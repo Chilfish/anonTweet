@@ -12,13 +12,20 @@ import {
   enrichTweet,
 } from "react-tweet";
 import { Suspense } from "react";
-import { getTweet } from "react-tweet/api";
+import { unstable_cache } from "next/cache";
+import { getTweet as _getTweet } from "react-tweet/api";
 import { type TweetProps, TweetNotFound, TweetSkeleton } from "react-tweet";
 
 type Props = {
   tweet: Tweet;
   components?: TwitterComponents;
 };
+
+const getTweet = unstable_cache(
+  async (id: string) => _getTweet(id),
+  ["tweet"],
+  { revalidate: 3600 * 24 },
+);
 
 const MyTweet = ({ tweet: t, components }: Props) => {
   const tweet = enrichTweet(t);
