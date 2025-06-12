@@ -21,7 +21,7 @@ type Props = {
   components?: TwitterComponents;
 };
 
-const getTweet = unstable_cache(
+export const getTweet = unstable_cache(
   async (id: string) => _getTweet(id),
   ["tweet"],
   { revalidate: 3600 * 24 },
@@ -60,8 +60,6 @@ const TweetContent = async ({ id, components, onError }: TweetProps) => {
     const NotFound = components?.TweetNotFound || TweetNotFound;
     return <NotFound />;
   }
-
-  // console.log(tweet.photos);
 
   return <MyTweet tweet={tweet} components={components} />;
 };
