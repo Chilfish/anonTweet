@@ -8,7 +8,6 @@ import {
   TweetMedia,
   TweetInfo,
   TweetActions,
-  QuotedTweet,
   enrichTweet,
 } from "react-tweet";
 import { Suspense } from "react";
@@ -29,18 +28,30 @@ export const getTweet = unstable_cache(
 
 const MyTweet = ({ tweet: t, components }: Props) => {
   const tweet = enrichTweet(t);
+  const parentTweet = tweet.parent as unknown as Tweet;
   return (
     <TweetContainer>
+      {parentTweet && <MyTweet tweet={parentTweet} components={components} />}
+
       <TweetHeader tweet={tweet} components={components} />
       {tweet.in_reply_to_status_id_str && <TweetInReplyTo tweet={tweet} />}
       <TweetBody tweet={tweet} />
       {tweet.mediaDetails?.length ? (
         <TweetMedia tweet={tweet} components={components} />
       ) : null}
-      {tweet.quoted_tweet && <QuotedTweet tweet={tweet.quoted_tweet} />}
+      {tweet.quoted_tweet && (
+        <div className="p-4! border-2 rounded-2xl mt-2!">
+          <TweetHeader tweet={tweet.quoted_tweet} components={components} />
+          <TweetBody tweet={tweet.quoted_tweet} />
+
+          {tweet.quoted_tweet.mediaDetails?.length ? (
+            <TweetMedia tweet={tweet.quoted_tweet} components={components} />
+          ) : null}
+          <TweetInfo tweet={tweet.quoted_tweet} />
+        </div>
+      )}
       <TweetInfo tweet={tweet} />
       <TweetActions tweet={tweet} />
-      {/* We're not including the `TweetReplies` component that adds the reply button */}
     </TweetContainer>
   );
 };
