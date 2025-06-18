@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Tweet } from "react-tweet/api";
 import {
   type TwitterComponents,
@@ -41,13 +42,13 @@ const MyTweet = ({ tweet: t, components }: Props) => {
       ) : null}
       {tweet.quoted_tweet && (
         <div className="p-4! border-2 rounded-2xl mt-2!">
-          <TweetHeader tweet={tweet.quoted_tweet} components={components} />
-          <TweetBody tweet={tweet.quoted_tweet} />
+          <TweetHeader tweet={tweet.quoted_tweet as any} components={components} />
+          <TweetBody tweet={tweet.quoted_tweet as any} />
 
           {tweet.quoted_tweet.mediaDetails?.length ? (
             <TweetMedia tweet={tweet.quoted_tweet} components={components} />
           ) : null}
-          <TweetInfo tweet={tweet.quoted_tweet} />
+          <TweetInfo tweet={tweet.quoted_tweet as any} />
         </div>
       )}
       <TweetInfo tweet={tweet} />
