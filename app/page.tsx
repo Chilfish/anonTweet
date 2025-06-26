@@ -3,16 +3,21 @@ import { TweetInputForm } from "@/components/TweetInputForm";
 import { PageHeader } from "@/components/PageHeader";
 import { BackButton } from "@/components/BackButton";
 import { getTweet } from "@/components/Tweet";
+import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 
 interface HomeProps {
-  searchParams: Promise<{ id?: string }>;
+  searchParams: Promise<{ id?: string; raw?: boolean }>;
 }
 
 export async function generateMetadata({
   searchParams,
 }: HomeProps): Promise<Metadata> {
-  const { id: tweetId } = await searchParams;
+  const { id: tweetId, raw } = await searchParams;
+
+  if (raw) {
+    return redirect(`https://x.com/i/status/${tweetId}`);
+  }
 
   if (!tweetId) {
     return {

@@ -123,13 +123,10 @@
 div.react-tweet-theme {
     --tweet-body-font-size: 1rem;
 }
-.tweet-header-module__A9EVQG__brand,
-.tweet-info-module___F14PW__infoLink,
+
+a[aria-label="View on Twitter"],
+a[aria-label="Twitter for Websites, Ads Information and Privacy"],
 .tweet-header-module__A9EVQG__authorFollow {
     display: none !important;
 }
 
-p.tweet-body-module__ZNRZja__root {
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
-}
