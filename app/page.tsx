@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 
 interface HomeProps {
-  searchParams: Promise<{ id?: string; raw?: boolean }>;
+  searchParams: Promise<{ id?: string; raw?: boolean; plain?: boolean }>;
 }
 
 export async function generateMetadata({
@@ -51,10 +51,14 @@ export async function generateMetadata({
 }
 
 export default async function Home({ searchParams }: HomeProps) {
-  const { id: tweetId } = await searchParams;
+  const { id: tweetId, plain = false } = await searchParams;
+
+  if (plain && tweetId) {
+    return <TweetComponent id={tweetId} />;
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="w-screen min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="container mx-auto px-4 py-8">
         <PageHeader />
 

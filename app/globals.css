@@ -117,7 +117,10 @@
         @apply border-border outline-ring/50;
     }
     body {
-        @apply bg-background text-foreground;
+        @apply bg-background text-foreground w-fit;
+    }
+    html {
+        width: fit-content;
     }
 }
 div.react-tweet-theme {
@@ -129,4 +132,3 @@ a[aria-label="Twitter for Websites, Ads Information and Privacy"],
 .tweet-header-module__A9EVQG__authorFollow {
     display: none !important;
 }
-

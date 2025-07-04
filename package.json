@@ -11,7 +11,7 @@
   "dependencies": {
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "lucide-react": "^0.523.0",
+    "lucide-react": "^0.525.0",
     "next": "15.3.3",
     "radix-ui": "^1.4.2",
     "react": "^19.1.0",
@@ -22,13 +22,14 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
     "@tailwindcss/postcss": "^4.1.11",
-    "@types/node": "^24.0.4",
+    "@types/node": "^24.0.10",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
-    "eslint": "^9.29.0",
+    "eslint": "^9.30.1",
     "eslint-config-next": "15.3.3",
     "tailwindcss": "^4.1.11",
-    "tw-animate-css": "^1.3.4",
+    "tw-animate-css": "^1.3.5",
     "typescript": "^5.8.3"
-  }
+  },
+  "packageManager": "yarn@4.9.1+sha512.f95ce356460e05be48d66401c1ae64ef84d163dd689964962c6888a9810865e39097a5e9de748876c2e0bf89b232d583c33982773e9903ae7a76257270986538"
 }
