@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Tweet } from "~/lib/react-tweet/api";
 import {
   type TwitterComponents,
@@ -13,6 +12,8 @@ import { Suspense } from "react";
 import { getTweet } from "~/lib/react-tweet/api";
 import { type TweetProps, TweetNotFound, TweetSkeleton } from "~/lib/react-tweet";
 import { enrichTweet } from "~/lib/react-tweet";
+import { TranslationDisplay } from "./TranslationDisplay";
+import { TranslationEditor } from "./TranslationPanel";
 
 type Props = {
   tweet: Tweet;
@@ -34,7 +35,7 @@ const ThreadTweet = ({ tweet: t, components }: Props) => {
 
   return (
     <TweetContainer
-      className="border-none! px-0! my-0! py-2"
+      className="border-none! px-0! my-0! py-2 relative"
     >
       <TweetHeader
         tweet={tweet}
@@ -50,11 +51,27 @@ const ThreadTweet = ({ tweet: t, components }: Props) => {
 
         {/* 原推文 */}
         <TweetBody tweet={tweet} />
+
+        {/* 翻译显示 */}
+        <TranslationDisplay
+          tweetId={`comment-${tweet.id_str}`}
+          originalTweet={tweet}
+          tweetType="comment"
+        />
+
         {tweet.mediaDetails?.length ? (
           <TweetMedia tweet={tweet} components={components} />
         ) : null}
 
-        <TweetActions tweet={tweet} />
+        <div
+          className="flex items-center justify-between mt-2"
+        >
+          <TweetActions tweet={tweet} />
+          <TranslationEditor
+            tweetId={tweet.id_str}
+            originalTweet={tweet}
+          />
+        </div>
       </div>
     </TweetContainer>
   )
@@ -74,25 +91,58 @@ export const MyTweet = ({ tweet: t, components }: Props) => {
       />
 
       <TweetBody tweet={tweet} />
+
+      {/* 源推文翻译显示 */}
+      <TranslationDisplay
+        tweetId={`source-${tweet.id_str}`}
+        originalTweet={tweet}
+        tweetType="source"
+      />
+
       {tweet.mediaDetails?.length ? (
         <TweetMedia tweet={tweet} components={components} />
       ) : null}
+
       {tweet.quoted_tweet && (
         <div className="p-4! border-2 rounded-2xl mt-2!">
           <TweetHeader tweet={tweet.quoted_tweet as any} components={components} />
           <TweetBody tweet={tweet.quoted_tweet as any} />
 
+          {/* 引用推文翻译显示 */}
+          <TranslationDisplay
+            tweetId={`quoted-${tweet.quoted_tweet.id_str}`}
+            originalTweet={tweet.quoted_tweet}
+            tweetType="quoted"
+          />
+
           {tweet.quoted_tweet.mediaDetails?.length ? (
             <TweetMedia tweet={tweet.quoted_tweet} components={components} />
           ) : null}
-          <TweetInfo tweet={tweet.quoted_tweet as any} />
+
+          {/* 引用推文翻译编辑按钮和信息 */}
+          <div className="flex items-center justify-between mt-2">
+            <TweetInfo tweet={tweet.quoted_tweet as any} />
+            <TranslationEditor
+              tweetId={`quoted-${tweet.quoted_tweet.id_str}`}
+              originalTweet={tweet.quoted_tweet}
+            />
+          </div>
         </div>
       )}
+
+      {/* 主推文的翻译编辑按钮、信息和操作 */}
       <div
-        className="flex items-center gap-4"
+        className="flex items-center justify-between w-full"
       >
-        <TweetInfo tweet={tweet} />
-        <TweetActions tweet={tweet} />
+        <div className="flex items-center gap-3">
+          <TweetInfo tweet={tweet} />
+          <TweetActions tweet={tweet} />
+        </div>
+
+        <TranslationEditor
+          tweetId={`source-${tweet.id_str}`}
+          originalTweet={tweet}
+        />
       </div>
     </TweetContainer>
   );

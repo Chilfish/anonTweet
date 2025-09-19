@@ -1,9 +1,19 @@
-import type { EnrichedTweet } from '../utils.js'
+import type { EnrichedQuotedTweet, EnrichedTweet } from '../utils.js'
 import { TweetLink } from './tweet-link.js'
 import s from './tweet-body.module.css'
+import { cn } from '~/lib/utils.js'
 
-export const TweetBody = ({ tweet }: { tweet: EnrichedTweet }) => (
-  <p className={s.root} lang={tweet.lang} dir="auto">
+interface TweetBodyProps {
+  tweet: EnrichedTweet | EnrichedQuotedTweet
+  lang?: string
+  className?: string
+}
+
+export const TweetBody = ({ tweet, lang, className }: TweetBodyProps) => (
+  <p
+    className={cn(s.root, className)}
+    lang={lang ?? tweet.lang}
+    dir="auto">
     {tweet.entities.map((item, i) => {
       switch (item.type) {
         case 'hashtag':

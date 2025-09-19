@@ -2,6 +2,7 @@ import { MyTweet, TweetComponent } from "~/components/Tweet";
 import { TweetInputForm } from "~/components/TweetInputForm";
 import { PageHeader } from "~/components/PageHeader";
 import { BackButton } from "~/components/BackButton";
+import { TranslationPanel } from "~/components/TranslationPanel";
 import { useSearchParams } from "react-router";
 import { getTweet } from "~/lib/react-tweet/api";
 import { Await, useLoaderData } from "react-router"
@@ -48,23 +49,28 @@ export default function Home() {
             <TweetInputForm />
           ) : (
             <div className="w-full flex flex-col items-center justify-center gap-6">
-              <div className="flex justify-center">
+              <div className="flex justify-between items-center w-full max-w-2xl">
                 <BackButton />
+                <TranslationPanel />
               </div>
 
-           <Suspense fallback={<TweetSkeleton />}>
-              <Await
-                resolve={tweet}
-                errorElement={
-                  <div>Could not load tweet 😬</div>
-                }
-                children={(resolvedTweet) => (
-                  resolvedTweet ?
-                  <MyTweet tweet={resolvedTweet} />
-                  : <TweetNotFound/>
-                )}
-              />
-            </Suspense>
+              <Suspense fallback={<TweetSkeleton />}>
+                <Await
+                  resolve={tweet}
+                  errorElement={
+                    <div>Could not load tweet 😬</div>
+                  }
+                  children={(resolvedTweet) => (
+                    <div className="w-full max-w-2xl space-y-4">
+                      {resolvedTweet ? (
+                        <MyTweet tweet={resolvedTweet} />
+                      ) : (
+                        <TweetNotFound />
+                      )}
+                    </div>
+                  )}
+                />
+              </Suspense>
             </div>
           )}
         </div>
