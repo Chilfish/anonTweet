@@ -13,7 +13,7 @@ import { getTweet } from "~/lib/react-tweet/api";
 import { type TweetProps, TweetNotFound, TweetSkeleton } from "~/lib/react-tweet";
 import { enrichTweet } from "~/lib/react-tweet";
 import { TranslationDisplay } from "./TranslationDisplay";
-import { TranslationEditor } from "./TranslationPanel";
+import { TranslationEditor } from "./TranslationEditor";
 
 type Props = {
   tweet: Tweet;
@@ -56,7 +56,6 @@ const ThreadTweet = ({ tweet: t, components }: Props) => {
         <TranslationDisplay
           tweetId={`comment-${tweet.id_str}`}
           originalTweet={tweet}
-          tweetType="comment"
         />
 
         {tweet.mediaDetails?.length ? (
@@ -96,7 +95,6 @@ export const MyTweet = ({ tweet: t, components }: Props) => {
       <TranslationDisplay
         tweetId={`source-${tweet.id_str}`}
         originalTweet={tweet}
-        tweetType="source"
       />
 
       {tweet.mediaDetails?.length ? (
@@ -112,7 +110,6 @@ export const MyTweet = ({ tweet: t, components }: Props) => {
           <TranslationDisplay
             tweetId={`quoted-${tweet.quoted_tweet.id_str}`}
             originalTweet={tweet.quoted_tweet}
-            tweetType="quoted"
           />
 
           {tweet.quoted_tweet.mediaDetails?.length ? (

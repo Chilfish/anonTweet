@@ -104,7 +104,7 @@ type EntityWithType =
   | (MediaEntity & { type: 'media' })
   | (SymbolEntity & { type: 'symbol' })
 
-type Entity = {
+export type Entity = {
   text: string
 } & (
   | TextEntity

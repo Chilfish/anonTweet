@@ -61,13 +61,11 @@ export default function Home() {
                     <div>Could not load tweet 😬</div>
                   }
                   children={(resolvedTweet) => (
-                    <div className="w-full max-w-2xl space-y-4">
-                      {resolvedTweet ? (
-                        <MyTweet tweet={resolvedTweet} />
-                      ) : (
-                        <TweetNotFound />
-                      )}
-                    </div>
+                    resolvedTweet ? (
+                      <MyTweet tweet={resolvedTweet} />
+                    ) : (
+                      <TweetNotFound />
+                    )
                   )}
                 />
               </Suspense>

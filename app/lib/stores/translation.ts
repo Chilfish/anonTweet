@@ -1,26 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { EnrichedTweet, EnrichedQuotedTweet } from '../react-tweet/utils';
+import type { EnrichedTweet, EnrichedQuotedTweet, Entity } from '../react-tweet/utils';
 
 // 翻译设置接口
 interface TranslationSettings {
-  enableTranslation: boolean;
-  showSourceTranslation: boolean;
-  showQuotedTranslation: boolean;
-  showCommentTranslation: boolean;
   customSeparator: string;
-}
-
-// 单个翻译内容
-interface TranslationContent {
-  text: string;
-  entities?: Array<{
-    type: 'hashtag' | 'mention' | 'url' | 'symbol';
-    originalText: string;
-    translatedText: string;
-  }>;
-  createdAt: number;
-  updatedAt: number;
 }
 
 // 翻译状态接口
@@ -28,8 +12,8 @@ interface TranslationState {
   // 翻译设置
   settings: TranslationSettings;
   
-  // 翻译内容存储 (tweetId -> TranslationContent)
-  translations: Record<string, TranslationContent>;
+  // 翻译内容存储 (tweetId -> Entity[])
+  translations: Record<string, Entity[]>;
   
   // UI状态
   showTranslations: boolean;
@@ -40,8 +24,8 @@ interface TranslationState {
   resetSettings: () => void;
   
   // 翻译内容相关方法
-  setTranslation: (tweetId: string, content: Partial<TranslationContent>) => void;
-  getTranslation: (tweetId: string) => TranslationContent | undefined;
+  setTranslation: (tweetId: string, content: Entity[]) => void;
+  getTranslation: (tweetId: string) => Entity[] | undefined;
   deleteTranslation: (tweetId: string) => void;
   
   // UI状态相关方法
@@ -49,16 +33,11 @@ interface TranslationState {
   setEditingTweetId: (tweetId: string | null) => void;
   
   // 工具方法
-  createTranslatedTweet: (originalTweet: EnrichedTweet | EnrichedQuotedTweet, tweetId: string) => EnrichedTweet | EnrichedQuotedTweet | null;
   hasTextContent: (text?: string) => boolean;
 }
 
 // 默认设置
 const defaultSettings: TranslationSettings = {
-  enableTranslation: true,
-  showSourceTranslation: true,
-  showQuotedTranslation: true,
-  showCommentTranslation: true,
   customSeparator: `<div style="margin-top: 4px; color: #1d9bf0;">
     <b style="font-weight: bold; font-size: small;">由 谷歌 翻译自 日语</b>
     <hr style="margin: 3px; border-top-width: 2px;">
@@ -70,28 +49,6 @@ const deepCloneTweet = <T extends EnrichedTweet | EnrichedQuotedTweet>(tweet: T)
   return JSON.parse(JSON.stringify(tweet));
 };
 
-// 创建翻译后的entities
-const createTranslatedEntities = (
-  originalEntities: any[],
-  translationContent: TranslationContent
-) => {
-  if (!translationContent.entities) return originalEntities;
-  
-  return originalEntities.map(entity => {
-    const translatedEntity = translationContent.entities?.find(
-      te => te.originalText === entity.text && te.type === entity.type
-    );
-    
-    if (translatedEntity) {
-      return {
-        ...entity,
-        text: translatedEntity.translatedText,
-      };
-    }
-    
-    return entity;
-  });
-};
 
 export const useTranslationStore = create<TranslationState>()(
   persist(
@@ -118,12 +75,7 @@ export const useTranslationStore = create<TranslationState>()(
         set((state) => ({
           translations: {
             ...state.translations,
-            [tweetId]: {
-              ...state.translations[tweetId],
-              ...content,
-              updatedAt: Date.now(),
-              createdAt: state.translations[tweetId]?.createdAt || Date.now(),
-            },
+            [tweetId]: content,
           },
         })),
       
@@ -141,19 +93,6 @@ export const useTranslationStore = create<TranslationState>()(
       
       setEditingTweetId: (tweetId) =>
         set({ editingTweetId: tweetId }),
-      
-      // 工具方法
-      createTranslatedTweet: (originalTweet, tweetId) => {
-        const translation = get().translations[tweetId];
-        if (!translation || !translation.text) return null;
-        
-        const clonedTweet = deepCloneTweet(originalTweet);
-        
-        // 更新entities以支持翻译后的链接、标签等
-        clonedTweet.entities = createTranslatedEntities(originalTweet.entities, translation);
-        
-        return clonedTweet;
-      },
       
       hasTextContent: (text?: string) => {
         if (!text) return false;
@@ -181,7 +120,7 @@ export const useTranslationStore = create<TranslationState>()(
       name: 'translation-store',
       partialize: (state) => ({
         settings: state.settings,
-        translations: state.translations,
+        showTranslations: state.showTranslations,
       }),
     }
   )
@@ -193,13 +132,6 @@ export const useTranslationSettings = () => {
   const updateSettings = useTranslationStore((state) => state.updateSettings);
   const resetSettings = useTranslationStore((state) => state.resetSettings);
   return { settings, updateSettings, resetSettings };
-};
-
-export const useTranslation = (tweetId: string) => {
-  const translation = useTranslationStore((state) => state.getTranslation(tweetId));
-  const setTranslation = useTranslationStore((state) => state.setTranslation);
-  const deleteTranslation = useTranslationStore((state) => state.deleteTranslation);
-  return { translation, setTranslation, deleteTranslation };
 };
 
 export const useTranslationUI = () => {
