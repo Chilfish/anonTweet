@@ -1,6 +1,7 @@
 .header {
   display: flex;
   padding-bottom: 0.75rem;
+  align-items: center;
   line-height: var(--tweet-header-line-height);
   font-size: var(--tweet-header-font-size);
   white-space: nowrap;
@@ -38,9 +39,18 @@
   max-width: calc(100% - 84px);
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  /* justify-content: center; */
   margin: 0 0.5rem;
+  height: fit-content;
+  flex-wrap: wrap;
 }
+
+.authorInline {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.25rem;
+}
+
 .authorLink {
   text-decoration: none;
   color: inherit;
@@ -93,4 +103,12 @@
   color: var(--tweet-twitter-icon-color);
   fill: currentColor;
   user-select: none;
+}
+
+
+.createdAt {
+  color: var(--tweet-font-color-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }

@@ -1,9 +1,9 @@
 import { type EnrichedTweet, formatNumber } from '../utils.js'
-import { TweetActionsCopy } from './tweet-actions-copy.js'
 import s from './tweet-actions.module.css'
 
 export const TweetActions = ({ tweet }: { tweet: EnrichedTweet }) => {
   const favoriteCount = formatNumber(tweet.favorite_count)
+  const replyCount = formatNumber(tweet.conversation_count)
 
   return (
     <div className={s.actions}>
@@ -28,7 +28,7 @@ export const TweetActions = ({ tweet }: { tweet: EnrichedTweet }) => {
         href={tweet.reply_url}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Reply to this Tweet on Twitter"
+        aria-label={`Reply. This Tweet has ${replyCount} replies`}
       >
         <div className={s.replyIconWrapper}>
           <svg viewBox="0 0 24 24" className={s.replyIcon} aria-hidden="true">
@@ -37,9 +37,8 @@ export const TweetActions = ({ tweet }: { tweet: EnrichedTweet }) => {
             </g>
           </svg>
         </div>
-        <span className={s.replyText}>Reply</span>
+        <span className={s.replyText}>{replyCount}</span>
       </a>
-      <TweetActionsCopy tweet={tweet} />
     </div>
   )
 }

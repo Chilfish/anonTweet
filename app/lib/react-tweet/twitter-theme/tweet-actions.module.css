@@ -4,7 +4,6 @@
   color: var(--tweet-font-color-secondary);
   padding-top: 0.25rem;
   margin-top: 0.25rem;
-  border-top: var(--tweet-border);
   overflow-wrap: break-word;
   white-space: nowrap;
   text-overflow: ellipsis;

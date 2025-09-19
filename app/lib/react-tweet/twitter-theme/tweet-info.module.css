@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   color: var(--tweet-font-color-secondary);
-  margin-top: 0.125rem;
+  margin-top: 0.5rem;
   overflow-wrap: break-word;
   white-space: nowrap;
   text-overflow: ellipsis;

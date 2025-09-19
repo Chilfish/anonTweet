@@ -9,10 +9,6 @@
   cursor: pointer;
 }
 
-.root:hover {
-  background-color: var(--tweet-quoted-bg-color-hover);
-}
-
 .article {
   position: relative;
   box-sizing: inherit;
