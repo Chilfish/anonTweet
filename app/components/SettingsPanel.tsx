@@ -1,15 +1,14 @@
 import { Monitor, Moon, SettingsIcon, Sun } from 'lucide-react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useTheme } from '~/lib/stores/theme';
 import { useTranslationSettings, useTranslationStore } from '~/lib/stores/translation';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Label } from './ui/label';
-import { Textarea } from './ui/textarea';
+import { SeparatorTemplateManager } from './SeparatorTemplateManager';
 
 export const SettingsPanel = () => {
-  const { settings, updateSettings, resetSettings } = useTranslationSettings();
   const { setShowTranslations, setShowTranslationButton, showTranslationButton, showTranslations } = useTranslationStore()
   const { theme, setTheme } = useTheme();
 
@@ -41,7 +40,8 @@ export const SettingsPanel = () => {
             <SettingsIcon className="size-5" />
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-auto">
+        <DialogContent
+         className="  max-h-[90vh] overflow-y-auto p-4">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold">设置</DialogTitle>
           </DialogHeader>
@@ -84,43 +84,11 @@ export const SettingsPanel = () => {
             </CardContent>
           </Card>
 
-          {/* 自定义分隔符 */}
-          <Card className="gap-0">
-            <CardContent className="space-y-4 px-4">
-              <Label htmlFor="separator-html">
-                <h3 className="font-bold">自定义分隔符</h3>
-              </Label>
-              <Textarea
-                value={settings.customSeparator}
-                onChange={(e) => updateSettings({ customSeparator: e.target.value })}
-                placeholder="输入自定义分隔符HTML"
-                className="text-sm"
-                id="separator-html"
-              />
-
-              <div className=" mt-1 space-y-2">
-                <div className='text-xs'>
-                  预览：
-                </div>
-                <p>正文：Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-                <div
-                  dangerouslySetInnerHTML={{ __html: settings.customSeparator }}
-                />
-                <p className='font-bold'>译文：Lorem Ipsum 只是印刷和排版行业的虚拟文本。</p>
-              </div>
-
-            </CardContent>
-          </Card>
+          {/* 分隔符设置 */}
+          <SeparatorTemplateManager />
+          
 
           <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={resetSettings}
-                className="text-sm"
-              >
-                重置为默认
-              </Button>
-
               <Button
                 onClick={() => setIsSettingsOpen(false)}
                 className="text-sm"

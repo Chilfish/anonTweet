@@ -103,7 +103,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
             variant='secondary'
             size='icon'
             onClick={handleOpen}
-            className={`${className} text-gray-500 ml-auto`}
+            className={`${className} ml-auto`}
             data-testid='translation-editor-button'
           >
             <LanguagesIcon className='size-4' />
@@ -118,10 +118,10 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
             </DialogTitle>
           </DialogHeader>
 
-          <div className='space-y-4'>
+          <div className='space-y-6'>
             {/* 原文显示 */}
             <div>
-              <Label className='text-sm font-medium text-gray-700'>原文</Label>
+              <Label className='font-medium'>原文</Label>
               <Card className='mt-2 py-3'>
                 <CardContent>
                   <TweetText text={originalTweet.text} />
@@ -131,7 +131,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
 
             {/* 按实体遍历的翻译输入 */}
             <div>
-              <Label className='text-sm font-medium text-gray-700'>翻译内容</Label>
+              <Label className='font-bold'>翻译内容</Label>
               <div className='mt-2 space-y-3'>
                 {entityTranslations.map((entityTranslation) => {
                   if (skipTranslation(entityTranslation)) {
@@ -141,7 +141,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
                   const id = `${entityTranslation.index}-${entityTranslation.type}`;
                   return (
                     <div key={id} className='space-y-2'>
-                      <Label htmlFor={id} className='text-xs text-gray-400 uppercase font-mono min-w-0 flex-shrink-0'>
+                      <Label htmlFor={id} className='text-xs uppercase font-mono min-w-0 flex-shrink-0'>
                         {entityTranslation.type}
                       </Label>
                       {entityTranslation.type === 'text' ? (
