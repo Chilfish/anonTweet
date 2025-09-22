@@ -5,12 +5,15 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useNavigation,
 } from 'react-router'
 import type { Route } from './+types/root'
 import './app.css'
 import { AlertTriangle, Loader2 } from 'lucide-react'
 import { Button } from './components/ui/button'
 import { Toaster } from "./components/ui/sonner"
+import { TweetSkeleton } from './lib/react-tweet'
+import { LayoutComponent } from './components/Layout'
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -26,6 +29,11 @@ export const links: Route.LinksFunction = () => [
 ]
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const navigation = useNavigation();
+  const isNavigating = Boolean(navigation.location);
+  const navToHome = navigation.location?.pathname === '/';
+  const showSkeleton = isNavigating && !navToHome;
+
   return (
     <html lang='en'>
       <head>
@@ -36,7 +44,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        {showSkeleton ? (
+          <LayoutComponent>
+            <TweetSkeleton />
+          </LayoutComponent>
+        )
+          : children
+        }
         <ScrollRestoration getKey={(location) => location.pathname} />
         <Scripts />
       </body>
