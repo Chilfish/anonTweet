@@ -39,10 +39,10 @@ const ThreadTweet = ({ tweet: t, components }: Props) => {
 
   return (
     <TweetContainer
-      className="border-none! p-0! my-0! relative"
+      className="border-none! p-0! m-0! pb-2! relative"
     >
       <div
-        className="flex items-center justify-between mb-4"
+        className="flex items-center justify-between"
       >
         <TweetHeader
           tweet={tweet}
@@ -59,7 +59,7 @@ const ThreadTweet = ({ tweet: t, components }: Props) => {
         className="pl-14!"
       >
         {/* Thread 的那根对齐头像的竖线 */}
-        <div className="absolute left-5.5 top-12 bottom-0 h-full w-1 bg-[#cfd9de] z-0"></div>
+        <div className="absolute left-5.5 top-12 bottom-0 h-full w-[2px] bg-[#cfd9de] dark:bg-[#333639] z-0"></div>
 
         {/* 原推文 */}
         <TweetBody tweet={tweet} />
@@ -95,7 +95,7 @@ export const MyTweet = ({ tweet: t, parentTweets = [], quotedTweet: q, component
 
   return (
     <TweetContainer
-      className="mx-auto!"
+      className="mx-auto! py-4!"
     >
       {parentTweets.map((parentTweet) => (
         <ThreadTweet
