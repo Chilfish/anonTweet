@@ -3,11 +3,11 @@ import { useIsMobile } from "~/hooks/use-mobile";
 export function PageHeader() {
   const isMobile = useIsMobile();
   return (
-    <div className="text-center space-y-4 mb-16">
+    <div className="text-center space-y-4 mb-12">
       <div className="space-y-2">
-        <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+        <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-pink-400 to-purple-600 bg-clip-text text-transparent">
           <ruby>
-            Anon
+            あのん
             <rp>(</rp><rt className="text-sm">Anonymously</rt><rp>)</rp>
           </ruby>
           <span className="ml-2">

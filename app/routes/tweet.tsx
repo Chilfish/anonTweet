@@ -119,7 +119,7 @@ export default function Tweet({
     }, [loaderData.tweet])
 
     return (
-        <div className="w-full flex flex-col items-center justify-center gap-6">
+        <>
             <div className="flex items-center w-full max-w-2xl gap-4">
                 <BackButton />
                 <SaveAsImageButton />
@@ -132,6 +132,6 @@ export default function Tweet({
             >
                 <TweetContent />
             </div>
-        </div>
+        </>
     )
 }
