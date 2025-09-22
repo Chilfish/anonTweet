@@ -206,6 +206,126 @@ function fixRange(tweet: TweetBase, entities: EntityWithType[]) {
   }
 }
 
+// Twitter Card Types
+export interface TwitterCardImage {
+  url: string
+  width: number
+  height: number
+}
+
+export interface TwitterCard {
+  type: 'summary' | 'unified_card' | 'unknown'
+  url: string
+  title?: string
+  description?: string
+  domain?: string
+  image?: TwitterCardImage
+  images?: {
+    small?: TwitterCardImage
+    medium?: TwitterCardImage
+    large?: TwitterCardImage
+    original?: TwitterCardImage
+  }
+}
+
+/**
+ * Maps raw Twitter card data to a clean TwitterCard interface
+ */
+export const mapTwitterCard = (cardData: any): TwitterCard | undefined => {
+  if (!cardData || !cardData.name) return undefined
+
+  const { name, url, binding_values } = cardData
+  const card: TwitterCard = {
+    type: name === 'summary' ? 'summary' : name === 'unified_card' ? 'unified_card' : 'unknown',
+    url: url || ''
+  }
+
+  if (!binding_values) return card
+
+  // Extract basic information
+  if (binding_values.title?.string_value) {
+    card.title = binding_values.title.string_value
+  }
+
+  if (binding_values.description?.string_value) {
+    card.description = binding_values.description.string_value
+  }
+
+  if (binding_values.domain?.string_value) {
+    card.domain = binding_values.domain.string_value
+  }
+
+  // Handle unified_card type (YouTube, etc.)
+  if (name === 'unified_card' && binding_values.unified_card?.string_value) {
+    try {
+      const unifiedData = JSON.parse(binding_values.unified_card.string_value)
+      
+      // Extract title and domain from unified card
+      if (unifiedData.component_objects?.details_1?.data?.title?.content) {
+        card.title = unifiedData.component_objects.details_1.data.title.content
+      }
+      
+      if (unifiedData.component_objects?.details_1?.data?.subtitle?.content) {
+        card.domain = unifiedData.component_objects.details_1.data.subtitle.content
+      }
+
+      // Extract URL from destination
+      if (unifiedData.destination_objects?.browser_1?.data?.url_data?.url) {
+        card.url = unifiedData.destination_objects.browser_1.data.url_data.url
+      }
+
+      // Extract image from media entities
+      const mediaEntities = unifiedData.media_entities
+      if (mediaEntities) {
+        const firstMediaKey = Object.keys(mediaEntities)[0]
+        const media = mediaEntities[firstMediaKey]
+        if (media?.media_url_https && media.original_info) {
+          card.image = {
+            url: media.media_url_https,
+            width: media.original_info.width,
+            height: media.original_info.height
+          }
+        }
+      }
+    } catch (e) {
+      // Ignore JSON parse errors
+    }
+  }
+
+  // Handle summary card images
+  if (name === 'summary') {
+    const images: TwitterCard['images'] = {}
+    
+    if (binding_values.thumbnail_image_small?.image_value) {
+      const img = binding_values.thumbnail_image_small.image_value
+      images.small = { url: img.url, width: img.width, height: img.height }
+    }
+    
+    if (binding_values.thumbnail_image?.image_value) {
+      const img = binding_values.thumbnail_image.image_value
+      images.medium = { url: img.url, width: img.width, height: img.height }
+    }
+    
+    if (binding_values.thumbnail_image_large?.image_value) {
+      const img = binding_values.thumbnail_image_large.image_value
+      images.large = { url: img.url, width: img.width, height: img.height }
+    }
+    
+    if (binding_values.thumbnail_image_original?.image_value) {
+      const img = binding_values.thumbnail_image_original.image_value
+      images.original = { url: img.url, width: img.width, height: img.height }
+    }
+
+    if (Object.keys(images).length > 0) {
+      card.images = images
+      // Set primary image to the largest available
+      card.image = images.original || images.large || images.medium || images.small
+    }
+  }
+
+  return card
+}
+
 export type EnrichedTweet = Omit<Tweet, 'entities' | 'quoted_tweet'> & {
   url: string
   user: {
@@ -217,6 +337,7 @@ export type EnrichedTweet = Omit<Tweet, 'entities' | 'quoted_tweet'> & {
   in_reply_to_url?: string
   entities: Entity[]
   quoted_tweet?: EnrichedQuotedTweet
+  card?: TwitterCard
 }
 
 export type EnrichedQuotedTweet = Omit<QuotedTweet, 'entities'> & {
@@ -248,4 +369,5 @@ export const enrichTweet = (tweet: Tweet): EnrichedTweet => ({
         entities: getEntities(tweet.quoted_tweet),
       }
     : undefined,
+  card: mapTwitterCard(tweet.card),
 })

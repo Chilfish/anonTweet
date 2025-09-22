@@ -62,6 +62,7 @@ export interface Tweet extends TweetBase {
   in_reply_to_user_id_str?: string
   parent?: TweetParent
   possibly_sensitive?: boolean
+  card?: any
 }
 
 /**

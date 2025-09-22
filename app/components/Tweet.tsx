@@ -14,6 +14,7 @@ import { type TweetProps, TweetNotFound, TweetSkeleton } from "~/lib/react-tweet
 import { enrichTweet } from "~/lib/react-tweet";
 import { TranslationDisplay } from "./TranslationDisplay";
 import { TranslationEditor } from "./TranslationEditor";
+import { TweetLinkCard } from "./TweetCard";
 
 type Props = {
   tweet: Tweet;
@@ -71,10 +72,12 @@ const ThreadTweet = ({ tweet: t, components }: Props) => {
           <TweetMedia tweet={tweet} components={components} />
         ) : null}
 
-        <TweetActions 
+      {tweet.card && <TweetLinkCard tweet={tweet} />}
+
+        <TweetActions
           tweet={tweet}
           className="mt-2 gap-12!"
-         />
+        />
 
       </div>
     </TweetContainer>
@@ -122,6 +125,8 @@ export const MyTweet = ({ tweet: t, parentTweets = [], components }: Props) => {
       {tweet.mediaDetails?.length ? (
         <TweetMedia tweet={tweet} components={components} />
       ) : null}
+
+      {tweet.card && <TweetLinkCard tweet={tweet} />}
 
       {tweet.quoted_tweet && (
         <div className="p-4! border-2 rounded-2xl mt-2!">
