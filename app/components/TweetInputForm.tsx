@@ -57,7 +57,7 @@ export function TweetInputForm() {
       return;
     }
 
-    navigate(`/?id=${tweetId}`);
+    navigate(`/${tweetId}`);
   };
 
   const isUrl = input.includes("twitter.com") || input.includes("x.com");
@@ -67,7 +67,7 @@ export function TweetInputForm() {
       <CardHeader className="text-center">
         <CardTitle className="flex items-center justify-center gap-2">
           <Hash className="h-5 w-5" />
-          Chill Tweet
+          Anon Tweet
         </CardTitle>
         <CardDescription>
           输入 Twitter/X 链接或 Tweet ID 来查看推文

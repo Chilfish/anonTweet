@@ -17,6 +17,7 @@ import { TranslationEditor } from "./TranslationEditor";
 
 type Props = {
   tweet: Tweet;
+  parentTweets?: Tweet[];
   components?: TwitterComponents;
 };
 
@@ -35,10 +36,10 @@ const ThreadTweet = ({ tweet: t, components }: Props) => {
 
   return (
     <TweetContainer
-      className="border-none! px-0! my-0! py-2 relative"
+      className="border-none! p-0! my-0! relative"
     >
       <div
-        className="flex items-center justify-between mt-2"
+        className="flex items-center justify-between mb-4"
       >
         <TweetHeader
           tweet={tweet}
@@ -52,10 +53,10 @@ const ThreadTweet = ({ tweet: t, components }: Props) => {
         />
       </div>
       <div
-        className="pl-14! relative"
+        className="pl-14!"
       >
         {/* Thread 的那根对齐头像的竖线 */}
-        <div className="absolute left-5.5 -top-1 bottom-0 h-[calc(100%+2rem)] w-1 bg-[#cfd9de]"></div>
+        <div className="absolute left-5.5 top-12 bottom-0 h-full w-1 bg-[#cfd9de] z-0"></div>
 
         {/* 原推文 */}
         <TweetBody tweet={tweet} />
@@ -70,20 +71,32 @@ const ThreadTweet = ({ tweet: t, components }: Props) => {
           <TweetMedia tweet={tweet} components={components} />
         ) : null}
 
+        <TweetActions 
+          tweet={tweet}
+          className="mt-2 gap-12!"
+         />
+
       </div>
     </TweetContainer>
   )
 }
 
-export const MyTweet = ({ tweet: t, components }: Props) => {
+export const MyTweet = ({ tweet: t, parentTweets = [], components }: Props) => {
   const tweet = enrichTweet(t);
-  const parentTweet = tweet.parent as unknown as Tweet;
+
+  console.log('MyTweet', tweet, parentTweets)
 
   return (
     <TweetContainer
       className="mx-auto!"
     >
-      {parentTweet && <ThreadTweet tweet={parentTweet} components={components} />}
+      {parentTweets.map((parentTweet) => (
+        <ThreadTweet
+          key={parentTweet.id_str}
+          tweet={parentTweet}
+          components={components}
+        />
+      ))}
 
       <div
         className="flex items-center justify-between"
@@ -140,10 +153,10 @@ export const MyTweet = ({ tweet: t, components }: Props) => {
         </div>
       )}
 
-        <div className="flex items-center gap-3 pt-2">
-          <TweetInfo tweet={tweet} />
-          <TweetActions tweet={tweet} />
-        </div>
+      <div className="flex items-center gap-3 pt-2">
+        <TweetInfo tweet={tweet} />
+        <TweetActions tweet={tweet} />
+      </div>
     </TweetContainer>
   );
 };
