@@ -29,7 +29,6 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     const [isOpen, setIsOpen] = useState(false);
     const [entityTranslations, setEntityTranslations] = useState<EntityTranslation[]>([]);
 
-
     const { showTranslationButton, getTranslation, setTranslation, translations} = useTranslationStore();
     const hasTextContent = useTranslationStore((state) => state.hasTextContent);
 
@@ -98,121 +97,105 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     }
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-                <Button
-                    variant={"ghost"}
-                    size="icon"
-                    onClick={handleOpen}
-                    className={`${className} text-gray-500 ml-auto`}
-                >
-                    <LanguagesIcon className="size-4" />
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
+          <Button
+            variant='secondary'
+            size='icon'
+            onClick={handleOpen}
+            className={`${className} text-gray-500 ml-auto`}
+            data-testid='translation-editor-button'
+          >
+            <LanguagesIcon className='size-4' />
+          </Button>
+        </DialogTrigger>
+
+        <DialogContent className='max-h-[92vh] max-w-[95vw] overflow-auto'>
+          <DialogHeader>
+            <DialogTitle className='flex items-center gap-2'>
+              <Languages className='h-5 w-5' />
+              翻译推文
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className='space-y-4'>
+            {/* 原文显示 */}
+            <div>
+              <Label className='text-sm font-medium text-gray-700'>原文</Label>
+              <Card className='mt-2 py-3'>
+                <CardContent>
+                  <TweetText text={originalTweet.text} />
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* 按实体遍历的翻译输入 */}
+            <div>
+              <Label className='text-sm font-medium text-gray-700'>翻译内容</Label>
+              <div className='mt-2 space-y-3'>
+                {entityTranslations.map((entityTranslation) => {
+                  if (skipTranslation(entityTranslation)) {
+                    return null;
+                  }
+
+                  const id = `${entityTranslation.index}-${entityTranslation.type}`;
+                  return (
+                    <div key={id} className='space-y-2'>
+                      <Label htmlFor={id} className='text-xs text-gray-400 uppercase font-mono min-w-0 flex-shrink-0'>
+                        {entityTranslation.type}
+                      </Label>
+                      {entityTranslation.type === 'text' ? (
+                        <Textarea
+                          id={id}
+                          value={entityTranslation.text}
+                          onChange={(e) => handleEntityTranslationChange(entityTranslation.index, e.target.value)}
+                          placeholder='输入翻译内容...'
+                          className='text-sm'
+                        />
+                      ) : (
+                        <Input
+                          id={id}
+                          value={entityTranslation.text}
+                          onChange={(e) => handleEntityTranslationChange(entityTranslation.index, e.target.value)}
+                          placeholder={`翻译 ${entityTranslation.text}`}
+                          className='text-sm'
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 操作按钮 */}
+            <div className='flex justify-between pt-4'>
+              <div>
+                {existingTranslation && (
+                  <Button variant='destructive' size='sm' onClick={handleDelete} className='gap-2'>
+                    <Trash2 className='h-4 w-4' />
+                    删除翻译
+                  </Button>
+                )}
+              </div>
+
+              <div className='flex gap-2'>
+                <Button variant='outline' size='sm' onClick={() => setIsOpen(false)} className='gap-2'>
+                  <X className='h-4 w-4' />
+                  取消
                 </Button>
-            </DialogTrigger>
-
-            <DialogContent className="max-h-[92vh] max-w-[95vw] overflow-auto">
-                <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                        <Languages className="h-5 w-5" />
-                        翻译推文
-                    </DialogTitle>
-                </DialogHeader>
-
-                <div className="space-y-4">
-                    {/* 原文显示 */}
-                    <div>
-                        <Label className="text-sm font-medium text-gray-700">原文</Label>
-                        <Card className="mt-2 py-3">
-                            <CardContent>
-                                <TweetText text={originalTweet.text} />
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                    {/* 按实体遍历的翻译输入 */}
-                    <div>
-                        <Label className="text-sm font-medium text-gray-700">
-                            翻译内容
-                        </Label>
-                        <div className="mt-2 space-y-3">
-                            {entityTranslations.map((entityTranslation) => {
-                                if (skipTranslation(entityTranslation)) {
-                                    return null;
-                                }
-
-                                const id = `${entityTranslation.index}-${entityTranslation.type}`;
-                                return (
-                                    <div
-                                        key={id}
-                                        className="space-y-2">
-                                        <Label
-                                            htmlFor={id}
-                                            className="text-xs text-gray-400 uppercase font-mono min-w-0 flex-shrink-0">
-                                            {entityTranslation.type}
-                                        </Label>
-                                        {entityTranslation.type === 'text' ? (
-                                            <Textarea
-                                                id={id}
-                                                value={entityTranslation.text}
-                                                onChange={(e) => handleEntityTranslationChange(entityTranslation.index, e.target.value)}
-                                                placeholder="输入翻译内容..."
-                                                className="text-sm"
-                                            />
-                                        ) : (
-                                            <Input
-                                                id={id}
-                                                value={entityTranslation.text}
-                                                onChange={(e) => handleEntityTranslationChange(entityTranslation.index, e.target.value)}
-                                                placeholder={`翻译 ${entityTranslation.text}`}
-                                                className="text-sm"
-                                            />
-                                        )}
-                                    </div>
-                                )
-                            }
-                            )}
-                        </div>
-                    </div>
-
-                    {/* 操作按钮 */}
-                    <div className="flex justify-between pt-4">
-                        <div>
-                            {existingTranslation && (
-                                <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    onClick={handleDelete}
-                                    className="gap-2"
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                    删除翻译
-                                </Button>
-                            )}
-                        </div>
-
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setIsOpen(false)}
-                                className="gap-2"
-                            >
-                                <X className="h-4 w-4" />
-                                取消
-                            </Button>
-                            <Button
-                                size="sm"
-                                onClick={handleSave}
-                                disabled={!entityTranslations.some(et => et.type === 'text' && et.text.trim())}
-                                className="gap-2"
-                            >
-                                <Save className="h-4 w-4" />
-                                保存
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            </DialogContent>
-        </Dialog>
+                <Button
+                  size='sm'
+                  onClick={handleSave}
+                  disabled={!entityTranslations.some((et) => et.type === 'text' && et.text.trim())}
+                  className='gap-2'
+                >
+                  <Save className='h-4 w-4' />
+                  保存
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     );
 };

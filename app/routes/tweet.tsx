@@ -32,17 +32,20 @@ export async function loader({
     params,
 }: Route.LoaderArgs): Promise<{
     tweet: Tweet | null,
-    parentTweets: Tweet[]
+    quotedTweet: Tweet | null,
+    parentTweets: Tweet[],
 }> {
     const { id: tweetId } = params;
     if (!tweetId) {
-        return { tweet: null, parentTweets: [] }
+        return { tweet: null, parentTweets: [], quotedTweet: null }
     }
 
     let tweet = await getTweet(tweetId)
+    let quotedTweet : Tweet | null = null;
     const mainTweet = tweet || null;
+
     if (!tweet) {
-        return { tweet: null, parentTweets: [] }
+        return { tweet: null, parentTweets: [], quotedTweet: null }
     }
 
     const parentTweets: Tweet[] = [];
@@ -59,7 +62,11 @@ export async function loader({
         tweet = parentTweet;
     }
 
-    return { tweet: mainTweet, parentTweets }
+    if (tweet.quoted_tweet) {
+        quotedTweet = await getTweet(tweet.quoted_tweet.id_str);
+    }
+
+    return { tweet: mainTweet, parentTweets, quotedTweet }
 }
 
 function TweetContent() {
@@ -75,6 +82,7 @@ function TweetContent() {
                 children={(resolvedTweet) => resolvedTweet.tweet
                     ? <MyTweet
                         tweet={resolvedTweet.tweet}
+                        quotedTweet={resolvedTweet.quotedTweet}
                         parentTweets={resolvedTweet.parentTweets}
                     />
                     : <TweetNotFound />

@@ -24,12 +24,11 @@ export const SettingsPanel = () => {
     <div className="flex items-center gap-3">
       {/* 显示/隐藏翻译按钮 */}
       <Button
-        variant="outline"
         size="sm"
         onClick={toggleTranslations}
         className="h-8 px-3 text-sm font-medium transition-all duration-200"
       >
-        {showTranslations ? "隐藏翻译" : "显示翻译"}
+        {showTranslations ? "隐藏翻译" : "开始翻译"}
       </Button>
 
       {/* 翻译设置对话框 */}

@@ -36,7 +36,7 @@ function getToken(id: string) {
 export async function fetchTweet(
   id: string,
   fetchOptions?: RequestInit
-): Promise<{ data?: Tweet; tombstone?: true; notFound?: true }> {
+): Promise<{ data: Tweet | null; tombstone?: true; notFound?: true }> {
   if (id.length > 40 || !TWEET_ID.test(id)) {
     throw new Error(`Invalid tweet id: ${id}`)
   }
@@ -68,16 +68,16 @@ export async function fetchTweet(
 
   const res = await fetch(url.toString(), fetchOptions)
   const isJson = res.headers.get('content-type')?.includes('application/json')
-  const data = isJson ? await res.json() : undefined
+  const data = isJson ? await res.json() : null
 
   if (res.ok) {
     if (data?.__typename === 'TweetTombstone') {
-      return { tombstone: true }
+      return { tombstone: true, data: null }
     }
     return { data }
   }
   if (res.status === 404) {
-    return { notFound: true }
+    return { notFound: true, data: null }
   }
 
   throw new TwitterApiError({

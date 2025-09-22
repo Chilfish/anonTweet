@@ -214,7 +214,7 @@ export interface TwitterCardImage {
 }
 
 export interface TwitterCard {
-  type: 'summary' | 'unified_card' | 'unknown'
+  type: 'summary' | 'summary_large_image' | 'unified_card' | 'unknown'
   url: string
   title?: string
   description?: string
@@ -236,7 +236,9 @@ export const mapTwitterCard = (cardData: any): TwitterCard | undefined => {
 
   const { name, url, binding_values } = cardData
   const card: TwitterCard = {
-    type: name === 'summary' ? 'summary' : name === 'unified_card' ? 'unified_card' : 'unknown',
+    type: name === 'summary' ? 'summary' : 
+          name === 'summary_large_image' ? 'summary_large_image' :
+          name === 'unified_card' ? 'unified_card' : 'unknown',
     url: url || ''
   }
 
@@ -292,28 +294,62 @@ export const mapTwitterCard = (cardData: any): TwitterCard | undefined => {
     }
   }
 
-  // Handle summary card images
-  if (name === 'summary') {
+  // Handle summary and summary_large_image card images
+  if (name === 'summary' || name === 'summary_large_image') {
     const images: TwitterCard['images'] = {}
     
-    if (binding_values.thumbnail_image_small?.image_value) {
-      const img = binding_values.thumbnail_image_small.image_value
-      images.small = { url: img.url, width: img.width, height: img.height }
-    }
-    
-    if (binding_values.thumbnail_image?.image_value) {
-      const img = binding_values.thumbnail_image.image_value
-      images.medium = { url: img.url, width: img.width, height: img.height }
-    }
-    
-    if (binding_values.thumbnail_image_large?.image_value) {
-      const img = binding_values.thumbnail_image_large.image_value
-      images.large = { url: img.url, width: img.width, height: img.height }
-    }
-    
-    if (binding_values.thumbnail_image_original?.image_value) {
-      const img = binding_values.thumbnail_image_original.image_value
-      images.original = { url: img.url, width: img.width, height: img.height }
+    // For summary_large_image, we need to handle different image field names
+    if (name === 'summary_large_image') {
+      // Map summary_large_image specific fields
+      if (binding_values.photo_image_full_size_small?.image_value || binding_values.summary_photo_image_small?.image_value) {
+        const img = binding_values.photo_image_full_size_small?.image_value || binding_values.summary_photo_image_small?.image_value
+        images.small = { url: img.url, width: img.width, height: img.height }
+      }
+      
+      if (binding_values.photo_image_full_size?.image_value || binding_values.summary_photo_image?.image_value) {
+        const img = binding_values.photo_image_full_size?.image_value || binding_values.summary_photo_image?.image_value
+        images.medium = { url: img.url, width: img.width, height: img.height }
+      }
+      
+      if (binding_values.photo_image_full_size_large?.image_value || binding_values.summary_photo_image_large?.image_value) {
+        const img = binding_values.photo_image_full_size_large?.image_value || binding_values.summary_photo_image_large?.image_value
+        images.large = { url: img.url, width: img.width, height: img.height }
+      }
+      
+      if (binding_values.photo_image_full_size_original?.image_value || binding_values.summary_photo_image_original?.image_value) {
+        const img = binding_values.photo_image_full_size_original?.image_value || binding_values.summary_photo_image_original?.image_value
+        images.original = { url: img.url, width: img.width, height: img.height }
+      }
+
+      // Also check for x_large variants
+      if (binding_values.photo_image_full_size_x_large?.image_value || binding_values.summary_photo_image_x_large?.image_value) {
+        const img = binding_values.photo_image_full_size_x_large?.image_value || binding_values.summary_photo_image_x_large?.image_value
+        // Use x_large as original if original is not available
+        if (!images.original) {
+          images.original = { url: img.url, width: img.width, height: img.height }
+        }
+      }
+    } else {
+      // Handle regular summary card images
+      if (binding_values.thumbnail_image_small?.image_value) {
+        const img = binding_values.thumbnail_image_small.image_value
+        images.small = { url: img.url, width: img.width, height: img.height }
+      }
+      
+      if (binding_values.thumbnail_image?.image_value) {
+        const img = binding_values.thumbnail_image.image_value
+        images.medium = { url: img.url, width: img.width, height: img.height }
+      }
+      
+      if (binding_values.thumbnail_image_large?.image_value) {
+        const img = binding_values.thumbnail_image_large.image_value
+        images.large = { url: img.url, width: img.width, height: img.height }
+      }
+      
+      if (binding_values.thumbnail_image_original?.image_value) {
+        const img = binding_values.thumbnail_image_original.image_value
+        images.original = { url: img.url, width: img.width, height: img.height }
+      }
     }
 
     if (Object.keys(images).length > 0) {

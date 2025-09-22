@@ -7,6 +7,7 @@ import {
   TweetMedia,
   TweetInfo,
   TweetActions,
+  type EnrichedTweet,
 } from "~/lib/react-tweet";
 import { Suspense } from "react";
 import { getTweet } from "~/lib/react-tweet/api";
@@ -18,6 +19,7 @@ import { TweetLinkCard } from "./TweetCard";
 
 type Props = {
   tweet: Tweet;
+  quotedTweet?: Tweet | null;
   parentTweets?: Tweet[];
   components?: TwitterComponents;
 };
@@ -84,10 +86,12 @@ const ThreadTweet = ({ tweet: t, components }: Props) => {
   )
 }
 
-export const MyTweet = ({ tweet: t, parentTweets = [], components }: Props) => {
+export const MyTweet = ({ tweet: t, parentTweets = [], quotedTweet: q, components }: Props) => {
   const tweet = enrichTweet(t);
-
-  console.log('MyTweet', tweet, parentTweets)
+  let quotedTweet: EnrichedTweet | null = null;
+  if (tweet.quoted_tweet?.id_str && q) {
+    quotedTweet = enrichTweet(q);
+  }
 
   return (
     <TweetContainer
@@ -128,33 +132,35 @@ export const MyTweet = ({ tweet: t, parentTweets = [], components }: Props) => {
 
       {tweet.card && <TweetLinkCard tweet={tweet} />}
 
-      {tweet.quoted_tweet && (
+      {quotedTweet && (
         <div className="p-4! border-2 rounded-2xl mt-2!">
           <div
             className="flex items-center justify-between"
           >
             <TweetHeader
-              tweet={tweet.quoted_tweet as any}
+              tweet={quotedTweet as any}
               components={components}
               createdAtInline
             />
             <TranslationEditor
-              tweetId={`${tweet.quoted_tweet.id_str}`}
-              originalTweet={tweet.quoted_tweet}
+              tweetId={`${quotedTweet.id_str}`}
+              originalTweet={quotedTweet}
             />
           </div>
 
-          <TweetBody tweet={tweet.quoted_tweet as any} />
+          <TweetBody tweet={quotedTweet} />
 
           {/* 引用推文翻译显示 */}
           <TranslationDisplay
-            tweetId={`${tweet.quoted_tweet.id_str}`}
-            originalTweet={tweet.quoted_tweet}
+            tweetId={`${quotedTweet.id_str}`}
+            originalTweet={quotedTweet}
           />
 
-          {tweet.quoted_tweet.mediaDetails?.length ? (
-            <TweetMedia tweet={tweet.quoted_tweet} components={components} />
+          {quotedTweet.mediaDetails?.length ? (
+            <TweetMedia tweet={quotedTweet} components={components} />
           ) : null}
+
+          {quotedTweet.card && <TweetLinkCard tweet={quotedTweet} />}
         </div>
       )}
 

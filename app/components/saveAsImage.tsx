@@ -45,9 +45,10 @@ export function SaveAsImageButton() {
     return (
         <Button
             size="sm"
+            variant="secondary"
             onClick={onSaveAsImage}
         >
-            保存图片
+            保存为图片
         </Button>
     )
 }

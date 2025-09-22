@@ -7,7 +7,7 @@ import type { Tweet } from './types/index.js'
 export async function getTweet(
   id: string,
   fetchOptions?: RequestInit
-): Promise<Tweet | undefined> {
+): Promise<Tweet | null> {
   const { data, tombstone, notFound } = await fetchTweet(id, fetchOptions)
 
   if (notFound) {
