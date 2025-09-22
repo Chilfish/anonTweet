@@ -77,8 +77,9 @@ function parseHashtags(text: ParsedText): ParsedText | ParsedText[] {
     return text
   }
 
-  // Matches hashtags, including those with non-latin characters
-  const regex = /#(\p{L}+|\S+)/gu
+  // Matches hashtags: letters, numbers, and underscores only
+  // Stops at any other punctuation or whitespace
+  const regex = /#([a-zA-Z0-9_\p{L}]+)/gu
   const parts = text.split(regex)
 
   return parts

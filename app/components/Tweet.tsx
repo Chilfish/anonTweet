@@ -80,7 +80,9 @@ export const MyTweet = ({ tweet: t, components }: Props) => {
   const parentTweet = tweet.parent as unknown as Tweet;
 
   return (
-    <TweetContainer>
+    <TweetContainer
+      className="mx-auto!"
+    >
       {parentTweet && <ThreadTweet tweet={parentTweet} components={components} />}
 
       <div

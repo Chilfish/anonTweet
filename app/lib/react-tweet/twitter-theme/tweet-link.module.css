@@ -3,6 +3,7 @@
   color: var(--tweet-color-blue-secondary);
   text-decoration: none;
   cursor: pointer;
+  padding: 0 2px;
 }
 .root:hover {
   text-decoration-thickness: 1px;
