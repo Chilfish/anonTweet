@@ -37,12 +37,20 @@ const ThreadTweet = ({ tweet: t, components }: Props) => {
     <TweetContainer
       className="border-none! px-0! my-0! py-2 relative"
     >
-      <TweetHeader
-        tweet={tweet}
-        components={components}
-        className="pb-1!"
-        createdAtInline
-      />
+      <div
+        className="flex items-center justify-between mt-2"
+      >
+        <TweetHeader
+          tweet={tweet}
+          components={components}
+          className="pb-1!"
+          createdAtInline
+        />
+        <TranslationEditor
+          tweetId={tweet.id_str}
+          originalTweet={tweet}
+        />
+      </div>
       <div
         className="pl-14! relative"
       >
@@ -54,7 +62,7 @@ const ThreadTweet = ({ tweet: t, components }: Props) => {
 
         {/* 翻译显示 */}
         <TranslationDisplay
-          tweetId={`comment-${tweet.id_str}`}
+          tweetId={`${tweet.id_str}`}
           originalTweet={tweet}
         />
 
@@ -62,15 +70,6 @@ const ThreadTweet = ({ tweet: t, components }: Props) => {
           <TweetMedia tweet={tweet} components={components} />
         ) : null}
 
-        <div
-          className="flex items-center justify-between mt-2"
-        >
-          <TweetActions tweet={tweet} />
-          <TranslationEditor
-            tweetId={tweet.id_str}
-            originalTweet={tweet}
-          />
-        </div>
       </div>
     </TweetContainer>
   )
@@ -84,16 +83,24 @@ export const MyTweet = ({ tweet: t, components }: Props) => {
     <TweetContainer>
       {parentTweet && <ThreadTweet tweet={parentTweet} components={components} />}
 
-      <TweetHeader
-        tweet={tweet}
-        components={components}
-      />
+      <div
+        className="flex items-center justify-between"
+      >
+        <TweetHeader
+          tweet={tweet}
+          components={components}
+        />
+        <TranslationEditor
+          tweetId={`${tweet.id_str}`}
+          originalTweet={tweet}
+        />
+      </div>
 
       <TweetBody tweet={tweet} />
 
       {/* 源推文翻译显示 */}
       <TranslationDisplay
-        tweetId={`source-${tweet.id_str}`}
+        tweetId={`${tweet.id_str}`}
         originalTweet={tweet}
       />
 
@@ -103,44 +110,38 @@ export const MyTweet = ({ tweet: t, components }: Props) => {
 
       {tweet.quoted_tweet && (
         <div className="p-4! border-2 rounded-2xl mt-2!">
-          <TweetHeader tweet={tweet.quoted_tweet as any} components={components} />
+          <div
+            className="flex items-center justify-between"
+          >
+            <TweetHeader
+              tweet={tweet.quoted_tweet as any}
+              components={components}
+              createdAtInline
+            />
+            <TranslationEditor
+              tweetId={`${tweet.quoted_tweet.id_str}`}
+              originalTweet={tweet.quoted_tweet}
+            />
+          </div>
+
           <TweetBody tweet={tweet.quoted_tweet as any} />
 
           {/* 引用推文翻译显示 */}
           <TranslationDisplay
-            tweetId={`quoted-${tweet.quoted_tweet.id_str}`}
+            tweetId={`${tweet.quoted_tweet.id_str}`}
             originalTweet={tweet.quoted_tweet}
           />
 
           {tweet.quoted_tweet.mediaDetails?.length ? (
             <TweetMedia tweet={tweet.quoted_tweet} components={components} />
           ) : null}
-
-          {/* 引用推文翻译编辑按钮和信息 */}
-          <div className="flex items-center justify-between mt-2">
-            <TweetInfo tweet={tweet.quoted_tweet as any} />
-            <TranslationEditor
-              tweetId={`quoted-${tweet.quoted_tweet.id_str}`}
-              originalTweet={tweet.quoted_tweet}
-            />
-          </div>
         </div>
       )}
 
-      {/* 主推文的翻译编辑按钮、信息和操作 */}
-      <div
-        className="flex items-center justify-between w-full"
-      >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 pt-2">
           <TweetInfo tweet={tweet} />
           <TweetActions tweet={tweet} />
         </div>
-
-        <TranslationEditor
-          tweetId={`source-${tweet.id_str}`}
-          originalTweet={tweet}
-        />
-      </div>
     </TweetContainer>
   );
 };

@@ -10,6 +10,7 @@ import type { Route } from './+types/root'
 import './app.css'
 import { AlertTriangle, Loader2 } from 'lucide-react'
 import { Button } from './components/ui/button'
+import { Toaster } from "./components/ui/sonner"
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -44,7 +45,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />
+  return (
+    <>
+      <Outlet />
+      <Toaster />
+    </>
+  )
 }
 
 export function HydrateFallback() {
@@ -87,7 +93,11 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
               <code>{stack}</code>
             </pre>
           )}
-          <Button asChild>
+          <Button
+            className='mt-8'
+            variant='link'
+            asChild
+          >
             <a href='/'>Go back to Home</a>
           </Button>
         </div>

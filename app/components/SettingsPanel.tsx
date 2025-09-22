@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Textarea } from './ui/textarea';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
@@ -9,15 +9,15 @@ import { Input } from './ui/input';
 import { Settings, Languages, Edit3, Save, X, Trash2, SettingsIcon, LanguagesIcon } from 'lucide-react';
 import { useTranslationStore, useTranslationSettings } from '~/lib/stores/translation';
 
-export const TranslationPanel = () => {
+export const SettingsPanel = () => {
   const { settings, updateSettings, resetSettings } = useTranslationSettings();
   const { setShowTranslations, setShowTranslationButton, showTranslationButton, showTranslations } = useTranslationStore()
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   function toggleTranslations() {
-    setShowTranslations(!showTranslations);
-    setShowTranslationButton(!showTranslationButton);
+    setShowTranslations(showTranslations ? false : true);
+    setShowTranslationButton(showTranslationButton ? false : true);
   }
 
   return (
@@ -43,15 +43,15 @@ export const TranslationPanel = () => {
             <SettingsIcon className="size-5" />
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-auto">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold">翻译设置</DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-6 py-4">
-            {/* 自定义分隔符 */}
-            <Card className="p-4 space-y-4">
-              <Label htmlFor="separator-html" className="text-sm font-normal">
+          {/* 自定义分隔符 */}
+          <Card className="gap-0">
+            <CardContent className="space-y-4 px-4">
+              <Label htmlFor="separator-html">
                 <h3 className="font-medium text-gray-900">自定义分隔符</h3>
               </Label>
               <Textarea
@@ -59,16 +59,24 @@ export const TranslationPanel = () => {
                 onChange={(e) => updateSettings({ customSeparator: e.target.value })}
                 placeholder="输入自定义分隔符HTML"
                 className="text-sm"
+                id="separator-html"
               />
 
-              <div className="text-xs text-gray-500 mt-1">
-                预览：
+              <div className=" mt-1 space-y-2">
+                <div className='text-xs text-gray-500'>
+                  预览：
+                </div>
+                <p>正文：Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
                 <div
                   dangerouslySetInnerHTML={{ __html: settings.customSeparator }}
                 />
+                <p className='font-bold'>译文：Lorem Ipsum 只是印刷和排版行业的虚拟文本。</p>
               </div>
-            </Card>
 
+            </CardContent>
+          </Card>
+
+          <DialogFooter>
             {/* 操作按钮 */}
             <div className="flex justify-between pt-4">
               <Button
@@ -86,7 +94,7 @@ export const TranslationPanel = () => {
                 完成
               </Button>
             </div>
-          </div>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

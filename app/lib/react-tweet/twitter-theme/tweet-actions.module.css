@@ -2,8 +2,7 @@
   display: flex;
   align-items: center;
   color: var(--tweet-font-color-secondary);
-  padding-top: 0.25rem;
-  margin-top: 0.25rem;
+  gap: 0.5rem;
   overflow-wrap: break-word;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -16,7 +15,6 @@
   color: inherit;
   display: flex;
   align-items: center;
-  margin-right: 1.25rem;
 }
 .like:hover,
 .reply:hover,

@@ -1,6 +1,7 @@
 import { domToPng } from 'modern-screenshot'
 import { useTranslationStore } from '~/lib/stores/translation';
 import { Button } from './ui/button';
+import { toast } from 'sonner';
 
 function saveAsImage(png: string, fileName: string) {
     const a = document.createElement('a');
@@ -35,7 +36,10 @@ export function SaveAsImageButton() {
             })
             const fileName = tweet.user.screen_name + '-' + tweet.id_str + '-' + now;
             saveAsImage(png, fileName);
+            toast.success('图片保存成功');
         }
+        // 恢复翻译按钮显示
+        setShowTranslationButton(true);
     }
 
     return (

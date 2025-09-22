@@ -30,7 +30,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     const [entityTranslations, setEntityTranslations] = useState<EntityTranslation[]>([]);
 
 
-    const { showTranslationButton, getTranslation, setTranslation } = useTranslationStore();
+    const { showTranslationButton, getTranslation, setTranslation, translations} = useTranslationStore();
     const hasTextContent = useTranslationStore((state) => state.hasTextContent);
 
     const existingTranslation = getTranslation(tweetId);

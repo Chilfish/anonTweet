@@ -67,7 +67,6 @@ export const TweetHeader = ({ tweet, components, className, createdAtInline }: P
         </div>
         
         { createdAtInline && <div className={s.createdAt}>
-          <span>·</span>
           <TweetInfoCreatedAt tweet={tweet} />
         </div> }
       </div>
