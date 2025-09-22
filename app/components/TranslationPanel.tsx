@@ -8,20 +8,23 @@ import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { Settings, Languages, Edit3, Save, X, Trash2, SettingsIcon, LanguagesIcon } from 'lucide-react';
 import { useTranslationStore, useTranslationSettings } from '~/lib/stores/translation';
-import type { EnrichedTweet, EnrichedQuotedTweet } from '~/lib/react-tweet/utils';
 
 export const TranslationPanel = () => {
   const { settings, updateSettings, resetSettings } = useTranslationSettings();
-  const showTranslations = useTranslationStore((state) => state.showTranslations);
-  const toggleTranslations = useTranslationStore((state) => state.toggleTranslations);
+  const { setShowTranslations, setShowTranslationButton, showTranslationButton, showTranslations } = useTranslationStore()
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  function toggleTranslations() {
+    setShowTranslations(!showTranslations);
+    setShowTranslationButton(!showTranslationButton);
+  }
 
   return (
     <div className="flex items-center gap-3">
       {/* 显示/隐藏翻译按钮 */}
       <Button
-        variant={showTranslations ? "default" : "outline"}
+        variant="outline"
         size="sm"
         onClick={toggleTranslations}
         className="h-8 px-3 text-sm font-medium transition-all duration-200"

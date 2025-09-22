@@ -6,8 +6,10 @@ import { TranslationPanel } from "~/components/TranslationPanel";
 import { useSearchParams } from "react-router";
 import { getTweet } from "~/lib/react-tweet/api";
 import { Await, useLoaderData } from "react-router"
-import { Suspense } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { TweetNotFound, TweetSkeleton } from "~/lib/react-tweet";
+import { useTranslationStore } from "~/lib/stores/translation";
+import { SaveAsImageButton } from "~/components/saveAsImage";
 
 export function meta() {
   return [
@@ -34,10 +36,24 @@ export default function Home() {
   const tweetId = searchParams.get('id');
   const plain = searchParams.get('plain') === 'true';
   const { tweet } = useLoaderData<typeof loader>();
+  const tweetRef = useRef<HTMLDivElement>(null);
+  const { setTweetElRef, setTweet } = useTranslationStore();
 
   if (plain && tweetId) {
     return <TweetComponent id={tweetId} />;
   }
+
+  useEffect(() => {
+    if (tweetRef.current) {
+      setTweetElRef(tweetRef.current);
+    }
+  }, [tweetRef])
+
+  useEffect(() => {
+    if (tweet) {
+      setTweet(tweet);
+    }
+  }, [tweet])
 
   return (
     <div className="w-screen min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -49,26 +65,28 @@ export default function Home() {
             <TweetInputForm />
           ) : (
             <div className="w-full flex flex-col items-center justify-center gap-6">
-              <div className="flex justify-between items-center w-full max-w-2xl">
+              <div className="flex items-center w-full max-w-2xl gap-4">
                 <BackButton />
+                <SaveAsImageButton />
                 <TranslationPanel />
               </div>
 
-              <Suspense fallback={<TweetSkeleton />}>
-                <Await
-                  resolve={tweet}
-                  errorElement={
-                    <div>Could not load tweet 😬</div>
-                  }
-                  children={(resolvedTweet) => (
-                    resolvedTweet ? (
-                      <MyTweet tweet={resolvedTweet} />
-                    ) : (
-                      <TweetNotFound />
-                    )
-                  )}
-                />
-              </Suspense>
+              <div 
+                className="w-full max-w-2xl"
+              ref={tweetRef}>
+                <Suspense fallback={<TweetSkeleton />}>
+                  <Await
+                    resolve={tweet}
+                    errorElement={
+                      <div>Could not load tweet 😬</div>
+                    }
+                    children={(resolvedTweet) => resolvedTweet
+                      ? <MyTweet tweet={resolvedTweet} />
+                      : <TweetNotFound />
+                    }
+                  />
+                </Suspense> 
+                     </div>
             </div>
           )}
         </div>

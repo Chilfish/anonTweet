@@ -8,6 +8,7 @@ import { Input } from './ui/input';
 import { Languages, Save, X, Trash2, LanguagesIcon } from 'lucide-react';
 import { useTranslationStore } from '~/lib/stores/translation';
 import type { EnrichedTweet, EnrichedQuotedTweet, Entity } from '~/lib/react-tweet/utils';
+import { TweetText } from './TweetText';
 
 type EntityTranslation = Entity & {
     index: number
@@ -29,7 +30,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     const [entityTranslations, setEntityTranslations] = useState<EntityTranslation[]>([]);
 
 
-    const { showTranslations, getTranslation, setTranslation } = useTranslationStore();
+    const { showTranslationButton, getTranslation, setTranslation } = useTranslationStore();
     const hasTextContent = useTranslationStore((state) => state.hasTextContent);
 
     const existingTranslation = getTranslation(tweetId);
@@ -44,7 +45,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
 
     // 检查是否应该显示翻译编辑器
     const shouldShowEditor = () => {
-        if (!hasTextContent(originalTweet.text) || !showTranslations) {
+        if (!hasTextContent(originalTweet.text) || !showTranslationButton) {
             return false;
         }
         return true;
@@ -109,7 +110,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
                 </Button>
             </DialogTrigger>
 
-            <DialogContent className="max-w-2xl h-[90vh] overflow-auto">
+            <DialogContent className="max-h-[92vh] max-w-[95vw] overflow-auto">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <Languages className="h-5 w-5" />
@@ -121,11 +122,9 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
                     {/* 原文显示 */}
                     <div>
                         <Label className="text-sm font-medium text-gray-700">原文</Label>
-                        <Card className="mt-2">
+                        <Card className="mt-2 py-3">
                             <CardContent>
-                                <p className="text-sm text-gray-600 leading-relaxed">
-                                    {originalTweet.text}
-                                </p>
+                                <TweetText text={originalTweet.text} />
                             </CardContent>
                         </Card>
                     </div>

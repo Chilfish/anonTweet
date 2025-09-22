@@ -5,8 +5,9 @@ import { Link } from "react-router";
 export function BackButton() {
   return (
     <Button
-      className="flex items-center gap-2"
+      className="flex items-center gap-2 mr-auto"
       asChild
+      variant="link"
     >
       <Link
         to="/"
