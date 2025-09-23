@@ -1,4 +1,4 @@
-import { MyTweet } from "~/components/Tweet";
+import { MyTweet } from "~/components/tweet/Tweet";
 import { BackButton } from "~/components/BackButton";
 import { SettingsPanel } from "~/components/SettingsPanel";
 import { useSearchParams } from "react-router";

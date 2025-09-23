@@ -1,6 +1,6 @@
 import { Plus, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
-import { useTranslationSettings } from '~/lib/stores/translation';
+import { useTranslationStore } from '~/lib/stores/translation';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Input } from './ui/input';
@@ -10,7 +10,7 @@ import { Textarea } from './ui/textarea';
 
 export const SeparatorTemplateManager = () => {
   const { settings, selectTemplate, addCustomTemplate, updateCustomTemplate, deleteCustomTemplate } =
-    useTranslationSettings();
+    useTranslationStore();
 
   const [isAddingTemplate, setIsAddingTemplate] = useState(false);
   const [newTemplateName, setNewTemplateName] = useState('');

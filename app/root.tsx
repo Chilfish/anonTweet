@@ -13,8 +13,8 @@ import { AlertTriangle, Loader2 } from 'lucide-react'
 import { Button } from './components/ui/button'
 import { Toaster } from "./components/ui/sonner"
 import { TweetSkeleton } from './lib/react-tweet'
-import { LayoutComponent } from './components/Layout'
-import { ThemeProvider } from './components/ThemeProvider'
+import { LayoutComponent } from '~/components/layout/Layout'
+import { ThemeProvider } from '~/components/ThemeProvider'
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },

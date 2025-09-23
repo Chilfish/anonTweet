@@ -13,8 +13,8 @@ import { Suspense } from "react";
 import { getTweet } from "~/lib/react-tweet/api";
 import { type TweetProps, TweetNotFound, TweetSkeleton } from "~/lib/react-tweet";
 import { enrichTweet } from "~/lib/react-tweet";
-import { TranslationDisplay } from "./TranslationDisplay";
-import { TranslationEditor } from "./TranslationEditor";
+import { TranslationDisplay } from "../TranslationDisplay";
+import { TranslationEditor } from "../TranslationEditor";
 import { TweetLinkCard } from "./TweetCard";
 
 type Props = {

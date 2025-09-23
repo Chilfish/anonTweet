@@ -1,7 +1,7 @@
 import { Monitor, Moon, SettingsIcon, Sun } from 'lucide-react';
 import React, { useState } from 'react';
 import { useTheme } from '~/lib/stores/theme';
-import { useTranslationSettings, useTranslationStore } from '~/lib/stores/translation';
+import { useTranslationStore } from '~/lib/stores/translation';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
@@ -15,8 +15,9 @@ export const SettingsPanel = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   function toggleTranslations() {
-    setShowTranslations(showTranslations ? false : true);
-    setShowTranslationButton(showTranslationButton ? false : true);
+    const target = !showTranslations
+    setShowTranslations(target);
+    setShowTranslationButton(target);
   }
 
   return (

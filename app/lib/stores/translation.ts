@@ -244,43 +244,10 @@ export const useTranslationStore = create<TranslationState>()(
     }),
     {
       name: 'translation-store',
+      version: 2,
       partialize: (state) => ({
         settings: state.settings,
       }),
     }
   )
 );
-
-// 便捷的hooks
-export const useTranslationSettings = () => {
-  const settings = useTranslationStore((state) => state.settings);
-  const updateSettings = useTranslationStore((state) => state.updateSettings);
-  const resetSettings = useTranslationStore((state) => state.resetSettings);
-  const selectTemplate = useTranslationStore((state) => state.selectTemplate);
-  const updateTemplate = useTranslationStore((state) => state.updateTemplate);
-  const addTemplate = useTranslationStore((state) => state.addTemplate);
-  const deleteTemplate = useTranslationStore((state) => state.deleteTemplate);
-  const addCustomTemplate = useTranslationStore((state) => state.addCustomTemplate);
-  const updateCustomTemplate = useTranslationStore((state) => state.updateCustomTemplate);
-  const deleteCustomTemplate = useTranslationStore((state) => state.deleteCustomTemplate);
-  return { 
-    settings, 
-    updateSettings, 
-    resetSettings, 
-    selectTemplate, 
-    updateTemplate, 
-    addTemplate, 
-    deleteTemplate,
-    addCustomTemplate,
-    updateCustomTemplate,
-    deleteCustomTemplate
-  };
-};
-
-export const useTranslationUI = () => {
-  const showTranslations = useTranslationStore((state) => state.showTranslations);
-  const editingTweetId = useTranslationStore((state) => state.editingTweetId);
-  const toggleTranslations = useTranslationStore((state) => state.setShowTranslations);
-  const setEditingTweetId = useTranslationStore((state) => state.setEditingTweetId);
-  return { showTranslations, editingTweetId, toggleTranslations, setEditingTweetId };
-};

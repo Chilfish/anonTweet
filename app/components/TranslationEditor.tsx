@@ -8,7 +8,7 @@ import { Input } from './ui/input';
 import { Languages, Save, X, Trash2, LanguagesIcon } from 'lucide-react';
 import { useTranslationStore } from '~/lib/stores/translation';
 import type { EnrichedTweet, EnrichedQuotedTweet, Entity } from '~/lib/react-tweet/utils';
-import { TweetText } from './TweetText';
+import { TweetText } from './tweet/TweetText';
 
 type EntityTranslation = Entity & {
     index: number

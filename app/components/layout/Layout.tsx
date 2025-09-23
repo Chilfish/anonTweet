@@ -3,7 +3,7 @@ import { InfoIcon, Sparkles } from 'lucide-react';
 import { Outlet, useSearchParams } from 'react-router';
 import { cn } from '~/lib/utils';
 import { PageHeader } from './PageHeader';
-import { Button } from './ui/button';
+import { Button } from '~/components/ui/button';
 
 interface LinkProps {
   to: string;
