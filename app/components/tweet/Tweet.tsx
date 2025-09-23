@@ -9,7 +9,7 @@ import {
   TweetActions,
   type EnrichedTweet,
 } from "~/lib/react-tweet";
-import { Suspense } from "react";
+import { Suspense, type Ref } from "react";
 import { getTweet } from "~/lib/react-tweet/api";
 import { type TweetProps, TweetNotFound, TweetSkeleton } from "~/lib/react-tweet";
 import { enrichTweet } from "~/lib/react-tweet";
@@ -17,12 +17,13 @@ import { TranslationDisplay } from "../TranslationDisplay";
 import { TranslationEditor } from "../TranslationEditor";
 import { TweetLinkCard } from "./TweetCard";
 
-type Props = {
+type TweetComponentProps = {
   tweet: Tweet;
   quotedTweet?: Tweet | null;
   parentTweets?: Tweet[];
   components?: TwitterComponents;
   showMp4CoverOnly?: boolean;
+  ref?: Ref<HTMLDivElement>;
 };
 
 /**
@@ -35,7 +36,7 @@ type Props = {
  *  - 推文的 in_reply_to_user_id_str 与 parent 的 user.id_str 相等
  */
 
-const ThreadTweet = ({ tweet: t, components, showMp4CoverOnly }: Props) => {
+const ThreadTweet = ({ tweet: t, components, showMp4CoverOnly }: TweetComponentProps) => {
   const tweet = enrichTweet(t);
 
   return (
@@ -87,7 +88,7 @@ const ThreadTweet = ({ tweet: t, components, showMp4CoverOnly }: Props) => {
   )
 }
 
-export const MyTweet = ({ tweet: t, parentTweets = [], quotedTweet: q, components, showMp4CoverOnly }: Props) => {
+export const MyTweet = ({ tweet: t, parentTweets = [], quotedTweet: q, components, showMp4CoverOnly, ref }: TweetComponentProps) => {
   const tweet = enrichTweet(t);
   let quotedTweet: EnrichedTweet | null = null;
   if (tweet.quoted_tweet?.id_str && q) {
@@ -95,7 +96,7 @@ export const MyTweet = ({ tweet: t, parentTweets = [], quotedTweet: q, component
   }
 
   return (
-    <TweetContainer>
+    <TweetContainer ref={ref}>
       {parentTweets.map((parentTweet) => (
         <ThreadTweet
           key={parentTweet.id_str}

@@ -4,7 +4,7 @@ import { SettingsPanel } from "~/components/SettingsPanel";
 import { useSearchParams } from "react-router";
 import { getTweet, type Tweet } from "~/lib/react-tweet/api";
 import { Await, useLoaderData } from "react-router"
-import { Suspense, useEffect, useRef, use } from "react";
+import { Suspense, useEffect, useRef, use, type Ref } from "react";
 import { TweetNotFound, TweetSkeleton } from "~/lib/react-tweet";
 import { useTranslationStore } from "~/lib/stores/translation";
 import { SaveAsImageButton } from "~/components/saveAsImage";
@@ -69,7 +69,7 @@ export async function loader({
     return { tweet: mainTweet, parentTweets, quotedTweet }
 }
 
-function TweetContent() {
+function TweetContent({ ref }: { ref?: Ref<HTMLDivElement> }) {
     const loaderData = useLoaderData<typeof loader>()
     const { screenshoting } = useTranslationStore();
 
@@ -86,6 +86,7 @@ function TweetContent() {
                         quotedTweet={resolvedTweet.quotedTweet}
                         parentTweets={resolvedTweet.parentTweets}
                         showMp4CoverOnly={screenshoting}
+                        ref={ref}
                     />
                     : <TweetNotFound />
                 }
@@ -130,9 +131,9 @@ export default function Tweet({
 
             <div
                 className="w-full max-w-2xl py-6"
-                ref={tweetRef}
             >
-                <TweetContent />
+                <TweetContent 
+                ref={tweetRef}/>
             </div>
         </>
     )
