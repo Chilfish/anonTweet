@@ -32,9 +32,10 @@ type Props = {
   tweet: EnrichedTweet | EnrichedQuotedTweet
   components?: TwitterComponents
   quoted?: boolean
+  showCoverOnly?: boolean
 }
 
-export const TweetMedia = ({ tweet, components, quoted }: Props) => {
+export const TweetMedia = ({ tweet, components, quoted, showCoverOnly }: Props) => {  
   const length = tweet.mediaDetails?.length ?? 0
   const Img = components?.MediaImg ?? MediaImg
 
@@ -75,7 +76,7 @@ export const TweetMedia = ({ tweet, components, quoted }: Props) => {
                   className={s.skeleton}
                   style={getSkeletonStyle(media, length)}
                 />
-                <TweetMediaVideo tweet={tweet} media={media} />
+                <TweetMediaVideo tweet={tweet} media={media} showCoverOnly={showCoverOnly} />
               </div>
             )}
           </Fragment>

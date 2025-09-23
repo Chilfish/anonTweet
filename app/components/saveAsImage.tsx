@@ -12,14 +12,18 @@ function saveAsImage(png: string, fileName: string) {
 }
 
 export function SaveAsImageButton() {
-    const { tweetElRef, tweet, setShowTranslationButton } = useTranslationStore();
+    const { tweetElRef, tweet, setShowTranslationButton, setScreenshoting } = useTranslationStore();
 
     async function onSaveAsImage() {
         if (!tweetElRef || !tweet) {
+            console.log('tweetElRef or tweet is null', {tweetElRef, tweet});
             return;
         }
 
         setShowTranslationButton(false);
+        setScreenshoting(true); 
+
+        await new Promise(resolve => requestAnimationFrame(resolve));
 
         const png = await domToPng(tweetElRef, {
             quality: 1,
@@ -37,9 +41,13 @@ export function SaveAsImageButton() {
             const fileName = tweet.user.screen_name + '-' + tweet.id_str + '-' + now;
             saveAsImage(png, fileName);
             toast.success('图片保存成功');
+        } else {
+            console.log('png is null', {png, tweetElRef, tweet});
+            toast.error('图片保存失败');
         }
         // 恢复翻译按钮显示
         setShowTranslationButton(true);
+        setScreenshoting(false);
     }
 
     return (

@@ -11,18 +11,70 @@ import {
 } from '../utils.js'
 import mediaStyles from './tweet-media.module.css'
 import s from './tweet-media-video.module.css'
+import { MediaImg } from './media-img.js'
 
 type Props = {
   tweet: EnrichedTweet | EnrichedQuotedTweet
   media: MediaAnimatedGif | MediaVideo
+  showCoverOnly?: boolean
 }
 
-export const TweetMediaVideo = ({ tweet, media }: Props) => {
+export const TweetMediaVideo = ({ tweet, media, showCoverOnly }: Props) => {
   const [playButton, setPlayButton] = useState(true)
   const [isPlaying, setIsPlaying] = useState(false)
   const [ended, setEnded] = useState(false)
   const mp4Video = getMp4Video(media)
   let timeout = 0
+
+  const PlayControlButton = () => (
+    <button
+      type="button"
+      className={s.videoButton}
+      aria-label="View video on X"
+      onClick={(e) => {
+        const video = e.currentTarget.previousSibling as HTMLMediaElement
+
+        e.preventDefault()
+        setPlayButton(false)
+        video.load()
+        video
+          .play()
+          .then(() => {
+            setIsPlaying(true)
+            video.focus()
+          })
+          .catch((error) => {
+            console.error('Error playing video:', error)
+            setPlayButton(true)
+            setIsPlaying(false)
+          })
+      }}
+    >
+      <svg
+        viewBox="0 0 24 24"
+        className={s.videoButtonIcon}
+        aria-hidden="true"
+      >
+        <g>
+          <path d="M21 12L4 2v20l17-10z"></path>
+        </g>
+      </svg>
+    </button>
+  )
+
+  if (showCoverOnly) {
+    return (
+      <>
+        <MediaImg
+          src={getMediaUrl(media, 'large')}
+          alt="Video"
+          className={mediaStyles.image}
+          draggable
+        />
+        <PlayControlButton />
+      </>
+    )
+  }
 
   return (
     <>
@@ -54,41 +106,7 @@ export const TweetMediaVideo = ({ tweet, media }: Props) => {
         <source src={mp4Video.url} type={mp4Video.content_type} />
       </video>
 
-      {playButton && (
-        <button
-          type="button"
-          className={s.videoButton}
-          aria-label="View video on X"
-          onClick={(e) => {
-            const video = e.currentTarget.previousSibling as HTMLMediaElement
-
-            e.preventDefault()
-            setPlayButton(false)
-            video.load()
-            video
-              .play()
-              .then(() => {
-                setIsPlaying(true)
-                video.focus()
-              })
-              .catch((error) => {
-                console.error('Error playing video:', error)
-                setPlayButton(true)
-                setIsPlaying(false)
-              })
-          }}
-        >
-          <svg
-            viewBox="0 0 24 24"
-            className={s.videoButtonIcon}
-            aria-hidden="true"
-          >
-            <g>
-              <path d="M21 12L4 2v20l17-10z"></path>
-            </g>
-          </svg>
-        </button>
-      )}
+      {playButton && <PlayControlButton />}
 
       {!isPlaying && !ended && (
         <div className={s.watchOnTwitter}>

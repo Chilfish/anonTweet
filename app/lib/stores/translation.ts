@@ -32,6 +32,7 @@ interface TranslationState {
   showTranslationButton: boolean;
   editingTweetId: string | null;
   tweetElRef: HTMLDivElement | null;
+  screenshoting: boolean;
 
   tweet: Tweet | null,
 
@@ -53,6 +54,7 @@ interface TranslationState {
 
   // UI状态相关方法
   setShowTranslations: (show: boolean) => void;
+  setScreenshoting: (screenshoting: boolean) => void;
   setEditingTweetId: (tweetId: string | null) => void;
   setShowTranslationButton: (show: boolean) => void;
   setTweetElRef: (ref: HTMLDivElement) => void;
@@ -95,6 +97,7 @@ export const useTranslationStore = create<TranslationState>()(
       editingTweetId: null,
       tweetElRef: null,
       tweet: null,
+      screenshoting: false,
 
       // 设置相关方法
       updateSettings: (newSettings) =>
@@ -219,6 +222,7 @@ export const useTranslationStore = create<TranslationState>()(
       setEditingTweetId: (tweetId) => set({ editingTweetId: tweetId }),
       setTweetElRef: (ref) => set({ tweetElRef: ref }),
       setTweet: (tweet) => set({ tweet }),
+      setScreenshoting: (screenshoting) => set({ screenshoting }),
 
       hasTextContent: (text?: string) => {
         if (!text) return false;

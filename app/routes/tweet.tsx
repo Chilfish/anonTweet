@@ -71,6 +71,7 @@ export async function loader({
 
 function TweetContent() {
     const loaderData = useLoaderData<typeof loader>()
+    const { screenshoting } = useTranslationStore();
 
     return (
         <Suspense fallback={<HydrateFallback />}>
@@ -84,6 +85,7 @@ function TweetContent() {
                         tweet={resolvedTweet.tweet}
                         quotedTweet={resolvedTweet.quotedTweet}
                         parentTweets={resolvedTweet.parentTweets}
+                        showMp4CoverOnly={screenshoting}
                     />
                     : <TweetNotFound />
                 }

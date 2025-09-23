@@ -22,6 +22,7 @@ type Props = {
   quotedTweet?: Tweet | null;
   parentTweets?: Tweet[];
   components?: TwitterComponents;
+  showMp4CoverOnly?: boolean;
 };
 
 /**
@@ -34,7 +35,7 @@ type Props = {
  *  - 推文的 in_reply_to_user_id_str 与 parent 的 user.id_str 相等
  */
 
-const ThreadTweet = ({ tweet: t, components }: Props) => {
+const ThreadTweet = ({ tweet: t, components, showMp4CoverOnly }: Props) => {
   const tweet = enrichTweet(t);
 
   return (
@@ -71,7 +72,7 @@ const ThreadTweet = ({ tweet: t, components }: Props) => {
         />
 
         {tweet.mediaDetails?.length ? (
-          <TweetMedia tweet={tweet} components={components} />
+          <TweetMedia tweet={tweet} components={components} showCoverOnly={showMp4CoverOnly} />
         ) : null}
 
       {tweet.card && <TweetLinkCard tweet={tweet} />}
@@ -86,7 +87,7 @@ const ThreadTweet = ({ tweet: t, components }: Props) => {
   )
 }
 
-export const MyTweet = ({ tweet: t, parentTweets = [], quotedTweet: q, components }: Props) => {
+export const MyTweet = ({ tweet: t, parentTweets = [], quotedTweet: q, components, showMp4CoverOnly }: Props) => {
   const tweet = enrichTweet(t);
   let quotedTweet: EnrichedTweet | null = null;
   if (tweet.quoted_tweet?.id_str && q) {
@@ -127,7 +128,7 @@ export const MyTweet = ({ tweet: t, parentTweets = [], quotedTweet: q, component
       />
 
       {tweet.mediaDetails?.length ? (
-        <TweetMedia tweet={tweet} components={components} />
+        <TweetMedia tweet={tweet} components={components} showCoverOnly={showMp4CoverOnly} />
       ) : null}
 
       {tweet.card && <TweetLinkCard tweet={tweet} />}
@@ -157,7 +158,7 @@ export const MyTweet = ({ tweet: t, parentTweets = [], quotedTweet: q, component
           />
 
           {quotedTweet.mediaDetails?.length ? (
-            <TweetMedia tweet={quotedTweet} components={components} />
+            <TweetMedia tweet={quotedTweet} components={components} showCoverOnly={showMp4CoverOnly} />
           ) : null}
 
           {quotedTweet.card && <TweetLinkCard tweet={quotedTweet} />}
