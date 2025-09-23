@@ -95,9 +95,7 @@ export const MyTweet = ({ tweet: t, parentTweets = [], quotedTweet: q, component
   }
 
   return (
-    <TweetContainer
-      className="mx-auto! py-4!"
-    >
+    <TweetContainer>
       {parentTweets.map((parentTweet) => (
         <ThreadTweet
           key={parentTweet.id_str}

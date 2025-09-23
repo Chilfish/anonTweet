@@ -12,7 +12,7 @@ function saveAsImage(png: string, fileName: string) {
 }
 
 export function SaveAsImageButton() {
-    const { tweetElRef, tweet, setShowTranslationButton, setScreenshoting } = useTranslationStore();
+    const { tweetElRef, tweet, setShowTranslationButton, setScreenshoting, showTranslations } = useTranslationStore();
 
     async function onSaveAsImage() {
         if (!tweetElRef || !tweet) {
@@ -46,8 +46,10 @@ export function SaveAsImageButton() {
             toast.error('图片保存失败');
         }
         // 恢复翻译按钮显示
-        setShowTranslationButton(true);
         setScreenshoting(false);
+        if (showTranslations) {
+            setShowTranslationButton(true);
+        }
     }
 
     return (

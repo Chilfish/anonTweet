@@ -129,7 +129,7 @@ export default function Tweet({
             </div>
 
             <div
-                className="w-full max-w-2xl"
+                className="w-full max-w-2xl py-6"
                 ref={tweetRef}
             >
                 <TweetContent />

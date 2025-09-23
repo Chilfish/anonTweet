@@ -10,7 +10,6 @@
   box-sizing: border-box;
   border: var(--tweet-border);
   border-radius: 12px;
-  margin: var(--tweet-container-margin);
   background-color: var(--tweet-bg-color);
   transition-property: background-color, box-shadow;
   transition-duration: 0.2s;
