@@ -4,6 +4,7 @@ import { Outlet, useSearchParams } from 'react-router';
 import { cn } from '~/lib/utils';
 import { PageHeader } from './PageHeader';
 import { Button } from '~/components/ui/button';
+import { formatDateFns } from '~/lib/react-tweet/date-utils';
 
 interface LinkProps {
   to: string;
@@ -35,6 +36,15 @@ const Footer = ({ className, ...props }: { className?: string }) => (
       <Linker to='https://replive.chilfish.top'>西尾夕香 replive 记录</Linker>/
       <Linker to='https://oshitabi.chilfish.top/'>推し旅 AR 镜头</Linker>
     </ul>
+    <div className='mt-2 flex items-center justify-center gap-2 text-xs text-muted-foreground/70'>
+      <span>
+        上次构建于：{formatDateFns(new Date(__GIT_DATE__))}
+      </span>
+      <span className='inline-flex items-center gap-1 px-2 py-1 bg-muted/50 rounded-md border'>
+        <span className='w-2 h-2 bg-green-500 rounded-full animate-pulse'></span>
+        <span>{__GIT_HASH__}</span>
+      </span>
+    </div>
   </footer>
 );
 
