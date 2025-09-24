@@ -35,12 +35,12 @@ export async function loader({
     tweet: Tweet | null,
     quotedTweet: Tweet | null,
     parentTweets: Tweet[],
-    error?: any,
+    tweetId?: string,
 }> {
     const { id } = params;
     const tweetId = extractTweetId(id);
     if (!tweetId) {
-        return { tweet: null, parentTweets: [], quotedTweet: null, error: new Error('Invalid tweet id: ' + id) }
+        return { tweet: null, parentTweets: [], quotedTweet: null, tweetId: id }
     }
 
     let tweet = await getTweet(tweetId)
@@ -48,7 +48,7 @@ export async function loader({
     const mainTweet = tweet || null;
 
     if (!tweet) {
-        return { tweet: null, parentTweets: [], quotedTweet: null, error: new Error('Invalid tweet id: ' + id) }
+        return { tweet: null, parentTweets: [], quotedTweet: null, tweetId: id }
     }
 
     const parentTweets: Tweet[] = [];
@@ -91,7 +91,7 @@ function TweetContent({ ref }: { ref?: Ref<HTMLDivElement> }) {
                 ref={ref}
               />
             ) : (
-              <TweetNotFound error={resolvedTweet.error} />
+              <TweetNotFound tweetId={resolvedTweet.tweetId} />
             )
           }
         />

@@ -17,6 +17,9 @@ export function SaveAsImageButton() {
     async function onSaveAsImage() {
         if (!tweetElRef || !tweet) {
             console.log('tweetElRef or tweet is null', {tweetElRef, tweet});
+            toast.error('图片保存失败', {
+              description: '请检查Tweet是否存在',
+            });
             return;
         }
 
@@ -43,7 +46,9 @@ export function SaveAsImageButton() {
             toast.success('图片保存成功');
         } else {
             console.log('png is null', {png, tweetElRef, tweet});
-            toast.error('图片保存失败');
+            toast.error('图片保存失败', {
+              description: '请检查Tweet是否存在',
+            });
         }
         // 恢复翻译按钮显示
         setScreenshoting(false);
