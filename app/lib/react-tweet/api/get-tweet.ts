@@ -1,3 +1,4 @@
+import type { AxiosRequestConfig } from 'axios'
 import type { Tweet } from './types/index.js'
 import { fetchTweet } from './fetch-tweet.js'
 
@@ -6,7 +7,7 @@ import { fetchTweet } from './fetch-tweet.js'
  */
 export async function getTweet(
   id: string,
-  fetchOptions?: RequestInit,
+  fetchOptions?: AxiosRequestConfig,
 ): Promise<Tweet | null> {
   const { data, tombstone, notFound } = await fetchTweet(id, fetchOptions)
 

@@ -1,6 +1,12 @@
+import type { AxiosRequestConfig } from 'axios'
 import type { Tweet } from './types/index.js'
+import Axios from 'axios'
+import { setupCache } from 'axios-cache-interceptor'
 
 const SYNDICATION_URL = 'https://cdn.syndication.twimg.com'
+
+const instance = Axios.create()
+const axios = setupCache(instance)
 
 export class TwitterApiError extends Error {
   status: number
@@ -35,7 +41,7 @@ function getToken(id: string) {
  */
 export async function fetchTweet(
   id: string,
-  fetchOptions?: RequestInit,
+  fetchOptions?: AxiosRequestConfig,
 ): Promise<{ data: Tweet | null, tombstone?: true, notFound?: true }> {
   if (id.length > 40 || !TWEET_ID.test(id)) {
     throw new Error(`Invalid tweet id: ${id}`)
@@ -66,26 +72,44 @@ export async function fetchTweet(
   )
   url.searchParams.set('token', getToken(id))
 
-  const res = await fetch(url.toString(), fetchOptions)
-  const isJson = res.headers.get('content-type')?.includes('application/json')
-  const data = isJson ? await res.json() : null
+  try {
+    const res = await axios.get(url.toString(), {
+      ...fetchOptions,
+      validateStatus: status => status < 500, // 不要对 4xx 状态码抛出异常
+    })
 
-  if (res.ok) {
-    if (data?.__typename === 'TweetTombstone') {
-      return { tombstone: true, data: null }
+    if (res.status === 200) {
+      if (res.data?.__typename === 'TweetTombstone') {
+        return { tombstone: true, data: null }
+      }
+      return { data: res.data }
     }
-    return { data }
-  }
-  if (res.status === 404) {
-    return { notFound: true, data: null }
-  }
+    if (res.status === 404) {
+      return { notFound: true, data: null }
+    }
 
-  throw new TwitterApiError({
-    message:
-      typeof data.error === 'string'
-        ? data.error
-        : `Failed to fetch tweet at "${url}" with "${res.status}".`,
-    status: res.status,
-    data,
-  })
+    throw new TwitterApiError({
+      message:
+        typeof res.data?.error === 'string'
+          ? res.data.error
+          : `Failed to fetch tweet at "${url}" with "${res.status}".`,
+      status: res.status,
+      data: res.data,
+    })
+  }
+  catch (error: any) {
+    // 处理网络错误或其他 axios 错误
+    if (error instanceof TwitterApiError) {
+      throw error
+    }
+
+    const status = error.response?.status || 500
+    const data = error.response?.data || null
+
+    throw new TwitterApiError({
+      message: error.message || `Failed to fetch tweet at "${url}".`,
+      status,
+      data,
+    })
+  }
 }
