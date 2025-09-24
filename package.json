@@ -8,7 +8,9 @@
     "build": "react-router build",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
-    "typecheck": "react-router typegen && tsc"
+    "typecheck": "react-router typegen && tsc",
+    "lint": "eslint . --fix",
+    "postinstall": "lefthook install"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -48,6 +50,7 @@
     "@vercel/react-router": "^1.2.3",
     "eslint": "^9.36.0",
     "eslint-plugin-format": "^1.0.2",
+    "lefthook": "^1.13.4",
     "tailwindcss": "^4.1.13",
     "tw-animate-css": "^1.3.8",
     "typescript": "^5.9.2",

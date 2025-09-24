@@ -1,0 +1,11 @@
+pre-commit:
+  commands:
+    check:
+      glob: '*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc,css}'
+      run: bun run eslint {staged_files}
+      stage_fixed: true
+
+pre-push:
+  commands:
+    build:
+      run: bun run build
