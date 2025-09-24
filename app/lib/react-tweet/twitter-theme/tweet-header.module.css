@@ -105,7 +105,6 @@
   user-select: none;
 }
 
-
 .createdAt {
   color: var(--tweet-font-color-secondary);
   display: flex;

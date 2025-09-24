@@ -1,8 +1,9 @@
 'use client'
 
+import type { Tweet } from './api/index.js'
 import { useEffect, useState } from 'react'
 import swr from 'swr'
-import { type Tweet, TwitterApiError } from './api/index.js'
+import { TwitterApiError } from './api/index.js'
 
 // Avoids an error when used in the pages directory where useSWR might be in `default`.
 const useSWR = ((swr as any).default as typeof swr) || swr
@@ -10,14 +11,15 @@ const host = 'https://react-tweet.vercel.app'
 
 async function fetcher([url, fetchOptions]: [
   string,
-  RequestInit
+  RequestInit,
 ]): Promise<Tweet | null> {
   const res = await fetch(url, fetchOptions)
   const json = await res.json()
 
   // We return null in case `json.data` is undefined, that way we can check for "loading" by
   // checking if data is `undefined`. `null` means it was fetched.
-  if (res.ok) return json.data || null
+  if (res.ok)
+    return json.data || null
 
   throw new TwitterApiError({
     message: `Failed to fetch tweet at "${url}" with "${res.status}".`,
@@ -29,11 +31,7 @@ async function fetcher([url, fetchOptions]: [
 /**
  * SWR hook for fetching a tweet in the browser.
  */
-export const useTweet = (
-  id?: string,
-  apiUrl?: string,
-  fetchOptions?: RequestInit
-) => {
+export function useTweet(id?: string, apiUrl?: string, fetchOptions?: RequestInit) {
   const { isLoading, data, error } = useSWR(
     () =>
       apiUrl || id
@@ -44,7 +42,7 @@ export const useTweet = (
       revalidateIfStale: false,
       revalidateOnFocus: false,
       shouldRetryOnError: false,
-    }
+    },
   )
 
   return {
@@ -56,7 +54,7 @@ export const useTweet = (
   }
 }
 
-export const useMounted = () => {
+export function useMounted() {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => setMounted(true), [])

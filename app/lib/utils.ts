@@ -1,17 +1,18 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import type { ClassValue } from 'clsx'
+import { clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export const extractTweetId = (input: string): string | null => {
+export function extractTweetId(input: string): string | null {
   // Remove whitespace
-  const trimmed = input.trim();
+  const trimmed = input.trim()
 
   // If it's already just a tweet ID (numeric string)
   if (/^\d+$/.test(trimmed)) {
-    return trimmed;
+    return trimmed
   }
 
   // Twitter URL patterns
@@ -23,14 +24,14 @@ export const extractTweetId = (input: string): string | null => {
     // Mobile URLs
     /(?:https?:\/\/)?(?:mobile\.)?twitter\.com\/\w+\/status\/(\d+)/i,
     /(?:https?:\/\/)?(?:mobile\.)?x\.com\/\w+\/status\/(\d+)/i,
-  ];
+  ]
 
   for (const pattern of patterns) {
-    const match = trimmed.match(pattern);
+    const match = trimmed.match(pattern)
     if (match && match[1]) {
-      return match[1];
+      return match[1]
     }
   }
 
-  return null;
-};
+  return null
+}

@@ -1,6 +1,6 @@
-import { Button } from "~/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import { Link } from "react-router";
+import { ArrowLeft } from 'lucide-react'
+import { Link } from 'react-router'
+import { Button } from '~/components/ui/button'
 
 export function BackButton() {
   return (
@@ -16,5 +16,5 @@ export function BackButton() {
         返回输入
       </Link>
     </Button>
-  );
+  )
 }

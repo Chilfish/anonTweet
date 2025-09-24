@@ -1,5 +1,6 @@
-import type { EnrichedTweet } from "~/lib/react-tweet"
-import { cn } from "~/lib/utils"
+/* eslint-disable style/multiline-ternary */
+import type { EnrichedTweet } from '~/lib/react-tweet'
+import { cn } from '~/lib/utils'
 
 interface TweetLinkCardProps {
   tweet: EnrichedTweet
@@ -8,8 +9,9 @@ interface TweetLinkCardProps {
 
 export function TweetLinkCard({ tweet, className }: TweetLinkCardProps) {
   const { card } = tweet
-  
-  if (!card) return null
+
+  if (!card)
+    return null
 
   // Validate card data - ensure we have at least title or description
   if (!card.title && !card.description && !card.image) {
@@ -19,49 +21,54 @@ export function TweetLinkCard({ tweet, className }: TweetLinkCardProps) {
   // Determine layout based on card type and image availability
   const hasImage = !!card.image
   const isLargeImageCard = hasImage && (
-    card.type === 'unified_card' || 
-    card.type === 'summary_large_image'
+    card.type === 'unified_card'
+    || card.type === 'summary_large_image'
   )
-  
+
   // Truncate long text for better display
   const truncateText = (text: string, maxLength: number) => {
-    if (text.length <= maxLength) return text
-    return text.slice(0, maxLength).trim() + '...'
+    if (text.length <= maxLength)
+      return text
+    return `${text.slice(0, maxLength).trim()}...`
   }
 
   // Safe domain extraction
-  const displayDomain = card.domain || (card.url ? (() => {
-    try {
-      return new URL(card.url).hostname
-    } catch {
-      return null
-    }
-  })() : null)
-  
+  const displayDomain = card.domain || (card.url
+    ? (() => {
+        try {
+          return new URL(card.url).hostname
+        }
+        catch {
+          return null
+        }
+      })()
+    : null)
+
   // Safe title and description with fallbacks
   const displayTitle = card.title ? truncateText(card.title, 120) : null
   const displayDescription = card.description ? truncateText(card.description, 200) : null
 
   // Common content component
   const CardContent = ({ compact = false }: { compact?: boolean }) => (
-    <div className={cn("space-y-2", compact ? "p-3" : "p-3")}>
+    <div className={cn('space-y-2', compact ? 'p-3' : 'p-3')}>
       {displayDomain && (
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground/80 truncate font-medium">
           {displayDomain}
         </div>
       )}
-      
+
       {displayTitle && (
         <h3 className="font-semibold text-[1rem] leading-tight line-clamp-2 text-foreground/90">
           {displayTitle}
         </h3>
       )}
-      
+
       {displayDescription && (
         <p className={cn(
-          "text-xs text-muted-foreground/70 leading-relaxed",
-          compact ? "line-clamp-2" : "line-clamp-3"
-        )}>
+          'text-xs text-muted-foreground/70 leading-relaxed',
+          compact ? 'line-clamp-2' : 'line-clamp-3',
+        )}
+        >
           {displayDescription}
         </p>
       )}
@@ -71,15 +78,16 @@ export function TweetLinkCard({ tweet, className }: TweetLinkCardProps) {
   // Image component with error handling
   const CardImage = ({ isLarge = false }: { isLarge?: boolean }) => (
     <div className={cn(
-      "relative overflow-hidden bg-muted/50 rounded-t-md",
-      isLarge ? "aspect-[16/9]" : "w-20 h-20 flex-shrink-0"
-    )}>
+      'relative overflow-hidden bg-muted/50 rounded-t-md',
+      isLarge ? 'aspect-[16/9]' : 'w-20 h-20 flex-shrink-0',
+    )}
+    >
       <img
         src={card.image!.url}
-        alt={card.title || "Link preview"}
+        alt={card.title || 'Link preview'}
         className={cn(
-          "h-full w-full object-cover",
-          isLarge ? "transition-transform duration-300 hover:scale-[1.02]" : ""
+          'h-full w-full object-cover',
+          isLarge ? 'transition-transform duration-300 hover:scale-[1.02]' : '',
         )}
         loading="lazy"
         onError={(e) => {
@@ -101,8 +109,8 @@ export function TweetLinkCard({ tweet, className }: TweetLinkCardProps) {
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        "rounded-md mt-2 block border border-border/60",
-        className
+        'rounded-md mt-2 block border border-border/60',
+        className,
       )}
     >
       {/* Large Image Layout (YouTube, summary_large_image, etc.) */}

@@ -1,20 +1,20 @@
-import clsx from 'clsx'
 import type { EnrichedTweet } from '../utils.js'
 import type { TwitterComponents } from './types.js'
+import clsx from 'clsx'
+import { cn } from '~/lib/utils.js'
 import { AvatarImg } from './avatar-img.js'
+import { TweetInfoCreatedAt } from './components.js'
 import s from './tweet-header.module.css'
 import { VerifiedBadge } from './verified-badge.js'
-import { cn } from '~/lib/utils.js'
-import { TweetInfoCreatedAt } from './components.js'
 
-type Props = {
+interface Props {
   tweet: EnrichedTweet
   components?: TwitterComponents
   className?: string
   createdAtInline?: boolean
 }
 
-export const TweetHeader = ({ tweet, components, className, createdAtInline }: Props) => {
+export function TweetHeader({ tweet, components, className, createdAtInline }: Props) {
   const Img = components?.AvatarImg ?? AvatarImg
   const { user } = tweet
 
@@ -29,7 +29,7 @@ export const TweetHeader = ({ tweet, components, className, createdAtInline }: P
         <div
           className={clsx(
             s.avatarOverflow,
-            user.profile_image_shape === 'Square' && s.avatarSquare
+            user.profile_image_shape === 'Square' && s.avatarSquare,
           )}
         >
           <Img
@@ -62,13 +62,18 @@ export const TweetHeader = ({ tweet, components, className, createdAtInline }: P
             target="_blank"
             rel="noopener noreferrer"
           >
-            <span title={`@${user.screen_name}`}>@{user.screen_name}</span>
+            <span title={`@${user.screen_name}`}>
+              @
+              {user.screen_name}
+            </span>
           </a>
         </div>
-        
-        { createdAtInline && <div className={s.createdAt}>
-          <TweetInfoCreatedAt tweet={tweet} />
-        </div> }
+
+        { createdAtInline && (
+          <div className={s.createdAt}>
+            <TweetInfoCreatedAt tweet={tweet} />
+          </div>
+        ) }
       </div>
     </div>
   )

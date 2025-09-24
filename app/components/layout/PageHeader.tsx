@@ -1,14 +1,16 @@
-import { useIsMobile } from "~/hooks/use-mobile";
+import { useIsMobile } from '~/hooks/use-mobile'
 
 export function PageHeader() {
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile()
   return (
     <div className="text-center space-y-4 mb-12">
       <div className="space-y-2">
         <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-pink-400 to-purple-600 bg-clip-text text-transparent">
           <ruby>
             あのん
-            <rp>(</rp><rt className="text-sm">Anonymously</rt><rp>)</rp>
+            <rp>(</rp>
+            <rt className="text-sm">Anonymously</rt>
+            <rp>)</rp>
           </ruby>
           <span className="ml-2">
             Tweet
@@ -34,5 +36,5 @@ export function PageHeader() {
         )}
       </div>
     </div>
-  );
+  )
 }

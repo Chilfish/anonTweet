@@ -1,24 +1,24 @@
-import { format } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { format } from 'date-fns'
+import { zhCN } from 'date-fns/locale'
 
 const tzs = {
   tokyo: 'Asia/Tokyo',
   beijing: 'Asia/Shanghai',
-} as const;
+} as const
 
-type Time = string | number | Date;
-type TZ = keyof typeof tzs;
+type Time = string | number | Date
+type TZ = keyof typeof tzs
 
 export function formatDateFns(
   time: Time,
   options: {
-    timezone?: TZ;
-    fmt?: string;
+    timezone?: TZ
+    fmt?: string
   } = {},
 ) {
-  const { timezone, fmt = 'yyyy-MM-dd HH:mm:ss' } = options;
+  const { timezone, fmt = 'yyyy-MM-dd HH:mm:ss' } = options
 
-  return format(getDate(time, timezone), fmt, { locale: zhCN });
+  return format(getDate(time, timezone), fmt, { locale: zhCN })
 }
 
 export function getDate(time: Time, timezone?: TZ) {
@@ -26,11 +26,11 @@ export function getDate(time: Time, timezone?: TZ) {
     new Date(time).toLocaleString(zhCN.code, {
       timeZone: timezone ? tzs[timezone] : undefined,
     }),
-  );
+  )
 }
 
 export function now(timezone: TZ = 'beijing') {
-  return getDate(new Date(), timezone);
+  return getDate(new Date(), timezone)
 }
 const DATE_KEYS = [
   'createdAt',
@@ -46,31 +46,31 @@ const DATE_KEYS = [
   'endDate',
   'start_date',
   'end_date',
-];
+]
 export function convertDate(obj: Record<string, any>, keys: string[] = DATE_KEYS) {
   for (const [key, value] of Object.entries(obj)) {
     if (value === null) {
-      continue;
+      continue
     }
     if (typeof value === 'object') {
-      convertDate(value);
-      continue;
+      convertDate(value)
+      continue
     }
     if (!keys.includes(key)) {
-      continue;
+      continue
     }
     if (typeof value !== 'string') {
-      continue;
+      continue
     }
 
-    const date = new Date(value);
+    const date = new Date(value)
     if (!Number.isNaN(date.getTime())) {
-      obj[key] = date;
+      obj[key] = date
     }
   }
 }
 
-type PartsObject = Record<keyof Intl.DateTimeFormatPartTypesRegistry, string>;
+type PartsObject = Record<keyof Intl.DateTimeFormatPartTypesRegistry, string>
 
 const options: Intl.DateTimeFormatOptions = {
   hour: 'numeric',
@@ -80,39 +80,39 @@ const options: Intl.DateTimeFormatOptions = {
   month: 'short',
   day: 'numeric',
   year: 'numeric',
-};
+}
 
 const lang2Locale = {
   en: 'en-US',
   zh: 'zh-CN',
   ja: 'ja-JP',
-} as const;
+} as const
 
-type Lang = keyof typeof lang2Locale | (string & {});
+type Lang = keyof typeof lang2Locale | (string & {})
 
-const partsArrayToObject = (parts: Intl.DateTimeFormatPart[]): PartsObject => {
-  const result = {} as PartsObject;
+function partsArrayToObject(parts: Intl.DateTimeFormatPart[]): PartsObject {
+  const result = {} as PartsObject
 
   for (const part of parts) {
-    result[part.type] = part.value;
+    result[part.type] = part.value
   }
 
-  return result;
-};
+  return result
+}
 
-const padString = (str: string, length: number, padChar = '0') => {
-  return str.padStart(length, padChar);
-};
+function padString(str: string, length: number, padChar = '0') {
+  return str.padStart(length, padChar)
+}
 
-export const formatDate = (date: Date, locale: Intl.LocalesArgument = 'zh-CN') => {
-  const formatter = new Intl.DateTimeFormat(locale, options);
-  const parts = partsArrayToObject(formatter.formatToParts(date));
+export function formatDate(date: Date, locale: Intl.LocalesArgument = 'zh-CN') {
+  const formatter = new Intl.DateTimeFormat(locale, options)
+  const parts = partsArrayToObject(formatter.formatToParts(date))
 
-  const formattedTime = `${padString(parts.hour, 2)}:${padString(parts.minute, 2)} ${parts.dayPeriod}`;
-  const formattedDate = `${parts.year}/${padString(parts.month, 2)}/${padString(parts.day, 2)}`;
-  return `${formattedDate} · ${formattedTime}`;
-};
+  const formattedTime = `${padString(parts.hour, 2)}:${padString(parts.minute, 2)} ${parts.dayPeriod}`
+  const formattedDate = `${parts.year}/${padString(parts.month, 2)}/${padString(parts.day, 2)}`
+  return `${formattedDate} · ${formattedTime}`
+}
 
-export const formatDateByLang = (date: Date, lang: Lang) => {
-  return formatDate(date, lang2Locale[lang]);
-};
+export function formatDateByLang(date: Date, lang: Lang) {
+  return formatDate(date, lang2Locale[lang])
+}

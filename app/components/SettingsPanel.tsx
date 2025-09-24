@@ -1,23 +1,23 @@
-import { Monitor, Moon, SettingsIcon, Sun } from 'lucide-react';
-import React, { useState } from 'react';
-import { useTheme } from '~/lib/stores/theme';
-import { useTranslationStore } from '~/lib/stores/translation';
-import { Button } from './ui/button';
-import { Card, CardContent } from './ui/card';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
-import { Label } from './ui/label';
-import { SeparatorTemplateManager } from './SeparatorTemplateManager';
+import { Monitor, Moon, SettingsIcon, Sun } from 'lucide-react'
+import React, { useState } from 'react'
+import { useTheme } from '~/lib/stores/theme'
+import { useTranslationStore } from '~/lib/stores/translation'
+import { SeparatorTemplateManager } from './SeparatorTemplateManager'
+import { Button } from './ui/button'
+import { Card, CardContent } from './ui/card'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog'
+import { Label } from './ui/label'
 
-export const SettingsPanel = () => {
+export function SettingsPanel() {
   const { setShowTranslations, setShowTranslationButton, showTranslationButton, showTranslations } = useTranslationStore()
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme } = useTheme()
 
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
   function toggleTranslations() {
     const target = !showTranslations
-    setShowTranslations(target);
-    setShowTranslationButton(target);
+    setShowTranslations(target)
+    setShowTranslationButton(target)
   }
 
   return (
@@ -28,7 +28,7 @@ export const SettingsPanel = () => {
         onClick={toggleTranslations}
         className="h-8 px-3 text-sm font-medium transition-all duration-200"
       >
-        {showTranslations ? "隐藏翻译" : "开始翻译"}
+        {showTranslations ? '隐藏翻译' : '开始翻译'}
       </Button>
 
       {/* 翻译设置对话框 */}
@@ -42,7 +42,8 @@ export const SettingsPanel = () => {
           </Button>
         </DialogTrigger>
         <DialogContent
-         className="  max-h-[90vh] overflow-y-auto p-4">
+          className="  max-h-[90vh] overflow-y-auto p-4"
+        >
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold">设置</DialogTitle>
           </DialogHeader>
@@ -87,19 +88,17 @@ export const SettingsPanel = () => {
 
           {/* 分隔符设置 */}
           <SeparatorTemplateManager />
-          
 
           <DialogFooter>
-              <Button
-                onClick={() => setIsSettingsOpen(false)}
-                className="text-sm"
-              >
-                完成
-              </Button>
+            <Button
+              onClick={() => setIsSettingsOpen(false)}
+              className="text-sm"
+            >
+              完成
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  );
-};
-
+  )
+}

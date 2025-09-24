@@ -1,43 +1,41 @@
-import type { Tweet } from "~/lib/react-tweet/api";
+import type { Ref } from 'react'
+import type { EnrichedTweet, TwitterComponents } from '~/lib/react-tweet'
+import type { Tweet } from '~/lib/react-tweet/api'
 import {
-  type TwitterComponents,
+
+  enrichTweet,
+  TweetActions,
+  TweetBody,
   TweetContainer,
   TweetHeader,
-  TweetBody,
-  TweetMedia,
   TweetInfo,
-  TweetActions,
-  type EnrichedTweet,
-} from "~/lib/react-tweet";
-import { Suspense, type Ref } from "react";
-import { getTweet } from "~/lib/react-tweet/api";
-import { type TweetProps, TweetNotFound, TweetSkeleton } from "~/lib/react-tweet";
-import { enrichTweet } from "~/lib/react-tweet";
-import { TranslationDisplay } from "../TranslationDisplay";
-import { TranslationEditor } from "../TranslationEditor";
-import { TweetLinkCard } from "./TweetCard";
+  TweetMedia,
+} from '~/lib/react-tweet'
+import { TranslationDisplay } from '../TranslationDisplay'
+import { TranslationEditor } from '../TranslationEditor'
+import { TweetLinkCard } from './TweetCard'
 
-type TweetComponentProps = {
-  tweet: Tweet;
-  quotedTweet?: Tweet | null;
-  parentTweets?: Tweet[];
-  components?: TwitterComponents;
-  showMp4CoverOnly?: boolean;
-  ref?: Ref<HTMLDivElement>;
-};
+interface TweetComponentProps {
+  tweet: Tweet
+  quotedTweet?: Tweet | null
+  parentTweets?: Tweet[]
+  components?: TwitterComponents
+  showMp4CoverOnly?: boolean
+  ref?: Ref<HTMLDivElement>
+}
 
 /**
  * 如果是 Thread （查看的是评论）：
  *  - 显示被回复的推文、评论的推文
  *  - 头像之间有竖线、源推文除了 header 有 padding
- * 
+ *
  * 条件：
  *  - 推文有 parent 且 parent 是 Tweet
  *  - 推文的 in_reply_to_user_id_str 与 parent 的 user.id_str 相等
  */
 
-const ThreadTweet = ({ tweet: t, components, showMp4CoverOnly }: TweetComponentProps) => {
-  const tweet = enrichTweet(t);
+function ThreadTweet({ tweet: t, components, showMp4CoverOnly }: TweetComponentProps) {
+  const tweet = enrichTweet(t)
 
   return (
     <TweetContainer
@@ -72,11 +70,13 @@ const ThreadTweet = ({ tweet: t, components, showMp4CoverOnly }: TweetComponentP
           originalTweet={tweet}
         />
 
-        {tweet.mediaDetails?.length ? (
-          <TweetMedia tweet={tweet} components={components} showCoverOnly={showMp4CoverOnly} />
-        ) : null}
+        {tweet.mediaDetails?.length
+          ? (
+              <TweetMedia tweet={tweet} components={components} showCoverOnly={showMp4CoverOnly} />
+            )
+          : null}
 
-      {tweet.card && <TweetLinkCard tweet={tweet} />}
+        {tweet.card && <TweetLinkCard tweet={tweet} />}
 
         <TweetActions
           tweet={tweet}
@@ -88,16 +88,16 @@ const ThreadTweet = ({ tweet: t, components, showMp4CoverOnly }: TweetComponentP
   )
 }
 
-export const MyTweet = ({ tweet: t, parentTweets = [], quotedTweet: q, components, showMp4CoverOnly, ref }: TweetComponentProps) => {
-  const tweet = enrichTweet(t);
-  let quotedTweet: EnrichedTweet | null = null;
+export function MyTweet({ tweet: t, parentTweets = [], quotedTweet: q, components, showMp4CoverOnly, ref }: TweetComponentProps) {
+  const tweet = enrichTweet(t)
+  let quotedTweet: EnrichedTweet | null = null
   if (tweet.quoted_tweet?.id_str && q) {
-    quotedTweet = enrichTweet(q);
+    quotedTweet = enrichTweet(q)
   }
 
   return (
     <TweetContainer ref={ref}>
-      {parentTweets.map((parentTweet) => (
+      {parentTweets.map(parentTweet => (
         <ThreadTweet
           key={parentTweet.id_str}
           tweet={parentTweet}
@@ -126,9 +126,11 @@ export const MyTweet = ({ tweet: t, parentTweets = [], quotedTweet: q, component
         originalTweet={tweet}
       />
 
-      {tweet.mediaDetails?.length ? (
-        <TweetMedia tweet={tweet} components={components} showCoverOnly={showMp4CoverOnly} />
-      ) : null}
+      {tweet.mediaDetails?.length
+        ? (
+            <TweetMedia tweet={tweet} components={components} showCoverOnly={showMp4CoverOnly} />
+          )
+        : null}
 
       {tweet.card && <TweetLinkCard tweet={tweet} />}
 
@@ -156,9 +158,11 @@ export const MyTweet = ({ tweet: t, parentTweets = [], quotedTweet: q, component
             originalTweet={quotedTweet}
           />
 
-          {quotedTweet.mediaDetails?.length ? (
-            <TweetMedia tweet={quotedTweet} components={components} showCoverOnly={showMp4CoverOnly} />
-          ) : null}
+          {quotedTweet.mediaDetails?.length
+            ? (
+                <TweetMedia tweet={quotedTweet} components={components} showCoverOnly={showMp4CoverOnly} />
+              )
+            : null}
 
           {quotedTweet.card && <TweetLinkCard tweet={quotedTweet} />}
         </div>
@@ -169,5 +173,5 @@ export const MyTweet = ({ tweet: t, parentTweets = [], quotedTweet: q, component
         <TweetActions tweet={tweet} />
       </div>
     </TweetContainer>
-  );
-};
+  )
+}

@@ -1,19 +1,19 @@
 import type { Indices } from './entities.js'
 
-export type RGB = {
+export interface RGB {
   red: number
   green: number
   blue: number
 }
 
-export type Rect = {
+export interface Rect {
   x: number
   y: number
   w: number
   h: number
 }
 
-export type Size = {
+export interface Size {
   h: number
   w: number
   resize: string

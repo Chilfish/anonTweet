@@ -1,25 +1,25 @@
 'use client'
 
-import { useState } from 'react'
-import clsx from 'clsx'
 import type { MediaAnimatedGif, MediaVideo } from '../api/index.js'
+import type { EnrichedQuotedTweet, EnrichedTweet } from '../utils.js'
+import clsx from 'clsx'
+import { useState } from 'react'
 import {
-  type EnrichedQuotedTweet,
-  type EnrichedTweet,
+
   getMediaUrl,
   getMp4Video,
 } from '../utils.js'
-import mediaStyles from './tweet-media.module.css'
-import s from './tweet-media-video.module.css'
 import { MediaImg } from './media-img.js'
+import s from './tweet-media-video.module.css'
+import mediaStyles from './tweet-media.module.css'
 
-type Props = {
+interface Props {
   tweet: EnrichedTweet | EnrichedQuotedTweet
   media: MediaAnimatedGif | MediaVideo
   showCoverOnly?: boolean
 }
 
-export const TweetMediaVideo = ({ tweet, media, showCoverOnly }: Props) => {
+export function TweetMediaVideo({ tweet, media, showCoverOnly }: Props) {
   const [playButton, setPlayButton] = useState(true)
   const [isPlaying, setIsPlaying] = useState(false)
   const [ended, setEnded] = useState(false)
@@ -86,16 +86,21 @@ export const TweetMediaVideo = ({ tweet, media, showCoverOnly }: Props) => {
         preload="none"
         tabIndex={playButton ? -1 : 0}
         onPlay={() => {
-          if (timeout) window.clearTimeout(timeout)
-          if (!isPlaying) setIsPlaying(true)
-          if (ended) setEnded(false)
+          if (timeout)
+            window.clearTimeout(timeout)
+          if (!isPlaying)
+            setIsPlaying(true)
+          if (ended)
+            setEnded(false)
         }}
         onPause={() => {
           // When the video is seeked (moved to a different timestamp), it will pause for a moment
           // before resuming. We don't want to show the message in that case so we wait a bit.
-          if (timeout) window.clearTimeout(timeout)
+          if (timeout)
+            window.clearTimeout(timeout)
           timeout = window.setTimeout(() => {
-            if (isPlaying) setIsPlaying(false)
+            if (isPlaying)
+              setIsPlaying(false)
             timeout = 0
           }, 100)
         }}

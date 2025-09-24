@@ -1,10 +1,10 @@
 import type { EnrichedTweet } from '../utils.js'
-import { formatDateFns } from '../date-utils.js';
+import { formatDateFns } from '../date-utils.js'
 import s from './tweet-info-created-at.module.css'
 
-export const TweetInfoCreatedAt = ({ tweet }: { tweet: EnrichedTweet }) => {
+export function TweetInfoCreatedAt({ tweet }: { tweet: EnrichedTweet }) {
   const createdAt = new Date(tweet.created_at)
-  const formattedCreatedAtDate = formatDateFns(createdAt);
+  const formattedCreatedAtDate = formatDateFns(createdAt)
 
   return (
     <a

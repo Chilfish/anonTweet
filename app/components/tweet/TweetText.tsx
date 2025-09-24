@@ -18,9 +18,9 @@ export function Link({ url, text, className }: LinkProps) {
         className,
         'px-1 text-primary hover:underline underline-offset-4 wrap-anywhere',
       )}
-      target='_blank'
-      rel='noreferrer'
-      onClick={(e) => e.stopPropagation()} // Avoid triggering card click
+      target="_blank"
+      rel="noreferrer"
+      onClick={e => e.stopPropagation()} // Avoid triggering card click
     >
       {text || url}
     </a>
@@ -79,7 +79,7 @@ function parseHashtags(text: ParsedText): ParsedText | ParsedText[] {
 
   // Matches hashtags: letters, numbers, and underscores only
   // Stops at any other punctuation or whitespace
-  const regex = /#([a-zA-Z0-9_\p{L}]+)/gu
+  const regex = /#([0-9_\p{L}]+)/gu
   const parts = text.split(regex)
 
   return parts
@@ -101,7 +101,7 @@ function parseMentions(text: ParsedText): ParsedText | ParsedText[] {
     return text
   }
 
-  const regex = /@([a-zA-Z0-9_]{4,15})\b/g
+  const regex = /@(\w{4,15})\b/g
   const parts = text.split(regex)
 
   return parts
@@ -125,7 +125,7 @@ function createTextParser(...parsers: ParserFn[]) {
     const initial: ParsedText[] = [text]
 
     const result = parsers.reduce((parts, parser) => {
-      return parts.flatMap((part) => parser(part))
+      return parts.flatMap(part => parser(part))
     }, initial)
 
     return result
@@ -145,7 +145,7 @@ const parseTweetText = createTextParser(
  */
 function getReplyInfo(text: string) {
   // Match reply-to format at the start of the tweet
-  const regex = /^@([a-zA-Z0-9_]{4,15})\s(.+)/s
+  const regex = /^@(\w{4,15})\s(.+)/s
   const match = text.match(regex)
 
   if (match) {
@@ -173,13 +173,16 @@ export const TweetText: React.FC<TweetTextProps> = ({ text }) => {
   if (replyToName) {
     return (
       <>
-        <p className='py-2 wrap-anywhere'>
-          回复 <PeopleLink name={replyToName} />:
+        <p className="py-2 wrap-anywhere">
+          回复
+          {' '}
+          <PeopleLink name={replyToName} />
+          :
         </p>
-        <p className='wrap-anywhere'>{parseTweetText(content)}</p>
+        <p className="wrap-anywhere">{parseTweetText(content)}</p>
       </>
     )
   }
 
-  return <p className='pt-2 wrap-anywhere'>{parseTweetText(text)}</p>
+  return <p className="pt-2 wrap-anywhere">{parseTweetText(text)}</p>
 }

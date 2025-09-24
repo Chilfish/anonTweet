@@ -1,12 +1,12 @@
+import type { EnrichedQuotedTweet } from '../../utils.js'
 import clsx from 'clsx'
 import { AvatarImg } from '../avatar-img.js'
-import s from './quoted-tweet-header.module.css'
-import type { EnrichedQuotedTweet } from '../../utils.js'
 import { VerifiedBadge } from '../verified-badge.js'
+import s from './quoted-tweet-header.module.css'
 
-type Props = { tweet: EnrichedQuotedTweet }
+interface Props { tweet: EnrichedQuotedTweet }
 
-export const QuotedTweetHeader = ({ tweet }: Props) => {
+export function QuotedTweetHeader({ tweet }: Props) {
   const { user } = tweet
 
   return (
@@ -20,7 +20,7 @@ export const QuotedTweetHeader = ({ tweet }: Props) => {
         <div
           className={clsx(
             s.avatarOverflow,
-            user.profile_image_shape === 'Square' && s.avatarSquare
+            user.profile_image_shape === 'Square' && s.avatarSquare,
           )}
         >
           <AvatarImg
@@ -37,7 +37,10 @@ export const QuotedTweetHeader = ({ tweet }: Props) => {
         </div>
         <VerifiedBadge user={user} />
         <div className={s.username}>
-          <span title={`@${user.screen_name}`}>@{user.screen_name}</span>
+          <span title={`@${user.screen_name}`}>
+            @
+            {user.screen_name}
+          </span>
         </div>
       </div>
     </div>

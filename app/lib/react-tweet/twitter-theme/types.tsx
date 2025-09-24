@@ -5,7 +5,7 @@
  * component that uses them is a Server Component and you can't pass down functions to a
  * client component unless they're Server Actions.
  */
-export type TwitterComponents = {
+export interface TwitterComponents {
   TweetNotFound?: typeof import('./tweet-not-found.js').TweetNotFound
   AvatarImg?: typeof import('./avatar-img.js').AvatarImg
   MediaImg?: typeof import('./media-img.js').MediaImg

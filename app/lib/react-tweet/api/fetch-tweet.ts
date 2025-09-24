@@ -22,7 +22,7 @@ export class TwitterApiError extends Error {
   }
 }
 
-const TWEET_ID = /^[0-9]+$/
+const TWEET_ID = /^\d+$/
 
 function getToken(id: string) {
   return ((Number(id) / 1e15) * Math.PI)
@@ -35,8 +35,8 @@ function getToken(id: string) {
  */
 export async function fetchTweet(
   id: string,
-  fetchOptions?: RequestInit
-): Promise<{ data: Tweet | null; tombstone?: true; notFound?: true }> {
+  fetchOptions?: RequestInit,
+): Promise<{ data: Tweet | null, tombstone?: true, notFound?: true }> {
   if (id.length > 40 || !TWEET_ID.test(id)) {
     throw new Error(`Invalid tweet id: ${id}`)
   }
@@ -62,7 +62,7 @@ export async function fetchTweet(
       'tfw_show_gov_verified_badge:on',
       'tfw_show_business_affiliate_badge:on',
       'tfw_tweet_edit_frontend:on',
-    ].join(';')
+    ].join(';'),
   )
   url.searchParams.set('token', getToken(id))
 

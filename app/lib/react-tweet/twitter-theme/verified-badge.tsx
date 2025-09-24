@@ -1,5 +1,5 @@
-import clsx from 'clsx'
 import type { TweetUser } from '../api/index.js'
+import clsx from 'clsx'
 import {
   Verified,
   VerifiedBusiness,
@@ -7,12 +7,12 @@ import {
 } from './icons/index.js'
 import s from './verified-badge.module.css'
 
-type Props = {
+interface Props {
   user: TweetUser
   className?: string
 }
 
-export const VerifiedBadge = ({ user, className }: Props) => {
+export function VerifiedBadge({ user, className }: Props) {
   const verified = user.verified || user.is_blue_verified || user.verified_type
   let icon = <Verified />
   let iconClassName: string | null = s.verifiedBlue
@@ -33,7 +33,9 @@ export const VerifiedBadge = ({ user, className }: Props) => {
     }
   }
 
-  return verified ? (
-    <div className={clsx(className, iconClassName)}>{icon}</div>
-  ) : null
+  return verified
+    ? (
+        <div className={clsx(className, iconClassName)}>{icon}</div>
+      )
+    : null
 }
