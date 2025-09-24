@@ -23,7 +23,7 @@ export function PageHeader() {
 
       <div className="max-w-2xl mx-auto text-muted-foreground space-y-2">
         <p>
-          一个简洁美观的推文查看器，直接输入推文链接或 ID。
+          一个简洁美观的推文查看/媒体下载器。
         </p>
         <p className="text-sm">
           可以手动输入推文翻译内容并导出推文卡片为图片。
@@ -31,7 +31,7 @@ export function PageHeader() {
 
         {isMobile && (
           <p className="text-xs">
-            （在手机端，需要先横屏再保存推文为图片，以获得最佳宽度）
+            （在手机端需要先横屏再保存推文为图片，以获得最佳宽度）
           </p>
         )}
       </div>

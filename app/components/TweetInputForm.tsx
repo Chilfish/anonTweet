@@ -13,7 +13,7 @@ export function TweetInputForm() {
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
@@ -28,7 +28,7 @@ export function TweetInputForm() {
       return
     }
 
-    navigate(`/${tweetId}`)
+    await navigate(`/${tweetId}`)
   }
 
   const isUrl = input.includes('twitter.com') || input.includes('x.com')

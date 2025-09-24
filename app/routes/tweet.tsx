@@ -4,6 +4,7 @@ import type { Tweet } from '~/lib/react-tweet/api'
 import { Suspense, useEffect, useRef } from 'react'
 import { Await, useLoaderData, useSearchParams } from 'react-router'
 import { BackButton } from '~/components/BackButton'
+import { DownloadMedia } from '~/components/DownloadMedia'
 import { SaveAsImageButton } from '~/components/saveAsImage'
 import { SettingsPanel } from '~/components/SettingsPanel'
 import { MyTweet } from '~/components/tweet/Tweet'
@@ -32,12 +33,17 @@ export function HydrateFallback() {
 
 export async function loader({
   params,
+  request,
 }: Route.LoaderArgs): Promise<{
   tweet: Tweet | null
   quotedTweet: Tweet | null
   parentTweets: Tweet[]
   tweetId?: string
 }> {
+  const isDebug = new URLSearchParams(request.url.split('?')[1]).get('debug') === 'true'
+  if (isDebug) {
+    return { tweet: null, parentTweets: [], quotedTweet: null, tweetId: params.id }
+  }
   const { id } = params
   const tweetId = extractTweetId(id)
   if (!tweetId) {
@@ -110,7 +116,7 @@ export default function TweetPage({
   const { id: tweetId } = params
 
   const tweetRef = useRef<HTMLDivElement>(null)
-  const { setTweetElRef, setTweet } = useTranslationStore()
+  const { setTweetElRef, setAllTweets } = useTranslationStore()
 
   if (plain && tweetId) {
     return <TweetContent />
@@ -124,25 +130,26 @@ export default function TweetPage({
 
   useEffect(() => {
     if (loaderData.tweet) {
-      setTweet(loaderData.tweet)
+      setAllTweets({
+        tweet: loaderData.tweet,
+        quotedTweet: loaderData.quotedTweet,
+        parentTweets: loaderData.parentTweets,
+      })
     }
-  }, [loaderData.tweet])
+  }, [loaderData.tweet, loaderData.quotedTweet, loaderData.parentTweets])
 
   return (
     <>
-      <div className="flex items-center w-full max-w-2xl gap-4">
+      <div className="flex items-center w-full gap-1 mb-6">
         <BackButton />
         <SaveAsImageButton />
         <SettingsPanel />
+        <DownloadMedia />
       </div>
 
-      <div
-        className="w-full max-w-2xl py-6"
-      >
-        <TweetContent
-          ref={tweetRef}
-        />
-      </div>
+      <TweetContent
+        ref={tweetRef}
+      />
     </>
   )
 }

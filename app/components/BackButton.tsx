@@ -5,7 +5,7 @@ import { Button } from '~/components/ui/button'
 export function BackButton() {
   return (
     <Button
-      className="flex items-center gap-2 mr-auto"
+      className="flex items-center gap-1 mr-auto"
       asChild
       variant="link"
     >
@@ -13,7 +13,7 @@ export function BackButton() {
         to="/"
       >
         <ArrowLeft className="h-4 w-4" />
-        返回输入
+        返回
       </Link>
     </Button>
   )

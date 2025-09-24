@@ -10,6 +10,12 @@ interface SeparatorTemplate {
   html: string
 }
 
+interface TweetData {
+  tweet: Tweet
+  quotedTweet: Tweet | null
+  parentTweets: Tweet[]
+}
+
 // 翻译设置接口
 interface TranslationSettings {
   enabled: boolean
@@ -35,6 +41,8 @@ interface TranslationState {
   screenshoting: boolean
 
   tweet: Tweet | null
+  quotedTweet: Tweet | null
+  parentTweets: Tweet[]
 
   // 设置相关方法
   updateSettings: (settings: Partial<TranslationSettings>) => void
@@ -60,6 +68,7 @@ interface TranslationState {
   setTweetElRef: (ref: HTMLDivElement) => void
 
   setTweet: (tweet: Tweet) => void
+  setAllTweets: (data: TweetData) => void
 
   // 工具方法
   hasTextContent: (text?: string) => boolean
@@ -97,12 +106,22 @@ export const useTranslationStore = create<TranslationState>()(
       editingTweetId: null,
       tweetElRef: null,
       tweet: null,
+      quotedTweet: null,
+      parentTweets: [],
       screenshoting: false,
 
       // 设置相关方法
       updateSettings: newSettings =>
         set(state => ({
           settings: { ...state.settings, ...newSettings },
+        })),
+
+      setAllTweets: (data: TweetData) =>
+        set(state => ({
+          ...state,
+          tweet: data.tweet,
+          quotedTweet: data.quotedTweet,
+          parentTweets: data.parentTweets,
         })),
 
       resetSettings: () =>

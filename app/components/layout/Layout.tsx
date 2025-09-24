@@ -61,7 +61,7 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
   const [showFooter, setShowFooter] = useState(false)
 
   return (
-    <div className="relative w-full mx-auto px-2 sm:px-16 pt-8 pb-4 flex flex-col justify-center min-h-screen overflow-hidden">
+    <div className="relative w-full mx-auto px-2 sm:px-16 pt-8 pb-4 flex flex-col justify-center items-center min-h-screen overflow-hidden">
       {/* 背景装饰 */}
       <div className="absolute inset-0 -z-10">
         {/* 主背景渐变 */}
@@ -94,7 +94,7 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
         <PageHeader />
       </div>
 
-      <main className="relative z-10 flex flex-col items-center justify-center mb-6">
+      <main className="relative w-full sm:max-w-3xl z-10 flex flex-col items-center justify-center mb-6">
         {children || <Outlet />}
       </main>
 

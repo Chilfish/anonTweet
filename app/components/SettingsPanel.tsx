@@ -21,7 +21,7 @@ export function SettingsPanel() {
   }
 
   return (
-    <div className="flex items-center gap-3">
+    <>
       {/* 显示/隐藏翻译按钮 */}
       <Button
         size="sm"
@@ -36,7 +36,7 @@ export function SettingsPanel() {
         <DialogTrigger asChild>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
           >
             <SettingsIcon className="size-5" />
           </Button>
@@ -99,6 +99,6 @@ export function SettingsPanel() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   )
 }
