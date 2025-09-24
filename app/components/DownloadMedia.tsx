@@ -1,25 +1,22 @@
+import type { DownloadItem } from '~/lib/downloader'
 import type { EnrichedTweet } from '~/lib/react-tweet'
 import type { Tweet } from '~/lib/react-tweet/api'
-import FileSaver from 'file-saver'
 import { DownloadIcon, LoaderIcon } from 'lucide-react'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
+import { downloadFiles } from '~/lib/downloader'
 import { enrichTweet } from '~/lib/react-tweet'
 import { formatDateFns } from '~/lib/react-tweet/date-utils'
 import { useTranslationStore } from '~/lib/stores/translation'
 import { Button } from './ui/button'
-
-interface MediaItem {
-  url: string
-  name: string
-}
 
 function renameMedia(
   tweet: EnrichedTweet,
   url: string,
   type: 'photo' | 'video',
   idx: number,
-): MediaItem {
+): DownloadItem {
   const id = tweet.id_str || Date.now()
   const suffix = idx ? `-${idx}` : ''
   const craetedAt = formatDateFns(tweet.created_at || Date.now(), { fmt: 'yyyymmdd_hhmmss' })
@@ -36,14 +33,14 @@ function renameMedia(
   }
 
   return {
-    name: filename,
+    filename,
     url: largeUrl.href,
   }
 }
 
-function getMediaUrls(tweet: Tweet): MediaItem[] {
+function getMediaUrls(tweet: Tweet): DownloadItem[] {
   const data = enrichTweet(tweet)
-  const medias: MediaItem[] = []
+  const medias: DownloadItem[] = []
   const photos = (data.photos || []).map((photo, idx) => renameMedia(data, photo.url, 'photo', idx))
   medias.push(...photos)
 
@@ -57,24 +54,6 @@ function getMediaUrls(tweet: Tweet): MediaItem[] {
   return medias
 }
 
-async function downloadMediaItem({ url, name }: MediaItem): Promise<void> {
-  return new Promise((resolve, reject) => {
-    try {
-      FileSaver.saveAs(url, name)
-      setTimeout(resolve, 200)
-    }
-    catch (error) {
-      reject(error)
-    }
-  })
-}
-
-async function downloadAllMedia(mediaUrls: MediaItem[]): Promise<void> {
-  for (const mediaItem of mediaUrls) {
-    await downloadMediaItem(mediaItem)
-  }
-}
-
 export function DownloadMedia() {
   const { tweet, quotedTweet, parentTweets } = useTranslationStore()
   const [isDownloading, setIsDownloading] = useState(false)
@@ -85,7 +64,7 @@ export function DownloadMedia() {
 
     const mediaUrls = [tweet, quotedTweet, ...parentTweets]
       .flatMap(t => t && getMediaUrls(t))
-      .filter((url): url is MediaItem => !!url)
+      .filter((url): url is DownloadItem => !!url)
 
     if (mediaUrls.length === 0)
       return
@@ -93,15 +72,32 @@ export function DownloadMedia() {
     console.log('Media urls:', mediaUrls)
 
     setIsDownloading(true)
+    toast.info('开始下载媒体...')
 
     try {
-      await downloadAllMedia(mediaUrls)
+      await downloadFiles(mediaUrls, {
+        delay: 300, // 300ms 间隔，避免并发过多
+        onError: (error, filename) => {
+          console.error(`下载失败: ${filename}`, error)
+          toast.error(`下载失败: ${filename}`, {
+            description: error instanceof Error ? error.message : '未知错误',
+          })
+        },
+      })
+      toast.success(`下载完成`, {
+        description: `共下载 ${mediaUrls.length} 个文件`,
+      })
     }
     catch (error) {
       console.error('下载失败:', error)
+      toast.error(`下载失败`, {
+        description: error instanceof Error ? error.message : '未知错误',
+      })
     }
     finally {
-      setIsDownloading(false)
+      setTimeout(() => {
+        setIsDownloading(false)
+      }, 1500)
     }
   }
 
@@ -120,7 +116,7 @@ export function DownloadMedia() {
         </Button>
       </TooltipTrigger>
       <TooltipContent>
-        <p>{isDownloading ? '正在下载...' : '下载推文媒体'}</p>
+        <p>下载推文媒体</p>
       </TooltipContent>
     </Tooltip>
   )
