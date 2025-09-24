@@ -8,6 +8,7 @@ import { Card, CardContent } from './ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
+import { Switch } from './ui/switch'
 import { Textarea } from './ui/textarea'
 
 type EntityTranslation = Entity & {
@@ -28,10 +29,16 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [entityTranslations, setEntityTranslations] = useState<EntityTranslation[]>([])
+  const [enablePrepend, setEnablePrepend] = useState(false)
+  const [prependEntity, setPrependEntity] = useState<EntityTranslation>({
+    type: 'text',
+    text: '',
+    indices: [-1, 0],
+    index: -1,
+  })
 
-  const { showTranslationButton, getTranslation, setTranslation, translations } = useTranslationStore()
+  const { showTranslationButton, getTranslation, setTranslation } = useTranslationStore()
   const hasTextContent = useTranslationStore(state => state.hasTextContent)
-
   const existingTranslation = getTranslation(tweetId)
 
   // 获取所有实体（包括文本实体）
@@ -66,12 +73,28 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
       ...entity,
       index,
     })))
+
+    // 检查是否已有句首补充翻译
+    const hasPrependEntity = allEntities.some(entity => entity.indices?.[0] === -1)
+    setEnablePrepend(hasPrependEntity)
+
     setIsOpen(true)
   }
 
   const handleSave = () => {
-    // 保存所有实体的翻译
-    setTranslation(tweetId, entityTranslations)
+    // 保存所有实体的翻译，包括句首补充（如果启用）
+    const finalTranslations = [...entityTranslations]
+
+    if (enablePrepend && prependEntity.text.trim()) {
+      if (entityTranslations[0].indices?.[0] !== -1) {
+        finalTranslations.unshift(prependEntity)
+      }
+      else {
+        finalTranslations[0] = prependEntity
+      }
+    }
+
+    setTranslation(tweetId, finalTranslations)
     setIsOpen(false)
   }
 
@@ -129,43 +152,70 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
             </Card>
           </div>
 
+          {/* 句首翻译补充开关 */}
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="enable-prepend"
+                checked={enablePrepend}
+                onCheckedChange={setEnablePrepend}
+              />
+              <Label htmlFor="enable-prepend" className="font-medium">
+                启用句首翻译补充
+              </Label>
+            </div>
+
+            {enablePrepend && (
+              <div className="space-y-2">
+                <Label htmlFor="prepend-text" className="text-xs uppercase font-mono">
+                  句首补充内容
+                </Label>
+                <Textarea
+                  id="prepend-text"
+                  value={prependEntity.text}
+                  onChange={e => setPrependEntity(prev => ({ ...prev, text: e.target.value }))}
+                  placeholder="输入要在句首添加的翻译内容..."
+                  className="text-sm"
+                />
+              </div>
+            )}
+          </div>
+
           {/* 按实体遍历的翻译输入 */}
           <div>
             <Label className="font-bold">翻译内容</Label>
             <div className="mt-2 space-y-3">
-              {entityTranslations.map((entityTranslation) => {
-                if (skipTranslation(entityTranslation)) {
-                  return null
-                }
-
-                const id = `${entityTranslation.index}-${entityTranslation.type}`
-                return (
-                  <div key={id} className="space-y-2">
-                    <Label htmlFor={id} className="text-xs uppercase font-mono min-w-0 flex-shrink-0">
-                      {entityTranslation.type}
-                    </Label>
-                    {entityTranslation.type === 'text'
-                      ? (
-                          <Textarea
-                            id={id}
-                            value={entityTranslation.text}
-                            onChange={e => handleEntityTranslationChange(entityTranslation.index, e.target.value)}
-                            placeholder="输入翻译内容..."
-                            className="text-sm"
-                          />
-                        )
-                      : (
-                          <Input
-                            id={id}
-                            value={entityTranslation.text}
-                            onChange={e => handleEntityTranslationChange(entityTranslation.index, e.target.value)}
-                            placeholder={`翻译 ${entityTranslation.text}`}
-                            className="text-sm"
-                          />
-                        )}
-                  </div>
-                )
-              })}
+              {entityTranslations
+                .filter(entityTranslation => !skipTranslation(entityTranslation) && entityTranslation.indices?.[0] !== -1)
+                .map((entityTranslation) => {
+                  const id = `${entityTranslation.index}-${entityTranslation.type}`
+                  return (
+                    <div key={id} className="space-y-2">
+                      <Label htmlFor={id} className="text-xs uppercase font-mono min-w-0 flex-shrink-0">
+                        {entityTranslation.type}
+                      </Label>
+                      {entityTranslation.type === 'text'
+                        ? (
+                            <Textarea
+                              id={id}
+                              value={entityTranslation.text}
+                              onChange={e => handleEntityTranslationChange(entityTranslation.index, e.target.value)}
+                              placeholder="输入翻译内容..."
+                              className="text-sm"
+                            />
+                          )
+                        : (
+                            <Input
+                              id={id}
+                              value={entityTranslation.text}
+                              onChange={e => handleEntityTranslationChange(entityTranslation.index, e.target.value)}
+                              placeholder={`翻译 ${entityTranslation.text}`}
+                              className="text-sm"
+                            />
+                          )}
+                    </div>
+                  )
+                })}
             </div>
           </div>
 
@@ -188,7 +238,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
               <Button
                 size="sm"
                 onClick={handleSave}
-                disabled={!entityTranslations.some(et => et.type === 'text' && et.text.trim())}
+                disabled={!entityTranslations.some(et => et.type === 'text' && et.text.trim()) && !(enablePrepend && prependEntity.text.trim())}
                 className="gap-2"
               >
                 <Save className="h-4 w-4" />
