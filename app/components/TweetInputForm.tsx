@@ -6,41 +6,12 @@ import { Label } from "~/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { AlertCircle, Link, Hash } from "lucide-react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
+import { extractTweetId } from "~/lib/utils";
 
 export function TweetInputForm() {
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
   const navigate= useNavigate();
-
-  const extractTweetId = (input: string): string | null => {
-    // Remove whitespace
-    const trimmed = input.trim();
-    
-    // If it's already just a tweet ID (numeric string)
-    if (/^\d+$/.test(trimmed)) {
-      return trimmed;
-    }
-
-    // Twitter URL patterns
-    const patterns = [
-      // Standard twitter.com URLs
-      /(?:https?:\/\/)?(?:www\.)?twitter\.com\/\w+\/status\/(\d+)/i,
-      // x.com URLs
-      /(?:https?:\/\/)?(?:www\.)?x\.com\/\w+\/status\/(\d+)/i,
-      // Mobile URLs
-      /(?:https?:\/\/)?(?:mobile\.)?twitter\.com\/\w+\/status\/(\d+)/i,
-      /(?:https?:\/\/)?(?:mobile\.)?x\.com\/\w+\/status\/(\d+)/i,
-    ];
-
-    for (const pattern of patterns) {
-      const match = trimmed.match(pattern);
-      if (match && match[1]) {
-        return match[1];
-      }
-    }
-
-    return null;
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

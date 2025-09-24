@@ -171,31 +171,3 @@ export const MyTweet = ({ tweet: t, parentTweets = [], quotedTweet: q, component
     </TweetContainer>
   );
 };
-
-const TweetContent = async ({ id, components, onError }: TweetProps) => {
-  const tweet = id
-    ? await getTweet(id).catch((err) => {
-      if (onError) {
-        onError(err);
-      } else {
-        console.error(err);
-      }
-    })
-    : undefined;
-
-  if (!tweet) {
-    const NotFound = components?.TweetNotFound || TweetNotFound;
-    return <NotFound />;
-  }
-
-  return <MyTweet tweet={tweet} components={components} />;
-};
-
-export const TweetComponent = ({
-  fallback = <TweetSkeleton />,
-  ...props
-}: TweetProps) => (
-  <Suspense fallback={fallback}>
-    <TweetContent {...props} />
-  </Suspense>
-);

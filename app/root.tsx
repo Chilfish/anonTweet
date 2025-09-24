@@ -88,11 +88,18 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
       error.status === 404
         ? "The page you're looking for doesn't exist."
         : error.data?.message || error.statusText
-  } else if (import.meta.env.DEV && error && error instanceof Error) {
-    message = error.message
-    details = 'Something went wrong.'
-    stack = error.stack
+  } else if (error && error instanceof Error) {
+    if (error.message.includes('Invalid tweet id')) {
+      message = error.message
+      details = 'The tweet id is invalid. Please try again.';
+    } else {
+      message = error.message;
+      details = 'Something went wrong.'
+      stack = error.stack
+    }
   }
+
+  console.error('ErrorBoundary caught an error:', error)
 
   return (
     <Layout>

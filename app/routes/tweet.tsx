@@ -9,6 +9,7 @@ import { TweetNotFound, TweetSkeleton } from "~/lib/react-tweet";
 import { useTranslationStore } from "~/lib/stores/translation";
 import { SaveAsImageButton } from "~/components/saveAsImage";
 import type { Route } from './+types/tweet'
+import { extractTweetId } from "~/lib/utils";
 
 export function meta() {
     return [
@@ -34,10 +35,12 @@ export async function loader({
     tweet: Tweet | null,
     quotedTweet: Tweet | null,
     parentTweets: Tweet[],
+    error?: any,
 }> {
-    const { id: tweetId } = params;
+    const { id } = params;
+    const tweetId = extractTweetId(id);
     if (!tweetId) {
-        return { tweet: null, parentTweets: [], quotedTweet: null }
+        return { tweet: null, parentTweets: [], quotedTweet: null, error: new Error('Invalid tweet id: ' + id) }
     }
 
     let tweet = await getTweet(tweetId)
@@ -45,7 +48,7 @@ export async function loader({
     const mainTweet = tweet || null;
 
     if (!tweet) {
-        return { tweet: null, parentTweets: [], quotedTweet: null }
+        return { tweet: null, parentTweets: [], quotedTweet: null, error: new Error('Invalid tweet id: ' + id) }
     }
 
     const parentTweets: Tweet[] = [];
@@ -74,24 +77,26 @@ function TweetContent({ ref }: { ref?: Ref<HTMLDivElement> }) {
     const { screenshoting } = useTranslationStore();
 
     return (
-        <Suspense fallback={<HydrateFallback />}>
-            <Await
-                resolve={loaderData}
-                errorElement={
-                    <TweetNotFound />
-                }
-                children={(resolvedTweet) => resolvedTweet.tweet
-                    ? <MyTweet
-                        tweet={resolvedTweet.tweet}
-                        quotedTweet={resolvedTweet.quotedTweet}
-                        parentTweets={resolvedTweet.parentTweets}
-                        showMp4CoverOnly={screenshoting}
-                        ref={ref}
-                    />
-                    : <TweetNotFound />
-                }
-            />
-        </Suspense>)
+      <Suspense fallback={<HydrateFallback />}>
+        <Await
+          resolve={loaderData}
+          errorElement={<TweetNotFound />}
+          children={(resolvedTweet) =>
+            resolvedTweet.tweet ? (
+              <MyTweet
+                tweet={resolvedTweet.tweet}
+                quotedTweet={resolvedTweet.quotedTweet}
+                parentTweets={resolvedTweet.parentTweets}
+                showMp4CoverOnly={screenshoting}
+                ref={ref}
+              />
+            ) : (
+              <TweetNotFound error={resolvedTweet.error} />
+            )
+          }
+        />
+      </Suspense>
+    );
 }
 
 export default function Tweet({
