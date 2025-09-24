@@ -74,10 +74,6 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
       index,
     })))
 
-    // 检查是否已有句首补充翻译
-    const hasPrependEntity = allEntities.some(entity => entity.indices?.[0] === -1)
-    setEnablePrepend(hasPrependEntity)
-
     setIsOpen(true)
   }
 
@@ -85,12 +81,19 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     // 保存所有实体的翻译，包括句首补充（如果启用）
     const finalTranslations = [...entityTranslations]
 
-    if (enablePrepend && prependEntity.text.trim()) {
-      if (entityTranslations[0].indices?.[0] !== -1) {
+    if (enablePrepend) {
+      if (entityTranslations[0].indices?.[0] !== -1 && prependEntity.text.trim()) {
         finalTranslations.unshift(prependEntity)
       }
       else {
         finalTranslations[0] = prependEntity
+      }
+    }
+    else {
+      // 禁用句首补充时，删除句首补充实体
+      const savedPrepend = entityTranslations.findIndex(et => et.indices[0] === -1)
+      if (savedPrepend !== -1) {
+        finalTranslations.splice(savedPrepend, 1)
       }
     }
 

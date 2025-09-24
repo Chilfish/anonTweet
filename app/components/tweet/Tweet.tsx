@@ -2,18 +2,16 @@ import type { Ref } from 'react'
 import type { EnrichedTweet, TwitterComponents } from '~/lib/react-tweet'
 import type { Tweet } from '~/lib/react-tweet/api'
 import {
-
   enrichTweet,
   TweetActions,
-  TweetBody,
   TweetContainer,
   TweetHeader,
   TweetInfo,
   TweetMedia,
 } from '~/lib/react-tweet'
-import { TranslationDisplay } from '../TranslationDisplay'
 import { TranslationEditor } from '../TranslationEditor'
 import { TweetLinkCard } from './TweetCard'
+import { TweetTextBody } from './TweetTextBody'
 
 interface TweetComponentProps {
   tweet: Tweet
@@ -61,14 +59,7 @@ function ThreadTweet({ tweet: t, components, showMp4CoverOnly }: TweetComponentP
         {/* Thread 的那根对齐头像的竖线 */}
         <div className="absolute left-5.5 top-12 bottom-0 h-full w-[2px] bg-[#cfd9de] dark:bg-[#333639] z-0"></div>
 
-        {/* 原推文 */}
-        <TweetBody tweet={tweet} />
-
-        {/* 翻译显示 */}
-        <TranslationDisplay
-          tweetId={`${tweet.id_str}`}
-          originalTweet={tweet}
-        />
+        <TweetTextBody tweet={tweet} />
 
         {tweet.mediaDetails?.length
           ? (
@@ -118,13 +109,7 @@ export function MyTweet({ tweet: t, parentTweets = [], quotedTweet: q, component
         />
       </div>
 
-      <TweetBody tweet={tweet} />
-
-      {/* 源推文翻译显示 */}
-      <TranslationDisplay
-        tweetId={`${tweet.id_str}`}
-        originalTweet={tweet}
-      />
+      <TweetTextBody tweet={tweet} />
 
       {tweet.mediaDetails?.length
         ? (
@@ -150,13 +135,7 @@ export function MyTweet({ tweet: t, parentTweets = [], quotedTweet: q, component
             />
           </div>
 
-          <TweetBody tweet={quotedTweet} />
-
-          {/* 引用推文翻译显示 */}
-          <TranslationDisplay
-            tweetId={`${quotedTweet.id_str}`}
-            originalTweet={quotedTweet}
-          />
+          <TweetTextBody tweet={tweet} />
 
           {quotedTweet.mediaDetails?.length
             ? (
