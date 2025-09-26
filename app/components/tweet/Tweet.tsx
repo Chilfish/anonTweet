@@ -135,7 +135,7 @@ export function MyTweet({ tweet: t, parentTweets = [], quotedTweet: q, component
             />
           </div>
 
-          <TweetTextBody tweet={tweet} />
+          <TweetTextBody tweet={quotedTweet} />
 
           {quotedTweet.mediaDetails?.length
             ? (
