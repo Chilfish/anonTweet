@@ -1,5 +1,7 @@
 import type { AxiosRequestConfig } from 'axios'
+import type { EnrichedTweet } from '../utils.js'
 import type { Tweet } from './types/index.js'
+import { enrichTweet } from '../utils.js'
 import { fetchTweet } from './fetch-tweet.js'
 
 /**
@@ -23,4 +25,15 @@ export async function getTweet(
   }
 
   return data
+}
+
+export async function getEnrichedTweet(
+  id: string,
+  fetchOptions?: AxiosRequestConfig,
+): Promise<EnrichedTweet | null> {
+  const tweet = await getTweet(id, fetchOptions)
+  if (!tweet) {
+    return null
+  }
+  return enrichTweet(tweet)
 }

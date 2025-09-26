@@ -1,8 +1,7 @@
 import type { Ref } from 'react'
 import type { EnrichedTweet, TwitterComponents } from '~/lib/react-tweet'
-import type { Tweet } from '~/lib/react-tweet/api'
+import type { TweetData } from '~/types'
 import {
-  enrichTweet,
   TweetActions,
   TweetContainer,
   TweetHeader,
@@ -13,10 +12,8 @@ import { TranslationEditor } from '../TranslationEditor'
 import { TweetLinkCard } from './TweetCard'
 import { TweetTextBody } from './TweetTextBody'
 
-interface TweetComponentProps {
-  tweet: Tweet
-  quotedTweet?: Tweet | null
-  parentTweets?: Tweet[]
+interface TweetComponentProps extends TweetData {
+  tweet: EnrichedTweet
   components?: TwitterComponents
   showMp4CoverOnly?: boolean
   ref?: Ref<HTMLDivElement>
@@ -32,9 +29,7 @@ interface TweetComponentProps {
  *  - 推文的 in_reply_to_user_id_str 与 parent 的 user.id_str 相等
  */
 
-function ThreadTweet({ tweet: t, components, showMp4CoverOnly }: TweetComponentProps) {
-  const tweet = enrichTweet(t)
-
+function ThreadTweet({ tweet, components, showMp4CoverOnly }: TweetComponentProps) {
   return (
     <TweetContainer
       className="border-none! p-0! m-0! pb-2! relative"
@@ -48,10 +43,7 @@ function ThreadTweet({ tweet: t, components, showMp4CoverOnly }: TweetComponentP
           className="pb-1!"
           createdAtInline
         />
-        <TranslationEditor
-          tweetId={tweet.id_str}
-          originalTweet={tweet}
-        />
+        <TranslationEditor originalTweet={tweet} />
       </div>
       <div
         className="pl-14!"
@@ -79,19 +71,16 @@ function ThreadTweet({ tweet: t, components, showMp4CoverOnly }: TweetComponentP
   )
 }
 
-export function MyTweet({ tweet: t, parentTweets = [], quotedTweet: q, components, showMp4CoverOnly, ref }: TweetComponentProps) {
-  const tweet = enrichTweet(t)
-  let quotedTweet: EnrichedTweet | null = null
-  if (tweet.quoted_tweet?.id_str && q) {
-    quotedTweet = enrichTweet(q)
-  }
-
+export function MyTweet({ tweet, parentTweets = [], quotedTweet, components, showMp4CoverOnly, ref }: TweetComponentProps) {
+  const hasMedia = (tweet: EnrichedTweet) => tweet.photos?.length || !!tweet.video?.videoId
   return (
     <TweetContainer ref={ref}>
       {parentTweets.map(parentTweet => (
         <ThreadTweet
           key={parentTweet.id_str}
           tweet={parentTweet}
+          quotedTweet={null}
+          parentTweets={[]}
           components={components}
         />
       ))}
@@ -103,10 +92,7 @@ export function MyTweet({ tweet: t, parentTweets = [], quotedTweet: q, component
           tweet={tweet}
           components={components}
         />
-        <TranslationEditor
-          tweetId={`${tweet.id_str}`}
-          originalTweet={tweet}
-        />
+        <TranslationEditor originalTweet={tweet} />
       </div>
 
       <TweetTextBody tweet={tweet} />
@@ -130,18 +116,20 @@ export function MyTweet({ tweet: t, parentTweets = [], quotedTweet: q, component
               createdAtInline
             />
             <TranslationEditor
-              tweetId={`${quotedTweet.id_str}`}
               originalTweet={quotedTweet}
             />
           </div>
 
           <TweetTextBody tweet={quotedTweet} />
 
-          {quotedTweet.mediaDetails?.length
-            ? (
-                <TweetMedia tweet={quotedTweet} components={components} showCoverOnly={showMp4CoverOnly} />
-              )
-            : null}
+          {hasMedia(quotedTweet)
+            && (
+              <TweetMedia
+                tweet={quotedTweet}
+                components={components}
+                showCoverOnly={showMp4CoverOnly}
+              />
+            )}
 
           {quotedTweet.card && <TweetLinkCard tweet={quotedTweet} />}
         </div>

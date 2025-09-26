@@ -1,4 +1,4 @@
-import type { EnrichedQuotedTweet, EnrichedTweet, Entity } from '~/lib/react-tweet/utils'
+import type { EnrichedTweet, Entity } from '~/lib/react-tweet/utils'
 import { Languages, LanguagesIcon, Save, Trash2, X } from 'lucide-react'
 import React, { useState } from 'react'
 import { useTranslationStore } from '~/lib/stores/translation'
@@ -17,16 +17,15 @@ type EntityTranslation = Entity & {
 
 // 翻译编辑器组件
 interface TranslationEditorProps {
-  tweetId: string
-  originalTweet: EnrichedTweet | EnrichedQuotedTweet
+  originalTweet: EnrichedTweet
   className?: string
 }
 
 export const TranslationEditor: React.FC<TranslationEditorProps> = ({
-  tweetId,
   originalTweet,
   className,
 }) => {
+  const tweetId = originalTweet.id_str
   const [isOpen, setIsOpen] = useState(false)
   const [entityTranslations, setEntityTranslations] = useState<EntityTranslation[]>([])
   const [enablePrepend, setEnablePrepend] = useState(false)

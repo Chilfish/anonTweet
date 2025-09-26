@@ -1,8 +1,8 @@
-import type { EnrichedQuotedTweet, EnrichedTweet } from '~/lib/react-tweet'
+import type { EnrichedTweet } from '~/lib/react-tweet'
 import { TweetBody } from '~/lib/react-tweet'
 import { TranslationDisplay } from '../TranslationDisplay'
 
-export function TweetTextBody({ tweet }: { tweet: EnrichedTweet | EnrichedQuotedTweet }) {
+export function TweetTextBody({ tweet }: { tweet: EnrichedTweet }) {
   return (
     <>
       {/* 原推文 */}

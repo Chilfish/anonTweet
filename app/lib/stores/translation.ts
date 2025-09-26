@@ -1,5 +1,5 @@
-import type { Tweet } from '../react-tweet/api'
-import type { Entity } from '../react-tweet/utils'
+import type { EnrichedTweet, Entity } from '../react-tweet/utils'
+import type { TweetData } from '~/types'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
@@ -8,12 +8,6 @@ interface SeparatorTemplate {
   id: string
   name: string
   html: string
-}
-
-interface TweetData {
-  tweet: Tweet
-  quotedTweet: Tweet | null
-  parentTweets: Tweet[]
 }
 
 // 翻译设置接口
@@ -26,7 +20,7 @@ interface TranslationSettings {
 }
 
 // 翻译状态接口
-interface TranslationState {
+interface TranslationState extends TweetData {
   // 翻译设置
   settings: TranslationSettings
 
@@ -39,10 +33,6 @@ interface TranslationState {
   editingTweetId: string | null
   tweetElRef: HTMLDivElement | null
   screenshoting: boolean
-
-  tweet: Tweet | null
-  quotedTweet: Tweet | null
-  parentTweets: Tweet[]
 
   // 设置相关方法
   updateSettings: (settings: Partial<TranslationSettings>) => void
@@ -67,7 +57,7 @@ interface TranslationState {
   setShowTranslationButton: (show: boolean) => void
   setTweetElRef: (ref: HTMLDivElement) => void
 
-  setTweet: (tweet: Tweet) => void
+  setTweet: (tweet: EnrichedTweet) => void
   setAllTweets: (data: TweetData) => void
 
   // 工具方法

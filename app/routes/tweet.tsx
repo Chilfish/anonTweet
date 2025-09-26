@@ -1,6 +1,6 @@
 import type { Ref } from 'react'
 import type { Route } from './+types/tweet'
-import type { Tweet } from '~/lib/react-tweet/api'
+import type { TweetData } from '~/types'
 import { Suspense, useEffect, useRef } from 'react'
 import { Await, useLoaderData, useSearchParams } from 'react-router'
 import { BackButton } from '~/components/BackButton'
@@ -8,8 +8,8 @@ import { DownloadMedia } from '~/components/DownloadMedia'
 import { SaveAsImageButton } from '~/components/saveAsImage'
 import { SettingsPanel } from '~/components/SettingsPanel'
 import { MyTweet } from '~/components/tweet/Tweet'
+import { getTweets } from '~/lib/getTweet'
 import { TweetNotFound, TweetSkeleton } from '~/lib/react-tweet'
-import { getTweet } from '~/lib/react-tweet/api'
 import { useTranslationStore } from '~/lib/stores/translation'
 import { extractTweetId } from '~/lib/utils'
 
@@ -34,10 +34,7 @@ export function HydrateFallback() {
 export async function loader({
   params,
   request,
-}: Route.LoaderArgs): Promise<{
-  tweet: Tweet | null
-  quotedTweet: Tweet | null
-  parentTweets: Tweet[]
+}: Route.LoaderArgs): Promise<TweetData & {
   tweetId?: string
 }> {
   const isDebug = new URLSearchParams(request.url.split('?')[1]).get('debug') === 'true'
@@ -49,34 +46,8 @@ export async function loader({
   if (!tweetId) {
     return { tweet: null, parentTweets: [], quotedTweet: null, tweetId: id }
   }
-
-  let tweet = await getTweet(tweetId)
-  let quotedTweet: Tweet | null = null
-  const mainTweet = tweet || null
-
-  if (!tweet) {
-    return { tweet: null, parentTweets: [], quotedTweet: null, tweetId: id }
-  }
-
-  const parentTweets: Tweet[] = []
-
-  while (true) {
-    if (!tweet.in_reply_to_status_id_str) {
-      break
-    }
-    const parentTweet = await getTweet(tweet.in_reply_to_status_id_str)
-    if (!parentTweet) {
-      break
-    }
-    parentTweets.unshift(parentTweet)
-    tweet = parentTweet
-  }
-
-  if (tweet.quoted_tweet) {
-    quotedTweet = await getTweet(tweet.quoted_tweet.id_str)
-  }
-
-  return { tweet: mainTweet, parentTweets, quotedTweet }
+  const { tweet, parentTweets, quotedTweet } = await getTweets(tweetId)
+  return { tweet, parentTweets, quotedTweet, tweetId }
 }
 
 function TweetContent({ ref }: { ref?: Ref<HTMLDivElement> }) {

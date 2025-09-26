@@ -1,12 +1,10 @@
 import type { DownloadItem } from '~/lib/downloader'
 import type { EnrichedTweet } from '~/lib/react-tweet'
-import type { Tweet } from '~/lib/react-tweet/api'
 import { DownloadIcon, LoaderIcon } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
 import { downloadFiles } from '~/lib/downloader'
-import { enrichTweet } from '~/lib/react-tweet'
 import { formatDateFns } from '~/lib/react-tweet/date-utils'
 import { useTranslationStore } from '~/lib/stores/translation'
 import { Button } from './ui/button'
@@ -38,8 +36,7 @@ function renameMedia(
   }
 }
 
-function getMediaUrls(tweet: Tweet): DownloadItem[] {
-  const data = enrichTweet(tweet)
+function getMediaUrls(data: EnrichedTweet): DownloadItem[] {
   const medias: DownloadItem[] = []
   const photos = (data.photos || []).map((photo, idx) => renameMedia(data, photo.url, 'photo', idx))
   medias.push(...photos)
@@ -76,7 +73,6 @@ export function DownloadMedia() {
 
     try {
       await downloadFiles(mediaUrls, {
-        delay: 300, // 300ms 间隔，避免并发过多
         onError: (error, filename) => {
           console.error(`下载失败: ${filename}`, error)
           toast.error(`下载失败: ${filename}`, {
