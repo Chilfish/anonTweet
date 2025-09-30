@@ -1,11 +1,11 @@
 import type { Ref } from 'react'
 import type { EnrichedTweet, TwitterComponents } from '~/lib/react-tweet'
+import type { ThemeSettings } from '~/lib/stores/theme'
 import type { TweetData } from '~/types'
 import {
   TweetActions,
   TweetContainer,
   TweetHeader,
-  TweetInfo,
   TweetMedia,
 } from '~/lib/react-tweet'
 import { TranslationEditor } from '../TranslationEditor'
@@ -15,13 +15,19 @@ import { TweetTextBody } from './TweetTextBody'
 interface TweetComponentProps extends TweetData {
   tweet: EnrichedTweet
   components?: TwitterComponents
+  settings?: ThemeSettings
   showMp4CoverOnly?: boolean
   ref?: Ref<HTMLDivElement>
 }
 
 const hasMedia = (tweet: EnrichedTweet) => tweet.photos?.length || !!tweet.video?.videoId
 
-function ThreadTweet({ tweet, components, showMp4CoverOnly }: TweetComponentProps) {
+function ThreadTweet({
+  tweet,
+  components,
+  showMp4CoverOnly,
+  settings,
+}: TweetComponentProps) {
   const quotedTweet = tweet.quoted_tweet
   return (
     <TweetContainer
@@ -56,17 +62,22 @@ function ThreadTweet({ tweet, components, showMp4CoverOnly }: TweetComponentProp
 
         {quotedTweet && <QuotedTweet tweet={quotedTweet as any} showMp4CoverOnly={showMp4CoverOnly} />}
 
-        <TweetActions
-          tweet={tweet}
-          className="mt-2 gap-12!"
-        />
+        {settings?.showActions && (
+          <TweetActions
+            tweet={tweet}
+            className="mt-2 gap-12!"
+          />
+        )}
 
       </div>
     </TweetContainer>
   )
 }
 
-function QuotedTweet({ tweet, showMp4CoverOnly }: { tweet: EnrichedTweet, showMp4CoverOnly?: boolean }) {
+function QuotedTweet({
+  tweet,
+  showMp4CoverOnly,
+}: { tweet: EnrichedTweet, showMp4CoverOnly?: boolean }) {
   return (
     <div className="p-4! border-2 rounded-2xl mt-2!">
       <div
@@ -96,7 +107,15 @@ function QuotedTweet({ tweet, showMp4CoverOnly }: { tweet: EnrichedTweet, showMp
   )
 }
 
-export function MyTweet({ tweet, parentTweets = [], quotedTweet, components, showMp4CoverOnly, ref }: TweetComponentProps) {
+export function MyTweet({
+  tweet,
+  parentTweets = [],
+  quotedTweet,
+  components,
+  showMp4CoverOnly,
+  settings,
+  ref,
+}: TweetComponentProps) {
   return (
     <TweetContainer ref={ref}>
       {parentTweets.map(parentTweet => (
@@ -115,6 +134,7 @@ export function MyTweet({ tweet, parentTweets = [], quotedTweet, components, sho
         <TweetHeader
           tweet={tweet}
           components={components}
+          createdAtInline
         />
         <TranslationEditor originalTweet={tweet} />
       </div>
@@ -132,8 +152,9 @@ export function MyTweet({ tweet, parentTweets = [], quotedTweet, components, sho
       {quotedTweet && <QuotedTweet tweet={quotedTweet} showMp4CoverOnly={showMp4CoverOnly} />}
 
       <div className="flex items-center gap-3 pt-2">
-        <TweetInfo tweet={tweet} />
-        <TweetActions tweet={tweet} />
+        {settings?.showActions && (
+          <TweetActions tweet={tweet} />
+        )}
       </div>
     </TweetContainer>
   )

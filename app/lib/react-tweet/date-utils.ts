@@ -16,7 +16,7 @@ export function formatDateFns(
     fmt?: string
   } = {},
 ) {
-  const { timezone, fmt = 'yyyy-MM-dd HH:mm:ss' } = options
+  const { timezone, fmt = 'yyyy年MM月dd日 HH:mm:ss' } = options
 
   return format(getDate(time, timezone), fmt, { locale: zhCN })
 }

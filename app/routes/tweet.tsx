@@ -47,6 +47,7 @@ export async function loader({
     return { tweet: null, parentTweets: [], quotedTweet: null, tweetId: id }
   }
   const { tweet, parentTweets, quotedTweet } = await getTweets(tweetId)
+  console.log(parentTweets.length)
   return { tweet, parentTweets, quotedTweet, tweetId }
 }
 
