@@ -223,7 +223,7 @@ export interface TwitterCardImage {
 }
 
 export interface TwitterCard {
-  type: 'summary' | 'summary_large_image' | 'unified_card' | 'unknown'
+  type: 'summary' | 'summary_large_image' | 'unified_card' | 'unknown' | 'player'
   url: string
   title?: string
   description?: string
@@ -246,11 +246,7 @@ export function mapTwitterCard(cardData: any): TwitterCard | undefined {
 
   const { name, url, binding_values } = cardData
   const card: TwitterCard = {
-    type: name === 'summary'
-      ? 'summary'
-      : name === 'summary_large_image'
-        ? 'summary_large_image'
-        : name === 'unified_card' ? 'unified_card' : 'unknown',
+    type: name,
     url: url || '',
   }
 
@@ -372,6 +368,11 @@ export function mapTwitterCard(cardData: any): TwitterCard | undefined {
       // Set primary image to the largest available
       card.image = images.original || images.large || images.medium || images.small
     }
+  }
+
+  if (card.type === 'player') {
+    card.image = binding_values.player_image_original?.image_value
+    card.type = 'summary_large_image'
   }
 
   return card
