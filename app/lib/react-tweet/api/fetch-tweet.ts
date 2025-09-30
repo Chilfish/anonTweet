@@ -3,7 +3,7 @@ import type { Tweet } from './types/index.js'
 import Axios from 'axios'
 import { setupCache } from 'axios-cache-interceptor'
 
-const SYNDICATION_URL = 'https://cdn.syndication.twimg.com'
+const SYNDICATION_URL = import.meta.env.VITE_API_URL || 'https://cdn.syndication.twimg.com'
 
 const instance = Axios.create()
 const axios = setupCache(instance)

@@ -19,17 +19,10 @@ interface TweetComponentProps extends TweetData {
   ref?: Ref<HTMLDivElement>
 }
 
-/**
- * 如果是 Thread （查看的是评论）：
- *  - 显示被回复的推文、评论的推文
- *  - 头像之间有竖线、源推文除了 header 有 padding
- *
- * 条件：
- *  - 推文有 parent 且 parent 是 Tweet
- *  - 推文的 in_reply_to_user_id_str 与 parent 的 user.id_str 相等
- */
+const hasMedia = (tweet: EnrichedTweet) => tweet.photos?.length || !!tweet.video?.videoId
 
 function ThreadTweet({ tweet, components, showMp4CoverOnly }: TweetComponentProps) {
+  const quotedTweet = tweet.quoted_tweet
   return (
     <TweetContainer
       className="border-none! p-0! m-0! pb-2! relative"
@@ -61,6 +54,8 @@ function ThreadTweet({ tweet, components, showMp4CoverOnly }: TweetComponentProp
 
         {tweet.card && <TweetLinkCard tweet={tweet} />}
 
+        {quotedTweet && <QuotedTweet tweet={quotedTweet as any} showMp4CoverOnly={showMp4CoverOnly} />}
+
         <TweetActions
           tweet={tweet}
           className="mt-2 gap-12!"
@@ -71,8 +66,37 @@ function ThreadTweet({ tweet, components, showMp4CoverOnly }: TweetComponentProp
   )
 }
 
+function QuotedTweet({ tweet, showMp4CoverOnly }: { tweet: EnrichedTweet, showMp4CoverOnly?: boolean }) {
+  return (
+    <div className="p-4! border-2 rounded-2xl mt-2!">
+      <div
+        className="flex items-center justify-between"
+      >
+        <TweetHeader
+          tweet={tweet}
+          createdAtInline
+        />
+        <TranslationEditor
+          originalTweet={tweet}
+        />
+      </div>
+
+      <TweetTextBody tweet={tweet} />
+
+      {hasMedia(tweet)
+        && (
+          <TweetMedia
+            tweet={tweet}
+            showCoverOnly={showMp4CoverOnly}
+          />
+        )}
+
+      {tweet.card && <TweetLinkCard tweet={tweet} />}
+    </div>
+  )
+}
+
 export function MyTweet({ tweet, parentTweets = [], quotedTweet, components, showMp4CoverOnly, ref }: TweetComponentProps) {
-  const hasMedia = (tweet: EnrichedTweet) => tweet.photos?.length || !!tweet.video?.videoId
   return (
     <TweetContainer ref={ref}>
       {parentTweets.map(parentTweet => (
@@ -105,35 +129,7 @@ export function MyTweet({ tweet, parentTweets = [], quotedTweet, components, sho
 
       {tweet.card && <TweetLinkCard tweet={tweet} />}
 
-      {quotedTweet && (
-        <div className="p-4! border-2 rounded-2xl mt-2!">
-          <div
-            className="flex items-center justify-between"
-          >
-            <TweetHeader
-              tweet={quotedTweet as any}
-              components={components}
-              createdAtInline
-            />
-            <TranslationEditor
-              originalTweet={quotedTweet}
-            />
-          </div>
-
-          <TweetTextBody tweet={quotedTweet} />
-
-          {hasMedia(quotedTweet)
-            && (
-              <TweetMedia
-                tweet={quotedTweet}
-                components={components}
-                showCoverOnly={showMp4CoverOnly}
-              />
-            )}
-
-          {quotedTweet.card && <TweetLinkCard tweet={quotedTweet} />}
-        </div>
-      )}
+      {quotedTweet && <QuotedTweet tweet={quotedTweet} showMp4CoverOnly={showMp4CoverOnly} />}
 
       <div className="flex items-center gap-3 pt-2">
         <TweetInfo tweet={tweet} />

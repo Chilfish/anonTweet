@@ -7,7 +7,7 @@ export async function getTweets(tweetId: string): Promise<TweetData> {
   let quotedTweet: EnrichedTweet | null = null
   const mainTweet = tweet || null
 
-  if (!tweet) {
+  if (!tweet || !mainTweet) {
     return { tweet: null, parentTweets: [], quotedTweet: null }
   }
 
@@ -25,8 +25,8 @@ export async function getTweets(tweetId: string): Promise<TweetData> {
     tweet = parentTweet
   }
 
-  if (tweet.quoted_tweet) {
-    quotedTweet = await getEnrichedTweet(tweet.quoted_tweet.id_str)
+  if (mainTweet.quoted_tweet) {
+    quotedTweet = await getEnrichedTweet(mainTweet.quoted_tweet.id_str)
   }
 
   return {
