@@ -4,7 +4,9 @@ import s from './tweet-info-created-at.module.css'
 
 export function TweetInfoCreatedAt({ tweet }: { tweet: EnrichedTweet }) {
   const createdAt = new Date(tweet.created_at)
-  const formattedCreatedAtDate = formatDateFns(createdAt)
+  const formattedCreatedAtDate = formatDateFns(createdAt, {
+    timezone: 'beijing',
+  })
 
   return (
     <a

@@ -32,6 +32,7 @@ export function HydrateFallback() {
 }
 
 export async function loader({
+// export async function clientLoader({
   params,
   request,
 }: Route.LoaderArgs): Promise<TweetData & {

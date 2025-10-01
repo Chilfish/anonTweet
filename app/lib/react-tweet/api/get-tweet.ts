@@ -35,5 +35,6 @@ export async function getEnrichedTweet(
   if (!tweet) {
     return null
   }
+  // console.log(tweet)
   return enrichTweet(tweet)
 }
