@@ -72,6 +72,8 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
       allEntities = getAllEntities()
     }
 
+    console.log('existingTranslation', allEntities)
+
     setEntityTranslations(allEntities.map((entity, index) => ({
       ...entity,
       index,
@@ -138,7 +140,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
   }
 
   const skipTranslation = (entityTranslation: EntityTranslation) => {
-    return (entityTranslation.type === 'text' && entityTranslation.text.trim() === '')
+    return (entityTranslation.text === ' ')
       || (entityTranslation.type === 'url')
       || (entityTranslation.type === 'mention')
   }
