@@ -1,5 +1,3 @@
-'use client'
-
 import type { Tweet } from './api/index.js'
 import { useEffect, useState } from 'react'
 import swr from 'swr'

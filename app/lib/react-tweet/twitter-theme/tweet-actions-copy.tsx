@@ -1,5 +1,3 @@
-'use client'
-
 import type { EnrichedTweet } from '../utils.js'
 import { useEffect, useState } from 'react'
 import s from './tweet-actions.module.css'

@@ -1,5 +1,3 @@
-'use client'
-
 import type { ReactNode } from 'react'
 import type { EnrichedQuotedTweet } from '../../utils.js'
 import s from './quoted-tweet-container.module.css'

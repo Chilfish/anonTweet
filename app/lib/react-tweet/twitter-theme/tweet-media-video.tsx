@@ -1,5 +1,3 @@
-'use client'
-
 import type { MediaAnimatedGif, MediaVideo } from '../api/index.js'
 import type { EnrichedQuotedTweet, EnrichedTweet } from '../utils.js'
 import clsx from 'clsx'
