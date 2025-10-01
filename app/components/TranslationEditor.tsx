@@ -1,6 +1,6 @@
 import type { EnrichedTweet, Entity } from '~/lib/react-tweet/utils'
 import { Languages, LanguagesIcon, Save, Trash2, X } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { useTranslationStore } from '~/lib/stores/translation'
 import { TweetText } from './tweet/TweetText'
 import { Button } from './ui/button'
@@ -35,6 +35,10 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     indices: [-1, 0],
     index: -1,
   })
+
+  // 用于存储输入框的引用
+  const inputRefs = useRef<Map<string, HTMLInputElement | HTMLTextAreaElement>>(new Map())
+  const prependRef = useRef<HTMLTextAreaElement>(null)
 
   const { showTranslationButton, getTranslation, setTranslation } = useTranslationStore()
   const hasTextContent = useTranslationStore(state => state.hasTextContent)
@@ -77,20 +81,37 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
   }
 
   const handleSave = () => {
+    // 从DOM中读取所有输入值
+    const updatedTranslations = entityTranslations.map((entity) => {
+      const inputId = `${entity.index}-${entity.type}`
+      const inputElement = inputRefs.current.get(inputId)
+      return {
+        ...entity,
+        text: inputElement?.value || entity.text,
+      }
+    })
+
     // 保存所有实体的翻译，包括句首补充（如果启用）
-    const finalTranslations = [...entityTranslations]
+    const finalTranslations = [...updatedTranslations]
 
     if (enablePrepend) {
-      if (entityTranslations[0].indices?.[0] !== -1 && prependEntity.text.trim()) {
-        finalTranslations.unshift(prependEntity)
+      const prependText = prependRef.current?.value || ''
+      const updatedPrependEntity = {
+        ...prependEntity,
+        text: prependText,
       }
-      else {
-        finalTranslations[0] = prependEntity
+      setPrependEntity(updatedPrependEntity)
+
+      if (updatedTranslations[0]?.indices?.[0] !== -1 && prependText.trim()) {
+        finalTranslations.unshift(updatedPrependEntity)
+      }
+      else if (prependText.trim()) {
+        finalTranslations[0] = updatedPrependEntity
       }
     }
     else {
       // 禁用句首补充时，删除句首补充实体
-      const savedPrepend = entityTranslations.findIndex(et => et.indices[0] === -1)
+      const savedPrepend = finalTranslations.findIndex(et => et.indices[0] === -1)
       if (savedPrepend !== -1) {
         finalTranslations.splice(savedPrepend, 1)
       }
@@ -106,12 +127,13 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     setIsOpen(false)
   }
 
-  const handleEntityTranslationChange = (index: number, translatedText: string) => {
-    const updated = [...entityTranslations]
-    const entityIndex = updated.findIndex(et => et.index === index)
-    if (entityIndex !== -1) {
-      updated[entityIndex].text = translatedText
-      setEntityTranslations(updated)
+  // 设置输入框引用的辅助函数
+  const setInputRef = (id: string, element: HTMLInputElement | HTMLTextAreaElement | null) => {
+    if (element) {
+      inputRefs.current.set(id, element)
+    }
+    else {
+      inputRefs.current.delete(id)
     }
   }
 
@@ -170,13 +192,13 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
             {enablePrepend && (
               <div className="space-y-2">
                 <Label htmlFor="prepend-text" className="text-xs uppercase font-mono">
-                  句首补充内容
+                  也许你需要调整语序
                 </Label>
                 <Textarea
                   id="prepend-text"
-                  value={prependEntity.text}
-                  onChange={e => setPrependEntity(prev => ({ ...prev, text: e.target.value }))}
-                  placeholder="输入要在句首添加的翻译内容..."
+                  ref={prependRef}
+                  defaultValue={prependEntity.text}
+                  placeholder="输入句首补充内容..."
                   className="text-sm"
                 />
               </div>
@@ -200,8 +222,8 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
                         ? (
                             <Textarea
                               id={id}
-                              value={entityTranslation.text}
-                              onChange={e => handleEntityTranslationChange(entityTranslation.index, e.target.value)}
+                              ref={el => setInputRef(id, el)}
+                              defaultValue={entityTranslation.text}
                               placeholder="输入翻译内容..."
                               className="text-sm"
                             />
@@ -209,8 +231,8 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
                         : (
                             <Input
                               id={id}
-                              value={entityTranslation.text}
-                              onChange={e => handleEntityTranslationChange(entityTranslation.index, e.target.value)}
+                              ref={el => setInputRef(id, el)}
+                              defaultValue={entityTranslation.text}
                               placeholder={`翻译 ${entityTranslation.text}`}
                               className="text-sm"
                             />
@@ -240,7 +262,6 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
               <Button
                 size="sm"
                 onClick={handleSave}
-                disabled={!entityTranslations.some(et => et.type === 'text' && et.text.trim()) && !(enablePrepend && prependEntity.text.trim())}
                 className="gap-2"
               >
                 <Save className="h-4 w-4" />
