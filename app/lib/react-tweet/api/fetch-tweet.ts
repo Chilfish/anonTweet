@@ -103,11 +103,14 @@ export async function fetchTweet(
       throw error
     }
 
+    console.error(error)
+
     const status = error.response?.status || 500
     const data = error.response?.data || null
+    const message = `${error.name}: ${error.message || `Failed to fetch tweet at "${url}".`}`
 
     throw new TwitterApiError({
-      message: error.message || `Failed to fetch tweet at "${url}".`,
+      message,
       status,
       data,
     })

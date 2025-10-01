@@ -2,12 +2,13 @@ import type { Ref } from 'react'
 import type { EnrichedTweet, TwitterComponents } from '~/lib/react-tweet'
 import type { ThemeSettings } from '~/lib/stores/theme'
 import type { TweetData } from '~/types'
+import { useEffect, useRef, useState } from 'react'
 import {
-  TweetActions,
   TweetContainer,
   TweetHeader,
   TweetMedia,
 } from '~/lib/react-tweet'
+import { cn } from '~/lib/utils'
 import { TranslationEditor } from '../TranslationEditor'
 import { TweetLinkCard } from './TweetCard'
 import { TweetTextBody } from './TweetTextBody'
@@ -26,12 +27,11 @@ function ThreadTweet({
   tweet,
   components,
   showMp4CoverOnly,
-  settings,
 }: TweetComponentProps) {
-  const quotedTweet = tweet.quoted_tweet
+  const quotedTweet = tweet.quoted_tweet || null
   return (
     <TweetContainer
-      className="border-none! p-0! m-0! pb-2! relative"
+      className="border-none! px-0! py-2! relative"
     >
       <div
         className="flex items-center justify-between"
@@ -47,30 +47,40 @@ function ThreadTweet({
       <div
         className="pl-14!"
       >
-        {/* Thread 的那根对齐头像的竖线 */}
-        <div className="absolute left-5.5 top-12 bottom-0 h-full w-[2px] bg-[#cfd9de] dark:bg-[#333639] z-0"></div>
-
-        <TweetTextBody tweet={tweet} />
-
-        {tweet.mediaDetails?.length
-          ? (
-              <TweetMedia tweet={tweet} components={components} showCoverOnly={showMp4CoverOnly} />
-            )
-          : null}
-
-        {tweet.card && <TweetLinkCard tweet={tweet} />}
-
-        {quotedTweet && <QuotedTweet tweet={quotedTweet as any} showMp4CoverOnly={showMp4CoverOnly} />}
-
-        {settings?.showActions && (
-          <TweetActions
-            tweet={tweet}
-            className="mt-2 gap-12!"
-          />
-        )}
-
+        <TweetBody
+          tweet={tweet}
+          quotedTweet={quotedTweet as any}
+          showMp4CoverOnly={showMp4CoverOnly}
+          parentTweets={[]}
+        />
       </div>
     </TweetContainer>
+  )
+}
+
+function TweetBody({ tweet, quotedTweet, showMp4CoverOnly }: TweetComponentProps) {
+  return (
+    <>
+      <TweetTextBody tweet={tweet} />
+
+      {tweet.mediaDetails?.length
+        ? (
+            <TweetMedia
+              tweet={tweet}
+              showCoverOnly={showMp4CoverOnly}
+            />
+          )
+        : null}
+
+      {tweet.card && <TweetLinkCard tweet={tweet} />}
+
+      {quotedTweet && (
+        <QuotedTweet
+          tweet={quotedTweet as any}
+          showMp4CoverOnly={showMp4CoverOnly}
+        />
+      )}
+    </>
   )
 }
 
@@ -113,49 +123,76 @@ export function MyTweet({
   quotedTweet,
   components,
   showMp4CoverOnly,
-  settings,
   ref,
 }: TweetComponentProps) {
+  const hasThread = parentTweets.length > 0
+  const mainTweetRef = useRef<HTMLElement | null>(null)
+  const [mainTweetheight, setMainTweetHeight] = useState(0)
+
+  useEffect(() => {
+    if (!mainTweetRef.current) {
+      return
+    }
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.target === mainTweetRef.current) {
+          setMainTweetHeight(entry.contentRect.height)
+        }
+      }
+    })
+
+    resizeObserver.observe(mainTweetRef.current)
+
+    return () => {
+      resizeObserver.disconnect()
+    }
+  }, [])
+
   return (
     <TweetContainer ref={ref}>
-      {parentTweets.map(parentTweet => (
-        <ThreadTweet
-          key={parentTweet.id_str}
-          tweet={parentTweet}
-          quotedTweet={null}
-          parentTweets={[]}
-          components={components}
-        />
-      ))}
+      {hasThread && (
+        <>
+          {parentTweets.map(parentTweet => (
+            <ThreadTweet
+              key={parentTweet.id_str}
+              tweet={parentTweet}
+              quotedTweet={null}
+              parentTweets={[]}
+              components={components}
+              showMp4CoverOnly={showMp4CoverOnly}
+            />
+          ))}
 
-      <div
-        className="flex items-center justify-between"
+          {/* Thread 的那根对齐头像的竖线 */}
+          <div
+            style={{
+              height: `calc(100% - ${mainTweetheight}px)`,
+            }}
+            className="absolute z-0 left-5.5 top-4 bottom-0 w-[2px] bg-[#cfd9de] dark:bg-[#333639]"
+          >
+          </div>
+        </>
+      )}
+
+      <article
+        ref={mainTweetRef}
       >
-        <TweetHeader
-          tweet={tweet}
-          components={components}
-          createdAtInline
-        />
-        <TranslationEditor originalTweet={tweet} />
-      </div>
+        <div className="flex items-center justify-between">
+          <TweetHeader tweet={tweet} components={components} createdAtInline />
+          <TranslationEditor originalTweet={tweet} />
+        </div>
 
-      <TweetTextBody tweet={tweet} />
-
-      {tweet.mediaDetails?.length
-        ? (
-            <TweetMedia tweet={tweet} components={components} showCoverOnly={showMp4CoverOnly} />
-          )
-        : null}
-
-      {tweet.card && <TweetLinkCard tweet={tweet} />}
-
-      {quotedTweet && <QuotedTweet tweet={quotedTweet} showMp4CoverOnly={showMp4CoverOnly} />}
-
-      <div className="flex items-center gap-3 pt-2">
-        {settings?.showActions && (
-          <TweetActions tweet={tweet} />
-        )}
-      </div>
+        <div
+          className={cn({ 'pl-14!': hasThread })}
+        >
+          <TweetBody
+            tweet={tweet}
+            quotedTweet={quotedTweet as any}
+            showMp4CoverOnly={showMp4CoverOnly}
+            parentTweets={[]}
+          />
+        </div>
+      </article>
     </TweetContainer>
   )
 }

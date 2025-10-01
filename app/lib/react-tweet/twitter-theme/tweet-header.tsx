@@ -1,6 +1,5 @@
 import type { EnrichedTweet } from '../utils.js'
 import type { TwitterComponents } from './types.js'
-import clsx from 'clsx'
 import { cn } from '~/lib/utils.js'
 import { AvatarImg } from './avatar-img.js'
 import { TweetInfoCreatedAt } from './components.js'
@@ -27,9 +26,10 @@ export function TweetHeader({ tweet, components, className, createdAtInline }: P
         rel="noopener noreferrer"
       >
         <div
-          className={clsx(
+          className={cn(
             s.avatarOverflow,
             user.profile_image_shape === 'Square' && s.avatarSquare,
+            'z-10',
           )}
         >
           <Img

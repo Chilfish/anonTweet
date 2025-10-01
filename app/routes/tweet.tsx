@@ -97,7 +97,7 @@ export default function TweetPage({
     if (tweetRef.current) {
       setTweetElRef(tweetRef.current)
     }
-  }, [tweetRef])
+  }, [tweetRef.current])
 
   useEffect(() => {
     if (loaderData.tweet) {
@@ -107,7 +107,7 @@ export default function TweetPage({
         parentTweets: loaderData.parentTweets,
       })
     }
-  }, [loaderData.tweet, loaderData.quotedTweet, loaderData.parentTweets])
+  }, [loaderData.tweet])
 
   return (
     <>

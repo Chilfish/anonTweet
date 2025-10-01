@@ -23,6 +23,8 @@ export function SaveAsImageButton() {
       return
     }
 
+    toast.info('正在截图中……')
+
     setShowTranslationButton(false)
     setScreenshoting(true)
 
