@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
 import { downloadFiles } from '~/lib/downloader'
-import { formatDateFns } from '~/lib/react-tweet/date-utils'
+import { formatDate } from '~/lib/react-tweet/date-utils'
 import { useTranslationStore } from '~/lib/stores/translation'
 import { Button } from './ui/button'
 
@@ -17,11 +17,11 @@ function renameMedia(
 ): DownloadItem {
   const id = tweet.id_str || Date.now()
   const suffix = idx ? `-${idx}` : ''
-  const craetedAt = formatDateFns(tweet.created_at || Date.now(), { fmt: 'yyyymmdd_hhmmss' })
+  const createdAt = formatDate(tweet.created_at || Date.now(), 'yyyymmdd_hhmmss')
   const username = tweet.user.screen_name || 'unknown'
   const ext = type === 'video' ? 'mp4' : 'png'
 
-  const filename = `${username}-${id}-${craetedAt}${suffix}.${ext}`
+  const filename = `${username}-${id}-${createdAt}${suffix}.${ext}`
 
   const largeUrl = new URL(url)
 

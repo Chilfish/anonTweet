@@ -1,37 +1,40 @@
-import { format } from 'date-fns'
-import { zhCN } from 'date-fns/locale'
-
-const tzs = {
-  tokyo: 'Asia/Tokyo',
-  beijing: 'Asia/Shanghai',
-} as const
-
-type Time = string | number | Date
-type TZ = keyof typeof tzs
-
-export function formatDateFns(
-  time: Time,
-  options: {
-    timezone?: TZ
-    fmt?: string
-  } = {},
+/**
+ * Format the date string
+ * @param time the date string
+ * @param fmt the format string, e.g. `YYYY-MM-DD HH:mm`
+ */
+export function formatDate(
+  time: string | number | Date,
+  fmt = 'yyyy年MM月dd日 HH:mm:ss',
 ) {
-  const { timezone, fmt = 'yyyy年MM月dd日 HH:mm:ss' } = options
+  if (typeof time === 'number' && time < 1e12)
+    time *= 1000
 
-  return format(getDate(time, timezone), fmt, { locale: zhCN })
+  let date = new Date(time)
+  if (Number.isNaN(date.getTime()))
+    return ''
+
+  // to beijing time
+  date = new Date(date.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }))
+
+  const pad = (num: number) => num.toString().padStart(2, '0')
+
+  const year = date.getFullYear().toString()
+  const month = pad(date.getMonth() + 1) // Months are zero-based
+  const day = pad(date.getDate())
+  const hours = pad(date.getHours())
+  const minutes = pad(date.getMinutes())
+  const seconds = pad(date.getSeconds())
+
+  return fmt
+    .replace('yyyy', year)
+    .replace('MM', month)
+    .replace('dd', day)
+    .replace('HH', hours)
+    .replace('mm', minutes)
+    .replace('ss', seconds)
 }
 
-export function getDate(time: Time, timezone?: TZ) {
-  return new Date(
-    new Date(time).toLocaleString(zhCN.code, {
-      timeZone: timezone ? tzs[timezone] : undefined,
-    }),
-  )
-}
-
-export function now(timezone: TZ = 'beijing') {
-  return getDate(new Date(), timezone)
-}
 const DATE_KEYS = [
   'createdAt',
   'updatedAt',

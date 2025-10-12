@@ -3,7 +3,7 @@ import { InfoIcon, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { Outlet, useSearchParams } from 'react-router'
 import { Button } from '~/components/ui/button'
-import { formatDateFns } from '~/lib/react-tweet/date-utils'
+import { formatDate } from '~/lib/react-tweet/date-utils'
 import { cn } from '~/lib/utils'
 import { PageHeader } from './PageHeader'
 
@@ -35,23 +35,26 @@ function Footer({ className, ...props }: { className?: string }) {
         <span>其他作品：</span>
       </p>
       <ul className="inline-flex flex-wrap items-center justify-center w-full text-xs">
-        <Linker to="https://tweet.chilfish.top/memo/240y_k">女声优特推&ins存档站</Linker>
+        <Linker to="https://tweet.chilfish.top/memo/240y_k">女声优推特&ins存档站</Linker>
         /
         <Linker to="https://nishio.chilfish.top/zh">西尾文明暦</Linker>
-        /
-        <Linker to="https://replive.chilfish.top">西尾夕香 replive 记录</Linker>
         /
         <Linker to="https://oshitabi.chilfish.top/">推し旅 AR 镜头</Linker>
       </ul>
       <div className="mt-2 flex items-center justify-center gap-2 text-xs text-muted-foreground/70">
         <span>
           上次构建于：
-          {formatDateFns(new Date(__GIT_DATE__))}
+          {formatDate(new Date(__GIT_DATE__))}
         </span>
-        <span className="inline-flex items-center gap-1 px-2 py-1 bg-muted/50 rounded-md border">
+        <a
+          href={`https://github.com/Chilfish/anonTweet/commit/${__GIT_HASH__}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 px-2 py-1 bg-muted/50 rounded-md border text-2 hover:text-primary hover:bg-muted/70 transition-colors duration-200 hover:border-primary"
+        >
           <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
           <span>{__GIT_HASH__}</span>
-        </span>
+        </a>
       </div>
     </footer>
   )
@@ -87,10 +90,8 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
         <Sparkles className="size-3" />
       </div>
 
-      <div className="mb-auto"></div>
-
       {/* 主内容区域添加微妙的背景 */}
-      <div className="relative z-10">
+      <div className="relative z-10 mt-auto">
         <PageHeader />
       </div>
 
@@ -98,7 +99,7 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
         {children || <Outlet />}
       </main>
 
-      <div className="relative z-10 flex items-center mt-auto">
+      <div className="relative z-10 flex items-center mx-auto mt-auto">
         <Footer
           className={cn('transition-all duration-300 flex-1', {
             'opacity-0': !showFooter,
@@ -108,7 +109,7 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
 
         <Button
           variant="ghost"
-          className="text-muted-foreground hover:text-primary transition-colors duration-200 hover:scale-105 transform"
+          className="text-muted-foreground/40 hover:text-primary transition-colors duration-200 hover:scale-105 transform"
           onClick={() => setShowFooter(!showFooter)}
         >
           <InfoIcon className="size-5" />
