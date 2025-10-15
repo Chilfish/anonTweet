@@ -1,6 +1,6 @@
 /* eslint-disable style/multiline-ternary */
 import type { EnrichedTweet } from '~/lib/react-tweet'
-import { cn } from '~/lib/utils'
+import { cn, proxyMedia } from '~/lib/utils'
 
 interface TweetLinkCardProps {
   tweet: EnrichedTweet
@@ -83,7 +83,7 @@ export function TweetLinkCard({ tweet, className }: TweetLinkCardProps) {
     )}
     >
       <img
-        src={card.image!.url}
+        src={proxyMedia(card.image!.url)}
         alt={card.title || 'Link preview'}
         className={cn(
           'h-full w-full object-cover',

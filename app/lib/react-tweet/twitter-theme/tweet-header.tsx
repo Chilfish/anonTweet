@@ -1,6 +1,6 @@
 import type { EnrichedTweet } from '../utils.js'
 import type { TwitterComponents } from './types.js'
-import { cn } from '~/lib/utils.js'
+import { cn, proxyMedia } from '~/lib/utils.js'
 import { AvatarImg } from './avatar-img.js'
 import { TweetInfoCreatedAt } from './components.js'
 import s from './tweet-header.module.css'
@@ -33,7 +33,7 @@ export function TweetHeader({ tweet, components, className, createdAtInline }: P
           )}
         >
           <Img
-            src={user.profile_image_url_https}
+            src={proxyMedia(user.profile_image_url_https)}
             alt={user.name}
             width={48}
             height={48}

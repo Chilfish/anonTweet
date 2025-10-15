@@ -35,3 +35,7 @@ export function extractTweetId(input: string): string | null {
 
   return null
 }
+
+export function proxyMedia(url: string) {
+  return `https://proxy.chilfish.top/${url}`
+}

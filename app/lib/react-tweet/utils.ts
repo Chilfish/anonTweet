@@ -12,6 +12,7 @@ import type {
   UrlEntity,
   UserMentionEntity,
 } from './api/index.js'
+import { proxyMedia } from '../utils.js'
 
 export interface TweetCoreProps {
   id: string
@@ -65,7 +66,7 @@ export function getMediaUrl(media: MediaDetails, size: 'small' | 'medium' | 'lar
   url.searchParams.set('format', extension)
   url.searchParams.set('name', size)
 
-  return url.toString()
+  return proxyMedia(url.toString())
 }
 
 export function getMp4Videos(media: MediaAnimatedGif | MediaVideo) {
