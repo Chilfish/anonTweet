@@ -1,5 +1,5 @@
-import type { EnrichedTweet } from '../utils.js'
-import { TweetInfoCreatedAt } from './tweet-info-created-at.js'
+import type { EnrichedTweet } from '../utils'
+import { TweetInfoCreatedAt } from './tweet-info-created-at'
 import s from './tweet-info.module.css'
 
 export function TweetInfo({ tweet }: { tweet: EnrichedTweet }) {

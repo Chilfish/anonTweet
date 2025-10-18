@@ -3,7 +3,6 @@
     "target": "esnext",
     "jsx": "react-jsx",
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
-    "baseUrl": ".",
     "rootDirs": [".", "./.react-router/types"],
     "module": "ES2022",
     "moduleResolution": "bundler",
@@ -28,5 +27,11 @@
     "**/.server/**/*",
     "**/.client/**/*",
     ".react-router/types/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/rettiwt-api/**"
   ]
 }

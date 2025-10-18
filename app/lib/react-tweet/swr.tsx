@@ -1,13 +1,13 @@
 import type { ReactNode } from 'react'
-import type { TwitterComponents } from './twitter-theme/components.js'
-import type { TweetCoreProps } from './utils.js'
-import { useTweet } from './hooks.js'
+import type { TwitterComponents } from './twitter-theme/components'
+import type { TweetCoreProps } from './utils'
+import { useTweet } from './hooks'
 import {
   EmbeddedTweet,
   TweetNotFound,
   TweetSkeleton,
 
-} from './twitter-theme/components.js'
+} from './twitter-theme/components'
 
 export type TweetProps = Omit<TweetCoreProps, 'id'> & {
   fallback?: ReactNode

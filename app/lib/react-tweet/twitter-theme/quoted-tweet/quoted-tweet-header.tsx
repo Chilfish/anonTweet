@@ -1,7 +1,7 @@
-import type { EnrichedQuotedTweet } from '../../utils.js'
+import type { EnrichedQuotedTweet } from '../../utils'
 import clsx from 'clsx'
-import { AvatarImg } from '../avatar-img.js'
-import { VerifiedBadge } from '../verified-badge.js'
+import { AvatarImg } from '../avatar-img'
+import { VerifiedBadge } from '../verified-badge'
 import s from './quoted-tweet-header.module.css'
 
 interface Props { tweet: EnrichedQuotedTweet }

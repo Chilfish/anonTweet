@@ -34,6 +34,7 @@
     "sonner": "^2.0.7",
     "swr": "^2.3.6",
     "tailwind-merge": "^3.3.1",
+    "x-client-transaction-id": "^0.1.8",
     "zod": "^4.1.12",
     "zustand": "^5.0.8"
   },
@@ -45,6 +46,7 @@
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@vercel/react-router": "^1.2.3",
+    "cookiejar": "^2.1.4",
     "eslint": "^9.38.0",
     "eslint-plugin-format": "^1.0.2",
     "lefthook": "^1.13.6",

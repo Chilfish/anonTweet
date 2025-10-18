@@ -1,0 +1,95 @@
+import type { HashtagEntity, Indices, MediaEntity, SymbolEntity, UrlEntity, UserMentionEntity } from './entities'
+import type { QuotedTweet, Tweet } from './tweet'
+import type { ITweetDetailsResponse } from '~/lib/rettiwt-api/types/raw/tweet/Details'
+
+export type * from './edit'
+export type * from './entities'
+export type * from './media'
+export type * from './photo'
+// export type * from './tweet'
+export type * from './user'
+export type * from './video'
+
+export type RawTweet = ITweetDetailsResponse['data']['tweetResult']['result']
+
+// Twitter Card Types
+export interface TwitterCardImage {
+  url: string
+  width: number
+  height: number
+}
+
+export interface TwitterCard {
+  type: 'summary' | 'summary_large_image' | 'unified_card' | 'unknown' | 'player'
+  url: string
+  title?: string
+  description?: string
+  domain?: string
+  image?: TwitterCardImage
+  images?: {
+    small?: TwitterCardImage
+    medium?: TwitterCardImage
+    large?: TwitterCardImage
+    original?: TwitterCardImage
+  }
+}
+
+export interface TwitterCard {
+  type: 'summary' | 'summary_large_image' | 'unified_card' | 'unknown' | 'player'
+  url: string
+  title?: string
+  description?: string
+  domain?: string
+  image?: TwitterCardImage
+  images?: {
+    small?: TwitterCardImage
+    medium?: TwitterCardImage
+    large?: TwitterCardImage
+    original?: TwitterCardImage
+  }
+}
+
+interface TextEntity {
+  indices: Indices
+  type: 'text'
+}
+
+export type TweetEntity = HashtagEntity | UserMentionEntity | UrlEntity | MediaEntity | SymbolEntity
+
+export type EntityWithType
+  = | TextEntity
+    | (HashtagEntity & { type: 'hashtag' })
+    | (UserMentionEntity & { type: 'mention' })
+    | (UrlEntity & { type: 'url' })
+    | (MediaEntity & { type: 'media' })
+    | (SymbolEntity & { type: 'symbol' })
+
+export type Entity = {
+  text: string
+} & (
+  | TextEntity
+  | (HashtagEntity & { type: 'hashtag', href: string })
+  | (UserMentionEntity & { type: 'mention', href: string })
+  | (UrlEntity & { type: 'url', href: string })
+  | (MediaEntity & { type: 'media', href: string })
+  | (SymbolEntity & { type: 'symbol', href: string })
+)
+
+export type EnrichedTweet = Omit<Tweet, 'entities' | 'quoted_tweet'> & {
+  url: string
+  user: {
+    url: string
+    follow_url: string
+  }
+  like_url: string
+  reply_url: string
+  in_reply_to_url?: string
+  entities: Entity[]
+  quoted_tweet?: EnrichedTweet
+  card?: TwitterCard
+}
+
+export type EnrichedQuotedTweet = Omit<QuotedTweet, 'entities'> & {
+  url: string
+  entities: Entity[]
+}

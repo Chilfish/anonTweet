@@ -28,6 +28,10 @@ interface Result {
   note_tweet: NoteTweet
   legacy: Legacy2
   quick_promote_eligibility: QuickPromoteEligibility
+  in_reply_to_screen_name?: string
+  in_reply_to_status_id_str?: string
+  quoted_status_result?: TweetResult
+  card?: any
 }
 
 interface Core {
@@ -156,9 +160,22 @@ interface Result3 {
 }
 
 interface EntitySet {
-  user_mentions: any[]
-  urls: any[]
-  hashtags: any[]
+  user_mentions: {
+    id_str: string
+    name: string
+    screen_name: string
+    indices: [number, number]
+  }[]
+  urls: {
+    display_url: string
+    expanded_url: string
+    url: string
+    indices: [number, number]
+  }[]
+  hashtags: {
+    text: string
+    indices: [number, number]
+  }[]
   symbols: any[]
 }
 
@@ -196,13 +213,103 @@ interface Legacy2 {
   id_str: string
 }
 
-interface Entities2 {
-  user_mentions: any[]
-  urls: any[]
-  hashtags: any[]
-  symbols: any[]
+interface Entities2 extends EntitySet {
+  media: MediaEntity[]
 }
 
 interface QuickPromoteEligibility {
   eligibility: string
+}
+
+export interface MediaEntity {
+  display_url: string
+  expanded_url: string
+  ext_alt_text?: string
+  id_str: string
+  indices: [number, number]
+  media_key: string
+  media_url_https: string
+  type: string
+  url: string
+  ext_media_availability: ExtMediaAvailability
+  sizes: Sizes
+  original_info: OriginalInfo
+  allow_download_status: AllowDownloadStatus
+  media_results: MediaResults
+  additional_media_info?: AdditionalMediaInfo
+  video_info?: VideoInfo
+}
+
+export interface ExtMediaAvailability {
+  status: string
+}
+
+export interface Sizes {
+  large: Large
+  medium: Medium
+  small: Small
+  thumb: Thumb
+}
+
+export interface Large {
+  h: number
+  w: number
+  resize: string
+}
+
+export interface Medium {
+  h: number
+  w: number
+  resize: string
+}
+
+export interface Small {
+  h: number
+  w: number
+  resize: string
+}
+
+export interface Thumb {
+  h: number
+  w: number
+  resize: string
+}
+
+export interface OriginalInfo {
+  height: number
+  width: number
+  focus_rects: FocusRect[]
+}
+
+export interface FocusRect {
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
+export interface AllowDownloadStatus {
+  allow_download: boolean
+}
+
+export interface MediaResults {
+  result: {
+    media_key: string
+  }
+}
+
+export interface AdditionalMediaInfo {
+  monetizable: boolean
+}
+
+export interface VideoInfo {
+  aspect_ratio: number[]
+  duration_millis: number
+  variants: Variant[]
+}
+
+export interface Variant {
+  content_type: string
+  url: string
+  bitrate?: number
 }

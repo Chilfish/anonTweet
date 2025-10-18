@@ -1,4 +1,3 @@
-/* eslint-disable style/multiline-ternary */
 import type { EnrichedTweet } from '~/lib/react-tweet'
 import { cn, proxyMedia } from '~/lib/utils'
 

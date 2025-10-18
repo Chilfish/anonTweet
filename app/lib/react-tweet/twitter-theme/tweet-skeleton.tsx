@@ -1,5 +1,5 @@
-import { Skeleton } from './skeleton.js'
-import { TweetContainer } from './tweet-container.js'
+import { Skeleton } from './skeleton'
+import { TweetContainer } from './tweet-container'
 import styles from './tweet-skeleton.module.css'
 
 export function TweetSkeleton() {

@@ -1,7 +1,7 @@
-import type { EnrichedQuotedTweet, EnrichedTweet } from '../utils.js'
-import { cn } from '~/lib/utils.js'
+import type { EnrichedQuotedTweet, EnrichedTweet } from '../utils'
+import { cn } from '~/lib/utils'
 import s from './tweet-body.module.css'
-import { TweetLink } from './tweet-link.js'
+import { TweetLink } from './tweet-link'
 
 interface TweetBodyProps {
   tweet: EnrichedTweet | EnrichedQuotedTweet

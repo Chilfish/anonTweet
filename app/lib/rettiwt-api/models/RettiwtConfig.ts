@@ -1,9 +1,6 @@
 import type { IErrorHandler } from '../types/ErrorHandler'
 
 import type { IRettiwtConfig } from '../types/RettiwtConfig'
-
-import { Agent } from 'node:https'
-import { HttpsProxyAgent } from 'https-proxy-agent'
 import { AuthService } from '../services/internal/AuthService'
 
 /**
@@ -33,7 +30,6 @@ export class RettiwtConfig implements IRettiwtConfig {
   // Parameters for internal use
   private _apiKey?: string
   private _headers: { [key: string]: string }
-  private _httpsAgent: Agent
   private _userId: string | undefined
 
   // Parameters that can be set once, upon initialization
@@ -48,7 +44,6 @@ export class RettiwtConfig implements IRettiwtConfig {
    */
   public constructor(config?: IRettiwtConfig) {
     this._apiKey = config?.apiKey
-    this._httpsAgent = config?.proxyUrl ? new HttpsProxyAgent(config?.proxyUrl) : new Agent()
     this._userId = config?.apiKey ? AuthService.getUserId(config?.apiKey) : undefined
     this.delay = config?.delay ?? 0
     this.maxRetries = config?.maxRetries ?? 0
@@ -70,11 +65,6 @@ export class RettiwtConfig implements IRettiwtConfig {
     return this._headers
   }
 
-  /** The HTTPS agent instance to use. */
-  public get httpsAgent(): Agent {
-    return this._httpsAgent
-  }
-
   /** The ID of the user associated with the API key, if any. */
   public get userId(): string | undefined {
     return this._userId
@@ -90,10 +80,6 @@ export class RettiwtConfig implements IRettiwtConfig {
       ...DefaultHeaders,
       ...headers,
     }
-  }
-
-  public set proxyUrl(proxyUrl: URL | undefined) {
-    this._httpsAgent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : new Agent()
   }
 }
 

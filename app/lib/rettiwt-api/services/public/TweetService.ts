@@ -5,7 +5,6 @@ import type { User } from '../../models/data/User'
 import type { RettiwtConfig } from '../../models/RettiwtConfig'
 import type { ITweetFilter } from '../../types/args/FetchArgs'
 import type { INewTweet } from '../../types/args/PostArgs'
-import type { IMediaInitializeUploadResponse } from '../../types/raw/media/InitalizeUpload'
 
 import type { ITweetBookmarkResponse } from '../../types/raw/tweet/Bookmark'
 import type { ITweetDetailsResponse } from '../../types/raw/tweet/Details'
@@ -24,7 +23,6 @@ import type { ITweetUnlikeResponse } from '../../types/raw/tweet/Unlike'
 import type { ITweetUnpostResponse } from '../../types/raw/tweet/Unpost'
 import type { ITweetUnretweetResponse } from '../../types/raw/tweet/Unretweet'
 import type { ITweetUnscheduleResponse } from '../../types/raw/tweet/Unschedule'
-import { statSync } from 'node:fs'
 import { Extractors } from '../../collections/Extractors'
 import { ResourceType } from '../../enums/Resource'
 import { TweetRepliesSortType } from '../../enums/Tweet'
@@ -867,20 +865,20 @@ export class TweetService extends FetcherService {
    * - Instead of a path to the media, an ArrayBuffer containing the media can also be uploaded.
    */
   public async upload(media: string | ArrayBuffer): Promise<string> {
-    // INITIALIZE
-    const size = typeof media === 'string' ? statSync(media).size : media.byteLength
-    const id: string = (
-      await this.request<IMediaInitializeUploadResponse>(ResourceType.MEDIA_UPLOAD_INITIALIZE, {
-        upload: { size },
-      })
-    ).media_id_string
+    // // INITIALIZE
+    // const size = typeof media === 'string' ? statSync(media).size : media.byteLength
+    // const id: string = (
+    //   await this.request<IMediaInitializeUploadResponse>(ResourceType.MEDIA_UPLOAD_INITIALIZE, {
+    //     upload: { size },
+    //   })
+    // ).media_id_string
 
-    // APPEND
-    await this.request<unknown>(ResourceType.MEDIA_UPLOAD_APPEND, { upload: { id, media } })
+    // // APPEND
+    // await this.request<unknown>(ResourceType.MEDIA_UPLOAD_APPEND, { upload: { id, media } })
 
-    // FINALIZE
-    await this.request<unknown>(ResourceType.MEDIA_UPLOAD_FINALIZE, { upload: { id } })
+    // // FINALIZE
+    // await this.request<unknown>(ResourceType.MEDIA_UPLOAD_FINALIZE, { upload: { id } })
 
-    return id
+    return 'not_implemented_yet'
   }
 }
