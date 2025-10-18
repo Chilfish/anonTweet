@@ -91,7 +91,6 @@ export function transformUserResponse(sourceData: RawTweet): TweetUser {
 }
 
 function getEntities(tweet: RawTweet, text: string): Entity[] {
-  const textMap = Array.from(text)
   const result: EntityWithType[] = []
 
   // 获取实体数据源
@@ -102,15 +101,27 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
   const allEntities: EntityWithType[] = []
 
   // 检查文本开头是否有 mention，如果有则记录需要移除的范围
-  const leadingMentionMatch = text.match(/^(@\w{1,25}\s*)+/)
+  const leadingMentionMatch = text.match(/^(@\w{1,15}\s*)+/)
   const leadingMentionEndIndex = leadingMentionMatch ? leadingMentionMatch[0].length : 0
+
+  // 用于去重的 Set，基于 indices 位置
+  const entityIndicesSet = new Set<string>()
+
+  // 辅助函数：添加实体并去重
+  const addEntityIfUnique = (entity: EntityWithType) => {
+    const indicesKey = `${entity.indices[0]}-${entity.indices[1]}-${entity.type}`
+    if (!entityIndicesSet.has(indicesKey)) {
+      entityIndicesSet.add(indicesKey)
+      allEntities.push(entity)
+    }
+  }
 
   // 处理 hashtags
   if (entities.hashtags) {
     entities.hashtags.forEach((hashtag) => {
       // 跳过在句首 mention 范围内的 hashtag
       if (hashtag.indices[0] >= leadingMentionEndIndex) {
-        allEntities.push({
+        addEntityIfUnique({
           ...hashtag,
           type: 'hashtag',
           // 调整索引位置
@@ -125,7 +136,7 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
     noteEntities.hashtags.forEach((hashtag) => {
       // 跳过在句首 mention 范围内的 hashtag
       if (hashtag.indices[0] >= leadingMentionEndIndex) {
-        allEntities.push({
+        addEntityIfUnique({
           text: hashtag.text,
           indices: [hashtag.indices[0] - leadingMentionEndIndex, hashtag.indices[1] - leadingMentionEndIndex] as [number, number],
           type: 'hashtag',
@@ -139,7 +150,7 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
     entities.user_mentions.forEach((mention) => {
       // 跳过在句首 mention 范围内的 mention
       if (mention.indices[0] >= leadingMentionEndIndex) {
-        allEntities.push({
+        addEntityIfUnique({
           ...mention,
           type: 'mention',
           // 调整索引位置
@@ -154,7 +165,7 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
     noteEntities.user_mentions.forEach((mention) => {
       // 跳过在句首 mention 范围内的 mention
       if (mention.indices[0] >= leadingMentionEndIndex) {
-        allEntities.push({
+        addEntityIfUnique({
           id_str: mention.id_str,
           name: mention.name,
           screen_name: mention.screen_name,
@@ -168,66 +179,90 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
   // 处理 urls
   if (entities.urls) {
     entities.urls.forEach((url) => {
-      allEntities.push({
-        ...url,
-        type: 'url',
-      })
+      // 跳过在句首 mention 范围内的 url
+      if (url.indices[0] >= leadingMentionEndIndex) {
+        addEntityIfUnique({
+          ...url,
+          type: 'url',
+          // 调整索引位置
+          indices: [url.indices[0] - leadingMentionEndIndex, url.indices[1] - leadingMentionEndIndex] as [number, number],
+        })
+      }
     })
   }
 
   // 处理 note_tweet 中的 urls
   if (noteEntities?.urls) {
     noteEntities.urls.forEach((url) => {
-      allEntities.push({
-        display_url: url.display_url,
-        expanded_url: url.expanded_url,
-        url: url.url,
-        indices: url.indices,
-        type: 'url',
-      })
+      // 跳过在句首 mention 范围内的 url
+      if (url.indices[0] >= leadingMentionEndIndex) {
+        addEntityIfUnique({
+          display_url: url.display_url,
+          expanded_url: url.expanded_url,
+          url: url.url,
+          indices: [url.indices[0] - leadingMentionEndIndex, url.indices[1] - leadingMentionEndIndex] as [number, number],
+          type: 'url',
+        })
+      }
     })
   }
 
   // 处理 media
   if (entities.media) {
     entities.media.forEach((media) => {
-      allEntities.push({
-        display_url: media.display_url,
-        expanded_url: media.expanded_url,
-        url: media.url,
-        indices: media.indices,
-        type: 'media',
-      })
+      // 跳过在句首 mention 范围内的 media
+      if (media.indices[0] >= leadingMentionEndIndex) {
+        addEntityIfUnique({
+          display_url: media.display_url,
+          expanded_url: media.expanded_url,
+          url: media.url,
+          indices: [media.indices[0] - leadingMentionEndIndex, media.indices[1] - leadingMentionEndIndex] as [number, number],
+          type: 'media',
+        })
+      }
     })
   }
 
   // 处理 symbols
   if (entities.symbols) {
     entities.symbols.forEach((symbol) => {
-      allEntities.push({
-        ...symbol,
-        type: 'symbol',
-      })
+      // 跳过在句首 mention 范围内的 symbol
+      if (symbol.indices[0] >= leadingMentionEndIndex) {
+        addEntityIfUnique({
+          ...symbol,
+          type: 'symbol',
+          // 调整索引位置
+          indices: [symbol.indices[0] - leadingMentionEndIndex, symbol.indices[1] - leadingMentionEndIndex] as [number, number],
+        })
+      }
     })
   }
 
   // 处理 note_tweet 中的 symbols
   if (noteEntities?.symbols) {
     noteEntities.symbols.forEach((symbol) => {
-      allEntities.push({
-        text: symbol.text,
-        indices: symbol.indices,
-        type: 'symbol',
-      })
+      // 跳过在句首 mention 范围内的 symbol
+      if (symbol.indices[0] >= leadingMentionEndIndex) {
+        addEntityIfUnique({
+          text: symbol.text,
+          indices: [symbol.indices[0] - leadingMentionEndIndex, symbol.indices[1] - leadingMentionEndIndex] as [number, number],
+          type: 'symbol',
+        })
+      }
     })
   }
 
   // 按索引排序
   allEntities.sort((a, b) => a.indices[0] - b.indices[0])
 
-  // 创建文本片段
+  // 移除句首 mention 后调整文本范围
   const displayTextRange = tweet.legacy.display_text_range as [number, number]
-  let currentIndex = displayTextRange[0]
+  const adjustedTextRange: [number, number] = [
+    Math.max(0, displayTextRange[0] - leadingMentionEndIndex),
+    displayTextRange[1] - leadingMentionEndIndex,
+  ]
+
+  let currentIndex = adjustedTextRange[0]
 
   allEntities.forEach((entity) => {
     // 添加实体前的文本
@@ -244,16 +279,20 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
   })
 
   // 添加最后的文本片段
-  if (currentIndex < displayTextRange[1]) {
+  if (currentIndex < adjustedTextRange[1]) {
     result.push({
-      indices: [currentIndex, displayTextRange[1]] as [number, number],
+      indices: [currentIndex, adjustedTextRange[1]] as [number, number],
       type: 'text',
     })
   }
 
+  // 移除句首 mention 后的文本
+  const adjustedText = text.slice(leadingMentionEndIndex)
+  const adjustedTextMap = Array.from(adjustedText)
+
   // 转换为最终的 Entity 类型
   return result.map((entity) => {
-    const entityText = textMap.slice(entity.indices[0], entity.indices[1]).join('')
+    const entityText = adjustedTextMap.slice(entity.indices[0], entity.indices[1]).join('')
 
     switch (entity.type) {
       case 'hashtag':

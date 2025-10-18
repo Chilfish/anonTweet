@@ -143,6 +143,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     return (entityTranslation.text === ' ')
       || (entityTranslation.type === 'url')
       || (entityTranslation.type === 'mention')
+      || (entityTranslation.type === 'media')
   }
 
   return (
