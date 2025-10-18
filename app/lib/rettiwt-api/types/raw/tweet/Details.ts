@@ -200,6 +200,7 @@ interface Legacy2 {
   conversation_id_str: string
   display_text_range: number[]
   entities: Entities2
+  extended_entities?: Entities2
   favorite_count: number
   favorited: boolean
   full_text: string
@@ -211,6 +212,7 @@ interface Legacy2 {
   retweeted: boolean
   user_id_str: string
   id_str: string
+  possibly_sensitive?: boolean
 }
 
 interface Entities2 extends EntitySet {
@@ -309,7 +311,7 @@ export interface VideoInfo {
 }
 
 export interface Variant {
-  content_type: string
+  content_type: 'video/mp4' | 'application/x-mpegURL'
   url: string
   bitrate?: number
 }

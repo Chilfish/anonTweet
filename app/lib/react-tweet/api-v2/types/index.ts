@@ -1,12 +1,14 @@
 import type { HashtagEntity, Indices, MediaEntity, SymbolEntity, UrlEntity, UserMentionEntity } from './entities'
+import type { TweetPhoto } from './photo'
 import type { QuotedTweet, Tweet } from './tweet'
+import type { TweetVideo } from './video'
 import type { ITweetDetailsResponse } from '~/lib/rettiwt-api/types/raw/tweet/Details'
 
 export type * from './edit'
 export type * from './entities'
 export type * from './media'
 export type * from './photo'
-// export type * from './tweet'
+export type * from './tweet'
 export type * from './user'
 export type * from './video'
 
@@ -87,6 +89,13 @@ export type EnrichedTweet = Omit<Tweet, 'entities' | 'quoted_tweet'> & {
   entities: Entity[]
   quoted_tweet?: EnrichedTweet
   card?: TwitterCard
+  photos?: TweetPhoto[]
+  video?: TweetVideo
+  possibly_sensitive?: boolean
+  isEdited: boolean
+  isStaleEdit: boolean
+  conversation_count: number
+  news_action_type: string
 }
 
 export type EnrichedQuotedTweet = Omit<QuotedTweet, 'entities'> & {
