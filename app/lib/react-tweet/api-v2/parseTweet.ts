@@ -216,7 +216,8 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
           display_url: media.display_url,
           expanded_url: media.expanded_url,
           url: media.url,
-          indices: [media.indices[0] - leadingMentionEndIndex, media.indices[1] - leadingMentionEndIndex] as [number, number],
+          // media 不占用文本范围，所以设置为 [0, 0]
+          indices: [0, 0],
           type: 'media',
         })
       }
