@@ -2,7 +2,7 @@ import type { AxiosRequestConfig } from 'axios'
 
 import type { RawAnalyticsGranularity, RawAnalyticsMetric } from '../enums/raw/Analytics'
 
-import qs from 'node:querystring'
+// import qs from 'node:querystring'
 
 /**
  * Collection of requests related to users.
@@ -240,9 +240,9 @@ export class UserRequests {
     return {
       method: 'post',
       url: 'https://x.com/i/api/1.1/friendships/create.json',
-      data: qs.stringify({
+      data: `qs.stringify({
         user_id: id,
-      }),
+      })`,
     }
   }
 

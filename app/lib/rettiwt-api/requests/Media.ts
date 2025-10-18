@@ -1,6 +1,6 @@
 import type { AxiosRequestConfig } from 'axios'
 
-import fs from 'node:fs'
+// import fs from 'node:fs'
 import FormData from 'form-data'
 
 /**
@@ -15,7 +15,7 @@ export class MediaRequests {
    */
   public static appendUpload(id: string, media: string | ArrayBuffer): AxiosRequestConfig {
     const data = new FormData()
-    data.append('media', typeof media === 'string' ? fs.createReadStream(media) : Buffer.from(media))
+    // data.append('media', typeof media === 'string' ? fs.createReadStream(media) : Buffer.from(media))
     return {
       method: 'post',
       headers: { referer: 'https://x.com' },

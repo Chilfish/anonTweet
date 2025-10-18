@@ -1,6 +1,6 @@
 import type { AxiosRequestConfig } from 'axios'
 
-import qs from 'node:querystring'
+// import qs from 'node:querystring'
 
 /**
  * Common parameter sets for DM requests
@@ -81,7 +81,7 @@ export class DMRequests {
     return {
       method: 'post',
       url: `https://x.com/i/api/1.1/dm/${conversationId}/delete.json`,
-      data: qs.stringify({
+      data: `qs.stringify({
         dm_secret_conversations_enabled: false,
         krs_registration_enabled: false,
         cards_platform: 'Web-12',
@@ -99,7 +99,7 @@ export class DMRequests {
         supports_reactions: true,
         supports_edit: true,
         include_conversation_info: true,
-      }),
+      })`,
     }
   }
 
