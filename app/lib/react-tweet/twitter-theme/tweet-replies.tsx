@@ -1,5 +1,5 @@
-import type { EnrichedTweet } from '../utils.js'
-import { formatNumber } from '../utils.js'
+import type { EnrichedTweet } from '../utils'
+import { formatNumber } from '../utils'
 import s from './tweet-replies.module.css'
 
 export function TweetReplies({ tweet }: { tweet: EnrichedTweet }) {

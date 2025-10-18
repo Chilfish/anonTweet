@@ -6,9 +6,9 @@
  * client component unless they're Server Actions.
  */
 export interface TwitterComponents {
-  TweetNotFound?: typeof import('./tweet-not-found.js').TweetNotFound
-  AvatarImg?: typeof import('./avatar-img.js').AvatarImg
-  MediaImg?: typeof import('./media-img.js').MediaImg
+  TweetNotFound?: typeof import('./tweet-not-found').TweetNotFound
+  AvatarImg?: typeof import('./avatar-img').AvatarImg
+  MediaImg?: typeof import('./media-img').MediaImg
 }
 
 /**

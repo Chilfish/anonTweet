@@ -1,6 +1,6 @@
-import type { EnrichedTweet } from '../utils.js'
-import { cn } from '~/lib/utils.js'
-import { formatNumber } from '../utils.js'
+import type { EnrichedTweet } from '../utils'
+import { cn } from '~/lib/utils'
+import { formatNumber } from '../utils'
 import s from './tweet-actions.module.css'
 
 interface TweetActionsProps {

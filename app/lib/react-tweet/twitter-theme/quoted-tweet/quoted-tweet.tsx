@@ -1,8 +1,8 @@
-import type { EnrichedQuotedTweet } from '../../utils.js'
-import { TweetMedia } from '../tweet-media.js'
-import { QuotedTweetBody } from './quoted-tweet-body.js'
-import { QuotedTweetContainer } from './quoted-tweet-container.js'
-import { QuotedTweetHeader } from './quoted-tweet-header.js'
+import type { EnrichedQuotedTweet } from '../../utils'
+import { TweetMedia } from '../tweet-media'
+import { QuotedTweetBody } from './quoted-tweet-body'
+import { QuotedTweetContainer } from './quoted-tweet-container'
+import { QuotedTweetHeader } from './quoted-tweet-header'
 
 interface Props { tweet: EnrichedQuotedTweet }
 

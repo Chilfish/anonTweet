@@ -1,14 +1,10 @@
-import type { MediaDetails } from '../api/index.js'
-import type { EnrichedQuotedTweet, EnrichedTweet } from '../utils.js'
-import type { TwitterComponents } from './types.js'
+import type { EnrichedQuotedTweet, EnrichedTweet, MediaDetails } from '../api-v2'
+import type { TwitterComponents } from './types'
 import clsx from 'clsx'
 import { Fragment } from 'react'
-import {
-
-  getMediaUrl,
-} from '../utils.js'
-import { MediaImg } from './media-img.js'
-import { TweetMediaVideo } from './tweet-media-video.js'
+import { getMediaUrl } from '../utils'
+import { MediaImg } from './media-img'
+import { TweetMediaVideo } from './tweet-media-video'
 import s from './tweet-media.module.css'
 
 function getSkeletonStyle(media: MediaDetails, itemCount: number) {
@@ -67,7 +63,7 @@ export function TweetMedia({ tweet, components, quoted, showCoverOnly }: Props) 
                       style={getSkeletonStyle(media, length)}
                     />
                     <Img
-                      src={getMediaUrl(media, 'small')}
+                      src={getMediaUrl(media, 'medium')}
                       alt={media.ext_alt_text || 'Image'}
                       className={s.image}
                       draggable
@@ -75,12 +71,19 @@ export function TweetMedia({ tweet, components, quoted, showCoverOnly }: Props) 
                   </a>
                 )
               : (
-                  <div key={media.media_url_https} className={s.mediaContainer}>
+                  <div
+                    key={media.media_url_https}
+                    className={s.mediaContainer}
+                  >
                     <div
                       className={s.skeleton}
                       style={getSkeletonStyle(media, length)}
                     />
-                    <TweetMediaVideo tweet={tweet} media={media} showCoverOnly={showCoverOnly} />
+                    <TweetMediaVideo
+                      tweet={tweet}
+                      media={media}
+                      showCoverOnly={showCoverOnly}
+                    />
                   </div>
                 )}
           </Fragment>

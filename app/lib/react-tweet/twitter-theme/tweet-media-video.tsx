@@ -1,13 +1,11 @@
-import type { MediaAnimatedGif, MediaVideo } from '../api/index.js'
-import type { EnrichedQuotedTweet, EnrichedTweet } from '../utils.js'
+import type { EnrichedQuotedTweet, EnrichedTweet, MediaAnimatedGif, MediaVideo } from '../api-v2'
 import clsx from 'clsx'
 import { useState } from 'react'
 import {
-
   getMediaUrl,
   getMp4Video,
-} from '../utils.js'
-import { MediaImg } from './media-img.js'
+} from '../utils'
+import { MediaImg } from './media-img'
 import s from './tweet-media-video.module.css'
 import mediaStyles from './tweet-media.module.css'
 

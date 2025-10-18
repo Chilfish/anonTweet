@@ -1,10 +1,10 @@
-import type { TweetUser } from '../api/index.js'
+import type { TweetUser } from '../api/index'
 import clsx from 'clsx'
 import {
   Verified,
   VerifiedBusiness,
   VerifiedGovernment,
-} from './icons/index.js'
+} from './icons/index'
 import s from './verified-badge.module.css'
 
 interface Props {

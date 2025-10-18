@@ -1,4 +1,4 @@
-import type { EnrichedQuotedTweet } from '../../utils.js'
+import type { EnrichedQuotedTweet } from '../../utils'
 import s from './quoted-tweet-body.module.css'
 
 interface Props { tweet: EnrichedQuotedTweet }

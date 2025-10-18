@@ -1,5 +1,5 @@
-import type { EnrichedTweet } from '../utils.js'
-import { formatDate } from '../date-utils.js'
+import type { EnrichedTweet } from '~/lib/react-tweet'
+import { formatDate } from '../date-utils'
 import s from './tweet-info-created-at.module.css'
 
 export function TweetInfoCreatedAt({ tweet }: { tweet: EnrichedTweet }) {

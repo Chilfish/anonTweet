@@ -1,4 +1,4 @@
-import { TweetContainer } from './tweet-container.js'
+import { TweetContainer } from './tweet-container'
 import styles from './tweet-not-found.module.css'
 
 interface Props {

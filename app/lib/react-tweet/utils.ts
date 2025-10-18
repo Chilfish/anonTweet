@@ -1,18 +1,6 @@
-import type {
-  HashtagEntity,
-  Indices,
-  MediaAnimatedGif,
-  MediaDetails,
-  MediaEntity,
-  MediaVideo,
-  QuotedTweet,
-  SymbolEntity,
-  Tweet,
-  TweetBase,
-  UrlEntity,
-  UserMentionEntity,
-} from './api/index.js'
-import { proxyMedia } from '../utils.js'
+import type { HashtagEntity, Indices, MediaAnimatedGif, MediaDetails, MediaEntity, MediaVideo, SymbolEntity, UrlEntity, UserMentionEntity } from './api-v2'
+import type { QuotedTweet, Tweet, TweetBase } from './api-v2/types/tweet'
+import { proxyMedia } from '../utils'
 
 export interface TweetCoreProps {
   id: string

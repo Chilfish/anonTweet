@@ -43,4 +43,9 @@ export default defineConfig({
     __GIT_HASH__: JSON.stringify(gitInfo.hash),
     __GIT_DATE__: JSON.stringify(gitInfo.date),
   },
+  build: {
+    rollupOptions: {
+      external: ['node:https', 'node:http', 'node:fs', 'node:path'],
+    },
+  },
 })

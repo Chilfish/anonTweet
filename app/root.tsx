@@ -105,24 +105,33 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 
   return (
     <Layout>
-      <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4">
-        <div className="text-center max-w-md">
-          <AlertTriangle className="mx-auto h-16 w-16 text-destructive mb-4" />
-          <h1 className="text-3xl font-bold text-destructive mb-2">
-            {message}
-          </h1>
-          <p className="text-muted-foreground mb-6">{details}</p>
-          {stack && (
-            <pre className="w-full p-4 overflow-x-auto bg-muted text-muted-foreground rounded text-left text-sm">
-              <code>{stack}</code>
-            </pre>
-          )}
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 max-w-3xl mx-auto">
+        <AlertTriangle className="mx-auto h-16 w-16 text-destructive mb-4" />
+        <h1 className="text-3xl font-bold text-destructive mb-2">
+          {message}
+        </h1>
+        <p className="text-muted-foreground mb-6">{details}</p>
+        {stack && (
+          <pre className="w-full p-4 overflow-x-auto bg-muted text-muted-foreground rounded text-left text-sm">
+            <code>{stack}</code>
+          </pre>
+        )}
+        <div
+          className="mt-8 flex items-center gap-4"
+        >
           <Button
-            className="mt-8"
             variant="link"
             asChild
           >
-            <a href="/">Go back to Home</a>
+            <a href="/">返回首页</a>
+          </Button>
+
+          <Button
+            onClick={() => {
+              window.location.reload()
+            }}
+          >
+            刷新重试
           </Button>
         </div>
       </div>

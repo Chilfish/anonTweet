@@ -1,4 +1,4 @@
-import type { EnrichedTweet } from '../utils.js'
+import type { EnrichedTweet } from '../utils'
 import { useEffect, useState } from 'react'
 import s from './tweet-actions.module.css'
 

@@ -1,11 +1,11 @@
-import type { TweetProps } from './swr.js'
+import type { TweetProps } from './swr'
 import { Suspense } from 'react'
-import { getTweet } from './api/index.js'
+import { fetchTweet } from './api-v2/get-tweet'
 import {
   EmbeddedTweet,
   TweetNotFound,
   TweetSkeleton,
-} from './twitter-theme/components.js'
+} from './twitter-theme/components'
 
 // This is not ideal because we don't use the `apiUrl` prop here and `id` is required. But as the
 // type is shared with the SWR version when the Tweet component is imported, we need to have a type
@@ -17,12 +17,11 @@ type TweetContentProps = Omit<TweetProps, 'fallback'>
 async function TweetContent({
   id,
   components,
-  fetchOptions,
   onError,
 }: TweetContentProps) {
   let error
   const tweet = id
-    ? await getTweet(id, fetchOptions).catch((err) => {
+    ? await fetchTweet(id).catch((err) => {
         if (onError) {
           error = onError(err)
         }

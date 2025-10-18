@@ -1,4 +1,4 @@
-import type { EnrichedTweet, Entity } from '~/lib/react-tweet/utils'
+import type { EnrichedTweet, Entity } from '~/lib/react-tweet'
 import { Languages, LanguagesIcon, Save, Trash2, X } from 'lucide-react'
 import React, { useRef, useState } from 'react'
 import { useTranslationStore } from '~/lib/stores/translation'
@@ -143,6 +143,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     return (entityTranslation.text === ' ')
       || (entityTranslation.type === 'url')
       || (entityTranslation.type === 'mention')
+      || (entityTranslation.type === 'media')
   }
 
   return (

@@ -1,10 +1,10 @@
-import type { EnrichedTweet } from '../utils.js'
-import type { TwitterComponents } from './types.js'
-import { cn, proxyMedia } from '~/lib/utils.js'
-import { AvatarImg } from './avatar-img.js'
-import { TweetInfoCreatedAt } from './components.js'
+import type { TwitterComponents } from './types'
+import type { EnrichedTweet } from '~/lib/react-tweet'
+import { cn, proxyMedia } from '~/lib/utils'
+import { AvatarImg } from './avatar-img'
+import { TweetInfoCreatedAt } from './components'
 import s from './tweet-header.module.css'
-import { VerifiedBadge } from './verified-badge.js'
+import { VerifiedBadge } from './verified-badge'
 
 interface Props {
   tweet: EnrichedTweet
