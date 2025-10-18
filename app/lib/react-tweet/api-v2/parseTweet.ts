@@ -275,7 +275,202 @@ function getSymbolUrl(symbol: SymbolEntity) {
  * Maps raw Twitter card data to a clean TwitterCard interface
  */
 export function mapTwitterCard(cardData: any): TwitterCard | undefined {
-  if (!cardData || !cardData.name)
+  if (!cardData)
+    return undefined
+
+  // Handle the new card structure with rest_id and legacy
+  if (cardData.rest_id && cardData.legacy) {
+    const { rest_id, legacy } = cardData
+    const { binding_values, name, url, card_platform, user_refs_results } = legacy
+
+    const card: TwitterCard = {
+      rest_id,
+      legacy: {
+        binding_values,
+        card_platform,
+        name,
+        url,
+        user_refs_results,
+      },
+    }
+
+    // Process binding_values for easier access
+    if (binding_values && Array.isArray(binding_values)) {
+      const bindingMap = new Map()
+      binding_values.forEach((item) => {
+        bindingMap.set(item.key, item.value)
+      })
+
+      // Extract basic information
+      const title = bindingMap.get('title')?.string_value
+      const description = bindingMap.get('description')?.string_value
+      const domain = bindingMap.get('domain')?.string_value || bindingMap.get('vanity_url')?.string_value
+
+      if (title)
+        card.title = title
+      if (description)
+        card.description = description
+      if (domain)
+        card.domain = domain
+      if (name)
+        card.type = name as any
+      if (url)
+        card.url = url
+
+      // Handle images based on card type
+      if (name === 'summary_large_image') {
+        const images: TwitterCard['images'] = {}
+
+        // Map different image sizes
+        const imageKeys = [
+          { key: 'photo_image_full_size_small', size: 'small' },
+          { key: 'summary_photo_image_small', size: 'small' },
+          { key: 'photo_image_full_size', size: 'medium' },
+          { key: 'summary_photo_image', size: 'medium' },
+          { key: 'photo_image_full_size_large', size: 'large' },
+          { key: 'summary_photo_image_large', size: 'large' },
+          { key: 'photo_image_full_size_original', size: 'original' },
+          { key: 'summary_photo_image_original', size: 'original' },
+          { key: 'photo_image_full_size_x_large', size: 'x_large' },
+          { key: 'summary_photo_image_x_large', size: 'x_large' },
+        ]
+
+        imageKeys.forEach(({ key, size }) => {
+          const imageValue = bindingMap.get(key)?.image_value
+          if (imageValue) {
+            const imageSize = size === 'x_large' ? 'original' : size as keyof NonNullable<TwitterCard['images']>
+            if (!images[imageSize]) {
+              images[imageSize] = {
+                url: imageValue.url,
+                width: imageValue.width,
+                height: imageValue.height,
+              }
+            }
+          }
+        })
+
+        if (Object.keys(images).length > 0) {
+          card.images = images
+          // Set primary image to the largest available
+          card.image = images.original || images.large || images.medium || images.small
+        }
+      }
+      else if (name === 'summary') {
+        const images: TwitterCard['images'] = {}
+
+        // Handle regular summary card images
+        const thumbnailKeys = [
+          { key: 'thumbnail_image_small', size: 'small' },
+          { key: 'thumbnail_image', size: 'medium' },
+          { key: 'thumbnail_image_large', size: 'large' },
+          { key: 'thumbnail_image_original', size: 'original' },
+          { key: 'thumbnail_image_x_large', size: 'x_large' },
+        ]
+
+        thumbnailKeys.forEach(({ key, size }) => {
+          const imageValue = bindingMap.get(key)?.image_value
+          if (imageValue) {
+            const imageSize = size === 'x_large' ? 'original' : size as keyof NonNullable<TwitterCard['images']>
+            if (!images[imageSize]) {
+              images[imageSize] = {
+                url: imageValue.url,
+                width: imageValue.width,
+                height: imageValue.height,
+              }
+            }
+          }
+        })
+
+        if (Object.keys(images).length > 0) {
+          card.images = images
+          card.image = images.original || images.large || images.medium || images.small
+        }
+      }
+      else if (name === 'unified_card') {
+        // Handle unified_card type (YouTube, etc.)
+        const unifiedCardValue = bindingMap.get('unified_card')?.string_value
+        if (unifiedCardValue) {
+          try {
+            const unifiedData = JSON.parse(unifiedCardValue)
+
+            // Extract title and domain from unified card
+            if (unifiedData.component_objects?.details_1?.data?.title?.content) {
+              card.title = unifiedData.component_objects.details_1.data.title.content
+            }
+
+            if (unifiedData.component_objects?.details_1?.data?.subtitle?.content) {
+              card.domain = unifiedData.component_objects.details_1.data.subtitle.content
+            }
+
+            // Extract URL from destination
+            if (unifiedData.destination_objects?.browser_1?.data?.url_data?.url) {
+              card.url = unifiedData.destination_objects.browser_1.data.url_data.url
+            }
+
+            // Extract image from media entities
+            const mediaEntities = unifiedData.media_entities
+            if (mediaEntities) {
+              const firstMediaKey = Object.keys(mediaEntities)[0]
+              const media = mediaEntities[firstMediaKey]
+              if (media?.media_url_https && media.original_info) {
+                card.image = {
+                  url: media.media_url_https,
+                  width: media.original_info.width,
+                  height: media.original_info.height,
+                }
+
+                // Also create images object with different sizes if available
+                if (media.sizes) {
+                  const images: TwitterCard['images'] = {}
+
+                  if (media.sizes.small) {
+                    images.small = {
+                      url: media.media_url_https,
+                      width: media.sizes.small.w,
+                      height: media.sizes.small.h,
+                    }
+                  }
+
+                  if (media.sizes.medium) {
+                    images.medium = {
+                      url: media.media_url_https,
+                      width: media.sizes.medium.w,
+                      height: media.sizes.medium.h,
+                    }
+                  }
+
+                  if (media.sizes.large) {
+                    images.large = {
+                      url: media.media_url_https,
+                      width: media.sizes.large.w,
+                      height: media.sizes.large.h,
+                    }
+                  }
+
+                  // Use original_info for original size
+                  images.original = {
+                    url: media.media_url_https,
+                    width: media.original_info.width,
+                    height: media.original_info.height,
+                  }
+
+                  card.images = images
+                }
+              }
+            }
+          }
+          catch (e) {
+            // Ignore JSON parse errors
+          }
+        }
+      }
+    }
+
+    return card
+  }
+
+  // Fallback for old card structure
+  if (!cardData.name)
     return undefined
 
   const { name, url, binding_values } = cardData
@@ -287,7 +482,7 @@ export function mapTwitterCard(cardData: any): TwitterCard | undefined {
   if (!binding_values)
     return card
 
-  // Extract basic information
+  // Extract basic information (old structure)
   if (binding_values.title?.string_value) {
     card.title = binding_values.title.string_value
   }
@@ -335,72 +530,6 @@ export function mapTwitterCard(cardData: any): TwitterCard | undefined {
     }
     catch (e) {
       // Ignore JSON parse errors
-    }
-  }
-
-  // Handle summary and summary_large_image card images
-  if (name === 'summary' || name === 'summary_large_image') {
-    const images: TwitterCard['images'] = {}
-
-    // For summary_large_image, we need to handle different image field names
-    if (name === 'summary_large_image') {
-      // Map summary_large_image specific fields
-      if (binding_values.photo_image_full_size_small?.image_value || binding_values.summary_photo_image_small?.image_value) {
-        const img = binding_values.photo_image_full_size_small?.image_value || binding_values.summary_photo_image_small?.image_value
-        images.small = { url: img.url, width: img.width, height: img.height }
-      }
-
-      if (binding_values.photo_image_full_size?.image_value || binding_values.summary_photo_image?.image_value) {
-        const img = binding_values.photo_image_full_size?.image_value || binding_values.summary_photo_image?.image_value
-        images.medium = { url: img.url, width: img.width, height: img.height }
-      }
-
-      if (binding_values.photo_image_full_size_large?.image_value || binding_values.summary_photo_image_large?.image_value) {
-        const img = binding_values.photo_image_full_size_large?.image_value || binding_values.summary_photo_image_large?.image_value
-        images.large = { url: img.url, width: img.width, height: img.height }
-      }
-
-      if (binding_values.photo_image_full_size_original?.image_value || binding_values.summary_photo_image_original?.image_value) {
-        const img = binding_values.photo_image_full_size_original?.image_value || binding_values.summary_photo_image_original?.image_value
-        images.original = { url: img.url, width: img.width, height: img.height }
-      }
-
-      // Also check for x_large variants
-      if (binding_values.photo_image_full_size_x_large?.image_value || binding_values.summary_photo_image_x_large?.image_value) {
-        const img = binding_values.photo_image_full_size_x_large?.image_value || binding_values.summary_photo_image_x_large?.image_value
-        // Use x_large as original if original is not available
-        if (!images.original) {
-          images.original = { url: img.url, width: img.width, height: img.height }
-        }
-      }
-    }
-    else {
-      // Handle regular summary card images
-      if (binding_values.thumbnail_image_small?.image_value) {
-        const img = binding_values.thumbnail_image_small.image_value
-        images.small = { url: img.url, width: img.width, height: img.height }
-      }
-
-      if (binding_values.thumbnail_image?.image_value) {
-        const img = binding_values.thumbnail_image.image_value
-        images.medium = { url: img.url, width: img.width, height: img.height }
-      }
-
-      if (binding_values.thumbnail_image_large?.image_value) {
-        const img = binding_values.thumbnail_image_large.image_value
-        images.large = { url: img.url, width: img.width, height: img.height }
-      }
-
-      if (binding_values.thumbnail_image_original?.image_value) {
-        const img = binding_values.thumbnail_image_original.image_value
-        images.original = { url: img.url, width: img.width, height: img.height }
-      }
-    }
-
-    if (Object.keys(images).length > 0) {
-      card.images = images
-      // Set primary image to the largest available
-      card.image = images.original || images.large || images.medium || images.small
     }
   }
 

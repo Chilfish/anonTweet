@@ -63,7 +63,7 @@ export function TweetMedia({ tweet, components, quoted, showCoverOnly }: Props) 
                       style={getSkeletonStyle(media, length)}
                     />
                     <Img
-                      src={getMediaUrl(media, 'small')}
+                      src={getMediaUrl(media, 'medium')}
                       alt={media.ext_alt_text || 'Image'}
                       className={s.image}
                       draggable

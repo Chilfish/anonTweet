@@ -77,7 +77,7 @@ export function TweetLinkCard({ tweet, className }: TweetLinkCardProps) {
   // Image component with error handling
   const CardImage = ({ isLarge = false }: { isLarge?: boolean }) => (
     <div className={cn(
-      'relative overflow-hidden bg-muted/50 rounded-t-md',
+      'relative overflow-hidden bg-muted/50 rounded',
       isLarge ? 'aspect-[16/9]' : 'w-20 h-20 flex-shrink-0',
     )}
     >

@@ -45,10 +45,16 @@ export class TwitterErrorDetails implements ITwitterErrorDetails {
    * @param details - The details of the error.
    */
   public constructor(details: IRawErrorDetails) {
-    this.code = details.code
-    this.message = details.message
-    this.name = details.name
-    this.type = details.kind
+    if (details) {
+      this.code = details.code
+      this.message = details.message
+      this.name = details.name
+      this.type = details.kind
+    }
+    else {
+      this.code = 0
+      this.message = 'Unknown error'
+    }
   }
 
   /**
