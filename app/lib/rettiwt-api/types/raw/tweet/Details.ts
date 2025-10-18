@@ -213,6 +213,7 @@ interface Legacy2 {
   user_id_str: string
   id_str: string
   possibly_sensitive?: boolean
+  in_reply_to_status_id_str?: string
 }
 
 interface Entities2 extends EntitySet {

@@ -11,7 +11,6 @@ import type {
   TweetVideo,
   TwitterCard,
 } from './types'
-import type { TweetParent } from './types/tweet'
 
 /**
  * Enriches a tweet with additional data used to more easily use the tweet in a UI.
@@ -59,6 +58,7 @@ export function enrichTweet(tweet: RawTweet): EnrichedTweet {
     in_reply_to_url: tweet.in_reply_to_screen_name
       ? inReplyToUrl
       : undefined,
+    in_reply_to_status_id_str: tweet.legacy.in_reply_to_status_id_str,
     entities: getEntities(tweet, text),
     quoted_tweet: tweet.quoted_status_result
       ? enrichTweet(tweet.quoted_status_result.result)
@@ -67,7 +67,7 @@ export function enrichTweet(tweet: RawTweet): EnrichedTweet {
     mediaDetails: mapMediaDetails(tweet),
     photos: mapPhotoEntities(tweet),
     video: mapVideoEntities(tweet),
-    parent: parentTweet(tweet),
+    // parent: parentTweet(tweet),
   }
 }
 
@@ -101,47 +101,67 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
   // 收集所有实体
   const allEntities: EntityWithType[] = []
 
+  // 检查文本开头是否有 mention，如果有则记录需要移除的范围
+  const leadingMentionMatch = text.match(/^(@\w{1,25}\s*)+/)
+  const leadingMentionEndIndex = leadingMentionMatch ? leadingMentionMatch[0].length : 0
+
   // 处理 hashtags
   if (entities.hashtags) {
     entities.hashtags.forEach((hashtag) => {
-      allEntities.push({
-        ...hashtag,
-        type: 'hashtag',
-      })
+      // 跳过在句首 mention 范围内的 hashtag
+      if (hashtag.indices[0] >= leadingMentionEndIndex) {
+        allEntities.push({
+          ...hashtag,
+          type: 'hashtag',
+          // 调整索引位置
+          indices: [hashtag.indices[0] - leadingMentionEndIndex, hashtag.indices[1] - leadingMentionEndIndex] as [number, number],
+        })
+      }
     })
   }
 
   // 处理 note_tweet 中的 hashtags
   if (noteEntities?.hashtags) {
     noteEntities.hashtags.forEach((hashtag) => {
-      allEntities.push({
-        text: hashtag.text,
-        indices: hashtag.indices,
-        type: 'hashtag',
-      })
+      // 跳过在句首 mention 范围内的 hashtag
+      if (hashtag.indices[0] >= leadingMentionEndIndex) {
+        allEntities.push({
+          text: hashtag.text,
+          indices: [hashtag.indices[0] - leadingMentionEndIndex, hashtag.indices[1] - leadingMentionEndIndex] as [number, number],
+          type: 'hashtag',
+        })
+      }
     })
   }
 
   // 处理 user_mentions
   if (entities.user_mentions) {
     entities.user_mentions.forEach((mention) => {
-      allEntities.push({
-        ...mention,
-        type: 'mention',
-      })
+      // 跳过在句首 mention 范围内的 mention
+      if (mention.indices[0] >= leadingMentionEndIndex) {
+        allEntities.push({
+          ...mention,
+          type: 'mention',
+          // 调整索引位置
+          indices: [mention.indices[0] - leadingMentionEndIndex, mention.indices[1] - leadingMentionEndIndex] as [number, number],
+        })
+      }
     })
   }
 
   // 处理 note_tweet 中的 user_mentions
   if (noteEntities?.user_mentions) {
     noteEntities.user_mentions.forEach((mention) => {
-      allEntities.push({
-        id_str: mention.id_str,
-        name: mention.name,
-        screen_name: mention.screen_name,
-        indices: mention.indices,
-        type: 'mention',
-      })
+      // 跳过在句首 mention 范围内的 mention
+      if (mention.indices[0] >= leadingMentionEndIndex) {
+        allEntities.push({
+          id_str: mention.id_str,
+          name: mention.name,
+          screen_name: mention.screen_name,
+          indices: [mention.indices[0] - leadingMentionEndIndex, mention.indices[1] - leadingMentionEndIndex] as [number, number],
+          type: 'mention',
+        })
+      }
     })
   }
 
@@ -599,10 +619,6 @@ function mapVideoEntities(tweet: RawTweet): TweetVideo | undefined {
     },
     viewCount: 0,
   }
-}
-
-function parentTweet(tweet: RawTweet): TweetParent | undefined {
-  return undefined
 }
 
 function mapMediaDetails(tweet: RawTweet): MediaDetails[] | undefined {

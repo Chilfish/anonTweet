@@ -8,7 +8,7 @@ export type * from './edit'
 export type * from './entities'
 export type * from './media'
 export type * from './photo'
-export type * from './tweet'
+// export type * from './tweet'
 export type * from './user'
 export type * from './video'
 

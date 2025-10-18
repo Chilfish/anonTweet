@@ -1,5 +1,5 @@
-import type { EnrichedTweet } from '../utils'
 import type { TwitterComponents } from './types'
+import type { EnrichedTweet } from '~/lib/react-tweet'
 import { cn, proxyMedia } from '~/lib/utils'
 import { AvatarImg } from './avatar-img'
 import { TweetInfoCreatedAt } from './components'

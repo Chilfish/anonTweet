@@ -60,7 +60,7 @@ export interface Tweet extends TweetBase {
   in_reply_to_screen_name?: string
   in_reply_to_status_id_str?: string
   in_reply_to_user_id_str?: string
-  parent?: TweetParent
+  // parent?: TweetParent
   possibly_sensitive?: boolean
   card?: any
 }
