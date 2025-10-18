@@ -126,7 +126,11 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
             <a href="/">返回首页</a>
           </Button>
 
-          <Button>
+          <Button
+            onClick={() => {
+              window.location.reload()
+            }}
+          >
             刷新重试
           </Button>
         </div>

@@ -257,10 +257,19 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
 
   // 移除句首 mention 后调整文本范围
   const displayTextRange = tweet.legacy.display_text_range as [number, number]
-  const adjustedTextRange: [number, number] = [
-    Math.max(0, displayTextRange[0] - leadingMentionEndIndex),
-    displayTextRange[1] - leadingMentionEndIndex,
-  ]
+
+  // 如果使用的是 note_tweet 的文本，应该使用完整文本长度
+  const isUsingNoteText = tweet.note_tweet?.note_tweet_results?.result?.text === text
+
+  const adjustedTextRange: [number, number] = isUsingNoteText
+    ? [
+        Math.max(0, 0 - leadingMentionEndIndex), // note_tweet 从头开始
+        text.length - leadingMentionEndIndex, // 使用完整文本长度
+      ]
+    : [
+        Math.max(0, displayTextRange[0] - leadingMentionEndIndex),
+        displayTextRange[1] - leadingMentionEndIndex,
+      ]
 
   let currentIndex = adjustedTextRange[0]
 
@@ -309,7 +318,7 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
       case 'media':
         return Object.assign(entity, {
           href: (entity as any).expanded_url,
-          text: (entity as any).display_url,
+          text: (entity as any).expanded_url,
         })
       case 'symbol':
         return Object.assign(entity, {
@@ -444,6 +453,40 @@ export function mapTwitterCard(cardData: any): TwitterCard | undefined {
           card.images = images
           card.image = images.original || images.large || images.medium || images.small
         }
+      }
+      else if (name === 'player') {
+        const images: TwitterCard['images'] = {}
+
+        // Handle player card images
+        const playerImageKeys = [
+          { key: 'player_image_small', size: 'small' },
+          { key: 'player_image', size: 'medium' },
+          { key: 'player_image_large', size: 'large' },
+          { key: 'player_image_original', size: 'original' },
+          { key: 'player_image_x_large', size: 'x_large' },
+        ]
+
+        playerImageKeys.forEach(({ key, size }) => {
+          const imageValue = bindingMap.get(key)?.image_value
+          if (imageValue) {
+            const imageSize = size === 'x_large' ? 'original' : size as keyof NonNullable<TwitterCard['images']>
+            if (!images[imageSize]) {
+              images[imageSize] = {
+                url: imageValue.url,
+                width: imageValue.width,
+                height: imageValue.height,
+              }
+            }
+          }
+        })
+
+        if (Object.keys(images).length > 0) {
+          card.images = images
+          card.image = images.original || images.large || images.medium || images.small
+        }
+
+        // Convert player type to summary_large_image for consistent rendering
+        card.type = 'summary_large_image'
       }
       else if (name === 'unified_card') {
         // Handle unified_card type (YouTube, etc.)
