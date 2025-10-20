@@ -32,11 +32,10 @@ export function TweetHeader({ tweet, components, className, createdAtInline }: P
             'z-10',
           )}
         >
-          <Img
+          <img
             src={proxyMedia(user.profile_image_url_https)}
             alt={user.name}
-            width={48}
-            height={48}
+            className={s.avatarImg}
           />
         </div>
         <div className={s.avatarOverflow}>

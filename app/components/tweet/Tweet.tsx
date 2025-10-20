@@ -45,7 +45,7 @@ function ThreadTweet({
         <TranslationEditor originalTweet={tweet} />
       </div>
       <div
-        className="pl-14!"
+        className="sm:pl-14! pl-12!"
       >
         <TweetBody
           tweet={tweet}
@@ -168,7 +168,7 @@ export function MyTweet({
             style={{
               height: `calc(100% - ${mainTweetheight}px)`,
             }}
-            className="absolute z-0 left-5.5 top-4 bottom-0 w-[2px] bg-[#cfd9de] dark:bg-[#333639]"
+            className="absolute z-0 left-[1.1rem] sm:left-[1.3rem] top-4 bottom-0 w-[2px] bg-[#cfd9de] dark:bg-[#333639]"
           >
           </div>
         </>
@@ -183,7 +183,7 @@ export function MyTweet({
         </div>
 
         <div
-          className={cn({ 'pl-14!': hasThread })}
+          className={cn({ 'sm:pl-14! pl-12!': hasThread })}
         >
           <TweetBody
             tweet={tweet}

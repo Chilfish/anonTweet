@@ -105,7 +105,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 
   return (
     <Layout>
-      <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 max-w-3xl mx-auto">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 sm:max-w-3xl max-w-full mx-auto text-center">
         <AlertTriangle className="mx-auto h-16 w-16 text-destructive mb-4" />
         <h1 className="text-3xl font-bold text-destructive mb-2">
           {message}

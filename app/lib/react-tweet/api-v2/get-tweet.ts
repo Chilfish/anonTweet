@@ -3,8 +3,12 @@ import type { ITweetDetailsResponse } from '~/lib/rettiwt-api/types/raw/tweet/De
 import { FetcherService, ResourceType } from '~/lib/rettiwt-api'
 import { enrichTweet } from './parseTweet'
 
+const TWEET_KEY = process.env.TWEET_KEY || ''
+
+console.log('Using TWEET_KEY:', TWEET_KEY ? 'Yes' : 'No')
+
 // @ts-expect-error: The FetcherService constructor does not must require an API key
-const fetcher = new FetcherService({})
+const fetcher = new FetcherService({ apiKey: TWEET_KEY })
 
 export async function fetchTweet(id: string): Promise<RawTweet> {
   return await fetcher

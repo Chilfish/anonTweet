@@ -108,3 +108,9 @@
     --tweet-verified-blue-color: #1d9bf0;
   }
 }
+
+@media (max-width: 480px) {
+  .react-tweet-theme {
+    --tweet-body-font-size: 14px;
+  }
+}

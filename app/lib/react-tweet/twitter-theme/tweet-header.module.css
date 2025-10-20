@@ -11,9 +11,10 @@
 
 .avatar {
   position: relative;
-  height: 48px;
-  width: 48px;
+  height: 40px;
+  width: 40px;
 }
+
 .avatarOverflow {
   height: 100%;
   width: 100%;
@@ -33,6 +34,14 @@
 }
 .avatarShadow:hover {
   background-color: rgba(26, 26, 26, 0.15);
+}
+
+.avatarImg {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  user-select: none;
+  pointer-events: none;
 }
 
 .author {
@@ -110,4 +119,11 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
+}
+
+@media (width >= 40rem) {
+  .avatar {
+    height: 48px;
+    width: 48px;
+  }
 }

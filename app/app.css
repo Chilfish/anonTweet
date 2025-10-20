@@ -229,4 +229,10 @@
     white-space: pre-wrap;
     line-height: 1.5rem;
   }
+
+  @media (width >= 40rem) {
+    body {
+      font-size: 14px;
+    }
+  }
 }
