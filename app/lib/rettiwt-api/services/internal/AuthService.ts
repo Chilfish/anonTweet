@@ -104,7 +104,7 @@ export class AuthService {
       guest_token: string
     }>('https://api.twitter.com/1.1/guest/activate.json', undefined, {
         headers: cred.toHeader(),
-        httpsAgent: this._config.httpsAgent,
+        // httpsAgent: this._config.httpsAgent,
       })
       .then((res) => {
         cred.guestToken = res.data.guest_token

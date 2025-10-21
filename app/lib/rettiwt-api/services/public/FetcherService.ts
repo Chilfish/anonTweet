@@ -224,8 +224,8 @@ export class FetcherService {
       ...cred.toHeader(),
       ...this.config.headers,
     }
-    config.httpAgent = this.config.httpsAgent
-    config.httpsAgent = this.config.httpsAgent
+    // config.httpAgent = this.config.httpsAgent
+    // config.httpsAgent = this.config.httpsAgent
     config.timeout = this._timeout
 
     // Using retries for error 404

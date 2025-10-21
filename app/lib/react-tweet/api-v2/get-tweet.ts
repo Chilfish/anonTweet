@@ -3,7 +3,7 @@ import type { ITweetDetailsResponse } from '~/lib/rettiwt-api/types/raw/tweet/De
 import { FetcherService, ResourceType } from '~/lib/rettiwt-api'
 import { enrichTweet } from './parseTweet'
 
-const TWEET_KEY = process.env.TWEET_KEY || ''
+const TWEET_KEY = typeof process !== 'undefined' ? process.env.TWEET_KEY || '' : ''
 
 console.log('Using TWEET_KEY:', TWEET_KEY ? 'Yes' : 'No')
 

@@ -253,8 +253,14 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
     })
   }
 
-  // 按索引排序
-  allEntities.sort((a, b) => a.indices[0] - b.indices[0])
+  // 按索引排序，但将 media 类型的实体排到最后（因为它们不占用文本位置）
+  allEntities.sort((a, b) => {
+    if (a.type === 'media' && b.type !== 'media')
+      return 1
+    if (a.type !== 'media' && b.type === 'media')
+      return -1
+    return a.indices[0] - b.indices[0]
+  })
 
   // 移除句首 mention 后调整文本范围
   const displayTextRange = tweet.legacy.display_text_range as [number, number]
@@ -274,7 +280,10 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
 
   let currentIndex = adjustedTextRange[0]
 
-  allEntities.forEach((entity) => {
+  // 只处理非 media 类型的实体来构建文本片段
+  const textEntities = allEntities.filter(entity => entity.type !== 'media')
+
+  textEntities.forEach((entity) => {
     // 添加实体前的文本
     if (currentIndex < entity.indices[0]) {
       result.push({
@@ -295,6 +304,10 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
       type: 'text',
     })
   }
+
+  // 添加 media 实体到结果中
+  const mediaEntities = allEntities.filter(entity => entity.type === 'media')
+  result.push(...mediaEntities)
 
   // 移除句首 mention 后的文本
   const adjustedText = text.slice(leadingMentionEndIndex)
