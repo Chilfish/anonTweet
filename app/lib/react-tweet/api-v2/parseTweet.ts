@@ -15,7 +15,8 @@ import type {
 /**
  * Enriches a tweet with additional data used to more easily use the tweet in a UI.
  */
-export function enrichTweet(tweet: RawTweet): EnrichedTweet {
+export function enrichTweet(sourceData: RawTweet): EnrichedTweet {
+  const tweet = ('tweet' in sourceData ? sourceData.tweet : sourceData) as RawTweet
   const userBase = transformUserResponse(tweet)
   const userScreenName = userBase.screen_name
   const user = {
@@ -60,7 +61,7 @@ export function enrichTweet(tweet: RawTweet): EnrichedTweet {
       : undefined,
     in_reply_to_status_id_str: tweet.legacy.in_reply_to_status_id_str,
     entities: getEntities(tweet, text),
-    quoted_tweet: tweet.quoted_status_result
+    quoted_tweet: tweet.quoted_status_result?.result
       ? enrichTweet(tweet.quoted_status_result.result)
       : undefined,
     card: mapTwitterCard(tweet.card),
