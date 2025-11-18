@@ -59,26 +59,35 @@ export function SeparatorTemplateManager() {
                 <div className="flex items-center gap-2">{selectedTemplate?.name}</div>
               </SelectValue>
             </SelectTrigger>
-            <SelectContent className="max-w-[300px] p-2">
+            <SelectContent className="p-2">
               {allTemplates.map(template => (
-                <SelectItem className="group" key={template.id} value={template.id}>
-                  <div className="flex flex-col min-w-56 p-2">
-                    <div className="font-medium text-sm">{template.name}</div>
-                    <div className="text-xs mt-1 p-2 rounded border overflow-hidden max-w-[200px] truncate">
-                      <div dangerouslySetInnerHTML={{ __html: template.html }} />
+                <div
+                  key={template.id}
+                  className="justify-between items-center flex gap-4 mb-2 w-full"
+                >
+
+                  <SelectItem
+                    value={template.id}
+                  >
+                    <div className="flex flex-col p-2">
+                      <div className="font-medium text-sm">{template.name}</div>
+                      <div className="text-xs mt-1 p-2 rounded border overflow-hidden max-w-[200px] truncate">
+                        <div dangerouslySetInnerHTML={{ __html: template.html }} />
+                      </div>
                     </div>
-                  </div>
+                  </SelectItem>
+
                   {!template.id.startsWith('preset-') && (
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="icon"
                       onClick={() => handleDeleteTemplate(template.id)}
-                      className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity "
+                      className="ml-auto"
                     >
-                      <Trash2 className="h-3 w-3 text-red-500" />
+                      <Trash2 className="size-4 text-red-500" />
                     </Button>
                   )}
-                </SelectItem>
+                </div>
               ))}
             </SelectContent>
           </Select>
