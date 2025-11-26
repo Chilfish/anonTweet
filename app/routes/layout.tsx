@@ -1,7 +1,7 @@
 import type { Route } from './+types/layout'
 import { Link, Outlet } from 'react-router'
 import { AppLogo } from '~/components/app-logo'
-import { ColorSchemeToggle } from '~/components/color-scheme-toggle'
+import { SettingsPanel } from '~/components/SettingsPanel'
 import { UserNav } from '~/components/user-nav'
 import { requireAuth, requireUser } from '~/middlewares/auth-guard'
 
@@ -20,7 +20,7 @@ export default function AuthenticatedLayout(_: Route.ComponentProps) {
             <AppLogo />
           </Link>
           <div className="flex items-center gap-4">
-            <ColorSchemeToggle />
+            <SettingsPanel />
             <UserNav />
           </div>
         </div>

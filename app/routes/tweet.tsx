@@ -7,7 +7,7 @@ import { BackButton } from '~/components/BackButton'
 import { DownloadMedia } from '~/components/DownloadMedia'
 import { LayoutComponent } from '~/components/layout/Layout'
 import { SaveAsImageButton } from '~/components/saveAsImage'
-import { SettingsPanel } from '~/components/SettingsPanel'
+import { ToggleTransButton } from '~/components/ToggleTransButton'
 import { MyTweet } from '~/components/tweet/Tweet'
 import { getTweets } from '~/lib/getTweet'
 import { TweetNotFound, TweetSkeleton } from '~/lib/react-tweet'
@@ -115,8 +115,8 @@ export default function TweetPage({
     <LayoutComponent>
       <div className="flex items-center w-full gap-1 mb-6">
         <BackButton />
+        <ToggleTransButton />
         <SaveAsImageButton />
-        <SettingsPanel />
         <DownloadMedia />
       </div>
 

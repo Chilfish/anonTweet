@@ -13,9 +13,18 @@ import {
 import { Button } from './ui/button'
 
 const THEME_ICONS = {
-  light: <SunIcon className="size-4" />,
-  dark: <MoonIcon className="size-4" />,
-  system: <LaptopIcon className="size-4" />,
+  light: {
+    icon: <SunIcon className="size-4" />,
+    label: '浅色',
+  },
+  dark: {
+    icon: <MoonIcon className="size-4" />,
+    label: '深色',
+  },
+  system: {
+    icon: <LaptopIcon className="size-4" />,
+    label: '系统',
+  },
 } as const
 
 export function ColorSchemeToggle() {
@@ -26,10 +35,10 @@ export function ColorSchemeToggle() {
     switch (colorScheme) {
       case 'dark':
         return <MoonIcon className="size-4" />
-      case 'light':
-        return <SunIcon className="size-4" />
-      default:
+      case 'system':
         return <LaptopIcon className="size-4" />
+      default:
+        return <SunIcon className="size-4" />
     }
   }
 
@@ -48,8 +57,8 @@ export function ColorSchemeToggle() {
             aria-selected={colorScheme === value}
             className="capitalize"
           >
-            {THEME_ICONS[value]}
-            {value}
+            {THEME_ICONS[value].icon}
+            {THEME_ICONS[value].label}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
