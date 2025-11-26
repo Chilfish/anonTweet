@@ -1,35 +1,40 @@
 {
   "compilerOptions": {
-    "target": "esnext",
+    "target": "ES2022",
     "jsx": "react-jsx",
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
+
+    "baseUrl": ".",
     "rootDirs": [".", "./.react-router/types"],
-    "module": "ES2022",
-    "moduleResolution": "bundler",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "paths": {
       "~/*": ["./app/*"]
     },
     "resolveJsonModule": true,
-    "types": ["node", "vite/client"],
-    "strict": true,
+    "types": ["vite/client"],
 
-    "noImplicitAny": false,
+    "allowJs": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
     "noEmit": true,
-    "noEmitOnError": true,
-    "removeComments": false,
-    "sourceMap": true,
     "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true
   },
   "include": [
-    "**/*",
-    "**/.server/**/*",
-    "**/.client/**/*",
+    "worker-configuration.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/.server/**/*.ts",
+    "**/.server/**/*.tsx",
+    "**/.client/**/*.ts",
+    "**/.client/**/*.tsx",
     ".react-router/types/**/*"
   ],
   "exclude": [
-    "node_modules",
     "**/*.spec.ts",
     "**/*.spec.tsx",
     "**/rettiwt-api/**"

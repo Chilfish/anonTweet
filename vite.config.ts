@@ -32,12 +32,13 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api': {
+      '/api/tweet': {
         target: 'https://cdn.syndication.twimg.com',
         changeOrigin: true,
         rewrite: path => path.replace(/^\/api/, ''),
       },
     },
+    port: 9080,
   },
   define: {
     __GIT_HASH__: JSON.stringify(gitInfo.hash),

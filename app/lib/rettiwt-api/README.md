@@ -22,56 +22,54 @@ For using the package in your own project, you can install it as a [dependency](
 Rettiwt-API can be used with or without logging in to Twitter. As such, the two authentication strategies are:
 
 - 'Guest' authentication (without logging in) grants access to the following resources/actions:
-
-    - Tweet Details
-    - User Details (by username)
-    - User Timeline
+  - Tweet Details
+  - User Details (by username)
+  - User Timeline
 
 - 'User' authentication (logging in) grants access to the following resources/actions:
-
-    - Direct Message Inbox
-    - Direct Message Conversations
-    - Direct Message Delete Conversation
-    - List Add Member
-    - List Details
-    - List Members
-    - List Remove Member
-    - List Tweets
-    - Tweet Details - Single and Bulk
-    - Tweet Bookmark
-    - Tweet Like
-    - Tweet Likers
-    - Tweet Media Upload
-    - Tweet Post
-    - Tweet Replies
-    - Tweet Retweet
-    - Tweet Retweeters
-    - Tweet Schedule
-    - Tweet Search
-    - Tweet Stream
-    - Tweet Unbookmark
-    - Tweet Unlike
-    - Tweet Unpost
-    - Tweet Unretweet
-    - Tweet Unschedule
-    - User Affiliates
-    - User Analytics (Only for Premium accounts)
-    - User Bookmarks
-    - User Details - Single (by ID and Username) and Bulk (by ID only)
-    - User Follow
-    - User Followed Feed
-    - User Followers
-    - User Following
-    - User Highlights
-    - User Likes
-    - User Lists
-    - User Media
-    - User Notification
-    - User Recommended Feed
-    - User Replies Timeline
-    - User Subscriptions
-    - User Timeline
-    - User Unfollow
+  - Direct Message Inbox
+  - Direct Message Conversations
+  - Direct Message Delete Conversation
+  - List Add Member
+  - List Details
+  - List Members
+  - List Remove Member
+  - List Tweets
+  - Tweet Details - Single and Bulk
+  - Tweet Bookmark
+  - Tweet Like
+  - Tweet Likers
+  - Tweet Media Upload
+  - Tweet Post
+  - Tweet Replies
+  - Tweet Retweet
+  - Tweet Retweeters
+  - Tweet Schedule
+  - Tweet Search
+  - Tweet Stream
+  - Tweet Unbookmark
+  - Tweet Unlike
+  - Tweet Unpost
+  - Tweet Unretweet
+  - Tweet Unschedule
+  - User Affiliates
+  - User Analytics (Only for Premium accounts)
+  - User Bookmarks
+  - User Details - Single (by ID and Username) and Bulk (by ID only)
+  - User Follow
+  - User Followed Feed
+  - User Followers
+  - User Following
+  - User Highlights
+  - User Likes
+  - User Lists
+  - User Media
+  - User Notification
+  - User Recommended Feed
+  - User Replies Timeline
+  - User Subscriptions
+  - User Timeline
+  - User Unfollow
 
 By default, Rettiwt-API uses 'guest' authentication. If however, access to the full set of resources is required, 'user' authentication can be used. This is done by using the cookies associated with your Twitter/X account, and encoding them into an `API_KEY` for convenience. The said `API_KEY` can be obtained by using a browser extension, as follows:
 
@@ -119,7 +117,7 @@ Rettiwt-API can be used as a dependency for your NodeJS project. In such a case,
 
 - `npm install --save rettiwt-api` (using npm)
 
-    or
+  or
 
 - `yarn add rettiwt-api` (using yarn)
 
@@ -166,21 +164,21 @@ Of these parameters, the following are hot-swappable, using their respective set
 The following example demonstrates changing the API key on the fly:
 
 ```ts
-import { Rettiwt } from 'rettiwt-api';
+import { Rettiwt } from 'rettiwt-api'
 
 // Initializing a new Rettiwt instance with API key 1
-const rettiwt = new Rettiwt({ apiKey: '<API_KEY_1>' });
+const rettiwt = new Rettiwt({ apiKey: '<API_KEY_1>' })
 
 rettiwt.user.details().then((res) => {
-	console.log(res); // Returns details of the user associated with API_KEY_1
-});
+  console.log(res) // Returns details of the user associated with API_KEY_1
+})
 
 // Changing API key to API key 2
-rettiwt.apiKey = '<API_KEY_2>';
+rettiwt.apiKey = '<API_KEY_2>'
 
 rettiwt.user.details().then((res) => {
-	console.log(res); // Returns details of the user associated with API_KEY_2
-});
+  console.log(res) // Returns details of the user associated with API_KEY_2
+})
 ```
 
 ## Usage
@@ -299,7 +297,7 @@ For masking of IP address using a proxy server, use the following code snippet f
 /**
  * PROXY_URL is the URL or configuration for the proxy server you want to use.`
  */
-const rettiwt = new Rettiwt({ apiKey: API_KEY, proxyUrl: PROXY_URL });
+const rettiwt = new Rettiwt({ apiKey: API_KEY, proxyUrl: PROXY_URL })
 ```
 
 This creates a Rettiwt instance which uses the given proxy server for making requests to Twitter.
@@ -312,7 +310,7 @@ Sometimes, when the library shows unexpected behaviour, for troubleshooting purp
 /**
  * By default, is no value for 'logging' is supplied, logging is disabled.
  */
-const rettiwt = new Rettiwt({ apiKey: API_KEY, logging: true });
+const rettiwt = new Rettiwt({ apiKey: API_KEY, logging: true })
 ```
 
 ## Accessing raw response
@@ -410,23 +408,23 @@ rettiwt.user.details('<username>')
 However, if further control over the raw response is required, Rettiwt-API provides the [`FetcherService`](https://rishikant181.github.io/Rettiwt-API/classes/FetcherService.html) class which provides direct access to the raw response, but keep in mind, this delegates the task of parsing and filtering the results to the consumer of the library. The following example demonstrates using the `FetcherService` class:
 
 ```ts
-import { RettiwtConfig, FetcherService, ResourceType, IUserDetailsResponse } from 'rettiwt-api';
+import { FetcherService, IUserDetailsResponse, ResourceType, RettiwtConfig } from 'rettiwt-api'
 
 // Creating the configuration for Rettiwt
-const config = new RettiwtConfig({ apiKey: '<API_KEY>' });
+const config = new RettiwtConfig({ apiKey: '<API_KEY>' })
 
 // Creating a new FetcherService instance using the config
-const fetcher = new FetcherService(config);
+const fetcher = new FetcherService(config)
 
 // Fetching the details of the given user
 fetcher
-	.request<IUserDetailsResponse>(ResourceType.USER_DETAILS_BY_USERNAME, { id: 'user1' })
-	.then((res) => {
-		console.log(res);
-	})
-	.catch((err) => {
-		console.log(err);
-	});
+  .request<IUserDetailsResponse>(ResourceType.USER_DETAILS_BY_USERNAME, { id: 'user1' })
+  .then((res) => {
+    console.log(res)
+  })
+  .catch((err) => {
+    console.log(err)
+  })
 ```
 
 As demonstrated by the example, the raw data can be accessed by using the `request` method of the `FetcherService` class, which takes two parameters. The first parameter is the name of the requested resource, while the second is an object specifying the associated arguments required for the given resource. The complete list of resource type can be checked [here](https://rishikant181.github.io/Rettiwt-API/enums/AuthService.html#ResourceType). As for the resource specific argurments, they are the same as that of the methods of `Rettiwt` class' methods for the respective resources, but structured as an object. Notice how the `FetcherService` class takes the same arguments as the `Rettiwt` class, and the arguments have the same effects as they have in case of `Rettiwt` class.
@@ -507,10 +505,10 @@ By default, the CLI operates in 'guest' authentication. If you want to use 'user
 
 1. Generate an API_KEY as described in [Authentication](https://rishikant181.github.io/Rettiwt-API/#md:authentication).
 2. Store the output API_KEY as an environment variable with the name 'API_KEY'.
-    - Additionally, store the API_KEY in a file for later use.
-    - Make sure to generate an API_KEY only once, and use it every time you need it.
+   - Additionally, store the API_KEY in a file for later use.
+   - Make sure to generate an API_KEY only once, and use it every time you need it.
 3. The CLI automatically reads this environment variable to authenticate against Twitter.
-    - Additionally, the API_KEY can also be passed in manually using the '-k' option as follows: `rettiwt -k <API_KEY> <command>`
+   - Additionally, the API_KEY can also be passed in manually using the '-k' option as follows: `rettiwt -k <API_KEY> <command>`
 
 Help for the CLI can be obtained from the CLI itself:
 

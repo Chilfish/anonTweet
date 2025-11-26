@@ -28,7 +28,7 @@ export function TweetInputForm() {
       return
     }
 
-    await navigate(`/${tweetId}`)
+    await navigate(`/tweets/${tweetId}`)
   }
 
   const isUrl = input.includes('twitter.com') || input.includes('x.com')

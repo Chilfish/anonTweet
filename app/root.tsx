@@ -1,6 +1,7 @@
 import type { Route } from './+types/root'
 import { AlertTriangle, Loader2 } from 'lucide-react'
 import {
+  data,
   isRouteErrorResponse,
   Links,
   Meta,
@@ -9,12 +10,20 @@ import {
   ScrollRestoration,
   useNavigation,
 } from 'react-router'
-import { LayoutComponent } from '~/components/layout/Layout'
 import { ThemeProvider } from '~/components/ThemeProvider'
+import stylesheet from './app.css?url'
+import { ProgressBar } from './components/progress-bar'
 import { Button } from './components/ui/button'
+
 import { Toaster } from './components/ui/sonner'
-import { TweetSkeleton } from './lib/react-tweet'
-import './app.css'
+import { useNonce } from './hooks/use-nonce'
+import {
+  ColorSchemeScript,
+  useColorScheme,
+} from './lib/color-scheme/components'
+import { parseColorScheme } from './lib/color-scheme/server'
+import { getPublicEnv } from './lib/env.server'
+import { requestMiddleware } from './lib/http.server'
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -29,41 +38,59 @@ export const links: Route.LinksFunction = () => [
   },
 ]
 
+export async function loader({ request }: Route.LoaderArgs) {
+  await requestMiddleware(request)
+  const colorScheme = await parseColorScheme(request)
+
+  return data({ ENV: getPublicEnv(), colorScheme })
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
   const navigation = useNavigation()
   const isNavigating = Boolean(navigation.location)
   const navToHome = navigation.location?.pathname === '/'
   const showSkeleton = isNavigating && !navToHome
+  const nonce = useNonce()
+  const colorScheme = useColorScheme()
 
   return (
-    <html lang="en">
+    <html
+      lang="zh"
+      className={`${colorScheme === 'dark' ? 'dark' : ''} touch-manipulation overflow-x-hidden`}
+      suppressHydrationWarning
+    >
       <head>
         <meta charSet="utf-8" />
         <link rel="icon" type="image/jpeg" href="/icon.jpg" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        <ColorSchemeScript nonce={nonce} />
+        <link rel="stylesheet" href={stylesheet} precedence="high" />
       </head>
       <body>
-        {showSkeleton
-          ? (
-              <LayoutComponent>
-                <TweetSkeleton />
-              </LayoutComponent>
-            )
-          : children}
+        <ProgressBar />
+        {children}
         <ScrollRestoration getKey={location => location.pathname} />
-        <Scripts />
+        <Scripts nonce={nonce} />
+        <Toaster position="top-center" theme={colorScheme} />
       </body>
     </html>
   )
 }
 
-export default function App() {
+export default function App({ loaderData }: Route.ComponentProps) {
+  const { ENV } = loaderData
+  const nonce = useNonce()
   return (
     <ThemeProvider>
       <Outlet />
-      <Toaster />
+      <script
+        nonce={nonce}
+        dangerouslySetInnerHTML={{
+          __html: `window.ENV = ${JSON.stringify(ENV)}`,
+        }}
+      />
     </ThemeProvider>
   )
 }
