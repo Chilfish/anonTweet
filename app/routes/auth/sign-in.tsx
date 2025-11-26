@@ -40,7 +40,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
     //   const { provider } = submission.value
     //   const { error } = await authClient.signIn.social({
     //     provider,
-    //     callbackURL: '/home',
+    //     callbackURL: '/',
     //   })
     //   if (error) {
     //     return toast.error(error.message || `${provider} sign in failed.`)
@@ -52,7 +52,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
       return toast.error('Invalid login method.')
   }
 
-  return redirect('/home')
+  return redirect('/')
 }
 
 export default function SignInRoute() {

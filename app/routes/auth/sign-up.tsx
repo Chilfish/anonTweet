@@ -24,7 +24,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
   }
 
   const { error } = await authClient.signUp.email({
-    callbackURL: '/home',
+    callbackURL: '/',
     ...submission.value,
   })
 

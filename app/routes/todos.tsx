@@ -19,8 +19,8 @@ export const meta: Route.MetaFunction = () => {
   return [{ title: `Todo List - ${AppInfo.name}` }]
 }
 
-export async function loader(_: Route.LoaderArgs) {
-  const { user } = requireUser()
+export async function loader({ context }: Route.LoaderArgs) {
+  const { user } = requireUser(context)
   const todos = await db.query.todo.findMany({
     where: eq(todo.userId, user.id),
     orderBy: (todo, { desc }) => [desc(todo.createdAt)],
@@ -28,8 +28,8 @@ export async function loader(_: Route.LoaderArgs) {
   return data({ todos })
 }
 
-export async function action({ request }: Route.ActionArgs) {
-  const { user } = requireUser()
+export async function action({ request, context }: Route.ActionArgs) {
+  const { user } = requireUser(context)
   const formData = await request.formData()
   const submission = parseWithZod(formData, { schema: todoSchema })
 

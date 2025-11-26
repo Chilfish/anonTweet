@@ -9,8 +9,8 @@ import { requireAuth, requireUser } from '~/middlewares/auth-guard'
 
 export const middleware = [requireAuth]
 
-export async function loader(_: Route.LoaderArgs) {
-  return requireUser()
+export async function loader({ context }: Route.LoaderArgs) {
+  return requireUser(context)
 }
 
 export default function AuthenticatedLayout(_: Route.ComponentProps) {
@@ -18,7 +18,7 @@ export default function AuthenticatedLayout(_: Route.ComponentProps) {
     <>
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md">
         <div className="flex w-full items-center justify-between p-4 sm:px-10">
-          <Link to="/home" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
             <AppLogo />
           </Link>
           <div className="flex items-center gap-4">
