@@ -8,6 +8,6 @@ export default {
   presets: [vercelPreset],
   future: {
     v8_middleware: true,
-    unstable_viteEnvironmentApi: true,
+    // unstable_viteEnvironmentApi: true,
   },
 } satisfies Config
