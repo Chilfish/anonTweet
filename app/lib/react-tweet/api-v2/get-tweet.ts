@@ -23,13 +23,19 @@ export async function getEnrichedTweet(
   if (!tweet) {
     return null
   }
-  const richTweet = enrichTweet(tweet)
-  if (richTweet.quoted_tweet) {
-    const quotedTweet = await fetchTweet(richTweet.quoted_tweet.id_str)
-    if (quotedTweet) {
-      richTweet.quoted_tweet = enrichTweet(quotedTweet)
+  try {
+    const richTweet = enrichTweet(tweet)
+    if (richTweet.quoted_tweet) {
+      const quotedTweet = await fetchTweet(richTweet.quoted_tweet.id_str)
+      if (quotedTweet) {
+        richTweet.quoted_tweet = enrichTweet(quotedTweet)
+      }
     }
-  }
 
-  return richTweet
+    return richTweet
+  }
+  catch (error) {
+    console.error('Error fetching tweet:', error)
+    return null
+  }
 }

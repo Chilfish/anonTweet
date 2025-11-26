@@ -8,16 +8,10 @@ import {
 } from '@react-router/dev/routes'
 
 export default [
-  layout('./components/layout/Layout.tsx', [
-    // index('routes/home.tsx'),
-    route('/tweets/:id', './routes/tweet.tsx'),
-  ]),
-
-  index('routes/index.tsx'),
-
   // User routes
   layout('routes/layout.tsx', [
-    route('home', 'routes/home.tsx'),
+    index('routes/home.tsx'),
+    route('/tweets/:id', './routes/tweet.tsx'),
     route('todos', 'routes/todos.tsx'),
 
     ...prefix('settings', [

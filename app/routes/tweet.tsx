@@ -5,6 +5,7 @@ import { Suspense, useEffect, useRef } from 'react'
 import { Await, useLoaderData, useSearchParams } from 'react-router'
 import { BackButton } from '~/components/BackButton'
 import { DownloadMedia } from '~/components/DownloadMedia'
+import { LayoutComponent } from '~/components/layout/Layout'
 import { SaveAsImageButton } from '~/components/saveAsImage'
 import { SettingsPanel } from '~/components/SettingsPanel'
 import { MyTweet } from '~/components/tweet/Tweet'
@@ -111,7 +112,7 @@ export default function TweetPage({
   }, [loaderData.tweet])
 
   return (
-    <>
+    <LayoutComponent>
       <div className="flex items-center w-full gap-1 mb-6">
         <BackButton />
         <SaveAsImageButton />
@@ -122,6 +123,6 @@ export default function TweetPage({
       <TweetContent
         ref={tweetRef}
       />
-    </>
+    </LayoutComponent>
   )
 }
