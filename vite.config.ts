@@ -25,7 +25,7 @@ function getGitInfo() {
 
 const gitInfo = getGitInfo()
 
-export default defineConfig({
+export default defineConfig(({ isSsrBuild }) => ({
   plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
   ssr: {
     noExternal: ['react-tweet'],
@@ -47,6 +47,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       external: ['node:https', 'node:http', 'node:fs', 'node:path'],
+      input: isSsrBuild ? './server/app.ts' : undefined,
     },
   },
-})
+}))
