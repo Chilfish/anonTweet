@@ -95,8 +95,8 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
   const result: EntityWithType[] = []
 
   // 获取实体数据源
-  const entities = tweet.legacy.entities
-  const noteEntities = tweet.note_tweet?.note_tweet_results?.result.entity_set
+  const entities = tweet.legacy.entities || []
+  const noteEntities = tweet.note_tweet?.note_tweet_results?.result.entity_set || []
 
   // 收集所有实体
   const allEntities: EntityWithType[] = []
@@ -120,7 +120,6 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
   // 处理 hashtags
   if (entities.hashtags) {
     entities.hashtags.forEach((hashtag) => {
-      // 跳过在句首 mention 范围内的 hashtag
       if (hashtag.indices[0] >= leadingMentionEndIndex) {
         addEntityIfUnique({
           ...hashtag,
@@ -150,7 +149,7 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
   if (entities.user_mentions) {
     entities.user_mentions.forEach((mention) => {
       // 跳过在句首 mention 范围内的 mention
-      if (mention.indices[0] >= leadingMentionEndIndex) {
+      if (mention.indices[0] > leadingMentionEndIndex) {
         addEntityIfUnique({
           ...mention,
           type: 'mention',
@@ -165,7 +164,7 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
   if (noteEntities?.user_mentions) {
     noteEntities.user_mentions.forEach((mention) => {
       // 跳过在句首 mention 范围内的 mention
-      if (mention.indices[0] >= leadingMentionEndIndex) {
+      if (mention.indices[0] > leadingMentionEndIndex) {
         addEntityIfUnique({
           id_str: mention.id_str,
           name: mention.name,
@@ -180,7 +179,6 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
   // 处理 urls
   if (entities.urls) {
     entities.urls.forEach((url) => {
-      // 跳过在句首 mention 范围内的 url
       if (url.indices[0] >= leadingMentionEndIndex) {
         addEntityIfUnique({
           ...url,
@@ -195,7 +193,6 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
   // 处理 note_tweet 中的 urls
   if (noteEntities?.urls) {
     noteEntities.urls.forEach((url) => {
-      // 跳过在句首 mention 范围内的 url
       if (url.indices[0] >= leadingMentionEndIndex) {
         addEntityIfUnique({
           display_url: url.display_url,
@@ -211,7 +208,6 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
   // 处理 media
   if (entities.media) {
     entities.media.forEach((media) => {
-      // 跳过在句首 mention 范围内的 media
       if (media.indices[0] >= leadingMentionEndIndex) {
         addEntityIfUnique({
           display_url: media.display_url,
@@ -228,7 +224,6 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
   // 处理 symbols
   if (entities.symbols) {
     entities.symbols.forEach((symbol) => {
-      // 跳过在句首 mention 范围内的 symbol
       if (symbol.indices[0] >= leadingMentionEndIndex) {
         addEntityIfUnique({
           ...symbol,
@@ -243,7 +238,6 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
   // 处理 note_tweet 中的 symbols
   if (noteEntities?.symbols) {
     noteEntities.symbols.forEach((symbol) => {
-      // 跳过在句首 mention 范围内的 symbol
       if (symbol.indices[0] >= leadingMentionEndIndex) {
         addEntityIfUnique({
           text: symbol.text,
