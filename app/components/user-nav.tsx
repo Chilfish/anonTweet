@@ -1,6 +1,7 @@
 import {
   CircleGaugeIcon,
   HomeIcon,
+  LogInIcon,
   LogOutIcon,
   UserCogIcon,
 } from 'lucide-react'
@@ -25,6 +26,7 @@ export function UserNav() {
   const initials = user?.name?.slice(0, 2)
   const alt = user?.name ?? 'User avatar'
   const avatar = avatarUrl || placeholderUrl
+  const isLoggedIn = !!user?.id
 
   return (
     <DropdownMenu>
@@ -61,19 +63,23 @@ export function UserNav() {
             to="/"
           >
             <HomeIcon />
-            Home Page
+            首页
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem
-          asChild
-        >
-          <Link
-            to="/settings/account"
-          >
-            <UserCogIcon />
-            Account Settings
-          </Link>
-        </DropdownMenuItem>
+        {
+          isLoggedIn && (
+            <DropdownMenuItem
+              asChild
+            >
+              <Link
+                to="/settings/account"
+              >
+                <UserCogIcon />
+                账号设置
+              </Link>
+            </DropdownMenuItem>
+          )
+        }
         {user.role === 'admin' && (
           <DropdownMenuItem
             asChild
@@ -82,21 +88,38 @@ export function UserNav() {
               to="/admin"
             >
               <CircleGaugeIcon />
-              Admin Panel
+              管理员面板
             </Link>
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => {
-            setTimeout(() => {
-              submit(null, { method: 'POST', action: '/auth/sign-out' })
-            }, 100)
-          }}
-        >
-          <LogOutIcon />
-          Log out
-        </DropdownMenuItem>
+
+        {isLoggedIn ? (
+          <DropdownMenuItem
+            asChild
+          >
+
+            <Link
+              to="/auth/sign-out"
+            >
+              <LogOutIcon />
+              退出登录
+            </Link>
+          </DropdownMenuItem>
+        )
+          : (
+              <DropdownMenuItem
+                asChild
+              >
+                <Link
+                  to="/auth/sign-in"
+                >
+                  <LogInIcon />
+                  登录
+                </Link>
+              </DropdownMenuItem>
+            )}
+
       </DropdownMenuContent>
     </DropdownMenu>
   )

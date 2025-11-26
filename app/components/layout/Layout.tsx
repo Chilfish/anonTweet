@@ -64,7 +64,7 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
   const [showFooter, setShowFooter] = useState(false)
 
   return (
-    <div className="relative w-full mx-auto px-2 sm:px-16 pt-8 pb-4 flex flex-col justify-center items-center min-h-screen overflow-hidden">
+    <div className="relative w-full mx-auto px-2 sm:px-16 pt-8 pb-4 flex flex-col justify-center items-center overflow-hidden">
       {/* 背景装饰 */}
       <div className="absolute inset-0 -z-10">
         {/* 主背景渐变 */}

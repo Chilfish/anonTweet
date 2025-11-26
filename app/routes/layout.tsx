@@ -1,9 +1,7 @@
 import type { Route } from './+types/layout'
-import { CircleFadingPlusIcon } from 'lucide-react'
 import { Link, Outlet } from 'react-router'
 import { AppLogo } from '~/components/app-logo'
 import { ColorSchemeToggle } from '~/components/color-scheme-toggle'
-import { Button } from '~/components/ui/button'
 import { UserNav } from '~/components/user-nav'
 import { requireAuth, requireUser } from '~/middlewares/auth-guard'
 
@@ -22,19 +20,12 @@ export default function AuthenticatedLayout(_: Route.ComponentProps) {
             <AppLogo />
           </Link>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" asChild>
-              <Link to="/todos">
-                <CircleFadingPlusIcon />
-              </Link>
-            </Button>
             <ColorSchemeToggle />
             <UserNav />
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-3xl p-4 sm:p-10">
-        <Outlet />
-      </main>
+      <Outlet />
     </>
   )
 }
