@@ -35,18 +35,18 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
       break
     }
 
-    case 'github':
-    case 'google': {
-      const { provider } = submission.value
-      const { error } = await authClient.signIn.social({
-        provider,
-        callbackURL: '/home',
-      })
-      if (error) {
-        return toast.error(error.message || `${provider} sign in failed.`)
-      }
-      break
-    }
+    // case 'github':
+    // case 'google': {
+    //   const { provider } = submission.value
+    //   const { error } = await authClient.signIn.social({
+    //     provider,
+    //     callbackURL: '/home',
+    //   })
+    //   if (error) {
+    //     return toast.error(error.message || `${provider} sign in failed.`)
+    //   }
+    //   break
+    // }
 
     default:
       return toast.error('Invalid login method.')

@@ -45,12 +45,12 @@ export const signInSchema = z.discriminatedUnion(
       password: passwordSchema,
       provider: z.literal('sign-in'),
     }),
-    z.object({
-      provider: z.literal('google'),
-    }),
-    z.object({
-      provider: z.literal('github'),
-    }),
+    // z.object({
+    //   provider: z.literal('google'),
+    // }),
+    // z.object({
+    //   provider: z.literal('github'),
+    // }),
   ],
   { errorMap: customSignInErrorMap },
 )

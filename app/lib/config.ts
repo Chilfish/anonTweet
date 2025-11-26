@@ -1,5 +1,5 @@
 import type { FC, SVGProps } from 'react'
-import { GithubIcon, GoogleIcon } from '~/components/icons'
+// import { GithubIcon, GoogleIcon } from '~/components/icons'
 
 /**
  * App info
@@ -15,16 +15,16 @@ export const AppInfo = {
  */
 // 1. social provider configs (note: this provider configuration should be synchronized with `~/lib/auth/auth.server.ts`)
 export const SOCIAL_PROVIDER_CONFIGS = [
-  {
-    id: 'github',
-    name: 'GitHub',
-    icon: GithubIcon,
-  },
-  {
-    id: 'google',
-    name: 'Google',
-    icon: GoogleIcon,
-  },
+  // {
+  //   id: 'github',
+  //   name: 'GitHub',
+  //   icon: GithubIcon,
+  // },
+  // {
+  //   id: 'google',
+  //   name: 'Google',
+  //   icon: GoogleIcon,
+  // },
 ] as const
 
 // 2. Derive type from configs
