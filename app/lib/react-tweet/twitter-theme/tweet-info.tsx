@@ -1,4 +1,4 @@
-import type { EnrichedTweet } from '../utils'
+import type { EnrichedTweet } from '~/lib/react-tweet'
 import { TweetInfoCreatedAt } from './tweet-info-created-at'
 import s from './tweet-info.module.css'
 

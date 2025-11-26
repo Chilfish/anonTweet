@@ -17,9 +17,8 @@ export function SeparatorTemplateManager() {
   const [newTemplateHtml, setNewTemplateHtml] = useState('')
 
   const allTemplates = [...settings.separatorTemplates, ...settings.customTemplates]
-  const selectedTemplate = allTemplates.find(t => t.id === settings.selectedTemplateId) || allTemplates[0]
-
-  const isPreset = selectedTemplate?.id.startsWith('preset-')
+  const selectedTemplate = allTemplates.find(t => t.id === settings.selectedTemplateId) || allTemplates.at(0)!
+  const isPreset = selectedTemplate.id.startsWith('preset-')
 
   const handleAddTemplate = () => {
     if (newTemplateName.trim() && newTemplateHtml.trim()) {

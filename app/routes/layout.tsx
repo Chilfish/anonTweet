@@ -1,6 +1,6 @@
 import type { Route } from './+types/layout'
 import { CircleFadingPlusIcon } from 'lucide-react'
-import { href, Link, Outlet } from 'react-router'
+import { Link, Outlet } from 'react-router'
 import { AppLogo } from '~/components/app-logo'
 import { ColorSchemeToggle } from '~/components/color-scheme-toggle'
 import { Button } from '~/components/ui/button'
@@ -18,7 +18,7 @@ export default function AuthenticatedLayout(_: Route.ComponentProps) {
     <>
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md">
         <div className="flex w-full items-center justify-between p-4 sm:px-10">
-          <Link to={href('/home')} className="flex items-center gap-2">
+          <Link to="/home" className="flex items-center gap-2">
             <AppLogo />
           </Link>
           <div className="flex items-center gap-4">

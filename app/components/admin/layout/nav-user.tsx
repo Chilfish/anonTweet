@@ -1,5 +1,5 @@
 import { CircleUserIcon, EllipsisVerticalIcon, LogOutIcon } from 'lucide-react'
-import { href, useNavigate, useSubmit } from 'react-router'
+import { Link, useNavigate, useSubmit } from 'react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import {
   DropdownMenu,
@@ -82,16 +82,20 @@ export function NavUser() {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem
-                onClick={() => navigate(href('/settings/account'))}
+                asChild
               >
-                <CircleUserIcon />
-                Account Settings
+                <Link
+                  to="/settings/account"
+                >
+                  <CircleUserIcon />
+                  Account Settings
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() =>
-                submit(null, { method: 'POST', action: href('/auth/sign-out') })}
+                submit(null, { method: 'POST', action: '/auth/sign-out' })}
             >
               <LogOutIcon />
               Log out

@@ -4,7 +4,7 @@ import {
   LogOutIcon,
   UserCogIcon,
 } from 'lucide-react'
-import { useNavigate, useSubmit } from 'react-router'
+import { Link, useSubmit } from 'react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import {
   DropdownMenu,
@@ -20,7 +20,6 @@ import { Button } from './ui/button'
 
 export function UserNav() {
   const { user } = useAuthUser()
-  const navigate = useNavigate()
   const submit = useSubmit()
   const { avatarUrl, placeholderUrl } = getAvatarUrl(user.image, user.name)
   const initials = user?.name?.slice(0, 2)
@@ -56,29 +55,35 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onClick={() => {
-            navigate('/')
-          }}
+          asChild
         >
-          <HomeIcon />
-          Home Page
+          <Link
+            to="/"
+          >
+            <HomeIcon />
+            Home Page
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => {
-            navigate('/settings/account')
-          }}
+          asChild
         >
-          <UserCogIcon />
-          Account Settings
+          <Link
+            to="/settings/account"
+          >
+            <UserCogIcon />
+            Account Settings
+          </Link>
         </DropdownMenuItem>
         {user.role === 'admin' && (
           <DropdownMenuItem
-            onClick={() => {
-              navigate('/admin')
-            }}
+            asChild
           >
-            <CircleGaugeIcon />
-            Admin Panel
+            <Link
+              to="/admin"
+            >
+              <CircleGaugeIcon />
+              Admin Panel
+            </Link>
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />

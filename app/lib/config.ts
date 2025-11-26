@@ -38,6 +38,6 @@ export interface SocialProviderConfig {
 // 3. Use z.enum needed string tuple format
 // This approach is closest to the original code's intent and solves the type issue
 export const ALLOWED_PROVIDERS = [
-  SOCIAL_PROVIDER_CONFIGS[0].id,
-  ...SOCIAL_PROVIDER_CONFIGS.slice(1).map(config => config.id),
+  // SOCIAL_PROVIDER_CONFIGS[0].id,
+  // ...SOCIAL_PROVIDER_CONFIGS.slice(1).map(config => config.id),
 ] as const

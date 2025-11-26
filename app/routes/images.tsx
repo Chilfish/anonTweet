@@ -1,4 +1,4 @@
-import type { Route } from './api/+types/images'
+import type { Route } from './+types/images'
 import { s3Client } from '~/lib/s3Storage'
 
 export async function loader({ params, context }: Route.LoaderArgs) {

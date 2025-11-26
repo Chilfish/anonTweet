@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
-import type { EnrichedQuotedTweet } from '../../utils'
+import type { EnrichedTweet } from '~/lib/react-tweet'
 import s from './quoted-tweet-container.module.css'
 
-interface Props { tweet: EnrichedQuotedTweet, children: ReactNode }
+interface Props { tweet: EnrichedTweet, children: ReactNode }
 
 export function QuotedTweetContainer({ tweet, children }: Props) {
   return (

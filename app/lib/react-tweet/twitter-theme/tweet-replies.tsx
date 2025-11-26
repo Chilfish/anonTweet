@@ -1,4 +1,4 @@
-import type { EnrichedTweet } from '../utils'
+import type { EnrichedTweet } from '~/lib/react-tweet'
 import { formatNumber } from '../utils'
 import s from './tweet-replies.module.css'
 

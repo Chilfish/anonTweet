@@ -1,10 +1,9 @@
-import type { EnrichedQuotedTweet } from '../../utils'
+import type { EnrichedTweet } from '~/lib/react-tweet'
 import clsx from 'clsx'
-import { AvatarImg } from '../avatar-img'
 import { VerifiedBadge } from '../verified-badge'
 import s from './quoted-tweet-header.module.css'
 
-interface Props { tweet: EnrichedQuotedTweet }
+interface Props { tweet: EnrichedTweet }
 
 export function QuotedTweetHeader({ tweet }: Props) {
   const { user } = tweet
@@ -23,7 +22,7 @@ export function QuotedTweetHeader({ tweet }: Props) {
             user.profile_image_shape === 'Square' && s.avatarSquare,
           )}
         >
-          <AvatarImg
+          <img
             src={user.profile_image_url_https}
             alt={user.name}
             width={20}

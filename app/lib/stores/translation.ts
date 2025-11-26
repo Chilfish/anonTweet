@@ -1,4 +1,4 @@
-import type { EnrichedTweet, Entity } from '../react-tweet/utils'
+import type { EnrichedTweet, Entity } from '~/lib/react-tweet'
 import type { TweetData } from '~/types'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
@@ -79,8 +79,8 @@ const defaultTemplates: SeparatorTemplate[] = [
 // 默认设置
 const defaultSettings: TranslationSettings = {
   enabled: true,
-  customSeparator: defaultTemplates[0].html,
-  selectedTemplateId: defaultTemplates[0].id,
+  customSeparator: defaultTemplates[0]!.html,
+  selectedTemplateId: defaultTemplates[0]!.id,
   separatorTemplates: defaultTemplates,
   customTemplates: [],
 }

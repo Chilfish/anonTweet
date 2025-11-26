@@ -1,10 +1,10 @@
-import type { EnrichedQuotedTweet, EnrichedTweet } from '../utils'
+import type { EnrichedTweet } from '~/lib/react-tweet'
 import { cn } from '~/lib/utils'
 import s from './tweet-body.module.css'
 import { TweetLink } from './tweet-link'
 
 interface TweetBodyProps {
-  tweet: EnrichedTweet | EnrichedQuotedTweet
+  tweet: EnrichedTweet
   lang?: string
   className?: string
 }

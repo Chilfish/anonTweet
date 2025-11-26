@@ -1,4 +1,4 @@
-import type { EnrichedTweet } from '../utils'
+import type { EnrichedTweet } from '~/lib/react-tweet'
 import s from './tweet-in-reply-to.module.css'
 
 export function TweetInReplyTo({ tweet }: { tweet: EnrichedTweet }) {

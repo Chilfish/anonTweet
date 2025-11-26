@@ -25,7 +25,6 @@
     "skipLibCheck": true
   },
   "include": [
-    "worker-configuration.d.ts",
     "**/*.ts",
     "**/*.tsx",
     "**/.server/**/*.ts",
@@ -37,6 +36,6 @@
   "exclude": [
     "**/*.spec.ts",
     "**/*.spec.tsx",
-    "**/rettiwt-api/**"
+    "**/lib/rettiwt-api/**/*"
   ]
 }

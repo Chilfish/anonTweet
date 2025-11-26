@@ -527,7 +527,7 @@ export function mapTwitterCard(cardData: any): TwitterCard | undefined {
             // Extract image from media entities
             const mediaEntities = unifiedData.media_entities
             if (mediaEntities) {
-              const firstMediaKey = Object.keys(mediaEntities)[0]
+              const firstMediaKey = Object.keys(mediaEntities)[0]!
               const media = mediaEntities[firstMediaKey]
               if (media?.media_url_https && media.original_info) {
                 card.image = {
@@ -634,7 +634,7 @@ export function mapTwitterCard(cardData: any): TwitterCard | undefined {
       // Extract image from media entities
       const mediaEntities = unifiedData.media_entities
       if (mediaEntities) {
-        const firstMediaKey = Object.keys(mediaEntities)[0]
+        const firstMediaKey = Object.keys(mediaEntities)[0]!
         const media = mediaEntities[firstMediaKey]
         if (media?.media_url_https && media.original_info) {
           card.image = {

@@ -1,4 +1,3 @@
-export * from './embedded-tweet'
 export * from './icons/index'
 export * from './quoted-tweet/index'
 export * from './tweet-actions'

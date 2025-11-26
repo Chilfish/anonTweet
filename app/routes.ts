@@ -20,7 +20,6 @@ export default [
         route('appearance', 'routes/settings/appearance.tsx'),
         route('sessions', 'routes/settings/sessions.tsx'),
         route('password', 'routes/settings/password.tsx'),
-        route('connections', 'routes/settings/connections.tsx'),
       ]),
     ]),
   ]),

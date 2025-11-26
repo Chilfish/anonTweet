@@ -1,5 +1,5 @@
 import type { Route } from './+types/layout'
-import { data, href, Outlet, redirect } from 'react-router'
+import { data, Outlet, redirect } from 'react-router'
 import { AppHeader } from '~/components/admin/layout/header'
 import { AppSidebar } from '~/components/admin/layout/sidebar'
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar'
@@ -10,7 +10,7 @@ export const middleware = [requireAuth]
 export async function loader(_: Route.LoaderArgs) {
   const user = requireUser()
   if (user.user.role !== 'admin')
-    throw redirect(href('/home'))
+    throw redirect('/home')
   return data(user)
 }
 

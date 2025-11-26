@@ -1,7 +1,7 @@
-import type { EnrichedQuotedTweet } from '../../utils'
+import type { EnrichedTweet } from '~/lib/react-tweet'
 import s from './quoted-tweet-body.module.css'
 
-interface Props { tweet: EnrichedQuotedTweet }
+interface Props { tweet: EnrichedTweet }
 
 export function QuotedTweetBody({ tweet }: Props) {
   return (
