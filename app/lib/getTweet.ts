@@ -4,34 +4,32 @@ import { getEnrichedTweet } from './react-tweet/api-v2'
 
 export async function getTweets(tweetId: string): Promise<TweetData> {
   let tweet = await getEnrichedTweet(tweetId)
-  let quotedTweet: EnrichedTweet | null = null
-  const mainTweet = tweet || null
+  let parentTweet: EnrichedTweet | null = null
+  const tweets: EnrichedTweet[] = []
 
-  if (!tweet || !mainTweet) {
-    return { tweet: null, parentTweets: [], quotedTweet: null }
+  if (!tweet) {
+    return []
   }
 
-  const parentTweets: EnrichedTweet[] = []
-
   while (true) {
-    if (!tweet.in_reply_to_status_id_str) {
+    if (!tweet) {
       break
     }
-    const parentTweet = await getEnrichedTweet(tweet.in_reply_to_status_id_str)
-    if (!parentTweet) {
-      break
+    if (tweet.quoted_tweet_id) {
+      const quotedTweet = await getEnrichedTweet(tweet.quoted_tweet_id)
+      if (quotedTweet) {
+        tweets.unshift(quotedTweet)
+      }
     }
-    parentTweets.unshift(parentTweet)
+    if (tweet.in_reply_to_status_id_str) {
+      parentTweet = await getEnrichedTweet(tweet.in_reply_to_status_id_str)
+      if (parentTweet) {
+        tweets.unshift(parentTweet)
+      }
+    }
+
     tweet = parentTweet
   }
 
-  if (mainTweet.quoted_tweet) {
-    quotedTweet = await getEnrichedTweet(mainTweet.quoted_tweet.id_str)
-  }
-
-  return {
-    tweet: mainTweet,
-    parentTweets,
-    quotedTweet,
-  }
+  return tweets
 }

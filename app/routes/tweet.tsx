@@ -33,23 +33,32 @@ export function HydrateFallback() {
 }
 
 export async function loader({
-// export async function clientLoader({
   params,
   request,
-}: Route.LoaderArgs): Promise<TweetData & {
+}: Route.LoaderArgs): Promise<{
+  tweets: TweetData
   tweetId?: string
 }> {
   const isDebug = new URLSearchParams(request.url.split('?')[1]).get('debug') === 'true'
   if (isDebug) {
-    return { tweet: null, parentTweets: [], quotedTweet: null, tweetId: params.id }
+    return {
+      tweets: [],
+      tweetId: undefined
+    }
   }
   const { id } = params
   const tweetId = extractTweetId(id)
   if (!tweetId) {
-    return { tweet: null, parentTweets: [], quotedTweet: null, tweetId: id }
+    return {
+      tweets: [],
+      tweetId: id
+    }
   }
-  const { tweet, parentTweets, quotedTweet } = await getTweets(tweetId)
-  return { tweet, parentTweets, quotedTweet, tweetId }
+  const tweets = await getTweets(tweetId)
+  return {
+    tweets,
+    tweetId
+  }
 }
 
 function TweetContent({ ref }: { ref?: Ref<HTMLDivElement> }) {
@@ -62,12 +71,10 @@ function TweetContent({ ref }: { ref?: Ref<HTMLDivElement> }) {
         resolve={loaderData}
         errorElement={<TweetNotFound />}
         children={resolvedTweet =>
-          resolvedTweet.tweet
+          resolvedTweet.tweets
             ? (
                 <MyTweet
-                  tweet={resolvedTweet.tweet}
-                  quotedTweet={resolvedTweet.quotedTweet}
-                  parentTweets={resolvedTweet.parentTweets}
+                  tweets={resolvedTweet.tweets}
                   showMp4CoverOnly={screenshoting}
                   ref={ref}
                 />
@@ -102,14 +109,11 @@ export default function TweetPage({
   }, [tweetRef.current])
 
   useEffect(() => {
-    if (loaderData.tweet) {
-      setAllTweets({
-        tweet: loaderData.tweet,
-        quotedTweet: loaderData.quotedTweet,
-        parentTweets: loaderData.parentTweets,
-      })
+    if (loaderData.tweets.length) {
+      console.log(loaderData)
+      setAllTweets(loaderData.tweets)
     }
-  }, [loaderData.tweet])
+  }, [loaderData.tweets])
 
   return (
     <LayoutComponent>

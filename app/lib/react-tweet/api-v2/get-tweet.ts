@@ -25,12 +25,12 @@ export async function getEnrichedTweet(
   }
   try {
     const richTweet = enrichTweet(tweet)
-    if (richTweet.quoted_tweet) {
-      const quotedTweet = await fetchTweet(richTweet.quoted_tweet.id_str)
-      if (quotedTweet) {
-        richTweet.quoted_tweet = enrichTweet(quotedTweet)
-      }
-    }
+    // if (richTweet.quoted_tweet) {
+    //   const quotedTweet = await fetchTweet(richTweet.quoted_tweet.id_str)
+    //   if (quotedTweet) {
+    //     richTweet.quoted_tweet = enrichTweet(quotedTweet)
+    //   }
+    // }
 
     return richTweet
   }

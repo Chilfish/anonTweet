@@ -19,16 +19,10 @@ export function enrichTweet(sourceData: RawTweet): EnrichedTweet {
   const tweet = ('tweet' in sourceData ? sourceData.tweet : sourceData) as RawTweet
   const userBase = transformUserResponse(tweet)
   const userScreenName = userBase.screen_name
-  const user = {
-    ...userBase,
-    url: `https://twitter.com/${userScreenName}`,
-    follow_url: `https://twitter.com/intent/follow?screen_name=${userScreenName}`,
-  }
+  const user = userBase
 
   const tweetId = tweet.rest_id
   const tweetUrl = `https://twitter.com/${userScreenName}/status/${tweetId}`
-  const likeUrl = `https://twitter.com/i/activity/like?tweet_id=${tweetId}`
-  const replyUrl = `https://twitter.com/${userScreenName}/status/${tweetId}`
 
   const text = tweet.note_tweet?.note_tweet_results?.result?.text || tweet.legacy.full_text
 
@@ -39,27 +33,16 @@ export function enrichTweet(sourceData: RawTweet): EnrichedTweet {
     favorite_count: tweet.legacy.favorite_count,
     created_at: tweet.legacy.created_at,
     conversation_count: tweet.legacy.reply_count,
-    edit_control: {
-      edit_tweet_ids: tweet.edit_control.edit_tweet_ids,
-      editable_until_msecs: tweet.edit_control.editable_until_msecs,
-      is_edit_eligible: tweet.edit_control.is_edit_eligible,
-      edits_remaining: tweet.edit_control.edits_remaining,
-    },
-    news_action_type: 'conversation',
     display_text_range: tweet.legacy.display_text_range as [number, number],
     __typename: 'Tweet',
-    isEdited: false,
-    isStaleEdit: false,
-    possibly_sensitive: tweet.legacy.possibly_sensitive ?? false,
     text,
     user,
-    like_url: likeUrl,
-    reply_url: replyUrl,
     in_reply_to_status_id_str: tweet.legacy.in_reply_to_status_id_str,
     entities: getEntities(tweet, text),
-    quoted_tweet: tweet.quoted_status_result?.result
-      ? enrichTweet(tweet.quoted_status_result.result)
-      : undefined,
+    quoted_tweet_id: tweet.quoted_status_result?.result?.rest_id,
+    // quoted_tweet: tweet.quoted_status_result?.result
+    //   ? enrichTweet(tweet.quoted_status_result.result)
+    //   : undefined,
     card: mapTwitterCard(tweet.card),
     mediaDetails: mapMediaDetails(tweet),
     photos: mapPhotoEntities(tweet),

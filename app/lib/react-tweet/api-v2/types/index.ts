@@ -109,24 +109,17 @@ export type Entity = {
   | (SymbolEntity & { type: 'symbol', href: string })
 )
 
-export type EnrichedTweet = Omit<Tweet, 'entities' | 'quoted_tweet'> & {
+type OmitTypes = 'entities' | 'quoted_tweet' | 'edit_control' | 'isEdited' | 'isStaleEdit' | 'possibly_sensitive' | 'news_action_type'
+
+export type EnrichedTweet = Omit<Tweet, OmitTypes> & {
   url: string
-  user: {
-    url: string
-    follow_url: string
-  }
-  like_url: string
-  reply_url: string
   entities: Entity[]
-  quoted_tweet?: EnrichedTweet
+  quoted_tweet_id?: string
+  quotedTweet?: EnrichedTweet
   card?: TwitterCard
   photos?: TweetPhoto[]
   video?: TweetVideo
-  possibly_sensitive?: boolean
-  isEdited: boolean
-  isStaleEdit: boolean
   conversation_count: number
-  news_action_type: string
 }
 
 export type EnrichedQuotedTweet = Omit<QuotedTweet, 'entities'> & {

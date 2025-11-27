@@ -1,4 +1,4 @@
-import type { EnrichedTweet, Entity } from '~/lib/react-tweet'
+import type { Entity } from '~/lib/react-tweet'
 import type { TweetData } from '~/types'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
@@ -20,7 +20,9 @@ interface TranslationSettings {
 }
 
 // 翻译状态接口
-interface TranslationState extends TweetData {
+interface TranslationState {
+  tweets: TweetData
+
   // 翻译设置
   settings: TranslationSettings
 
@@ -57,7 +59,6 @@ interface TranslationState extends TweetData {
   setShowTranslationButton: (show: boolean) => void
   setTweetElRef: (ref: HTMLDivElement) => void
 
-  setTweet: (tweet: EnrichedTweet) => void
   setAllTweets: (data: TweetData) => void
 
   // 工具方法
@@ -95,9 +96,7 @@ export const useTranslationStore = create<TranslationState>()(
       showTranslationButton: false,
       editingTweetId: null,
       tweetElRef: null,
-      tweet: null,
-      quotedTweet: null,
-      parentTweets: [],
+      tweets: [],
       screenshoting: false,
 
       // 设置相关方法
@@ -106,13 +105,14 @@ export const useTranslationStore = create<TranslationState>()(
           settings: { ...state.settings, ...newSettings },
         })),
 
-      setAllTweets: (data: TweetData) =>
-        set(state => ({
+      setAllTweets: (data: TweetData) => {
+        const tweets = formatTweets(data)
+        console.log(tweets)
+        return set(state => ({
           ...state,
-          tweet: data.tweet,
-          quotedTweet: data.quotedTweet,
-          parentTweets: data.parentTweets,
-        })),
+          tweets,
+        }))
+      },
 
       resetSettings: () =>
         set(state => ({
@@ -230,7 +230,6 @@ export const useTranslationStore = create<TranslationState>()(
       setShowTranslationButton: show => set({ showTranslationButton: show }),
       setEditingTweetId: tweetId => set({ editingTweetId: tweetId }),
       setTweetElRef: ref => set({ tweetElRef: ref }),
-      setTweet: tweet => set({ tweet }),
       setScreenshoting: screenshoting => set({ screenshoting }),
 
       hasTextContent: (text?: string) => {
@@ -266,3 +265,22 @@ export const useTranslationStore = create<TranslationState>()(
     },
   ),
 )
+
+/**
+ * 重组推文数据，将回复的推文嵌到对应的推文中，
+ * 并从列表数据中删掉它
+ */
+function formatTweets(tweets: TweetData): TweetData {
+  const qoutedTweets = tweets.filter(tweet => !!tweet.in_reply_to_status_id_str)
+  const mainTweets = tweets.filter(tweet => !tweet.in_reply_to_status_id_str)
+
+  mainTweets.forEach((tweet) => {
+    const qoutedTweetIndex = qoutedTweets.findIndex(q => q.id_str === tweet.in_reply_to_status_id_str)
+    if (qoutedTweetIndex !== -1) {
+      tweet.quotedTweet = qoutedTweets[qoutedTweetIndex]
+      qoutedTweets.splice(qoutedTweetIndex, 1)
+    }
+  })
+
+  return mainTweets
+}

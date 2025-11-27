@@ -4,7 +4,6 @@ import { getTweets } from '~/lib/getTweet'
 import { extractTweetId } from '~/lib/utils'
 
 export async function loader({
-// export async function clientLoader({
   params,
   request,
 }: Route.LoaderArgs): Promise<TweetData & {
@@ -12,20 +11,19 @@ export async function loader({
 }> {
   const isDebug = new URLSearchParams(request.url.split('?')[1]).get('debug') === 'true'
   if (isDebug) {
-    return { tweet: null, parentTweets: [], quotedTweet: null, tweetId: params.id }
+    return []
   }
   const { id } = params
   const tweetId = extractTweetId(id)
   if (!tweetId) {
-    return { tweet: null, parentTweets: [], quotedTweet: null, tweetId: id }
+    return []
   }
-  const { tweet, parentTweets, quotedTweet } = await getTweets(tweetId)
-  return { tweet, parentTweets, quotedTweet, tweetId }
+  const tweets = await getTweets(tweetId)
+  return tweets
 }
 
 export async function action({
   params,
-  request,
 }: Route.ActionArgs): Promise<Response> {
   const { id } = params
   const tweetId = extractTweetId(id)
