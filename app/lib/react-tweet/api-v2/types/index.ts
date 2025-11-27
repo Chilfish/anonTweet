@@ -117,7 +117,6 @@ export type EnrichedTweet = Omit<Tweet, 'entities' | 'quoted_tweet'> & {
   }
   like_url: string
   reply_url: string
-  in_reply_to_url?: string
   entities: Entity[]
   quoted_tweet?: EnrichedTweet
   card?: TwitterCard

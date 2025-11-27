@@ -1,46 +1,9 @@
-import type { HashtagEntity, MediaAnimatedGif, MediaDetails, MediaVideo, SymbolEntity } from './api-v2'
-import type { Tweet, TweetBase } from './api-v2/types/tweet'
+import type { MediaAnimatedGif, MediaDetails, MediaVideo } from './api-v2'
 import { proxyMedia } from '../utils'
 
 export interface TweetCoreProps {
   id: string
   onError?: (error: any) => any
-}
-
-function getTweetUrl(tweet: TweetBase) {
-  return `https://x.com/${tweet.user.screen_name}/status/${tweet.id_str}`
-}
-
-function getUserUrl(usernameOrTweet: string | TweetBase) {
-  return `https://x.com/${
-    typeof usernameOrTweet === 'string'
-      ? usernameOrTweet
-      : usernameOrTweet.user.screen_name
-  }`
-}
-
-function getLikeUrl(tweet: TweetBase) {
-  return `https://x.com/intent/like?tweet_id=${tweet.id_str}`
-}
-
-function getReplyUrl(tweet: TweetBase) {
-  return `https://x.com/intent/tweet?in_reply_to=${tweet.id_str}`
-}
-
-function getFollowUrl(tweet: TweetBase) {
-  return `https://x.com/intent/follow?screen_name=${tweet.user.screen_name}`
-}
-
-function getHashtagUrl(hashtag: HashtagEntity) {
-  return `https://x.com/hashtag/${hashtag.text}`
-}
-
-function getSymbolUrl(symbol: SymbolEntity) {
-  return `https://x.com/search?q=%24${symbol.text}`
-}
-
-function getInReplyToUrl(tweet: Tweet) {
-  return `https://x.com/${tweet.in_reply_to_screen_name}/status/${tweet.in_reply_to_status_id_str}`
 }
 
 export function getMediaUrl(media: MediaDetails, size: 'small' | 'medium' | 'large'): string {

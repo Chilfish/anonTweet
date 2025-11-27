@@ -29,7 +29,6 @@ export function enrichTweet(sourceData: RawTweet): EnrichedTweet {
   const tweetUrl = `https://twitter.com/${userScreenName}/status/${tweetId}`
   const likeUrl = `https://twitter.com/i/activity/like?tweet_id=${tweetId}`
   const replyUrl = `https://twitter.com/${userScreenName}/status/${tweetId}`
-  const inReplyToUrl = `https://x.com/${tweet.in_reply_to_screen_name}/status/${tweet.in_reply_to_status_id_str}`
 
   const text = tweet.note_tweet?.note_tweet_results?.result?.text || tweet.legacy.full_text
 
@@ -56,9 +55,6 @@ export function enrichTweet(sourceData: RawTweet): EnrichedTweet {
     user,
     like_url: likeUrl,
     reply_url: replyUrl,
-    in_reply_to_url: tweet.in_reply_to_screen_name
-      ? inReplyToUrl
-      : undefined,
     in_reply_to_status_id_str: tweet.legacy.in_reply_to_status_id_str,
     entities: getEntities(tweet, text),
     quoted_tweet: tweet.quoted_status_result?.result
