@@ -1,7 +1,7 @@
 import { domToPng } from 'modern-screenshot'
 import { toast } from 'sonner'
+import { Button } from '~/components/ui/button'
 import { useTranslationStore } from '~/lib/stores/translation'
-import { Button } from './ui/button'
 
 function saveAsImage(png: string, fileName: string) {
   const a = document.createElement('a')

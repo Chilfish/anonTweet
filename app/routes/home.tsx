@@ -1,5 +1,5 @@
 import { LayoutComponent } from '~/components/layout/Layout'
-import { TweetInputForm } from '~/components/TweetInputForm'
+import { TweetInputForm } from '~/components/tweet/TweetInputForm'
 
 export function meta() {
   return [

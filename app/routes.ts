@@ -11,7 +11,7 @@ export default [
   // User routes
   layout('routes/layout.tsx', [
     index('routes/home.tsx'),
-    route('/tweets/:id', './routes/tweet.tsx'),
+    route('/tweets/:id', 'routes/tweet.tsx'),
     route('todos', 'routes/todos.tsx'),
 
     ...prefix('settings', [
@@ -49,7 +49,7 @@ export default [
     route('auth/error', 'routes/api/better-error.tsx'),
     route('auth/*', 'routes/api/better.tsx'),
     route('color-scheme', 'routes/api/color-scheme.ts'),
-
+    route('tweet/:id', 'routes/api/tweet.tsx'),
   ]),
 
   // Not found

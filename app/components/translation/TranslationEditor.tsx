@@ -1,15 +1,15 @@
 import type { EnrichedTweet, Entity } from '~/lib/react-tweet'
 import { Languages, LanguagesIcon, Save, Trash2, X } from 'lucide-react'
 import React, { useRef, useState } from 'react'
+import { TweetText } from '~/components/tweet/TweetText'
+import { Button } from '~/components/ui/button'
+import { Card, CardContent } from '~/components/ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '~/components/ui/dialog'
+import { Input } from '~/components/ui/input'
+import { Label } from '~/components/ui/label'
+import { Switch } from '~/components/ui/switch'
+import { Textarea } from '~/components/ui/textarea'
 import { useTranslationStore } from '~/lib/stores/translation'
-import { TweetText } from './tweet/TweetText'
-import { Button } from './ui/button'
-import { Card, CardContent } from './ui/card'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog'
-import { Input } from './ui/input'
-import { Label } from './ui/label'
-import { Switch } from './ui/switch'
-import { Textarea } from './ui/textarea'
 
 type EntityTranslation = Entity & {
   index: number

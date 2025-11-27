@@ -1,14 +1,14 @@
 import { Monitor, Moon, SettingsIcon, Sun } from 'lucide-react'
 import React, { useState } from 'react'
+import { Button } from '~/components/ui/button'
+import { Card, CardContent } from '~/components/ui/card'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '~/components/ui/dialog'
+import { Label } from '~/components/ui/label'
 import {
   useColorScheme,
   useSetColorScheme,
 } from '~/lib/color-scheme/components'
 import { SeparatorTemplateManager } from './SeparatorTemplateManager'
-import { Button } from './ui/button'
-import { Card, CardContent } from './ui/card'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog'
-import { Label } from './ui/label'
 
 export function SettingsPanel() {
   // const { theme, setTheme } = useTheme()

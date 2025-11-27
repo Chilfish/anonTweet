@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { Link, useSubmit } from 'react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
+import { Button } from '~/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +18,6 @@ import {
 } from '~/components/ui/dropdown-menu'
 import { useAuthUser } from '~/hooks/use-auth-user'
 import { getAvatarUrl } from '~/lib/utils'
-import { Button } from './ui/button'
 
 export function UserNav() {
   const { user } = useAuthUser()

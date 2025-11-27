@@ -31,13 +31,13 @@ export default defineConfig(({ isSsrBuild }) => ({
     noExternal: ['react-tweet'],
   },
   server: {
-    proxy: {
-      '/api/tweet': {
-        target: 'https://cdn.syndication.twimg.com',
-        changeOrigin: true,
-        rewrite: path => path.replace(/^\/api/, ''),
-      },
-    },
+    // proxy: {
+    //   '/api/tweet': {
+    //     target: 'https://cdn.syndication.twimg.com',
+    //     changeOrigin: true,
+    //     rewrite: path => path.replace(/^\/api/, ''),
+    //   },
+    // },
     port: 9080,
   },
   define: {

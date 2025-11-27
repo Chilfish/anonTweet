@@ -1,5 +1,5 @@
+import { Button } from '~/components/ui/button'
 import { useTranslationStore } from '~/lib/stores/translation'
-import { Button } from './ui/button'
 
 export function ToggleTransButton() {
   const { setShowTranslations, setShowTranslationButton, showTranslations } = useTranslationStore()

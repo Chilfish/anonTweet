@@ -3,13 +3,13 @@ import type { EnrichedTweet, TwitterComponents } from '~/lib/react-tweet'
 import type { ThemeSettings } from '~/lib/stores/theme'
 import type { TweetData } from '~/types'
 import { useEffect, useRef, useState } from 'react'
+import { TranslationEditor } from '~/components/translation/TranslationEditor'
 import {
   TweetContainer,
   TweetHeader,
   TweetMedia,
 } from '~/lib/react-tweet'
 import { cn } from '~/lib/utils'
-import { TranslationEditor } from '../TranslationEditor'
 import { TweetLinkCard } from './TweetCard'
 import { TweetTextBody } from './TweetTextBody'
 

@@ -1,6 +1,6 @@
 import { MehIcon } from 'lucide-react'
 import { isRouteErrorResponse, Link, useRouteError } from 'react-router'
-import { buttonVariants } from './ui/button'
+import { buttonVariants } from '~/components/ui/button'
 
 function DevErrorDisplay({
   message,

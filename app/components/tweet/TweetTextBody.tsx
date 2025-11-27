@@ -1,6 +1,6 @@
 import type { EnrichedTweet } from '~/lib/react-tweet'
+import { TranslationDisplay } from '~/components/translation/TranslationDisplay'
 import { TweetBody } from '~/lib/react-tweet'
-import { TranslationDisplay } from '../TranslationDisplay'
 
 export function TweetTextBody({ tweet }: { tweet: EnrichedTweet }) {
   return (
