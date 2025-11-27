@@ -4,7 +4,7 @@ import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select'
+import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from '~/components/ui/select'
 import { Textarea } from '~/components/ui/textarea'
 import { useTranslationStore } from '~/lib/stores/translation'
 
@@ -42,7 +42,11 @@ export function SeparatorTemplateManager() {
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>分隔符样式</span>
-          <Button variant="outline" size="sm" onClick={() => setIsAddingTemplate(true)} className="h-8">
+          <Button
+            size="sm"
+            onClick={() => setIsAddingTemplate(true)}
+            className="h-8"
+          >
             <Plus className="h-4 w-4 mr-1" />
             新建模板
           </Button>
@@ -52,34 +56,31 @@ export function SeparatorTemplateManager() {
         {/* 模板选择器 */}
         <div className="flex items-center gap-2">
           <Label>当前模板</Label>
-          <Select value={settings.selectedTemplateId} onValueChange={selectTemplate}>
-            <SelectTrigger>
+
+          <Select
+            value={settings.selectedTemplateId}
+            onValueChange={selectTemplate}
+          >
+            <SelectTrigger className="w-fit">
               <SelectValue>
-                <div className="flex items-center gap-2">{selectedTemplate?.name}</div>
+                {selectedTemplate?.name}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent className="p-2">
+
+            <SelectPopup>
               {allTemplates.map(template => (
                 <div
                   key={template.id}
-                  className="justify-between items-center flex gap-4 mb-2 w-full"
+                  className="justify-between items-center flex gap-2"
                 >
-
-                  <SelectItem
-                    value={template.id}
-                  >
-                    <div className="flex flex-col p-2">
-                      <div className="font-medium text-sm">{template.name}</div>
-                      <div className="text-xs mt-1 p-2 rounded border overflow-hidden max-w-[200px] truncate">
-                        <div dangerouslySetInnerHTML={{ __html: template.html }} />
-                      </div>
-                    </div>
+                  <SelectItem value={template.id}>
+                    {template.name}
                   </SelectItem>
 
                   {!template.id.startsWith('preset-') && (
                     <Button
                       variant="outline"
-                      size="icon"
+                      size="icon-xs"
                       onClick={() => handleDeleteTemplate(template.id)}
                       className="ml-auto"
                     >
@@ -88,7 +89,7 @@ export function SeparatorTemplateManager() {
                   )}
                 </div>
               ))}
-            </SelectContent>
+            </SelectPopup>
           </Select>
         </div>
 

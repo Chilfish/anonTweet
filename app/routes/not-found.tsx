@@ -25,7 +25,7 @@ export function ErrorBoundary() {
   return (
     <ErrorDisplay
       message="Oops! Page Not Found."
-      detail="It seems like the page you're looking for does not exist or might have been removed."
+      detail="您要查找的页面似乎不存在，或者可能已被删除。"
     />
   )
 }

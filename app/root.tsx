@@ -3,6 +3,7 @@ import { AlertTriangle, Loader2 } from 'lucide-react'
 import {
   data,
   isRouteErrorResponse,
+  Link,
   Links,
   Meta,
   Outlet,
@@ -148,9 +149,9 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
         >
           <Button
             variant="link"
-            asChild
+            render={<Link to="/" />}
           >
-            <a href="/">返回首页</a>
+            返回首页
           </Button>
 
           <Button

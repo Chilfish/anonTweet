@@ -17,7 +17,6 @@ export default [
     ...prefix('settings', [
       layout('routes/settings/layout.tsx', [
         route('account', 'routes/settings/account.tsx'),
-        route('appearance', 'routes/settings/appearance.tsx'),
         route('sessions', 'routes/settings/sessions.tsx'),
         route('password', 'routes/settings/password.tsx'),
       ]),

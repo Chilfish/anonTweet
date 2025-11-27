@@ -46,7 +46,7 @@ export function ErrorDisplay({
         </div>
 
         <Link to="/" className={buttonVariants()}>
-          Back to home
+          返回首页
         </Link>
       </div>
     </main>

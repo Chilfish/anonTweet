@@ -4,8 +4,7 @@ import { AlertCircleIcon, SearchIcon, TrashIcon, XIcon } from 'lucide-react'
 import { useId, useRef } from 'react'
 import {
   AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
+  AlertDialogClose,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -75,18 +74,16 @@ export function UsersTableToolbar({
         {/* Delete button */}
         {table.getSelectedRowModel().rows.length > 0 && (
           <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button className="ml-auto" variant="outline">
-                <TrashIcon
-                  className="-ms-1 opacity-60"
-                  size={16}
-                  aria-hidden="true"
-                />
-                Delete
-                <span className="-me-1 ms-1 inline-flex h-5 max-h-full items-center rounded border border-border bg-background px-1 font-[inherit] font-medium text-[0.625rem] text-muted-foreground/70">
-                  {table.getSelectedRowModel().rows.length}
-                </span>
-              </Button>
+            <AlertDialogTrigger render={<Button className="ml-auto" variant="outline" />}>
+              <TrashIcon
+                className="-ms-1 opacity-60"
+                size={16}
+                aria-hidden="true"
+              />
+              Delete
+              <span className="-me-1 ms-1 inline-flex h-5 max-h-full items-center rounded border border-border bg-background px-1 font-[inherit] font-medium text-[0.625rem] text-muted-foreground/70">
+                {table.getSelectedRowModel().rows.length}
+              </span>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <div className="flex flex-col gap-2 max-sm:items-center sm:flex-row sm:gap-4">
@@ -113,13 +110,15 @@ export function UsersTableToolbar({
                 </AlertDialogHeader>
               </div>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
+                <AlertDialogClose>
+                  Cancel
+                </AlertDialogClose>
+                <AlertDialogClose
                   className={cn(buttonVariants({ variant: 'destructive' }))}
                   onClick={onDeleteRows}
                 >
                   Delete
-                </AlertDialogAction>
+                </AlertDialogClose>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

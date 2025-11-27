@@ -148,16 +148,18 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button
-          variant="secondary"
-          size="icon"
-          onClick={handleOpen}
-          className={`${className} ml-auto`}
-          data-testid="translation-editor-button"
-        >
-          <LanguagesIcon className="size-4" />
-        </Button>
+      <DialogTrigger
+        render={(
+          <Button
+            variant="secondary"
+            size="icon"
+            onClick={handleOpen}
+            className={`${className} ml-auto`}
+            data-testid="translation-editor-button"
+          />
+        )}
+      >
+        <LanguagesIcon className="size-4" />
       </DialogTrigger>
 
       <DialogContent className="max-h-[92vh] max-w-[95vw] overflow-auto">

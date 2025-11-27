@@ -1,64 +1,65 @@
-import type * as React from 'react'
-import { Tooltip as TooltipPrimitive } from 'radix-ui'
+'use client'
+
+import { Tooltip as TooltipPrimitive } from '@base-ui-components/react/tooltip'
 
 import { cn } from '~/lib/utils'
 
-function TooltipProvider({
-  delayDuration = 0,
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
-  return (
-    <TooltipPrimitive.Provider
-      data-slot="tooltip-provider"
-      delayDuration={delayDuration}
-      {...props}
-    />
-  )
-}
+const TooltipCreateHandle = TooltipPrimitive.createHandle
 
-function Tooltip({
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Root>) {
-  return (
-    <TooltipProvider>
-      <TooltipPrimitive.Root data-slot="tooltip" {...props} />
-    </TooltipProvider>
-  )
-}
+const TooltipProvider = TooltipPrimitive.Provider
 
-function TooltipTrigger({
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
+const Tooltip = TooltipPrimitive.Root
+
+function TooltipTrigger(props: TooltipPrimitive.Trigger.Props) {
   return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />
 }
 
-function TooltipContent({
+function TooltipPopup({
   className,
+  align = 'center',
   sideOffset = 4,
-  showArrow = false,
+  side = 'top',
   children,
   ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Content> & {
-  showArrow?: boolean
+}: TooltipPrimitive.Popup.Props & {
+  align?: TooltipPrimitive.Positioner.Props['align']
+  side?: TooltipPrimitive.Positioner.Props['side']
+  sideOffset?: TooltipPrimitive.Positioner.Props['sideOffset']
 }) {
   return (
     <TooltipPrimitive.Portal>
-      <TooltipPrimitive.Content
-        data-slot="tooltip-content"
+      <TooltipPrimitive.Positioner
+        align={align}
+        className="z-50 h-(--positioner-height) w-(--positioner-width) max-w-(--available-width) transition-[top,left,right,bottom,transform] data-instant:transition-none"
+        data-slot="tooltip-positioner"
+        side={side}
         sideOffset={sideOffset}
-        className={cn(
-          'fade-in-0 zoom-in-95 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 max-w-70 animate-in rounded-md border bg-popover px-3 py-1.5 text-popover-foreground text-sm data-[state=closed]:animate-out',
-          className,
-        )}
-        {...props}
       >
-        {children}
-        {showArrow && (
-          <TooltipPrimitive.Arrow className="-my-px fill-popover drop-shadow-[0_1px_0_var(--border)]" />
-        )}
-      </TooltipPrimitive.Content>
+        <TooltipPrimitive.Popup
+          className={cn(
+            'relative flex h-(--popup-height,auto) w-(--popup-width,auto) origin-(--transform-origin) text-balance rounded-md border bg-popover bg-clip-padding text-popover-foreground text-xs shadow-black/5 shadow-md transition-[width,height,scale,opacity] before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-md)-1px)] before:shadow-[0_1px_--theme(--color-black/4%)] data-ending-style:scale-98 data-starting-style:scale-98 data-ending-style:opacity-0 data-starting-style:opacity-0 data-instant:duration-0 dark:bg-clip-border dark:before:shadow-[0_-1px_--theme(--color-white/8%)]',
+            className,
+          )}
+          data-slot="tooltip-popup"
+          {...props}
+        >
+          <TooltipPrimitive.Viewport
+            className="relative size-full overflow-clip px-(--viewport-inline-padding) py-1 [--viewport-inline-padding:--spacing(2)] data-instant:transition-none **:data-current:data-ending-style:opacity-0 **:data-current:data-starting-style:opacity-0 **:data-previous:data-ending-style:opacity-0 **:data-previous:data-starting-style:opacity-0 **:data-current:w-[calc(var(--popup-width)-2*var(--viewport-inline-padding)-2px)] **:data-previous:w-[calc(var(--popup-width)-2*var(--viewport-inline-padding)-2px)] **:data-previous:truncate **:data-current:opacity-100 **:data-previous:opacity-100 **:data-current:transition-opacity **:data-previous:transition-opacity"
+            data-slot="tooltip-viewport"
+          >
+            {children}
+          </TooltipPrimitive.Viewport>
+        </TooltipPrimitive.Popup>
+      </TooltipPrimitive.Positioner>
     </TooltipPrimitive.Portal>
   )
 }
 
-export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger }
+export {
+  Tooltip,
+  TooltipPopup as TooltipContent,
+  TooltipCreateHandle,
+  TooltipPopup,
+  TooltipProvider,
+  TooltipTrigger,
+}

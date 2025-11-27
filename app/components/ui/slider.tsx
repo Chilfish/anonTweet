@@ -1,132 +1,76 @@
-import { Slider as SliderPrimitive } from 'radix-ui'
+'use client'
+
+import { Slider as SliderPrimitive } from '@base-ui-components/react/slider'
 import * as React from 'react'
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '~/components/ui/tooltip'
 import { cn } from '~/lib/utils'
 
 function Slider({
   className,
+  children,
   defaultValue,
   value,
   min = 0,
   max = 100,
-  showTooltip = false,
-  tooltipContent,
   ...props
-}: React.ComponentProps<typeof SliderPrimitive.Root> & {
-  showTooltip?: boolean
-  tooltipContent?: (value: number) => React.ReactNode
-}) {
-  const [internalValues, setInternalValues] = React.useState<number[]>(
-    Array.isArray(value)
-      ? value
-      : Array.isArray(defaultValue)
-        ? defaultValue
-        : [min, max],
-  )
-
-  React.useEffect(() => {
+}: SliderPrimitive.Root.Props) {
+  const _values = React.useMemo(() => {
     if (value !== undefined) {
-      setInternalValues(Array.isArray(value) ? value : [value])
+      return Array.isArray(value) ? value : [value]
     }
-  }, [value])
-
-  const handleValueChange = (newValue: number[]) => {
-    setInternalValues(newValue)
-    props.onValueChange?.(newValue)
-  }
-
-  const [showTooltipState, setShowTooltipState] = React.useState(false)
-
-  const handlePointerDown = () => {
-    if (showTooltip) {
-      setShowTooltipState(true)
+    if (defaultValue !== undefined) {
+      return Array.isArray(defaultValue) ? defaultValue : [defaultValue]
     }
-  }
-
-  const handlePointerUp = React.useCallback(() => {
-    if (showTooltip) {
-      setShowTooltipState(false)
-    }
-  }, [showTooltip])
-
-  React.useEffect(() => {
-    if (showTooltip) {
-      document.addEventListener('pointerup', handlePointerUp)
-      return () => {
-        document.removeEventListener('pointerup', handlePointerUp)
-      }
-    }
-  }, [showTooltip, handlePointerUp])
-
-  const renderThumb = (value: number) => {
-    const thumb = (
-      <SliderPrimitive.Thumb
-        data-slot="slider-thumb"
-        className="block size-4 shrink-0 rounded-full border border-primary bg-background shadow-sm outline-none ring-ring/50 transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 disabled:pointer-events-none disabled:opacity-50"
-        onPointerDown={handlePointerDown}
-      />
-    )
-
-    if (!showTooltip)
-      return thumb
-
-    return (
-      <TooltipProvider>
-        <Tooltip open={showTooltipState}>
-          <TooltipTrigger asChild>{thumb}</TooltipTrigger>
-          <TooltipContent
-            className="px-2 py-1 text-xs"
-            sideOffset={8}
-            side={props.orientation === 'vertical' ? 'right' : 'top'}
-          >
-            <p>{tooltipContent ? tooltipContent(value) : value}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    )
-  }
+    return [min]
+  }, [value, defaultValue, min])
 
   return (
     <SliderPrimitive.Root
-      data-slot="slider"
+      className="data-[orientation=horizontal]:w-full"
       defaultValue={defaultValue}
-      value={value}
-      min={min}
       max={max}
-      className={cn(
-        'relative flex w-full touch-none select-none items-center data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col data-[disabled]:opacity-50',
-        className,
-      )}
-      onValueChange={handleValueChange}
+      min={min}
+      thumbAlignment="edge"
+      value={value}
       {...props}
     >
-      <SliderPrimitive.Track
-        data-slot="slider-track"
+      {children}
+      <SliderPrimitive.Control
         className={cn(
-          'relative grow overflow-hidden rounded-full bg-muted data-[orientation=horizontal]:h-1.5 data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-1.5',
+          'flex touch-none select-none data-[disabled]:pointer-events-none data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=horizontal]:w-full data-[orientation=horizontal]:min-w-44 data-[orientation=vertical]:flex-col data-disabled:opacity-64',
+          className,
         )}
+        data-slot="slider-control"
       >
-        <SliderPrimitive.Range
-          data-slot="slider-range"
-          className={cn(
-            'absolute bg-primary data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full',
-          )}
-        />
-      </SliderPrimitive.Track>
-      {Array.from({ length: internalValues.length }, (_, index) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: false positive
-        <React.Fragment key={index}>
-          {renderThumb(internalValues[index] ?? 0)}
-        </React.Fragment>
-      ))}
+        <SliderPrimitive.Track
+          className="relative grow select-none before:absolute before:rounded-full before:bg-input data-[orientation=horizontal]:h-1 data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-1 data-[orientation=horizontal]:before:inset-x-0.5 data-[orientation=vertical]:before:inset-x-0 data-[orientation=horizontal]:before:inset-y-0 data-[orientation=vertical]:before:inset-y-0.5"
+          data-slot="slider-track"
+        >
+          <SliderPrimitive.Indicator
+            className="select-none rounded-full bg-primary data-[orientation=horizontal]:ms-0.5 data-[orientation=vertical]:mb-0.5"
+            data-slot="slider-indicator"
+          />
+          {Array.from({ length: _values.length }, (_, index) => (
+            <SliderPrimitive.Thumb
+              className="block size-4 shrink-0 select-none rounded-full border border-input bg-white bg-clip-padding shadow-xs outline-none transition-shadow before:absolute before:inset-0 before:rounded-full before:shadow-[0_1px_--theme(--color-black/4%)] focus-visible:ring-[3px] focus-visible:ring-ring/24 has-focus-visible:ring-[3px] has-focus-visible:ring-ring/24 data-dragging:ring-[3px] data-dragging:ring-ring/24 dark:border-background dark:bg-clip-border dark:data-dragging:ring-ring/48 dark:focus-visible:ring-ring/48 [&:is(:focus-visible,[data-dragging])]:shadow-none"
+              data-slot="slider-thumb"
+              key={String(index)}
+            />
+          ))}
+        </SliderPrimitive.Track>
+      </SliderPrimitive.Control>
     </SliderPrimitive.Root>
   )
 }
 
-export { Slider }
+function SliderValue({ className, ...props }: SliderPrimitive.Value.Props) {
+  return (
+    <SliderPrimitive.Value
+      className={cn('flex justify-end text-sm', className)}
+      data-slot="slider-value"
+      {...props}
+    />
+  )
+}
+
+export { Slider, SliderValue }

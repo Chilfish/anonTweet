@@ -32,15 +32,14 @@ export default function BetterError() {
         </p>
 
         <div className="mt-6 flex w-full shrink-0 items-center justify-center space-x-3">
-          <Button variant="outline" asChild>
-            <Link to="/auth/sign-in">
-              <ArrowLeftIcon className="size-4" />
-              Go to sign in
-            </Link>
+          <Button variant="outline" render={<Link to="/auth/sign-in" />}>
+
+            <ArrowLeftIcon className="size-4" />
+            Go to sign in
           </Button>
 
-          <Button asChild>
-            <Link to="/">Take me home</Link>
+          <Button render={<Link to="/" />}>
+            Take me home
           </Button>
         </div>
 

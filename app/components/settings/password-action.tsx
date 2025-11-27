@@ -39,10 +39,8 @@ export function ChangePassword() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          Change Password
-        </Button>
+      <DialogTrigger render={<Button variant="outline" size="sm" />}>
+        Change Password
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
@@ -86,10 +84,9 @@ export function ChangePassword() {
             errors={fields.confirmPassword.errors}
           />
           <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={isPending}>
-                Cancel
-              </Button>
+            <DialogClose render={<Button type="button" variant="outline" disabled={isPending} />}>
+
+              Cancel
             </DialogClose>
             <LoadingButton
               buttonText="Save changes"

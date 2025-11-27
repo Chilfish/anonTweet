@@ -99,17 +99,20 @@ export function DownloadMedia() {
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          onClick={() => tweet && handleDownload()}
-          size="icon"
-          variant="ghost"
-          disabled={isDownloading}
-        >
-          {isDownloading
-            ? <LoaderIcon className="animate-spin" />
-            : <DownloadIcon />}
-        </Button>
+      <TooltipTrigger
+        render={(
+          <Button
+            onClick={() => tweet && handleDownload()}
+            size="icon"
+            variant="ghost"
+            disabled={isDownloading}
+          />
+        )}
+      >
+
+        {isDownloading
+          ? <LoaderIcon className="animate-spin" />
+          : <DownloadIcon />}
       </TooltipTrigger>
       <TooltipContent>
         <p>下载推文媒体</p>

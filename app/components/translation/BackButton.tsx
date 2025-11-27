@@ -6,15 +6,11 @@ export function BackButton() {
   return (
     <Button
       className="flex items-center gap-1 mr-auto"
-      asChild
+      render={<Link to="/" />}
       variant="link"
     >
-      <Link
-        to="/"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        返回
-      </Link>
+      <ArrowLeft className="h-4 w-4" />
+      返回
     </Button>
   )
 }

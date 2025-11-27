@@ -63,7 +63,7 @@ export function TweetInputForm() {
           </div>
 
           {error && (
-            <Alert variant="destructive">
+            <Alert variant="error">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>

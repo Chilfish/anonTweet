@@ -75,15 +75,14 @@ function SidebarMenuLink({
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
-        asChild
+        render={<Link to={item.url} onClick={() => setOpenMobile(false)} />}
         isActive={isActiveLink(href, item.url)}
         tooltip={item.title}
       >
-        <Link to={item.url} onClick={() => setOpenMobile(false)}>
-          {item.icon && <item.icon />}
-          <span>{item.title}</span>
-          {item.badge && <NavBadge>{item.badge}</NavBadge>}
-        </Link>
+
+        {item.icon && <item.icon />}
+        <span>{item.title}</span>
+        {item.badge && <NavBadge>{item.badge}</NavBadge>}
       </SidebarMenuButton>
     </SidebarMenuItem>
   )
@@ -106,38 +105,34 @@ function SidebarMenuCollapsible({
 
   return (
     <Collapsible
-      asChild
+      render={<SidebarMenuItem />}
       defaultOpen={isGroupActive}
       className="group/collapsible"
     >
-      <SidebarMenuItem>
-        <CollapsibleTrigger asChild>
-          <SidebarMenuButton tooltip={item.title}>
-            {item.icon && <item.icon />}
-            <span>{item.title}</span>
-            {item.badge && <NavBadge>{item.badge}</NavBadge>}
-            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-          </SidebarMenuButton>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="CollapsibleContent">
-          <SidebarMenuSub>
-            {item.items.map(subItem => (
-              <SidebarMenuSubItem key={subItem.title}>
-                <SidebarMenuSubButton
-                  asChild
-                  isActive={isActiveLink(href, subItem.url)}
-                >
-                  <Link to={subItem.url} onClick={() => setOpenMobile(false)}>
-                    {subItem.icon && <subItem.icon />}
-                    <span>{subItem.title}</span>
-                    {subItem.badge && <NavBadge>{subItem.badge}</NavBadge>}
-                  </Link>
-                </SidebarMenuSubButton>
-              </SidebarMenuSubItem>
-            ))}
-          </SidebarMenuSub>
-        </CollapsibleContent>
-      </SidebarMenuItem>
+
+      <CollapsibleTrigger render={<SidebarMenuButton tooltip={item.title} />}>
+
+        {item.icon && <item.icon />}
+        <span>{item.title}</span>
+        {item.badge && <NavBadge>{item.badge}</NavBadge>}
+        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="CollapsibleContent">
+        <SidebarMenuSub>
+          {item.items.map(subItem => (
+            <SidebarMenuSubItem key={subItem.title}>
+              <SidebarMenuSubButton
+                render={<Link to={subItem.url} onClick={() => setOpenMobile(false)} />}
+                isActive={isActiveLink(href, subItem.url)}
+              >
+                {subItem.icon && <subItem.icon />}
+                <span>{subItem.title}</span>
+                {subItem.badge && <NavBadge>{subItem.badge}</NavBadge>}
+              </SidebarMenuSubButton>
+            </SidebarMenuSubItem>
+          ))}
+        </SidebarMenuSub>
+      </CollapsibleContent>
     </Collapsible>
   )
 }

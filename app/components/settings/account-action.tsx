@@ -23,10 +23,8 @@ export function DeleteAccount({ email }: { email: string }) {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="destructive" size="sm">
-          Delete
-        </Button>
+      <DialogTrigger render={<Button variant="destructive" size="sm" />}>
+        Delete
       </DialogTrigger>
       <DialogContent className="sm:max-w-sm">
         <div className="flex flex-col items-center gap-2">
@@ -62,10 +60,8 @@ export function DeleteAccount({ email }: { email: string }) {
             <input type="hidden" name="intent" value="delete-account" />
           </div>
           <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant="outline" className="flex-1">
-                Cancel
-              </Button>
+            <DialogClose render={<Button type="button" variant="outline" className="flex-1" />}>
+              Cancel
             </DialogClose>
             <LoadingButton
               buttonText="Delete"

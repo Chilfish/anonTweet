@@ -125,43 +125,8 @@ export default function SignInRoute() {
           )}
         </div>
       </Form>
-      {/*
-      <div className="relative text-center text-xs after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-border after:border-t">
-        <span className="relative z-10 bg-background px-2 text-muted-foreground">
-          Or continue with
-        </span>
-      </div>
-
-      Social login
-      {SOCIAL_PROVIDER_CONFIGS.length > 0 && (
-        <div className="grid gap-2">
-          {SOCIAL_PROVIDER_CONFIGS.map(config => (
-            <Form key={config.id} method="post">
-              <input type="hidden" name="provider" value={config.id} />
-              <Button
-                variant="outline"
-                className="relative w-full overflow-hidden"
-                disabled={isPending(config.id)}
-              >
-                <config.icon className="size-4" />
-                <span>
-                  Login with
-                  {' '}
-                  <span className="capitalize">{config.name}</span>
-                </span>
-                {lastMethod === config.id && (
-                  <span className="absolute top-0 right-0 rounded-bl-md bg-blue-50 px-2 py-0.5 text-[10px] text-blue-500 capitalize dark:bg-muted dark:text-white">
-                    Last used
-                  </span>
-                )}
-              </Button>
-            </Form>
-          ))}
-        </div>
-      )}
-*/}
       {/* Sign up */}
-      <div className="text-center text-sm">
+      <div className="text-center text-sm mt-2">
         Don&apos;t have an account?
         {' '}
         <Link to="/auth/sign-up" className="text-primary hover:underline">

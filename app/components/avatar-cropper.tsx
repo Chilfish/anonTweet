@@ -315,7 +315,7 @@ export default function AvatarCropper({
               min={1}
               max={3}
               step={0.1}
-              onValueChange={(values) => {
+              onValueChange={(values: any) => {
                 if (values[0] !== undefined) {
                   setZoom(values[0])
                 }

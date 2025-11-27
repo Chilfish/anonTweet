@@ -90,20 +90,18 @@ export function UserStatusFilter({ table }: UserStatusFilterProps) {
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="outline">
-          <FilterIcon
-            className="-ms-1.5 size-4 text-muted-foreground/60"
-            size={16}
-            aria-hidden="true"
-          />
-          Filter
-          {totalActiveFilters > 0 && (
-            <span className="-me-1 ms-3 inline-flex h-5 max-h-full items-center rounded border border-border bg-background px-1 font-[inherit] font-medium text-[0.625rem] text-muted-foreground/70">
-              {totalActiveFilters}
-            </span>
-          )}
-        </Button>
+      <PopoverTrigger render={<Button variant="outline" />}>
+        <FilterIcon
+          className="-ms-1.5 size-4 text-muted-foreground/60"
+          size={16}
+          aria-hidden="true"
+        />
+        Filter
+        {totalActiveFilters > 0 && (
+          <span className="-me-1 ms-3 inline-flex h-5 max-h-full items-center rounded border border-border bg-background px-1 font-[inherit] font-medium text-[0.625rem] text-muted-foreground/70">
+            {totalActiveFilters}
+          </span>
+        )}
       </PopoverTrigger>
       <PopoverContent className="w-auto min-w-48 p-3" align="end">
         <div className="space-y-4">

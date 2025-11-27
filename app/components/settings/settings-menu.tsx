@@ -2,8 +2,6 @@ import type { LucideIcon } from 'lucide-react'
 import {
   HardDriveIcon,
   KeyIcon,
-
-  SunMoonIcon,
   UserIcon,
 } from 'lucide-react'
 import { href, NavLink } from 'react-router'
@@ -22,16 +20,6 @@ const menuItems: MenuItem[] = [
     url: href('/settings/account'),
     icon: UserIcon,
   },
-  {
-    title: 'Appearance',
-    url: href('/settings/appearance'),
-    icon: SunMoonIcon,
-  },
-  // {
-  //   title: "Connections",
-  //   url: href("/settings/connections"),
-  //   icon: Link2Icon,
-  // },
   {
     title: 'Sessions',
     url: href('/settings/sessions'),

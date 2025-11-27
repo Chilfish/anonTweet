@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import { useFetcher } from 'react-router'
 import {
   AlertDialog,
-  AlertDialogCancel,
+  AlertDialogClose,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -31,8 +31,8 @@ export function SignOutOfOtherSessions() {
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <Button variant="outline">Sign out of other sessions</Button>
+      <AlertDialogTrigger render={<Button variant="outline" />}>
+        Sign out of other sessions
       </AlertDialogTrigger>
       <AlertDialogContent className="sm:max-w-md">
         <div className="flex flex-col gap-2 max-sm:items-center sm:flex-row sm:gap-4">
@@ -52,7 +52,9 @@ export function SignOutOfOtherSessions() {
         </div>
         <fetcher.Form method="post" action=".">
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogClose disabled={isPending}>
+              Cancel
+            </AlertDialogClose>
             <LoadingButton
               buttonText="Sign out"
               loadingText="Signing out..."

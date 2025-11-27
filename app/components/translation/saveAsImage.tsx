@@ -62,7 +62,6 @@ export function SaveAsImageButton() {
 
   return (
     <Button
-      size="sm"
       variant="secondary"
       onClick={onSaveAsImage}
     >
