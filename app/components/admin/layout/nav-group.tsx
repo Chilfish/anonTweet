@@ -75,14 +75,15 @@ function SidebarMenuLink({
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
-        render={<Link to={item.url} onClick={() => setOpenMobile(false)} />}
+        asChild
         isActive={isActiveLink(href, item.url)}
         tooltip={item.title}
       >
-
-        {item.icon && <item.icon />}
-        <span>{item.title}</span>
-        {item.badge && <NavBadge>{item.badge}</NavBadge>}
+        <Link to={item.url} onClick={() => setOpenMobile(false)}>
+          {item.icon && <item.icon />}
+          <span>{item.title}</span>
+          {item.badge && <NavBadge>{item.badge}</NavBadge>}
+        </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>
   )
@@ -122,12 +123,15 @@ function SidebarMenuCollapsible({
           {item.items.map(subItem => (
             <SidebarMenuSubItem key={subItem.title}>
               <SidebarMenuSubButton
-                render={<Link to={subItem.url} onClick={() => setOpenMobile(false)} />}
+                asChild
                 isActive={isActiveLink(href, subItem.url)}
               >
-                {subItem.icon && <subItem.icon />}
-                <span>{subItem.title}</span>
-                {subItem.badge && <NavBadge>{subItem.badge}</NavBadge>}
+                <Link to={subItem.url} onClick={() => setOpenMobile(false)}>
+
+                  {subItem.icon && <subItem.icon />}
+                  <span>{subItem.title}</span>
+                  {subItem.badge && <NavBadge>{subItem.badge}</NavBadge>}
+                </Link>
               </SidebarMenuSubButton>
             </SidebarMenuSubItem>
           ))}

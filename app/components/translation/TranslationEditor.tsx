@@ -4,7 +4,7 @@ import React, { useRef, useState } from 'react'
 import { TweetText } from '~/components/tweet/TweetText'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '~/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogPanel, DialogTitle, DialogTrigger } from '~/components/ui/dialog'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Switch } from '~/components/ui/switch'
@@ -170,10 +170,10 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <DialogPanel className="space-y-6">
           {/* 原文显示 */}
           <div>
-            <Label className="font-medium">原文</Label>
+            <Label className="font-bold">原文</Label>
             <Card className="mt-2 py-3">
               <CardContent>
                 <TweetText text={originalTweet.text} />
@@ -184,12 +184,12 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
           {/* 句首翻译补充开关 */}
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
-              <Switch
-                id="enable-prepend"
-                checked={enablePrepend}
-                onCheckedChange={setEnablePrepend}
-              />
               <Label htmlFor="enable-prepend" className="font-medium">
+                <Switch
+                  id="enable-prepend"
+                  checked={enablePrepend}
+                  onCheckedChange={setEnablePrepend}
+                />
                 启用句首翻译补充
               </Label>
             </div>
@@ -248,33 +248,39 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
             </div>
           </div>
 
-          {/* 操作按钮 */}
-          <div className="flex justify-between pt-4">
-            <div>
-              {existingTranslation && (
-                <Button variant="destructive" size="sm" onClick={handleDelete} className="gap-2">
-                  <Trash2 className="h-4 w-4" />
-                  删除翻译
-                </Button>
-              )}
-            </div>
+        </DialogPanel>
 
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => setIsOpen(false)} className="gap-2">
-                <X className="h-4 w-4" />
-                取消
-              </Button>
-              <Button
-                size="sm"
-                onClick={handleSave}
-                className="gap-2"
-              >
-                <Save className="h-4 w-4" />
-                保存
-              </Button>
-            </div>
+        <DialogFooter className="flex-row items-center">
+          {/* 操作按钮 */}
+          {existingTranslation && (
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              className="gap-2 w-fit"
+            >
+              <Trash2 className="h-4 w-4" />
+              删除翻译
+            </Button>
+          )}
+
+          <div className="flex gap-2 ml-auto">
+            <Button
+              variant="outline"
+              onClick={() => setIsOpen(false)}
+              className="gap-2"
+            >
+              <X className="h-4 w-4" />
+              取消
+            </Button>
+            <Button
+              onClick={handleSave}
+              className="gap-2"
+            >
+              <Save className="h-4 w-4" />
+              保存
+            </Button>
           </div>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )
