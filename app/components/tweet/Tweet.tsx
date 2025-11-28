@@ -1,5 +1,5 @@
 import type { Ref } from 'react'
-import type { EnrichedTweet, TwitterComponents } from '~/lib/react-tweet'
+import type { EnrichedTweet } from '~/lib/react-tweet'
 import type { ThemeSettings } from '~/lib/stores/theme'
 import type { TweetData } from '~/types'
 import { useEffect, useRef, useState } from 'react'
@@ -9,13 +9,14 @@ import {
   TweetHeader,
   TweetMedia,
 } from '~/lib/react-tweet'
+import { useTranslationStore } from '~/lib/stores/translation'
 import { cn } from '~/lib/utils'
 import { TweetLinkCard } from './TweetCard'
 import { TweetTextBody } from './TweetTextBody'
 
-interface TweetComponentProps extends TweetData {
-  tweet: EnrichedTweet
-  components?: TwitterComponents
+interface TweetComponentProps {
+  tweets: TweetData
+  mainTweetId: string
   settings?: ThemeSettings
   showMp4CoverOnly?: boolean
   ref?: Ref<HTMLDivElement>
@@ -25,10 +26,11 @@ const hasMedia = (tweet: EnrichedTweet) => tweet.photos?.length || !!tweet.video
 
 function ThreadTweet({
   tweet,
-  components,
   showMp4CoverOnly,
-}: TweetComponentProps) {
-  const quotedTweet = tweet.quoted_tweet || null
+}: {
+  tweet: EnrichedTweet
+  showMp4CoverOnly?: boolean
+}) {
   return (
     <TweetContainer
       className="border-none! px-0! py-2! relative"
@@ -38,7 +40,6 @@ function ThreadTweet({
       >
         <TweetHeader
           tweet={tweet}
-          components={components}
           className="pb-1!"
           createdAtInline
         />
@@ -49,16 +50,18 @@ function ThreadTweet({
       >
         <TweetBody
           tweet={tweet}
-          quotedTweet={quotedTweet as any}
           showMp4CoverOnly={showMp4CoverOnly}
-          parentTweets={[]}
         />
       </div>
     </TweetContainer>
   )
 }
 
-function TweetBody({ tweet, quotedTweet, showMp4CoverOnly }: TweetComponentProps) {
+function TweetBody({ tweet, showMp4CoverOnly }: {
+  tweet: EnrichedTweet
+  showMp4CoverOnly?: boolean
+}) {
+  const quotedTweet = tweet.quotedTweet || null
   return (
     <>
       <TweetTextBody tweet={tweet} />
@@ -118,13 +121,22 @@ function QuotedTweet({
 }
 
 export function MyTweet({
-  tweet,
-  parentTweets = [],
-  quotedTweet,
-  components,
+  tweets,
+  mainTweetId,
   showMp4CoverOnly,
-  ref,
 }: TweetComponentProps) {
+  const ref = useRef<HTMLDivElement | null>(null)
+  const { setTweetElRef } = useTranslationStore()
+
+  useEffect(() => {
+    if (ref.current) {
+      setTweetElRef(ref.current)
+    }
+  }, [ref.current])
+
+  const mainTweet = tweets.find(tweet => tweet.id_str === mainTweetId)!
+  const parentTweets = tweets.filter(tweet => tweet.id_str !== mainTweetId)
+
   const hasThread = parentTweets.length > 0
   const mainTweetRef = useRef<HTMLElement | null>(null)
   const [mainTweetheight, setMainTweetHeight] = useState(0)
@@ -156,9 +168,6 @@ export function MyTweet({
             <ThreadTweet
               key={parentTweet.id_str}
               tweet={parentTweet}
-              quotedTweet={null}
-              parentTweets={[]}
-              components={components}
               showMp4CoverOnly={showMp4CoverOnly}
             />
           ))}
@@ -178,18 +187,16 @@ export function MyTweet({
         ref={mainTweetRef}
       >
         <div className="flex items-center justify-between">
-          <TweetHeader tweet={tweet} components={components} createdAtInline />
-          <TranslationEditor originalTweet={tweet} />
+          <TweetHeader tweet={mainTweet} createdAtInline />
+          <TranslationEditor originalTweet={mainTweet} />
         </div>
 
         <div
           className={cn({ 'sm:pl-14! pl-12!': hasThread })}
         >
           <TweetBody
-            tweet={tweet}
-            quotedTweet={quotedTweet as any}
+            tweet={mainTweet}
             showMp4CoverOnly={showMp4CoverOnly}
-            parentTweets={[]}
           />
         </div>
       </article>

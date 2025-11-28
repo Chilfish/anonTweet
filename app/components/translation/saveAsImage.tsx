@@ -12,11 +12,11 @@ function saveAsImage(png: string, fileName: string) {
 }
 
 export function SaveAsImageButton() {
-  const { tweetElRef, tweet, setShowTranslationButton, setScreenshoting, showTranslations } = useTranslationStore()
+  const { tweetElRef, mainTweet, setShowTranslationButton, setScreenshoting, showTranslations } = useTranslationStore()
 
   async function onSaveAsImage() {
-    if (!tweetElRef || !tweet) {
-      console.log('tweetElRef or tweet is null', { tweetElRef, tweet })
+    if (!tweetElRef || !mainTweet) {
+      console.log('tweetElRef or tweet is null', { tweetElRef, tweet: mainTweet })
       toast.error('图片保存失败', {
         description: '请检查Tweet是否存在',
       })
@@ -43,12 +43,12 @@ export function SaveAsImageButton() {
         minute: '2-digit',
         second: '2-digit',
       })
-      const fileName = `${tweet.user.screen_name}-${tweet.id_str}-${now}`
+      const fileName = `${mainTweet.user.screen_name}-${mainTweet.id_str}-${now}`
       saveAsImage(png, fileName)
       toast.success('图片保存成功')
     }
     else {
-      console.log('png is null', { png, tweetElRef, tweet })
+      console.log('png is null', { png, tweetElRef, mainTweet })
       toast.error('图片保存失败', {
         description: '请检查Tweet是否存在',
       })

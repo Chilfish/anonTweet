@@ -1,4 +1,4 @@
-import type { Entity } from '~/lib/react-tweet'
+import type { EnrichedTweet, Entity } from '~/lib/react-tweet'
 import type { TweetData } from '~/types'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
@@ -34,6 +34,7 @@ interface TranslationState {
   showTranslationButton: boolean
   editingTweetId: string | null
   tweetElRef: HTMLDivElement | null
+  mainTweet: EnrichedTweet | null
   screenshoting: boolean
 
   // 设置相关方法
@@ -60,6 +61,7 @@ interface TranslationState {
   setTweetElRef: (ref: HTMLDivElement) => void
 
   setAllTweets: (data: TweetData) => void
+  setMainTweet: (tweet: EnrichedTweet) => void
 
   // 工具方法
   hasTextContent: (text?: string) => boolean
@@ -97,6 +99,7 @@ export const useTranslationStore = create<TranslationState>()(
       editingTweetId: null,
       tweetElRef: null,
       tweets: [],
+      mainTweet: null,
       screenshoting: false,
 
       // 设置相关方法
@@ -105,14 +108,17 @@ export const useTranslationStore = create<TranslationState>()(
           settings: { ...state.settings, ...newSettings },
         })),
 
-      setAllTweets: (data: TweetData) => {
-        const tweets = formatTweets(data)
-        console.log(tweets)
-        return set(state => ({
+      setAllTweets: (data: TweetData) =>
+        set(state => ({
           ...state,
-          tweets,
-        }))
-      },
+          tweets: data,
+        })),
+
+      setMainTweet: (tweet: EnrichedTweet) =>
+        set(state => ({
+          ...state,
+          mainTweet: tweet,
+        })),
 
       resetSettings: () =>
         set(state => ({
@@ -265,22 +271,3 @@ export const useTranslationStore = create<TranslationState>()(
     },
   ),
 )
-
-/**
- * 重组推文数据，将回复的推文嵌到对应的推文中，
- * 并从列表数据中删掉它
- */
-function formatTweets(tweets: TweetData): TweetData {
-  const qoutedTweets = tweets.filter(tweet => !!tweet.in_reply_to_status_id_str)
-  const mainTweets = tweets.filter(tweet => !tweet.in_reply_to_status_id_str)
-
-  mainTweets.forEach((tweet) => {
-    const qoutedTweetIndex = qoutedTweets.findIndex(q => q.id_str === tweet.in_reply_to_status_id_str)
-    if (qoutedTweetIndex !== -1) {
-      tweet.quotedTweet = qoutedTweets[qoutedTweetIndex]
-      qoutedTweets.splice(qoutedTweetIndex, 1)
-    }
-  })
-
-  return mainTweets
-}

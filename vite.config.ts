@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
 // TODO: REMOVE IT
-process.exit(1)
+// process.exit(1)
 // 获取 git 信息
 function getGitInfo() {
   try {

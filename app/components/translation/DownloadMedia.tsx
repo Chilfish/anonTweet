@@ -52,14 +52,15 @@ function getMediaUrls(data: EnrichedTweet): DownloadItem[] {
 }
 
 export function DownloadMedia() {
-  const { tweet, quotedTweet, parentTweets } = useTranslationStore()
+  const { tweets } = useTranslationStore()
   const [isDownloading, setIsDownloading] = useState(false)
 
   async function handleDownload() {
     if (isDownloading)
       return
 
-    const mediaUrls = [tweet, quotedTweet, ...parentTweets]
+    const mediaUrls = tweets
+      .flatMap(t => t.quotedTweet ? [t.quotedTweet, t] : [t])
       .flatMap(t => t && getMediaUrls(t))
       .filter((url): url is DownloadItem => !!url)
 
@@ -102,7 +103,7 @@ export function DownloadMedia() {
       <TooltipTrigger
         render={(
           <Button
-            onClick={() => tweet && handleDownload()}
+            onClick={() => handleDownload()}
             size="icon"
             variant="ghost"
             disabled={isDownloading}

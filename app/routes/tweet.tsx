@@ -1,7 +1,6 @@
-import type { Ref } from 'react'
 import type { Route } from './+types/tweet'
 import type { TweetData } from '~/types'
-import { Suspense, useEffect, useRef } from 'react'
+import { Suspense, useEffect } from 'react'
 import { Await, useLoaderData, useSearchParams } from 'react-router'
 import { LayoutComponent } from '~/components/layout/Layout'
 import { BackButton } from '~/components/translation/BackButton'
@@ -43,7 +42,7 @@ export async function loader({
   if (isDebug) {
     return {
       tweets: [],
-      tweetId: undefined
+      tweetId: undefined,
     }
   }
   const { id } = params
@@ -51,17 +50,17 @@ export async function loader({
   if (!tweetId) {
     return {
       tweets: [],
-      tweetId: id
+      tweetId: id,
     }
   }
   const tweets = await getTweets(tweetId)
   return {
     tweets,
-    tweetId
+    tweetId,
   }
 }
 
-function TweetContent({ ref }: { ref?: Ref<HTMLDivElement> }) {
+function TweetContent() {
   const loaderData = useLoaderData<typeof loader>()
   const { screenshoting } = useTranslationStore()
 
@@ -71,12 +70,12 @@ function TweetContent({ ref }: { ref?: Ref<HTMLDivElement> }) {
         resolve={loaderData}
         errorElement={<TweetNotFound />}
         children={resolvedTweet =>
-          resolvedTweet.tweets
+          resolvedTweet.tweets && resolvedTweet.tweetId
             ? (
                 <MyTweet
                   tweets={resolvedTweet.tweets}
+                  mainTweetId={resolvedTweet.tweetId}
                   showMp4CoverOnly={screenshoting}
-                  ref={ref}
                 />
               )
             : (
@@ -95,23 +94,18 @@ export default function TweetPage({
   const plain = searchParams.get('plain') === 'true'
   const { id: tweetId } = params
 
-  const tweetRef = useRef<HTMLDivElement>(null)
-  const { setTweetElRef, setAllTweets } = useTranslationStore()
+  const { setAllTweets, setMainTweet } = useTranslationStore()
 
   if (plain && tweetId) {
     return <TweetContent />
   }
 
   useEffect(() => {
-    if (tweetRef.current) {
-      setTweetElRef(tweetRef.current)
-    }
-  }, [tweetRef.current])
-
-  useEffect(() => {
     if (loaderData.tweets.length) {
-      console.log(loaderData)
+      const mainTweet = loaderData.tweets.find(tweet => tweet.id_str === tweetId)
+      console.log(loaderData, mainTweet)
       setAllTweets(loaderData.tweets)
+      setMainTweet(mainTweet!)
     }
   }, [loaderData.tweets])
 
@@ -124,9 +118,7 @@ export default function TweetPage({
         <DownloadMedia />
       </div>
 
-      <TweetContent
-        ref={tweetRef}
-      />
+      <TweetContent />
     </LayoutComponent>
   )
 }

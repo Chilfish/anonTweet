@@ -5,10 +5,14 @@ import { getEnrichedTweet } from './react-tweet/api-v2'
 export async function getTweets(tweetId: string): Promise<TweetData> {
   let tweet = await getEnrichedTweet(tweetId)
   let parentTweet: EnrichedTweet | null = null
+  let quotedTweet: EnrichedTweet | null = null
   const tweets: EnrichedTweet[] = []
 
   if (!tweet) {
     return []
+  }
+  else {
+    tweets.push(tweet)
   }
 
   while (true) {
@@ -16,9 +20,9 @@ export async function getTweets(tweetId: string): Promise<TweetData> {
       break
     }
     if (tweet.quoted_tweet_id) {
-      const quotedTweet = await getEnrichedTweet(tweet.quoted_tweet_id)
+      quotedTweet = await getEnrichedTweet(tweet.quoted_tweet_id)
       if (quotedTweet) {
-        tweets.unshift(quotedTweet)
+        tweet.quotedTweet = quotedTweet
       }
     }
     if (tweet.in_reply_to_status_id_str) {
@@ -28,8 +32,11 @@ export async function getTweets(tweetId: string): Promise<TweetData> {
       }
     }
 
+    if (!tweet.in_reply_to_status_id_str) {
+      break
+    }
     tweet = parentTweet
   }
 
-  return tweets
+  return tweets.sort((a, b) => a.id_str.localeCompare(b.id_str))
 }
