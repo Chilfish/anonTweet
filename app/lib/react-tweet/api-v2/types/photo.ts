@@ -1,8 +1,8 @@
-import type { Rect, RGB } from './media'
+// import type { Rect, RGB } from './media'
 
 export interface TweetPhoto {
-  backgroundColor: RGB
-  cropCandidates: Rect[]
+  // backgroundColor: RGB
+  // cropCandidates: Rect[]
   expandedUrl: string
   url: string
   width: number

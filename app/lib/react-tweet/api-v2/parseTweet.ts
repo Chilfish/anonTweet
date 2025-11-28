@@ -497,51 +497,19 @@ function mapVideoEntities(tweet: RawTweet): TweetVideo | undefined {
   }
 }
 
-function mapMediaDetails(tweet: RawTweet): MediaDetails[] | undefined {
+export function mapMediaDetails(tweet: RawTweet): MediaDetails[] | undefined {
   const mediaEntities = tweet.legacy.entities?.media
   if (!mediaEntities || mediaEntities.length === 0)
     return undefined
 
   return mediaEntities.map((media) => {
+    // 提取公共基础字段
     const baseMedia = {
-      display_url: media.display_url,
-      expanded_url: media.expanded_url,
-      ext_media_availability: {
-        status: media.ext_media_availability?.status || 'Available',
-      },
-      ext_media_color: {
-        palette: [],
-      },
-      indices: media.indices,
       media_url_https: media.media_url_https,
       original_info: {
         height: media.original_info.height,
         width: media.original_info.width,
-        focus_rects: media.original_info.focus_rects || [],
       },
-      sizes: {
-        large: {
-          h: media.sizes.large.h,
-          resize: media.sizes.large.resize,
-          w: media.sizes.large.w,
-        },
-        medium: {
-          h: media.sizes.medium.h,
-          resize: media.sizes.medium.resize,
-          w: media.sizes.medium.w,
-        },
-        small: {
-          h: media.sizes.small.h,
-          resize: media.sizes.small.resize,
-          w: media.sizes.small.w,
-        },
-        thumb: {
-          h: media.sizes.thumb.h,
-          resize: media.sizes.thumb.resize,
-          w: media.sizes.thumb.w,
-        },
-      },
-      url: media.url,
     }
 
     if (media.type === 'photo') {
@@ -551,28 +519,36 @@ function mapMediaDetails(tweet: RawTweet): MediaDetails[] | undefined {
         ext_alt_text: media.ext_alt_text,
       }
     }
-    else if (media.type === 'animated_gif' && media.video_info) {
+
+    if (media.type === 'animated_gif' && media.video_info) {
       return {
         ...baseMedia,
         type: 'animated_gif' as const,
         video_info: {
-          aspect_ratio: [media.video_info.aspect_ratio[0] || 1, media.video_info.aspect_ratio[1] || 1] as [number, number],
-          variants: media.video_info.variants,
-        },
-      }
-    }
-    else if (media.type === 'video' && media.video_info) {
-      return {
-        ...baseMedia,
-        type: 'video' as const,
-        video_info: {
-          aspect_ratio: [media.video_info.aspect_ratio[0] || 1, media.video_info.aspect_ratio[1] || 1] as [number, number],
+          aspect_ratio: [
+            media.video_info.aspect_ratio[0] || 1,
+            media.video_info.aspect_ratio[1] || 1,
+          ] as [number, number],
           variants: media.video_info.variants,
         },
       }
     }
 
-    // 默认返回 photo 类型
+    if (media.type === 'video' && media.video_info) {
+      return {
+        ...baseMedia,
+        type: 'video' as const,
+        video_info: {
+          aspect_ratio: [
+            media.video_info.aspect_ratio[0] || 1,
+            media.video_info.aspect_ratio[1] || 1,
+          ] as [number, number],
+          variants: [media.video_info.variants.at(-1)!],
+        },
+      }
+    }
+
+    // Fallback: 默认返回 photo 类型以保证类型安全
     return {
       ...baseMedia,
       type: 'photo' as const,
