@@ -1,6 +1,7 @@
 import type { EnrichedTweet } from './react-tweet'
 import type { TweetData } from '~/types'
 import { getEnrichedTweet } from './react-tweet/api-v2'
+// import { writeFile } from 'node:fs/promises'
 
 export async function getTweets(tweetId: string): Promise<TweetData> {
   let tweet = await getEnrichedTweet(tweetId)
@@ -37,6 +38,8 @@ export async function getTweets(tweetId: string): Promise<TweetData> {
     }
     tweet = parentTweet
   }
+
+  // await writeFile('tweets.json', JSON.stringify(tweets, null, 2), 'utf8')
 
   return tweets.sort((a, b) => a.id_str.localeCompare(b.id_str))
 }

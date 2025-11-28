@@ -13,12 +13,12 @@ export function TweetLinkCard({ tweet, className }: TweetLinkCardProps) {
     return null
 
   // Validate card data - ensure we have at least title or description
-  if (!card.title && !card.description && !card.image) {
+  if (!card.title && !card.description && !card.imageUrl) {
     return null
   }
 
   // Determine layout based on card type and image availability
-  const hasImage = !!card.image
+  const hasImage = !!card.imageUrl
   const isLargeImageCard = hasImage && (
     card.type === 'unified_card'
     || card.type === 'summary_large_image'
@@ -82,7 +82,7 @@ export function TweetLinkCard({ tweet, className }: TweetLinkCardProps) {
     )}
     >
       <img
-        src={proxyMedia(card.image!.url)}
+        src={proxyMedia(card.imageUrl)}
         alt={card.title || 'Link preview'}
         className={cn(
           'h-full w-full object-cover',

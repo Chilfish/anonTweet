@@ -6,3 +6,4 @@
 /build/
 .env
 data/
+tmp/

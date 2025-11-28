@@ -83,6 +83,20 @@ export interface TwitterCard {
   }
 }
 
+export interface LinkPreviewCard {
+  type: 'summary' | 'summary_large_image' | 'unified_card' | 'unknown' | 'player'
+  /** 跳转链接 */
+  url: string
+  /** 显示标题 */
+  title: string
+  /** 显示描述 */
+  description: string
+  /** 显示域名  */
+  domain: string
+  /** 图片地址 */
+  imageUrl: string
+}
+
 interface TextEntity {
   indices: Indices
   type: 'text'
@@ -109,14 +123,14 @@ export type Entity = {
   | (SymbolEntity & { type: 'symbol', href: string })
 )
 
-type OmitTypes = 'entities' | 'quoted_tweet' | 'edit_control' | 'isEdited' | 'isStaleEdit' | 'possibly_sensitive' | 'news_action_type'
+type OmitTypes = 'entities' | 'quoted_tweet' | 'edit_control' | 'isEdited' | 'isStaleEdit' | 'possibly_sensitive' | 'news_action_type' | 'card'
 
 export type EnrichedTweet = Omit<Tweet, OmitTypes> & {
   url: string
   entities: Entity[]
   quoted_tweet_id?: string
   quotedTweet?: EnrichedTweet
-  card?: TwitterCard
+  card?: LinkPreviewCard
   photos?: TweetPhoto[]
   video?: TweetVideo
   conversation_count: number
