@@ -39,7 +39,7 @@ export async function getTweets(tweetId: string): Promise<TweetData> {
     tweet = parentTweet
   }
 
-  // await writeFile('tweets.json', JSON.stringify(tweets, null, 2), 'utf8')
+  // await writeFile('tmp/tweets.json', JSON.stringify(tweets, null, 2), 'utf8')
 
   return tweets.sort((a, b) => a.id_str.localeCompare(b.id_str))
 }

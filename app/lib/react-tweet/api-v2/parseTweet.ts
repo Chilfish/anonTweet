@@ -45,8 +45,8 @@ export function enrichTweet(sourceData: RawTweet): EnrichedTweet {
     //   : undefined,
     card: mapTwitterCard(tweet.card),
     mediaDetails: mapMediaDetails(tweet),
-    photos: mapPhotoEntities(tweet),
-    video: mapVideoEntities(tweet),
+    // photos: mapPhotoEntities(tweet),
+    // video: mapVideoEntities(tweet),
     // parent: parentTweet(tweet),
   }
 }

@@ -12,5 +12,6 @@ export default antfu({
     'style/multiline-ternary': 'off',
     'unicorn/prefer-number-properties': 'warn',
     'ts/no-use-before-define': 'warn',
+    'no-case-declarations': 'off',
   },
 })

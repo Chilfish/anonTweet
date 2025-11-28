@@ -1,9 +1,7 @@
 import type { TweetEditControl } from './edit'
 import type { Indices, TweetEntities } from './entities'
 import type { MediaDetails } from './media'
-import type { TweetPhoto } from './photo'
 import type { TweetUser } from './user'
-import type { TweetVideo } from './video'
 
 /**
  * Base tweet information shared by a tweet, a parent tweet and a quoted tweet.
@@ -52,8 +50,8 @@ export interface Tweet extends TweetBase {
   __typename: 'Tweet'
   favorite_count: number
   mediaDetails?: MediaDetails[]
-  photos?: TweetPhoto[]
-  video?: TweetVideo
+  // photos?: TweetPhoto[]
+  // video?: TweetVideo
   conversation_count: number
   news_action_type: 'conversation'
   quoted_tweet?: QuotedTweet

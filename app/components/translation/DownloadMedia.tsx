@@ -1,5 +1,5 @@
 import type { DownloadItem } from '~/lib/downloader'
-import type { EnrichedTweet } from '~/lib/react-tweet'
+import type { EnrichedTweet, MediaDetails } from '~/lib/react-tweet'
 import { DownloadIcon, LoaderIcon } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -36,17 +36,45 @@ function renameMedia(
   }
 }
 
-function getMediaUrls(data: EnrichedTweet): DownloadItem[] {
-  const medias: DownloadItem[] = []
-  const photos = (data.photos || []).map((photo, idx) => renameMedia(data, photo.url, 'photo', idx))
-  medias.push(...photos)
-
-  if (data.video?.videoId) {
-    const videoUrl = data.video.variants.at(-1)?.src
-    if (videoUrl) {
-      medias.push(renameMedia(data, videoUrl, 'video', 0))
-    }
+function extractMediaUrls(mediaDetails: MediaDetails[] | undefined): string[] {
+  if (!mediaDetails || !Array.isArray(mediaDetails)) {
+    return []
   }
+
+  return mediaDetails.map((media) => {
+    switch (media.type) {
+      case 'photo':
+        return media.media_url_https
+
+      case 'animated_gif':
+        return media.video_info?.variants[0]?.url || ''
+
+      case 'video':
+        const mp4Variants = media.video_info?.variants.filter(
+          v => v.content_type === 'video/mp4' && typeof v.bitrate === 'number',
+        )
+
+        if (!mp4Variants || mp4Variants.length === 0) {
+          return ''
+        }
+
+        const bestVariant = mp4Variants.reduce((best, current) =>
+          (current.bitrate! > best.bitrate!) ? current : best,
+        )
+
+        return bestVariant.url
+
+      default:
+        return ''
+    }
+  }).filter(url => url !== '')
+}
+
+const getMediaType = (url: string): 'photo' | 'video' => url.includes('video') ? 'video' : 'photo'
+
+function getMediaUrls(tweet: EnrichedTweet): DownloadItem[] {
+  const medias: DownloadItem[] = extractMediaUrls(tweet.mediaDetails)
+    .map((url, idx) => renameMedia(tweet, url, getMediaType(url), idx))
 
   return medias
 }

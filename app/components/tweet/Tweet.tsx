@@ -22,7 +22,7 @@ interface TweetComponentProps {
   ref?: Ref<HTMLDivElement>
 }
 
-const hasMedia = (tweet: EnrichedTweet) => tweet.photos?.length || !!tweet.video?.videoId
+const hasMedia = (tweet: EnrichedTweet) => !!tweet.mediaDetails?.length
 
 function ThreadTweet({
   tweet,
