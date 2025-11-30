@@ -288,7 +288,7 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
   const adjustedTextMap = Array.from(adjustedText)
 
   // 转换为最终的 Entity 类型
-  return result.map((entity) => {
+  return result.map((entity, index) => {
     const entityText = adjustedTextMap.slice(entity.indices[0], entity.indices[1]).join('')
 
     switch (entity.type) {
@@ -296,25 +296,29 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
         return Object.assign(entity, {
           href: getHashtagUrl(entity as HashtagEntity),
           text: entityText,
+          index,
         })
       case 'mention':
         return Object.assign(entity, {
           href: `https://twitter.com/${(entity as any).screen_name}`,
           text: entityText,
+          index,
         })
       case 'url':
       case 'media':
         return Object.assign(entity, {
           href: (entity as any).expanded_url,
           text: (entity as any).expanded_url,
+          index,
         })
       case 'symbol':
         return Object.assign(entity, {
           href: getSymbolUrl(entity as SymbolEntity),
           text: entityText,
+          index,
         })
       default:
-        return Object.assign(entity, { text: entityText })
+        return Object.assign(entity, { text: entityText, index })
     }
   })
 }

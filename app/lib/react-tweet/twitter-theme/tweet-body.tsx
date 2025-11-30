@@ -5,11 +5,12 @@ import { TweetLink } from './tweet-link'
 
 interface TweetBodyProps {
   tweet: EnrichedTweet
+  isTranslated: boolean
   lang?: string
   className?: string
 }
 
-export function TweetBody({ tweet, lang, className }: TweetBodyProps) {
+export function TweetBody({ tweet, isTranslated, lang, className }: TweetBodyProps) {
   return (
     <p
       className={cn(s.root, className)}
@@ -17,6 +18,10 @@ export function TweetBody({ tweet, lang, className }: TweetBodyProps) {
       dir="auto"
     >
       {tweet.entities.map((item, i) => {
+        const text = isTranslated ? (item.translation || item.text) : item.text
+        if (!isTranslated && item.index < 0)
+          return null
+
         switch (item.type) {
           case 'hashtag':
           case 'mention':
@@ -24,7 +29,7 @@ export function TweetBody({ tweet, lang, className }: TweetBodyProps) {
           case 'symbol':
             return (
               <TweetLink key={i} href={item.href}>
-                {item.text}
+                {text}
               </TweetLink>
             )
           case 'media':
@@ -35,7 +40,7 @@ export function TweetBody({ tweet, lang, className }: TweetBodyProps) {
           // We use `dangerouslySetInnerHTML` to preserve the text encoding.
           // https://github.com/vercel-labs/react-tweet/issues/29
             return (
-              <span key={i} dangerouslySetInnerHTML={{ __html: item.text }} />
+              <span key={i} dangerouslySetInnerHTML={{ __html: text }} />
             )
         }
       })}

@@ -11,7 +11,7 @@ export function ToggleTransButton() {
 
   return (
     <Button
-      size="sm"
+      variant="secondary"
       onClick={toggleTranslations}
       className="h-8 px-3 text-sm font-medium transition-all duration-200"
     >

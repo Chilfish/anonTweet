@@ -112,6 +112,8 @@ export type EntityWithType
 
 export type Entity = {
   text: string
+  translation?: string
+  index: number
 } & (
   | TextEntity
   | (HashtagEntity & { type: 'hashtag', href: string })

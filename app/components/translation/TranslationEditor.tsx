@@ -11,9 +11,7 @@ import { Switch } from '~/components/ui/switch'
 import { Textarea } from '~/components/ui/textarea'
 import { useTranslationStore } from '~/lib/stores/translation'
 
-type EntityTranslation = Entity & {
-  index: number
-}
+type EntityTranslation = Entity
 
 // 翻译编辑器组件
 interface TranslationEditorProps {
@@ -87,18 +85,19 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     const updatedTranslations = entityTranslations.map((entity) => {
       const inputId = `${entity.index}-${entity.type}`
       const inputElement = inputRefs.current.get(inputId)
+      const translation = inputElement?.value || entity.text
       return {
         ...entity,
-        text: inputElement?.value || entity.text,
+        translation,
       }
     })
 
     // 保存所有实体的翻译，包括句首补充（如果启用）
-    const finalTranslations = [...updatedTranslations]
+    const finalTranslations: EntityTranslation[] = [...updatedTranslations]
 
     if (enablePrepend) {
       const prependText = prependRef.current?.value || ''
-      const updatedPrependEntity = {
+      const updatedPrependEntity: EntityTranslation = {
         ...prependEntity,
         text: prependText,
       }

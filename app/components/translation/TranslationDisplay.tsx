@@ -19,7 +19,6 @@ export const TranslationDisplay: React.FC<TranslationDisplayProps> = ({
     if (!showTranslations)
       return false
 
-    // 纯图片推文检测 - 使用更严格的检测逻辑
     if (!hasTextContent(originalTweet.text))
       return false
 
@@ -50,6 +49,7 @@ export const TranslationDisplay: React.FC<TranslationDisplayProps> = ({
           ...originalTweet,
           entities: translation,
         }}
+        isTranslated
       />
     </>
   )
