@@ -48,7 +48,11 @@ export default [
     route('auth/error', 'routes/api/better-error.tsx'),
     route('auth/*', 'routes/api/better.tsx'),
     route('color-scheme', 'routes/api/color-scheme.ts'),
-    route('tweet/:id', 'routes/api/tweet.tsx'),
+
+    ...prefix('tweet', [
+      route('get/:id', 'routes/api/tweet/get.ts'),
+      route('set', 'routes/api/tweet/set.ts'),
+    ]),
   ]),
 
   // Not found

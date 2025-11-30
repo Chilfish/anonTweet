@@ -145,6 +145,10 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
       || (entityTranslation.type === 'media')
   }
 
+  const getText = (entityTranslation: EntityTranslation) => {
+    return entityTranslation.translation || entityTranslation.text
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger
@@ -219,7 +223,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
                   const id = `${entityTranslation.index}-${entityTranslation.type}`
                   return (
                     <div key={id} className="space-y-2">
-                      <Label htmlFor={id} className="text-xs uppercase font-mono min-w-0 flex-shrink-0">
+                      <Label htmlFor={id} className="text-xs uppercase font-mono min-w-0 shrink-0">
                         {entityTranslation.type}
                       </Label>
                       {entityTranslation.type === 'text'
@@ -227,7 +231,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
                             <Textarea
                               id={id}
                               ref={el => setInputRef(id, el)}
-                              defaultValue={entityTranslation.text}
+                              defaultValue={getText(entityTranslation)}
                               placeholder="输入翻译内容..."
                               className="text-sm"
                             />
@@ -236,8 +240,8 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
                             <Input
                               id={id}
                               ref={el => setInputRef(id, el)}
-                              defaultValue={entityTranslation.text}
-                              placeholder={`翻译 ${entityTranslation.text}`}
+                              defaultValue={getText(entityTranslation)}
+                              placeholder={`翻译 ${getText(entityTranslation)}`}
                               className="text-sm"
                             />
                           )}

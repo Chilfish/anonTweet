@@ -3,8 +3,8 @@ import type { TweetData } from '~/types'
 import { getEnrichedTweet } from './react-tweet/api-v2'
 // import { writeFile } from 'node:fs/promises'
 
-export async function getTweets(tweetId: string): Promise<TweetData> {
-  let tweet = await getEnrichedTweet(tweetId)
+export async function getTweets(tweetId: string, tweetGetter: typeof getEnrichedTweet = getEnrichedTweet): Promise<TweetData> {
+  let tweet = await tweetGetter(tweetId)
   let parentTweet: EnrichedTweet | null = null
   let quotedTweet: EnrichedTweet | null = null
   const tweets: EnrichedTweet[] = []
@@ -21,13 +21,13 @@ export async function getTweets(tweetId: string): Promise<TweetData> {
       break
     }
     if (tweet.quoted_tweet_id) {
-      quotedTweet = await getEnrichedTweet(tweet.quoted_tweet_id)
+      quotedTweet = await tweetGetter(tweet.quoted_tweet_id)
       if (quotedTweet) {
         tweet.quotedTweet = quotedTweet
       }
     }
     if (tweet.in_reply_to_status_id_str) {
-      parentTweet = await getEnrichedTweet(tweet.in_reply_to_status_id_str)
+      parentTweet = await tweetGetter(tweet.in_reply_to_status_id_str)
       if (parentTweet) {
         tweets.unshift(parentTweet)
       }

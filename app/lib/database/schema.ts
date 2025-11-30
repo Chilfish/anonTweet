@@ -1,7 +1,9 @@
+import type { EnrichedTweet } from '~/lib/react-tweet'
 import {
   boolean,
   index,
   integer,
+  json,
   pgTable,
   serial,
   text,
@@ -119,6 +121,21 @@ export const todo = pgTable(
   table => [index('todo_userId_idx').on(table.userId)],
 )
 
+export const tweet = pgTable(
+  'tweet',
+  {
+    id: serial('id').primaryKey(),
+    jsonContent: json('jsonContent').$type<EnrichedTweet>().notNull(),
+    tweetOwnerId: text('tweetOwnerId').notNull(),
+    tweetId: text('tweetId').notNull(),
+    createdAt: timestamp('createdAt').notNull().defaultNow(),
+  },
+  table => [index('tweet_ownerId_idx').on(table.tweetOwnerId)],
+)
+
 // Type
 export type SelectTodo = typeof todo.$inferSelect
 export type InsertTodo = typeof todo.$inferInsert
+
+export type SelectTweet = typeof tweet.$inferSelect
+export type InsertTweet = typeof tweet.$inferInsert

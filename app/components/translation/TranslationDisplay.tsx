@@ -12,14 +12,12 @@ export const TranslationDisplay: React.FC<TranslationDisplayProps> = ({
   originalTweet,
 }) => {
   const { settings, showTranslations, getTranslation, hasTextContent } = useTranslationStore()
+  const translation = getTranslation(tweetId)
 
   // 检查是否应该显示翻译
   const shouldShowTranslation = () => {
     // 全局翻译开关关闭
     if (!showTranslations)
-      return false
-
-    if (!hasTextContent(originalTweet.text))
       return false
 
     return true
@@ -28,8 +26,6 @@ export const TranslationDisplay: React.FC<TranslationDisplayProps> = ({
   if (!shouldShowTranslation()) {
     return null
   }
-
-  const translation = getTranslation(tweetId)
 
   if (!translation) {
     return null

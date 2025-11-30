@@ -8,6 +8,13 @@
       "when": 1764124098458,
       "tag": "0000_sudden_santa_claus",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1764524587384,
+      "tag": "0001_furry_paladin",
+      "breakpoints": true
     }
   ]
 }

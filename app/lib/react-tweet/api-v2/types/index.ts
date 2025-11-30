@@ -131,8 +131,6 @@ export type EnrichedTweet = Omit<Tweet, OmitTypes> & {
   quoted_tweet_id?: string
   quotedTweet?: EnrichedTweet
   card?: LinkPreviewCard
-  // photos?: TweetPhoto[]
-  // video?: TweetVideo
   conversation_count: number
 }
 

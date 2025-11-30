@@ -1,5 +1,6 @@
 import type { Route } from './+types/tweet'
 import type { TweetData } from '~/types'
+import axios from 'axios'
 import { Suspense, useEffect } from 'react'
 import { Await, useLoaderData, useSearchParams } from 'react-router'
 import { LayoutComponent } from '~/components/layout/Layout'
@@ -7,8 +8,8 @@ import { BackButton } from '~/components/translation/BackButton'
 import { DownloadMedia } from '~/components/translation/DownloadMedia'
 import { SaveAsImageButton } from '~/components/translation/saveAsImage'
 import { ToggleTransButton } from '~/components/translation/ToggleTransButton'
+import UpdateTranslation from '~/components/translation/UpdateTranslation'
 import { MyTweet } from '~/components/tweet/Tweet'
-import { getTweets } from '~/lib/getTweet'
 import { TweetNotFound, TweetSkeleton } from '~/lib/react-tweet'
 import { useTranslationStore } from '~/lib/stores/translation'
 import { extractTweetId } from '~/lib/utils'
@@ -31,20 +32,12 @@ export function HydrateFallback() {
   )
 }
 
-export async function loader({
+export async function clientLoader({
   params,
-  request,
 }: Route.LoaderArgs): Promise<{
   tweets: TweetData
   tweetId?: string
 }> {
-  const isDebug = new URLSearchParams(request.url.split('?')[1]).get('debug') === 'true'
-  if (isDebug) {
-    return {
-      tweets: [],
-      tweetId: undefined,
-    }
-  }
   const { id } = params
   const tweetId = extractTweetId(id)
   if (!tweetId) {
@@ -53,7 +46,8 @@ export async function loader({
       tweetId: id,
     }
   }
-  const tweets = await getTweets(tweetId)
+  // const tweets = await getTweets(tweetId)
+  const { data: tweets } = await axios.get<TweetData>(`/api/tweet/get/${tweetId}`)
   return {
     tweets,
     tweetId,
@@ -61,7 +55,7 @@ export async function loader({
 }
 
 function TweetContent() {
-  const loaderData = useLoaderData<typeof loader>()
+  const loaderData = useLoaderData<typeof clientLoader>()
   const { screenshoting } = useTranslationStore()
 
   return (
@@ -94,7 +88,7 @@ export default function TweetPage({
   const plain = searchParams.get('plain') === 'true'
   const { id: tweetId } = params
 
-  const { setAllTweets, setMainTweet } = useTranslationStore()
+  const { setAllTweets } = useTranslationStore()
 
   if (plain && tweetId) {
     return <TweetContent />
@@ -102,10 +96,8 @@ export default function TweetPage({
 
   useEffect(() => {
     if (loaderData.tweets.length) {
-      const mainTweet = loaderData.tweets.find(tweet => tweet.id_str === tweetId)
-      console.log(loaderData, mainTweet)
-      setAllTweets(loaderData.tweets)
-      setMainTweet(mainTweet!)
+      console.log(loaderData)
+      setAllTweets(loaderData.tweets, tweetId)
     }
   }, [loaderData.tweets])
 
@@ -116,6 +108,7 @@ export default function TweetPage({
         <ToggleTransButton />
         <SaveAsImageButton />
         <DownloadMedia />
+        <UpdateTranslation />
       </div>
 
       <TweetContent />

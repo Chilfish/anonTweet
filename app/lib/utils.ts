@@ -1,4 +1,5 @@
 import type { ClassValue } from 'clsx'
+import type { EnrichedTweet } from './react-tweet'
 import { clsx } from 'clsx'
 import { format, parseISO } from 'date-fns'
 import { twMerge } from 'tailwind-merge'
@@ -138,4 +139,20 @@ export function getAvatarUrl(
     avatarUrl,
     placeholderUrl,
   }
+}
+
+export function flatTweets(tweets: EnrichedTweet[]): EnrichedTweet[] {
+  const copiedTweets = structuredClone(tweets)
+  return copiedTweets.flatMap((tweet) => {
+    const quotedTweet = tweet.quotedTweet
+
+    if (quotedTweet) {
+      delete tweet.quotedTweet
+      return [
+        quotedTweet,
+        tweet,
+      ]
+    }
+    return [tweet]
+  })
 }
