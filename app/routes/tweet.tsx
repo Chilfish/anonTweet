@@ -8,7 +8,6 @@ import { BackButton } from '~/components/translation/BackButton'
 import { DownloadMedia } from '~/components/translation/DownloadMedia'
 import { SaveAsImageButton } from '~/components/translation/saveAsImage'
 import { ToggleTransButton } from '~/components/translation/ToggleTransButton'
-import UpdateTranslation from '~/components/translation/UpdateTranslation'
 import { MyTweet } from '~/components/tweet/Tweet'
 import { TweetNotFound, TweetSkeleton } from '~/lib/react-tweet'
 import { useTranslationStore } from '~/lib/stores/translation'
@@ -108,7 +107,7 @@ export default function TweetPage({
         <ToggleTransButton />
         <SaveAsImageButton />
         <DownloadMedia />
-        <UpdateTranslation />
+        {/* <UpdateTranslation /> */}
       </div>
 
       <TweetContent />

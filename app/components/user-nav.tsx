@@ -99,16 +99,19 @@ export function UserNav() {
           <DropdownMenuItem
             asChild
           >
-            <Button
-              onClick={() =>
+            <Link
+              to="/"
+              onClick={(e) => {
+                e.preventDefault()
                 signOutFetcher.submit(null, {
                   method: 'POST',
                   action: '/auth/sign-out',
-                })}
+                })
+              }}
             >
               <LogOutIcon />
               退出登录
-            </Button>
+            </Link>
           </DropdownMenuItem>
         )
           : (

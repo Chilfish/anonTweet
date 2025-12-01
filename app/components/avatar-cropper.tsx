@@ -1,9 +1,8 @@
 import { XIcon, ZoomInIcon, ZoomOutIcon } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useFetcher } from 'react-router'
-import { toast } from 'sonner'
-
 import { Spinner } from '~/components/spinner'
+
 import { Button } from '~/components/ui/button'
 import {
   Cropper,
@@ -21,6 +20,7 @@ import {
 } from '~/components/ui/dialog'
 import { Slider } from '~/components/ui/slider'
 import { useFileUpload } from '~/hooks/use-file-upload'
+import { toast } from '~/lib/utils'
 import {
   ACCEPTED_IMAGE_TYPES,
   MAX_FILE_SIZE,
@@ -222,7 +222,7 @@ export default function AvatarCropper({
   // Effect to show error toast if there are any
   useEffect(() => {
     if (errors.length > 0) {
-      toast.error(errors[0])
+      toast.error(errors[0] || '')
     }
   }, [errors])
 

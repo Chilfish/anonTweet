@@ -1,8 +1,8 @@
 import type { ChangeEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { useFetcher } from 'react-router'
-import { toast } from 'sonner'
 import { formatBytes } from '~/hooks/use-file-upload'
+import { toast } from '~/lib/utils'
 import {
   ACCEPTED_IMAGE_TYPES,
   MAX_FILE_SIZE,

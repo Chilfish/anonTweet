@@ -1,11 +1,11 @@
 import axios from 'axios'
 import { LoaderIcon, SaveIcon } from 'lucide-react'
 import { useState } from 'react'
-import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
+import { toastManager } from '~/components/ui/toast'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
 import { useTranslationStore } from '~/lib/stores/translation'
-import { flatTweets } from '~/lib/utils'
+import { flatTweets, toast } from '~/lib/utils'
 
 export default function UpdateTranslation() {
   const { tweets, translations } = useTranslationStore()
@@ -36,7 +36,21 @@ export default function UpdateTranslation() {
           toast.success('翻译结果已保存')
         }
         else if (data.status === 401) {
-          toast.error('需要先登录才能保存翻译结果')
+          const id = toastManager.add({
+            actionProps: {
+              children: '不再提醒',
+              onClick: () => {
+                toastManager.close(id)
+                console.log(id)
+              },
+            },
+            description: '需要先登录才能保存翻译结果。',
+            timeout: 1000000,
+            title: '尚未登录',
+            type: 'error',
+          })
+
+          console.log(id)
         }
       })
       .catch((error) => {

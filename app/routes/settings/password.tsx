@@ -1,12 +1,12 @@
 import type { Route } from './+types/password'
 import { parseWithZod } from '@conform-to/zod'
 
-import { toast } from 'sonner'
 import { ChangePassword } from '~/components/settings/password-action'
 import { SettingRow } from '~/components/settings/setting-row'
 import { SettingsLayout } from '~/components/settings/settings-layout'
 import { authClient } from '~/lib/auth/auth.client'
 import { AppInfo } from '~/lib/config'
+import { toast } from '~/lib/utils'
 import { changePasswordSchema } from '~/lib/validations/auth'
 
 export const meta: Route.MetaFunction = () => {

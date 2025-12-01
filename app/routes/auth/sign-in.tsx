@@ -3,11 +3,11 @@ import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import { useEffect, useState } from 'react'
 import { Form, Link, redirect, useNavigation } from 'react-router'
-import { toast } from 'sonner'
 import { AuthLayout } from '~/components/auth-layout'
 import { InputField, LoadingButton, PasswordField } from '~/components/forms'
 import { authClient } from '~/lib/auth/auth.client'
 import { AppInfo } from '~/lib/config'
+import { toast } from '~/lib/utils'
 import { signInSchema } from '~/lib/validations/auth'
 
 export const meta: Route.MetaFunction = () => {
@@ -30,6 +30,9 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
         password,
       })
       if (error) {
+        if (error.code === 'INVALID_EMAIL_OR_PASSWORD') {
+          return toast.error('用户名或密码错误')
+        }
         return toast.error(error.message || '登录失败')
       }
       break

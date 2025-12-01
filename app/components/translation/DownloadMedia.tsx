@@ -2,12 +2,12 @@ import type { DownloadItem } from '~/lib/downloader'
 import type { EnrichedTweet, MediaDetails } from '~/lib/react-tweet'
 import { DownloadIcon, LoaderIcon } from 'lucide-react'
 import { useState } from 'react'
-import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
 import { downloadFiles } from '~/lib/downloader'
 import { formatDate } from '~/lib/react-tweet/date-utils'
 import { useTranslationStore } from '~/lib/stores/translation'
+import { toast } from '~/lib/utils'
 
 function renameMedia(
   tweet: EnrichedTweet,

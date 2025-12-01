@@ -3,6 +3,7 @@ import type { EnrichedTweet } from './react-tweet'
 import { clsx } from 'clsx'
 import { format, parseISO } from 'date-fns'
 import { twMerge } from 'tailwind-merge'
+import { toastManager } from '~/components/ui/toast'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -155,4 +156,28 @@ export function flatTweets(tweets: EnrichedTweet[]): EnrichedTweet[] {
     }
     return [tweet]
   })
+}
+
+export const toast = {
+  success: (title: string, args?: { description: string }) => {
+    toastManager.add({
+      title,
+      type: 'success',
+      ...args,
+    })
+  },
+  error: (title: string, args?: { description: string }) => {
+    toastManager.add({
+      title,
+      type: 'error',
+      ...args,
+    })
+  },
+  info: (title: string, args?: { description: string }) => {
+    toastManager.add({
+      title,
+      type: 'info',
+      ...args,
+    })
+  },
 }

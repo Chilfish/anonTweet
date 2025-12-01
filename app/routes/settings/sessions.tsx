@@ -2,7 +2,6 @@ import type { Route } from './+types/sessions'
 import { Suspense } from 'react'
 import { Await, data, useNavigate } from 'react-router'
 
-import { toast } from 'sonner'
 import { SignOutOfOtherSessions } from '~/components/settings/session-action'
 import { SessionItem } from '~/components/settings/session-item'
 import { SettingsLayout } from '~/components/settings/settings-layout'
@@ -12,6 +11,7 @@ import { useAuthUser } from '~/hooks/use-auth-user'
 import { authClient } from '~/lib/auth/auth.client'
 import { serverAuth } from '~/lib/auth/auth.server'
 import { AppInfo } from '~/lib/config'
+import { toast } from '~/lib/utils'
 
 export const meta: Route.MetaFunction = () => {
   return [{ title: `会话 - ${AppInfo.name}` }]

@@ -21,6 +21,7 @@ const customSignInErrorMap: z.ZodErrorMap = (issue, ctx) => {
   if (issue.code === z.ZodIssueCode.invalid_union_discriminator) {
     return { message: '指定的登录提供商无效。' }
   }
+  console.log(issue, ctx)
   return { message: ctx.defaultError }
 }
 

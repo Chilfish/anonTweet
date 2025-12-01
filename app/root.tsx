@@ -12,10 +12,10 @@ import {
   useNavigation,
 } from 'react-router'
 import { ThemeProvider } from '~/components/ThemeProvider'
+import { AnchoredToastProvider, ToastProvider } from '~/components/ui/toast'
 import stylesheet from './app.css?url'
 import { ProgressBar } from './components/progress-bar'
 import { Button } from './components/ui/button'
-
 import { Toaster } from './components/ui/sonner'
 import { useNonce } from './hooks/use-nonce'
 import {
@@ -71,10 +71,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <ProgressBar />
-        {children}
+
+        <ToastProvider>
+          <AnchoredToastProvider>
+            {children}
+          </AnchoredToastProvider>
+        </ToastProvider>
+
         <ScrollRestoration getKey={location => location.pathname} />
         <Scripts nonce={nonce} />
-        <Toaster position="top-center" theme={colorScheme} />
+        <Toaster theme={colorScheme} />
       </body>
     </html>
   )
@@ -85,6 +91,7 @@ export default function App({ loaderData }: Route.ComponentProps) {
   const nonce = useNonce()
   return (
     <ThemeProvider>
+
       <Outlet />
       <script
         nonce={nonce}
