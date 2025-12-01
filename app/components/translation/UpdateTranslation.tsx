@@ -14,12 +14,38 @@ export default function UpdateTranslation() {
   async function submitTweet() {
     setIsSubmitting(true)
     const flatedTweet = flatTweets(tweets)
-    await axios.postForm('/api/tweet/set', {
-      tweet: JSON.stringify(flatedTweet),
-      intent: 'update',
+    const data = flatedTweet.map((tweet) => {
+      const entities = tweet.entities
+        .filter(entity => entity.type === 'hashtag' || entity.type === 'text')
+        .filter(entity => !!entity.translation?.trim())
+      if (entities.length === 0)
+        return null
+      return {
+        tweetId: tweet.id_str,
+        entities,
+      }
     })
-    setIsSubmitting(false)
-    toast.success('翻译结果已保存')
+      .filter(Boolean)
+
+    await axios.post('/api/tweet/set', {
+      data,
+      intent: 'updateEntities',
+    })
+      .then(({ data }) => {
+        if (data.success) {
+          toast.success('翻译结果已保存')
+        }
+        else if (data.status === 401) {
+          toast.error('需要先登录才能保存翻译结果')
+        }
+      })
+      .catch((error) => {
+        toast.error('保存翻译结果失败')
+        console.error(error)
+      })
+      .finally(() => {
+        setIsSubmitting(false)
+      })
   }
 
   return (

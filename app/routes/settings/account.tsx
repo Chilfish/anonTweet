@@ -28,7 +28,7 @@ export async function action({ request, context }: Route.ActionArgs) {
     }
 
     const headers = request.headers
-    const { user } = requireUser(context)
+    const { user } = requireUser()
     const { intent } = submission.value
     let message = ''
 

@@ -7,7 +7,7 @@ import { requireAuth, requireUser } from '~/middlewares/auth-guard'
 export const middleware = [requireAuth]
 
 export async function loader({ context }: Route.LoaderArgs) {
-  return requireUser(context)
+  return requireUser()
 }
 
 export default function AuthenticatedLayout(_: Route.ComponentProps) {

@@ -3,10 +3,13 @@ import type { EnrichedTweet } from '~/lib/react-tweet'
 import type { TweetData } from '~/types'
 import { eq } from 'drizzle-orm'
 import { db } from '~/lib/database/db.server'
-import { tweet } from '~/lib/database/schema'
+import { tweet, tweetEntities } from '~/lib/database/schema'
 import { getTweets } from '~/lib/getTweet'
 import { getEnrichedTweet } from '~/lib/react-tweet/api-v2'
 import { extractTweetId } from '~/lib/utils'
+import { requireAuth, requireUser } from '~/middlewares/auth-guard'
+
+export const middleware = [requireAuth]
 
 async function getDBTweet(tweetId: string): Promise<EnrichedTweet | null> {
   const cachedTweet = await db.query.tweet.findFirst({
@@ -23,6 +26,20 @@ async function getDBTweet(tweetId: string): Promise<EnrichedTweet | null> {
       tweetId: enrichedTweet.id_str,
       tweetOwnerId: enrichedTweet.user.screen_name,
       jsonContent: enrichedTweet,
+    })
+  }
+
+  const { user } = requireUser()
+  const translationEntities = await db.query.tweetEntities.findMany({
+    where: eq(tweetEntities.tweetUserId, `${tweetId}-${user.id}`),
+  }).then(r => r[0])
+
+  if (translationEntities) {
+    translationEntities.entities.forEach((entity) => {
+      const idx = enrichedTweet.entities.findIndex(e => e.index === entity.index)
+      if (idx > -1) {
+        enrichedTweet.entities[idx]!.translation = entity.translation
+      }
     })
   }
 

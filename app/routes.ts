@@ -12,7 +12,6 @@ export default [
   layout('routes/layout.tsx', [
     index('routes/home.tsx'),
     route('/tweets/:id', 'routes/tweet.tsx'),
-    route('todos', 'routes/todos.tsx'),
 
     ...prefix('settings', [
       layout('routes/settings/layout.tsx', [

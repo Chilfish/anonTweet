@@ -63,10 +63,6 @@ interface TranslationState {
   hasTextContent: (text?: string) => boolean
 }
 
-// ==========================================
-// 2. 静态常量与纯函数 (Constants & Pure Utils)
-// ==========================================
-
 const DEFAULT_TEMPLATES: SeparatorTemplate[] = [
   {
     id: 'preset-google',
@@ -135,10 +131,6 @@ function extractTranslationsFromEntities(tweets: EnrichedTweet | EnrichedTweet[]
   return extracted
 }
 
-// ==========================================
-// 3. Store 实现 (Implementation)
-// ==========================================
-
 export const useTranslationStore = create<TranslationState>()(
   persist(
     (set, get) => ({
@@ -149,15 +141,11 @@ export const useTranslationStore = create<TranslationState>()(
       mainTweet: null,
 
       // UI Defaults
-      showTranslations: true,
+      showTranslations: false,
       showTranslationButton: false,
       editingTweetId: null,
       tweetElRef: null,
       screenshoting: false,
-
-      // ----------------------------------------------------------------
-      // Settings Domain Actions
-      // ----------------------------------------------------------------
 
       updateSettings: newSettings =>
         set(state => ({
@@ -304,19 +292,12 @@ export const useTranslationStore = create<TranslationState>()(
           return { translations: newTranslations }
         }),
 
-      // ----------------------------------------------------------------
-      // UI Domain Actions
-      // ----------------------------------------------------------------
-
       setShowTranslations: show => set({ showTranslations: show }),
       setShowTranslationButton: show => set({ showTranslationButton: show }),
       setEditingTweetId: tweetId => set({ editingTweetId: tweetId }),
       setTweetElRef: ref => set({ tweetElRef: ref }),
       setScreenshoting: screenshoting => set({ screenshoting }),
 
-      // ----------------------------------------------------------------
-      // Utils (Exposed)
-      // ----------------------------------------------------------------
       hasTextContent: checkTextContent,
     }),
     {

@@ -110,11 +110,18 @@ export type EntityWithType
     | (MediaEntity & { type: 'media' })
     | (SymbolEntity & { type: 'symbol' })
 
-export type Entity = {
+export interface EntityBase {
   text: string
   translation?: string
   index: number
-} & (
+}
+
+export type TranslationEntity = EntityBase & (
+  | TextEntity
+  | (HashtagEntity & { type: 'hashtag', href: string })
+)
+
+export type Entity = EntityBase & (
   | TextEntity
   | (HashtagEntity & { type: 'hashtag', href: string })
   | (UserMentionEntity & { type: 'mention', href: string })

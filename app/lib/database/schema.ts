@@ -1,4 +1,4 @@
-import type { EnrichedTweet } from '~/lib/react-tweet'
+import type { EnrichedTweet, TranslationEntity } from '~/lib/react-tweet'
 import {
   boolean,
   index,
@@ -127,10 +127,23 @@ export const tweet = pgTable(
     id: serial('id').primaryKey(),
     jsonContent: json('jsonContent').$type<EnrichedTweet>().notNull(),
     tweetOwnerId: text('tweetOwnerId').notNull(),
-    tweetId: text('tweetId').notNull(),
+    tweetId: text('tweetId').notNull().unique(),
     createdAt: timestamp('createdAt').notNull().defaultNow(),
   },
   table => [index('tweet_ownerId_idx').on(table.tweetOwnerId)],
+)
+
+export const tweetEntities = pgTable(
+  'tweet_entities',
+  {
+    id: serial('id').primaryKey(),
+    tweetUserId: text('tweetUserId').notNull().unique(),
+    entities: json('entities').$type<TranslationEntity[]>().notNull(),
+    translatedBy: text('translatedBy').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  },
+  table => [
+    index('tweet_entities_tweetId_idx').on(table.tweetUserId),
+  ],
 )
 
 // Type
@@ -139,3 +152,6 @@ export type InsertTodo = typeof todo.$inferInsert
 
 export type SelectTweet = typeof tweet.$inferSelect
 export type InsertTweet = typeof tweet.$inferInsert
+
+export type SelectEntities = typeof tweetEntities.$inferSelect
+export type InsertEntities = typeof tweetEntities.$inferInsert

@@ -41,3 +41,24 @@ export const ALLOWED_PROVIDERS = [
   // SOCIAL_PROVIDER_CONFIGS[0].id,
   // ...SOCIAL_PROVIDER_CONFIGS.slice(1).map(config => config.id),
 ] as const
+
+export const anonUser = {
+  id: 'anonymous',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  email: '',
+  emailVerified: false,
+  name: '访客',
+  banned: false,
+}
+
+export const anonSession = {
+  id: 'anonymous',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  userId: 'anonymous',
+  expiresAt: new Date(),
+  token: '',
+}
+
+export const isAnonUser = (user: any) => user.id === anonUser.id

@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
 import { useAuthUser } from '~/hooks/use-auth-user'
+import { isAnonUser } from '~/lib/config'
 import { getAvatarUrl } from '~/lib/utils'
 
 export function UserNav() {
@@ -26,7 +27,7 @@ export function UserNav() {
   const initials = user?.name?.slice(0, 2)
   const alt = user?.name ?? 'User avatar'
   const avatar = avatarUrl || placeholderUrl
-  const isLoggedIn = !!user?.id
+  const isLoggedIn = !isAnonUser(user)
 
   return (
     <DropdownMenu>

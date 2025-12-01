@@ -1,5 +1,5 @@
 {
-  "id": "b83b1560-1e77-4a75-b1af-a151f63e808e",
+  "id": "e111da50-9336-4f3c-8baf-909c134e8ea9",
   "prevId": "70f889c2-409e-422b-b1f8-57ba08f0f220",
   "version": "7",
   "dialect": "postgresql",
@@ -454,7 +454,90 @@
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "tweet_tweetId_unique": {
+          "name": "tweet_tweetId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "tweetId"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.tweet_entities": {
+      "name": "tweet_entities",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "tweetUserId": {
+          "name": "tweetUserId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entities": {
+          "name": "entities",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "translatedBy": {
+          "name": "translatedBy",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "tweet_entities_tweetId_idx": {
+          "name": "tweet_entities_tweetId_idx",
+          "columns": [
+            {
+              "expression": "tweetUserId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "tweet_entities_translatedBy_user_id_fk": {
+          "name": "tweet_entities_translatedBy_user_id_fk",
+          "tableFrom": "tweet_entities",
+          "tableTo": "user",
+          "columnsFrom": [
+            "translatedBy"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "tweet_entities_tweetUserId_unique": {
+          "name": "tweet_entities_tweetUserId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "tweetUserId"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

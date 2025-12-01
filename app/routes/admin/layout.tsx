@@ -8,7 +8,7 @@ import { requireAuth, requireUser } from '~/middlewares/auth-guard'
 export const middleware = [requireAuth]
 
 export async function loader({ context }: Route.LoaderArgs) {
-  const user = requireUser(context)
+  const user = requireUser()
   if (user.user.role !== 'admin')
     throw redirect('/')
   return data(user)
