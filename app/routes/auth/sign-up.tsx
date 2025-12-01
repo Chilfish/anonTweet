@@ -12,7 +12,7 @@ import { AppInfo } from '~/lib/config'
 import { signUpSchema } from '~/lib/validations/auth'
 
 export const meta: Route.MetaFunction = () => {
-  return [{ title: `Sign Up - ${AppInfo.name}` }]
+  return [{ title: `注册 - ${AppInfo.name}` }]
 }
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
@@ -25,16 +25,16 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
 
   const { error } = await authClient.signUp.email({
     callbackURL: '/',
-    ...submission.value,
+    email: `${submission.value.name}@${AppInfo.domain}`,
+    name: submission.value.name,
+    password: submission.value.password,
   })
 
   if (error) {
-    return toast.error(error.message || 'An unexpected error occurred.')
+    return toast.error(error.message || '发生未知错误。')
   }
 
-  toast.success(
-    'Sign up successful! Please check your email for a verification link.',
-  )
+  // toast.success('注册成功！请检查您的电子邮件以获取验证链接。')
   return redirect('/auth/sign-in')
 }
 
@@ -53,69 +53,59 @@ export default function SignUpRoute() {
 
   return (
     <AuthLayout
-      title="Create your account"
-      description="Welcome! Please fill in the details to get started."
+      title="创建您的账户"
+      description="欢迎！请填写以下详细信息以开始。"
     >
-      {/* Sign up form */}
+      {/* 注册表单 */}
       <Form method="post" className="grid gap-4" {...getFormProps(form)}>
         <InputField
-          labelProps={{ children: 'Name' }}
+          labelProps={{ children: '用户名' }}
           inputProps={{
             ...getInputProps(fields.name, { type: 'text' }),
-            placeholder: 'John Doe',
+            placeholder: 'Anon Chihaya',
             autoComplete: 'name',
             enterKeyHint: 'next',
             required: true,
           }}
           errors={fields.name.errors}
         />
-        <InputField
-          labelProps={{ children: 'Email' }}
-          inputProps={{
-            ...getInputProps(fields.email, { type: 'email' }),
-            placeholder: 'johndoe@example.com',
-            autoComplete: 'email',
-            enterKeyHint: 'next',
-          }}
-          errors={fields.email.errors}
-        />
         <PasswordField
-          labelProps={{ children: 'Password' }}
+          labelProps={{ children: '密码' }}
           inputProps={{
             ...getInputProps(fields.password, { type: 'password' }),
-            placeholder: 'Enter a unique password',
+            placeholder: '请输入一个唯一的密码',
             autoComplete: 'password',
             enterKeyHint: 'done',
           }}
           errors={fields.password.errors}
         />
         <LoadingButton
-          buttonText="Sign Up"
-          loadingText="Signing up..."
+          buttonText="注册"
+          loadingText="正在注册..."
           isPending={isPending}
         />
       </Form>
 
-      {/* Terms of service */}
+      {/* 服务条款 */}
       <div className="text-balance text-center text-muted-foreground text-xs my-3">
-        By clicking continue, you agree to our
+        点击继续，即表示您同意我们的
         {' '}
-        <a href="/" className="text-primary hover:underline">
-          Terms of Service
+        <a href="#" className="text-primary hover:underline">
+          服务条款
         </a>
-        {' and '}
-        <a href="/" className="text-primary hover:underline">
-          Privacy Policy
+        {' 和 '}
+        <a href="#" className="text-primary hover:underline">
+          隐私政策
         </a>
-        .
+        。
       </div>
 
-      {/* Sign in */}
+      {/* 登录 */}
       <div className="text-center text-sm">
-        Already have an account?
+        已经有账户了？
         {' '}
         <Link to="/auth/sign-in" className="text-primary hover:underline">
-          Sign in
+          登录
         </Link>
       </div>
     </AuthLayout>

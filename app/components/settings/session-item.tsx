@@ -32,20 +32,20 @@ export function SessionItem({
           {isCurrentSession && (
             <span className="flex h-3 flex-shrink-0 items-center gap-1 rounded-md border border-primary px-0.5 text-primary text-xs sm:h-auto sm:px-1.5">
               <span className="size-1.5 rounded-full bg-primary" />
-              <span className="hidden sm:inline">Current device</span>
+              <span className="hidden sm:inline">当前设备</span>
             </span>
           )}
         </div>
 
         <div className="space-x-2 text-muted-foreground text-xs">
           <span>
-            IP Address:
-            {session.ipAddress || 'unknown'}
+            IP 地址:
+            {session.ipAddress || '未知'}
           </span>
           <span>
-            Last active:
+            上次活跃:
             {' '}
-            {formatDate(session.createdAt, 'MMM d, yyyy hh:mm a')}
+            {formatDate(session.createdAt, 'yyyy/MM/dd hh:mm a')}
           </span>
         </div>
       </div>

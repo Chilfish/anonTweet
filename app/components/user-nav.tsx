@@ -5,7 +5,7 @@ import {
   LogOutIcon,
   UserCogIcon,
 } from 'lucide-react'
-import { Link, useSubmit } from 'react-router'
+import { Link, useFetcher } from 'react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import { Button } from '~/components/ui/button'
 import {
@@ -22,7 +22,7 @@ import { getAvatarUrl } from '~/lib/utils'
 
 export function UserNav() {
   const { user } = useAuthUser()
-  const submit = useSubmit()
+  const signOutFetcher = useFetcher()
   const { avatarUrl, placeholderUrl } = getAvatarUrl(user.image, user.name)
   const initials = user?.name?.slice(0, 2)
   const alt = user?.name ?? 'User avatar'
@@ -99,13 +99,16 @@ export function UserNav() {
           <DropdownMenuItem
             asChild
           >
-
-            <Link
-              to="/auth/sign-out"
+            <Button
+              onClick={() =>
+                signOutFetcher.submit(null, {
+                  method: 'POST',
+                  action: '/auth/sign-out',
+                })}
             >
               <LogOutIcon />
               退出登录
-            </Link>
+            </Button>
           </DropdownMenuItem>
         )
           : (

@@ -10,7 +10,7 @@ import { AppInfo } from '~/lib/config'
 import { changePasswordSchema } from '~/lib/validations/auth'
 
 export const meta: Route.MetaFunction = () => {
-  return [{ title: `Password - ${AppInfo.name}` }]
+  return [{ title: `密码 - ${AppInfo.name}` }]
 }
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
@@ -28,20 +28,20 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
   })
 
   if (result.error) {
-    toast.error(result.error.message || 'An unexpected error occurred.')
+    toast.error(result.error.message || '发生了意外错误。')
     return { status: 'error' }
   }
 
-  toast.success('Password changed successfully! Other sessions revoked.')
+  toast.success('密码修改成功！其他会话已撤销。')
   return { status: 'success' }
 }
 
 export default function ChangePasswordRoute() {
   return (
-    <SettingsLayout title="Password">
+    <SettingsLayout title="密码">
       <SettingRow
-        title="Change your password"
-        description="If you have already set your password, you can update it here. If you have forgotten your password, please reset it below."
+        title="更改您的密码"
+        description="如果您已经设置了密码，可以在此处更新。"
         action={<ChangePassword />}
       />
     </SettingsLayout>

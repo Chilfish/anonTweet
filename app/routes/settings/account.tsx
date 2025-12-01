@@ -3,7 +3,7 @@ import { parseWithZod } from '@conform-to/zod'
 
 import { dataWithError, dataWithSuccess } from 'remix-toast'
 import AvatarCropper from '~/components/avatar-cropper'
-import { DeleteAccount, SignOut } from '~/components/settings/account-action'
+import { SignOut } from '~/components/settings/account-action'
 import { SettingRow } from '~/components/settings/setting-row'
 import { SettingsLayout } from '~/components/settings/settings-layout'
 import { useAuthUser } from '~/hooks/use-auth-user'
@@ -15,7 +15,7 @@ import { accountSchema } from '~/lib/validations/settings'
 import { requireUser } from '~/middlewares/auth-guard'
 
 export const meta: Route.MetaFunction = () => {
-  return [{ title: `Account - ${AppInfo.name}` }]
+  return [{ title: `账户 - ${AppInfo.name}` }]
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
@@ -24,7 +24,7 @@ export async function action({ request, context }: Route.ActionArgs) {
     const submission = parseWithZod(formData, { schema: accountSchema })
 
     if (submission.status !== 'success') {
-      return dataWithError(null, 'Invalid form data.')
+      return dataWithError(null, '无效的表单数据。')
     }
 
     const headers = request.headers
@@ -35,19 +35,19 @@ export async function action({ request, context }: Route.ActionArgs) {
     switch (intent) {
       case 'delete-account':
         if (user.role === 'admin') {
-          return dataWithError(null, 'Admin account cannot be deleted.')
+          return dataWithError(null, '管理员帐户无法删除。')
         }
 
         await Promise.all([
           serverAuth.api.revokeSessions({ headers }),
           serverAuth.api.deleteUser({ body: {}, asResponse: false, headers }),
         ])
-        message = 'Account deleted.'
+        message = '帐户已删除。'
         break
 
       case 'delete-avatar': {
         if (!user.image) {
-          return dataWithError(null, 'No avatar to delete.')
+          return dataWithError(null, '没有要删除的头像。')
         }
 
         await Promise.all([
@@ -59,7 +59,7 @@ export async function action({ request, context }: Route.ActionArgs) {
             headers,
           }),
         ])
-        message = 'Avatar deleted.'
+        message = '头像已删除。'
         break
       }
 
@@ -83,19 +83,19 @@ export async function action({ request, context }: Route.ActionArgs) {
             headers,
           }),
         ])
-        message = 'Avatar updated.'
+        message = '头像已更新。'
         break
       }
 
       default:
-        return dataWithError(null, 'Invalid intent.')
+        return dataWithError(null, '无效的意图。')
     }
 
     return dataWithSuccess(null, message)
   }
   catch (error) {
-    console.error('Account action error:', error)
-    return dataWithError(null, 'An unexpected error occurred.')
+    console.error('帐户操作错误:', error)
+    return dataWithError(null, '发生了意外错误。')
   }
 }
 
@@ -104,10 +104,10 @@ export default function AccountRoute() {
   const { avatarUrl, placeholderUrl } = getAvatarUrl(user.image, user.name)
 
   return (
-    <SettingsLayout title="Account">
+    <SettingsLayout title="帐户">
       <SettingRow
-        title="Avatar"
-        description="Click avatar to change profile picture."
+        title="头像"
+        description="点击头像更改个人资料图片。"
         action={(
           <AvatarCropper
             avatarUrl={avatarUrl}
@@ -116,19 +116,15 @@ export default function AccountRoute() {
         )}
       />
       <SettingRow
-        title="Name & Email address"
-        description={`${user.name}, ${user.email}`}
-      />
-      <SettingRow
-        title="Current sign in"
-        description={`You are signed in as ${user.email}`}
+        title="当前登录"
+        description={`您已登录为 @${user.name}`}
         action={<SignOut />}
       />
-      <SettingRow
-        title="Delete account"
-        description="Permanently delete your account."
+      {/* <SettingRow
+        title="删除帐户"
+        description="永久删除您的帐户。"
         action={<DeleteAccount email={user.email} />}
-      />
+      /> */}
     </SettingsLayout>
   )
 }

@@ -32,7 +32,7 @@ export function SignOutOfOtherSessions() {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger render={<Button variant="outline" />}>
-        Sign out of other sessions
+        退出其他会话
       </AlertDialogTrigger>
       <AlertDialogContent className="sm:max-w-md">
         <div className="flex flex-col gap-2 max-sm:items-center sm:flex-row sm:gap-4">
@@ -43,21 +43,20 @@ export function SignOutOfOtherSessions() {
             <CircleAlertIcon className="opacity-80" size={16} />
           </div>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>您确定吗？</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to sign out of other sessions? This will
-              sign you out of all sessions except the current one.
+              您确定要退出其他会话吗？ 这将退出除当前会话之外的所有会话。
             </AlertDialogDescription>
           </AlertDialogHeader>
         </div>
         <fetcher.Form method="post" action=".">
           <AlertDialogFooter>
             <AlertDialogClose disabled={isPending}>
-              Cancel
+              取消
             </AlertDialogClose>
             <LoadingButton
-              buttonText="Sign out"
-              loadingText="Signing out..."
+              buttonText="退出"
+              loadingText="退出中..."
               isPending={isPending}
             />
           </AlertDialogFooter>

@@ -26,30 +26,17 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
     case 'sign-in': {
       const { email, password } = submission.value
       const { error } = await authClient.signIn.email({
-        email,
+        email: `${email}@${AppInfo.domain}`,
         password,
       })
       if (error) {
-        return toast.error(error.message || 'Sign in failed.')
+        return toast.error(error.message || '登录失败')
       }
       break
     }
 
-    // case 'github':
-    // case 'google': {
-    //   const { provider } = submission.value
-    //   const { error } = await authClient.signIn.social({
-    //     provider,
-    //     callbackURL: '/',
-    //   })
-    //   if (error) {
-    //     return toast.error(error.message || `${provider} sign in failed.`)
-    //   }
-    //   break
-    // }
-
     default:
-      return toast.error('Invalid login method.')
+      return toast.error('无效的登录方式.')
   }
 
   return redirect('/')
@@ -75,20 +62,19 @@ export default function SignInRoute() {
     const lastMethod = authClient.getLastUsedLoginMethod()
     setLastMethod(lastMethod)
   }, [])
-
   return (
     <AuthLayout
-      title="Sign in to your account"
-      description="Welcome back! Please sign in to continue."
+      title="登录您的账户"
+      description="欢迎回来！请登录以继续。"
     >
-      {/* Sign in form */}
+      {/* 登录表单 */}
       <Form method="post" className="grid gap-4" {...getFormProps(form)}>
         <InputField
-          labelProps={{ children: 'Email' }}
+          labelProps={{ children: '用户名' }}
           inputProps={{
-            ...getInputProps(fields.email, { type: 'email' }),
-            placeholder: 'john@doe.com',
-            autoComplete: 'email',
+            ...getInputProps(fields.email, { type: 'text' }),
+            placeholder: 'Anon Chihaya',
+            autoComplete: 'text',
             enterKeyHint: 'next',
           }}
           errors={fields.email.errors}
@@ -98,7 +84,7 @@ export default function SignInRoute() {
             className: 'flex items-center justify-between',
             children: (
               <>
-                <span>Password</span>
+                <span>密码</span>
               </>
             ),
           }}
@@ -114,23 +100,23 @@ export default function SignInRoute() {
         <div className="relative overflow-hidden rounded-lg">
           <LoadingButton
             className="w-full"
-            buttonText="Sign In"
-            loadingText="Signing in..."
+            buttonText="登录"
+            loadingText="正在登录..."
             isPending={isSignInPending}
           />
           {lastMethod === 'email' && (
             <span className="absolute top-0 right-0 rounded-bl-md bg-blue-400 px-2 py-0.5 text-[10px] text-white capitalize">
-              Last used
+              上次使用
             </span>
           )}
         </div>
       </Form>
-      {/* Sign up */}
+      {/* 注册 */}
       <div className="text-center text-sm mt-2">
-        Don&apos;t have an account?
+        没有账号吗？
         {' '}
         <Link to="/auth/sign-up" className="text-primary hover:underline">
-          Sign up
+          点击注册
         </Link>
       </div>
     </AuthLayout>

@@ -24,7 +24,7 @@ export function DeleteAccount({ email }: { email: string }) {
   return (
     <Dialog>
       <DialogTrigger render={<Button variant="destructive" size="sm" />}>
-        Delete
+        删除
       </DialogTrigger>
       <DialogContent className="sm:max-w-sm">
         <div className="flex flex-col items-center gap-2">
@@ -36,14 +36,10 @@ export function DeleteAccount({ email }: { email: string }) {
           </div>
           <DialogHeader>
             <DialogTitle className="sm:text-center">
-              Final confirmation
+              确认删除账户
             </DialogTitle>
             <DialogDescription className="sm:text-center">
-              This action cannot be undone. To confirm, please enter the email
-              address
-              {' '}
-              <span className="text-foreground">{email}</span>
-              .
+              此操作无法撤回
             </DialogDescription>
           </DialogHeader>
         </div>
@@ -61,11 +57,11 @@ export function DeleteAccount({ email }: { email: string }) {
           </div>
           <DialogFooter>
             <DialogClose render={<Button type="button" variant="outline" className="flex-1" />}>
-              Cancel
+              取消
             </DialogClose>
             <LoadingButton
-              buttonText="Delete"
-              loadingText="Deleting..."
+              buttonText="删除"
+              loadingText="删除中..."
               isPending={isPending}
               variant="destructive"
               className="flex-1"
@@ -84,8 +80,8 @@ export function SignOut() {
 
   return (
     <LoadingButton
-      buttonText="Sign out"
-      loadingText="Signing out..."
+      buttonText="退出登录"
+      loadingText="退出登录..."
       isPending={signOutIsPending}
       variant="outline"
       size="sm"

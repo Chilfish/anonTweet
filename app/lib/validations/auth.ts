@@ -12,55 +12,49 @@ function passwordConfirmationRefinement({ confirmPassword, newPassword }: Passwo
     ctx.addIssue({
       path: ['confirmPassword'],
       code: z.ZodIssueCode.custom,
-      message: 'New password and confirm password do not match.',
+      message: '新密码和确认密码不匹配。',
     })
   }
 }
 
 const customSignInErrorMap: z.ZodErrorMap = (issue, ctx) => {
   if (issue.code === z.ZodIssueCode.invalid_union_discriminator) {
-    return { message: 'Invalid sign-in provider specified.' }
+    return { message: '指定的登录提供商无效。' }
   }
   return { message: ctx.defaultError }
 }
 
 export const emailSchema = z
-  .string({ message: 'Email is required.' })
-  .email({ message: 'Invalid email address.' })
+  .string({ message: '电子邮箱是必填项。' })
+  .email({ message: '无效的电子邮件地址。' })
   .toLowerCase()
   .trim()
 
 export const passwordSchema = z
-  .string({ message: 'Password is required.' })
-  .min(8, 'Password must be at least 8 characters long.')
-  .max(32, 'Password must be less than 32 characters long.')
+  .string({ message: '密码是必填项。' })
+  .min(8, '密码长度至少为 8 个字符。')
+  .max(32, '密码长度必须小于 32 个字符。')
 
-export const tokenSchema = z.string().min(1, 'Token is required.')
+export const tokenSchema = z.string().min(1, '令牌是必填项。')
 
 export const signInSchema = z.discriminatedUnion(
   'provider',
   [
     z.object({
-      email: emailSchema,
+      email: z.string(),
       password: passwordSchema,
       provider: z.literal('sign-in'),
     }),
-    // z.object({
-    //   provider: z.literal('google'),
-    // }),
-    // z.object({
-    //   provider: z.literal('github'),
-    // }),
   ],
   { errorMap: customSignInErrorMap },
 )
 
 export const signUpSchema = z.object({
-  email: emailSchema,
+  // email: emailSchema,
   password: passwordSchema,
   name: z
-    .string({ message: 'Name is required.' })
-    .min(3, 'Name must be at least 3 characters long.')
+    .string({ message: '昵称是必填项。' })
+    .min(3, '昵称长度至少为 3 个字符。')
     .trim(),
 })
 

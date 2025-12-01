@@ -40,14 +40,13 @@ export function ChangePassword() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={<Button variant="outline" size="sm" />}>
-        Change Password
+        更改密码
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Change Password</DialogTitle>
+          <DialogTitle>更改密码</DialogTitle>
           <DialogDescription>
-            Make changes to your password here. You can change your password and
-            set a new password.
+            在这里更改您的密码。您可以更改密码并设置新密码。
           </DialogDescription>
         </DialogHeader>
         <fetcher.Form
@@ -57,7 +56,7 @@ export function ChangePassword() {
           {...getFormProps(form)}
         >
           <PasswordField
-            labelProps={{ children: 'Current Password' }}
+            labelProps={{ children: '当前密码' }}
             inputProps={{
               ...getInputProps(fields.currentPassword, { type: 'password' }),
               autoComplete: 'current-password',
@@ -66,7 +65,7 @@ export function ChangePassword() {
             errors={fields.currentPassword.errors}
           />
           <PasswordField
-            labelProps={{ children: 'New Password' }}
+            labelProps={{ children: '新密码' }}
             inputProps={{
               ...getInputProps(fields.newPassword, { type: 'password' }),
               autoComplete: 'new-password',
@@ -75,7 +74,7 @@ export function ChangePassword() {
             errors={fields.newPassword.errors}
           />
           <PasswordField
-            labelProps={{ children: 'Confirm New Password' }}
+            labelProps={{ children: '确认新密码' }}
             inputProps={{
               ...getInputProps(fields.confirmPassword, { type: 'password' }),
               autoComplete: 'confirm-password',
@@ -86,11 +85,11 @@ export function ChangePassword() {
           <DialogFooter>
             <DialogClose render={<Button type="button" variant="outline" disabled={isPending} />}>
 
-              Cancel
+              取消
             </DialogClose>
             <LoadingButton
-              buttonText="Save changes"
-              loadingText="Saving..."
+              buttonText="保存更改"
+              loadingText="保存中..."
               isPending={isPending}
             />
           </DialogFooter>

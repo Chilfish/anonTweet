@@ -5,9 +5,9 @@ import type { FC, SVGProps } from 'react'
  * App info
  */
 export const AppInfo = {
-  name: 'React Router(v7) x Better Auth',
-  description:
-    'This is a template that can be deployed on Cloudflare Workers, built with React Router v7 (Remix), Better Auth, Drizzle ORM, and D1.',
+  name: 'Anon Tweet',
+  description: '匿名地查看和分享 Twitter 推文。一个简洁美观的推文查看/媒体下载器。可以手动输入推文翻译内容并导出推文卡片为图片。',
+  domain: 'chilfish.top',
 } as const
 
 /**

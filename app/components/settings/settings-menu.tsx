@@ -16,17 +16,17 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   {
-    title: 'Account',
+    title: '账号',
     url: href('/settings/account'),
     icon: UserIcon,
   },
   {
-    title: 'Sessions',
+    title: '登录会话',
     url: href('/settings/sessions'),
     icon: HardDriveIcon,
   },
   {
-    title: 'Password',
+    title: '密码',
     url: href('/settings/password'),
     icon: KeyIcon,
   },

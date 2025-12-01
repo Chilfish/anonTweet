@@ -14,7 +14,7 @@ import { serverAuth } from '~/lib/auth/auth.server'
 import { AppInfo } from '~/lib/config'
 
 export const meta: Route.MetaFunction = () => {
-  return [{ title: `Sessions - ${AppInfo.name}` }]
+  return [{ title: `会话 - ${AppInfo.name}` }]
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -28,11 +28,11 @@ export async function clientAction(_: Route.ClientActionArgs) {
   const { error } = await authClient.revokeOtherSessions()
 
   if (error) {
-    toast.error(error.message || 'An unexpected error occurred.')
+    toast.error(error.message || '发生意外错误。')
     return { status: 'error' }
   }
 
-  toast.success('Other sessions signed out successfully.')
+  toast.success('已成功退出其他会话。')
   return { status: 'success' }
 }
 
@@ -42,8 +42,8 @@ export default function SessionsRoute({ loaderData }: Route.ComponentProps) {
 
   return (
     <SettingsLayout
-      title="Sessions"
-      description="If necessary, you can sign out of all other browser sessions. Some of your recent sessions are listed below, but this list may not be complete. If you think your account has been compromised, you should also update your password."
+      title="会话"
+      description="如有必要，您可以退出所有其他浏览器会话。下面列出了一些您最近的会话，但此列表可能不完整。如果您认为自己的帐户已被盗用，还应更新密码。"
     >
       <div className="py-4">
         <Suspense
@@ -64,7 +64,7 @@ export default function SessionsRoute({ loaderData }: Route.ComponentProps) {
             resolve={loaderData.listSessions}
             errorElement={(
               <div className="flex items-center justify-between rounded-lg border px-4 py-3 shadow-xs">
-                <p>Error loading sessions.</p>
+                <p>加载会话出错。</p>
                 <Button
                   variant="outline"
                   size="sm"
@@ -72,7 +72,7 @@ export default function SessionsRoute({ loaderData }: Route.ComponentProps) {
                     navigate('.')
                   }}
                 >
-                  Refresh
+                  刷新
                 </Button>
               </div>
             )}
@@ -81,7 +81,7 @@ export default function SessionsRoute({ loaderData }: Route.ComponentProps) {
               <div className="space-y-4">
                 <div className="divide-y rounded-lg border shadow-xs">
                   {resolvedSessions.length === 0 ? (
-                    <div className="px-4 py-3">No sessions found.</div>
+                    <div className="px-4 py-3">未找到会话。</div>
                   ) : (
                     resolvedSessions.map(item => (
                       <SessionItem
