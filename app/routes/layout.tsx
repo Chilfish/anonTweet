@@ -13,12 +13,11 @@ export async function loader({ context }: Route.LoaderArgs) {
 export default function AuthenticatedLayout(_: Route.ComponentProps) {
   return (
     <>
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md">
-        <div className="flex w-full items-center justify-between p-4 sm:px-10">
-          <div className="flex items-center gap-4 ml-auto">
-            <SettingsPanel />
-            <UserNav />
-          </div>
+      <header className="w-full p-2 flex items-center">
+        <div className="ml-auto w-fit gap-2 flex items-center rounded-full border-2 border-border/40 px-2 py-1 shadow-2xl backdrop-blur-md transition-all hover:bg-background/90">
+
+          <SettingsPanel />
+          <UserNav />
         </div>
       </header>
       <Outlet />
