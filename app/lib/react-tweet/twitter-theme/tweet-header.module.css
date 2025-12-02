@@ -1,18 +1,26 @@
 .header {
+  --avatar-size: 40px;
+
   display: flex;
   padding-bottom: 0.75rem;
   align-items: center;
-  line-height: var(--tweet-header-line-height);
-  font-size: var(--tweet-header-font-size);
+  line-height: 1.25rem;
+  font-size: 0.9375rem;
   white-space: nowrap;
   overflow-wrap: break-word;
   overflow: hidden;
 }
 
+.inQuote.header {
+  --avatar-size: 36px;
+  font-size: 0.85rem;
+  line-height: 1.2rem;
+}
+
 .avatar {
   position: relative;
-  height: 40px;
-  width: 40px;
+  min-height: var(--avatar-size);
+  min-width: var(--avatar-size);
 }
 
 .avatarOverflow {
@@ -45,16 +53,15 @@
 }
 
 .author {
-  max-width: calc(100% - 84px);
   display: flex;
   flex-direction: column;
-  /* justify-content: center; */
   margin: 0 0.5rem;
   height: fit-content;
-  flex-wrap: wrap;
+  gap: 0.1rem;
 }
 
 .authorInline {
+  display: flex;
   flex-direction: row;
   align-items: center;
   gap: 0.25rem;
@@ -80,7 +87,9 @@
 }
 
 .authorMeta {
-  display: flex;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .authorFollow {
   display: flex;
@@ -119,11 +128,11 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  font-size: 0.85rem;
 }
 
 @media (width >= 40rem) {
-  .avatar {
-    height: 48px;
-    width: 48px;
+  .header {
+    --avatar-size: 48px;
   }
 }

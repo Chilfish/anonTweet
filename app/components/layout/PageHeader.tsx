@@ -5,7 +5,7 @@ export function PageHeader() {
   return (
     <div className="text-center space-y-4 mb-12">
       <div className="space-y-2">
-        <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-pink-400 to-purple-600 bg-clip-text text-transparent">
+        <h1 className="text-4xl font-bold tracking-tight bg-linear-to-r from-pink-400 to-[#1d9bf0] bg-clip-text text-transparent">
           <ruby>
             あのん
             <rp>(</rp>
@@ -16,12 +16,12 @@ export function PageHeader() {
             Tweet
           </span>
         </h1>
-        <p className="text-xl text-muted-foreground">
+        <p className="text-xl">
           匿名地查看和分享 Twitter 推文
         </p>
       </div>
 
-      <div className="max-w-2xl mx-auto text-muted-foreground space-y-2">
+      <div className="max-w-2xl mx-auto space-y-2">
         <p>
           一个简洁美观的推文查看/媒体下载器。
         </p>

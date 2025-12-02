@@ -2,8 +2,9 @@ import type { Ref } from 'react'
 import type { EnrichedTweet } from '~/lib/react-tweet'
 import type { ThemeSettings } from '~/lib/stores/theme'
 import type { TweetData } from '~/types'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { TranslationEditor } from '~/components/translation/TranslationEditor'
+import { useElementSize } from '~/hooks/use-element-size'
 import {
   TweetContainer,
   TweetHeader,
@@ -14,191 +15,122 @@ import { cn } from '~/lib/utils'
 import { TweetLinkCard } from './TweetCard'
 import { TweetTextBody } from './TweetTextBody'
 
-interface TweetComponentProps {
-  tweets: TweetData
-  mainTweetId: string
-  settings?: ThemeSettings
-  showMp4CoverOnly?: boolean
-  ref?: Ref<HTMLDivElement>
+type TweetVariant = 'thread' | 'quoted' | 'main' | 'main-in-thread'
+
+interface UnifiedTweetProps {
+  tweet: EnrichedTweet
+  variant: TweetVariant
 }
 
-const hasMedia = (tweet: EnrichedTweet) => !!tweet.mediaDetails?.length
+function UnifiedTweet({ tweet, variant }: UnifiedTweetProps) {
+  const { screenshoting } = useTranslationStore()
+  const isQuoted = variant === 'quoted'
+  const isThread = variant === 'thread'
+  const isMainInThread = variant === 'main-in-thread'
 
-function ThreadTweet({
-  tweet,
-  showMp4CoverOnly,
-}: {
-  tweet: EnrichedTweet
-  showMp4CoverOnly?: boolean
-}) {
+  const containerClasses = cn({
+    'p-4! border-2 rounded-2xl mt-2!': isQuoted,
+    'border-none! px-0! py-2! relative': isThread,
+  })
+
+  const bodyContainerClasses = cn({
+    'sm:pl-14! pl-12!': isThread || isMainInThread,
+  })
+
+  const quotedTweet = tweet.quotedTweet
+
   return (
-    <TweetContainer
-      className="border-none! px-0! py-2! relative"
-    >
-      <div
-        className="flex items-center justify-between"
-      >
+    <div className={containerClasses}>
+      <div className="flex items-center justify-between">
         <TweetHeader
           tweet={tweet}
-          className="pb-1!"
+          className={cn({ 'pb-1!': isThread })}
           createdAtInline
+          inQuote={isQuoted}
         />
         <TranslationEditor originalTweet={tweet} />
       </div>
-      <div
-        className="sm:pl-14! pl-12!"
-      >
-        <TweetBody
-          tweet={tweet}
-          showMp4CoverOnly={showMp4CoverOnly}
-        />
-      </div>
-    </TweetContainer>
-  )
-}
+      <div className={bodyContainerClasses}>
+        <TweetTextBody tweet={tweet} />
 
-function TweetBody({ tweet, showMp4CoverOnly }: {
-  tweet: EnrichedTweet
-  showMp4CoverOnly?: boolean
-}) {
-  const quotedTweet = tweet.quotedTweet || null
-  return (
-    <>
-      <TweetTextBody tweet={tweet} />
+        {tweet.mediaDetails?.length ? (
+          <TweetMedia tweet={tweet} showCoverOnly={screenshoting} />
+        ) : null}
 
-      {tweet.mediaDetails?.length
-        ? (
-            <TweetMedia
-              tweet={tweet}
-              showCoverOnly={showMp4CoverOnly}
-            />
-          )
-        : null}
+        {tweet.card && <TweetLinkCard tweet={tweet} />}
 
-      {tweet.card && <TweetLinkCard tweet={tweet} />}
-
-      {quotedTweet && (
-        <QuotedTweet
-          tweet={quotedTweet as any}
-          showMp4CoverOnly={showMp4CoverOnly}
-        />
-      )}
-    </>
-  )
-}
-
-function QuotedTweet({
-  tweet,
-  showMp4CoverOnly,
-}: { tweet: EnrichedTweet, showMp4CoverOnly?: boolean }) {
-  return (
-    <div className="p-4! border-2 rounded-2xl mt-2!">
-      <div
-        className="flex items-center justify-between"
-      >
-        <TweetHeader
-          tweet={tweet}
-          createdAtInline
-        />
-        <TranslationEditor
-          originalTweet={tweet}
-        />
-      </div>
-
-      <TweetTextBody tweet={tweet} />
-
-      {hasMedia(tweet)
-        && (
-          <TweetMedia
-            tweet={tweet}
-            showCoverOnly={showMp4CoverOnly}
+        {quotedTweet && (
+          <UnifiedTweet
+            tweet={quotedTweet}
+            variant="quoted"
           />
         )}
-
-      {tweet.card && <TweetLinkCard tweet={tweet} />}
+      </div>
     </div>
   )
 }
 
-export function MyTweet({
-  tweets,
-  mainTweetId,
-  showMp4CoverOnly,
-}: TweetComponentProps) {
-  const ref = useRef<HTMLDivElement | null>(null)
+interface MyTweetProps {
+  tweets: TweetData
+  mainTweetId: string
+  settings?: ThemeSettings
+  ref?: Ref<HTMLDivElement>
+}
+
+export function MyTweet({ tweets, mainTweetId }: MyTweetProps) {
+  const containerRef = useRef<HTMLDivElement | null>(null)
   const { setTweetElRef } = useTranslationStore()
 
   useEffect(() => {
-    if (ref.current) {
-      setTweetElRef(ref.current)
+    if (containerRef.current) {
+      setTweetElRef(containerRef.current)
     }
-  }, [ref.current])
+  }, [setTweetElRef])
 
-  const mainTweet = tweets.find(tweet => tweet.id_str === mainTweetId)!
-  const parentTweets = tweets.filter(tweet => tweet.id_str !== mainTweetId)
+  const { mainTweet, parentTweets } = useMemo(() => {
+    const main = tweets.find(tweet => tweet.id_str === mainTweetId)
+    if (!main) {
+      return { mainTweet: null, parentTweets: [] }
+    }
+    const parents = tweets.filter(tweet => tweet.id_str !== mainTweetId)
+    return { mainTweet: main, parentTweets: parents }
+  }, [tweets, mainTweetId])
 
   const hasThread = parentTweets.length > 0
-  const mainTweetRef = useRef<HTMLElement | null>(null)
-  const [mainTweetheight, setMainTweetHeight] = useState(0)
+  const mainTweetRef = useRef<HTMLDivElement | null>(null)
 
-  useEffect(() => {
-    if (!mainTweetRef.current) {
-      return
-    }
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        if (entry.target === mainTweetRef.current) {
-          setMainTweetHeight(entry.contentRect.height)
-        }
-      }
-    })
+  const { height: mainTweetHeight } = useElementSize(mainTweetRef)
 
-    resizeObserver.observe(mainTweetRef.current)
-
-    return () => {
-      resizeObserver.disconnect()
-    }
-  }, [])
+  if (!mainTweet) {
+    return null
+  }
 
   return (
-    <TweetContainer ref={ref}>
+    <TweetContainer ref={containerRef}>
       {hasThread && (
         <>
           {parentTweets.map(parentTweet => (
-            <ThreadTweet
+            <UnifiedTweet
               key={parentTweet.id_str}
               tweet={parentTweet}
-              showMp4CoverOnly={showMp4CoverOnly}
+              variant="thread"
             />
           ))}
 
-          {/* Thread 的那根对齐头像的竖线 */}
           <div
             style={{
-              height: `calc(100% - ${mainTweetheight}px)`,
+              height: mainTweetHeight > 0 ? `calc(100% - ${mainTweetHeight}px)` : '100%',
             }}
             className="absolute z-0 left-[1.1rem] sm:left-[1.3rem] top-4 bottom-0 w-[2px] bg-[#cfd9de] dark:bg-[#333639]"
-          >
-          </div>
+          />
         </>
       )}
 
-      <article
-        ref={mainTweetRef}
-      >
-        <div className="flex items-center justify-between">
-          <TweetHeader tweet={mainTweet} createdAtInline />
-          <TranslationEditor originalTweet={mainTweet} />
-        </div>
-
-        <div
-          className={cn({ 'sm:pl-14! pl-12!': hasThread })}
-        >
-          <TweetBody
-            tweet={mainTweet}
-            showMp4CoverOnly={showMp4CoverOnly}
-          />
-        </div>
+      <article ref={mainTweetRef}>
+        <UnifiedTweet
+          tweet={mainTweet}
+          variant={hasThread ? 'main-in-thread' : 'main'}
+        />
       </article>
     </TweetContainer>
   )

@@ -1,3 +1,4 @@
+import type { LucideIcon } from 'lucide-react'
 import { Monitor, Moon, SettingsIcon, Sun } from 'lucide-react'
 import React, { useState } from 'react'
 import { Button } from '~/components/ui/button'
@@ -11,18 +12,44 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '~/components/ui/dialog'
-import { Label } from '~/components/ui/label'
-import {
-  useColorScheme,
-  useSetColorScheme,
-} from '~/lib/color-scheme/components'
+
+import { useTheme } from '~/lib/stores/theme'
+
 import { SeparatorTemplateManager } from './SeparatorTemplateManager'
 
-export function SettingsPanel() {
-  // const { theme, setTheme } = useTheme()
-  const setColorScheme = useSetColorScheme()
-  const colorScheme = useColorScheme()
+const THEME_OPTIONS: {
+  value: 'light' | 'dark' | 'system'
+  label: string
+  Icon: LucideIcon
+}[] = [
+  { value: 'light', label: '浅色', Icon: Sun },
+  { value: 'dark', label: '深色', Icon: Moon },
+  { value: 'system', label: '系统', Icon: Monitor },
+]
 
+function ThemeSelector() {
+  const { theme, setTheme } = useTheme()
+
+  return (
+    <div className="flex gap-2">
+      {THEME_OPTIONS.map(({ value, label, Icon }) => (
+        <Button
+          key={value}
+          variant={theme === value ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setTheme(value)}
+          className="flex items-center gap-2"
+          aria-pressed={theme === value}
+        >
+          <Icon className="size-4" />
+          {label}
+        </Button>
+      ))}
+    </div>
+  )
+}
+
+export function SettingsPanel() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
   return (
@@ -36,49 +63,17 @@ export function SettingsPanel() {
           <DialogTitle className="text-lg font-semibold">设置</DialogTitle>
         </DialogHeader>
 
-        <DialogPanel>
-          {/* 主题设置 */}
-          <Card className="gap-0 mb-4">
-            <CardContent className="space-y-4">
-              <Label>
-                <h3 className="font-bold">主题</h3>
-              </Label>
-              <div className="flex gap-2">
-                <Button
-                  variant={colorScheme === 'light' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setColorScheme('light')}
-                  className="flex items-center gap-2"
-                >
-                  <Sun className="size-4" />
-                  浅色
-                </Button>
-                <Button
-                  variant={colorScheme === 'dark' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setColorScheme('dark')}
-                  className="flex items-center gap-2"
-                >
-                  <Moon className="size-4" />
-                  深色
-                </Button>
-                <Button
-                  variant={colorScheme === 'system' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setColorScheme('system')}
-                  className="flex items-center gap-2"
-                >
-                  <Monitor className="size-4" />
-                  系统
-                </Button>
-              </div>
+        <DialogPanel className="space-y-6">
+          <Card>
+            <CardContent className="space-y-3">
+              <h3 className="font-bold">主题</h3>
+              <ThemeSelector />
             </CardContent>
           </Card>
 
-          {/* 分隔符设置 */}
           <SeparatorTemplateManager />
-
         </DialogPanel>
+
         <DialogFooter>
           <Button
             onClick={() => setIsSettingsOpen(false)}

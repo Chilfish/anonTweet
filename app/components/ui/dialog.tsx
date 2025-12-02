@@ -2,10 +2,27 @@
 
 import { Dialog as DialogPrimitive } from '@base-ui-components/react/dialog'
 import { XIcon } from 'lucide-react'
+import * as React from 'react'
 import { ScrollArea } from '~/components/ui/scroll-area'
 import { cn } from '~/lib/utils'
 
-const Dialog = DialogPrimitive.Root
+interface DialogProps extends React.ComponentProps<typeof DialogPrimitive.Root> {
+  /**
+   * 控制点击蒙版背景或按 Esc 键时是否关闭 Dialog。
+   * 当设置为 `false` 时，用户必须通过点击明确的关闭按钮来关闭对话框。
+   * @default true
+   */
+  dismissible?: boolean
+}
+
+function Dialog({ dismissible = true, ...props }: DialogProps) {
+  return (
+    <DialogPrimitive.Root
+      disablePointerDismissal={!dismissible}
+      {...props}
+    />
+  )
+}
 
 const DialogPortal = DialogPrimitive.Portal
 

@@ -1,22 +1,42 @@
 import type { EnrichedTweet, Entity } from '~/lib/react-tweet'
-import { Languages, LanguagesIcon, Save, Trash2, X } from 'lucide-react'
-import React, { useRef, useState } from 'react'
-import { TweetText } from '~/components/tweet/TweetText'
+import { Languages, LanguagesIcon, Save, Trash2 } from 'lucide-react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogPanel, DialogTitle, DialogTrigger } from '~/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogPanel,
+  DialogTitle,
+  DialogTrigger,
+} from '~/components/ui/dialog'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Switch } from '~/components/ui/switch'
 import { Textarea } from '~/components/ui/textarea'
+import { TweetBody } from '~/lib/react-tweet'
 import { useTranslationStore } from '~/lib/stores/translation'
 
-type EntityTranslation = Entity
-
-// 翻译编辑器组件
 interface TranslationEditorProps {
   originalTweet: EnrichedTweet
   className?: string
+}
+
+// 辅助函数：判断是否跳过某些实体的翻译
+function shouldSkipEntity(entity: Entity) {
+  return (
+    entity.text === ' '
+    || entity.type === 'url'
+    || entity.type === 'mention'
+    || entity.type === 'media'
+  )
+}
+
+// 辅助函数：获取显示文本
+function getEntityDisplayValue(entity: Entity) {
+  return entity.translation || entity.text
 }
 
 export const TranslationEditor: React.FC<TranslationEditorProps> = ({
@@ -25,96 +45,79 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
 }) => {
   const tweetId = originalTweet.id_str
   const [isOpen, setIsOpen] = useState(false)
-  const [entityTranslations, setEntityTranslations] = useState<EntityTranslation[]>([])
+
+  const [editingEntities, setEditingEntities] = useState<Entity[]>([])
   const [enablePrepend, setEnablePrepend] = useState(false)
-  const [prependEntity, setPrependEntity] = useState<EntityTranslation>({
-    type: 'text',
-    text: '',
-    indices: [-1, 0],
-    index: -1,
-  })
+  const [prependText, setPrependText] = useState('')
 
-  // 用于存储输入框的引用
-  const inputRefs = useRef<Map<string, HTMLInputElement | HTMLTextAreaElement>>(new Map())
-  const prependRef = useRef<HTMLTextAreaElement>(null)
+  const {
+    showTranslationButton,
+    getTranslation,
+    setTranslation,
+    deleteTranslation,
+    hasTextContent,
+  } = useTranslationStore()
 
-  const { showTranslationButton, getTranslation, setTranslation } = useTranslationStore()
-  const hasTextContent = useTranslationStore(state => state.hasTextContent)
-  const existingTranslation = getTranslation(tweetId)
+  const isVisible = useMemo(() => {
+    return hasTextContent(originalTweet.text) && showTranslationButton
+  }, [originalTweet.text, showTranslationButton, hasTextContent])
 
-  // 获取所有实体（包括文本实体）
-  const getAllEntities = () => {
-    if (Array.isArray(originalTweet.entities)) {
-      return originalTweet.entities
+  const handleOpen = useCallback(() => {
+    const existing = getTranslation(tweetId)
+    let baseEntities: Entity[] = []
+
+    if (existing && existing.length > 0) {
+      baseEntities = JSON.parse(JSON.stringify(existing))
     }
-    return []
-  }
-
-  // 检查是否应该显示翻译编辑器
-  const shouldShowEditor = () => {
-    if (!hasTextContent(originalTweet.text) || !showTranslationButton) {
-      return false
-    }
-    return true
-  }
-
-  // 如果不应该显示编辑器，返回null
-  if (!shouldShowEditor()) {
-    return null
-  }
-
-  const handleOpen = () => {
-    // 初始化所有实体的翻译状态
-    let allEntities = existingTranslation
-    if (!allEntities) {
-      allEntities = getAllEntities()
+    else {
+      baseEntities = (originalTweet.entities || []).map((e, i) => ({ ...e, index: i }))
     }
 
-    console.log('existingTranslation', allEntities)
+    const prependIndex = baseEntities.findIndex(e => e.index === -1)
 
-    setEntityTranslations(allEntities.map((entity, index) => ({
-      ...entity,
-      index,
-    })))
+    if (prependIndex !== -1) {
+      const prependEntity = baseEntities[prependIndex]!
+      setEnablePrepend(true)
+      setPrependText(prependEntity.text || prependEntity.translation || '')
 
+      baseEntities.splice(prependIndex, 1)
+    }
+    else {
+      setEnablePrepend(false)
+      setPrependText('')
+    }
+
+    setEditingEntities(baseEntities)
     setIsOpen(true)
-  }
+  }, [tweetId, getTranslation, originalTweet.entities])
 
-  const handleSave = () => {
-    // 从DOM中读取所有输入值
-    const updatedTranslations = entityTranslations.map((entity) => {
-      const inputId = `${entity.index}-${entity.type}`
-      const inputElement = inputRefs.current.get(inputId)
-      const translation = inputElement?.value || entity.text
+  const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+
+    const finalTranslations: Entity[] = editingEntities.map((entity) => {
+      const inputName = `entity-${entity.index}`
+      const inputValue = formData.get(inputName) as string
+
       return {
         ...entity,
-        translation,
+        translation: inputValue !== null ? inputValue : entity.translation,
       }
     })
 
-    // 保存所有实体的翻译，包括句首补充（如果启用）
-    const finalTranslations: EntityTranslation[] = [...updatedTranslations]
-
     if (enablePrepend) {
-      const prependText = prependRef.current?.value || ''
-      const updatedPrependEntity: EntityTranslation = {
-        ...prependEntity,
-        text: prependText,
-      }
-      setPrependEntity(updatedPrependEntity)
+      const currentPrependText = formData.get('prepend-text') as string
 
-      if (updatedTranslations[0]?.indices?.[0] !== -1 && prependText.trim()) {
-        finalTranslations.unshift(updatedPrependEntity)
-      }
-      else if (prependText.trim()) {
-        finalTranslations[0] = updatedPrependEntity
-      }
-    }
-    else {
-      // 禁用句首补充时，删除句首补充实体
-      const savedPrepend = finalTranslations.findIndex(et => et.indices[0] === -1)
-      if (savedPrepend !== -1) {
-        finalTranslations.splice(savedPrepend, 1)
+      if (currentPrependText?.trim()) {
+        const prependEntity: Entity = {
+          type: 'text',
+          text: currentPrependText,
+          indices: [-1, 0],
+          index: -1,
+          translation: currentPrependText,
+        }
+
+        finalTranslations.unshift(prependEntity)
       }
     }
 
@@ -123,49 +126,33 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
   }
 
   const handleDelete = () => {
-    const deleteTranslation = useTranslationStore.getState().deleteTranslation
     deleteTranslation(tweetId)
     setIsOpen(false)
   }
 
-  // 设置输入框引用的辅助函数
-  const setInputRef = (id: string, element: HTMLInputElement | HTMLTextAreaElement | null) => {
-    if (element) {
-      inputRefs.current.set(id, element)
-    }
-    else {
-      inputRefs.current.delete(id)
-    }
-  }
-
-  const skipTranslation = (entityTranslation: EntityTranslation) => {
-    return (entityTranslation.text === ' ')
-      || (entityTranslation.type === 'url')
-      || (entityTranslation.type === 'mention')
-      || (entityTranslation.type === 'media')
-  }
-
-  const getText = (entityTranslation: EntityTranslation) => {
-    return entityTranslation.translation || entityTranslation.text
-  }
+  if (!isVisible)
+    return null
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger
-        render={(
-          <Button
-            variant="secondary"
-            size="icon"
-            onClick={handleOpen}
-            className={`${className} ml-auto`}
-            data-testid="translation-editor-button"
-          />
-        )}
+    <Dialog
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      dismissible={false}
+    >
+      <DialogTrigger render={(
+        <Button
+          variant="secondary"
+          size="icon"
+          onClick={handleOpen}
+          className={`${className} ml-auto`}
+          data-testid="translation-editor-button"
+        />
+      )}
       >
         <LanguagesIcon className="size-4" />
       </DialogTrigger>
 
-      <DialogContent>
+      <DialogContent render={<form onSubmit={handleSave} />}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Languages className="h-5 w-5" />
@@ -173,39 +160,39 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        <DialogPanel className="space-y-6">
-          {/* 原文显示 */}
+        <DialogPanel className="space-y-4">
           <div>
             <Label className="font-bold">原文</Label>
-            <Card className="mt-2 py-3">
-              <CardContent>
-                <TweetText text={originalTweet.text} />
+            <Card className="mt-2 py-2 bg-muted/30">
+              <CardContent className="px-3">
+
+                <TweetBody tweet={originalTweet} isTranslated={false} />
+                {/* <TweetText text={originalTweet.text} /> */}
               </CardContent>
             </Card>
           </div>
 
-          {/* 句首翻译补充开关 */}
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
-              <Label htmlFor="enable-prepend" className="font-medium">
-                <Switch
-                  id="enable-prepend"
-                  checked={enablePrepend}
-                  onCheckedChange={setEnablePrepend}
-                />
+              <Switch
+                id="enable-prepend"
+                checked={enablePrepend}
+                onCheckedChange={setEnablePrepend}
+              />
+              <Label htmlFor="enable-prepend" className="font-medium cursor-pointer">
                 启用句首翻译补充
               </Label>
             </div>
 
             {enablePrepend && (
-              <div className="space-y-2">
-                <Label htmlFor="prepend-text" className="text-xs uppercase font-mono">
-                  也许你需要调整语序
+              <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                <Label htmlFor="prepend-text" className="text-xs font-mono text-muted-foreground">
+                  也许你需要 调整语序 / 补充上下文
                 </Label>
                 <Textarea
                   id="prepend-text"
-                  ref={prependRef}
-                  defaultValue={prependEntity.text}
+                  name="prepend-text"
+                  defaultValue={prependText}
                   placeholder="输入句首补充内容..."
                   className="text-sm"
                 />
@@ -213,72 +200,67 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
             )}
           </div>
 
-          {/* 按实体遍历的翻译输入 */}
           <div>
             <Label className="font-bold">翻译内容</Label>
-            <div className="mt-2 space-y-3">
-              {entityTranslations
-                .filter(entityTranslation => !skipTranslation(entityTranslation) && entityTranslation.indices?.[0] !== -1)
-                .map((entityTranslation) => {
-                  const id = `${entityTranslation.index}-${entityTranslation.type}`
-                  return (
-                    <div key={id} className="space-y-2">
-                      <Label htmlFor={id} className="text-xs uppercase font-mono min-w-0 shrink-0">
-                        {entityTranslation.type}
-                      </Label>
-                      {entityTranslation.type === 'text'
-                        ? (
-                            <Textarea
-                              id={id}
-                              ref={el => setInputRef(id, el)}
-                              defaultValue={getText(entityTranslation)}
-                              placeholder="输入翻译内容..."
-                              className="text-sm"
-                            />
-                          )
-                        : (
-                            <Input
-                              id={id}
-                              ref={el => setInputRef(id, el)}
-                              defaultValue={getText(entityTranslation)}
-                              placeholder={`翻译 ${getText(entityTranslation)}`}
-                              className="text-sm"
-                            />
-                          )}
-                    </div>
-                  )
-                })}
+            <div className="mt-3 space-y-4">
+              {editingEntities.map((entity) => {
+                if (shouldSkipEntity(entity))
+                  return null
+
+                const inputId = `entity-${entity.index}`
+                const isText = entity.type === 'text'
+                const displayValue = getEntityDisplayValue(entity)
+
+                return (
+                  <div key={inputId} className="space-y-1.5">
+                    <Label htmlFor={inputId} className="text-xs uppercase font-mono text-muted-foreground">
+                      {entity.type}
+                    </Label>
+                    {isText ? (
+                      <Textarea
+                        id={inputId}
+                        name={inputId}
+                        defaultValue={displayValue}
+                        className="text-sm min-h-[60px]"
+                      />
+                    ) : (
+                      <Input
+                        id={inputId}
+                        name={inputId}
+                        defaultValue={displayValue}
+                        className="text-sm"
+                      />
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
-
         </DialogPanel>
 
-        <DialogFooter className="flex-row items-center">
-          {/* 操作按钮 */}
-          {existingTranslation && (
+        <DialogFooter className="flex-row items-center sm:justify-between gap-2 sticky bottom-0 bg-background/95 backdrop-blur">
+          {getTranslation(tweetId) ? (
             <Button
+              type="button"
               variant="destructive"
+              size="sm"
               onClick={handleDelete}
-              className="gap-2 w-fit"
+              className="gap-2"
             >
               <Trash2 className="h-4 w-4" />
-              删除翻译
+              删除
             </Button>
-          )}
+          ) : <div />}
 
-          <div className="flex gap-2 ml-auto">
+          <div className="flex gap-2">
             <Button
+              type="button"
               variant="outline"
               onClick={() => setIsOpen(false)}
-              className="gap-2"
             >
-              <X className="h-4 w-4" />
               取消
             </Button>
-            <Button
-              onClick={handleSave}
-              className="gap-2"
-            >
+            <Button type="submit" className="gap-2">
               <Save className="h-4 w-4" />
               保存
             </Button>

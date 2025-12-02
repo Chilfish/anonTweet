@@ -23,9 +23,15 @@ export function TweetBody({ tweet, isTranslated, lang, className }: TweetBodyPro
           return null
 
         switch (item.type) {
+          case 'url':
+            return (
+              <TweetLink key={i} href={item.href}>
+                {text.length > 36 ? item.display_url : text}
+              </TweetLink>
+            )
+
           case 'hashtag':
           case 'mention':
-          case 'url':
           case 'symbol':
             return (
               <TweetLink key={i} href={item.href}>

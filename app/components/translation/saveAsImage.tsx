@@ -35,9 +35,7 @@ function saveAsImage(png: string, fileName: string) {
 }
 
 export function SaveAsImageButton() {
-  const { tweetElRef, mainTweet, setShowTranslationButton, setScreenshoting, showTranslations } = useTranslationStore()
-
-  const { tweets } = useTranslationStore()
+  const { tweetElRef, mainTweet, setShowTranslationButton, setScreenshoting, showTranslations, tweets } = useTranslationStore()
 
   async function submitTweet() {
     const flatedTweet = flatTweets(tweets)
@@ -97,8 +95,11 @@ export function SaveAsImageButton() {
       type: 'info',
     })
 
+    const hasVideo = tweets.some(tweet => tweet.mediaDetails?.some(media => media.type === 'video'))
+    if (hasVideo) {
+      setScreenshoting(true)
+    }
     setShowTranslationButton(false)
-    setScreenshoting(true)
 
     await new Promise(resolve => requestAnimationFrame(resolve))
 

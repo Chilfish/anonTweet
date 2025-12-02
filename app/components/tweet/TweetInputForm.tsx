@@ -1,6 +1,7 @@
-import { AlertCircle, Hash, Link } from 'lucide-react'
+import type { FormEvent } from 'react'
+import { AlertCircle, Hash } from 'lucide-react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useNavigate } from 'react-router' // Assuming react-router-dom
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
@@ -8,30 +9,37 @@ import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { extractTweetId } from '~/lib/utils'
 
+function FormatListItem({ children }: { children: React.ReactNode }) {
+  return (
+    <li className="flex items-start gap-2 text-muted-foreground">
+      <span className="mt-1 text-primary/80">•</span>
+      <span className="flex-1">{children}</span>
+    </li>
+  )
+}
+
 export function TweetInputForm() {
   const [input, setInput] = useState('')
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     setError('')
 
-    if (!input.trim()) {
-      setError('请输入 Tweet URL 或 Tweet ID')
+    const trimmedInput = input.trim()
+    if (!trimmedInput) {
+      setError('请输入 Tweet 的 URL 或 ID。')
       return
     }
 
-    const tweetId = extractTweetId(input)
+    const tweetId = extractTweetId(trimmedInput)
     if (!tweetId) {
-      setError('无效的 Tweet URL 或 ID 格式')
+      setError('无法识别有效的 Tweet URL 或 ID，请检查格式。')
       return
     }
-
-    await navigate(`/tweets/${tweetId}`)
+    navigate(`/tweets/${tweetId}`)
   }
-
-  const isUrl = input.includes('twitter.com') || input.includes('x.com')
 
   return (
     <Card className="w-full max-w-md">
@@ -41,21 +49,20 @@ export function TweetInputForm() {
           Anon Tweet
         </CardTitle>
         <CardDescription>
-          输入 Twitter/X 链接或 Tweet ID 来查看推文
+          输入链接或 ID，立即加载推文内容
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="tweet-input" className="flex items-center gap-2">
-              {isUrl ? <Link className="h-4 w-4" /> : <Hash className="h-4 w-4" />}
+          <div className="relative">
+            <Label htmlFor="tweet-input" className="sr-only">
               Tweet URL 或 ID
             </Label>
             <Input
               id="tweet-input"
               name="tweet-id"
               type="text"
-              placeholder="https://twitter.com/user/status/123... 或 1234567890"
+              placeholder="粘贴 URL 或输入 ID..."
               value={input}
               onChange={e => setInput(e.target.value)}
               className="font-mono text-sm"
@@ -74,12 +81,20 @@ export function TweetInputForm() {
           </Button>
         </form>
 
-        <div className="mt-6 text-xs text-muted-foreground space-y-1">
-          <p className="font-medium">支持的格式：</p>
-          <ul className="space-y-1 ml-2">
-            <li>• Twitter URL: twitter.com/user/status/123...</li>
-            <li>• X URL: x.com/user/status/123...</li>
-            <li>• Tweet ID: 1234567890</li>
+        <div className="mt-6 text-xs space-y-2">
+          <p className="font-medium text-foreground/80">支持格式:</p>
+          <ul className="space-y-1.5">
+            <FormatListItem>
+              <code className="bg-muted px-1.5 py-0.5 rounded-sm">twitter.com/.../status/123...</code>
+            </FormatListItem>
+            <FormatListItem>
+              <code className="bg-muted px-1.5 py-0.5 rounded-sm">x.com/.../status/123...</code>
+            </FormatListItem>
+            <FormatListItem>
+              <code className="bg-muted px-1.5 py-0.5 rounded-sm">1234567890...</code>
+              {' '}
+              (纯数字 ID)
+            </FormatListItem>
           </ul>
         </div>
       </CardContent>
