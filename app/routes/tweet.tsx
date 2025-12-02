@@ -62,7 +62,7 @@ function TweetContent() {
         resolve={loaderData}
         errorElement={<TweetNotFound />}
         children={resolvedTweet =>
-          resolvedTweet.tweets && resolvedTweet.tweetId
+          resolvedTweet.tweets.length && resolvedTweet.tweetId
             ? (
                 <MyTweet
                   tweets={resolvedTweet.tweets}

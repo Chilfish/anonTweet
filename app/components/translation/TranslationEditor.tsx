@@ -165,9 +165,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
             <Label className="font-bold">原文</Label>
             <Card className="mt-2 py-2 bg-muted/30">
               <CardContent className="px-3">
-
                 <TweetBody tweet={originalTweet} isTranslated={false} />
-                {/* <TweetText text={originalTweet.text} /> */}
               </CardContent>
             </Card>
           </div>
@@ -221,7 +219,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
                         id={inputId}
                         name={inputId}
                         defaultValue={displayValue}
-                        className="text-sm min-h-[60px]"
+                        className="text-sm"
                       />
                     ) : (
                       <Input
@@ -238,7 +236,9 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
           </div>
         </DialogPanel>
 
-        <DialogFooter className="flex-row items-center sm:justify-between gap-2 sticky bottom-0 bg-background/95 backdrop-blur">
+        <DialogFooter
+          className="flex-row items-center justify-between gap-2"
+        >
           {getTranslation(tweetId) ? (
             <Button
               type="button"
