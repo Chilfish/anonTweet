@@ -12,6 +12,7 @@ export default [
   layout('routes/layout.tsx', [
     index('routes/home.tsx'),
     route('/tweets/:id', 'routes/tweet.tsx'),
+    route('/bili', 'routes/bili.tsx'),
 
     // ...prefix('settings', [
     //   layout('routes/settings/layout.tsx', [
@@ -47,6 +48,7 @@ export default [
     route('auth/error', 'routes/api/better-error.tsx'),
     route('auth/*', 'routes/api/better.tsx'),
     route('color-scheme', 'routes/api/color-scheme.ts'),
+    route('bili-post', 'routes/api/bili-post.tsx'),
 
     ...prefix('tweet', [
       route('get/:id', 'routes/api/tweet/get.ts'),

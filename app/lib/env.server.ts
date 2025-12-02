@@ -20,6 +20,8 @@ const serverEnvSchema = z.object({
   BETTER_AUTH_SECRET: z.string().min(1),
 
   DB_URL: z.string().url(),
+
+  BILIBILI_COOKIE: z.string(),
 })
 
 /**
