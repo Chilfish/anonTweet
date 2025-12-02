@@ -3,10 +3,10 @@ import type { TweetData } from '~/types'
 import axios from 'axios'
 import { Suspense, useEffect } from 'react'
 import { Await, useLoaderData, useSearchParams } from 'react-router'
-import { LayoutComponent } from '~/components/layout/Layout'
 import { BackButton } from '~/components/translation/BackButton'
 import { DownloadMedia } from '~/components/translation/DownloadMedia'
 import { SaveAsImageButton } from '~/components/translation/saveAsImage'
+import { SettingsPanel } from '~/components/translation/SettingsPanel'
 import { ToggleTransButton } from '~/components/translation/ToggleTransButton'
 import { MyTweet } from '~/components/tweet/Tweet'
 import { TweetNotFound, TweetSkeleton } from '~/lib/react-tweet'
@@ -94,23 +94,24 @@ export default function TweetPage({
   }
 
   useEffect(() => {
-    if (loaderData.tweets.length) {
+    if (loaderData.tweets.length > 0 && tweetId) {
       console.log(loaderData)
       setAllTweets(loaderData.tweets, tweetId)
     }
   }, [loaderData.tweets])
 
   return (
-    <LayoutComponent>
+    <>
       <div className="flex items-center w-full gap-1 mb-6">
         <BackButton />
         <ToggleTransButton />
         <SaveAsImageButton />
+        <SettingsPanel />
         <DownloadMedia />
         {/* <UpdateTranslation /> */}
       </div>
 
       <TweetContent />
-    </LayoutComponent>
+    </>
   )
 }

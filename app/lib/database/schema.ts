@@ -106,21 +106,6 @@ export const rateLimit = pgTable(
   table => [index('rateLimit_key_idx').on(table.key)],
 )
 
-// Todo tables
-export const todo = pgTable(
-  'todo',
-  {
-    id: serial('id').primaryKey(),
-    title: text('title').notNull(),
-    userId: text('userId')
-      .notNull()
-      .references(() => user.id, { onDelete: 'cascade' }),
-    completed: integer('completed').notNull().default(0),
-    createdAt: timestamp('createdAt').notNull().defaultNow(),
-  },
-  table => [index('todo_userId_idx').on(table.userId)],
-)
-
 export const tweet = pgTable(
   'tweet',
   {
@@ -147,8 +132,6 @@ export const tweetEntities = pgTable(
 )
 
 // Type
-export type SelectTodo = typeof todo.$inferSelect
-export type InsertTodo = typeof todo.$inferInsert
 
 export type SelectTweet = typeof tweet.$inferSelect
 export type InsertTweet = typeof tweet.$inferInsert

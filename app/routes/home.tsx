@@ -1,4 +1,3 @@
-import { LayoutComponent } from '~/components/layout/Layout'
 import { TweetInputForm } from '~/components/tweet/TweetInputForm'
 
 export function meta() {
@@ -13,8 +12,8 @@ export function meta() {
 
 export default function Home() {
   return (
-    <LayoutComponent>
+    <>
       <TweetInputForm />
-    </LayoutComponent>
+    </>
   )
 }

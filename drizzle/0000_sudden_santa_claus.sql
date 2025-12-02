@@ -33,14 +33,7 @@ CREATE TABLE "session" (
 	"updatedAt" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "session_token_unique" UNIQUE("token")
 );
---> statement-breakpoint
-CREATE TABLE "todo" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"title" text NOT NULL,
-	"userId" text NOT NULL,
-	"completed" integer DEFAULT 0 NOT NULL,
-	"createdAt" timestamp DEFAULT now() NOT NULL
-);
+
 --> statement-breakpoint
 CREATE TABLE "user" (
 	"id" text PRIMARY KEY NOT NULL,

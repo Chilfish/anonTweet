@@ -43,10 +43,10 @@ export const ALLOWED_PROVIDERS = [
 ] as const
 
 export const anonUser = {
-  id: 'anonymous',
+  id: 'hRoDLF1IPqHEY7IF4ooENPgXdGSyr5Aj',
   createdAt: new Date(),
   updatedAt: new Date(),
-  email: '',
+  email: 'anon@chilfish.top',
   emailVerified: false,
   name: '访客',
   banned: false,
@@ -56,7 +56,7 @@ export const anonSession = {
   id: 'anonymous',
   createdAt: new Date(),
   updatedAt: new Date(),
-  userId: 'anonymous',
+  userId: anonUser.id,
   expiresAt: new Date(),
   token: '',
 }

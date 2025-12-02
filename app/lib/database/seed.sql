@@ -16,9 +16,9 @@ INSERT INTO "user" (
 ) VALUES
 -- 普通用户
 (
-  'nt2AZZSr3ci6OWUpEG38f7GZwUBJ01CZ',
-  'John Doe',
-  'john@example.com',
+  'hRoDLF1IPqHEY7IF4ooENPgXdGSyr5Aj',
+  'Anon',
+  'anon@chilfish.top',
   TRUE,  -- 使用布尔值 TRUE 替换 1
   null,
   'user',

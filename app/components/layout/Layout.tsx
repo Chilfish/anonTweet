@@ -64,11 +64,11 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
   const [showFooter, setShowFooter] = useState(false)
 
   return (
-    <div className="relative w-full mx-auto px-2 sm:px-16 pt-8 pb-4 flex flex-col justify-center items-center overflow-hidden">
+    <div className="relative w-full min-h-screen mx-auto px-2 sm:px-16 pt-8 pb-4 flex flex-col justify-center items-center overflow-hidden">
       {/* 背景装饰 */}
       <div className="absolute inset-0 -z-10">
         {/* 主背景渐变 */}
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-accent/5" />
+        <div className="absolute inset-0 bg-linear-to-br from-background via-background to-accent/5" />
 
         {/* 动态光点 */}
         <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-primary/10 rounded-full blur-3xl animate-pulse" />

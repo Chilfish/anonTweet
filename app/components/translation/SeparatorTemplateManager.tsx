@@ -52,7 +52,7 @@ export function SeparatorTemplateManager() {
           </Button>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 max-w-80 sm:max-w-110 px-4">
+      <CardContent className="space-y-4">
         {/* 模板选择器 */}
         <div className="flex items-center gap-2">
           <Label>当前模板</Label>
@@ -67,7 +67,7 @@ export function SeparatorTemplateManager() {
               </SelectValue>
             </SelectTrigger>
 
-            <SelectPopup>
+            <SelectPopup className="py-2 px-3">
               {allTemplates.map(template => (
                 <div
                   key={template.id}

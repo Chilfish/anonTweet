@@ -165,7 +165,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
         <LanguagesIcon className="size-4" />
       </DialogTrigger>
 
-      <DialogContent className="max-h-[92vh] max-w-[95vw] overflow-auto">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Languages className="h-5 w-5" />

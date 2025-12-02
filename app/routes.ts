@@ -13,33 +13,33 @@ export default [
     index('routes/home.tsx'),
     route('/tweets/:id', 'routes/tweet.tsx'),
 
-    ...prefix('settings', [
-      layout('routes/settings/layout.tsx', [
-        route('account', 'routes/settings/account.tsx'),
-        route('sessions', 'routes/settings/sessions.tsx'),
-        route('password', 'routes/settings/password.tsx'),
-      ]),
-    ]),
+    // ...prefix('settings', [
+    //   layout('routes/settings/layout.tsx', [
+    //     route('account', 'routes/settings/account.tsx'),
+    //     route('sessions', 'routes/settings/sessions.tsx'),
+    //     route('password', 'routes/settings/password.tsx'),
+    //   ]),
+    // ]),
   ]),
 
   // Better Auth routes
-  ...prefix('auth', [
-    layout('routes/auth/layout.tsx', [
-      route('sign-in', 'routes/auth/sign-in.tsx'),
-      route('sign-up', 'routes/auth/sign-up.tsx'),
-      route('sign-out', 'routes/auth/sign-out.tsx'),
-    ]),
-    // route("forget-password", "routes/auth/forget-password.tsx"),
-    route('reset-password', 'routes/auth/reset-password.tsx'),
-  ]),
+  // ...prefix('auth', [
+  //   layout('routes/auth/layout.tsx', [
+  //     route('sign-in', 'routes/auth/sign-in.tsx'),
+  //     route('sign-up', 'routes/auth/sign-up.tsx'),
+  //     route('sign-out', 'routes/auth/sign-out.tsx'),
+  //   ]),
+  //   // route("forget-password", "routes/auth/forget-password.tsx"),
+  //   route('reset-password', 'routes/auth/reset-password.tsx'),
+  // ]),
 
   // Admin routes
-  ...prefix('admin', [
-    layout('routes/admin/layout.tsx', [
-      index('routes/admin/dashboard.tsx'),
-      route('users', 'routes/admin/users/index.tsx'),
-    ]),
-  ]),
+  // ...prefix('admin', [
+  //   layout('routes/admin/layout.tsx', [
+  //     index('routes/admin/dashboard.tsx'),
+  //     route('users', 'routes/admin/users/index.tsx'),
+  //   ]),
+  // ]),
 
   route('images/*', 'routes/images.tsx'),
   // Better Auth and other API routes

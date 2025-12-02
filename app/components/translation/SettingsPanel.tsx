@@ -39,7 +39,7 @@ export function SettingsPanel() {
         <DialogPanel>
           {/* 主题设置 */}
           <Card className="gap-0 mb-4">
-            <CardContent className="space-y-4 px-4">
+            <CardContent className="space-y-4">
               <Label>
                 <h3 className="font-bold">主题</h3>
               </Label>

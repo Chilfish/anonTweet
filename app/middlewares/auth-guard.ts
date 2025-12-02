@@ -2,7 +2,7 @@ import type { MiddlewareFunction } from 'react-router'
 import type { AuthServerSession } from '~/lib/auth/auth.server'
 import { AsyncLocalStorage } from 'node:async_hooks'
 import { createContext } from 'react-router'
-import { serverAuth } from '~/lib/auth/auth.server'
+// import { serverAuth } from '~/lib/auth/auth.server'
 import { anonSession, anonUser } from '~/lib/config'
 
 export const authContext = createContext<AuthServerSession>()
@@ -33,17 +33,21 @@ export const requireAuth: MiddlewareFunction = async (
   { request, context },
   next,
 ) => {
-  let session = await serverAuth.api.getSession({
-    headers: request.headers,
-  })
+  const session = {
+    session: anonSession,
+    user: anonUser,
+  }
+  //   await serverAuth.api.getSession({
+  //   headers: request.headers,
+  // })
 
   // 如果需要登录但用户不存在，则使用默认匿名User，但无Id
-  if (!session?.user) {
-    session = {
-      session: anonSession,
-      user: anonUser,
-    }
-  }
+  // if (!session?.user) {
+  //   session = {
+  //     session: anonSession,
+  //     user: anonUser,
+  //   }
+  // }
   context.set(authContext, session)
   return authStorage.run(session, next)
 }

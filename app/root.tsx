@@ -9,7 +9,6 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useNavigation,
 } from 'react-router'
 import { ThemeProvider } from '~/components/ThemeProvider'
 import { AnchoredToastProvider, ToastProvider } from '~/components/ui/toast'
@@ -47,10 +46,6 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const navigation = useNavigation()
-  const isNavigating = Boolean(navigation.location)
-  const navToHome = navigation.location?.pathname === '/'
-  const showSkeleton = isNavigating && !navToHome
   const nonce = useNonce()
   const colorScheme = useColorScheme()
 
@@ -91,7 +86,6 @@ export default function App({ loaderData }: Route.ComponentProps) {
   const nonce = useNonce()
   return (
     <ThemeProvider>
-
       <Outlet />
       <script
         nonce={nonce}

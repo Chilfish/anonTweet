@@ -68,9 +68,9 @@ export function SaveAsImageButton() {
             type: 'success',
           })
         }
-        else if (data.status === 401) {
-          toastAction()
-        }
+        // else if (data.status === 401) {
+        //   toastAction()
+        // }
       })
       .catch((error) => {
         toastManager.add({
@@ -118,7 +118,7 @@ export function SaveAsImageButton() {
       const fileName = `${mainTweet.user.screen_name}-${mainTweet.id_str}-${now}`
       saveAsImage(png, fileName)
       toastManager.add({
-        title: '图片保存成功',
+        title: '推文截图保存成功',
         type: 'success',
       })
     }
