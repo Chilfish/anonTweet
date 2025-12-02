@@ -255,7 +255,7 @@ export const useTranslationStore = create<TranslationState>()(
 
         set(state => ({
           tweets: data,
-          mainTweet: state.tweets.find(t => t.id_str === mainTweetId),
+          mainTweet: data.find(t => t.id_str === mainTweetId),
           translations: {
             ...state.translations,
             ...extracted,
