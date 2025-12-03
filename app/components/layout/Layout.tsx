@@ -111,6 +111,7 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
                   <FooterLink to="https://tweet.chilfish.top/memo/240y_k">女声优存档</FooterLink>
                   <FooterLink to="https://nishio.chilfish.top/zh">西尾文明暦</FooterLink>
                   <FooterLink to="https://oshitabi.chilfish.top/">推し旅AR</FooterLink>
+                  <FooterLink to="/bili">发布到B站</FooterLink>
                 </span>
               </p>
             </div>
