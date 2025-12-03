@@ -17,13 +17,13 @@ function passwordConfirmationRefinement({ confirmPassword, newPassword }: Passwo
   }
 }
 
-const customSignInErrorMap: z.ZodErrorMap = (issue, ctx) => {
-  if (issue.code === z.ZodIssueCode.invalid_union_discriminator) {
-    return { message: '指定的登录提供商无效。' }
-  }
-  console.log(issue, ctx)
-  return { message: ctx.defaultError }
-}
+// const customSignInErrorMap: z.ZodErrorMap = (issue, ctx) => {
+//   if (issue.code === z.ZodIssueCode.invalid_union_discriminator) {
+//     return { message: '指定的登录提供商无效。' }
+//   }
+//   console.log(issue, ctx)
+//   return { message: ctx.defaultError }
+// }
 
 export const emailSchema = z
   .string({ message: '电子邮箱是必填项。' })
@@ -47,7 +47,7 @@ export const signInSchema = z.discriminatedUnion(
       provider: z.literal('sign-in'),
     }),
   ],
-  { errorMap: customSignInErrorMap },
+  // { errorMap: customSignInErrorMap },
 )
 
 export const signUpSchema = z.object({

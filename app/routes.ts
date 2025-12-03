@@ -45,9 +45,9 @@ export default [
   route('images/*', 'routes/images.tsx'),
   // Better Auth and other API routes
   ...prefix('api', [
-    route('auth/error', 'routes/api/better-error.tsx'),
-    route('auth/*', 'routes/api/better.tsx'),
-    route('color-scheme', 'routes/api/color-scheme.ts'),
+    // route('auth/error', 'routes/api/better-error.tsx'),
+    // route('auth/*', 'routes/api/better.tsx'),
+    // route('color-scheme', 'routes/api/color-scheme.ts'),
     route('bili-post', 'routes/api/bili-post.tsx'),
 
     ...prefix('tweet', [

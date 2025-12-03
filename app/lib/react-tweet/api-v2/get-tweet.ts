@@ -5,7 +5,7 @@ import { enrichTweet } from './parseTweet'
 
 const TWEET_KEY = typeof process !== 'undefined' ? process.env.TWEET_KEY || '' : ''
 
-console.log('Using TWEET_KEY:', TWEET_KEY ? 'Yes' : 'No')
+// console.log('Using TWEET_KEY:', TWEET_KEY ? 'Yes' : 'No')
 
 // @ts-expect-error: The FetcherService constructor does not must require an API key
 const fetcher = new FetcherService({ apiKey: TWEET_KEY })
