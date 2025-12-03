@@ -21,7 +21,7 @@ const serverEnvSchema = z.object({
 
   DB_URL: z.string().url(),
 
-  BILIBILI_COOKIE: z.string(),
+  // BILIBILI_COOKIE: z.string(),
 })
 
 /**

@@ -3,7 +3,6 @@ import type { ActionFunctionArgs } from 'react-router'
 import type { CreateDynResult, UploadImageResult } from '~/types/bili'
 import axios from 'axios'
 import { data } from 'react-router'
-import { env } from '~/lib/env.server'
 
 // 基础配置
 const API_BASE = 'https://api.bilibili.com'
@@ -21,9 +20,9 @@ export async function action({ request }: ActionFunctionArgs) {
   const content = formData.get('content') as string
   const files = formData.getAll('images') as File[]
 
-  // 环境变量获取 Cookie
   // TODO: 从db中获取用户存入的cookie
-  const cookie = env.BILIBILI_COOKIE || ''
+  // bili_jct=asdd;DedeUserID=1234567890;
+  const cookie = (formData.get('cookie') || '') as string
   const csrf = getCookieValue(cookie, 'bili_jct')
   const uid = getCookieValue(cookie, 'DedeUserID')
 
@@ -48,8 +47,18 @@ export async function action({ request }: ActionFunctionArgs) {
   // 统一错误处理包装
   const requestApi = async function<T>(method: 'post' | 'postForm', url: string, data: any) {
     const res = await client[method](url, data)
-    if (res.data?.code !== 0) {
-      throw new Error(`API Error [${url}]: ${JSON.stringify(res.data, null, 2)}`)
+    const code = Number(res.data?.code) ?? -1
+    // Cookie 已失效，没有登录信息
+    if (code === -101) {
+      throw new Error('Cookie 已失效，没有登录信息', {
+        cause: 401,
+      })
+    }
+
+    if (code !== 0) {
+      throw new Error(`发布失败：${JSON.stringify(res.data)}`, {
+        cause: res.data,
+      })
     }
     return res.data.data as T
   }
@@ -100,7 +109,7 @@ export async function action({ request }: ActionFunctionArgs) {
     return data(result)
   }
   catch (error: any) {
-    console.error('Publish Failed:', error.message)
+    console.error('Publish Failed:', error)
     return { error: error.message || 'Service Error' }
   }
 }

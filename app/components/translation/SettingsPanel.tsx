@@ -13,7 +13,7 @@ import {
   DialogTrigger,
 } from '~/components/ui/dialog'
 
-import { useTheme } from '~/lib/stores/theme'
+import { useThemeStore } from '~/lib/stores/theme'
 
 import { SeparatorTemplateManager } from './SeparatorTemplateManager'
 
@@ -28,7 +28,7 @@ const THEME_OPTIONS: {
 ]
 
 function ThemeSelector() {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme } = useThemeStore()
 
   return (
     <div className="flex gap-2">

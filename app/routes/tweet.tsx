@@ -3,7 +3,7 @@ import type { TweetData } from '~/types'
 import axios from 'axios'
 import { Suspense, useEffect } from 'react'
 import { Await, useLoaderData, useSearchParams } from 'react-router'
-import { BackButton } from '~/components/translation/BackButton'
+import { BackButton, PubToBili } from '~/components/translation/BackButton'
 import { DownloadMedia } from '~/components/translation/DownloadMedia'
 import { SaveAsImageButton } from '~/components/translation/saveAsImage'
 import { SettingsPanel } from '~/components/translation/SettingsPanel'
@@ -106,6 +106,7 @@ export default function TweetPage({
         <SaveAsImageButton />
         <SettingsPanel />
         <DownloadMedia />
+        <PubToBili />
         {/* <UpdateTranslation /> */}
       </div>
 

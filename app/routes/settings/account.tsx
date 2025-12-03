@@ -1,7 +1,5 @@
 import type { Route } from './+types/account'
 import { parseWithZod } from '@conform-to/zod'
-
-import { dataWithError, dataWithSuccess } from 'remix-toast'
 import AvatarCropper from '~/components/avatar-cropper'
 import { SignOut } from '~/components/settings/account-action'
 import { SettingRow } from '~/components/settings/setting-row'

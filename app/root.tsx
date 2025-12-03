@@ -15,7 +15,6 @@ import { AnchoredToastProvider, ToastProvider } from '~/components/ui/toast'
 import stylesheet from './app.css?url'
 import { ProgressBar } from './components/progress-bar'
 import { Button } from './components/ui/button'
-import { Toaster } from './components/ui/sonner'
 import { useNonce } from './hooks/use-nonce'
 import {
   ColorSchemeScript,
@@ -75,7 +74,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
         <ScrollRestoration getKey={location => location.pathname} />
         <Scripts nonce={nonce} />
-        <Toaster theme={colorScheme} />
       </body>
     </html>
   )

@@ -1,12 +1,12 @@
 import { useEffect } from 'react'
-import { useTheme } from '~/lib/stores/theme'
+import { useThemeStore } from '~/lib/stores/theme'
 
 interface ThemeProviderProps {
   children: React.ReactNode
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
 
   useEffect(() => {
     const root = window.document.documentElement
