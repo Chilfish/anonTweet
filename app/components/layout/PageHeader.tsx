@@ -34,6 +34,26 @@ export function PageHeader() {
             （在手机端需要先横屏再保存推文为图片，以获得最佳宽度）
           </p>
         )}
+
+        <p className="text-xs">
+          （页面设计、逻辑优化的测试版本已发布，
+          <a
+            className="text-primary underline-offset-4 hover:underline"
+            target="_blank"
+            href="https://anon-tweet-dev.chilfish.top"
+          >
+            点击试用
+          </a>
+          。如有问题，还请联系
+          <a
+            className="text-primary underline-offset-4 hover:underline"
+            target="_blank"
+            href="https://space.bilibili.com/259486090"
+          >
+            @Chilfish
+          </a>
+          ）
+        </p>
       </div>
     </div>
   )
