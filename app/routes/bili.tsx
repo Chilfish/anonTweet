@@ -2,7 +2,7 @@ import type { FormEvent } from 'react'
 import axios from 'axios'
 import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router'
+import { Link } from 'react-router'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { ImageUploader } from '~/components/SortableImage'
@@ -47,8 +47,6 @@ export default function PublishDynamicForm() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [postId, setPostId] = useState<string | null>(null)
-
-  const navigate = useNavigate()
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -184,10 +182,10 @@ export default function PublishDynamicForm() {
 
         <CardFooter className="pt-4">
           <Button
-            onClick={() => navigate(-1)}
+            render={<Link to="/" />}
             variant="link"
           >
-            返回
+            返回首页
           </Button>
 
           <Button
