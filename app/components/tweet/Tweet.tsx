@@ -29,7 +29,7 @@ function UnifiedTweet({ tweet, variant }: UnifiedTweetProps) {
   const isMainInThread = variant === 'main-in-thread'
 
   const containerClasses = cn({
-    'p-4! border-2 rounded-2xl mt-2!': isQuoted,
+    'p-2 sm:p-4! border-2 rounded-2xl mt-2!': isQuoted,
     'border-none! px-0! py-2! relative': isThread,
   })
 
@@ -106,7 +106,9 @@ export function MyTweet({ tweets, mainTweetId }: MyTweetProps) {
   }
 
   return (
-    <TweetContainer ref={containerRef}>
+    <TweetContainer
+      ref={containerRef}
+    >
       {hasThread && (
         <>
           {parentTweets.map(parentTweet => (

@@ -95,10 +95,10 @@ export function SaveAsImageButton() {
       type: 'info',
     })
 
-    const hasVideo = tweets.some(tweet => tweet.mediaDetails?.some(media => media.type === 'video'))
-    if (hasVideo) {
-      setScreenshoting(true)
-    }
+    // const hasVideo = tweets.some(tweet => tweet.mediaDetails?.some(media => media.type === 'video'))
+    // if (hasVideo) {
+    setScreenshoting(true)
+    // }
     setShowTranslationButton(false)
 
     await new Promise(resolve => requestAnimationFrame(resolve))

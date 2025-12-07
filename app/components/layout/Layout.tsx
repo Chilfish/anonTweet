@@ -81,7 +81,7 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
     >
       <MinimalBackground />
 
-      <div className="flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 pt-8 pb-12 flex flex-col items-center justify-center  animate-in fade-in slide-in-from-bottom-2 duration-500">
+      <div className="flex-1 w-full max-w-3xl mx-auto sm:px-4 pt-8 pb-12 flex flex-col items-center justify-center  animate-in fade-in slide-in-from-bottom-2 duration-500">
         <div className="mb-8 w-full">
           <PageHeader />
         </div>
