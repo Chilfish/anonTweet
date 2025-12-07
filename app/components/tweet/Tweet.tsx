@@ -34,7 +34,7 @@ function UnifiedTweet({ tweet, variant }: UnifiedTweetProps) {
   })
 
   const bodyContainerClasses = cn({
-    'sm:pl-14! pl-12!': isThread || isMainInThread,
+    'pl-12!': isThread || isMainInThread,
   })
 
   const quotedTweet = tweet.quotedTweet

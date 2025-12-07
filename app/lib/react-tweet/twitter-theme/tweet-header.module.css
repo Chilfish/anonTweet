@@ -133,6 +133,6 @@
 
 @media (width >= 40rem) {
   .header {
-    --avatar-size: 48px;
+    --avatar-size: 40px;
   }
 }
