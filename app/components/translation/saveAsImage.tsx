@@ -105,7 +105,7 @@ export function SaveAsImageButton() {
 
     const png = await domToPng(tweetElRef, {
       quality: 1,
-      scale: 2,
+      scale: 1.7,
     })
     if (png) {
       const now = new Date().toLocaleString('zh-CN', {
