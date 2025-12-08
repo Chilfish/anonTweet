@@ -5,5 +5,9 @@ export default {
   // Config options...
   // Server-side render by default, to enable SPA mode set this to `false`
   ssr: true,
-  presets: [vercelPreset],
+  presets: [vercelPreset()],
+  future: {
+    v8_middleware: true,
+    // unstable_viteEnvironmentApi: true,
+  },
 } satisfies Config

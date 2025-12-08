@@ -633,7 +633,7 @@ export class TweetService extends FetcherService {
 
       // Store the most recent tweet ID from this batch
       if (tweets.list.length > 0 && cursor === undefined) {
-        nextSinceId = tweets.list[0].id
+        nextSinceId = tweets.list[0]!.id
       }
 
       // If there are more tweets to fetch, adjust the cursor value

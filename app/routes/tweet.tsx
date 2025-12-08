@@ -1,14 +1,14 @@
-import type { Ref } from 'react'
 import type { Route } from './+types/tweet'
 import type { TweetData } from '~/types'
-import { Suspense, useEffect, useRef } from 'react'
+import axios from 'axios'
+import { Suspense, useEffect } from 'react'
 import { Await, useLoaderData, useSearchParams } from 'react-router'
-import { BackButton } from '~/components/BackButton'
-import { DownloadMedia } from '~/components/DownloadMedia'
-import { SaveAsImageButton } from '~/components/saveAsImage'
-import { SettingsPanel } from '~/components/SettingsPanel'
+import { BackButton } from '~/components/translation/BackButton'
+import { DownloadMedia } from '~/components/translation/DownloadMedia'
+import { SaveAsImageButton } from '~/components/translation/saveAsImage'
+import { SettingsPanel } from '~/components/translation/SettingsPanel'
+import { ToggleTransButton } from '~/components/translation/ToggleTransButton'
 import { MyTweet } from '~/components/tweet/Tweet'
-import { getTweets } from '~/lib/getTweet'
 import { TweetNotFound, TweetSkeleton } from '~/lib/react-tweet'
 import { useTranslationStore } from '~/lib/stores/translation'
 import { extractTweetId } from '~/lib/utils'
@@ -31,29 +31,30 @@ export function HydrateFallback() {
   )
 }
 
-export async function loader({
-// export async function clientLoader({
+export async function clientLoader({
   params,
-  request,
-}: Route.LoaderArgs): Promise<TweetData & {
+}: Route.LoaderArgs): Promise<{
+  tweets: TweetData
   tweetId?: string
 }> {
-  const isDebug = new URLSearchParams(request.url.split('?')[1]).get('debug') === 'true'
-  if (isDebug) {
-    return { tweet: null, parentTweets: [], quotedTweet: null, tweetId: params.id }
-  }
   const { id } = params
   const tweetId = extractTweetId(id)
   if (!tweetId) {
-    return { tweet: null, parentTweets: [], quotedTweet: null, tweetId: id }
+    return {
+      tweets: [],
+      tweetId: id,
+    }
   }
-  const { tweet, parentTweets, quotedTweet } = await getTweets(tweetId)
-  return { tweet, parentTweets, quotedTweet, tweetId }
+  // const tweets = await getTweets(tweetId)
+  const { data: tweets } = await axios.get<TweetData>(`/api/tweet/get/${tweetId}`)
+  return {
+    tweets,
+    tweetId,
+  }
 }
 
-function TweetContent({ ref }: { ref?: Ref<HTMLDivElement> }) {
-  const loaderData = useLoaderData<typeof loader>()
-  const { screenshoting } = useTranslationStore()
+function TweetContent() {
+  const loaderData = useLoaderData<typeof clientLoader>()
 
   return (
     <Suspense fallback={<HydrateFallback />}>
@@ -61,14 +62,11 @@ function TweetContent({ ref }: { ref?: Ref<HTMLDivElement> }) {
         resolve={loaderData}
         errorElement={<TweetNotFound />}
         children={resolvedTweet =>
-          resolvedTweet.tweet
+          resolvedTweet.tweets.length && resolvedTweet.tweetId
             ? (
                 <MyTweet
-                  tweet={resolvedTweet.tweet}
-                  quotedTweet={resolvedTweet.quotedTweet}
-                  parentTweets={resolvedTweet.parentTweets}
-                  showMp4CoverOnly={screenshoting}
-                  ref={ref}
+                  tweets={resolvedTweet.tweets}
+                  mainTweetId={resolvedTweet.tweetId}
                 />
               )
             : (
@@ -87,41 +85,32 @@ export default function TweetPage({
   const plain = searchParams.get('plain') === 'true'
   const { id: tweetId } = params
 
-  const tweetRef = useRef<HTMLDivElement>(null)
-  const { setTweetElRef, setAllTweets } = useTranslationStore()
+  const { setAllTweets } = useTranslationStore()
 
   if (plain && tweetId) {
     return <TweetContent />
   }
 
   useEffect(() => {
-    if (tweetRef.current) {
-      setTweetElRef(tweetRef.current)
+    if (loaderData.tweets.length > 0 && tweetId) {
+      console.log(loaderData)
+      setAllTweets(loaderData.tweets, tweetId)
     }
-  }, [tweetRef.current])
-
-  useEffect(() => {
-    if (loaderData.tweet) {
-      setAllTweets({
-        tweet: loaderData.tweet,
-        quotedTweet: loaderData.quotedTweet,
-        parentTweets: loaderData.parentTweets,
-      })
-    }
-  }, [loaderData.tweet])
+  }, [loaderData.tweets])
 
   return (
     <>
       <div className="flex items-center w-full gap-1 mb-6">
         <BackButton />
+        <ToggleTransButton />
         <SaveAsImageButton />
         <SettingsPanel />
         <DownloadMedia />
+        {/* <PubToBili /> */}
+        {/* <UpdateTranslation /> */}
       </div>
 
-      <TweetContent
-        ref={tweetRef}
-      />
+      <TweetContent />
     </>
   )
 }

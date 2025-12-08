@@ -347,7 +347,7 @@ export class TweetMedia {
     // If the media is a gif
     else if (media.type === RawMediaType.GIF) {
       this.type = MediaType.GIF
-      this.url = media.video_info?.variants[0].url as string
+      this.url = media.video_info?.variants[0]?.url as string
     }
     // If the media is a video
     else {

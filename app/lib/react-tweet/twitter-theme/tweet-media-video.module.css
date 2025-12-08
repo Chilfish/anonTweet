@@ -16,9 +16,9 @@
 }
 .videoButton {
   position: relative;
-  height: 67px;
-  width: 67px;
   display: flex;
+  width: 48px;
+  height: 48px;
   align-items: center;
   justify-content: center;
   background-color: var(--tweet-color-blue-primary);
@@ -67,4 +67,11 @@
 }
 .viewReplies:hover {
   background-color: var(--tweet-color-blue-primary-hover);
+}
+
+@media (width >= 40rem) {
+  .playButton {
+    height: 67px;
+    width: 67px;
+  }
 }

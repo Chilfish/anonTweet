@@ -1,6 +1,6 @@
 .root {
   font-weight: inherit;
-  color: var(--tweet-color-blue-secondary);
+  color: var(--primary);
   text-decoration: none;
   cursor: pointer;
   padding: 0 2px;

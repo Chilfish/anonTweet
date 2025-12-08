@@ -1,24 +1,21 @@
-import type { TwitterComponents } from './types'
 import type { EnrichedTweet } from '~/lib/react-tweet'
 import { cn, proxyMedia } from '~/lib/utils'
-import { AvatarImg } from './avatar-img'
 import { TweetInfoCreatedAt } from './components'
 import s from './tweet-header.module.css'
 import { VerifiedBadge } from './verified-badge'
 
 interface Props {
   tweet: EnrichedTweet
-  components?: TwitterComponents
+  inQuote?: boolean
   className?: string
   createdAtInline?: boolean
 }
 
-export function TweetHeader({ tweet, components, className, createdAtInline }: Props) {
-  const Img = components?.AvatarImg ?? AvatarImg
+export function TweetHeader({ tweet, inQuote, className }: Props) {
   const { user } = tweet
 
   return (
-    <div className={cn(s.header, className)}>
+    <div className={cn(s.header, className, inQuote && s.inQuote)}>
       <a
         href={tweet.url}
         className={s.avatar}
@@ -42,37 +39,38 @@ export function TweetHeader({ tweet, components, className, createdAtInline }: P
           <div className={s.avatarShadow}></div>
         </div>
       </a>
-      <div className={cn(s.author, createdAtInline && s.authorInline)}>
-        <a
-          href={tweet.url}
-          className={s.authorLink}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <div className={s.authorLinkText}>
-            <span title={user.name}>{user.name}</span>
-          </div>
-          <VerifiedBadge user={user} className={s.authorVerified} />
-        </a>
-        <div className={s.authorMeta}>
+
+      <div className={cn(s.author)}>
+        <div className={s.authorInline}>
           <a
             href={tweet.url}
-            className={s.username}
+            className={s.authorLink}
             target="_blank"
             rel="noopener noreferrer"
           >
-            <span title={`@${user.screen_name}`}>
-              @
-              {user.screen_name}
-            </span>
+            <div className={s.authorLinkText}>
+              <span title={user.name}>{user.name}</span>
+            </div>
+            <VerifiedBadge user={user} className={s.authorVerified} />
           </a>
+          <div className={s.authorMeta}>
+            <a
+              href={tweet.url}
+              className={s.username}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span title={`@${user.screen_name}`}>
+                @
+                {user.screen_name}
+              </span>
+            </a>
+          </div>
         </div>
 
-        { createdAtInline && (
-          <div className={s.createdAt}>
-            <TweetInfoCreatedAt tweet={tweet} />
-          </div>
-        ) }
+        <div className={s.createdAt}>
+          <TweetInfoCreatedAt tweet={tweet} />
+        </div>
       </div>
     </div>
   )

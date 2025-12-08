@@ -28,10 +28,3 @@ export const useThemeStore = create<ThemeState>()(
     },
   ),
 )
-
-// 便捷的 hook
-export function useTheme() {
-  const theme = useThemeStore(state => state.theme)
-  const setTheme = useThemeStore(state => state.setTheme)
-  return { theme, setTheme }
-}

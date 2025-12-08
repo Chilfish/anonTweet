@@ -1,4 +1,4 @@
-import type { EnrichedTweet } from '../utils'
+import type { EnrichedTweet } from '~/lib/react-tweet'
 import { cn } from '~/lib/utils'
 import { formatNumber } from '../utils'
 import s from './tweet-actions.module.css'
@@ -14,11 +14,8 @@ export function TweetActions({ tweet, className }: TweetActionsProps) {
 
   return (
     <div className={cn(s.actions, className)}>
-      <a
+      <span
         className={s.reply}
-        href={tweet.reply_url}
-        target="_blank"
-        rel="noopener noreferrer"
         aria-label={`Reply. This Tweet has ${replyCount} replies`}
       >
         <div className={s.replyIconWrapper}>
@@ -29,12 +26,9 @@ export function TweetActions({ tweet, className }: TweetActionsProps) {
           </svg>
         </div>
         <span className={s.replyText}>{replyCount}</span>
-      </a>
-      <a
+      </span>
+      <span
         className={s.like}
-        href={tweet.like_url}
-        target="_blank"
-        rel="noopener noreferrer"
         aria-label={`Like. This Tweet has ${favoriteCount} likes`}
       >
         <div className={s.likeIconWrapper}>
@@ -49,7 +43,7 @@ export function TweetActions({ tweet, className }: TweetActionsProps) {
           </svg>
         </div>
         <span className={s.likeCount}>{favoriteCount}</span>
-      </a>
+      </span>
     </div>
   )
 }

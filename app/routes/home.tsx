@@ -1,4 +1,4 @@
-import { TweetInputForm } from '~/components/TweetInputForm'
+import { TweetInputForm } from '~/components/tweet/TweetInputForm'
 
 export function meta() {
   return [
@@ -12,6 +12,8 @@ export function meta() {
 
 export default function Home() {
   return (
-    <TweetInputForm />
+    <>
+      <TweetInputForm />
+    </>
   )
 }

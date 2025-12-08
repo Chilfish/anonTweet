@@ -3,7 +3,8 @@ import { reactRouter } from '@react-router/dev/vite'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
-
+// TODO: REMOVE IT
+// process.exit(1)
 // 获取 git 信息
 function getGitInfo() {
   try {
@@ -25,19 +26,20 @@ function getGitInfo() {
 
 const gitInfo = getGitInfo()
 
-export default defineConfig({
+export default defineConfig(({ isSsrBuild }) => ({
   plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
   ssr: {
     noExternal: ['react-tweet'],
   },
   server: {
-    proxy: {
-      '/api': {
-        target: 'https://cdn.syndication.twimg.com',
-        changeOrigin: true,
-        rewrite: path => path.replace(/^\/api/, ''),
-      },
-    },
+    // proxy: {
+    //   '/api/tweet': {
+    //     target: 'https://cdn.syndication.twimg.com',
+    //     changeOrigin: true,
+    //     rewrite: path => path.replace(/^\/api/, ''),
+    //   },
+    // },
+    port: 9080,
   },
   define: {
     __GIT_HASH__: JSON.stringify(gitInfo.hash),
@@ -46,6 +48,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       external: ['node:https', 'node:http', 'node:fs', 'node:path'],
+      input: isSsrBuild ? './server/app.ts' : undefined,
     },
   },
-})
+}))

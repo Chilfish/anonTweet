@@ -1,24 +1,3 @@
-import type { Indices } from './entities'
-
-export interface RGB {
-  red: number
-  green: number
-  blue: number
-}
-
-export interface Rect {
-  x: number
-  y: number
-  w: number
-  h: number
-}
-
-export interface Size {
-  h: number
-  w: number
-  resize: string
-}
-
 export interface VideoInfo {
   aspect_ratio: [number, number]
   variants: {
@@ -29,31 +8,11 @@ export interface VideoInfo {
 }
 
 interface MediaBase {
-  display_url: string
-  expanded_url: string
-  ext_media_availability: {
-    status: string
-  }
-  ext_media_color: {
-    palette: {
-      percentage: number
-      rgb: RGB
-    }[]
-  }
-  indices: Indices
   media_url_https: string
   original_info: {
     height: number
     width: number
-    focus_rects: Rect[]
   }
-  sizes: {
-    large: Size
-    medium: Size
-    small: Size
-    thumb: Size
-  }
-  url: string
 }
 
 export interface MediaPhoto extends MediaBase {

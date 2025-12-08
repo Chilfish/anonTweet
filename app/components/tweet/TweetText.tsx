@@ -179,7 +179,7 @@ export const TweetText: React.FC<TweetTextProps> = ({ text }) => {
           <PeopleLink name={replyToName} />
           :
         </p>
-        <p className="wrap-anywhere">{parseTweetText(content)}</p>
+        <p className="wrap-anywhere">{parseTweetText(content || '')}</p>
       </>
     )
   }

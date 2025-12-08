@@ -3,13 +3,13 @@ import type {
   Entity,
   EntityWithType,
   HashtagEntity,
+  LinkPreviewCard,
   MediaDetails,
   RawTweet,
   SymbolEntity,
   TweetPhoto,
   TweetUser,
   TweetVideo,
-  TwitterCard,
 } from './types'
 
 /**
@@ -19,17 +19,10 @@ export function enrichTweet(sourceData: RawTweet): EnrichedTweet {
   const tweet = ('tweet' in sourceData ? sourceData.tweet : sourceData) as RawTweet
   const userBase = transformUserResponse(tweet)
   const userScreenName = userBase.screen_name
-  const user = {
-    ...userBase,
-    url: `https://twitter.com/${userScreenName}`,
-    follow_url: `https://twitter.com/intent/follow?screen_name=${userScreenName}`,
-  }
+  const user = userBase
 
   const tweetId = tweet.rest_id
   const tweetUrl = `https://twitter.com/${userScreenName}/status/${tweetId}`
-  const likeUrl = `https://twitter.com/i/activity/like?tweet_id=${tweetId}`
-  const replyUrl = `https://twitter.com/${userScreenName}/status/${tweetId}`
-  const inReplyToUrl = `https://x.com/${tweet.in_reply_to_screen_name}/status/${tweet.in_reply_to_status_id_str}`
 
   const text = tweet.note_tweet?.note_tweet_results?.result?.text || tweet.legacy.full_text
 
@@ -40,34 +33,20 @@ export function enrichTweet(sourceData: RawTweet): EnrichedTweet {
     favorite_count: tweet.legacy.favorite_count,
     created_at: tweet.legacy.created_at,
     conversation_count: tweet.legacy.reply_count,
-    edit_control: {
-      edit_tweet_ids: tweet.edit_control.edit_tweet_ids,
-      editable_until_msecs: tweet.edit_control.editable_until_msecs,
-      is_edit_eligible: tweet.edit_control.is_edit_eligible,
-      edits_remaining: tweet.edit_control.edits_remaining,
-    },
-    news_action_type: 'conversation',
     display_text_range: tweet.legacy.display_text_range as [number, number],
     __typename: 'Tweet',
-    isEdited: false,
-    isStaleEdit: false,
-    possibly_sensitive: tweet.legacy.possibly_sensitive ?? false,
     text,
     user,
-    like_url: likeUrl,
-    reply_url: replyUrl,
-    in_reply_to_url: tweet.in_reply_to_screen_name
-      ? inReplyToUrl
-      : undefined,
     in_reply_to_status_id_str: tweet.legacy.in_reply_to_status_id_str,
     entities: getEntities(tweet, text),
-    quoted_tweet: tweet.quoted_status_result?.result
-      ? enrichTweet(tweet.quoted_status_result.result)
-      : undefined,
+    quoted_tweet_id: tweet.quoted_status_result?.result?.rest_id,
+    // quoted_tweet: tweet.quoted_status_result?.result
+    //   ? enrichTweet(tweet.quoted_status_result.result)
+    //   : undefined,
     card: mapTwitterCard(tweet.card),
     mediaDetails: mapMediaDetails(tweet),
-    photos: mapPhotoEntities(tweet),
-    video: mapVideoEntities(tweet),
+    // photos: mapPhotoEntities(tweet),
+    // video: mapVideoEntities(tweet),
     // parent: parentTweet(tweet),
   }
 }
@@ -309,7 +288,7 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
   const adjustedTextMap = Array.from(adjustedText)
 
   // 转换为最终的 Entity 类型
-  return result.map((entity) => {
+  return result.map((entity, index) => {
     const entityText = adjustedTextMap.slice(entity.indices[0], entity.indices[1]).join('')
 
     switch (entity.type) {
@@ -317,25 +296,29 @@ function getEntities(tweet: RawTweet, text: string): Entity[] {
         return Object.assign(entity, {
           href: getHashtagUrl(entity as HashtagEntity),
           text: entityText,
+          index,
         })
       case 'mention':
         return Object.assign(entity, {
           href: `https://twitter.com/${(entity as any).screen_name}`,
           text: entityText,
+          index,
         })
       case 'url':
       case 'media':
         return Object.assign(entity, {
           href: (entity as any).expanded_url,
           text: (entity as any).expanded_url,
+          index,
         })
       case 'symbol':
         return Object.assign(entity, {
           href: getSymbolUrl(entity as SymbolEntity),
           text: entityText,
+          index,
         })
       default:
-        return Object.assign(entity, { text: entityText })
+        return Object.assign(entity, { text: entityText, index })
     }
   })
 }
@@ -348,305 +331,111 @@ function getSymbolUrl(symbol: SymbolEntity) {
   return `https://x.com/search?q=%24${symbol.text}`
 }
 
+// 统一的图片 Key 优先级列表，按清晰度从高到低排列
+const IMAGE_KEYS_PRIORITY = [
+  // Unified / Large
+  'photo_image_full_size_original',
+  'photo_image_full_size_large',
+  'photo_image_full_size',
+  // Summary
+  'thumbnail_image_original',
+  'thumbnail_image_large',
+  'thumbnail_image',
+  // Player
+  'player_image_original',
+  'player_image_large',
+  'player_image',
+  // Fallback
+  'summary_photo_image_original',
+  'summary_photo_image_large',
+  'summary_photo_image',
+]
+
 /**
- * Maps raw Twitter card data to a clean TwitterCard interface
+ * 辅助函数：从 binding_values Map 中提取字符串值
  */
-export function mapTwitterCard(cardData: any): TwitterCard | undefined {
+const getStr = (map: Map<string, any>, key: string) => map.get(key)?.string_value
+
+/**
+ * 辅助函数：从 binding_values Map 中按优先级提取最佳图片 URL
+ */
+function getBestImage(map: Map<string, any>) {
+  for (const key of IMAGE_KEYS_PRIORITY) {
+    const img = map.get(key)?.image_value
+    if (img?.url)
+      return img.url
+  }
+  return undefined
+}
+
+/**
+ * 辅助函数：解析 Unified Card (YouTube 等) 的复杂 JSON
+ */
+function parseUnifiedCard(jsonStr: string | undefined) {
+  if (!jsonStr)
+    return null
+  try {
+    const data = JSON.parse(jsonStr)
+    const details = data.component_objects?.details_1?.data
+    const media = Object.values(data.media_entities || {})[0] as any
+
+    return {
+      title: details?.title?.content,
+      domain: details?.subtitle?.content,
+      url: data.destination_objects?.browser_1?.data?.url_data?.url,
+      imageUrl: media?.media_url_https,
+    }
+  }
+  catch {
+    return null
+  }
+}
+
+export function mapTwitterCard(cardData: any): LinkPreviewCard | undefined {
   if (!cardData)
     return undefined
 
-  // Handle the new card structure with rest_id and legacy
-  if (cardData.rest_id && cardData.legacy) {
-    const { rest_id, legacy } = cardData
-    const { binding_values, name, url, card_platform, user_refs_results } = legacy
+  // 1. 数据归一化：无论是新旧结构，都提取出核心的 name 和 binding_values
+  const legacy = cardData.legacy || cardData
+  const name = legacy.name
+  const bindingValues = legacy.binding_values
 
-    const card: TwitterCard = {
-      rest_id,
-      legacy: {
-        binding_values,
-        card_platform,
-        name,
-        url,
-        user_refs_results,
-      },
-    }
-
-    // Process binding_values for easier access
-    if (binding_values && Array.isArray(binding_values)) {
-      const bindingMap = new Map()
-      binding_values.forEach((item) => {
-        bindingMap.set(item.key, item.value)
-      })
-
-      // Extract basic information
-      const title = bindingMap.get('title')?.string_value
-      const description = bindingMap.get('description')?.string_value
-      const domain = bindingMap.get('domain')?.string_value || bindingMap.get('vanity_url')?.string_value
-
-      if (title)
-        card.title = title
-      if (description)
-        card.description = description
-      if (domain)
-        card.domain = domain
-      if (name)
-        card.type = name as any
-      if (url)
-        card.url = url
-
-      // Handle images based on card type
-      if (name === 'summary_large_image') {
-        const images: TwitterCard['images'] = {}
-
-        // Map different image sizes
-        const imageKeys = [
-          { key: 'photo_image_full_size_small', size: 'small' },
-          { key: 'summary_photo_image_small', size: 'small' },
-          { key: 'photo_image_full_size', size: 'medium' },
-          { key: 'summary_photo_image', size: 'medium' },
-          { key: 'photo_image_full_size_large', size: 'large' },
-          { key: 'summary_photo_image_large', size: 'large' },
-          { key: 'photo_image_full_size_original', size: 'original' },
-          { key: 'summary_photo_image_original', size: 'original' },
-          { key: 'photo_image_full_size_x_large', size: 'x_large' },
-          { key: 'summary_photo_image_x_large', size: 'x_large' },
-        ]
-
-        imageKeys.forEach(({ key, size }) => {
-          const imageValue = bindingMap.get(key)?.image_value
-          if (imageValue) {
-            const imageSize = size === 'x_large' ? 'original' : size as keyof NonNullable<TwitterCard['images']>
-            if (!images[imageSize]) {
-              images[imageSize] = {
-                url: imageValue.url,
-                width: imageValue.width,
-                height: imageValue.height,
-              }
-            }
-          }
-        })
-
-        if (Object.keys(images).length > 0) {
-          card.images = images
-          // Set primary image to the largest available
-          card.image = images.original || images.large || images.medium || images.small
-        }
-      }
-      else if (name === 'summary') {
-        const images: TwitterCard['images'] = {}
-
-        // Handle regular summary card images
-        const thumbnailKeys = [
-          { key: 'thumbnail_image_small', size: 'small' },
-          { key: 'thumbnail_image', size: 'medium' },
-          { key: 'thumbnail_image_large', size: 'large' },
-          { key: 'thumbnail_image_original', size: 'original' },
-          { key: 'thumbnail_image_x_large', size: 'x_large' },
-        ]
-
-        thumbnailKeys.forEach(({ key, size }) => {
-          const imageValue = bindingMap.get(key)?.image_value
-          if (imageValue) {
-            const imageSize = size === 'x_large' ? 'original' : size as keyof NonNullable<TwitterCard['images']>
-            if (!images[imageSize]) {
-              images[imageSize] = {
-                url: imageValue.url,
-                width: imageValue.width,
-                height: imageValue.height,
-              }
-            }
-          }
-        })
-
-        if (Object.keys(images).length > 0) {
-          card.images = images
-          card.image = images.original || images.large || images.medium || images.small
-        }
-      }
-      else if (name === 'player') {
-        const images: TwitterCard['images'] = {}
-
-        // Handle player card images
-        const playerImageKeys = [
-          { key: 'player_image_small', size: 'small' },
-          { key: 'player_image', size: 'medium' },
-          { key: 'player_image_large', size: 'large' },
-          { key: 'player_image_original', size: 'original' },
-          { key: 'player_image_x_large', size: 'x_large' },
-        ]
-
-        playerImageKeys.forEach(({ key, size }) => {
-          const imageValue = bindingMap.get(key)?.image_value
-          if (imageValue) {
-            const imageSize = size === 'x_large' ? 'original' : size as keyof NonNullable<TwitterCard['images']>
-            if (!images[imageSize]) {
-              images[imageSize] = {
-                url: imageValue.url,
-                width: imageValue.width,
-                height: imageValue.height,
-              }
-            }
-          }
-        })
-
-        if (Object.keys(images).length > 0) {
-          card.images = images
-          card.image = images.original || images.large || images.medium || images.small
-        }
-
-        // Convert player type to summary_large_image for consistent rendering
-        card.type = 'summary_large_image'
-      }
-      else if (name === 'unified_card') {
-        // Handle unified_card type (YouTube, etc.)
-        const unifiedCardValue = bindingMap.get('unified_card')?.string_value
-        if (unifiedCardValue) {
-          try {
-            const unifiedData = JSON.parse(unifiedCardValue)
-
-            // Extract title and domain from unified card
-            if (unifiedData.component_objects?.details_1?.data?.title?.content) {
-              card.title = unifiedData.component_objects.details_1.data.title.content
-            }
-
-            if (unifiedData.component_objects?.details_1?.data?.subtitle?.content) {
-              card.domain = unifiedData.component_objects.details_1.data.subtitle.content
-            }
-
-            // Extract URL from destination
-            if (unifiedData.destination_objects?.browser_1?.data?.url_data?.url) {
-              card.url = unifiedData.destination_objects.browser_1.data.url_data.url
-            }
-
-            // Extract image from media entities
-            const mediaEntities = unifiedData.media_entities
-            if (mediaEntities) {
-              const firstMediaKey = Object.keys(mediaEntities)[0]
-              const media = mediaEntities[firstMediaKey]
-              if (media?.media_url_https && media.original_info) {
-                card.image = {
-                  url: media.media_url_https,
-                  width: media.original_info.width,
-                  height: media.original_info.height,
-                }
-
-                // Also create images object with different sizes if available
-                if (media.sizes) {
-                  const images: TwitterCard['images'] = {}
-
-                  if (media.sizes.small) {
-                    images.small = {
-                      url: media.media_url_https,
-                      width: media.sizes.small.w,
-                      height: media.sizes.small.h,
-                    }
-                  }
-
-                  if (media.sizes.medium) {
-                    images.medium = {
-                      url: media.media_url_https,
-                      width: media.sizes.medium.w,
-                      height: media.sizes.medium.h,
-                    }
-                  }
-
-                  if (media.sizes.large) {
-                    images.large = {
-                      url: media.media_url_https,
-                      width: media.sizes.large.w,
-                      height: media.sizes.large.h,
-                    }
-                  }
-
-                  // Use original_info for original size
-                  images.original = {
-                    url: media.media_url_https,
-                    width: media.original_info.width,
-                    height: media.original_info.height,
-                  }
-
-                  card.images = images
-                }
-              }
-            }
-          }
-          catch (e) {
-            // Ignore JSON parse errors
-          }
-        }
-      }
-    }
-
-    return card
-  }
-
-  // Fallback for old card structure
-  if (!cardData.name)
+  if (!name || !Array.isArray(bindingValues))
     return undefined
 
-  const { name, url, binding_values } = cardData
-  const card: TwitterCard = {
-    type: name,
-    url: url || '',
+  // 2. 将 binding_values 转为 Map 以便快速查找 (O(1))
+  const bindings = new Map(bindingValues.map((v: any) => [v.key, v.value]))
+
+  // 3. 基础字段提取
+  let card: LinkPreviewCard = {
+    type: name === 'player' ? 'summary_large_image' : name, // Player 统一视为大图卡片
+    url: legacy.url || getStr(bindings, 'card_url') || '',
+    title: getStr(bindings, 'title'),
+    description: getStr(bindings, 'description'),
+    domain: getStr(bindings, 'domain') || getStr(bindings, 'vanity_url'),
+    imageUrl: getBestImage(bindings),
   }
 
-  if (!binding_values)
-    return card
-
-  // Extract basic information (old structure)
-  if (binding_values.title?.string_value) {
-    card.title = binding_values.title.string_value
+  // 4. 特殊处理 Unified Card (覆盖之前的提取)
+  if (name === 'unified_card') {
+    const unifiedData = parseUnifiedCard(getStr(bindings, 'unified_card'))
+    if (unifiedData) {
+      card = { ...card, ...unifiedData }
+    }
   }
 
-  if (binding_values.description?.string_value) {
-    card.description = binding_values.description.string_value
+  // 5. 最终校验与清洗
+  // 必须至少有 标题 或 描述 或 图片
+  if (!card.title && !card.description && !card.imageUrl) {
+    return undefined
   }
 
-  if (binding_values.domain?.string_value) {
-    card.domain = binding_values.domain.string_value
-  }
-
-  // Handle unified_card type (YouTube, etc.)
-  if (name === 'unified_card' && binding_values.unified_card?.string_value) {
+  // 域名兜底逻辑
+  if (!card.domain && card.url) {
     try {
-      const unifiedData = JSON.parse(binding_values.unified_card.string_value)
-
-      // Extract title and domain from unified card
-      if (unifiedData.component_objects?.details_1?.data?.title?.content) {
-        card.title = unifiedData.component_objects.details_1.data.title.content
-      }
-
-      if (unifiedData.component_objects?.details_1?.data?.subtitle?.content) {
-        card.domain = unifiedData.component_objects.details_1.data.subtitle.content
-      }
-
-      // Extract URL from destination
-      if (unifiedData.destination_objects?.browser_1?.data?.url_data?.url) {
-        card.url = unifiedData.destination_objects.browser_1.data.url_data.url
-      }
-
-      // Extract image from media entities
-      const mediaEntities = unifiedData.media_entities
-      if (mediaEntities) {
-        const firstMediaKey = Object.keys(mediaEntities)[0]
-        const media = mediaEntities[firstMediaKey]
-        if (media?.media_url_https && media.original_info) {
-          card.image = {
-            url: media.media_url_https,
-            width: media.original_info.width,
-            height: media.original_info.height,
-          }
-        }
-      }
+      card.domain = new URL(card.url).hostname
     }
-    catch (e) {
-      // Ignore JSON parse errors
-    }
-  }
-
-  if (card.type === 'player') {
-    card.image = binding_values.player_image_original?.image_value
-    card.type = 'summary_large_image'
+    catch {}
   }
 
   return card
@@ -712,51 +501,19 @@ function mapVideoEntities(tweet: RawTweet): TweetVideo | undefined {
   }
 }
 
-function mapMediaDetails(tweet: RawTweet): MediaDetails[] | undefined {
+export function mapMediaDetails(tweet: RawTweet): MediaDetails[] | undefined {
   const mediaEntities = tweet.legacy.entities?.media
   if (!mediaEntities || mediaEntities.length === 0)
     return undefined
 
   return mediaEntities.map((media) => {
+    // 提取公共基础字段
     const baseMedia = {
-      display_url: media.display_url,
-      expanded_url: media.expanded_url,
-      ext_media_availability: {
-        status: media.ext_media_availability?.status || 'Available',
-      },
-      ext_media_color: {
-        palette: [],
-      },
-      indices: media.indices,
       media_url_https: media.media_url_https,
       original_info: {
         height: media.original_info.height,
         width: media.original_info.width,
-        focus_rects: media.original_info.focus_rects || [],
       },
-      sizes: {
-        large: {
-          h: media.sizes.large.h,
-          resize: media.sizes.large.resize,
-          w: media.sizes.large.w,
-        },
-        medium: {
-          h: media.sizes.medium.h,
-          resize: media.sizes.medium.resize,
-          w: media.sizes.medium.w,
-        },
-        small: {
-          h: media.sizes.small.h,
-          resize: media.sizes.small.resize,
-          w: media.sizes.small.w,
-        },
-        thumb: {
-          h: media.sizes.thumb.h,
-          resize: media.sizes.thumb.resize,
-          w: media.sizes.thumb.w,
-        },
-      },
-      url: media.url,
     }
 
     if (media.type === 'photo') {
@@ -766,28 +523,36 @@ function mapMediaDetails(tweet: RawTweet): MediaDetails[] | undefined {
         ext_alt_text: media.ext_alt_text,
       }
     }
-    else if (media.type === 'animated_gif' && media.video_info) {
+
+    if (media.type === 'animated_gif' && media.video_info) {
       return {
         ...baseMedia,
         type: 'animated_gif' as const,
         video_info: {
-          aspect_ratio: [media.video_info.aspect_ratio[0] || 1, media.video_info.aspect_ratio[1] || 1] as [number, number],
-          variants: media.video_info.variants,
-        },
-      }
-    }
-    else if (media.type === 'video' && media.video_info) {
-      return {
-        ...baseMedia,
-        type: 'video' as const,
-        video_info: {
-          aspect_ratio: [media.video_info.aspect_ratio[0] || 1, media.video_info.aspect_ratio[1] || 1] as [number, number],
+          aspect_ratio: [
+            media.video_info.aspect_ratio[0] || 1,
+            media.video_info.aspect_ratio[1] || 1,
+          ] as [number, number],
           variants: media.video_info.variants,
         },
       }
     }
 
-    // 默认返回 photo 类型
+    if (media.type === 'video' && media.video_info) {
+      return {
+        ...baseMedia,
+        type: 'video' as const,
+        video_info: {
+          aspect_ratio: [
+            media.video_info.aspect_ratio[0] || 1,
+            media.video_info.aspect_ratio[1] || 1,
+          ] as [number, number],
+          variants: [media.video_info.variants.at(-1)!],
+        },
+      }
+    }
+
+    // Fallback: 默认返回 photo 类型以保证类型安全
     return {
       ...baseMedia,
       type: 'photo' as const,

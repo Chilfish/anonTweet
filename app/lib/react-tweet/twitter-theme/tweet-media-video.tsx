@@ -109,19 +109,6 @@ export function TweetMediaVideo({ tweet, media, showCoverOnly }: Props) {
 
       {playButton && <PlayControlButton />}
 
-      {!isPlaying && !ended && (
-        <div className={s.watchOnTwitter}>
-          <a
-            href={tweet.url}
-            className={s.anchor}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {playButton ? 'Watch on X' : 'Continue watching on X'}
-          </a>
-        </div>
-      )}
-
       {ended && (
         <a
           href={tweet.url}

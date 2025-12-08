@@ -110,7 +110,7 @@ export class FetcherService {
     const transaction = await ClientTransaction.create(document)
 
     // Getting the URL path excluding all params
-    const path = new URL(url).pathname.split('?')[0].trim()
+    const path = new URL(url).pathname.split('?')[0]!.trim()
 
     // Generating the transaction ID
     const tid = await transaction.generateTransactionId(method.toUpperCase(), path)

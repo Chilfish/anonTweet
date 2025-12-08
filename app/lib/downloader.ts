@@ -73,9 +73,7 @@ export async function downloadFiles(
   items: DownloadItem[],
   options: DownloadOptions = {},
 ): Promise<void> {
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i]
-
+  for (const item of items) {
     try {
       await downloadFile(item, {
         ...options,
@@ -87,7 +85,6 @@ export async function downloadFiles(
           })
         },
         onComplete: (filename) => {
-          console.log(`下载完成: ${filename} (${i + 1}/${items.length})`)
           options.onComplete?.(filename)
         },
         onError: (error, filename) => {

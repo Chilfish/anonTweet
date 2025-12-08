@@ -1,7 +1,5 @@
 import type { HashtagEntity, Indices, MediaEntity, SymbolEntity, UrlEntity, UserMentionEntity } from './entities'
-import type { TweetPhoto } from './photo'
 import type { QuotedTweet, Tweet } from './tweet'
-import type { TweetVideo } from './video'
 import type { ITweetDetailsResponse } from '~/lib/rettiwt-api/types/raw/tweet/Details'
 
 export type * from './edit'
@@ -83,6 +81,20 @@ export interface TwitterCard {
   }
 }
 
+export interface LinkPreviewCard {
+  type: 'summary' | 'summary_large_image' | 'unified_card' | 'unknown' | 'player'
+  /** 跳转链接 */
+  url: string
+  /** 显示标题 */
+  title: string
+  /** 显示描述 */
+  description: string
+  /** 显示域名  */
+  domain: string
+  /** 图片地址 */
+  imageUrl: string
+}
+
 interface TextEntity {
   indices: Indices
   type: 'text'
@@ -98,9 +110,18 @@ export type EntityWithType
     | (MediaEntity & { type: 'media' })
     | (SymbolEntity & { type: 'symbol' })
 
-export type Entity = {
+export interface EntityBase {
   text: string
-} & (
+  translation?: string
+  index: number
+}
+
+export type TranslationEntity = EntityBase & (
+  | TextEntity
+  | (HashtagEntity & { type: 'hashtag', href: string })
+)
+
+export type Entity = EntityBase & (
   | TextEntity
   | (HashtagEntity & { type: 'hashtag', href: string })
   | (UserMentionEntity & { type: 'mention', href: string })
@@ -109,25 +130,15 @@ export type Entity = {
   | (SymbolEntity & { type: 'symbol', href: string })
 )
 
-export type EnrichedTweet = Omit<Tweet, 'entities' | 'quoted_tweet'> & {
+type OmitTypes = 'entities' | 'quoted_tweet' | 'edit_control' | 'isEdited' | 'isStaleEdit' | 'possibly_sensitive' | 'news_action_type' | 'card'
+
+export type EnrichedTweet = Omit<Tweet, OmitTypes> & {
   url: string
-  user: {
-    url: string
-    follow_url: string
-  }
-  like_url: string
-  reply_url: string
-  in_reply_to_url?: string
   entities: Entity[]
-  quoted_tweet?: EnrichedTweet
-  card?: TwitterCard
-  photos?: TweetPhoto[]
-  video?: TweetVideo
-  possibly_sensitive?: boolean
-  isEdited: boolean
-  isStaleEdit: boolean
+  quoted_tweet_id?: string
+  quotedTweet?: EnrichedTweet
+  card?: LinkPreviewCard
   conversation_count: number
-  news_action_type: string
 }
 
 export type EnrichedQuotedTweet = Omit<QuotedTweet, 'entities'> & {

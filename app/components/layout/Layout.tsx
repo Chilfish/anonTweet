@@ -1,5 +1,4 @@
-import type { JSX } from 'react'
-import { InfoIcon, Sparkles } from 'lucide-react'
+import { GitCommitHorizontal, InfoIcon, XIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Outlet, useSearchParams } from 'react-router'
 import { Button } from '~/components/ui/button'
@@ -7,56 +6,68 @@ import { formatDate } from '~/lib/react-tweet/date-utils'
 import { cn } from '~/lib/utils'
 import { PageHeader } from './PageHeader'
 
+const THEME_COLOR = {
+  '--primary-brand': 'oklch(0.6 0.18 260)',
+  '--primary-fallback': '#1d9bf0',
+} as React.CSSProperties
+
+function MinimalBackground() {
+  return (
+    <div className="fixed inset-0 -z-50 pointer-events-none select-none bg-background">
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[30vh] opacity-10 blur-[100px]"
+        style={{ background: 'var(--primary-brand, var(--primary-fallback))' }}
+      />
+    </div>
+  )
+}
+
 interface LinkProps {
   to: string
   className?: string
-  children?: JSX.Element | string
+  children?: React.ReactNode
+  emoji?: string
 }
 
-function Linker({ to, className, children }: LinkProps) {
+function FooterLink({ to, className, children, emoji }: LinkProps) {
   return (
     <a
       href={to}
-      className={cn('inline-flex items-center gap-1 text-primary underline-offset-4 hover:underline mx-1', className)}
       target="_blank"
       rel="noopener noreferrer"
+      className={cn(
+        'inline-flex items-center gap-1.5 transition-colors hover:text-(--primary-brand) hover:underline underline-offset-4 decoration-dotted',
+        className,
+      )}
     >
-      {children}
+      {emoji && <span className="text-[1.1em] grayscale group-hover:grayscale-0 transition-all">{emoji}</span>}
+      <span>{children}</span>
     </a>
   )
 }
 
-function Footer({ className, ...props }: { className?: string }) {
+function GitInfo() {
+  const hash = typeof __GIT_HASH__ !== 'undefined' ? __GIT_HASH__ : 'DEV'
+  const dateStr = typeof __GIT_DATE__ !== 'undefined' ? __GIT_DATE__ : new Date()
+
   return (
-    <footer className={cn('w-full text-center text-sm text-muted-foreground', className)} {...props}>
-      <p>
-        <span>Made by</span>
-        <Linker to="https://space.bilibili.com/259486090">@Chilfish</Linker>
-        <span>其他作品：</span>
-      </p>
-      <ul className="inline-flex flex-wrap items-center justify-center w-full text-xs">
-        <Linker to="https://tweet.chilfish.top/memo/240y_k">女声优推特&ins存档站</Linker>
-        /
-        <Linker to="https://nishio.chilfish.top/zh">西尾文明暦</Linker>
-        /
-        <Linker to="https://oshitabi.chilfish.top/">推し旅 AR 镜头</Linker>
-      </ul>
-      <div className="mt-2 flex items-center justify-center gap-2 text-xs text-muted-foreground/70">
-        <span>
-          上次构建于：
-          {formatDate(new Date(__GIT_DATE__))}
-        </span>
-        <a
-          href={`https://github.com/Chilfish/anonTweet/commit/${__GIT_HASH__}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 px-2 py-1 bg-muted/50 rounded-md border text-2 hover:text-primary hover:bg-muted/70 transition-colors duration-200 hover:border-primary"
-        >
-          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-          <span>{__GIT_HASH__}</span>
-        </a>
-      </div>
-    </footer>
+    <div className="flex items-center justify-center gap-2 text-[10px] text-muted-foreground/50 font-mono mt-3 select-all">
+      <span title={formatDate(new Date(dateStr))}>
+        Last build:
+        {' '}
+        {formatDate(new Date(dateStr))}
+      </span>
+      <span>•</span>
+      <a
+        href={`https://github.com/Chilfish/anonTweet/commit/${hash}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-1 hover:text-foreground transition-colors"
+      >
+        <GitCommitHorizontal className="size-3" />
+        {hash.substring(0, 7)}
+      </a>
+    </div>
   )
 }
 
@@ -64,55 +75,63 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
   const [showFooter, setShowFooter] = useState(false)
 
   return (
-    <div className="relative w-full mx-auto px-2 sm:px-16 pt-8 pb-4 flex flex-col justify-center items-center min-h-screen overflow-hidden">
-      {/* 背景装饰 */}
-      <div className="absolute inset-0 -z-10">
-        {/* 主背景渐变 */}
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-accent/5" />
+    <div
+      className="relative min-h-screen w-full flex flex-col font-sans text-foreground antialiased"
+      style={THEME_COLOR}
+    >
+      <MinimalBackground />
 
-        {/* 动态光点 */}
-        <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute top-3/4 right-1/4 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-3/4 w-20 h-20 bg-pink-500/10 rounded-full blur-xl animate-pulse delay-2000" />
+      <div className="flex-1 w-full max-w-3xl mx-auto sm:px-4 pt-8 pb-12 flex flex-col items-center justify-center  animate-in fade-in slide-in-from-bottom-2 duration-500">
+        <div className="mb-8 w-full">
+          <PageHeader />
+        </div>
 
-        {/* 网格背景 */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20" />
-      </div>
-
-      {/* 顶部装饰星星 */}
-      <div className="absolute top-8 right-8 text-primary/30 animate-pulse">
-        <Sparkles className="size-6" />
-      </div>
-      <div className="absolute top-16 left-8 text-purple-500/30 animate-pulse delay-500">
-        <Sparkles className="size-4" />
-      </div>
-      <div className="absolute top-32 right-1/3 text-pink-500/30 animate-pulse delay-1000">
-        <Sparkles className="size-3" />
-      </div>
-
-      {/* 主内容区域添加微妙的背景 */}
-      <div className="relative z-10 mt-auto">
-        <PageHeader />
-      </div>
-
-      <main className="relative w-full sm:max-w-3xl z-10 flex flex-col items-center justify-center mb-6">
         {children || <Outlet />}
-      </main>
+      </div>
 
-      <div className="relative z-10 flex items-center mx-auto mt-auto">
-        <Footer
-          className={cn('transition-all duration-300 flex-1', {
-            'opacity-0': !showFooter,
-            'opacity-100': showFooter,
-          })}
-        />
+      <div className="w-full py-6 flex flex-col items-center justify-center gap-4 z-10">
+
+        <div
+          className={cn(
+            'w-full overflow-hidden transition-all duration-300 ease-in-out origin-bottom',
+            showFooter ? 'max-h-[200px] opacity-100 translate-y-0' : 'max-h-0 opacity-0 translate-y-4',
+          )}
+        >
+          <footer className="text-center text-xs sm:text-sm text-muted-foreground space-y-3 pb-2">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
+              <p>
+                Made by
+                {' '}
+                <FooterLink to="https://space.bilibili.com/259486090">@Chilfish</FooterLink>
+              </p>
+              <span className="hidden sm:inline opacity-30">|</span>
+              <p>
+                More:
+                <span className="inline-flex gap-3 ml-2">
+                  <FooterLink to="https://tweet.chilfish.top/memo/240y_k">女声优存档</FooterLink>
+                  <FooterLink to="https://nishio.chilfish.top/zh">西尾文明暦</FooterLink>
+                  <FooterLink to="https://oshitabi.chilfish.top/">推し旅AR</FooterLink>
+                  <FooterLink to="/bili">发布到B站</FooterLink>
+                </span>
+              </p>
+            </div>
+
+            <GitInfo />
+          </footer>
+        </div>
 
         <Button
           variant="ghost"
-          className="text-muted-foreground/40 hover:text-primary transition-colors duration-200 hover:scale-105 transform"
+          size="sm"
           onClick={() => setShowFooter(!showFooter)}
+          className="rounded-full h-8 w-8 p-0 text-muted-foreground/40 hover:text-(--primary-brand) hover:bg-transparent transition-all hover:scale-110"
+          aria-label={showFooter ? '隐藏信息' : '显示信息'}
         >
-          <InfoIcon className="size-5" />
+          {showFooter ? (
+            <XIcon className="size-4" />
+          ) : (
+            <InfoIcon className="size-4" />
+          )}
         </Button>
       </div>
     </div>
@@ -124,7 +143,11 @@ export default function Layout() {
   const plain = searchParams.get('plain') === 'true'
 
   if (plain) {
-    return <Outlet />
+    return (
+      <div className="min-h-screen w-full bg-background font-sans antialiased" style={THEME_COLOR}>
+        <Outlet />
+      </div>
+    )
   }
 
   return (

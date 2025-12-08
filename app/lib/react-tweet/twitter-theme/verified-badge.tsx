@@ -1,4 +1,4 @@
-import type { TweetUser } from '../api/index'
+import type { TweetUser } from '~/lib/react-tweet'
 import clsx from 'clsx'
 import {
   Verified,
@@ -15,7 +15,7 @@ interface Props {
 export function VerifiedBadge({ user, className }: Props) {
   const verified = user.verified || user.is_blue_verified || user.verified_type
   let icon = <Verified />
-  let iconClassName: string | null = s.verifiedBlue
+  let iconClassName: string | undefined = s.verifiedBlue
 
   if (verified) {
     if (!user.is_blue_verified) {
@@ -28,7 +28,7 @@ export function VerifiedBadge({ user, className }: Props) {
         break
       case 'Business':
         icon = <VerifiedBusiness />
-        iconClassName = null
+        iconClassName = undefined
         break
     }
   }

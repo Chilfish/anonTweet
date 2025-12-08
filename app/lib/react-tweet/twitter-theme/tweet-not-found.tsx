@@ -12,10 +12,12 @@ export function TweetNotFound(_props: Props) {
     <TweetContainer>
       <div className={styles.root}>
         <h3>
-          Tweet not found for ID:
+          找不到推文 ID:
           {errorMessage}
         </h3>
-        <p>The embedded tweet could not be found. Please check the tweet ID and try again.</p>
+        <p>
+          该推文未找到或已不可见，可能已被删除。
+        </p>
       </div>
     </TweetContainer>
   )
