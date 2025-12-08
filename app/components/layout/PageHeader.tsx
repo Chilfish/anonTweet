@@ -35,7 +35,7 @@ export function PageHeader() {
           </p>
         )}
 
-        <p className="text-xs">
+        {/* <p className="text-xs">
           （页面设计、逻辑优化的测试版本已发布，
           <a
             className="text-primary underline-offset-4 hover:underline"
@@ -53,7 +53,7 @@ export function PageHeader() {
             @Chilfish
           </a>
           ）
-        </p>
+        </p> */}
       </div>
     </div>
   )
