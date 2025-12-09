@@ -40,7 +40,8 @@ export function extractTweetId(input: string): string | null {
 }
 
 export function proxyMedia(url: string) {
-  return `https://proxy.chilfish.top/${url}`
+  return url
+  // return `https://proxy.chilfish.top/${url}`
 }
 
 export function parseUserAgent(userAgent: string): {
