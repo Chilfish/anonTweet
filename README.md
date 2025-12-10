@@ -69,6 +69,7 @@ bun run dev
 为了项目正常运行，请务必配置以下环境变量：
 
 #### 核心配置
+
 - `ENVIRONMENT`: 设置为 `development` 或 `production`。
 - `DB_URL`: PostgreSQL 数据库连接字符串（推荐使用 Neon）。
 
