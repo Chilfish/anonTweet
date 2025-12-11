@@ -36,7 +36,7 @@ export function SettingsPanel() {
         <SettingsIcon className="size-5" />
       </DialogTrigger>
 
-      <DialogPopup className="">
+      <DialogPopup className="sm:max-w-[50%]">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">设置</DialogTitle>
         </DialogHeader>
