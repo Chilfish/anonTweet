@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { SeparatorTemplateManager } from '~/components/settings/SeparatorTemplateManager'
 import { SettingsBody, SettingsPanel } from '~/components/settings/SettingsPanel'
 import { ThemeSwitcher } from '~/components/settings/ThemeSwitcher'
+import { TranslationDictionaryManager } from '~/components/settings/TranslationDictionaryManager'
 
 const meta = {
   title: 'SettingsPanel',
@@ -29,4 +30,8 @@ export const ThemeSwitcher_: Story = {
 
 export const SeparatorTemplate: Story = {
   render: () => <SeparatorTemplateManager />,
+}
+
+export const TranslationDictionary: Story = {
+  render: () => <TranslationDictionaryManager />,
 }

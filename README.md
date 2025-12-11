@@ -6,19 +6,19 @@
 
 本项目采用现代 React 全栈架构，利用 Bun 作为高性能运行时。
 
-*   **Core Framework**: [React Router v7](https://reactrouter.com/) (Fullstack, SSR/CSR)
-*   **Language & Runtime**: TypeScript, [Bun](https://bun.sh/)
-*   **UI System**:
-    *   [Tailwind CSS v4](https://tailwindcss.com/) (Styling)
-    *   [coss/ui](https://coss.com/ui/docs) (Component Primitives)
-    *   [Lucide React](https://lucide.dev/) (Icons)
-*   **Data & State**:
-    *   [Drizzle ORM](https://orm.drizzle.team/) + PostgreSQL (Neon Serverless)
-    *   Zustand (Client-side global state)
-    *   React Router Loaders/Actions (Server-side data flow)
-*   **Utilities**:
-    *   `better-auth` (Authentication infrastructure)
-    *   `modern-screenshot` (Dom to image generation)
+- **Core Framework**: [React Router v7](https://reactrouter.com/) (Fullstack, SSR/CSR)
+- **Language & Runtime**: TypeScript, [Bun](https://bun.sh/)
+- **UI System**:
+  - [Tailwind CSS v4](https://tailwindcss.com/) (Styling)
+  - [coss/ui](https://coss.com/ui/docs) (Component Primitives)
+  - [Lucide React](https://lucide.dev/) (Icons)
+- **Data & State**:
+  - [Drizzle ORM](https://orm.drizzle.team/) + PostgreSQL (Neon Serverless)
+  - Zustand (Client-side global state)
+  - React Router Loaders/Actions (Server-side data flow)
+- **Utilities**:
+  - `better-auth` (Authentication infrastructure)
+  - `modern-screenshot` (Dom to image generation)
 
 ## 🚀 Getting Started
 
@@ -81,24 +81,27 @@ bun run dev
 
 核心路由逻辑位于 `app/routes.ts`，采用了 React Router v7 的配置式路由定义。
 
-| 路径模式 | 文件位置 | 说明 |
-| :--- | :--- | :--- |
-| `/tweets/:id` | `app/routes/tweet.tsx` | **核心业务页**。推文详情、翻译编辑器、图片导出功能。 |
+| 路径模式             | 文件位置                      | 说明                                                               |
+| :------------------- | :---------------------------- | :----------------------------------------------------------------- |
+| `/tweets/:id`        | `app/routes/tweet.tsx`        | **核心业务页**。推文详情、翻译编辑器、图片导出功能。               |
 | `/api/tweet/get/:id` | `app/routes/api/tweet/get.ts` | **Loader API**。获取推文数据（优先读库，无缓存则调用第三方 API）。 |
-| `/api/tweet/set` | `app/routes/api/tweet/set.ts` | **Action API**。保存/更新推文的翻译内容到数据库。 |
-
+| `/api/tweet/set`     | `app/routes/api/tweet/set.ts` | **Action API**。保存/更新推文的翻译内容到数据库。                  |
 
 > **Note**: `app/components` 目录下包含大量业务组件，如 `tweet/` (推文渲染) 和 `translation/` (翻译编辑器)。
 
 ## 🚧 Development Status
 
 ### Authentication
+
 目前项目的认证模块处于 **开发/简化模式**：
-*   虽然集成了 `better-auth`，但 **Auth UI 路由**（如 `/auth/sign-in`, `/auth/sign-up`）在 `routes.ts` 中已被注释禁用。
-*   项目当前主要依赖匿名 Session 或简化的验证逻辑来处理用户状态。
-*   相关的管理后台路由（`/admin/*`）和设置路由（`/settings/*`）也暂时处于禁用状态。
+
+- 虽然集成了 `better-auth`，但 **Auth UI 路由**（如 `/auth/sign-in`, `/auth/sign-up`）在 `routes.ts` 中已被注释禁用。
+- 项目当前主要依赖匿名 Session 或简化的验证逻辑来处理用户状态。
+- 相关的管理后台路由（`/admin/*`）和设置路由（`/settings/*`）也暂时处于禁用状态。
 
 ### External Libraries
+
 项目包含部分 fork 并修改的第三方库，位于 `app/lib/` 目录下：
-*   **`react-tweet`**: 基于 Vercel 的同名库修改，以适配自定义的 UI 渲染需求和样式（Tailwind v4）。
-*   **`rettiwt-api`**: 基于 Rettiwt-API 修改，用于在服务端逆向获取 Twitter 数据流。
+
+- **`react-tweet`**: 基于 Vercel 的同名库修改，以适配自定义的 UI 渲染需求和样式（Tailwind v4）。
+- **`rettiwt-api`**: 基于 Rettiwt-API 修改，用于在服务端逆向获取 Twitter 数据流。

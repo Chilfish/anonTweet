@@ -7,12 +7,23 @@
 />
 <style>
   :root {
-    --font-geist-sans: "Geist", sans-serif;
-    --font-geist-mono: "Geist Mono", monospace;
+    --font-geist-sans: 'Geist', sans-serif;
+    --font-geist-mono: 'Geist Mono', monospace;
   }
   body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     touch-action: manipulation;
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-geist-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  div#storybook-root {
+      width: 100%;
   }
 </style>

@@ -13,12 +13,16 @@ import {
 import { SeparatorTemplateManager } from './SeparatorTemplateManager'
 import { ThemeSwitcher } from './ThemeSwitcher'
 
+import { TranslationDictionaryManager } from './TranslationDictionaryManager'
+
 export function SettingsBody() {
   return (
     <DialogPanel className="space-y-6">
       <ThemeSwitcher />
 
       <SeparatorTemplateManager />
+
+      <TranslationDictionaryManager />
     </DialogPanel>
   )
 }
@@ -32,7 +36,7 @@ export function SettingsPanel() {
         <SettingsIcon className="size-5" />
       </DialogTrigger>
 
-      <DialogPopup className="sm:max-w-md">
+      <DialogPopup className="">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">设置</DialogTitle>
         </DialogHeader>
