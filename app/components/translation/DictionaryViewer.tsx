@@ -57,6 +57,7 @@ export function DictionaryViewer() {
                       size="icon-xs"
                       onClick={() => copyToClipboard(entry.translated)}
                       title="复制译文"
+                      className="text-secondary-foreground"
                     >
                       <Copy />
                     </Button>

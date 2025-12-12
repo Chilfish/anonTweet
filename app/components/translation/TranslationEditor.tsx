@@ -178,23 +178,6 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
           <div>
             <div className="flex items-center justify-between">
               <Label className="font-bold">原文</Label>
-              <Popover>
-                <PopoverTrigger render={(
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 p-0 hover:bg-muted"
-                    title="查看词汇表"
-                  />
-                )}
-                >
-
-                  <BookA className="h-4 w-4 text-muted-foreground" />
-                </PopoverTrigger>
-                <PopoverContent className="w-80 p-0" align="end" side="bottom">
-                  <DictionaryViewer />
-                </PopoverContent>
-              </Popover>
             </div>
             <Card className="mt-2 py-2 bg-muted/30">
               <CardContent className="px-3">
@@ -272,32 +255,38 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
         <DialogFooter
           className="flex-row items-center justify-between gap-2"
         >
+          <Popover>
+            <PopoverTrigger render={(
+              <Button
+                variant="secondary"
+                className="mr-auto hover:bg-muted"
+                title="查看词汇表"
+              />
+            )}
+            >
+              <BookA className="size-4" />
+              查看词汇表
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-0" align="center" side="top">
+              <DictionaryViewer />
+            </PopoverContent>
+          </Popover>
+
           {getTranslation(tweetId) ? (
             <Button
               type="button"
               variant="destructive"
-              size="sm"
               onClick={handleDelete}
-              className="gap-2"
             >
               <Trash2 className="h-4 w-4" />
               删除
             </Button>
           ) : <div />}
 
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsOpen(false)}
-            >
-              取消
-            </Button>
-            <Button type="submit" className="gap-2">
-              <Save className="h-4 w-4" />
-              保存
-            </Button>
-          </div>
+          <Button type="submit">
+            <Save className="h-4 w-4" />
+            保存
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
