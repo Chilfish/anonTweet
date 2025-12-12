@@ -173,7 +173,7 @@ export function TranslationDictionaryManager() {
             </span>
           </h3>
 
-          <div className="flex gap-2 w-full sm:w-auto">
+          <div className="flex gap-2 justify-end w-full sm:w-auto">
             <Button
               onClick={() => setShowAddForm(!showAddForm)}
               variant={showAddForm ? 'secondary' : 'default'}

@@ -10,19 +10,31 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '~/components/ui/dialog'
+import { Tabs, TabsList, TabsPanel, TabsTab } from '~/components/ui/tabs'
 import { SeparatorTemplateManager } from './SeparatorTemplateManager'
 import { ThemeSwitcher } from './ThemeSwitcher'
-
 import { TranslationDictionaryManager } from './TranslationDictionaryManager'
 
 export function SettingsBody() {
   return (
     <DialogPanel className="space-y-6">
-      <ThemeSwitcher />
+      <Tabs defaultValue="theme">
+        <TabsList>
+          <TabsTab value="separator">分隔符样式</TabsTab>
+          <TabsTab value="translation">翻译对照表</TabsTab>
+          <TabsTab value="theme">主题</TabsTab>
+        </TabsList>
+        <TabsPanel value="theme">
+          <ThemeSwitcher />
+        </TabsPanel>
+        <TabsPanel value="separator">
+          <SeparatorTemplateManager />
+        </TabsPanel>
+        <TabsPanel value="translation">
+          <TranslationDictionaryManager />
+        </TabsPanel>
+      </Tabs>
 
-      <SeparatorTemplateManager />
-
-      <TranslationDictionaryManager />
     </DialogPanel>
   )
 }
@@ -36,7 +48,7 @@ export function SettingsPanel() {
         <SettingsIcon className="size-5" />
       </DialogTrigger>
 
-      <DialogPopup className="sm:max-w-[50%]">
+      <DialogPopup className="md:max-w-[50%]">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">设置</DialogTitle>
         </DialogHeader>
