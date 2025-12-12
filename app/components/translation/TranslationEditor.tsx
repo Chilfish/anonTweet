@@ -18,6 +18,7 @@ import { Switch } from '~/components/ui/switch'
 import { Textarea } from '~/components/ui/textarea'
 import { TweetBody } from '~/lib/react-tweet'
 import { useTranslationStore } from '~/lib/stores/translation'
+import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 
 interface TranslationEditorProps {
   originalTweet: EnrichedTweet
@@ -58,6 +59,8 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     hasTextContent,
   } = useTranslationStore()
 
+  const dictionaryEntries = useTranslationDictionaryStore(state => state.entries)
+
   const isVisible = useMemo(() => {
     return hasTextContent(originalTweet.text) && showTranslationButton
   }, [originalTweet.text, showTranslationButton, hasTextContent])
@@ -70,7 +73,16 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
       baseEntities = JSON.parse(JSON.stringify(existing))
     }
     else {
-      baseEntities = (originalTweet.entities || []).map((e, i) => ({ ...e, index: i }))
+      baseEntities = (originalTweet.entities || []).map((e, i) => {
+        const entity = { ...e, index: i }
+        if (entity.type === 'hashtag') {
+          const match = dictionaryEntries.find(d => d.original === entity.text.replace('#', ''))
+          if (match) {
+            entity.translation = `#${match.translated}`
+          }
+        }
+        return entity
+      })
     }
 
     const prependIndex = baseEntities.findIndex(e => e.index === -1)
@@ -89,7 +101,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
 
     setEditingEntities(baseEntities)
     setIsOpen(true)
-  }, [tweetId, getTranslation, originalTweet.entities])
+  }, [tweetId, getTranslation, originalTweet.entities, dictionaryEntries])
 
   const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
