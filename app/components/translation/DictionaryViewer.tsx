@@ -25,7 +25,7 @@ export function DictionaryViewer() {
   }
 
   return (
-    <div className="flex flex-col gap-3 h-[300px]">
+    <div className="flex flex-col gap-3 max-h-[300px]">
       <InputGroup>
         <InputGroupAddon align="inline-start">
           <SearchIcon className="size-4" />
@@ -41,8 +41,8 @@ export function DictionaryViewer() {
         <div className="p-3 space-y-3">
           {filtered.length === 0
             ? (
-                <div className="text-xs text-muted-foreground text-center py-8">
-                  {search ? '无匹配结果' : '暂无词条'}
+                <div className="text-sm text-muted-foreground text-center py-4">
+                  {search ? '无匹配结果' : '暂无词条，可在设置中添加'}
                 </div>
               )
             : (
