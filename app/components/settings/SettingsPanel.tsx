@@ -18,7 +18,7 @@ import { TranslationDictionaryManager } from './TranslationDictionaryManager'
 export function SettingsBody() {
   return (
     <DialogPanel className="space-y-6">
-      <Tabs defaultValue="theme">
+      <Tabs defaultValue="separator">
         <TabsList>
           <TabsTab value="separator">分隔符样式</TabsTab>
           <TabsTab value="translation">翻译对照表</TabsTab>

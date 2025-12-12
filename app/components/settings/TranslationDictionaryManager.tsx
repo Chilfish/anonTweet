@@ -1,4 +1,4 @@
-import type { TranslationDicEntry } from '~/lib/stores/TranslationDictionary' // 请根据实际路径调整
+import type { TranslationDicEntry } from '~/lib/stores/TranslationDictionary'
 import { FileDown, FileUp, MoreHorizontal, Pencil, Plus, SearchIcon, Trash2, X } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 import { Button } from '~/components/ui/button'
@@ -23,7 +23,7 @@ import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 import { toastManager } from '~/components/ui/toast'
-import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
+import { downloadExcel, parseExcel, useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '../ui/input-group'
 
 export function TranslationDictionaryManager() {
@@ -74,24 +74,20 @@ export function TranslationDictionaryManager() {
     // setShowAddForm(false)
   }
 
-  const handleExport = () => {
+  const handleExport = async () => {
     try {
-      const dataStr = JSON.stringify(entries, null, 2)
-      const blob = new Blob([dataStr], { type: 'application/json' })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `dictionary_${new Date().toISOString().slice(0, 10)}.json`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
+      await downloadExcel(entries)
+      toastManager.add({
+        title: '导出成功',
+        description: 'Excel 文件已开始下载',
+        type: 'success',
+      })
     }
     catch (e) {
       console.error('Export failed', e)
       toastManager.add({
         title: '导出失败',
-        description: `请检查您的浏览器是否支持导出文件。${e}`,
+        description: `导出过程中发生错误: ${e}`,
         type: 'error',
       })
     }
@@ -103,12 +99,15 @@ export function TranslationDictionaryManager() {
       return
 
     const reader = new FileReader()
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
-        const result = event.target?.result as string
-        const parsed = JSON.parse(result)
+        const result = event.target?.result as ArrayBuffer
+        if (!result)
+          throw new Error('File read failed')
 
-        if (Array.isArray(parsed)) {
+        const parsed = await parseExcel(result)
+
+        if (Array.isArray(parsed) && parsed.length > 0) {
           const stats = importEntries(parsed)
           toastManager.add({
             title: '导入成功',
@@ -116,10 +115,17 @@ export function TranslationDictionaryManager() {
             type: 'success',
           })
         }
+        else if (Array.isArray(parsed) && parsed.length === 0) {
+          toastManager.add({
+            title: '导入无数据',
+            description: '未在 Excel 中找到有效词条。请确保表头为 原文 和 译文。',
+            type: 'error',
+          })
+        }
         else {
           toastManager.add({
             title: '导入失败',
-            description: '文件格式错误：JSON 内容必须是数组。',
+            description: '文件格式错误或为空。',
             type: 'error',
           })
         }
@@ -128,7 +134,7 @@ export function TranslationDictionaryManager() {
         console.error('Import failed', error)
         toastManager.add({
           title: '导入失败',
-          description: '解析 JSON 失败，请检查文件格式。',
+          description: '解析 Excel 失败，请检查文件格式。',
           type: 'error',
         })
       }
@@ -137,7 +143,7 @@ export function TranslationDictionaryManager() {
           fileInputRef.current.value = ''
       }
     }
-    reader.readAsText(file)
+    reader.readAsArrayBuffer(file)
   }
 
   const openEditDialog = (entry: TranslationDicEntry) => {
@@ -195,7 +201,7 @@ export function TranslationDictionaryManager() {
             <input
               ref={fileInputRef}
               type="file"
-              accept=".json"
+              accept=".xlsx, .xls"
               className="hidden"
               onChange={handleImport}
             />
