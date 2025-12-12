@@ -1,4 +1,4 @@
-import type { HashtagEntity, Indices, MediaEntity, SymbolEntity, UrlEntity, UserMentionEntity } from './entities'
+import type { Entity } from './entities'
 import type { QuotedTweet, Tweet } from './tweet'
 import type { ITweetDetailsResponse } from '~/lib/rettiwt-api/types/raw/tweet/Details'
 
@@ -94,42 +94,6 @@ export interface LinkPreviewCard {
   /** 图片地址 */
   imageUrl: string
 }
-
-interface TextEntity {
-  indices: Indices
-  type: 'text'
-}
-
-export type TweetEntity = HashtagEntity | UserMentionEntity | UrlEntity | MediaEntity | SymbolEntity
-
-export type EntityWithType
-  = | TextEntity
-    | (HashtagEntity & { type: 'hashtag' })
-    | (UserMentionEntity & { type: 'mention' })
-    | (UrlEntity & { type: 'url' })
-    | (MediaEntity & { type: 'media' })
-    | (SymbolEntity & { type: 'symbol' })
-
-export interface EntityBase {
-  text: string
-  translation?: string
-  index: number
-}
-
-export type TranslationEntity = EntityBase & (
-  | TextEntity
-  | (HashtagEntity & { type: 'hashtag', href: string })
-)
-
-export type Entity = EntityBase & (
-  | TextEntity
-  | (HashtagEntity & { type: 'hashtag', href: string })
-  | (UserMentionEntity & { type: 'mention', href: string })
-  | (UrlEntity & { type: 'url', href: string })
-  | (MediaEntity & { type: 'media', href: string })
-  | (SymbolEntity & { type: 'symbol', href: string })
-)
-
 type OmitTypes = 'entities' | 'quoted_tweet' | 'edit_control' | 'isEdited' | 'isStaleEdit' | 'possibly_sensitive' | 'news_action_type' | 'card'
 
 export type EnrichedTweet = Omit<Tweet, OmitTypes> & {

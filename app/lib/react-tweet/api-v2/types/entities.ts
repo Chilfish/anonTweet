@@ -38,3 +38,42 @@ export interface TweetEntities {
   symbols: SymbolEntity[]
   media?: MediaEntity[]
 }
+
+interface TextEntity {
+  indices: Indices
+  type: 'text'
+}
+
+export type EntityWithType
+  = | TextEntity
+    | (HashtagEntity & { type: 'hashtag' })
+    | (UserMentionEntity & { type: 'mention' })
+    | (UrlEntity & { type: 'url' })
+    | (MediaEntity & { type: 'media' })
+    | (SymbolEntity & { type: 'symbol' })
+
+export interface EntityBase {
+  text: string
+  translation?: string
+  index: number
+}
+
+/**
+ * 存在DB中的翻译结果
+ */
+export type TranslationEntity = EntityBase & (
+  | TextEntity
+  | (HashtagEntity & { type: 'hashtag', href: string })
+)
+
+/**
+ * 推文实体类
+ */
+export type Entity = EntityBase & (
+  | TextEntity
+  | (HashtagEntity & { type: 'hashtag', href: string })
+  | (UserMentionEntity & { type: 'mention', href: string })
+  | (UrlEntity & { type: 'url', href: string })
+  | (MediaEntity & { type: 'media', href: string })
+  | (SymbolEntity & { type: 'symbol', href: string })
+)
