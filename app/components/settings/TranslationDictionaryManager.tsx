@@ -12,19 +12,13 @@ import {
   DialogPanel,
   DialogTitle,
 } from '~/components/ui/dialog'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '~/components/ui/dropdown-menu'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 import { toastManager } from '~/components/ui/toast'
 import { downloadExcel, parseExcel, useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '../ui/input-group'
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
 
 export function TranslationDictionaryManager() {
   const { entries, addEntry, removeEntry, updateEntry, importEntries } = useTranslationDictionaryStore()
@@ -260,7 +254,7 @@ export function TranslationDictionaryManager() {
 
         {/* Main Table Area */}
         <Table
-          containerClassName="h-[350px] overflow-y-auto p-2 pt-0"
+          containerClassName="max-h-[350px] overflow-y-auto p-2 pt-0"
           className="table-fixed w-full rounded-md"
         >
           <TableHeader className="sticky top-0 z-10 bg-background shadow-sm">
@@ -280,35 +274,45 @@ export function TranslationDictionaryManager() {
             ) : (
               filteredEntries.map(entry => (
                 <TableRow key={entry.id}>
-                  <TableCell className="font-medium align-top py-3 wrap-break-word whitespace-normal">
+                  <TableCell className="font-medium align-middle py-3 wrap-break-word whitespace-normal">
                     {entry.original}
                   </TableCell>
-                  <TableCell className="align-top py-3 wrap-break-word whitespace-normal text-muted-foreground">
+                  <TableCell className="align-middle py-3 wrap-break-word whitespace-normal text-muted-foreground">
                     {entry.translated}
                   </TableCell>
                   <TableCell className="text-right align-top py-3 pr-4">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-muted">
-                          <MoreHorizontal className="size-4" />
-                          <span className="sr-only">菜单</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => openEditDialog(entry)}>
+                    <Popover>
+                      <PopoverTrigger render={
+                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-muted" />
+                      }
+                      >
+                        <MoreHorizontal className="size-4" />
+                        <span className="sr-only">菜单</span>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        viewportClassName="p-2"
+                        className="p-0"
+                        align="end"
+                        side="bottom"
+                      >
+                        <Button
+                          variant="ghost"
+                          onClick={() => openEditDialog(entry)}
+                        >
                           <Pencil className="mr-2 size-3.5" />
                           编辑
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
+                        </Button>
+                        <div className="h-px my-1" />
+                        <Button
+                          variant="ghost"
                           onClick={() => removeEntry(entry.id)}
                           className="text-destructive focus:text-destructive"
                         >
                           <Trash2 className="mr-2 size-3.5" />
                           删除
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                        </Button>
+                      </PopoverContent>
+                    </Popover>
                   </TableCell>
                 </TableRow>
               ))
