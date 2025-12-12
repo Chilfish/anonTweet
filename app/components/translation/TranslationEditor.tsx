@@ -1,6 +1,7 @@
 import type { EnrichedTweet, Entity } from '~/lib/react-tweet'
-import { Languages, LanguagesIcon, Save, Trash2 } from 'lucide-react'
+import { BookA, Languages, LanguagesIcon, Save, Trash2 } from 'lucide-react'
 import React, { useCallback, useMemo, useState } from 'react'
+import { DictionaryViewer } from '~/components/translation/DictionaryViewer'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import {
@@ -14,6 +15,7 @@ import {
 } from '~/components/ui/dialog'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
+import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover'
 import { Switch } from '~/components/ui/switch'
 import { Textarea } from '~/components/ui/textarea'
 import { TweetBody } from '~/lib/react-tweet'
@@ -174,7 +176,26 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
 
         <DialogPanel className="space-y-4">
           <div>
-            <Label className="font-bold">原文</Label>
+            <div className="flex items-center justify-between">
+              <Label className="font-bold">原文</Label>
+              <Popover>
+                <PopoverTrigger render={(
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 hover:bg-muted"
+                    title="查看词汇表"
+                  />
+                )}
+                >
+
+                  <BookA className="h-4 w-4 text-muted-foreground" />
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-0" align="end" side="bottom">
+                  <DictionaryViewer />
+                </PopoverContent>
+              </Popover>
+            </div>
             <Card className="mt-2 py-2 bg-muted/30">
               <CardContent className="px-3">
                 <TweetBody tweet={originalTweet} isTranslated={false} />
