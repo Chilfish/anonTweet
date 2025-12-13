@@ -1,7 +1,7 @@
 'use client'
 
 import type * as React from 'react'
-import { Menu as MenuPrimitive } from '@base-ui-components/react/menu'
+import { Menu as MenuPrimitive } from '@base-ui/react/menu'
 import { CheckIcon, ChevronRightIcon } from 'lucide-react'
 
 import { cn } from '~/lib/utils'

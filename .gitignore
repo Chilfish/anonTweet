@@ -10,3 +10,5 @@ tmp/
 
 *storybook.log
 storybook-static
+
+.vercel/
