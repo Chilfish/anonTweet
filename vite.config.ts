@@ -3,6 +3,7 @@ import { reactRouter } from '@react-router/dev/vite'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
+
 // TODO: REMOVE IT
 // process.exit(1)
 // 获取 git 信息
@@ -27,7 +28,11 @@ function getGitInfo() {
 const gitInfo = getGitInfo()
 
 export default defineConfig(({ isSsrBuild }) => ({
-  plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
+  plugins: [
+    tailwindcss(),
+    reactRouter(),
+    tsconfigPaths(),
+  ],
   ssr: {
     noExternal: ['react-tweet'],
   },

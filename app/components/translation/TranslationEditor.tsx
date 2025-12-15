@@ -1,6 +1,7 @@
 import type { EnrichedTweet, Entity } from '~/lib/react-tweet'
-import { Languages, LanguagesIcon, Save, Trash2 } from 'lucide-react'
+import { BookA, Languages, LanguagesIcon, Save, Trash2 } from 'lucide-react'
 import React, { useCallback, useMemo, useState } from 'react'
+import { DictionaryViewer } from '~/components/translation/DictionaryViewer'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import {
@@ -14,10 +15,12 @@ import {
 } from '~/components/ui/dialog'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
+import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover'
 import { Switch } from '~/components/ui/switch'
 import { Textarea } from '~/components/ui/textarea'
 import { TweetBody } from '~/lib/react-tweet'
 import { useTranslationStore } from '~/lib/stores/translation'
+import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 
 interface TranslationEditorProps {
   originalTweet: EnrichedTweet
@@ -58,6 +61,8 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     hasTextContent,
   } = useTranslationStore()
 
+  const dictionaryEntries = useTranslationDictionaryStore(state => state.entries)
+
   const isVisible = useMemo(() => {
     return hasTextContent(originalTweet.text) && showTranslationButton
   }, [originalTweet.text, showTranslationButton, hasTextContent])
@@ -70,7 +75,16 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
       baseEntities = JSON.parse(JSON.stringify(existing))
     }
     else {
-      baseEntities = (originalTweet.entities || []).map((e, i) => ({ ...e, index: i }))
+      baseEntities = (originalTweet.entities || []).map((e, i) => {
+        const entity = { ...e, index: i }
+        if (entity.type === 'hashtag') {
+          const match = dictionaryEntries.find(d => d.original === entity.text.replace('#', ''))
+          if (match) {
+            entity.translation = `#${match.translated}`
+          }
+        }
+        return entity
+      })
     }
 
     const prependIndex = baseEntities.findIndex(e => e.index === -1)
@@ -89,7 +103,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
 
     setEditingEntities(baseEntities)
     setIsOpen(true)
-  }, [tweetId, getTranslation, originalTweet.entities])
+  }, [tweetId, getTranslation, originalTweet.entities, dictionaryEntries])
 
   const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -162,7 +176,9 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
 
         <DialogPanel className="space-y-4">
           <div>
-            <Label className="font-bold">原文</Label>
+            <div className="flex items-center justify-between">
+              <Label className="font-bold">原文</Label>
+            </div>
             <Card className="mt-2 py-2 bg-muted/30">
               <CardContent className="px-3">
                 <TweetBody tweet={originalTweet} isTranslated={false} />
@@ -239,32 +255,38 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
         <DialogFooter
           className="flex-row items-center justify-between gap-2"
         >
+          <Popover>
+            <PopoverTrigger render={(
+              <Button
+                variant="secondary"
+                className="mr-auto hover:bg-muted"
+                title="查看词汇表"
+              />
+            )}
+            >
+              <BookA className="size-4" />
+              查看词汇表
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-0" align="center" side="top">
+              <DictionaryViewer />
+            </PopoverContent>
+          </Popover>
+
           {getTranslation(tweetId) ? (
             <Button
               type="button"
               variant="destructive"
-              size="sm"
               onClick={handleDelete}
-              className="gap-2"
             >
               <Trash2 className="h-4 w-4" />
               删除
             </Button>
           ) : <div />}
 
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsOpen(false)}
-            >
-              取消
-            </Button>
-            <Button type="submit" className="gap-2">
-              <Save className="h-4 w-4" />
-              保存
-            </Button>
-          </div>
+          <Button type="submit">
+            <Save className="h-4 w-4" />
+            保存
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

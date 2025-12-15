@@ -7,3 +7,6 @@
 .env
 data/
 tmp/
+
+*storybook.log
+storybook-static
