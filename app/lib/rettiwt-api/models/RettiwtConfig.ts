@@ -55,6 +55,8 @@ export class RettiwtConfig implements IRettiwtConfig {
       ...DefaultHeaders,
       ...config?.headers,
     }
+
+    // console.log(this)
   }
 
   public get apiKey(): string | undefined {

@@ -15,6 +15,13 @@
       "when": 1764562844951,
       "tag": "0001_breezy_firebird",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1766076244093,
+      "tag": "0002_broken_shadowcat",
+      "breakpoints": true
     }
   ]
 }

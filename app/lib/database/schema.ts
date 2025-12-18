@@ -131,6 +131,15 @@ export const tweetEntities = pgTable(
   ],
 )
 
+export const tweetUser = pgTable(
+  'tweet_user',
+  {
+    id: serial('id').primaryKey(),
+    tweetUserName: text('tweetUserName').notNull().unique(),
+    user: text('user').notNull(),
+  },
+)
+
 // Type
 
 export type SelectTweet = typeof tweet.$inferSelect

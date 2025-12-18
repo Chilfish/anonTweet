@@ -52,6 +52,7 @@ export default [
 
     ...prefix('tweet', [
       route('get/:id', 'routes/api/tweet/get.ts'),
+      route('user/:id', 'routes/api/tweet/user.ts'),
       route('set', 'routes/api/tweet/set.ts'),
     ]),
   ]),
