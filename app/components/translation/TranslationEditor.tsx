@@ -21,6 +21,7 @@ import { Textarea } from '~/components/ui/textarea'
 import { TweetBody } from '~/lib/react-tweet'
 import { useTranslationStore } from '~/lib/stores/translation'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
+import { decodeHtmlEntities } from '~/lib/utils'
 
 interface TranslationEditorProps {
   originalTweet: EnrichedTweet
@@ -39,7 +40,7 @@ function shouldSkipEntity(entity: Entity) {
 
 // 辅助函数：获取显示文本
 function getEntityDisplayValue(entity: Entity) {
-  return entity.translation || entity.text
+  return decodeHtmlEntities(entity.translation || entity.text)
 }
 
 export const TranslationEditor: React.FC<TranslationEditorProps> = ({
