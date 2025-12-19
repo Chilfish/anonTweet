@@ -1,6 +1,7 @@
 import type { EnrichedTweet, RawTweet } from './types'
 import type { ITweetDetailsResponse } from '~/lib/rettiwt-api/types/raw/tweet/Details'
-import type { IUserTweetsAndRepliesResponse } from '~/lib/rettiwt-api/types/raw/user/TweetsAndReplies'
+import type { IUserTweetsResponse } from '~/lib/rettiwt-api/types/raw/user/Tweets'
+import { writeFile } from 'node:fs/promises'
 import { FetcherService, ResourceType, Rettiwt } from '~/lib/rettiwt-api'
 import { RettiwtConfig } from '~/lib/rettiwt-api/models/RettiwtConfig'
 import { enrichTweet } from './parseTweet'
@@ -25,17 +26,35 @@ export async function fetchUserDetails(username: string) {
 
 export async function fetchUserTweet(userId: string): Promise<RawTweet[]> {
   return await fetcher
-    .request<IUserTweetsAndRepliesResponse>(ResourceType.USER_TIMELINE_AND_REPLIES, { id: userId })
-    .then(({ data }) => data.user.result.timeline.timeline
-      .instructions
-      .filter(d => d.type === 'TimelineAddEntries')
-      .flatMap(d => d.entries.map(e => e.content.itemContent?.tweet_results.result as unknown as RawTweet))
-      .filter(Boolean),
+    .request<IUserTweetsResponse>(ResourceType.USER_TIMELINE, { id: userId })
+    .then(({ data }) => {
+      const rawTweets = data.user.result.timeline.timeline
+        .instructions
+        .filter(d => d.type === 'TimelineAddEntries')
+        .flatMap(d => d.entries)
+        .filter(entry => [
+          'tweet-',
+          'profile-conversation-',
+        ].some(id => entry.entryId.startsWith(id)),
+        )
+
+      const tweets1 = rawTweets
+        .filter(e => e.content.itemContent?.itemType === 'TimelineTweet')
+        .map(e => e.content.itemContent?.tweet_results.result as unknown as RawTweet)
+
+      const tweets2 = rawTweets.filter(d => d.content.entryType === 'TimelineTimelineModule')
+        .flatMap(d => d.content.items
+          .map(({ item }) => item.itemContent.tweet_results.result as unknown as RawTweet))
+        .filter(Boolean)
+
+      return [...tweets1, ...tweets2].sort((a, b) => b.rest_id.localeCompare(a.rest_id))
+    },
     )
 }
 
 export async function getEnrichedUserTweet(userId: string): Promise<EnrichedTweet[]> {
   const tweets = await fetchUserTweet(userId)
+  await writeFile('data/user-timeline-tweets.json', JSON.stringify(tweets, null, 2), 'utf8')
   return tweets
     .map((tweet) => {
       const enrichedTweet = enrichTweet(tweet)
