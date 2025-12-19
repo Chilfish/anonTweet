@@ -1,7 +1,7 @@
 import type { EnrichedTweet, RawTweet } from './types'
 import type { ITweetDetailsResponse } from '~/lib/rettiwt-api/types/raw/tweet/Details'
 import type { IUserTweetsResponse } from '~/lib/rettiwt-api/types/raw/user/Tweets'
-import { writeFile } from 'node:fs/promises'
+// import { writeFile } from 'node:fs/promises'
 import { FetcherService, ResourceType, Rettiwt } from '~/lib/rettiwt-api'
 import { RettiwtConfig } from '~/lib/rettiwt-api/models/RettiwtConfig'
 import { enrichTweet } from './parseTweet'
@@ -54,7 +54,7 @@ export async function fetchUserTweet(userId: string): Promise<RawTweet[]> {
 
 export async function getEnrichedUserTweet(userId: string): Promise<EnrichedTweet[]> {
   const tweets = await fetchUserTweet(userId)
-  await writeFile('data/user-timeline-tweets.json', JSON.stringify(tweets, null, 2), 'utf8')
+  // await writeFile('data/user-timeline-tweets.json', JSON.stringify(tweets, null, 2), 'utf8')
   return tweets
     .map((tweet) => {
       const enrichedTweet = enrichTweet(tweet)
