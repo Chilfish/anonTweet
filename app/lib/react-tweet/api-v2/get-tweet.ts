@@ -37,7 +37,14 @@ export async function fetchUserTweet(userId: string): Promise<RawTweet[]> {
 export async function getEnrichedUserTweet(userId: string): Promise<EnrichedTweet[]> {
   const tweets = await fetchUserTweet(userId)
   return tweets
-    .map(tweet => enrichTweet(tweet))
+    .map((tweet) => {
+      const enrichedTweet = enrichTweet(tweet)
+      if (tweet.quoted_status_result?.result) {
+        const quotedTweet = enrichTweet(tweet.quoted_status_result.result)
+        enrichedTweet.quotedTweet = quotedTweet
+      }
+      return enrichedTweet
+    })
     .filter((tweet) => {
       const isAd = tweet.user.id_str !== userId && !tweet.retweetedOrignalId
 

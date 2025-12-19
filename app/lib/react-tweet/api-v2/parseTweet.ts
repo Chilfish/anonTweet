@@ -44,9 +44,6 @@ export function enrichTweet(sourceData: RawTweet, retweetedOrignalId?: string): 
     in_reply_to_status_id_str: tweet.legacy.in_reply_to_status_id_str,
     entities: getEntities(tweet, text),
     quoted_tweet_id: tweet.quoted_status_result?.result?.rest_id,
-    // quoted_tweet: tweet.quoted_status_result?.result
-    //   ? enrichTweet(tweet.quoted_status_result.result)
-    //   : undefined,
     card: mapTwitterCard(tweet.card),
     mediaDetails: mapMediaDetails(tweet),
     retweetedOrignalId,
