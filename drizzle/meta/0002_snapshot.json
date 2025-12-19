@@ -1,5 +1,5 @@
 {
-  "id": "6d927ef5-3009-4006-8dca-0abde424b871",
+  "id": "5f614ec2-3bab-401f-a134-05c1dfd56aa0",
   "prevId": "e111da50-9336-4f3c-8baf-909c134e8ea9",
   "version": "7",
   "dialect": "postgresql",
@@ -485,7 +485,7 @@
         },
         "user": {
           "name": "user",
-          "type": "text",
+          "type": "json",
           "primaryKey": false,
           "notNull": true
         }

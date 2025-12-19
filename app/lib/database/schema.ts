@@ -1,4 +1,4 @@
-import type { EnrichedTweet, TranslationEntity } from '~/lib/react-tweet'
+import type { EnrichedTweet, RawUser, TranslationEntity } from '~/lib/react-tweet'
 import {
   boolean,
   index,
@@ -136,7 +136,7 @@ export const tweetUser = pgTable(
   {
     id: serial('id').primaryKey(),
     tweetUserName: text('tweetUserName').notNull().unique(),
-    user: text('user').notNull(),
+    user: json('user').$type<RawUser>().notNull(),
   },
 )
 
