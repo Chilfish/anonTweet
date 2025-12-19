@@ -33,7 +33,7 @@ export function HydrateFallback() {
 
 export async function clientLoader({
   params,
-}: Route.LoaderArgs): Promise<{
+}: Route.LoaderArgs): Promise<Response | {
   tweets: TweetData
   tweetId?: string
 }> {
