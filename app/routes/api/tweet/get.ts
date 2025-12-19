@@ -26,12 +26,18 @@ async function getDBTweet(tweetId: string): Promise<EnrichedTweet | null> {
       .values({
         tweetId: enrichedTweet.id_str,
         tweetOwnerId: enrichedTweet.user.screen_name,
-        jsonContent: enrichedTweet,
+        jsonContent: {
+          ...enrichedTweet,
+          retweetedOrignalId: undefined,
+        },
       })
       .onConflictDoUpdate({
         target: tweet.tweetId,
         set: {
-          jsonContent: enrichedTweet,
+          jsonContent: {
+            ...enrichedTweet,
+            retweetedOrignalId: undefined,
+          },
         },
       })
   }
