@@ -5,12 +5,8 @@ import { env } from '~/lib/env.server'
 
 let browserInstance: Browser | null = null
 
-/**
- * Generates the appropriate browser launch options based on the environment.
- * Handles the binary path resolution for Vercel (Lambda) vs Local Machine.
- */
 async function getLaunchOptions(): Promise<LaunchOptions> {
-  // Common arguments for stability in containerized environments
+  // 核心优化 1: 强制色彩配置和字体渲染策略
   const commonArgs = [
     '--no-sandbox',
     '--disable-setuid-sandbox',
@@ -19,54 +15,55 @@ async function getLaunchOptions(): Promise<LaunchOptions> {
     '--no-first-run',
     '--no-zygote',
     '--disable-gpu',
+    // --- 新增色彩与渲染修正参数 ---
+    '--force-color-profile=srgb', // 强制使用 sRGB，修复颜色发灰
+    '--font-render-hinting=none', // 调整字体微调策略，有时能改善模糊
+    '--disable-font-subpixel-positioning', // 禁用子像素定位，截图场景下能让文字更锐利
   ]
 
   if (env.VERCEL) {
     // Vercel / AWS Lambda Configuration
-    // @sparticuz/chromium automatically handles the correct binary path and graphics flags
-    chromium.setGraphicsMode = false // Optional: strict mode for headless
+    chromium.setGraphicsMode = false
 
-    // 如果需要支持自定义字体，需要在此处加载
-    // await chromium.font('https://raw.githack.com/googlefonts/noto-cjk/main/Sans/Variable/HK/NotoSansHK-VF.ttf');
+    // Noto Sans SC (Simplified Chinese)
+    await chromium.font(
+      'https://github.com/googlefonts/noto-cjk/raw/main/Sans/Variable/SC/NotoSansSC-VF.ttf',
+    )
+    await chromium.font('https://github.com/googlefonts/noto-cjk/raw/main/Sans/Variable/JP/NotoSansJP-VF.ttf')
 
     const viewport = {
-      deviceScaleFactor: 1,
+      deviceScaleFactor: 2, // 建议设为 2 或 3，直接模拟 Retina 屏，截图更清晰，无需后续 resize
       hasTouch: false,
       height: 1080,
       isLandscape: true,
       isMobile: false,
       width: 1920,
     }
+
     return {
       args: [...chromium.args, ...commonArgs],
       defaultViewport: viewport,
       executablePath: await chromium.executablePath(),
-      headless: 'shell',
+      headless: 'shell', // 或使用 chromium.headless 变量
     }
   }
   else {
-    // Local Development Configuration
-    // Dynamically import full puppeteer to find local chrome path
-    // or assume standard paths.
-    // Using a conditional require to avoid bundling 'puppeteer' in production
+    // Local Development
     let exePath = ''
     try {
-      // 尝试自动定位本地 Chrome/Chromium
       const { executablePath } = await import('puppeteer')
       exePath = executablePath()
     }
     catch (e) {
-      // Fallback: Manually specify path if 'puppeteer' devDependency is missing
-      // Mac example:
-      exePath = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-      console.warn('Local Puppeteer not found, using manual path:', exePath)
+      // exePath = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+      console.warn('Local Puppeteer not found')
     }
 
     return {
       args: commonArgs,
       executablePath: exePath,
-      headless: 'shell',
-      defaultViewport: { width: 1000, height: 1000 },
+      headless: 'shell', // 新版 Puppeteer 推荐使用 'shell'
+      defaultViewport: { width: 1000, height: 1000, deviceScaleFactor: 2 },
     }
   }
 }
@@ -80,7 +77,6 @@ async function getBrowser(): Promise<Browser> {
 
   browserInstance = await core.launch({
     ...options,
-    // Protocol timeout specifically for slow serverless environments
     protocolTimeout: 240000,
   })
 
@@ -95,33 +91,24 @@ export async function screenshotTweet(tweetId: string): Promise<Buffer> {
     browser = await getBrowser()
     page = await browser.newPage()
 
-    // Optimizing Viewport
     await page.setViewport({
-      width: 1000,
-      height: 1200, // Slightly larger initial height to prevent scroll jank
-      deviceScaleFactor: 2,
+      width: 1920,
+      height: 1080,
+      deviceScaleFactor: 2, // 2x 渲染，解决文字发虚边缘模糊
     })
 
     const targetUrl = `https://anon-tweet-dev.chilfish.top/tweets/${tweetId}?plain=true`
-    // const targetUrl = `http://localhost:9080/tweets/${tweetId}?plain=true`
 
+    // 在 goto 之后，screenshot 之前，除了等待图片，最好也等待 Web Font 加载
     await page.goto(targetUrl, {
-      waitUntil: 'networkidle0',
+      waitUntil: 'networkidle0', // 等待网络空闲，通常包含字体下载
       timeout: 30000,
     })
 
     const screenshootSelector = '#main-container'
     const loadedSelector = '.tweet-loaded'
 
-    try {
-      await page.waitForSelector(loadedSelector, {
-        visible: true,
-        timeout: 20000,
-      })
-    }
-    catch (e) {
-      throw new Error(`Tweet loaded timeout: Skeleton screen persisted for too long on ${tweetId}`)
-    }
+    await page.waitForSelector(loadedSelector, { visible: true, timeout: 20000 })
 
     await page.waitForFunction(
       (selector) => {
@@ -129,19 +116,17 @@ export async function screenshotTweet(tweetId: string): Promise<Buffer> {
         if (!container)
           return false
         const images = Array.from(container.querySelectorAll('img'))
-        // 检查每一张图片的状态
-        // img.complete: 浏览器原生属性，图片加载成功或失败时都为 true，加载中为 false
-        // 只有当所有图片都 complete 时，才返回 true，触发截图
-        return images.every(img => img.complete)
+
+        const fontsReady = document.fonts.status === 'loaded'
+        const imagesReady = images.every(img => img.complete)
+
+        return imagesReady && fontsReady
       },
-      {
-        timeout: 10000,
-        polling: 100,
-      },
+      { timeout: 10000, polling: 100 },
       screenshootSelector,
     )
 
-    await new Promise(r => setTimeout(r, 500))
+    await new Promise(r => setTimeout(r, 200))
 
     const element = await page.$(screenshootSelector)
     if (!element) {
@@ -151,16 +136,13 @@ export async function screenshotTweet(tweetId: string): Promise<Buffer> {
     const buffer = await element.screenshot({
       type: 'png',
       omitBackground: true,
-      // Optimize encoding
-      optimizeForSpeed: true,
+      optimizeForSpeed: false,
     })
 
     return Buffer.from(buffer)
   }
   catch (error) {
     console.error(`Screenshot failed for ${tweetId}:`, error)
-
-    // Critical: If browser crashed, force reset the singleton
     if (browserInstance && !browserInstance.connected) {
       browserInstance = null
     }
@@ -168,7 +150,7 @@ export async function screenshotTweet(tweetId: string): Promise<Buffer> {
   }
   finally {
     if (page) {
-      await page.close().catch(() => {}) // Suppress errors on close
+      await page.close().catch(() => {})
     }
   }
 }
