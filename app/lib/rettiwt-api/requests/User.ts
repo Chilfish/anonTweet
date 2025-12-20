@@ -2,7 +2,7 @@ import type { AxiosRequestConfig } from 'axios'
 
 import type { RawAnalyticsGranularity, RawAnalyticsMetric } from '../enums/raw/Analytics'
 
-import qs from 'node:querystring'
+// import qs from 'node:querystring'
 
 /**
  * Collection of requests related to users.
@@ -914,13 +914,13 @@ export class UserRequests {
   /**
    * @param id - The id of the user to be unfollowed.
    */
-  public static unfollow(id: string): AxiosRequestConfig {
-    return {
-      method: 'post',
-      url: 'https://x.com/i/api/1.1/friendships/destroy.json',
-      data: qs.stringify({
-        user_id: id,
-      }),
-    }
-  }
+  // public static unfollow(id: string): AxiosRequestConfig {
+  //   return {
+  //     method: 'post',
+  //     url: 'https://x.com/i/api/1.1/friendships/destroy.json',
+  //     data: qs.stringify({
+  //       user_id: id,
+  //     }),
+  //   }
+  // }
 }
