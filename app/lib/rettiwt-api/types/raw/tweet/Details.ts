@@ -212,6 +212,7 @@ interface Legacy2 {
   retweeted: boolean
   user_id_str: string
   id_str: string
+  retweeted_status_result?: TweetResult
   possibly_sensitive?: boolean
   in_reply_to_status_id_str?: string
 }

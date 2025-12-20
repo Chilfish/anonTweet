@@ -1,6 +1,6 @@
 'use client'
 
-import { Autocomplete as AutocompletePrimitive } from '@base-ui-components/react/autocomplete'
+import { Autocomplete as AutocompletePrimitive } from '@base-ui/react/autocomplete'
 import { ChevronsUpDownIcon, XIcon } from 'lucide-react'
 
 import { Input } from '~/components/ui/input'

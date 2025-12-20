@@ -1,9 +1,9 @@
 'use client'
 
-import type { Toggle as TogglePrimitive } from '@base-ui-components/react/toggle'
+import type { Toggle as TogglePrimitive } from '@base-ui/react/toggle'
 import type { VariantProps } from 'class-variance-authority'
 import type { toggleVariants } from '~/components/ui/toggle'
-import { ToggleGroup as ToggleGroupPrimitive } from '@base-ui-components/react/toggle-group'
+import { ToggleGroup as ToggleGroupPrimitive } from '@base-ui/react/toggle-group'
 
 import * as React from 'react'
 import { Separator } from '~/components/ui/separator'

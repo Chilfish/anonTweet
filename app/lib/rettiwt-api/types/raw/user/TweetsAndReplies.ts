@@ -17,7 +17,7 @@ interface User {
 
 interface Result {
   __typename: string
-  timeline_v2: TimelineV2
+  timeline: TimelineV2
 }
 
 interface TimelineV2 {

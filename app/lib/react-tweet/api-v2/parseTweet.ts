@@ -15,7 +15,11 @@ import type {
 /**
  * Enriches a tweet with additional data used to more easily use the tweet in a UI.
  */
-export function enrichTweet(sourceData: RawTweet): EnrichedTweet {
+export function enrichTweet(sourceData: RawTweet, retweetedOrignalId?: string): EnrichedTweet {
+  if (sourceData.legacy?.retweeted_status_result) {
+    return enrichTweet(sourceData.legacy.retweeted_status_result.result, sourceData.legacy.id_str)
+  }
+
   const tweet = ('tweet' in sourceData ? sourceData.tweet : sourceData) as RawTweet
   const userBase = transformUserResponse(tweet)
   const userScreenName = userBase.screen_name
@@ -40,11 +44,9 @@ export function enrichTweet(sourceData: RawTweet): EnrichedTweet {
     in_reply_to_status_id_str: tweet.legacy.in_reply_to_status_id_str,
     entities: getEntities(tweet, text),
     quoted_tweet_id: tweet.quoted_status_result?.result?.rest_id,
-    // quoted_tweet: tweet.quoted_status_result?.result
-    //   ? enrichTweet(tweet.quoted_status_result.result)
-    //   : undefined,
     card: mapTwitterCard(tweet.card),
     mediaDetails: mapMediaDetails(tweet),
+    retweetedOrignalId,
     // photos: mapPhotoEntities(tweet),
     // video: mapVideoEntities(tweet),
     // parent: parentTweet(tweet),

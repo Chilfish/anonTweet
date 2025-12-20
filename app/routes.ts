@@ -54,6 +54,11 @@ export default [
       route('get/:id', 'routes/api/tweet/get.ts'),
       route('set', 'routes/api/tweet/set.ts'),
     ]),
+
+    ...prefix('user', [
+      route('get/:username', 'routes/api/user/get.ts'),
+      route('timeline/:username', 'routes/api/user/timeline.ts'),
+    ]),
   ]),
 
   // Not found

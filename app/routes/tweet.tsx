@@ -2,7 +2,7 @@ import type { Route } from './+types/tweet'
 import type { TweetData } from '~/types'
 import axios from 'axios'
 import { Suspense, useEffect } from 'react'
-import { Await, useLoaderData, useSearchParams } from 'react-router'
+import { Await, redirect, useLoaderData, useSearchParams } from 'react-router'
 import { SettingsPanel } from '~/components/settings/SettingsPanel'
 import { BackButton } from '~/components/translation/BackButton'
 import { DownloadMedia } from '~/components/translation/DownloadMedia'
@@ -33,7 +33,7 @@ export function HydrateFallback() {
 
 export async function clientLoader({
   params,
-}: Route.LoaderArgs): Promise<{
+}: Route.LoaderArgs): Promise<Response | {
   tweets: TweetData
   tweetId?: string
 }> {
@@ -47,6 +47,13 @@ export async function clientLoader({
   }
   // const tweets = await getTweets(tweetId)
   const { data: tweets } = await axios.get<TweetData>(`/api/tweet/get/${tweetId}`)
+
+  const isRetweet = tweets[0] && tweets[0].retweetedOrignalId && tweets[0].retweetedOrignalId !== tweets[0].id_str
+
+  if (isRetweet) {
+    console.log(tweets)
+    return redirect(`/tweets/${tweets[0]?.id_str}`)
+  }
   return {
     tweets,
     tweetId,
@@ -94,6 +101,7 @@ export default function TweetPage({
   useEffect(() => {
     if (loaderData.tweets.length > 0 && tweetId) {
       console.log(loaderData)
+
       setAllTweets(loaderData.tweets, tweetId)
     }
   }, [loaderData.tweets])

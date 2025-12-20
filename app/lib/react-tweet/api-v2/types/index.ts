@@ -1,5 +1,6 @@
 import type { Entity } from './entities'
 import type { QuotedTweet, Tweet } from './tweet'
+import type { IUser } from '~/lib/rettiwt-api'
 import type { ITweetDetailsResponse } from '~/lib/rettiwt-api/types/raw/tweet/Details'
 
 export type * from './edit'
@@ -11,6 +12,8 @@ export type * from './user'
 export type * from './video'
 
 export type RawTweet = ITweetDetailsResponse['data']['tweetResult']['result']
+
+export type RawUser = IUser
 
 // Twitter Card Types
 export interface TwitterCardImage {
@@ -103,6 +106,7 @@ export type EnrichedTweet = Omit<Tweet, OmitTypes> & {
   quotedTweet?: EnrichedTweet
   card?: LinkPreviewCard
   conversation_count: number
+  retweetedOrignalId?: string
 }
 
 export type EnrichedQuotedTweet = Omit<QuotedTweet, 'entities'> & {

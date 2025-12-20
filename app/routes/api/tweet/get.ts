@@ -22,11 +22,24 @@ async function getDBTweet(tweetId: string): Promise<EnrichedTweet | null> {
   }
 
   if (!cachedTweet?.id) {
-    await db.insert(tweet).values({
-      tweetId: enrichedTweet.id_str,
-      tweetOwnerId: enrichedTweet.user.screen_name,
-      jsonContent: enrichedTweet,
-    })
+    await db.insert(tweet)
+      .values({
+        tweetId: enrichedTweet.id_str,
+        tweetOwnerId: enrichedTweet.user.screen_name,
+        jsonContent: {
+          ...enrichedTweet,
+          retweetedOrignalId: undefined,
+        },
+      })
+      .onConflictDoUpdate({
+        target: tweet.tweetId,
+        set: {
+          jsonContent: {
+            ...enrichedTweet,
+            retweetedOrignalId: undefined,
+          },
+        },
+      })
   }
 
   const { user } = requireUser()
