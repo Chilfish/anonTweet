@@ -108,6 +108,8 @@ export function MyTweet({ tweets, mainTweetId }: MyTweetProps) {
   return (
     <TweetContainer
       ref={containerRef}
+      id={mainTweet.id_str}
+      className="tweet-loaded"
     >
       {hasThread && (
         <>

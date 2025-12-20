@@ -9,7 +9,10 @@ interface Props {
 export function TweetNotFound(_props: Props) {
   const errorMessage = _props.error?.message?.split('Invalid tweet id:')[1] || _props.tweetId || 'Unknown'
   return (
-    <TweetContainer>
+    <TweetContainer
+      id={errorMessage}
+      className="tweet-loaded"
+    >
       <div className={styles.root}>
         <h3>
           找不到推文 ID:
