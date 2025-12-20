@@ -6,7 +6,6 @@ import { env } from '~/lib/env.server'
 let browserInstance: Browser | null = null
 
 async function getLaunchOptions(): Promise<LaunchOptions> {
-  // 核心优化 1: 强制色彩配置和字体渲染策略
   const commonArgs = [
     '--no-sandbox',
     '--disable-setuid-sandbox',
@@ -15,7 +14,6 @@ async function getLaunchOptions(): Promise<LaunchOptions> {
     '--no-first-run',
     '--no-zygote',
     '--disable-gpu',
-    // --- 新增色彩与渲染修正参数 ---
     '--force-color-profile=srgb', // 强制使用 sRGB，修复颜色发灰
     '--font-render-hinting=none', // 调整字体微调策略，有时能改善模糊
     '--disable-font-subpixel-positioning', // 禁用子像素定位，截图场景下能让文字更锐利
@@ -24,15 +22,8 @@ async function getLaunchOptions(): Promise<LaunchOptions> {
   if (env.VERCEL) {
     // Vercel / AWS Lambda Configuration
     chromium.setGraphicsMode = false
-
-    // Noto Sans SC (Simplified Chinese)
-    await chromium.font(
-      'https://github.com/googlefonts/noto-cjk/raw/main/Sans/Variable/SC/NotoSansSC-VF.ttf',
-    )
-    await chromium.font('https://github.com/googlefonts/noto-cjk/raw/main/Sans/Variable/JP/NotoSansJP-VF.ttf')
-
     const viewport = {
-      deviceScaleFactor: 2, // 建议设为 2 或 3，直接模拟 Retina 屏，截图更清晰，无需后续 resize
+      deviceScaleFactor: 2,
       hasTouch: false,
       height: 1080,
       isLandscape: true,
