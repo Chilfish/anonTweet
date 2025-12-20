@@ -5,7 +5,6 @@ const isInVercel = process.env.VERCEL === 'true'
 
 const config: Config = {
   ssr: true,
-  prerender: ['/'],
   presets: [],
   future: {
     v8_middleware: true,
