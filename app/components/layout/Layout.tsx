@@ -146,7 +146,7 @@ export function Layout({ children }: { children?: React.ReactNode }) {
     return (
       <div
         id="main-container"
-        className="max-w-fit max-h-fit bg-background p-2 font-sans antialiased"
+        className="max-w-fit max-h-fit bg-background font-sans antialiased"
         style={THEME_COLOR}
       >
         {children || <Outlet />}
