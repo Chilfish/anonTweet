@@ -138,21 +138,25 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
   )
 }
 
-export default function Layout() {
+export function Layout({ children }: { children?: React.ReactNode }) {
   const [searchParams] = useSearchParams()
   const plain = searchParams.get('plain') === 'true'
 
   if (plain) {
     return (
-      <div className="min-h-screen w-full bg-background font-sans antialiased" style={THEME_COLOR}>
-        <Outlet />
+      <div
+        id="main-container"
+        className="max-w-fit max-h-fit bg-background p-2 font-sans antialiased"
+        style={THEME_COLOR}
+      >
+        {children || <Outlet />}
       </div>
     )
   }
 
   return (
     <LayoutComponent>
-      <Outlet />
+      {children || <Outlet />}
     </LayoutComponent>
   )
 }
