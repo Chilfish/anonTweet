@@ -9,19 +9,18 @@ const serverEnvSchema = z.object({
 
   TWEET_KEY: z.string().min(1),
 
-  S3_ENDPOINT: z.string().url().min(1),
+  S3_ENDPOINT: z.url().min(1),
   S3_ACCESS_KEY_ID: z.string().min(1),
   S3_SECRET_ACCESS_KEY: z.string().min(1),
   S3_BUCKET_NAME: z.string().min(1),
-  S3_PUBLIC_URL: z.string().url().min(1),
+  S3_PUBLIC_URL: z.url().min(1),
 
   // Better Auth
-  BETTER_AUTH_URL: z.string().url().min(1),
+  BETTER_AUTH_URL: z.url().min(1),
   BETTER_AUTH_SECRET: z.string().min(1),
 
-  DB_URL: z.string().url(),
-
-  // BILIBILI_COOKIE: z.string(),
+  DB_URL: z.url().optional(),
+  ENABLE_DB_CACHE: z.string().default('true'),
 })
 
 /**
@@ -33,7 +32,7 @@ export const env = (() => {
   if (parsed.success === false) {
     console.error(
       '❌ Invalid environment variables:',
-      parsed.error.flatten().fieldErrors,
+      z.treeifyError(parsed.error),
     )
     throw new Error('Invalid environment variables')
   }
