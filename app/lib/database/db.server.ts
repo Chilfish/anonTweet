@@ -22,7 +22,7 @@ export function getDbClient(): DrizzleDB {
 
 // 辅助函数：判断 DB 是否可用，用于业务逻辑层的 if 判断
 export function isDbAvailable(): boolean {
-  return !!env.DB_URL && env.ENABLE_DB_CACHE === 'true'
+  return !!env.DB_URL && env.ENABLE_DB_CACHE
 }
 
 console.log('isDbAvailable', isDbAvailable())

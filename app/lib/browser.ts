@@ -1,7 +1,7 @@
 import type { Browser, LaunchOptions, Page } from 'puppeteer-core'
 import chromium from '@sparticuz/chromium'
 import core from 'puppeteer-core'
-import { isProduction } from '~/lib/env.server'
+import { env } from '~/lib/env.server'
 
 let browserInstance: Browser | null = null
 
@@ -21,7 +21,7 @@ async function getLaunchOptions(): Promise<LaunchOptions> {
     '--disable-gpu',
   ]
 
-  if (isProduction) {
+  if (env.VERCEL) {
     // Vercel / AWS Lambda Configuration
     // @sparticuz/chromium automatically handles the correct binary path and graphics flags
     chromium.setGraphicsMode = false // Optional: strict mode for headless

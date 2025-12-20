@@ -20,7 +20,8 @@ const serverEnvSchema = z.object({
   BETTER_AUTH_SECRET: z.string().min(1),
 
   DB_URL: z.url().optional(),
-  ENABLE_DB_CACHE: z.string().default('true'),
+  ENABLE_DB_CACHE: z.stringbool().default(true),
+  VERCEL: z.stringbool().default(false),
 })
 
 /**
