@@ -5,15 +5,17 @@ const isInVercel = process.env.VERCEL === 'true'
 
 const config: Config = {
   ssr: true,
-  presets: [],
+  presets: [vercelPreset()],
   future: {
     v8_middleware: true,
     // unstable_viteEnvironmentApi: true,
   },
 }
 
-if (isInVercel) {
-  config.presets!.push(vercelPreset())
+if (!isInVercel) {
+  config.presets = []
 }
+
+console.log('isInVercel:', isInVercel)
 
 export default config
