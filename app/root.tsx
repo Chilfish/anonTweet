@@ -1,7 +1,6 @@
 import type { Route } from './+types/root'
 import { AlertTriangle, Loader2 } from 'lucide-react'
 import {
-  data,
   isRouteErrorResponse,
   Link,
   Links,
@@ -16,13 +15,6 @@ import stylesheet from './app.css?url'
 import { ProgressBar } from './components/progress-bar'
 import { Button } from './components/ui/button'
 import { useNonce } from './hooks/use-nonce'
-import {
-  ColorSchemeScript,
-  useColorScheme,
-} from './lib/color-scheme/components'
-import { parseColorScheme } from './lib/color-scheme/server'
-import { getPublicEnv } from './lib/env.server'
-import { requestMiddleware } from './lib/http.server'
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -41,21 +33,13 @@ export const links: Route.LinksFunction = () => [
   },
 ]
 
-export async function loader({ request }: Route.LoaderArgs) {
-  await requestMiddleware(request)
-  const colorScheme = await parseColorScheme(request)
-
-  return data({ ENV: getPublicEnv(), colorScheme })
-}
-
 export function Layout({ children }: { children: React.ReactNode }) {
   const nonce = useNonce()
-  const colorScheme = useColorScheme()
 
   return (
     <html
       lang="zh"
-      className={`${colorScheme === 'dark' ? 'dark' : ''} touch-manipulation overflow-x-hidden`}
+      className="touch-manipulation overflow-x-hidden"
       suppressHydrationWarning
     >
       <head>
@@ -64,7 +48,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
-        <ColorSchemeScript nonce={nonce} />
         <link rel="stylesheet" href={stylesheet} precedence="high" />
       </head>
       <body>
@@ -84,17 +67,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App({ loaderData }: Route.ComponentProps) {
-  const { ENV } = loaderData
-  const nonce = useNonce()
   return (
     <ThemeProvider>
       <Outlet />
-      <script
-        nonce={nonce}
-        dangerouslySetInnerHTML={{
-          __html: `window.ENV = ${JSON.stringify(ENV)}`,
-        }}
-      />
     </ThemeProvider>
   )
 }

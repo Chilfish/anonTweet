@@ -16,9 +16,6 @@
   - [Drizzle ORM](https://orm.drizzle.team/) + PostgreSQL (Optional, for caching)
   - Zustand (Client-side global state)
   - React Router Loaders/Actions (Server-side data flow)
-- **Utilities**:
-  - `better-auth` (Authentication infrastructure)
-  - `modern-screenshot` (Dom to image generation)
 
 ## 🚀 Getting Started
 
@@ -45,16 +42,11 @@ bun install
 # Database (Optional)
 # ⚠️ 数据库不再是必须的。如果不配置 DB_URL，系统将直接调用 API 而不使用缓存。
 # DB_URL="postgres://..."
-ENABLE_DB_CACHE="false" # 默认为 true，如果没有数据库请设为 false
+ENABLE_DB_CACHE="false" # 默认为 false，如果有数据库请设为 true
 
 # Deployment Environment
 # ⚠️ 部署到 Vercel 时必须设置为 true，本地开发设为 false 或留空
 VERCEL="false"
-
-# Auth (Better Auth)
-# ⚠️ 用于 Session 加密，开发环境可生成随机字符串
-BETTER_AUTH_SECRET="your_generated_secret"
-BETTER_AUTH_URL="http://localhost:9080" # 或者是你的端口
 
 # Twitter Integration (Critical)
 # ⚠️ 必需。这是用于服务器端抓取推文的 Guest/Auth Token。
@@ -113,14 +105,6 @@ bun run dev
 > **Note**: `app/components` 目录下包含大量业务组件，如 `tweet/` (推文渲染) 和 `translation/` (翻译编辑器)。
 
 ## 🚧 Development Status
-
-### Authentication
-
-目前项目的认证模块处于 **开发/简化模式**：
-
-- 虽然集成了 `better-auth`，但 **Auth UI 路由**（如 `/auth/sign-in`, `/auth/sign-up`）在 `routes.ts` 中已被注释禁用。
-- 项目当前主要依赖匿名 Session 或简化的验证逻辑来处理用户状态。
-- 相关的管理后台路由（`/admin/*`）和设置路由（`/settings/*`）也暂时处于禁用状态。
 
 ### External Libraries
 

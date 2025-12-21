@@ -9,12 +9,17 @@ CREATE TABLE "tweet" (
 --> statement-breakpoint
 CREATE TABLE "tweet_entities" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"tweetUserId" text NOT NULL,
+	"tweetId" text NOT NULL,
 	"entities" json NOT NULL,
-	"translatedBy" text NOT NULL,
-	CONSTRAINT "tweet_entities_tweetUserId_unique" UNIQUE("tweetUserId")
+	CONSTRAINT "tweet_entities_tweetId_unique" UNIQUE("tweetId")
 );
 --> statement-breakpoint
-ALTER TABLE "tweet_entities" ADD CONSTRAINT "tweet_entities_translatedBy_user_id_fk" FOREIGN KEY ("translatedBy") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE TABLE "tweet_user" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"tweetUserName" text NOT NULL,
+	"user" json NOT NULL,
+	CONSTRAINT "tweet_user_tweetUserName_unique" UNIQUE("tweetUserName")
+);
+--> statement-breakpoint
 CREATE INDEX "tweet_ownerId_idx" ON "tweet" USING btree ("tweetOwnerId");--> statement-breakpoint
-CREATE INDEX "tweet_entities_tweetId_idx" ON "tweet_entities" USING btree ("tweetUserId");
+CREATE INDEX "tweet_entities_tweetId_idx" ON "tweet_entities" USING btree ("tweetId");

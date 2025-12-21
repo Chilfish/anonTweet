@@ -1,9 +1,6 @@
 import type { Route } from './+types/get'
 import { screenshotTweet } from '~/lib/browser'
 import { extractTweetId } from '~/lib/utils'
-import { requireAuth } from '~/middlewares/auth-guard'
-
-export const middleware = [requireAuth]
 
 export async function loader({
   params,

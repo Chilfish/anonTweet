@@ -15,10 +15,6 @@ const serverEnvSchema = z.object({
   S3_BUCKET_NAME: z.string().min(1),
   S3_PUBLIC_URL: z.url().min(1),
 
-  // Better Auth
-  BETTER_AUTH_URL: z.url().min(1),
-  BETTER_AUTH_SECRET: z.string().min(1),
-
   DB_URL: z.url().optional(),
   ENABLE_DB_CACHE: z.stringbool().default(true),
   VERCEL: z.stringbool().default(false),
