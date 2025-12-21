@@ -1,6 +1,6 @@
 import { GitCommitHorizontal, InfoIcon, XIcon } from 'lucide-react'
 import { useState } from 'react'
-import { Outlet, useSearchParams } from 'react-router'
+import { Outlet } from 'react-router'
 import { Button } from '~/components/ui/button'
 import { formatDate } from '~/lib/react-tweet/date-utils'
 import { cn } from '~/lib/utils'
@@ -139,21 +139,6 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
 }
 
 export function Layout({ children }: { children?: React.ReactNode }) {
-  const [searchParams] = useSearchParams()
-  const plain = searchParams.get('plain') === 'true'
-
-  if (plain) {
-    return (
-      <div
-        id="main-container"
-        className="max-w-fit max-h-fit min-w-[500px] bg-background font-sans antialiased"
-        style={THEME_COLOR}
-      >
-        {children || <Outlet />}
-      </div>
-    )
-  }
-
   return (
     <LayoutComponent>
       {children || <Outlet />}

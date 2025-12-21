@@ -39,21 +39,12 @@ async function getLaunchOptions(): Promise<LaunchOptions> {
     }
   }
   else {
-    // Local Development
-    let exePath = ''
-    try {
-      const { executablePath } = await import('puppeteer')
-      exePath = executablePath()
-    }
-    catch (e) {
-      // exePath = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-      console.warn('Local Puppeteer not found')
-    }
+    const { executablePath } = await import('puppeteer')
 
     return {
       args: commonArgs,
-      executablePath: exePath,
-      headless: 'shell', // 新版 Puppeteer 推荐使用 'shell'
+      executablePath: executablePath(),
+      headless: 'shell',
       defaultViewport: { width: 1000, height: 1000, deviceScaleFactor: 2 },
     }
   }
@@ -88,7 +79,7 @@ export async function screenshotTweet(tweetId: string): Promise<Buffer> {
       deviceScaleFactor: 2, // 2x 渲染，解决文字发虚边缘模糊
     })
 
-    const targetUrl = `https://anon-tweet-dev.chilfish.top/tweets/${tweetId}?plain=true`
+    const targetUrl = `${env.HOSTNAME}/plain-tweet/${tweetId}`
 
     // 在 goto 之后，screenshot 之前，除了等待图片，最好也等待 Web Font 加载
     await page.goto(targetUrl, {

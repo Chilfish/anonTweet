@@ -1,6 +1,7 @@
 import { execSync } from 'node:child_process'
 import { reactRouter } from '@react-router/dev/vite'
 import tailwindcss from '@tailwindcss/vite'
+import { reactRouterHonoServer } from 'react-router-hono-server/dev'
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
@@ -29,6 +30,7 @@ const gitInfo = getGitInfo()
 
 export default defineConfig(({ isSsrBuild }) => ({
   plugins: [
+    reactRouterHonoServer(),
     tailwindcss(),
     reactRouter(),
     tsconfigPaths(),
@@ -37,13 +39,6 @@ export default defineConfig(({ isSsrBuild }) => ({
     noExternal: ['react-tweet'],
   },
   server: {
-    // proxy: {
-    //   '/api/tweet': {
-    //     target: 'https://cdn.syndication.twimg.com',
-    //     changeOrigin: true,
-    //     rewrite: path => path.replace(/^\/api/, ''),
-    //   },
-    // },
     port: 9080,
   },
   define: {

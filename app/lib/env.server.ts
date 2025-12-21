@@ -18,6 +18,8 @@ const serverEnvSchema = z.object({
   DB_URL: z.url().optional(),
   ENABLE_DB_CACHE: z.stringbool().default(true),
   VERCEL: z.stringbool().default(false),
+
+  HOSTNAME: z.url().default('https://anon-tweet.chilfish.top'),
 })
 
 /**

@@ -8,6 +8,7 @@ import {
 } from '@react-router/dev/routes'
 
 export default [
+  route('plain-tweet/:id', 'routes/plain.tsx'),
   layout('routes/layout.tsx', [
     index('routes/home.tsx'),
     route('/list/:id', 'routes/list.tsx'),

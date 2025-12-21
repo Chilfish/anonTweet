@@ -2,7 +2,7 @@ import type { Route } from './+types/tweet'
 import type { TweetData } from '~/types'
 import axios from 'axios'
 import { Suspense, useEffect } from 'react'
-import { Await, redirect, useLoaderData, useSearchParams } from 'react-router'
+import { Await, redirect, useLoaderData } from 'react-router'
 import { SettingsPanel } from '~/components/settings/SettingsPanel'
 import { BackButton } from '~/components/translation/BackButton'
 import { DownloadMedia } from '~/components/translation/DownloadMedia'
@@ -88,15 +88,8 @@ export default function TweetPage({
   params,
   loaderData,
 }: Route.ComponentProps) {
-  const [searchParams] = useSearchParams()
-  const plain = searchParams.get('plain') === 'true'
   const { id: tweetId } = params
-
   const { setAllTweets } = useTranslationStore()
-
-  if (plain && tweetId) {
-    return <TweetContent />
-  }
 
   useEffect(() => {
     if (loaderData.tweets.length > 0 && tweetId) {
