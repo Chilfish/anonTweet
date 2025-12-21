@@ -2,13 +2,6 @@ import type { Route } from './+types/layout'
 import { Outlet, useNavigation } from 'react-router'
 import { Layout } from '~/components/layout/Layout'
 import { TweetSkeleton } from '~/lib/react-tweet'
-import { requireAuth, requireUser } from '~/middlewares/auth-guard'
-
-export const middleware = [requireAuth]
-
-export async function loader({ context }: Route.LoaderArgs) {
-  return requireUser()
-}
 
 export default function AuthenticatedLayout(_: Route.ComponentProps) {
   const navigation = useNavigation()

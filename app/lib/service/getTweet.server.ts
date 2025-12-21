@@ -3,7 +3,6 @@ import { eq } from 'drizzle-orm'
 import { getDbClient, isDbAvailable } from '~/lib/database/db.server'
 import { tweet, tweetEntities } from '~/lib/database/schema'
 import { getEnrichedTweet } from '~/lib/react-tweet/api-v2'
-import { requireUser } from '~/middlewares/auth-guard'
 
 export async function getDBTweet(tweetId: string): Promise<EnrichedTweet | null> {
   // 1. 无 DB 环境：直接短路返回
@@ -45,9 +44,8 @@ export async function getDBTweet(tweetId: string): Promise<EnrichedTweet | null>
         })
     }
 
-    const { user } = requireUser()
     const translationEntities = await db.query.tweetEntities.findMany({
-      where: eq(tweetEntities.tweetUserId, `${tweetId}-${user.id}`),
+      where: eq(tweetEntities.tweetId, tweetId),
     }).then(r => r[0])
 
     if (translationEntities) {
