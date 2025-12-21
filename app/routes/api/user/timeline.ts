@@ -1,7 +1,7 @@
 import type { Route } from './+types/get'
 import type { TweetData } from '~/types'
-import { getDBUser } from '~/lib/getUser.server'
 import { getEnrichedUserTweet } from '~/lib/react-tweet'
+import { getDBUser } from '~/lib/service/getUser.server'
 
 export async function loader({
   params,

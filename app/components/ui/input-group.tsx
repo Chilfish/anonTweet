@@ -1,5 +1,3 @@
-'use client'
-
 import type { VariantProps } from 'class-variance-authority'
 import type * as React from 'react'
 import type { InputProps } from '~/components/ui/input'

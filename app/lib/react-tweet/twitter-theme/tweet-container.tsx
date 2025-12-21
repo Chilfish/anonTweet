@@ -6,12 +6,17 @@ import './theme.css'
 interface TweetContainerProps {
   children: ReactNode
   className?: string
+  id?: string
   ref?: Ref<HTMLDivElement>
 }
 
-export function TweetContainer({ className, children, ref }: TweetContainerProps) {
+export function TweetContainer({ className, children, ref, id }: TweetContainerProps) {
   return (
-    <div className={cn('react-tweet-theme', s.root, className)} ref={ref}>
+    <div
+      id={id}
+      className={cn('react-tweet-theme', s.root, className)}
+      ref={ref}
+    >
       <article className={s.article}>{children}</article>
     </div>
   )

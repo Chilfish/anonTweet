@@ -1,7 +1,7 @@
 import type { FormEvent } from 'react'
 import { AlertCircle, Hash } from 'lucide-react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router' // Assuming react-router-dom
+import { useNavigate } from 'react-router'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'

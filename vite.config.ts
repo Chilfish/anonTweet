@@ -52,7 +52,6 @@ export default defineConfig(({ isSsrBuild }) => ({
   },
   build: {
     rollupOptions: {
-      external: ['node:https', 'node:http', 'node:fs', 'node:path'],
       input: isSsrBuild ? './server/app.ts' : undefined,
     },
   },

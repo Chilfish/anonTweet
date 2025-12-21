@@ -1,8 +1,6 @@
 import type { Route } from './+types/set'
-import { and, eq } from 'drizzle-orm'
 import { data } from 'react-router'
-import { db } from '~/lib/database/db.server'
-import { tweetEntities } from '~/lib/database/schema'
+import { updateEntities } from '~/lib/service/setTweet'
 import { tweetSchema } from '~/lib/validations/tweet'
 import { requireAuth, requireUser } from '~/middlewares/auth-guard'
 
@@ -34,24 +32,11 @@ export async function action({ request, context }: Route.ActionArgs) {
   switch (submission.data.intent) {
     case 'updateEntities':
       const entities = submission.data.data
-      await Promise.all((entities).map(async (data) => {
-        const tweetUserId = `${data.tweetId}-${user.id}`
-        await db
-          .insert(tweetEntities)
-          .values({
-            entities: data.entities,
-            tweetUserId,
-            translatedBy: user.id,
-          })
-          .onConflictDoUpdate({
-            target: tweetEntities.tweetUserId,
-            targetWhere: and(
-              eq(tweetEntities.tweetUserId, tweetUserId),
-              eq(tweetEntities.translatedBy, user.id),
-            ),
-            set: { entities: data.entities },
-          })
-      }))
+      await Promise.all((entities).map(async data => updateEntities({
+        userId: user.id,
+        tweetId: data.tweetId,
+        entities: data.entities,
+      })))
       break
   }
 

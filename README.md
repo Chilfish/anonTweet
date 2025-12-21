@@ -13,7 +13,7 @@
   - [coss/ui](https://coss.com/ui/docs) (Component Primitives)
   - [Lucide React](https://lucide.dev/) (Icons)
 - **Data & State**:
-  - [Drizzle ORM](https://orm.drizzle.team/) + PostgreSQL (Neon Serverless)
+  - [Drizzle ORM](https://orm.drizzle.team/) + PostgreSQL (Optional, for caching)
   - Zustand (Client-side global state)
   - React Router Loaders/Actions (Server-side data flow)
 - **Utilities**:
@@ -42,8 +42,14 @@ bun install
 在项目根目录创建 `.env` 文件，并参照 `example.env` 配置以下关键变量：
 
 ```env
-# Database (Neon/PostgreSQL)
-DB_URL="postgres://..."
+# Database (Optional)
+# ⚠️ 数据库不再是必须的。如果不配置 DB_URL，系统将直接调用 API 而不使用缓存。
+# DB_URL="postgres://..."
+ENABLE_DB_CACHE="false" # 默认为 true，如果没有数据库请设为 false
+
+# Deployment Environment
+# ⚠️ 部署到 Vercel 时必须设置为 true，本地开发设为 false 或留空
+VERCEL="false"
 
 # Auth (Better Auth)
 # ⚠️ 用于 Session 加密，开发环境可生成随机字符串
@@ -54,11 +60,18 @@ BETTER_AUTH_URL="http://localhost:9080" # 或者是你的端口
 # ⚠️ 必需。这是用于服务器端抓取推文的 Guest/Auth Token。
 # 如果不配置，极易触发 Twitter 的 429 限制。
 TWEET_KEY="your_twitter_auth_token"
+
+# S3 Storage (For image assets)，暂时可不设置
+S3_ENDPOINT="https://..."
+S3_ACCESS_KEY_ID="..."
+S3_SECRET_ACCESS_KEY="..."
+S3_BUCKET_NAME="..."
+S3_PUBLIC_URL="..."
 ```
 
-### 3. Database Migration
+### 3. Database Migration (Optional)
 
-本项目使用 Drizzle Kit 管理数据库 Schema。
+如果你启用了数据库（配置了 `DB_URL` 且 `ENABLE_DB_CACHE=true`），则需要初始化数据库 Schema。如果不使用数据库，请跳过此步骤。
 
 ```bash
 # 将 Schema 推送到数据库 (Prototyping)
@@ -76,6 +89,16 @@ bun run db:push
 ```bash
 bun run dev
 ```
+
+## 📦 Deployment
+
+### Vercel 部署
+
+本项目针对 Vercel 进行了适配。在 Vercel 仪表盘配置项目时，请务必添加以下环境变量以启用正确的构建预设：
+
+- **`VERCEL`**: `true`
+
+如果没有设置此变量，React Router 适配器可能无法正确加载，导致 Serverless Function 运行失败。
 
 ## 📂 Project Structure
 

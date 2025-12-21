@@ -21,7 +21,7 @@ export async function fetchTweet(id: string): Promise<RawTweet> {
 }
 
 export async function fetchUserDetails(username: string) {
-  return rettiwt.user.details(username)
+  return (await rettiwt.user.details(username)) || null
 }
 
 export async function fetchUserTweet(userId: string): Promise<RawTweet[]> {

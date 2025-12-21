@@ -1,13 +1,21 @@
 import type { Config } from '@react-router/dev/config'
 import { vercelPreset } from '@vercel/react-router/vite'
 
-export default {
-  // Config options...
-  // Server-side render by default, to enable SPA mode set this to `false`
+const isInVercel = process.env.VERCEL === 'true'
+
+const config: Config = {
   ssr: true,
   presets: [vercelPreset()],
   future: {
     v8_middleware: true,
     // unstable_viteEnvironmentApi: true,
   },
-} satisfies Config
+}
+
+if (!isInVercel) {
+  config.presets = []
+}
+
+console.log('isInVercel:', isInVercel)
+
+export default config
