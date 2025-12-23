@@ -49,21 +49,23 @@ function TweetContent() {
       <Await
         resolve={loaderData}
         errorElement={<TweetNotFound />}
-        children={resolvedTweet =>
-          resolvedTweet.tweets.length
-            ? resolvedTweet.tweets.map(tweets => (
-                <MyTweet
-                  tweets={[tweets]}
-                  mainTweetId={tweets.id_str}
-                  containerClassName="mb-3"
-                  key={tweets.id_str}
-                />
-              ))
-            : (
-                <TweetNotFound
-                  tweetId={resolvedTweet.listId}
-                />
-              )}
+        children={resolvedTweet => (
+          <div className="flex flex-col gap-3 items-center justify-center w-[96vw]">
+            {resolvedTweet.tweets.length
+              ? resolvedTweet.tweets.map(tweets => (
+                  <MyTweet
+                    tweets={[tweets]}
+                    mainTweetId={tweets.id_str}
+                    key={tweets.id_str}
+                  />
+                ))
+              : (
+                  <TweetNotFound
+                    tweetId={resolvedTweet.listId}
+                  />
+                )}
+          </div>
+        )}
       />
     </Suspense>
   )
@@ -90,7 +92,9 @@ function ListIdInputForm() {
           placeholder="Twitter List ID"
           required
           type="text"
-          className="w-64"
+          className="max-w-64"
+          autoFocus
+          autoComplete="off"
         />
       </Field>
       <Button disabled={loading} type="submit">
@@ -105,7 +109,7 @@ export default function TweetPage({
   loaderData,
 }: Route.ComponentProps) {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 px-1">
       <div className="flex items-center w-full gap-4">
         <BackButton />
         <ListIdInputForm />
