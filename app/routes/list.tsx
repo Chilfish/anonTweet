@@ -60,7 +60,9 @@ function TweetContent() {
                 />
               ))
             : (
-                <TweetNotFound tweetId={resolvedTweet.listId} />
+                <TweetNotFound
+                  tweetId={resolvedTweet.listId}
+                />
               )}
       />
     </Suspense>
@@ -104,10 +106,10 @@ export default function TweetPage({
 }: Route.ComponentProps) {
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center w-full gap-1">
+      <div className="flex items-center w-full gap-4">
         <BackButton />
+        <ListIdInputForm />
       </div>
-      <ListIdInputForm />
 
       <TweetContent />
     </div>

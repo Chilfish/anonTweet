@@ -24,7 +24,7 @@ export async function fetchTweet(id: string): Promise<RawTweet> {
 export async function fetchListTweets(id: string): Promise<RawTweet[]> {
   return await fetcher
     .request<IListTweetsResponse>(ResourceType.LIST_TWEETS, { id })
-    .then(({ data }) => data.list.tweets_timeline.timeline.instructions
+    .then(({ data }) => (data.list?.tweets_timeline?.timeline?.instructions || [])
       .flatMap(instruction => instruction.entries.map(entry => entry.content.itemContent?.tweet_results?.result as unknown as RawTweet))
       .filter(tweet => !!tweet),
     )
