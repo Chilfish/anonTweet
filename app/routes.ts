@@ -10,6 +10,7 @@ import {
 export default [
   layout('routes/layout.tsx', [
     index('routes/home.tsx'),
+    route('/list/:id', 'routes/list.tsx'),
     route('/tweets/:id', 'routes/tweet.tsx'),
     route('/bili', 'routes/bili.tsx'),
   ]),
@@ -21,6 +22,7 @@ export default [
     ...prefix('tweet', [
       route('get/:id', 'routes/api/tweet/get.ts'),
       route('set', 'routes/api/tweet/set.ts'),
+      route('list/:id', 'routes/api/tweet/list.ts'),
       route('image/:id', 'routes/api/tweet/image.ts'),
     ]),
 

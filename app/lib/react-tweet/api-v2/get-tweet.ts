@@ -1,4 +1,5 @@
 import type { EnrichedTweet, RawTweet } from './types'
+import type { IListTweetsResponse } from '~/lib/rettiwt-api/types/raw/list/Tweets'
 import type { ITweetDetailsResponse } from '~/lib/rettiwt-api/types/raw/tweet/Details'
 import type { IUserTweetsResponse } from '~/lib/rettiwt-api/types/raw/user/Tweets'
 // import { writeFile } from 'node:fs/promises'
@@ -18,6 +19,15 @@ export async function fetchTweet(id: string): Promise<RawTweet> {
   return await fetcher
     .request<ITweetDetailsResponse>(ResourceType.TWEET_DETAILS, { id })
     .then(({ data }) => data.tweetResult.result)
+}
+
+export async function fetchListTweets(id: string): Promise<RawTweet[]> {
+  return await fetcher
+    .request<IListTweetsResponse>(ResourceType.LIST_TWEETS, { id })
+    .then(({ data }) => data.list.tweets_timeline.timeline.instructions
+      .flatMap(instruction => instruction.entries.map(entry => entry.content.itemContent?.tweet_results?.result as unknown as RawTweet))
+      .filter(tweet => !!tweet),
+    )
 }
 
 export async function fetchUserDetails(username: string) {

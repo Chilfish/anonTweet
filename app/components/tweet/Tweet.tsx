@@ -73,11 +73,12 @@ function UnifiedTweet({ tweet, variant }: UnifiedTweetProps) {
 interface MyTweetProps {
   tweets: TweetData
   mainTweetId: string
+  containerClassName?: string
   settings?: ThemeSettings
   ref?: Ref<HTMLDivElement>
 }
 
-export function MyTweet({ tweets, mainTweetId }: MyTweetProps) {
+export function MyTweet({ tweets, mainTweetId, containerClassName }: MyTweetProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const { setTweetElRef } = useTranslationStore()
 
@@ -109,7 +110,7 @@ export function MyTweet({ tweets, mainTweetId }: MyTweetProps) {
     <TweetContainer
       ref={containerRef}
       id={mainTweet.id_str}
-      className="tweet-loaded"
+      className={cn('tweet-loaded', containerClassName)}
     >
       {hasThread && (
         <>
