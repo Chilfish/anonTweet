@@ -1,25 +1,25 @@
 import { Check, Plus, RotateCcw, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button } from '~/components/ui/button'
-import { Card, CardContent, CardHeader } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from '~/components/ui/select'
 import { Textarea } from '~/components/ui/textarea'
 import { useTranslationStore } from '~/lib/stores/translation'
 import { cn } from '~/lib/utils'
+import { SettingsGroup, SettingsRow } from './SettingsUI'
 
 function TemplatePreview({ html }: { html: string }) {
   return (
     <div className="space-y-2">
-      <Label>预览效果</Label>
-      <div className="border rounded-md p-4 bg-background/50 relative overflow-hidden">
-        <div className="text-sm mb-2">原文内容...</div>
+      <h4 className="px-1 text-sm font-medium text-muted-foreground">预览效果</h4>
+      <div className="overflow-hidden rounded-xl border bg-muted/20 p-6 shadow-sm">
+        <div className="text-sm mb-2 opacity-60">原文内容...</div>
         <div
           className="prose dark:prose-invert max-w-none text-sm"
           dangerouslySetInnerHTML={{ __html: html }}
         />
-        <div className="text-sm font-bold mt-2">翻译内容...</div>
+        <div className="text-sm font-bold mt-2 opacity-60">翻译内容...</div>
       </div>
     </div>
   )
@@ -64,47 +64,54 @@ function TemplateEditor({
   }, [name, html, id, isReadOnly, onUpdate, initialName, initialHtml])
 
   return (
-    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-      <div className="grid gap-4">
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor={`tpl-name-${id}`}>模板名称</Label>
-            {!isReadOnly && onDelete && (
-              <Button
-                variant="destructive-outline"
-                size="sm"
-                onClick={() => onDelete(id)}
-              >
-                <Trash2 className="size-3.5" />
-                删除此模板
-              </Button>
-            )}
-          </div>
-          <Input
-            id={`tpl-name-${id}`}
-            value={name}
-            onChange={e => setName(e.target.value)}
-            disabled={isReadOnly}
-            className={cn(isReadOnly && 'opacity-70')}
-          />
-        </div>
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+      <div className="space-y-2">
+        <h4 className="px-1 text-sm font-medium text-muted-foreground">配置</h4>
+        <SettingsGroup>
+          <SettingsRow>
+            <Label htmlFor={`tpl-name-${id}`} className="w-20 shrink-0 font-medium">名称</Label>
+            <Input
+              id={`tpl-name-${id}`}
+              value={name}
+              onChange={e => setName(e.target.value)}
+              disabled={isReadOnly}
+              className={cn(
+                'text-right h-8 border-none shadow-none focus-visible:ring-0 px-0',
+                isReadOnly && 'opacity-70',
+              )}
+            />
+          </SettingsRow>
 
-        <div className="space-y-2">
-          <Label htmlFor={`tpl-html-${id}`}>HTML 代码</Label>
-          <Textarea
-            id={`tpl-html-${id}`}
-            value={html}
-            onChange={e => setHtml(e.target.value)}
-            readOnly={isReadOnly}
-            className={cn(
-              'font-mono text-xs min-h-[100px] resize-y',
-              isReadOnly && 'opacity-70 bg-muted',
-            )}
-          />
-        </div>
+          <div className="p-4 border-t space-y-2 bg-muted/10">
+            <Label htmlFor={`tpl-html-${id}`} className="text-xs text-muted-foreground">HTML 结构</Label>
+            <Textarea
+              id={`tpl-html-${id}`}
+              value={html}
+              onChange={e => setHtml(e.target.value)}
+              readOnly={isReadOnly}
+              className={cn(
+                'font-mono text-xs min-h-[100px] resize-y bg-background',
+                isReadOnly && 'opacity-70 bg-muted',
+              )}
+            />
+          </div>
+        </SettingsGroup>
       </div>
 
       <TemplatePreview html={html} />
+
+      {!isReadOnly && onDelete && (
+        <div className="px-1">
+          <Button
+            variant="destructive"
+            className="w-full"
+            onClick={() => onDelete(id)}
+          >
+            <Trash2 className="size-4 mr-2" />
+            删除此模板
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
@@ -151,107 +158,126 @@ export function SeparatorTemplateManager() {
   }, [settings.selectedTemplateId, allTemplates, selectTemplate, deleteCustomTemplate])
 
   return (
-    <Card className="w-full gap-2">
-      <CardHeader className="flex items-center justify-between">
-        <h3 className="font-bold">分隔符样式</h3>
-        {!isCreating ? (
-          <Button
-            size="sm"
-            onClick={() => setIsCreating(true)}
-            className="h-8 gap-1"
-          >
-            <Plus className="size-3.5" />
-            新建
-          </Button>
-        ) : (
-          <Button
-            size="sm"
-            onClick={() => setIsCreating(false)}
-            className="h-8 gap-1"
-          >
-            <RotateCcw className="size-3.5" />
-            返回
-          </Button>
-        )}
-      </CardHeader>
-
-      <CardContent className="space-y-6">
-        {isCreating ? (
-          <div className="space-y-4 animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-4 border rounded-lg bg-muted/30 space-y-4">
-              <div className="space-y-2">
-                <Label>新模板名称</Label>
-                <Input
-                  value={newTemplate.name}
-                  onChange={e => setNewTemplate(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="例如：极简线条"
-                  autoFocus
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>HTML 代码</Label>
-                <Textarea
-                  value={newTemplate.html}
-                  onChange={e => setNewTemplate(prev => ({ ...prev, html: e.target.value }))}
-                  className="font-mono text-xs"
-                />
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <Button variant="ghost" size="sm" onClick={() => setIsCreating(false)}>取消</Button>
-                <Button size="sm" onClick={handleCreate} disabled={!newTemplate.name.trim()}>
-                  <Check className="size-3.5" />
-                  确认创建
+    <div className="space-y-6 p-1">
+      {/* Header Section */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between px-1">
+          <h4 className="text-sm font-medium text-muted-foreground">
+            {isCreating ? '新建模板' : '模板选择'}
+          </h4>
+          {!isCreating
+            ? (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setIsCreating(true)}
+                  className="h-7 px-2 text-primary hover:text-primary hover:bg-primary/10"
+                >
+                  <Plus className="size-3.5 mr-1" />
+                  新建
                 </Button>
-              </div>
-            </div>
-            <TemplatePreview html={newTemplate.html} />
-          </div>
-        ) : (
-          <>
-            <div className="space-y-2">
-              <Label>选择模板</Label>
-              <Select
-                value={selectedTemplate?.id}
-                onValueChange={value => selectTemplate(value!)}
-              >
-                <SelectTrigger>
-                  <SelectValue>{selectedTemplate?.name || '选择模板'}</SelectValue>
-                </SelectTrigger>
-                <SelectPopup className="max-h-[300px]">
-                  {allTemplates.map(template => (
-                    <SelectItem key={template.id} value={template.id}>
-                      <span className={cn(
-                        'flex items-center gap-2',
-                        template.id.startsWith('preset-') && 'font-medium',
-                      )}
-                      >
-                        {template.name}
-                        {template.id.startsWith('preset-') && (
-                          <span className="text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
-                            预设
-                          </span>
-                        )}
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectPopup>
-              </Select>
-            </div>
+              )
+            : (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setIsCreating(false)}
+                  className="h-7 px-2"
+                >
+                  <RotateCcw className="size-3.5 mr-1" />
+                  返回
+                </Button>
+              )}
+        </div>
 
-            {selectedTemplate && (
-              <TemplateEditor
-                key={selectedTemplate.id}
-                id={selectedTemplate.id}
-                initialName={selectedTemplate.name}
-                initialHtml={selectedTemplate.html}
-                isReadOnly={isPreset}
-                onUpdate={updateCustomTemplate}
-                onDelete={handleDelete}
-              />
+        {isCreating
+          ? (
+              <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
+                <SettingsGroup>
+                  <SettingsRow>
+                    <Label className="w-20 shrink-0 font-medium">名称</Label>
+                    <Input
+                      value={newTemplate.name}
+                      onChange={e => setNewTemplate(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="例如：极简线条"
+                      className="text-right h-8 border-none shadow-none focus-visible:ring-0"
+                      autoFocus
+                    />
+                  </SettingsRow>
+                  <div className="p-4 border-t space-y-2 bg-muted/10">
+                    <Label className="text-xs text-muted-foreground">HTML 结构</Label>
+                    <Textarea
+                      value={newTemplate.html}
+                      onChange={e => setNewTemplate(prev => ({ ...prev, html: e.target.value }))}
+                      className="font-mono text-xs bg-background min-h-[100px]"
+                    />
+                  </div>
+                </SettingsGroup>
+
+                <TemplatePreview html={newTemplate.html} />
+
+                <div className="px-1">
+                  <Button
+                    className="w-full"
+                    onClick={handleCreate}
+                    disabled={!newTemplate.name.trim()}
+                  >
+                    <Check className="size-4 mr-2" />
+                    确认创建
+                  </Button>
+                </div>
+              </div>
+            )
+          : (
+              <>
+                <SettingsGroup>
+                  <SettingsRow>
+                    <Label className="shrink-0 font-medium">当前应用</Label>
+                    <div className="flex-1 min-w-0 flex justify-end">
+                      <Select
+                        value={selectedTemplate?.id}
+                        onValueChange={value => selectTemplate(value!)}
+                      >
+                        <SelectTrigger className="w-[200px] h-8 border-none shadow-none focus:ring-0 justify-end gap-2">
+                          <SelectValue>{selectedTemplate?.name || '选择模板'}</SelectValue>
+                        </SelectTrigger>
+                        <SelectPopup className="max-h-[300px]">
+                          {allTemplates.map(template => (
+                            <SelectItem key={template.id} value={template.id}>
+                              <span className={cn(
+                                'flex items-center gap-2',
+                                template.id.startsWith('preset-') && 'font-medium',
+                              )}
+                              >
+                                {template.name}
+                                {template.id.startsWith('preset-') && (
+                                  <span className="text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
+                                    预设
+                                  </span>
+                                )}
+                              </span>
+                            </SelectItem>
+                          ))}
+                        </SelectPopup>
+                      </Select>
+                    </div>
+                  </SettingsRow>
+                </SettingsGroup>
+
+                {selectedTemplate && (
+                  <TemplateEditor
+                    key={selectedTemplate.id}
+                    id={selectedTemplate.id}
+                    initialName={selectedTemplate.name}
+                    initialHtml={selectedTemplate.html}
+                    isReadOnly={isPreset}
+                    onUpdate={updateCustomTemplate}
+                    onDelete={handleDelete}
+                  />
+                )}
+              </>
             )}
-          </>
-        )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

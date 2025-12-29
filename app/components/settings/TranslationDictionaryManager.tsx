@@ -1,8 +1,7 @@
 import type { TranslationDicEntry } from '~/lib/stores/TranslationDictionary'
-import { FileDown, FileUp, MoreHorizontal, Pencil, Plus, SearchIcon, Trash2, X } from 'lucide-react'
+import { FileDown, FileUp, Pencil, Plus, SearchIcon, Trash2, X } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 import { Button } from '~/components/ui/button'
-import { Card, CardContent, CardHeader } from '~/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -14,11 +13,9 @@ import {
 } from '~/components/ui/dialog'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 import { toastManager } from '~/components/ui/toast'
 import { downloadExcel, parseExcel, useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '../ui/input-group'
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
+import { SettingsGroup, SettingsRow } from './SettingsUI'
 
 export function TranslationDictionaryManager() {
   const { entries, addEntry, removeEntry, updateEntry, importEntries } = useTranslationDictionaryStore()
@@ -64,8 +61,10 @@ export function TranslationDictionaryManager() {
 
     setNewOriginal('')
     setNewTranslated('')
-    // 以此保持添加模式开启，方便连续添加
-    // setShowAddForm(false)
+    toastManager.add({
+      title: '已添加',
+      type: 'success',
+    })
   }
 
   const handleExport = async () => {
@@ -159,167 +158,133 @@ export function TranslationDictionaryManager() {
   }
 
   return (
-    <Card className="w-full border shadow-sm gap-2 pb-0">
-      <CardHeader className="py-0">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <h3 className="font-semibold tracking-tight">
-            翻译词汇对照表
-            <span className="text-xs text-muted-foreground">
-              {' '}
-              (
-              {entries.length}
-              {' '}
-              条)
-            </span>
-          </h3>
-
-          <div className="flex gap-2 justify-end w-full sm:w-auto">
-            <Button
-              onClick={() => setShowAddForm(!showAddForm)}
-              variant={showAddForm ? 'secondary' : 'default'}
-              size="sm"
-            >
-              {showAddForm ? <X className="size-4 mr-1" /> : <Plus className="size-4 mr-1" />}
-              {showAddForm ? '关闭添加' : '添加词汇'}
-            </Button>
-
-            <Button variant="outline" size="sm" onClick={handleExport}>
-              <FileDown className="size-4 mr-1" />
-              导出
-            </Button>
-
-            <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-              <FileUp className="size-4 mr-1" />
-              导入
-            </Button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".xlsx, .xls"
-              className="hidden"
-              onChange={handleImport}
-            />
-          </div>
+    <div className="space-y-6 p-1">
+      {/* Management Section */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between px-1">
+          <h4 className="text-sm font-medium text-muted-foreground">管理</h4>
+          <span className="text-xs text-muted-foreground">
+            共
+            {' '}
+            {entries.length}
+            {' '}
+            条
+          </span>
         </div>
-      </CardHeader>
+        <SettingsGroup>
+          {/* Add Toggle */}
+          <SettingsRow
+            className="cursor-pointer hover:bg-muted/50 transition-colors"
+            onClick={() => setShowAddForm(!showAddForm)}
+          >
+            <span className="text-sm font-medium text-primary">添加新词汇...</span>
+            <Button size="icon" variant="ghost" className="h-6 w-6 pointer-events-none">
+              {showAddForm ? <X className="size-4" /> : <Plus className="size-4" />}
+            </Button>
+          </SettingsRow>
 
-      <CardContent className="p-0">
-        {/* Add Entry Section - Collapsible */}
-        {showAddForm && (
-          <div className="border-b p-4 animate-in slide-in-from-top-2 fade-in duration-200">
-            <div className="flex flex-col sm:flex-row gap-3 items-end">
-              <div className="grid w-full gap-1.5">
-                <Label htmlFor="new-orig" className="text-xs text-muted-foreground">原文</Label>
+          {/* Add Form */}
+          {showAddForm && (
+            <div className="p-4 bg-muted/30 border-t space-y-3 animate-in slide-in-from-top-2 fade-in duration-200">
+              <div className="space-y-2">
                 <Input
-                  id="new-orig"
-                  placeholder="e.g. MyGO!!!!!"
+                  placeholder="原文 (e.g. MyGO!!!!!)"
                   value={newOriginal}
                   onChange={e => setNewOriginal(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleAdd()}
-                  className="h-9 bg-background"
+                  className="bg-background"
                 />
-              </div>
-              <div className="grid w-full gap-1.5">
-                <Label htmlFor="new-trans" className="text-xs text-muted-foreground">译文</Label>
                 <Input
-                  id="new-trans"
-                  placeholder="e.g. 我的去!!!!!"
+                  placeholder="译文 (e.g. 我的去!!!!!)"
                   value={newTranslated}
                   onChange={e => setNewTranslated(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleAdd()}
-                  className="h-9 bg-background"
+                  className="bg-background"
                 />
               </div>
-              <Button onClick={handleAdd} disabled={!newOriginal || !newTranslated}>
-                添加
+              <Button onClick={handleAdd} disabled={!newOriginal || !newTranslated} size="sm" className="w-full">
+                确认添加
               </Button>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Toolbar: Search */}
-        <div className="p-3 flex items-center gap-2">
-          <InputGroup>
-            <InputGroupAddon align="inline-start">
-              <SearchIcon className="size-4" />
-            </InputGroupAddon>
-            <InputGroupInput
-              placeholder="搜索原文或译文..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="h-9"
-            />
-          </InputGroup>
+          {/* Import / Export */}
+          <SettingsRow>
+            <span className="text-sm font-medium">数据备份</span>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="h-8" onClick={handleExport}>
+                <FileDown className="size-3.5 mr-1" />
+                导出
+              </Button>
+
+              <Button variant="outline" size="sm" className="h-8" onClick={() => fileInputRef.current?.click()}>
+                <FileUp className="size-3.5 mr-1" />
+                导入
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".xlsx, .xls"
+                className="hidden"
+                onChange={handleImport}
+              />
+            </div>
+          </SettingsRow>
+        </SettingsGroup>
+      </div>
+
+      {/* List Section */}
+      <div className="space-y-2">
+        <h4 className="px-1 text-sm font-medium text-muted-foreground">词汇列表</h4>
+
+        {/* Search Bar */}
+        <div className="relative">
+          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+          <Input
+            placeholder="搜索原文 or 译文..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="pl-9 bg-muted/30 border-transparent focus-visible:bg-background focus-visible:border-input transition-all"
+          />
         </div>
 
-        {/* Main Table Area */}
-        <Table
-          containerClassName="max-h-[350px] overflow-y-auto p-2 pt-0"
-          className="table-fixed w-full rounded-md"
-        >
-          <TableHeader className="sticky top-0 z-10 bg-background shadow-sm">
-            <TableRow className="hover:bg-transparent">
-              <TableHead className="w-[40%]">原文</TableHead>
-              <TableHead className="w-[40%]">译文</TableHead>
-              <TableHead className="w-[20%] text-right pr-6">操作</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody className="">
-            {filteredEntries.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={3} className="h-32 text-center text-muted-foreground">
+        <SettingsGroup className="max-h-[400px] overflow-y-auto">
+          {filteredEntries.length === 0
+            ? (
+                <div className="p-8 text-center text-sm text-muted-foreground">
                   {searchTerm ? '没有找到匹配的词汇' : '暂无数据，请添加或导入'}
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredEntries.map(entry => (
-                <TableRow key={entry.id}>
-                  <TableCell className="font-medium align-middle py-3 wrap-break-word whitespace-normal">
-                    {entry.original}
-                  </TableCell>
-                  <TableCell className="align-middle py-3 wrap-break-word whitespace-normal text-muted-foreground">
-                    {entry.translated}
-                  </TableCell>
-                  <TableCell className="text-right align-top py-3 pr-4">
-                    <Popover>
-                      <PopoverTrigger render={
-                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-muted" />
-                      }
+                </div>
+              )
+            : (
+                filteredEntries.map(entry => (
+                  <SettingsRow key={entry.id} className="items-start py-3 gap-3">
+                    <div className="flex flex-col gap-1 flex-1 min-w-0">
+                      <span className="text-sm font-medium break-words leading-relaxed">{entry.original}</span>
+                      <span className="text-xs text-muted-foreground break-words leading-relaxed">{entry.translated}</span>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1 -mr-2">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        onClick={() => openEditDialog(entry)}
                       >
-                        <MoreHorizontal className="size-4" />
-                        <span className="sr-only">菜单</span>
-                      </PopoverTrigger>
-                      <PopoverContent
-                        viewportClassName="p-2"
-                        className="p-0"
-                        align="end"
-                        side="bottom"
+                        <Pencil className="size-3.5" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        onClick={() => removeEntry(entry.id)}
                       >
-                        <Button
-                          variant="ghost"
-                          onClick={() => openEditDialog(entry)}
-                        >
-                          <Pencil className="mr-2 size-3.5" />
-                          编辑
-                        </Button>
-                        <div className="h-px my-1" />
-                        <Button
-                          variant="ghost"
-                          onClick={() => removeEntry(entry.id)}
-                          className="text-destructive focus:text-destructive"
-                        >
-                          <Trash2 className="mr-2 size-3.5" />
-                          删除
-                        </Button>
-                      </PopoverContent>
-                    </Popover>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </CardContent>
+                        <Trash2 className="size-3.5" />
+                      </Button>
+                    </div>
+                  </SettingsRow>
+                ))
+              )}
+        </SettingsGroup>
+      </div>
 
       {/* Edit Dialog */}
       <Dialog
@@ -358,6 +323,6 @@ export function TranslationDictionaryManager() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </Card>
+    </div>
   )
 }
