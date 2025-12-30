@@ -1,11 +1,12 @@
 import type { LucideIcon } from 'lucide-react'
+import type { Theme } from '~/lib/stores/appConfig'
 import { Monitor, Moon, Sun } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
-import { useThemeStore } from '~/lib/stores/theme'
+import { useAppConfigStore } from '~/lib/stores/appConfig'
 
 const THEME_OPTIONS: {
-  value: 'light' | 'dark' | 'system'
+  value: Theme
   label: string
   Icon: LucideIcon
 }[] = [
@@ -14,8 +15,8 @@ const THEME_OPTIONS: {
   { value: 'system', label: '系统', Icon: Monitor },
 ]
 
-function ThemeSelector() {
-  const { theme, setTheme } = useThemeStore()
+export function ThemeSelector() {
+  const { theme, setTheme } = useAppConfigStore()
 
   return (
     <div className="flex gap-2">

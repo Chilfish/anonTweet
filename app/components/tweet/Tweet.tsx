@@ -1,6 +1,6 @@
 import type { Ref } from 'react'
 import type { EnrichedTweet } from '~/lib/react-tweet'
-import type { ThemeSettings } from '~/lib/stores/theme'
+import type { AppConfigs } from '~/lib/stores/appConfig'
 import type { TweetData } from '~/types'
 import { useEffect, useMemo, useRef } from 'react'
 import { TranslationEditor } from '~/components/translation/TranslationEditor'
@@ -73,11 +73,12 @@ function UnifiedTweet({ tweet, variant }: UnifiedTweetProps) {
 interface MyTweetProps {
   tweets: TweetData
   mainTweetId: string
-  settings?: ThemeSettings
+  containerClassName?: string
+  settings?: AppConfigs
   ref?: Ref<HTMLDivElement>
 }
 
-export function MyTweet({ tweets, mainTweetId }: MyTweetProps) {
+export function MyTweet({ tweets, mainTweetId, containerClassName }: MyTweetProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const { setTweetElRef } = useTranslationStore()
 
@@ -109,7 +110,7 @@ export function MyTweet({ tweets, mainTweetId }: MyTweetProps) {
     <TweetContainer
       ref={containerRef}
       id={mainTweet.id_str}
-      className="tweet-loaded"
+      className={cn('tweet-loaded', containerClassName)}
     >
       {hasThread && (
         <>

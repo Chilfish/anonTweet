@@ -52,25 +52,6 @@ export function formatDate(
   return format(dateObj, formatString)
 }
 
-export function getAvatarUrl(
-  userImage: string | null | undefined,
-  userName: string | null | undefined,
-) {
-  const seed = userName || 'defaultUser'
-  const placeholderUrl = `https://api.dicebear.com/9.x/glass/svg?seed=${seed}&backgroundType=gradientLinear,solid`
-  let avatarUrl = null
-  if (userImage?.startsWith('http://') || userImage?.startsWith('https://')) {
-    avatarUrl = userImage
-  }
-  else if (userImage?.startsWith('user-avatar/')) {
-    avatarUrl = `/images/${userImage}`
-  }
-  return {
-    avatarUrl,
-    placeholderUrl,
-  }
-}
-
 export function flatTweets(tweets: EnrichedTweet[]): EnrichedTweet[] {
   const copiedTweets = structuredClone(tweets)
   return copiedTweets.flatMap((tweet) => {

@@ -11,8 +11,8 @@ import {
   DialogTrigger,
 } from '~/components/ui/dialog'
 import { Tabs, TabsList, TabsPanel, TabsTab } from '~/components/ui/tabs'
+import { GeneralSettings } from './GeneralSettings'
 import { SeparatorTemplateManager } from './SeparatorTemplateManager'
-import { ThemeSwitcher } from './ThemeSwitcher'
 import { TranslationDictionaryManager } from './TranslationDictionaryManager'
 
 export function SettingsBody() {
@@ -22,10 +22,10 @@ export function SettingsBody() {
         <TabsList>
           <TabsTab value="separator">分隔符样式</TabsTab>
           <TabsTab value="translation">翻译对照表</TabsTab>
-          <TabsTab value="theme">主题</TabsTab>
+          <TabsTab value="general">通用设置</TabsTab>
         </TabsList>
-        <TabsPanel value="theme">
-          <ThemeSwitcher />
+        <TabsPanel value="general">
+          <GeneralSettings />
         </TabsPanel>
         <TabsPanel value="separator">
           <SeparatorTemplateManager />

@@ -1,5 +1,5 @@
 import type { MediaAnimatedGif, MediaDetails, MediaVideo } from './api-v2'
-import { proxyMedia } from '../utils'
+import { useProxyMedia } from '../stores/appConfig'
 
 export interface TweetCoreProps {
   id: string
@@ -17,6 +17,7 @@ export function getMediaUrl(media: MediaDetails, size: 'small' | 'medium' | 'lar
   url.searchParams.set('format', extension)
   url.searchParams.set('name', size)
 
+  const proxyMedia = useProxyMedia()
   return proxyMedia(url.toString())
 }
 

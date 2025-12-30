@@ -1,5 +1,6 @@
 import type { EnrichedTweet } from '~/lib/react-tweet'
-import { cn, proxyMedia } from '~/lib/utils'
+import { useProxyMedia } from '~/lib/stores/appConfig'
+import { cn } from '~/lib/utils'
 import { TweetInfoCreatedAt } from './components'
 import s from './tweet-header.module.css'
 import { VerifiedBadge } from './verified-badge'
@@ -13,6 +14,7 @@ interface Props {
 
 export function TweetHeader({ tweet, inQuote, className }: Props) {
   const { user } = tweet
+  const proxyMedia = useProxyMedia()
 
   return (
     <div className={cn(s.header, className, inQuote && s.inQuote)}>
