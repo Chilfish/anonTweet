@@ -2,7 +2,7 @@
 
 此文档定义了项目中通用的原子级 UI 组件规范。本项目采用 **coss-ui** (基于 **Base UI** 和 **Tailwind CSS**) 作为组件库基础。这意味着大多数基础组件（如 Button, Input, Dialog）已经具备了良好的可访问性和默认样式。
 
-**核心原则：** 优先复用 `~/components/ui/` 下的既有组件，而非手动编写 Tailwind 类名。仅在为了匹配特殊的 Apple 风格（如设置列表）时进行必要的样式覆盖。
+**核心原则：** 优先复用 `~/components/ui/` 下的既有组件，而非手动编写 Tailwind 类名。仅在为了匹配特殊的 Apple 风格（如设置列表）时进行必要的样式覆盖。特别地，不要过多地给baseui组件外层擅自添加 padding，Base UI 会处理好整体结构。
 
 使用前请参考文档 https://coss.com/ui/llms.txt
 
@@ -69,7 +69,7 @@ coss-ui 已预设以下变体，开发时请直接使用 `variant` 属性：
 </InputGroup>
 ```
 
-*   **关键点:** 不要手动通过 absolute 定位图标，也不要给组件外层擅自添加 padding，Base UI 会处理好整体结构。
+*   **关键点:** 不要手动通过 absolute 定位图标
 *   **图标色:** `text-muted-foreground`.
 
 ### 2.3 文本域 (Textarea)

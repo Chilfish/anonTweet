@@ -1,108 +1,136 @@
-# Anon Tweet 架构设计文档
+```md D:/git/anonTweet/docs/project_architecture.md
+# Anon Tweet 架构设计文档 v2.0
 
-## 1. 架构概览
+## 1. 架构总览 (System Architecture)
 
-项目采用 **React Router v7** 作为全栈框架，构建了一个 **BFF (Backend for Frontend)** 架构。前端主要负责视图交互与状态管理，后端 API 路由负责数据聚合、缓存策略及第三方 API 代理。
+本项目采用 **React Router v7** 构建全栈应用，遵循 **BFF (Backend for Frontend)** 设计模式。系统明确划分为表现层（Presentation Layer）、API 聚合层（BFF Layer）与领域服务层（Domain Service Layer）。
 
-核心设计哲学：**读写分离，动静分离**。
+- **运行时 (Runtime)**: Bun (高性能 JavaScript 运行时)
+- **全栈框架 (Framework)**: React Router v7 (SSR + CSR Hybrid)
+- **数据持久化 (Persistence)**: PostgreSQL (Neon Serverless) + Drizzle ORM
+- **状态管理 (State Management)**: Zustand (Client) + React Router Loaders (Server/Network)
 
-- **静态数据**：推特原文内容，一旦抓取，视为不可变数据，存入 Document-style 表。
-- **动态数据**：用户的翻译、Tag 高亮等，视为可变数据，存入关联表。
-
----
-
-## 2. Data Loading (数据获取与组装)
-
-数据获取并非简单的单条记录查询，而是包含**递归抓取**和**运行时合并**的复杂流程。
-
-### 2.1 线程化抓取策略 (Thread Resolution)
-
-位于 `app/lib/getTweet.ts`。系统不仅获取目标推文，还会尝试还原对话上下文：
-
-1.  **Fetch Loop**: 从目标 ID 开始。
-2.  **Upward Traversal**: 检查 `in_reply_to_status_id_str`，递归获取父推文。
-3.  **Downward Traversal**: 检查 `quoted_tweet_id`，获取引用推文。
-4.  **Sorting**: 最终返回按 ID 排序的推文数组（`TweetData`），确保前端渲染顺序正确。
-
-### 2.2 混合数据源与合并 (Hybrid Source & Merge)
-
-位于 `app/routes/api/tweet/get.ts`。
-
-1.  **Level 1: DB Cache (Raw)**
-    - 查询 `tweet` 表。该表本质是一个 **Document Store**，通过 `jsonContent` 字段存储完整的 `EnrichedTweet` JSON 对象。
-    - **Cache Miss**: 若数据库无记录，调用 `rettiwt-api` (Forked) 从 Twitter 逆向接口抓取，并**Write-Back** 写入数据库。
-
-2.  **Level 2: User Layer (Translation)**
-    - 查询 `tweet_entities` 表。根据 `tweetId` + `userId` 查找当前用户的编辑记录。
-    - **Runtime Merge**: 服务端在返回数据前，动态将 DB 中的 `translation` 字段注入到原始 `jsonContent.entities` 中。
-    - **优势**: 这种“非破坏性编辑”设计确保了原始推文数据的纯净，允许多个用户对同一推文有不同的翻译版本。
+核心设计原则遵循 **关注点分离 (SoC)** 与 **读写分离**：
+- **API 路由**：承担网关角色，负责数据聚合、权限校验、第三方服务代理及缓存策略。
+- **UI 路由**：采用 SPA (Single Page Application) 优先策略，通过 Client Loader 异步请求 API，确保交互的瞬时响应性。
 
 ---
 
-## 3. Client State Management (客户端状态)
+## 2. API 接口设计与路由策略 (API Layer)
 
-位于 `app/lib/stores/translation.ts`。客户端使用 **Zustand** 进行复杂状态管理，而非仅仅依赖 React Context。
+API 层作为 BFF，主要负责将异构数据源（Database, Twitter Private API, S3, Bilibili API）标准化为前端可消费的 JSON 格式。
 
-### 3.1 Store 结构
+### 2.1 Tweet Domain (`/api/tweet/*`)
 
-- **Settings Domain**: 翻译模板、分隔符样式。使用 `persist` 中间件持久化到 localStorage。
-- **Data Domain**: 当前推文列表、主推文对象。**不持久化**，每次导航重置。
-- **Translation Map**: `Record<string, Entity[]>`。用于快速索引和更新 UI。
+核心推文数据的获取、处理与状态变更。
 
-### 3.2 初始化与同步
+-   **`GET /api/tweet/get/:id`**
+    -   **Handler**: `app/routes/api/tweet/get.ts`
+    -   **逻辑**: 这是一个复合查询接口。它不仅获取指定 ID 的推文，还会触发 **递归上下文解析 (Recursive Context Resolution)** 逻辑。
+        1.  解析 URL 参数提取 `tweetId`。
+        2.  调用 `getTweets` 服务，该服务会向上查找父推文（Parent Chain），向下查找引用推文（Quoted Tweet）。
+        3.  优先读取 DB 缓存，Cache Miss 时回源抓取并 Write-Back。
+    -   **返回**: `TweetData` (按时间线排序的推文数组)。
 
-1.  **Hydration**: 当 `clientLoader` 数据返回时，组件调用 `setAllTweets`。
-2.  **Extraction**: Store 自动遍历所有推文的 `entities`，提取其中包含 `translation` 字段的实体，填充到 `translations` Map 中。
-3.  **Optimistic UI**: 用户编辑翻译时，直接更新 Store 中的 Map 和 Tweet 对象，实现无延迟的预览效果。
+-   **`POST /api/tweet/set`**
+    -   **Handler**: `app/routes/api/tweet/set.ts`
+    -   **逻辑**: 处理用户对推文的“富化”操作（如翻译、笔记）。
+    -   **机制**: 接收 `entities` 数据包，使用 `ON CONFLICT DO UPDATE` 策略写入 `tweet_entities` 表。支持批量更新，保证原子性。
+
+-   **`GET /api/tweet/list/:id`**
+    -   **Handler**: `app/routes/api/tweet/list.ts`
+    -   **逻辑**: 对 Twitter List 功能的封装。调用 `fetchListTweets` 获取原始数据，并应用 `enrichTweet` 进行数据清洗和标准化，剔除冗余字段，适配前端组件。
+
+-   **`GET /api/tweet/image/:id`**
+    -   **Handler**: `app/routes/api/tweet/image.ts`
+    -   **逻辑**: 服务端渲染 (SSR) 转图片的生成服务。
+    -   **实现**: 启动 Headless Browser (Puppeteer/Chromium)，渲染特定推文快照，返回 `image/png` 流。该接口通常用于跨平台分享或元数据预览。
+
+### 2.2 User Domain (`/api/user/*`)
+
+用户画像与时间线数据的聚合。
+
+-   **`GET /api/user/get/:username`**
+    -   **Handler**: `app/routes/api/user/get.ts`
+    -   **逻辑**: 获取用户基础元数据（头像、Banner、简介等）。优先查库，失败则回源。
+
+-   **`GET /api/user/timeline/:username`**
+    -   **Handler**: `app/routes/api/user/timeline.ts`
+    -   **逻辑**: 获取指定用户的推文时间线。包含 `enrichTweet` 处理流程，确保返回结构与单条推文详情页一致。
+
+### 2.3 Integration Domain
+
+外部平台集成服务。
+
+-   **`POST /api/bili-post`**
+    -   **Handler**: `app/routes/api/bili-post.tsx`
+    -   **逻辑**: Bilibili 动态发布代理。
+    -   **流程**:
+        1.  接收多部分表单数据 (Multipart FormData)，包含文本与图片文件。
+        2.  从 Payload 或 DB 中提取用户凭证 (Cookie)。
+        3.  **并发上传**: 将图片并发上传至 Bilibili 图床服务 (`/x/dynamic/feed/draw/upload_bfs`)。
+        4.  **元数据组装**: 构造符合 Bilibili 协议的复杂 JSON Payload（包含 `raw_text`, `pics`, `upload_id` 等）。
+        5.  **发布**: 调用动态创建接口，完成跨平台发布。
+    - 缺陷：发布者的ip目前只能跟随着服务器ip，没法改变，致使平台上所有用户都用同一个ip发布动态
 
 ---
 
-## 4. Mutations (数据变更)
+## 3. 数据流与服务层 (Data Flow & Services)
 
-数据写入操作遵循 **Action Pattern**，确保原子性和一致性。
+### 3.1 混合数据源策略 (Hybrid Data Source)
 
-### 核心流程
+系统采用 **Write-Through Cache** 变体策略。
 
-1.  **Endpoint**: `POST /api/tweet/set`
-2.  **Payload**: 仅提交被修改的 `entities` 数组，而非整条推文。
-3.  **Schema Enforcement**:
-    - 数据库表 `tweet_entities` 使用复合键逻辑：`tweetUserId` (文本字段, 格式为 `${tweetId}-${userId}`)。
-    - 使用 `ON CONFLICT DO UPDATE` 策略，实现“存在即更新，不存在即插入”。
-    - **关联性**: `translatedBy` 字段外键关联到 `user` 表（尽管目前 User 为 Mock）。
+1.  **Level 1: Database (Cache)**
+    -   作为主要读取源。存储结构化 JSON 数据 (`EnrichedTweet`)。
+    -   **User Metadata**: `tweet_entities` 表存储用户生成的翻译、标注等动态数据，与原始推文解耦。
 
----
+2.  **Level 2: Upstream API (Source of Truth)**
+    -   基于 `rettiwt-api` (Forked) 的逆向工程接口。
+    -   仅在 DB Cache Miss 时调用，获取后立即通过 Write-Back 机制存入数据库。
 
-## 5. Auth & Session (认证与会话)
+### 3.2 运行时数据合并 (Runtime Injection)
 
-**⚠️ 当前状态: Development / Mocked**
-
-虽然数据库 Schema (`app/lib/database/schema.ts`) 中完整定义了 `user`, `session`, `account` 等 `better-auth` 标准表结构，但运行时逻辑已被短路。
-
-### 5.1 数据库模型
-
-- **User**: 包含 `id`, `email`, `image`, `role` 等标准字段。
-- **Tweet Entites Relation**: `tweet_entities.translatedBy` -> `user.id`。
-
-### 5.2 中间件短路 (`auth-guard.ts`)
-
-- `requireAuth` 中间件构造了一个静态的 `anonUser` 对象。
-- 系统中所有的写操作（Translation Save）目前都挂载在这个虚拟的匿名用户 ID 下。
-- **生产环境准备**: 代码结构已就绪，只需取消 `serverAuth.api.getSession` 的注释并配置 OAuth Provider 即可启用真实认证。
+在数据返回前端之前，服务端会执行“数据富化”过程：
+-   读取 `tweet` 表获取原始推文。
+-   读取 `tweet_entities` 表获取翻译内容。
+-   **Merge**: 将翻译内容动态注入到 `jsonContent.entities` 节点中。此过程在内存中完成，不修改原始推文记录。
 
 ---
 
-## 6. Routing Strategy (路由策略)
+## 4. 客户端架构 (Client-Side Architecture)
 
-基于 **React Router v7** 的 Route Config 模式。
+### 4.1 SPA 路由加载机制
 
-### Client Loader vs Server Loader
+前端采用 **Render-as-you-fetch** 模式的变体。
 
-项目采用了 **SPA 优先** 的加载策略：
+-   **Client Loader (`clientLoader`)**:
+    -   UI 路由（如 `/tweets/:id`）仅定义 `clientLoader`。
+    -   通过 `axios` 发起对本域 API 的异步请求。
+    -   这种设计避免了传统 SSR 的 TTFB (Time to First Byte) 阻塞问题，允许前端先渲染骨架屏 (Skeleton)，提升感官性能。
+    -   **Redirection**: 在客户端处理重定向逻辑（例如检测到当前 ID 为 Retweet 时，自动跳转至源推文 ID）。
 
-- **UI Routes (`routes/tweet.tsx`)**: 仅使用 `clientLoader`。
-  - 这意味着路由跳转完全在客户端发生，立即响应交互。
-  - 数据获取通过 `axios` 异步请求 API。
-  - 配合 `Suspense` + `Skeleton` 提供流畅的用户体验。
-- **API Routes (`routes/api/*`)**: 使用 Server `loader`/`action`。
-  - 充当微服务网关，处理与数据库和第三方服务的交互。
-  - 这种分离使得前端 UI 与后端逻辑解耦，便于独立维护。
+### 4.2 状态管理 (Zustand)
+
+使用 Zustand 构建分层状态库：
+
+-   **Ephemeral State (短暂状态)**:
+    -   `tweets`: 当前视图的推文列表。每次路由切换时，通过 `useEffect` 监听 `loaderData` 变化并重置。
+    -   `translations`: 翻译内容的索引 Map (`Record<string, Entity[]>`)。用于 O(1) 复杂度的查找与更新。
+-   **Persistent State (持久状态)**:
+    -   用户偏好设置（如翻译语言、显示风格），通过中间件持久化至 `localStorage`。
+
+### 4.3 乐观 UI 更新 (Optimistic UI)
+
+在用户提交翻译 (`POST /api/tweet/set`) 时：
+1.  **立即突变**: 直接更新 Zustand Store 中的本地数据，UI 即刻反映变化。
+2.  **后台同步**: 异步发送网络请求。若请求失败，则回滚状态并提示错误。
+
+---
+
+## 5. 基础设施依赖
+
+-   **Database**: PostgreSQL (用于存储 JSON Document 及关系型 User Entity)。
+-   **Object Storage**: S3 兼容协议 (用于存储生成的图片、媒体资源)。
+-   **Headless Browser**: Puppeteer (运行于服务端，用于高保真截图生成)。
+-   **Upstream**: Twitter Private API (GraphQL endpoints via Guest Auth)。

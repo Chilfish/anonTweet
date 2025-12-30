@@ -52,13 +52,6 @@ VERCEL="false"
 # ⚠️ 必需。这是用于服务器端抓取推文的 Guest/Auth Token。
 # 如果不配置，极易触发 Twitter 的 429 限制。
 TWEET_KEY="your_twitter_auth_token"
-
-# S3 Storage (For image assets)，暂时可不设置
-S3_ENDPOINT="https://..."
-S3_ACCESS_KEY_ID="..."
-S3_SECRET_ACCESS_KEY="..."
-S3_BUCKET_NAME="..."
-S3_PUBLIC_URL="..."
 ```
 
 ### 3. Database Migration (Optional)
@@ -92,17 +85,7 @@ bun run dev
 
 如果没有设置此变量，React Router 适配器可能无法正确加载，导致 Serverless Function 运行失败。
 
-## 📂 Project Structure
-
-核心路由逻辑位于 `app/routes.ts`，采用了 React Router v7 的配置式路由定义。
-
-| 路径模式             | 文件位置                      | 说明                                                               |
-| :------------------- | :---------------------------- | :----------------------------------------------------------------- |
-| `/tweets/:id`        | `app/routes/tweet.tsx`        | **核心业务页**。推文详情、翻译编辑器、图片导出功能。               |
-| `/api/tweet/get/:id` | `app/routes/api/tweet/get.ts` | **Loader API**。获取推文数据（优先读库，无缓存则调用第三方 API）。 |
-| `/api/tweet/set`     | `app/routes/api/tweet/set.ts` | **Action API**。保存/更新推文的翻译内容到数据库。                  |
-
-> **Note**: `app/components` 目录下包含大量业务组件，如 `tweet/` (推文渲染) 和 `translation/` (翻译编辑器)。
+项目结构详见 [项目架构文档](./docs/project_architecture.md)
 
 ## 🚧 Development Status
 
