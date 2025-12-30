@@ -177,6 +177,7 @@ interface EntitySet {
     indices: [number, number]
   }[]
   symbols: any[]
+  media: any[]
 }
 
 interface Richtext {

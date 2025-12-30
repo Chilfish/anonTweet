@@ -13,19 +13,19 @@
 
 ### 1.1 视觉解构 (Visual Anatomy)
 
-*   **容器 (Group):**
-    *   `rounded-xl` (12px) 或 `rounded-2xl` (16px) 在移动端。
-    *   `border` (1px solid border-border)。
-    *   `bg-card` (背景色与底色区分)。
-    *   `overflow-hidden` (确保子元素背景不溢出)。
-*   **行 (Row):**
-    *   `min-h-14` (56px) 保证手指易触。
-    *   `border-b` (内部行之间的分隔线)，**最后一行无边框** (`not-last:border-b`)。
-    *   `px-4` (左右内边距)。
-*   **文本 (Typography):**
-    *   Label: `text-sm font-medium`.
-    *   Description: `text-xs text-muted-foreground`.
-    *   Value: `text-sm text-muted-foreground` (通常右对齐)。
+- **容器 (Group):**
+  - `rounded-xl` (12px) 或 `rounded-2xl` (16px) 在移动端。
+  - `border` (1px solid border-border)。
+  - `bg-card` (背景色与底色区分)。
+  - `overflow-hidden` (确保子元素背景不溢出)。
+- **行 (Row):**
+  - `min-h-14` (56px) 保证手指易触。
+  - `border-b` (内部行之间的分隔线)，**最后一行无边框** (`not-last:border-b`)。
+  - `px-4` (左右内边距)。
+- **文本 (Typography):**
+  - Label: `text-sm font-medium`.
+  - Description: `text-xs text-muted-foreground`.
+  - Value: `text-sm text-muted-foreground` (通常右对齐)。
 
 ---
 
@@ -45,7 +45,7 @@ import { Switch } from '~/components/ui/switch'
   {/* Header Title */}
   <div className="space-y-2">
     <h4 className="px-1 text-sm font-medium text-muted-foreground">分组标题 (Header)</h4>
-    
+
     <SettingsGroup>
       {/* Row 1: Simple Toggle */}
       <SettingsRow>
@@ -91,7 +91,7 @@ import { ChevronRight } from 'lucide-react'
 
 // ...
 
-<SettingsRow 
+<SettingsRow
   className="cursor-pointer hover:bg-muted/50 transition-colors active:scale-[0.98]"
   onClick={() => navigate('/sub-page')}
 >
@@ -109,7 +109,7 @@ import { ChevronRight } from 'lucide-react'
 
 ```tsx
 <SettingsGroup>
-  <SettingsRow 
+  <SettingsRow
     className="justify-center cursor-pointer hover:bg-destructive/10 active:bg-destructive/20"
     onClick={handleDelete}
   >
@@ -122,15 +122,15 @@ import { ChevronRight } from 'lucide-react'
 
 ## 3. 响应式适配 (Responsive Adaptation)
 
-*   **Mobile (PWA):** 
-    *   分组的左右外边距应较小（如 `mx-4`）或者全宽（`rounded-none border-x-0`）。
-    *   标题文字 (`h4`) 可适当增大。
-*   **Desktop:**
-    *   保持定宽或限制最大宽度 (`max-w-2xl`)，避免在大屏幕上行过长导致阅读困难。
+- **Mobile (PWA):**
+  - 分组的左右外边距应较小（如 `mx-4`）或者全宽（`rounded-none border-x-0`）。
+  - 标题文字 (`h4`) 可适当增大。
+- **Desktop:**
+  - 保持定宽或限制最大宽度 (`max-w-2xl`)，避免在大屏幕上行过长导致阅读困难。
 
 ## 4. 常见错误 (Common Pitfalls)
 
-*   ❌ **Don't:** 在 `SettingsRow` 内部再嵌套 Card 组件。
-*   ❌ **Don't:** 使用默认带边框的 `Input` 组件，这会破坏列表的整体感（除非是在模态框表单中）。
-*   ❌ **Don't:** 忘记给可点击的行添加 Hover 和 Active 态反馈。
-*   ✅ **Do:** 始终保持分组标题 (Header) 与 分组容器 (Group) 的左对齐（通常都有 `px-1` 或 `px-4` 的缩进）。
+- ❌ **Don't:** 在 `SettingsRow` 内部再嵌套 Card 组件。
+- ❌ **Don't:** 使用默认带边框的 `Input` 组件，这会破坏列表的整体感（除非是在模态框表单中）。
+- ❌ **Don't:** 忘记给可点击的行添加 Hover 和 Active 态反馈。
+- ✅ **Do:** 始终保持分组标题 (Header) 与 分组容器 (Group) 的左对齐（通常都有 `px-1` 或 `px-4` 的缩进）。

@@ -1,14 +1,9 @@
 import type { ModelMessage } from 'ai'
-import type { Route } from './+types/get'
 import type { EnrichedTweet } from '~/lib/react-tweet'
-import type { TweetData } from '~/types'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
-
 import { generateText } from 'ai'
+import { getEnrichedTweet } from '~/lib/react-tweet'
 import { restoreEntities, serializeForAI } from '~/lib/react-tweet/api-v2/entitytParser'
-import { getTweets } from '~/lib/service/getTweet'
-import { getDBTweet } from '~/lib/service/getTweet.server'
-import { extractTweetId } from '~/lib/utils'
 
 const gemini = createGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_API_KEY,
@@ -91,23 +86,10 @@ async function autoTranslateTweet(tweet: EnrichedTweet) {
 
   const translatedText = restoreEntities(translatedTextString, entityMap)
 
-  return translatedText
+  console.log({ entityMap, maskedText, translatedText })
 }
 
-export async function loader({
-  params,
-}: Route.LoaderArgs): Promise<TweetData & {
-  tweetId?: string
-}> {
-  const { id } = params
-  const tweetId = extractTweetId(id)
-  if (!tweetId) {
-    return []
-  }
-  const tweets = await getTweets(tweetId, getDBTweet)
-  // for (const tweet of tweets) {
-  //   tweet.text = await autoTranslateTweet(tweet)
-  // }
-
-  return tweets
+const tweet = await getEnrichedTweet('2005629485559992366')
+if (tweet) {
+  await autoTranslateTweet(tweet)
 }

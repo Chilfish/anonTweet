@@ -11,6 +11,7 @@ import type {
   TweetUser,
   TweetVideo,
 } from './types'
+import { getEntities } from './entitytParser'
 
 /**
  * Enriches a tweet with additional data used to more easily use the tweet in a UI.
@@ -72,7 +73,7 @@ export function transformUserResponse(sourceData: RawTweet): TweetUser {
   return transformedUser
 }
 
-function getEntities(tweet: RawTweet, text: string): Entity[] {
+function _getEntities(tweet: RawTweet, text: string): Entity[] {
   const result: EntityWithType[] = []
 
   // 获取实体数据源
