@@ -1,6 +1,7 @@
 import type { EnrichedTweet } from '~/lib/react-tweet'
 import { useMemo, useState } from 'react'
-import { cn, proxyMedia } from '~/lib/utils'
+import { useProxyMedia } from '~/lib/stores/appConfig'
+import { cn } from '~/lib/utils'
 
 /**
  * Truncates a string to a maximum length, appending '...'.
@@ -37,6 +38,7 @@ interface CardImageProps {
 
 function CardImage({ imageUrl, altText, isLarge = false }: CardImageProps) {
   const [isError, setIsError] = useState(false)
+  const proxyMedia = useProxyMedia()
 
   if (isError) {
     return null
