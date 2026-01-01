@@ -1,13 +1,9 @@
-export type Indices = [number, number]
-
 export interface HashtagEntity {
-  indices: Indices
   text: string
 }
 
 export interface UserMentionEntity {
   id_str: string
-  indices: Indices
   name: string
   screen_name: string
 }
@@ -15,35 +11,24 @@ export interface UserMentionEntity {
 export interface MediaEntity {
   display_url: string
   expanded_url: string
-  indices: Indices
   url: string
 }
 
 export interface UrlEntity {
   display_url: string
   expanded_url: string
-  indices: Indices
   url: string
 }
 
 export interface SymbolEntity {
-  indices: Indices
   text: string
 }
 
-export interface TweetEntities {
-  hashtags: HashtagEntity[]
-  urls: UrlEntity[]
-  user_mentions: UserMentionEntity[]
-  symbols: SymbolEntity[]
-  media?: MediaEntity[]
-}
-
 interface TextEntity {
-  indices: Indices
   type: 'text'
 }
 
+// 内部处理用的带类型联合
 export type EntityWithType
   = | TextEntity
     | (HashtagEntity & { type: 'hashtag' })
@@ -58,17 +43,7 @@ export interface EntityBase {
   index: number
 }
 
-/**
- * 存在DB中的翻译结果
- */
-export type TranslationEntity = EntityBase & (
-  | TextEntity
-  | (HashtagEntity & { type: 'hashtag', href: string })
-)
-
-/**
- * 推文实体类
- */
+// 最终输出的实体类型
 export type Entity = EntityBase & (
   | TextEntity
   | (HashtagEntity & { type: 'hashtag', href: string })

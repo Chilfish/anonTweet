@@ -28,18 +28,18 @@ interface TranslationEditorProps {
   className?: string
 }
 
-// 辅助函数：判断是否跳过某些实体的翻译
+// 辅助函数：判断是否跳过某些实体的翻译编辑（通常只编辑文本，URL/Mention 保持原样）
 function shouldSkipEntity(entity: Entity) {
   return (
     entity.text === ' '
-    || entity.type === 'url'
     || entity.type === 'mention'
     || entity.type === 'media'
-    // || (entity.text?.trim() === '' && entity.text !== '')
+    // URL 有时需要保留以便上下文参考，但通常不翻译
+    || entity.type === 'url'
   )
 }
 
-// 辅助函数：获取显示文本
+// 辅助函数：获取显示文本（优先取 translation，没有则取 text）
 function getEntityDisplayValue(entity: Entity) {
   return decodeHtmlEntities(entity.translation || entity.text)
 }
@@ -70,13 +70,43 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
   }, [originalTweet.text, showTranslationButton, hasTextContent])
 
   const handleOpen = useCallback(() => {
+    // 1. 优先获取用户本地保存的“人工精修”翻译
     const existing = getTranslation(tweetId)
+    const tweetWithAuto = originalTweet as EnrichedTweet
+
     let baseEntities: Entity[] = []
 
     if (existing && existing.length > 0) {
+      // 命中本地缓存，深拷贝
       baseEntities = JSON.parse(JSON.stringify(existing))
     }
+    else if (tweetWithAuto.autoTranslationEntities && tweetWithAuto.autoTranslationEntities.length > 0) {
+      // 2. 命中服务端 AI 翻译
+      // AI 翻译的结果（autoTranslationEntities）已经是结构化好的 Entity 数组，
+      // 其中 .text 字段存放的是中文。
+      // 我们直接将其作为编辑器的基础状态。
+      baseEntities = JSON.parse(JSON.stringify(tweetWithAuto.autoTranslationEntities))
+
+      // 额外处理：如果希望字典逻辑也能覆盖 AI 没处理好的 Hashtag
+      baseEntities = baseEntities.map((e) => {
+        // 确保 index 存在，虽然 API-v2 解析器通常会带上
+        // 同时，对于 text 类型的节点，虽然 .text 已经是中文，
+        // 但为了数据模型的一致性（保存时是存到 translation 字段），
+        // 我们可以选择把 .text 复制给 .translation，或者保持现状（因为编辑器读取逻辑支持 fallback 到 text）
+        // 这里保持现状即可，因为下面的 Dictionary 逻辑只针对 hashtag
+
+        if (e.type === 'hashtag') {
+          // 尝试对 AI 结果中的标签再次应用本地字典（如果 AI 没翻译标签的话）
+          const match = dictionaryEntries.find(d => d.original === e.text.replace('#', ''))
+          if (match && !e.translation) {
+            e.translation = `#${match.translated}`
+          }
+        }
+        return e
+      })
+    }
     else {
+      // 3. 回退：使用原始实体 + 本地字典
       baseEntities = (originalTweet.entities || []).map((e, i) => {
         const entity = { ...e, index: i }
         if (entity.type === 'hashtag') {
@@ -89,14 +119,13 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
       })
     }
 
+    // 处理句首补充逻辑 (index 为 -1 的特殊实体)
     const prependIndex = baseEntities.findIndex(e => e.index === -1)
-
     if (prependIndex !== -1) {
       const prependEntity = baseEntities[prependIndex]!
       setEnablePrepend(true)
       setPrependText(prependEntity.text || prependEntity.translation || '')
-
-      baseEntities.splice(prependIndex, 1)
+      baseEntities.splice(prependIndex, 1) // 从编辑列表中移除，单独用 Textarea 管理
     }
     else {
       setEnablePrepend(false)
@@ -105,7 +134,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
 
     setEditingEntities(baseEntities)
     setIsOpen(true)
-  }, [tweetId, getTranslation, originalTweet.entities, dictionaryEntries])
+  }, [tweetId, getTranslation, originalTweet, dictionaryEntries])
 
   const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -115,6 +144,10 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
       const inputName = `entity-${entity.index}`
       const inputValue = formData.get(inputName) as string
 
+      // 注意：如果是基于 AI 翻译（text 已经是中文），用户没有修改直接保存，
+      // inputValue 会是那个中文。
+      // 我们将其存入 translation 字段。
+      // 这样以后读取时，translation 字段就有值了，符合数据模型。
       return {
         ...entity,
         translation: inputValue !== null ? inputValue : entity.translation,
@@ -123,16 +156,13 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
 
     if (enablePrepend) {
       const currentPrependText = formData.get('prepend-text') as string
-
       if (currentPrependText?.trim()) {
         const prependEntity: Entity = {
           type: 'text',
           text: currentPrependText,
-          indices: [-1, 0],
           index: -1,
           translation: currentPrependText,
         }
-
         finalTranslations.unshift(prependEntity)
       }
     }
@@ -150,11 +180,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     return null
 
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={setIsOpen}
-      dismissible={false}
-    >
+    <Dialog open={isOpen} onOpenChange={setIsOpen} dismissible={false}>
       <DialogTrigger render={(
         <Button
           variant="secondary"
@@ -177,9 +203,9 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
         </DialogHeader>
 
         <DialogPanel className="space-y-6">
-          {/* 原文预览 */}
+          {/* 原文预览：始终显示最原始的推文，供对照 */}
           <div className="space-y-2">
-            <Label className="px-1 text-xs font-medium text-muted-foreground">原文</Label>
+            <Label className="px-1 text-xs font-medium text-muted-foreground">原文对照</Label>
             <SettingsGroup className="bg-muted/30 border-dashed">
               <div className="p-4">
                 <TweetBody tweet={originalTweet} isTranslated={false} />
@@ -197,7 +223,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
                     启用句首补充
                   </Label>
                   <span className="text-xs text-muted-foreground">
-                    也许你需要调整翻译语序或补充上下文
+                    用于调整语序或补充上下文
                   </span>
                 </div>
                 <Switch
@@ -220,9 +246,14 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
             </SettingsGroup>
           </div>
 
-          {/* 翻译内容编辑器 */}
+          {/* 译文编辑 */}
           <div className="space-y-2">
-            <Label className="px-1 text-xs font-medium text-muted-foreground">译文编辑</Label>
+            <Label className="px-1 text-xs font-medium text-muted-foreground">
+              {/* 动态提示当前编辑的基础内容来源 */}
+              {(originalTweet as EnrichedTweet).autoTranslationEntities?.length && !getTranslation(tweetId)
+                ? '编辑 AI 翻译结果'
+                : '译文编辑'}
+            </Label>
             <SettingsGroup>
               {editingEntities.map((entity) => {
                 if (shouldSkipEntity(entity))
@@ -230,6 +261,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
 
                 const inputId = `entity-${entity.index}`
                 const isText = entity.type === 'text'
+                // 这里很关键：如果是 AI 结果，entity.text 已经是中文，所以 defaultValue 会直接显示中文
                 const displayValue = getEntityDisplayValue(entity)
 
                 return (

@@ -1,5 +1,5 @@
 import type { TweetEditControl } from './edit'
-import type { Indices, TweetEntities } from './entities'
+import type { Indices } from './entities'
 import type { MediaDetails } from './media'
 import type { TweetUser } from './user'
 
@@ -22,7 +22,7 @@ export interface TweetBase {
   /**
    * All the entities that are part of the tweet. Like hashtags, mentions, urls, etc.
    */
-  entities: TweetEntities
+  entities: any[]
   /**
    * The unique identifier of the tweet.
    */

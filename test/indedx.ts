@@ -80,7 +80,7 @@ async function translateText(text: string) {
 }
 
 async function autoTranslateTweet(tweet: EnrichedTweet) {
-  const { entityMap, maskedText } = serializeForAI(tweet.text)
+  const { entityMap, maskedText } = serializeForAI(tweet.entities)
 
   const translatedTextString = await translateText(maskedText)
 
@@ -89,7 +89,7 @@ async function autoTranslateTweet(tweet: EnrichedTweet) {
   console.log({ entityMap, maskedText, translatedText })
 }
 
-const tweet = await getEnrichedTweet('2005629485559992366')
+const tweet = await getEnrichedTweet('2006561028054905271')
 if (tweet) {
   await autoTranslateTweet(tweet)
 }

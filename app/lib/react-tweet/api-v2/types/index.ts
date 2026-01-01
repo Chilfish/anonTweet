@@ -102,6 +102,7 @@ type OmitTypes = 'entities' | 'quoted_tweet' | 'edit_control' | 'isEdited' | 'is
 export type EnrichedTweet = Omit<Tweet, OmitTypes> & {
   url: string
   entities: Entity[]
+  autoTranslationEntities?: Entity[]
   quoted_tweet_id?: string
   quotedTweet?: EnrichedTweet
   card?: LinkPreviewCard
