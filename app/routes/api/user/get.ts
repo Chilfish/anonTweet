@@ -1,5 +1,5 @@
 import type { Route } from './+types/get'
-import type { RawUser } from '~/lib/react-tweet'
+import type { RawUser } from '~/types'
 import { getDBUser } from '~/lib/service/getUser.server'
 
 export async function loader({

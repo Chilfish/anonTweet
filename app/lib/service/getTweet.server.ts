@@ -1,8 +1,8 @@
-import type { EnrichedTweet } from '~/lib/react-tweet/api-v2'
+import type { EnrichedTweet } from '~/types'
 import { eq } from 'drizzle-orm'
 import { getDbClient, isDbAvailable } from '~/lib/database/db.server'
 import { tweet, tweetEntities } from '~/lib/database/schema'
-import { getEnrichedTweet } from '~/lib/react-tweet/api-v2'
+import { getEnrichedTweet } from '~/lib/react-tweet/utils/index'
 
 export async function getDBTweet(tweetId: string): Promise<EnrichedTweet | null> {
   // 1. 无 DB 环境：直接短路返回

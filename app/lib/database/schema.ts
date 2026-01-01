@@ -1,4 +1,4 @@
-import type { EnrichedTweet, RawUser, TranslationEntity } from '~/lib/react-tweet'
+import type { EnrichedTweet, RawUser, TranslationEntity } from '~/types'
 import {
   index,
   json,

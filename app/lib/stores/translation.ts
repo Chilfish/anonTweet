@@ -1,5 +1,4 @@
-import type { EnrichedTweet, Entity } from '~/lib/react-tweet'
-import type { TweetData } from '~/types'
+import type { EnrichedTweet, Entity, TweetData } from '~/types'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { flatTweets } from '../utils'

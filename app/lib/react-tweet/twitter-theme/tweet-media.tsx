@@ -1,5 +1,5 @@
-import type { EnrichedQuotedTweet, EnrichedTweet, MediaDetails } from '../api-v2'
 import type { TwitterComponents } from './types'
+import type { EnrichedQuotedTweet, EnrichedTweet, MediaDetails } from '~/types'
 import clsx from 'clsx'
 import { Fragment } from 'react'
 import { getMediaUrl } from '../utils'

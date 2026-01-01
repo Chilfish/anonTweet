@@ -1,4 +1,4 @@
-import type { TranslationEntity } from '~/lib/react-tweet'
+import type { TranslationEntity } from '~/types'
 import { z } from 'zod'
 
 export const tweetSchema = z.discriminatedUnion('intent', [

@@ -1,7 +1,6 @@
 import type { Ref } from 'react'
-import type { EnrichedTweet } from '~/lib/react-tweet'
 import type { AppConfigs } from '~/lib/stores/appConfig'
-import type { TweetData } from '~/types'
+import type { EnrichedTweet, TweetData } from '~/types'
 import { useEffect, useMemo, useRef } from 'react'
 import { TranslationEditor } from '~/components/translation/TranslationEditor'
 import { useElementSize } from '~/hooks/use-element-size'

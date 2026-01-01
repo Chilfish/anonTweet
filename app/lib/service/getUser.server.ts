@@ -1,4 +1,4 @@
-import type { RawUser } from '~/lib/react-tweet'
+import type { RawUser } from '~/types'
 import { eq } from 'drizzle-orm'
 import { getDbClient, isDbAvailable } from '~/lib/database/db.server'
 import { tweetUser } from '~/lib/database/schema'

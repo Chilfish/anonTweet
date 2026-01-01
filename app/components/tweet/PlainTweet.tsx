@@ -1,7 +1,6 @@
 import type { Ref } from 'react'
-import type { EnrichedTweet } from '~/lib/react-tweet'
 import type { ThemeSettings } from '~/lib/stores/theme'
-import type { TweetData } from '~/types'
+import type { EnrichedTweet, TweetData } from '~/types'
 import { useMemo, useRef } from 'react'
 import { useElementSize } from '~/hooks/use-element-size'
 import {

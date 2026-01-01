@@ -1,4 +1,4 @@
-import type { Entity, EntityWithType, RawTweet } from './types'
+import type { Entity, EntityWithType, RawTweet } from '~/types'
 
 // 用于 AI 交互的载荷
 export interface TranslationPayload {

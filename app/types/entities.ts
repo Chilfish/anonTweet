@@ -52,3 +52,11 @@ export type Entity = EntityBase & (
   | (MediaEntity & { type: 'media', href: string })
   | (SymbolEntity & { type: 'symbol', href: string })
 )
+
+/**
+ * 存在DB中的翻译结果
+ */
+export type TranslationEntity = EntityBase & (
+  | TextEntity
+  | (HashtagEntity & { type: 'hashtag', href: string })
+)

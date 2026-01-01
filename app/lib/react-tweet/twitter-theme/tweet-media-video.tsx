@@ -1,4 +1,4 @@
-import type { EnrichedQuotedTweet, EnrichedTweet, MediaAnimatedGif, MediaVideo } from '../api-v2'
+import type { EnrichedQuotedTweet, EnrichedTweet, MediaAnimatedGif, MediaVideo } from '~/types'
 import clsx from 'clsx'
 import { useState } from 'react'
 import {

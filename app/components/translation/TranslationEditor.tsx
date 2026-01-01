@@ -1,4 +1,4 @@
-import type { EnrichedTweet, Entity } from '~/lib/react-tweet'
+import type { EnrichedTweet, Entity } from '~/types'
 import { BookA, Languages, LanguagesIcon, Save, Trash2 } from 'lucide-react'
 import React, { useCallback, useMemo, useState } from 'react'
 import { SettingsGroup, SettingsRow } from '~/components/settings/SettingsUI'

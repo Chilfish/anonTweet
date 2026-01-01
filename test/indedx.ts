@@ -1,9 +1,8 @@
 import type { ModelMessage } from 'ai'
-import type { EnrichedTweet } from '~/lib/react-tweet'
+import type { EnrichedTweet } from '~/types'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { generateText } from 'ai'
-import { getEnrichedTweet } from '~/lib/react-tweet'
-import { restoreEntities, serializeForAI } from '~/lib/react-tweet/api-v2/entitytParser'
+import { getEnrichedTweet, restoreEntities, serializeForAI } from '~/lib/react-tweet'
 
 const gemini = createGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_API_KEY,

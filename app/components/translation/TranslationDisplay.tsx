@@ -1,4 +1,4 @@
-import type { EnrichedTweet } from '~/lib/react-tweet'
+import type { EnrichedTweet } from '~/types'
 import React from 'react'
 import { TweetBody } from '~/lib/react-tweet/twitter-theme/tweet-body'
 import { useTranslationStore } from '~/lib/stores/translation'

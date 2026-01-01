@@ -1,4 +1,4 @@
-import type { EnrichedTweet } from '~/lib/react-tweet'
+import type { EnrichedTweet } from '~/types'
 import { useMemo, useState } from 'react'
 import { useProxyMedia } from '~/lib/stores/appConfig'
 import { cn } from '~/lib/utils'

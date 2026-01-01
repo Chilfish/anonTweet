@@ -1,4 +1,4 @@
-import type { EnrichedTweet } from '~/lib/react-tweet'
+import type { EnrichedTweet } from '~/types'
 import { TranslationDisplay } from '~/components/translation/TranslationDisplay'
 import { TweetBody } from '~/lib/react-tweet'
 

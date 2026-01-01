@@ -1,6 +1,5 @@
-import type { EnrichedTweet } from '~/lib/react-tweet'
-import type { TweetData } from '~/types'
-import { getEnrichedTweet } from '~/lib/react-tweet/api-v2'
+import type { EnrichedTweet, TweetData } from '~/types'
+import { getEnrichedTweet } from '~/lib/react-tweet'
 
 export async function getTweets(tweetId: string, tweetGetter: typeof getEnrichedTweet = getEnrichedTweet): Promise<TweetData> {
   let tweet = await tweetGetter(tweetId)

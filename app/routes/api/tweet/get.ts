@@ -1,15 +1,12 @@
 import type { ModelMessage } from 'ai'
 import type { Route } from './+types/get'
-import type { EnrichedTweet } from '~/lib/react-tweet'
-import type { Entity } from '~/lib/react-tweet/api-v2/entitytParser'
-import type { TweetData } from '~/types'
+import type { EnrichedTweet, Entity, TweetData } from '~/types'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { generateText } from 'ai'
 import {
-
   restoreEntities,
   serializeForAI,
-} from '~/lib/react-tweet/api-v2/entitytParser'
+} from '~/lib/react-tweet'
 import { getTweets } from '~/lib/service/getTweet'
 import { getDBTweet } from '~/lib/service/getTweet.server'
 import { extractTweetId } from '~/lib/utils'
