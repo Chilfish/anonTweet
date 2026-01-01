@@ -40,13 +40,14 @@ export function generateEntityContext(entityMap: Map<string, Entity>): string {
 }
 
 interface TranslatePayload {
+  tweet: EnrichedTweet
   maskedText: string
   entityContext: string
   translationGlossary?: string
   model: LanguageModel
 }
 
-export async function translateText({ maskedText, entityContext, translationGlossary, model }: TranslatePayload) {
+export async function translateText({ tweet, maskedText, entityContext, translationGlossary, model }: TranslatePayload) {
   const systemPrompt = `
 # Role Definition
 You are a professional translator specializing in social media content localization (Twitter/X). You possess deep knowledge of internet slang, pop culture, and technical terminology.
@@ -66,7 +67,15 @@ Return ONLY the translated text string. No markdown code blocks, no explanations
 
   const userContent = `
 # Glossary & Context
+
+<translationGlossary>
 ${translationGlossary}
+</translationGlossary>
+
+Tweet author: ${tweet.user.screen_name}
+Tweet created at: ${tweet.created_at}
+
+${tweet.quotedTweet ? `Context (Quoted tweet by @${tweet.quotedTweet.user.screen_name}, DO NOT TRANSLATE this part, use it only for context):\n${tweet.quotedTweet.text}` : ''}
 
 # Entity Reference (For Context Only - Do NOT Translate Content)
 ${entityContext}
@@ -113,6 +122,7 @@ export async function autoTranslateTweet({ tweet, model, translationGlossary, ap
   })
 
   const translatedTextString = await translateText({
+    tweet,
     maskedText,
     entityContext,
     model: gemini(model),

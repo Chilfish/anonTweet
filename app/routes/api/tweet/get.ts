@@ -3,7 +3,7 @@ import { data } from 'react-router'
 import z from 'zod'
 import { autoTranslateTweet } from '~/lib/AITranslation'
 import { getTweets } from '~/lib/service/getTweet'
-import { getDBTweet } from '~/lib/service/getTweet.server'
+import { getDBTweet, insertToTweetDB } from '~/lib/service/getTweet.server'
 import { extractTweetId } from '~/lib/utils'
 import { getTweetSchema } from '~/lib/validations/tweet'
 
@@ -59,6 +59,7 @@ export async function action({ request }: Route.ActionArgs) {
           model,
           translationGlossary,
         })
+        await insertToTweetDB([tweet])
       }
       catch (e) {
         console.error(`Failed to translate tweet ${tweet.id_str}`, e)

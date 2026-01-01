@@ -103,9 +103,19 @@ export function AITranslationSettings() {
           {enableAITranslation && (
             <>
               <SettingsRow>
-                <Label htmlFor="gemini-api-key" className="w-24 shrink-0 font-medium">
-                  API Key
-                </Label>
+                <div className="flex flex-col gap-1">
+                  <Label htmlFor="gemini-api-key" className="font-medium">
+                    API Key
+                  </Label>
+                  <a
+                    href="https://aistudio.google.com/api-keys"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs text-muted-foreground underline hover:text-primary"
+                  >
+                    获取 API Key
+                  </a>
+                </div>
                 <Input
                   id="gemini-api-key"
                   type="password"
@@ -113,7 +123,7 @@ export function AITranslationSettings() {
                   value={geminiApiKey}
                   onChange={e => setGeminiApiKey(e.target.value)}
                   placeholder="输入 Gemini API Key"
-                  className="text-right h-8"
+                  className="text-right h-8 w-1/2 min-w-40 border-none shadow-none focus-visible:ring-0 px-0 bg-transparent"
                 />
               </SettingsRow>
 
@@ -160,6 +170,11 @@ export function AITranslationSettings() {
             </>
           )}
         </SettingsGroup>
+        {enableAITranslation && (
+          <p className="px-4 text-[10px] text-muted-foreground/60 leading-tight">
+            您的 API Key 仅存储在浏览器本地，经由服务器直接用于与 Google Gemini API 通信，不会经过/发送/存储给第三方。
+          </p>
+        )}
       </div>
 
       {enableAITranslation && (
@@ -180,7 +195,7 @@ export function AITranslationSettings() {
               id="translation-glossary"
               value={translationGlossary}
               onChange={e => setTranslationGlossary(e.target.value)}
-              placeholder="例如：请将所有 'Tweet' 翻译为 '推文'，保持 emoji 原样..."
+              placeholder="例如：ひなぴよ -> Hinapiyo..."
               className="min-h-30 leading-relaxed"
             />
           </SettingsGroup>
