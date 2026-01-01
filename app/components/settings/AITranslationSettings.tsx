@@ -17,6 +17,25 @@ import { toastManager } from '~/components/ui/toast'
 import { fetcher } from '~/lib/fetcher'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 
+const models = [
+  {
+    name: 'models/gemini-3-flash-preview',
+    text: 'Gemini 3 Flash Preview',
+  },
+  {
+    name: 'models/gemini-3-pro-preview',
+    text: 'Gemini 3 Pro Preview',
+  },
+  {
+    name: 'models/gemini-2.5-flash-lite',
+    text: 'Gemini 2.5 Flash Lite',
+  },
+  {
+    name: 'models/gemini-2.5-flash',
+    text: 'Gemini 2.5 Flash',
+  },
+]
+
 export function AITranslationSettings() {
   const {
     enableAITranslation,
@@ -123,7 +142,7 @@ export function AITranslationSettings() {
                   value={geminiApiKey}
                   onChange={e => setGeminiApiKey(e.target.value)}
                   placeholder="输入 Gemini API Key"
-                  className="text-right h-8 w-1/2 min-w-40 border-none shadow-none focus-visible:ring-0 px-0 bg-transparent"
+                  className="text-right h-8 w-1/2 min-w-40"
                 />
               </SettingsRow>
 
@@ -134,12 +153,18 @@ export function AITranslationSettings() {
                 <div className="flex-1 flex justify-end">
                   <Select value={geminiModel} onValueChange={val => val && setGeminiModel(val)}>
                     <SelectTrigger className="w-fit">
-                      <SelectValue />
+                      <SelectValue>
+                        {models.find(model => model.name === geminiModel)?.text || '选择模型'}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="models/gemini-3-flash-preview">Gemini 3 Flash</SelectItem>
-                      <SelectItem value="models/gemini-3-pro-preview">Gemini 3 Pro</SelectItem>
-                      <SelectItem value="models/gemini-2.5-flash">Gemini 2.5 flash</SelectItem>
+                      {
+                        models.map(model => (
+                          <SelectItem key={model.name} value={model.name}>
+                            {model.text}
+                          </SelectItem>
+                        ))
+                      }
                     </SelectContent>
                   </Select>
                 </div>

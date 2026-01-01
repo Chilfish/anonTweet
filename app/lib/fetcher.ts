@@ -4,7 +4,7 @@ import { buildWebStorage, setupCache } from 'axios-cache-interceptor'
 const storage = typeof localStorage === 'undefined' ? {} as Storage : localStorage
 
 const axios = Axios.create({
-  timeout: 20000,
+  timeout: 60000,
 })
 
 export const fetcher = setupCache(

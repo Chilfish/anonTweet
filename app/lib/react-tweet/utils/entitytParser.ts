@@ -197,7 +197,7 @@ export function restoreEntities(
     else {
       result.push({
         type: 'text',
-        text: part,
+        text: '',
         index: newIndex++,
         translation: part,
       })
