@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from '~/components/ui/dialog'
 import { Tabs, TabsList, TabsPanel, TabsTab } from '~/components/ui/tabs'
+import { AITranslationSettings } from './AITranslationSettings'
 import { GeneralSettings } from './GeneralSettings'
 import { SeparatorTemplateManager } from './SeparatorTemplateManager'
 import { TranslationDictionaryManager } from './TranslationDictionaryManager'
@@ -22,6 +23,7 @@ export function SettingsBody() {
         <TabsList>
           <TabsTab value="separator">分隔符样式</TabsTab>
           <TabsTab value="translation">翻译对照表</TabsTab>
+          <TabsTab value="ai-translation">AI 翻译</TabsTab>
           <TabsTab value="general">通用设置</TabsTab>
         </TabsList>
         <TabsPanel value="general">
@@ -32,6 +34,9 @@ export function SettingsBody() {
         </TabsPanel>
         <TabsPanel value="translation">
           <TranslationDictionaryManager />
+        </TabsPanel>
+        <TabsPanel value="ai-translation">
+          <AITranslationSettings />
         </TabsPanel>
       </Tabs>
 
@@ -48,7 +53,7 @@ export function SettingsPanel() {
         <SettingsIcon className="size-5" />
       </DialogTrigger>
 
-      <DialogPopup className="md:max-w-[50%]">
+      <DialogPopup>
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">设置</DialogTitle>
         </DialogHeader>

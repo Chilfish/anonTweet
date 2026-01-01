@@ -134,6 +134,12 @@ export function getEntities(tweet: RawTweet, rawText: string): Entity[] {
     if (idxToRemove !== -1)
       result.splice(idxToRemove, 1)
 
+    result.forEach((entity) => {
+      if (entity.type === 'text' && entity.text.includes(mediaUrl)) {
+        entity.text = entity.text.replace(mediaUrl, '')
+      }
+    })
+
     // Media 始终追加在最后，或者根据业务需求放置
     // 这里我们不加入 Media 到 text 流中，通常由 UI 独立渲染组件
     // 但为了保持数据完整性，如果原逻辑需要返回 Media Entity，可以 push

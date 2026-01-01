@@ -2,7 +2,7 @@ import { GitCommitHorizontal, InfoIcon, XIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Outlet } from 'react-router'
 import { Button } from '~/components/ui/button'
-import { formatDate } from '~/lib/react-tweet/date-utils'
+import { formatDate } from '~/lib/react-tweet'
 import { cn } from '~/lib/utils'
 import { PageHeader } from './PageHeader'
 

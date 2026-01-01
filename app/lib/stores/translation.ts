@@ -301,11 +301,24 @@ export const useTranslationStore = create<TranslationState>()(
     }),
     {
       name: 'translation-store',
-      version: 2,
+      version: 3,
       // 持久化白名单：只持久化设置，不持久化推文数据和UI状态
       partialize: state => ({
         settings: state.settings,
       }),
+      migrate: (state: any, version) => {
+        if (version === 2) {
+          (state as TranslationState).settings.separatorTemplates.push({
+            id: 'preset-gemini',
+            name: 'Gemini 翻译风格',
+            html: `<div style="margin-top: 4px; color: #3285FD;">
+  <b style="font-weight: bold; font-size: small;">由 Gemini 3 Flash 翻译自日语</b>
+  <hr style="margin: 3px; border-top-width: 2px;">
+</div>`,
+          })
+        }
+        return state
+      },
     },
   ),
 )

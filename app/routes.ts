@@ -19,6 +19,7 @@ export default [
   route('images/*', 'routes/images.tsx'),
   ...prefix('api', [
     route('bili-post', 'routes/api/bili-post.tsx'),
+    route('ai-test', 'routes/api/ai-test.ts'),
 
     ...prefix('tweet', [
       route('get/:id', 'routes/api/tweet/get.ts'),
