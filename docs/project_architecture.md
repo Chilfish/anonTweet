@@ -7,7 +7,7 @@
 - **运行时 (Runtime)**: Bun (高性能 JavaScript 运行时)
 - **全栈框架 (Framework)**: React Router v7 (SSR + CSR Hybrid)
 - **数据持久化 (Persistence)**: PostgreSQL (Neon Serverless) + Drizzle ORM
-- **AI & 自动化 (AI & Automation)**: Google Gemini API + Vercel AI SDK (Translation), Puppeteer (Screenshot)
+- **AI & 自动化 (AI & Automation)**: Google Gemini API + Vercel AI SDK (Translation)
 - **状态管理 (State Management)**: Zustand (Client State) + SWR (Server State)
 
 核心设计原则遵循 **关注点分离 (SoC)** 与 **读写分离**：
@@ -38,21 +38,12 @@ API 层作为 BFF，主要负责将异构数据源（Database, Twitter Private A
   - **逻辑**: 处理推文数据的持久化与更新。
   - **机制**: 接收 `entities` 数据包，使用 `ON CONFLICT DO UPDATE` 策略写入 `tweet` 及 `tweet_entities` 表。支持批量插入（Batch Insert），确保翻译后的推文内容及时同步到数据库。
 
-- **`GET /api/tweet/image/:id`**
-  - **Handler**: `app/routes/api/tweet/image.ts`
-  - **逻辑**: 服务端截图生成服务。
-  - **流程**:
-    1.  启动 Headless Browser (Puppeteer)。
-    2.  访问内部渲染路由 `/plain-tweet/:id` (纯净模式，无干扰 UI)。
-    3.  通过 Query 参数控制是否渲染 AI 翻译内容。
-    4.  截取视口快照并返回 `image/png` 流。
-
 ### 2.2 AI Domain
 
 - **`POST /api/ai-test`**
   - **Handler**: `app/routes/api/ai-test.ts`
   - **逻辑**: AI 连通性测试及代理接口。
-  - **实现**: 集成 `Vercel AI SDK` (`@ai-sdk/google`)，调用 Google Gemini 模型（如 `gemini-2.0-flash-exp`）。
+  - **实现**: 集成 `Vercel AI SDK` (`@ai-sdk/google`)，调用 Google Gemini 模型（如 `gemini-3.0-flash-preview`）。
 
 ### 2.3 User Domain (`/api/user/*`)
 
@@ -70,6 +61,7 @@ API 层作为 BFF，主要负责将异构数据源（Database, Twitter Private A
   - **Handler**: `app/routes/api/bili-post.tsx`
   - **逻辑**: Bilibili 动态发布代理。
   - **流程**: 接收 FormData -> 提取凭证 -> 并发上传图片至 Bilibili BFS -> 构造动态 Payload -> 发布。
+  - **缺陷**： 未实现指定代理，目前所有发送到B站动态的ip来源都来自服务器IP
 
 ---
 
@@ -146,5 +138,4 @@ API 层作为 BFF，主要负责将异构数据源（Database, Twitter Private A
 
 - **Database**: PostgreSQL (存储 JSON Document 及关系型 User Entity)。
 - **AI Engine**: Google Gemini API (通过 Vercel AI SDK 调用)。
-- **Headless Browser**: Puppeteer (服务端运行，支持 Vercel Serverless 环境适配)。
 - **Upstream**: Twitter Private API (GraphQL endpoints via Guest/Auth)。

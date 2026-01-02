@@ -11,7 +11,6 @@
 - **AI & Automation**:
   - [Google Gemini API](https://ai.google.dev/) (Translation Engine)
   - [Vercel AI SDK](https://sdk.vercel.ai/docs) (Stream & State Management)
-  - [Puppeteer](https://pptr.dev/) (Server-side Screenshot Generation)
 - **UI System**:
   - [Tailwind CSS v4](https://tailwindcss.com/) (Styling)
   - [coss/ui](https://coss.com/ui/docs) (Component Primitives)

@@ -26,7 +26,7 @@ export interface SymbolEntity {
 
 export interface MediaAltEntity {
   text: string
-  media_url: string
+  // media_url: string
 }
 
 export interface SeparatorEntity {
