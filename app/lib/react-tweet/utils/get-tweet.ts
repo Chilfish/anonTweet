@@ -1,7 +1,7 @@
-import type { EnrichedTweet, RawTweet } from './types'
 import type { IListTweetsResponse } from '~/lib/rettiwt-api/types/raw/list/Tweets'
 import type { ITweetDetailsResponse } from '~/lib/rettiwt-api/types/raw/tweet/Details'
 import type { IUserTweetsResponse } from '~/lib/rettiwt-api/types/raw/user/Tweets'
+import type { EnrichedTweet, RawTweet } from '~/types'
 // import { writeFile } from 'node:fs/promises'
 import { FetcherService, ResourceType, Rettiwt } from '~/lib/rettiwt-api'
 import { RettiwtConfig } from '~/lib/rettiwt-api/models/RettiwtConfig'

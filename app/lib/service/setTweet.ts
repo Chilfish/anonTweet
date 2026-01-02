@@ -1,4 +1,4 @@
-import type { TranslationEntity } from '~/lib/react-tweet'
+import type { TranslationEntity } from '~/types'
 import { and, eq } from 'drizzle-orm'
 import { getDbClient } from '~/lib/database/db.server'
 import { tweetEntities } from '~/lib/database/schema'

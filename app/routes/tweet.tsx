@@ -1,15 +1,17 @@
-import type { Route } from './+types/tweet'
+import type { GetTweetSchema } from '~/lib/validations/tweet'
 import type { TweetData } from '~/types'
-import axios from 'axios'
-import { Suspense, useEffect } from 'react'
-import { Await, redirect, useLoaderData, useSearchParams } from 'react-router'
+import { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router'
+import useSWR from 'swr'
 import { SettingsPanel } from '~/components/settings/SettingsPanel'
 import { BackButton } from '~/components/translation/BackButton'
 import { DownloadMedia } from '~/components/translation/DownloadMedia'
 import { SaveAsImageButton } from '~/components/translation/saveAsImage'
 import { ToggleTransButton } from '~/components/translation/ToggleTransButton'
 import { MyTweet } from '~/components/tweet/Tweet'
+import { fetcher } from '~/lib/fetcher'
 import { TweetNotFound, TweetSkeleton } from '~/lib/react-tweet'
+import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { useTranslationStore } from '~/lib/stores/translation'
 import { extractTweetId } from '~/lib/utils'
 
@@ -23,102 +25,107 @@ export function meta() {
   ]
 }
 
-export function HydrateFallback() {
-  return (
-    <div className="w-full max-w-2xl">
-      <TweetSkeleton />
-    </div>
-  )
+async function getTweets(args: GetTweetSchema): Promise<TweetData> {
+  const { data } = await fetcher.post<TweetData>(`/api/tweet/get/${args.tweetId}`, args)
+  return data
 }
 
-export async function clientLoader({
-  params,
-}: Route.LoaderArgs): Promise<Response | {
-  tweets: TweetData
-  tweetId?: string
-}> {
-  const { id } = params
-  const tweetId = extractTweetId(id)
-  if (!tweetId) {
-    return {
-      tweets: [],
-      tweetId: id,
-    }
-  }
-  // const tweets = await getTweets(tweetId)
-  const { data: tweets } = await axios.get<TweetData>(`/api/tweet/get/${tweetId}`)
+const Header = (
+  <div className="flex items-center w-full gap-1 mb-6">
+    <BackButton />
+    <ToggleTransButton />
+    <SaveAsImageButton />
+    <SettingsPanel />
+    <DownloadMedia />
+    {/* <PubToBili /> */}
+    {/* <UpdateTranslation /> */}
+  </div>
+)
 
-  const isRetweet = tweets[0] && tweets[0].retweetedOrignalId && tweets[0].retweetedOrignalId !== tweets[0].id_str
-
-  if (isRetweet) {
-    console.log(tweets)
-    return redirect(`/tweets/${tweets[0]?.id_str}`)
-  }
-  return {
-    tweets,
-    tweetId,
-  }
-}
-
-function TweetContent() {
-  const loaderData = useLoaderData<typeof clientLoader>()
-
-  return (
-    <Suspense fallback={<HydrateFallback />}>
-      <Await
-        resolve={loaderData}
-        errorElement={<TweetNotFound />}
-        children={resolvedTweet =>
-          resolvedTweet.tweets.length && resolvedTweet.tweetId
-            ? (
-                <MyTweet
-                  tweets={resolvedTweet.tweets}
-                  mainTweetId={resolvedTweet.tweetId}
-                />
-              )
-            : (
-                <TweetNotFound tweetId={resolvedTweet.tweetId} />
-              )}
-      />
-    </Suspense>
-  )
-}
-
-export default function TweetPage({
-  params,
-  loaderData,
-}: Route.ComponentProps) {
-  const [searchParams] = useSearchParams()
-  const plain = searchParams.get('plain') === 'true'
-  const { id: tweetId } = params
-
+export default function TweetPage() {
+  const { id } = useParams()
+  const tweetId = id ? extractTweetId(id) : null
+  const navigate = useNavigate()
   const { setAllTweets } = useTranslationStore()
+  const [isStoreReady, setIsStoreReady] = useState(false)
+  const appConfig = useAppConfigStore()
+  const { enableAITranslation, geminiApiKey, geminiModel, translationGlossary } = appConfig
 
-  if (plain && tweetId) {
-    return <TweetContent />
+  if (!tweetId) {
+    return (
+      <>
+        {Header}
+        <TweetNotFound tweetId={id} />
+      </>
+    )
   }
 
   useEffect(() => {
-    if (loaderData.tweets.length > 0 && tweetId) {
-      console.log(loaderData)
+    setIsStoreReady(true)
+  }, [])
 
-      setAllTweets(loaderData.tweets, tweetId)
+  const { data: tweets, error, isLoading } = useSWR<TweetData>(
+    (tweetId && isStoreReady) ? tweetId : null,
+    () => getTweets({
+      tweetId,
+      enableAITranslation,
+      translationGlossary,
+      apiKey: geminiApiKey,
+      model: geminiModel,
+    }),
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
+  )
+
+  useEffect(() => {
+    if (tweets && tweets.length > 0 && tweetId) {
+      console.log(tweets)
+      const mainTweet = tweets[0]
+      const isRetweet = mainTweet && mainTweet.retweetedOrignalId && mainTweet.retweetedOrignalId !== mainTweet.id_str
+
+      if (isRetweet) {
+        navigate(`/tweets/${mainTweet.id_str}`, { replace: true })
+      }
+      else {
+        setAllTweets(tweets, tweetId)
+      }
     }
-  }, [loaderData.tweets])
+  }, [tweets, tweetId, navigate, setAllTweets])
+
+  // Check for retweet to show skeleton while redirecting
+  const isRetweet = tweets?.[0]?.retweetedOrignalId && tweets[0].retweetedOrignalId !== tweets[0].id_str
+
+  if (isLoading || isRetweet || !isStoreReady) {
+    return (
+      <>
+        {Header}
+        <div className="w-full max-w-2xl">
+          <TweetSkeleton />
+        </div>
+      </>
+    )
+  }
+
+  if (error || !tweets || tweets.length === 0) {
+    console.error(error)
+    return (
+      <>
+        {Header}
+        <TweetNotFound tweetId={tweetId} />
+      </>
+    )
+  }
 
   return (
     <>
-      <div className="flex items-center w-full gap-1 mb-6">
-        <BackButton />
-        <ToggleTransButton />
-        <SaveAsImageButton />
-        <SettingsPanel />
-        <DownloadMedia />
-        {/* <PubToBili /> */}
-        {/* <UpdateTranslation /> */}
-      </div>
-
-      <TweetContent />
+      {Header}
+      <MyTweet
+        tweets={tweets}
+        mainTweetId={tweetId}
+      />
     </>
   )
 }

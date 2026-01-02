@@ -1,4 +1,4 @@
-import type { TweetUser } from '~/lib/react-tweet'
+import type { TweetUser } from '~/types'
 import clsx from 'clsx'
 import {
   Verified,

@@ -13,7 +13,7 @@ function TemplatePreview({ html }: { html: string }) {
   return (
     <div className="space-y-2">
       <h4 className="px-1 text-sm font-medium text-muted-foreground">预览效果</h4>
-      <div className="overflow-hidden rounded-xl border bg-muted/20 p-6 shadow-sm">
+      <div className="overflow-hidden rounded-xl border bg-muted/20 p-3 shadow-sm">
         <div className="text-sm mb-2 opacity-60">原文内容...</div>
         <div
           className="prose dark:prose-invert max-w-none text-sm"

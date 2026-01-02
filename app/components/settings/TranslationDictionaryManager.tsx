@@ -192,14 +192,14 @@ export function TranslationDictionaryManager() {
                   value={newOriginal}
                   onChange={e => setNewOriginal(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleAdd()}
-                  className="bg-background"
+                  className="bg-background text-xs"
                 />
                 <Input
                   placeholder="译文 (e.g. 我的去!!!!!)"
                   value={newTranslated}
                   onChange={e => setNewTranslated(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleAdd()}
-                  className="bg-background"
+                  className="bg-background text-xs"
                 />
               </div>
               <Button onClick={handleAdd} disabled={!newOriginal || !newTranslated} size="sm" className="w-full">

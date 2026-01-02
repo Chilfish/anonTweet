@@ -1,14 +1,9 @@
-import type { EnrichedTweet, Entity } from '~/lib/react-tweet'
-import type { TweetData } from '~/types'
+import type { SeparatorTemplate } from '~/lib/constants'
+import type { EnrichedTweet, Entity, TweetData } from '~/types'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { flatTweets } from '../utils'
-
-interface SeparatorTemplate {
-  id: string
-  name: string
-  html: string
-}
+import { DEFAULT_TEMPLATES } from '~/lib/constants'
+import { flatTweets } from '~/lib/utils'
 
 interface TranslationSettings {
   enabled: boolean
@@ -23,7 +18,7 @@ interface TranslationState {
   tweets: TweetData
   mainTweet: EnrichedTweet | null
   /** 存储推文ID到实体数组的映射，用于缓存翻译结果 */
-  translations: Record<string, Entity[]>
+  translations: Record<string, Entity[] | null>
 
   // === Settings Domain ===
   settings: TranslationSettings
@@ -47,9 +42,10 @@ interface TranslationState {
   deleteCustomTemplate: (templateId: string) => void
 
   // === Actions: Data ===
-  setTranslation: (tweetId: string, content: Entity[]) => void
-  getTranslation: (tweetId: string) => Entity[] | undefined
+  setTranslation: (tweetId: string, content: Entity[] | null) => void
+  getTranslation: (tweetId: string) => Entity[] | null | undefined
   deleteTranslation: (tweetId: string) => void
+  resetTranslation: (tweetId: string) => void
   setAllTweets: (data: TweetData, mainTweetId: string) => void
 
   // === Actions: UI ===
@@ -62,17 +58,6 @@ interface TranslationState {
   // === Utils ===
   hasTextContent: (text?: string) => boolean
 }
-
-const DEFAULT_TEMPLATES: SeparatorTemplate[] = [
-  {
-    id: 'preset-google',
-    name: '谷歌翻译风格',
-    html: `<div style="margin-top: 4px; color: #1d9bf0;">
-    <b style="font-weight: bold; font-size: small;">由 谷歌 翻译自 日语</b>
-    <hr style="margin: 3px; border-top-width: 2px;">
-  </div>`,
-  },
-]
 
 const DEFAULT_SETTINGS: TranslationSettings = {
   enabled: true,
@@ -141,7 +126,7 @@ export const useTranslationStore = create<TranslationState>()(
       mainTweet: null,
 
       // UI Defaults
-      showTranslations: false,
+      showTranslations: true,
       showTranslationButton: false,
       editingTweetId: null,
       tweetElRef: null,
@@ -257,8 +242,8 @@ export const useTranslationStore = create<TranslationState>()(
           tweets: data,
           mainTweet: data.find(t => t.id_str === mainTweetId),
           translations: {
-            ...state.translations,
             ...extracted,
+            ...state.translations,
           },
         }))
       },
@@ -267,6 +252,13 @@ export const useTranslationStore = create<TranslationState>()(
         set((state) => {
           // 保持数据一致性：更新 Map 同时更新 Tweet 对象内的 entities
           // 这是一个副作用处理：确保 UI 渲染源（tweets数组）和缓存源（translations字典）同步
+          // 当 content 为 null (隐藏) 时，不更新 tweet.entities，仅更新 map
+          if (content === null) {
+            return {
+              translations: { ...state.translations, [tweetId]: null },
+            }
+          }
+
           const updateTweetEntities = (t: EnrichedTweet): EnrichedTweet =>
             t.id_str === tweetId ? { ...t, entities: content } : t
 
@@ -285,7 +277,9 @@ export const useTranslationStore = create<TranslationState>()(
 
       getTranslation: tweetId => get().translations[tweetId],
 
-      deleteTranslation: tweetId =>
+      deleteTranslation: tweetId => get().setTranslation(tweetId, null),
+
+      resetTranslation: tweetId =>
         set((state) => {
           const newTranslations = { ...state.translations }
           delete newTranslations[tweetId]
@@ -302,11 +296,24 @@ export const useTranslationStore = create<TranslationState>()(
     }),
     {
       name: 'translation-store',
-      version: 2,
+      version: 3,
       // 持久化白名单：只持久化设置，不持久化推文数据和UI状态
       partialize: state => ({
         settings: state.settings,
       }),
+      migrate: (state: any, version) => {
+        if (version === 2) {
+          (state as TranslationState).settings.separatorTemplates.push({
+            id: 'preset-gemini',
+            name: 'Gemini 翻译风格',
+            html: `<div style="margin-top: 4px; color: #3285FD;">
+  <b style="font-weight: bold; font-size: small;">由 Gemini 3 Flash 翻译自日语</b>
+  <hr style="margin: 3px; border-top-width: 2px;">
+</div>`,
+          })
+        }
+        return state
+      },
     },
   ),
 )

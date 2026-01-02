@@ -1,4 +1,4 @@
-import type { TranslationEntity } from '~/lib/react-tweet'
+import type { TranslationEntity } from '~/types'
 import { z } from 'zod'
 
 export const tweetSchema = z.discriminatedUnion('intent', [
@@ -18,3 +18,13 @@ export const tweetSchema = z.discriminatedUnion('intent', [
     }).array(),
   }),
 ])
+
+export const getTweetSchema = z.object({
+  tweetId: z.string().min(1),
+  enableAITranslation: z.boolean().default(false),
+  apiKey: z.string().optional(),
+  model: z.string().optional(),
+  translationGlossary: z.string().optional(),
+})
+
+export type GetTweetSchema = z.infer<typeof getTweetSchema>

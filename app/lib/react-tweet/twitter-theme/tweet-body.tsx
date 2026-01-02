@@ -1,4 +1,4 @@
-import type { EnrichedTweet } from '~/lib/react-tweet'
+import type { EnrichedTweet } from '~/types'
 import { cn } from '~/lib/utils'
 import s from './tweet-body.module.css'
 import { TweetLink } from './tweet-link'

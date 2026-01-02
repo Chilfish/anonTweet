@@ -1,7 +1,12 @@
-import type { TweetEditControl } from './edit'
-import type { Indices, TweetEntities } from './entities'
 import type { MediaDetails } from './media'
 import type { TweetUser } from './user'
+
+export interface TweetEditControl {
+  edit_tweet_ids: string[]
+  editable_until_msecs: string
+  is_edit_eligible: boolean
+  edits_remaining: string
+}
 
 /**
  * Base tweet information shared by a tweet, a parent tweet and a quoted tweet.
@@ -18,11 +23,11 @@ export interface TweetBase {
   /**
    * Text range of the tweet text.
    */
-  display_text_range: Indices
+  display_text_range: number[]
   /**
    * All the entities that are part of the tweet. Like hashtags, mentions, urls, etc.
    */
-  entities: TweetEntities
+  entities: any[]
   /**
    * The unique identifier of the tweet.
    */

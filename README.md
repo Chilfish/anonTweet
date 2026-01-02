@@ -1,6 +1,6 @@
 # Anon Tweet
 
-**Anon Tweet** 是一个基于 **React Router v7** 的全栈应用程序，旨在提供推文的匿名查看、在线翻译编辑、持久化缓存以及卡片式图片导出功能。
+**Anon Tweet** 是一个基于 **React Router v7** 构建的现代化全栈应用程序，旨在提供极致的推文匿名浏览体验。本项目集成了 **Google Gemini AI** 实现的翻译功能，支持推文的卡片导出。
 
 ## 🛠 Tech Stack
 
@@ -8,14 +8,18 @@
 
 - **Core Framework**: [React Router v7](https://reactrouter.com/) (Fullstack, SSR/CSR)
 - **Language & Runtime**: TypeScript, [Bun](https://bun.sh/)
+- **AI & Automation**:
+  - [Google Gemini API](https://ai.google.dev/) (Translation Engine)
+  - [Vercel AI SDK](https://sdk.vercel.ai/docs) (Stream & State Management)
+  - [Puppeteer](https://pptr.dev/) (Server-side Screenshot Generation)
 - **UI System**:
   - [Tailwind CSS v4](https://tailwindcss.com/) (Styling)
   - [coss/ui](https://coss.com/ui/docs) (Component Primitives)
   - [Lucide React](https://lucide.dev/) (Icons)
 - **Data & State**:
   - [Drizzle ORM](https://orm.drizzle.team/) + PostgreSQL (Optional, for caching)
+  - [SWR](https://swr.vercel.app/) (Data Fetching)
   - Zustand (Client-side global state)
-  - React Router Loaders/Actions (Server-side data flow)
 
 ## 🚀 Getting Started
 
@@ -27,7 +31,7 @@
 
 ```bash
 # Clone repository
-git clone <repository-url>
+git clone https://github.com/Chilfish/anonTweet.git
 cd anonTweet
 
 # Install dependencies
@@ -36,34 +40,52 @@ bun install
 
 ### 2. Environment Setup
 
-在项目根目录创建 `.env` 文件，并参照 `example.env` 配置以下关键变量：
+在项目根目录创建 `.env` 文件，并参照以下配置设置关键变量。
+
+> **注意**: AI 翻译功能依赖于 Google Gemini API，截图功能依赖于正确的 HOSTNAME 配置。
 
 ```env
-# Database (Optional)
-# ⚠️ 数据库不再是必须的。如果不配置 DB_URL，系统将直接调用 API 而不使用缓存。
-# DB_URL="postgres://..."
-ENABLE_DB_CACHE="false" # 默认为 false，如果有数据库请设为 true
+ENVIRONMENT="development" # development | production
+HOSTNAME="http://localhost:9080" # ⚠️ 截图服务回调地址，生产环境请填写实际域名
 
-# Deployment Environment
-# ⚠️ 部署到 Vercel 时必须设置为 true，本地开发设为 false 或留空
-VERCEL="false"
-
-# Twitter Integration (Critical)
-# ⚠️ 必需。这是用于服务器端抓取推文的 Guest/Auth Token。
-# 如果不配置，极易触发 Twitter 的 429 限制。
+# ⚠️ 必需。用于服务端逆向获取推文数据流。
+# 若不配置，将受到严格的 Rate Limit 限制。
 TWEET_KEY="your_twitter_auth_token"
 
-# S3 Storage (For image assets)，暂时可不设置
-S3_ENDPOINT="https://..."
-S3_ACCESS_KEY_ID="..."
-S3_SECRET_ACCESS_KEY="..."
-S3_BUCKET_NAME="..."
-S3_PUBLIC_URL="..."
+# 启用 AI 翻译功能
+ENABLE_AI_TRANSLATION="true"
+# Google Gemini API Key
+GEMINI_API_KEY="AIzaSy..."
+# 模型选择 (支持 gemini-2.0-flash-exp, gemini-1.5-pro 等)
+GEMINI_MODEL="models/gemini-2.0-flash-exp"
+
+# 如果不配置 DB_URL，系统将直接调用 API 而不使用持久化缓存。
+# DB_URL="postgres://..."
+ENABLE_DB_CACHE="false"
+
+# 部署到 Vercel 时必须设置为 true，本地开发设为 false 或留空
+VERCEL="false"
 ```
+
+#### 🔑 关于 TWEET_KEY 的获取
+
+本项目使用 Rettiwt-API 进行数据抓取。为获取完整访问权限并降低风控概率，需注入 Twitter 用户凭证。
+
+**操作步骤：**
+
+1.  安装浏览器扩展：
+    - **Chrome/Chromium**: [X Auth Helper](https://chromewebstore.google.com/detail/x-auth-helper/igpkhkjmpdecacocghpgkghdcmcmpfhp)
+    - **Firefox**: [Rettiwt Auth Helper](https://addons.mozilla.org/en-US/firefox/addon/rettiwt-auth-helper)
+2.  建议使用浏览器的**无痕/隐私模式**登录 Twitter/X 账号。
+3.  登录后打开扩展，点击 `Get Key` / `Get API Key` 并复制生成的字符串。
+4.  将该字符串填入 `.env` 的 `TWEET_KEY` 字段。
+
+> **⚠️ Security Note**: 该 Key 本质上是账号 Cookies 的 Base64 编码，拥有完全账户权限，安全等级等同于你的账号+密码。请勿泄露。
+> **⚠️ Session Keep-alive**: 获取 Key 后，**请勿手动点击登出 (Log out)**，否则服务端 Session 将失效。直接关闭浏览器窗口即可。
 
 ### 3. Database Migration (Optional)
 
-如果你启用了数据库（配置了 `DB_URL` 且 `ENABLE_DB_CACHE=true`），则需要初始化数据库 Schema。如果不使用数据库，请跳过此步骤。
+如果你启用了数据库（配置了 `DB_URL` 且 `ENABLE_DB_CACHE=true`），则需要初始化数据库 Schema。
 
 ```bash
 # 将 Schema 推送到数据库 (Prototyping)
@@ -86,29 +108,17 @@ bun run dev
 
 ### Vercel 部署
 
-本项目针对 Vercel 进行了适配。在 Vercel 仪表盘配置项目时，请务必添加以下环境变量以启用正确的构建预设：
+本项目针对 Vercel Serverless 环境进行了深度适配。
 
-- **`VERCEL`**: `true`
-
-如果没有设置此变量，React Router 适配器可能无法正确加载，导致 Serverless Function 运行失败。
-
-## 📂 Project Structure
-
-核心路由逻辑位于 `app/routes.ts`，采用了 React Router v7 的配置式路由定义。
-
-| 路径模式             | 文件位置                      | 说明                                                               |
-| :------------------- | :---------------------------- | :----------------------------------------------------------------- |
-| `/tweets/:id`        | `app/routes/tweet.tsx`        | **核心业务页**。推文详情、翻译编辑器、图片导出功能。               |
-| `/api/tweet/get/:id` | `app/routes/api/tweet/get.ts` | **Loader API**。获取推文数据（优先读库，无缓存则调用第三方 API）。 |
-| `/api/tweet/set`     | `app/routes/api/tweet/set.ts` | **Action API**。保存/更新推文的翻译内容到数据库。                  |
-
-> **Note**: `app/components` 目录下包含大量业务组件，如 `tweet/` (推文渲染) 和 `translation/` (翻译编辑器)。
+1.  在 Vercel 项目设置中，务必添加环境变量 `VERCEL="true"` 以激活 React Router 的适配器逻辑。
+2.  配置 `GEMINI_API_KEY` 以启用线上的翻译服务。
+3.  确保 `HOSTNAME` 设置为生产环境域名，否则推文截图功能将无法正确回调渲染。
 
 ## 🚧 Development Status
 
-### External Libraries
+### External Libraries Refactoring
 
-项目包含部分 fork 并修改的第三方库，位于 `app/lib/` 目录下：
+项目包含部分深度定制的第三方库核心，位于 `app/lib/` 目录下：
 
-- **`react-tweet`**: 基于 Vercel 的同名库修改，以适配自定义的 UI 渲染需求和样式（Tailwind v4）。
-- **`rettiwt-api`**: 基于 Rettiwt-API 修改，用于在服务端逆向获取 Twitter 数据流。
+- **`react-tweet`**: 经深度修改以适配 Tailwind v4，并增加了对 AI 翻译实体（Auto Translation Entities）的渲染支持。
+- **`rettiwt-api`**: 针对最新的 Twitter GraphQL 接口进行了逆向工程适配，增强了数据获取的稳定性。

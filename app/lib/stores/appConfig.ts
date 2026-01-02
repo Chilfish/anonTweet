@@ -8,6 +8,10 @@ export interface AppConfigs {
   showActions: boolean
   enableMediaProxy: boolean
   mediaProxyUrl: string
+  enableAITranslation: boolean
+  geminiApiKey: string
+  geminiModel: string
+  translationGlossary: string
 }
 
 interface AppConfigState extends AppConfigs {
@@ -16,6 +20,10 @@ interface AppConfigState extends AppConfigs {
 
   setEnableMediaProxy: (enableMediaProxy: boolean) => void
   setMediaProxyUrl: (mediaProxyUrl: string) => void
+  setEnableAITranslation: (enable: boolean) => void
+  setGeminiApiKey: (apiKey: string) => void
+  setGeminiModel: (model: string) => void
+  setTranslationGlossary: (glossary: string) => void
 }
 
 export const useAppConfigStore = create<AppConfigState>()(
@@ -25,15 +33,23 @@ export const useAppConfigStore = create<AppConfigState>()(
       showActions: false,
       enableMediaProxy: false,
       mediaProxyUrl: 'https://proxy.chilfish.top/',
+      enableAITranslation: false,
+      geminiApiKey: '',
+      geminiModel: 'models/gemini-3-flash-preview',
+      translationGlossary: '',
 
       setEnableMediaProxy: enableMediaProxy => set({ enableMediaProxy }),
       setMediaProxyUrl: mediaProxyUrl => set({ mediaProxyUrl }),
+      setEnableAITranslation: enableAITranslation => set({ enableAITranslation }),
       setTheme: theme => set({ theme }),
       setShowActions: showActions => set({ showActions }),
+      setGeminiApiKey: geminiApiKey => set({ geminiApiKey }),
+      setGeminiModel: geminiModel => set({ geminiModel }),
+      setTranslationGlossary: translationGlossary => set({ translationGlossary }),
     }),
     {
       name: 'app-config-store',
-      version: 1,
+      version: 2,
     },
   ),
 )

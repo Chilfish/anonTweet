@@ -16,6 +16,4 @@ if (!isInVercel) {
   config.presets = []
 }
 
-console.log('isInVercel:', isInVercel)
-
 export default config

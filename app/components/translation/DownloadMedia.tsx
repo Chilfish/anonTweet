@@ -1,12 +1,12 @@
 import type { DownloadItem } from '~/lib/downloader'
-import type { EnrichedTweet, MediaDetails } from '~/lib/react-tweet'
+import type { EnrichedTweet, MediaDetails } from '~/types'
 import { DownloadIcon, Loader2 } from 'lucide-react' // 使用 Loader2 替代 LoaderIcon (更现代的命名习惯)
 import { useCallback, useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
 import { downloadFiles } from '~/lib/downloader'
 
-import { formatDate } from '~/lib/react-tweet/date-utils'
+import { formatDate } from '~/lib/react-tweet'
 import { useTranslationStore } from '~/lib/stores/translation'
 import { toast } from '~/lib/utils'
 

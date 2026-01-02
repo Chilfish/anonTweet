@@ -1,28 +1,60 @@
-import type { Ref } from 'react'
-import type { AppConfigs } from '~/lib/stores/appConfig'
 import type { EnrichedTweet, TweetData } from '~/types'
-import { useEffect, useMemo, useRef } from 'react'
-import { TranslationEditor } from '~/components/translation/TranslationEditor'
+import { useMemo, useRef } from 'react'
 import { useElementSize } from '~/hooks/use-element-size'
+import { models } from '~/lib/constants'
 import {
+  TweetBody,
   TweetContainer,
   TweetHeader,
   TweetMedia,
 } from '~/lib/react-tweet'
-import { useTranslationStore } from '~/lib/stores/translation'
 import { cn } from '~/lib/utils'
 import { TweetLinkCard } from './TweetCard'
-import { TweetTextBody } from './TweetTextBody'
+
+function TweetTextBody({ tweet, enableTranslation }: { tweet: EnrichedTweet, enableTranslation: boolean }) {
+  const translation = enableTranslation ? tweet.autoTranslationEntities : null
+
+  if (!translation) {
+    return (<TweetBody tweet={tweet} isTranslated={false} />)
+  }
+
+  const geminiModel = typeof __GEMINI_MODEL__ === 'undefined' ? 'models/gemini-3-flash-preview' : __GEMINI_MODEL__
+  const separatorTemplate = `<div style="margin-top: 4px; color: #3285FD;">
+<b style="font-weight: bold; font-size: small;">由 ${models.find(m => m.name === geminiModel)?.text || 'Gemini'} 翻译</b>
+<hr style="margin: 3px; border-top-width: 2px;">
+</div>`
+
+  return (
+    <>
+      <TweetBody tweet={tweet} isTranslated={false} />
+
+      <div
+        className="translation-separator"
+        dangerouslySetInnerHTML={{ __html: separatorTemplate }}
+      >
+      </div>
+      <TweetBody
+        lang="zh"
+        className="font-bold! mt-2!"
+        tweet={{
+          ...tweet,
+          entities: translation || tweet.entities,
+        }}
+        isTranslated
+      />
+    </>
+  )
+}
 
 type TweetVariant = 'thread' | 'quoted' | 'main' | 'main-in-thread'
 
 interface UnifiedTweetProps {
   tweet: EnrichedTweet
   variant: TweetVariant
+  enableTranslation: boolean
 }
 
-function UnifiedTweet({ tweet, variant }: UnifiedTweetProps) {
-  const { screenshoting } = useTranslationStore()
+function UnifiedTweet({ tweet, variant, enableTranslation }: UnifiedTweetProps) {
   const isQuoted = variant === 'quoted'
   const isThread = variant === 'thread'
   const isMainInThread = variant === 'main-in-thread'
@@ -47,19 +79,22 @@ function UnifiedTweet({ tweet, variant }: UnifiedTweetProps) {
           createdAtInline
           inQuote={isQuoted}
         />
-        <TranslationEditor originalTweet={tweet} />
       </div>
       <div className={bodyContainerClasses}>
-        <TweetTextBody tweet={tweet} />
+        <TweetTextBody
+          tweet={tweet}
+          enableTranslation={enableTranslation}
+        />
 
         {tweet.mediaDetails?.length ? (
-          <TweetMedia tweet={tweet} showCoverOnly={screenshoting} />
+          <TweetMedia tweet={tweet} showCoverOnly={true} />
         ) : null}
 
         {tweet.card && <TweetLinkCard tweet={tweet} />}
 
         {quotedTweet && (
           <UnifiedTweet
+            enableTranslation={enableTranslation}
             tweet={quotedTweet}
             variant="quoted"
           />
@@ -72,21 +107,10 @@ function UnifiedTweet({ tweet, variant }: UnifiedTweetProps) {
 interface MyTweetProps {
   tweets: TweetData
   mainTweetId: string
-  containerClassName?: string
-  settings?: AppConfigs
-  ref?: Ref<HTMLDivElement>
+  enableTranslation: boolean
 }
 
-export function MyTweet({ tweets, mainTweetId, containerClassName }: MyTweetProps) {
-  const containerRef = useRef<HTMLDivElement | null>(null)
-  const { setTweetElRef } = useTranslationStore()
-
-  useEffect(() => {
-    if (containerRef.current) {
-      setTweetElRef(containerRef.current)
-    }
-  }, [setTweetElRef])
-
+export function MyPlainTweet({ tweets, mainTweetId, enableTranslation }: MyTweetProps) {
   const { mainTweet, parentTweets } = useMemo(() => {
     const main = tweets.find(tweet => tweet.id_str === mainTweetId)
     if (!main) {
@@ -107,9 +131,8 @@ export function MyTweet({ tweets, mainTweetId, containerClassName }: MyTweetProp
 
   return (
     <TweetContainer
-      ref={containerRef}
       id={mainTweet.id_str}
-      className={cn('tweet-loaded', containerClassName)}
+      className="tweet-loaded"
     >
       {hasThread && (
         <>
@@ -117,6 +140,7 @@ export function MyTweet({ tweets, mainTweetId, containerClassName }: MyTweetProp
             <UnifiedTweet
               key={parentTweet.id_str}
               tweet={parentTweet}
+              enableTranslation={enableTranslation}
               variant="thread"
             />
           ))}
@@ -133,6 +157,7 @@ export function MyTweet({ tweets, mainTweetId, containerClassName }: MyTweetProp
       <article ref={mainTweetRef}>
         <UnifiedTweet
           tweet={mainTweet}
+          enableTranslation={enableTranslation}
           variant={hasThread ? 'main-in-thread' : 'main'}
         />
       </article>

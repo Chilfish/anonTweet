@@ -8,6 +8,7 @@ import {
 } from '@react-router/dev/routes'
 
 export default [
+  route('plain-tweet/:id', 'routes/plain.tsx'),
   layout('routes/layout.tsx', [
     index('routes/home.tsx'),
     route('/list/:id', 'routes/list.tsx'),
@@ -15,9 +16,9 @@ export default [
     route('/bili', 'routes/bili.tsx'),
   ]),
 
-  route('images/*', 'routes/images.tsx'),
   ...prefix('api', [
     route('bili-post', 'routes/api/bili-post.tsx'),
+    route('ai-test', 'routes/api/ai-test.ts'),
 
     ...prefix('tweet', [
       route('get/:id', 'routes/api/tweet/get.ts'),

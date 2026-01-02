@@ -1,8 +1,42 @@
-import type { EnrichedTweet } from '~/lib/react-tweet/api-v2'
+import type { EnrichedTweet } from '~/types'
 import { eq } from 'drizzle-orm'
 import { getDbClient, isDbAvailable } from '~/lib/database/db.server'
 import { tweet, tweetEntities } from '~/lib/database/schema'
-import { getEnrichedTweet } from '~/lib/react-tweet/api-v2'
+import { getEnrichedTweet } from '~/lib/react-tweet/utils/index'
+
+export async function insertToTweetDB(tweets: EnrichedTweet[]) {
+  if (!isDbAvailable()) {
+    return
+  }
+
+  const db = getDbClient()
+
+  try {
+    for (const enrichedTweet of tweets) {
+      await db.insert(tweet)
+        .values({
+          tweetId: enrichedTweet.id_str,
+          tweetOwnerId: enrichedTweet.user.screen_name,
+          jsonContent: {
+            ...enrichedTweet,
+            retweetedOrignalId: undefined,
+          },
+        })
+        .onConflictDoUpdate({
+          target: tweet.tweetId,
+          set: {
+            jsonContent: {
+              ...enrichedTweet,
+              retweetedOrignalId: undefined,
+            },
+          },
+        })
+    }
+  }
+  catch (error) {
+    console.error('Failed to insert tweets to DB:', error)
+  }
+}
 
 export async function getDBTweet(tweetId: string): Promise<EnrichedTweet | null> {
   // 1. 无 DB 环境：直接短路返回
@@ -24,24 +58,7 @@ export async function getDBTweet(tweetId: string): Promise<EnrichedTweet | null>
     }
 
     if (!cachedTweet?.id) {
-      await db.insert(tweet)
-        .values({
-          tweetId: enrichedTweet.id_str,
-          tweetOwnerId: enrichedTweet.user.screen_name,
-          jsonContent: {
-            ...enrichedTweet,
-            retweetedOrignalId: undefined,
-          },
-        })
-        .onConflictDoUpdate({
-          target: tweet.tweetId,
-          set: {
-            jsonContent: {
-              ...enrichedTweet,
-              retweetedOrignalId: undefined,
-            },
-          },
-        })
+      await insertToTweetDB([enrichedTweet])
     }
 
     const translationEntities = await db.query.tweetEntities.findMany({

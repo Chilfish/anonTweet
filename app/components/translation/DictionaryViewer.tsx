@@ -1,5 +1,6 @@
 import { Copy, SearchIcon } from 'lucide-react'
 import { useState } from 'react'
+import { SettingsGroup, SettingsRow } from '~/components/settings/SettingsUI'
 import { Button } from '~/components/ui/button'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '~/components/ui/input-group'
 import { ScrollArea } from '~/components/ui/scroll-area'
@@ -25,46 +26,55 @@ export function DictionaryViewer() {
   }
 
   return (
-    <div className="flex flex-col gap-3 max-h-[300px]">
-      <InputGroup>
-        <InputGroupAddon align="inline-start">
-          <SearchIcon className="size-4" />
-        </InputGroupAddon>
-        <InputGroupInput
-          placeholder="搜索词汇..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="pl-8 h-9"
-        />
-      </InputGroup>
-      <ScrollArea className="flex-1 rounded-md border bg-muted/30">
-        <div className="p-3 space-y-3">
-          {filtered.length === 0
-            ? (
-                <div className="text-sm text-muted-foreground text-center py-4">
-                  {search ? '无匹配结果' : '暂无词条，可在设置中添加'}
+    <div className="flex flex-col gap-3 max-h-80">
+      <div className="sticky top-0 z-10">
+        <InputGroup>
+          <InputGroupAddon align="inline-start">
+            <SearchIcon className="size-4" />
+          </InputGroupAddon>
+          <InputGroupInput
+            placeholder="搜索词汇..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="pl-8 h-9"
+          />
+        </InputGroup>
+      </div>
+
+      <ScrollArea className="flex-1">
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full py-8 text-muted-foreground space-y-1">
+            <span className="text-sm">{search ? '无匹配结果' : '暂无词条'}</span>
+            {!search && <span className="text-xs opacity-70">可在设置中添加</span>}
+          </div>
+        ) : (
+          <SettingsGroup className="border-border/50 shadow-none">
+            {filtered.map(entry => (
+              <SettingsRow
+                key={entry.id}
+                className="min-h-12 py-2 px-3 gap-2"
+              >
+                <div className="flex flex-col min-w-0 flex-1">
+                  <span className="text-sm font-medium truncate" title={entry.translated}>
+                    {entry.translated}
+                  </span>
+                  <span className="text-xs text-muted-foreground truncate" title={entry.original}>
+                    {entry.original}
+                  </span>
                 </div>
-              )
-            : (
-                filtered.map(entry => (
-                  <div key={entry.id} className="flex justify-between items-start gap-2 text-sm border-b border-border/50 pb-2 last:border-0 last:pb-0">
-                    <div className="grid gap-0.5 w-full">
-                      <div className="text-muted-foreground wrap-break-word whitespace-normal">{entry.translated}</div>
-                      <div className="font-medium text-foreground wrap-break-word whitespace-normal text-xs">{entry.original}</div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon-xs"
-                      onClick={() => copyToClipboard(entry.translated)}
-                      title="复制译文"
-                      className="text-secondary-foreground"
-                    >
-                      <Copy />
-                    </Button>
-                  </div>
-                ))
-              )}
-        </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 shrink-0 text-muted-foreground hover:text-foreground"
+                  onClick={() => copyToClipboard(entry.translated)}
+                  title="复制译文"
+                >
+                  <Copy className="size-3.5" />
+                </Button>
+              </SettingsRow>
+            ))}
+          </SettingsGroup>
+        )}
       </ScrollArea>
     </div>
   )

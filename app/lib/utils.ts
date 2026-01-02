@@ -1,5 +1,5 @@
 import type { ClassValue } from 'clsx'
-import type { EnrichedTweet } from './react-tweet'
+import type { EnrichedTweet } from '~/types'
 import { clsx } from 'clsx'
 import { format, parseISO } from 'date-fns'
 import { twMerge } from 'tailwind-merge'
