@@ -14,27 +14,9 @@ import {
 import { Switch } from '~/components/ui/switch'
 import { Textarea } from '~/components/ui/textarea'
 import { toastManager } from '~/components/ui/toast'
+import { models } from '~/lib/constants'
 import { fetcher } from '~/lib/fetcher'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
-
-const models = [
-  {
-    name: 'models/gemini-3-flash-preview',
-    text: 'Gemini 3 Flash Preview',
-  },
-  {
-    name: 'models/gemini-3-pro-preview',
-    text: 'Gemini 3 Pro Preview',
-  },
-  {
-    name: 'models/gemini-2.5-flash-lite',
-    text: 'Gemini 2.5 Flash Lite',
-  },
-  {
-    name: 'models/gemini-2.5-flash',
-    text: 'Gemini 2.5 Flash',
-  },
-]
 
 export function AITranslationSettings() {
   const {

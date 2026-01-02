@@ -35,7 +35,7 @@ async function getLaunchOptions(): Promise<LaunchOptions> {
       args: [...chromium.args, ...commonArgs],
       defaultViewport: viewport,
       executablePath: await chromium.executablePath(),
-      headless: 'shell', // 或使用 chromium.headless 变量
+      headless: 'shell',
     }
   }
   else {
@@ -65,7 +65,7 @@ async function getBrowser(): Promise<Browser> {
   return browserInstance
 }
 
-export async function screenshotTweet(tweetId: string): Promise<Buffer> {
+export async function screenshotTweet(tweetId: string, enableTranslation: boolean): Promise<Buffer> {
   let browser: Browser | null = null
   let page: Page | null = null
 
@@ -79,7 +79,8 @@ export async function screenshotTweet(tweetId: string): Promise<Buffer> {
       deviceScaleFactor: 2, // 2x 渲染，解决文字发虚边缘模糊
     })
 
-    const targetUrl = `${env.HOSTNAME}/plain-tweet/${tweetId}`
+    const targetUrl = `${env.HOSTNAME}/plain-tweet/${tweetId}?translation=${enableTranslation}`
+    console.log(`Screenshotting tweet ${tweetId} with translation enabled: ${enableTranslation}`)
 
     // 在 goto 之后，screenshot 之前，除了等待图片，最好也等待 Web Font 加载
     await page.goto(targetUrl, {

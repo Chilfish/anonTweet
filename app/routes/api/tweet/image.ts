@@ -4,6 +4,7 @@ import { extractTweetId } from '~/lib/utils'
 
 export async function loader({
   params,
+  request,
 }: Route.LoaderArgs) {
   const { id } = params
   const tweetId = extractTweetId(id)
@@ -11,7 +12,8 @@ export async function loader({
     return []
   }
 
-  const pngBuffer = await screenshotTweet(tweetId)
+  const translation = new URL(request.url).searchParams.get('translation') === 'true'
+  const pngBuffer = await screenshotTweet(tweetId, translation)
   const pngStream = new ReadableStream({
     start(controller) {
       controller.enqueue(pngBuffer)

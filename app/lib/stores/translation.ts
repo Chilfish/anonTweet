@@ -1,13 +1,9 @@
+import type { SeparatorTemplate } from '~/lib/constants'
 import type { EnrichedTweet, Entity, TweetData } from '~/types'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { flatTweets } from '../utils'
-
-interface SeparatorTemplate {
-  id: string
-  name: string
-  html: string
-}
+import { DEFAULT_TEMPLATES } from '~/lib/constants'
+import { flatTweets } from '~/lib/utils'
 
 interface TranslationSettings {
   enabled: boolean
@@ -62,17 +58,6 @@ interface TranslationState {
   // === Utils ===
   hasTextContent: (text?: string) => boolean
 }
-
-const DEFAULT_TEMPLATES: SeparatorTemplate[] = [
-  {
-    id: 'preset-google',
-    name: '谷歌翻译风格',
-    html: `<div style="margin-top: 4px; color: #1d9bf0;">
-    <b style="font-weight: bold; font-size: small;">由 谷歌 翻译自 日语</b>
-    <hr style="margin: 3px; border-top-width: 2px;">
-  </div>`,
-  },
-]
 
 const DEFAULT_SETTINGS: TranslationSettings = {
   enabled: true,

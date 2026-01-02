@@ -3,23 +3,60 @@ import type { ThemeSettings } from '~/lib/stores/theme'
 import type { EnrichedTweet, TweetData } from '~/types'
 import { useMemo, useRef } from 'react'
 import { useElementSize } from '~/hooks/use-element-size'
+import { models } from '~/lib/constants'
+import { env } from '~/lib/env.server'
 import {
+  TweetBody,
   TweetContainer,
   TweetHeader,
   TweetMedia,
 } from '~/lib/react-tweet'
 import { cn } from '~/lib/utils'
 import { TweetLinkCard } from './TweetCard'
-import { TweetTextBody } from './TweetTextBody'
+
+function TweetTextBody({ tweet, enableTranslation }: { tweet: EnrichedTweet, enableTranslation: boolean }) {
+  const translation = enableTranslation ? tweet.autoTranslationEntities : null
+
+  if (!translation) {
+    return (<TweetBody tweet={tweet} isTranslated={false} />)
+  }
+
+  const separatorTemplate = `<div style="margin-top: 4px; color: #3285FD;">
+<b style="font-weight: bold; font-size: small;">由 ${models.find(m => m.name === env.GEMINI_MODEL)?.text || 'Gemini'} 翻译</b>
+<hr style="margin: 3px; border-top-width: 2px;">
+</div>`
+
+  return (
+    <>
+      <TweetBody tweet={tweet} isTranslated={false} />
+
+      <div
+        className="translation-separator"
+        dangerouslySetInnerHTML={{ __html: separatorTemplate }}
+      >
+      </div>
+      <TweetBody
+        lang="zh"
+        className="font-bold! mt-2!"
+        tweet={{
+          ...tweet,
+          entities: translation || tweet.entities,
+        }}
+        isTranslated
+      />
+    </>
+  )
+}
 
 type TweetVariant = 'thread' | 'quoted' | 'main' | 'main-in-thread'
 
 interface UnifiedTweetProps {
   tweet: EnrichedTweet
   variant: TweetVariant
+  enableTranslation: boolean
 }
 
-function UnifiedTweet({ tweet, variant }: UnifiedTweetProps) {
+function UnifiedTweet({ tweet, variant, enableTranslation }: UnifiedTweetProps) {
   const isQuoted = variant === 'quoted'
   const isThread = variant === 'thread'
   const isMainInThread = variant === 'main-in-thread'
@@ -46,7 +83,10 @@ function UnifiedTweet({ tweet, variant }: UnifiedTweetProps) {
         />
       </div>
       <div className={bodyContainerClasses}>
-        <TweetTextBody tweet={tweet} />
+        <TweetTextBody
+          tweet={tweet}
+          enableTranslation={enableTranslation}
+        />
 
         {tweet.mediaDetails?.length ? (
           <TweetMedia tweet={tweet} showCoverOnly={true} />
@@ -56,6 +96,7 @@ function UnifiedTweet({ tweet, variant }: UnifiedTweetProps) {
 
         {quotedTweet && (
           <UnifiedTweet
+            enableTranslation={enableTranslation}
             tweet={quotedTweet}
             variant="quoted"
           />
@@ -68,11 +109,12 @@ function UnifiedTweet({ tweet, variant }: UnifiedTweetProps) {
 interface MyTweetProps {
   tweets: TweetData
   mainTweetId: string
+  enableTranslation: boolean
   settings?: ThemeSettings
   ref?: Ref<HTMLDivElement>
 }
 
-export function MyPlainTweet({ tweets, mainTweetId }: MyTweetProps) {
+export function MyPlainTweet({ tweets, mainTweetId, enableTranslation }: MyTweetProps) {
   const { mainTweet, parentTweets } = useMemo(() => {
     const main = tweets.find(tweet => tweet.id_str === mainTweetId)
     if (!main) {
@@ -102,6 +144,7 @@ export function MyPlainTweet({ tweets, mainTweetId }: MyTweetProps) {
             <UnifiedTweet
               key={parentTweet.id_str}
               tweet={parentTweet}
+              enableTranslation={enableTranslation}
               variant="thread"
             />
           ))}
@@ -118,6 +161,7 @@ export function MyPlainTweet({ tweets, mainTweetId }: MyTweetProps) {
       <article ref={mainTweetRef}>
         <UnifiedTweet
           tweet={mainTweet}
+          enableTranslation={enableTranslation}
           variant={hasThread ? 'main-in-thread' : 'main'}
         />
       </article>

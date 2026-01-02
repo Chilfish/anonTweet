@@ -16,7 +16,6 @@ export default [
     route('/bili', 'routes/bili.tsx'),
   ]),
 
-  route('images/*', 'routes/images.tsx'),
   ...prefix('api', [
     route('bili-post', 'routes/api/bili-post.tsx'),
     route('ai-test', 'routes/api/ai-test.ts'),

@@ -9,17 +9,15 @@ const serverEnvSchema = z.object({
 
   TWEET_KEY: z.string().min(1),
 
-  S3_ENDPOINT: z.url().min(1),
-  S3_ACCESS_KEY_ID: z.string().min(1),
-  S3_SECRET_ACCESS_KEY: z.string().min(1),
-  S3_BUCKET_NAME: z.string().min(1),
-  S3_PUBLIC_URL: z.url().min(1),
-
   DB_URL: z.url().optional(),
   ENABLE_DB_CACHE: z.stringbool().default(true),
   VERCEL: z.stringbool().default(false),
 
   HOSTNAME: z.url().default('https://anon-tweet.chilfish.top'),
+
+  GEMINI_API_KEY: z.string().min(1).optional(),
+  GEMINI_MODEL: z.string().min(1).optional().default('models/gemini-3-flash-preview'),
+  ENABLE_AI_TRANSLATION: z.stringbool().default(false),
 })
 
 /**

@@ -1,15 +1,19 @@
 import type { Route } from './+types/tweet'
+import type { GetTweetSchema } from '~/lib/validations/tweet'
 import type { TweetData } from '~/types'
+import axios from 'axios'
 import { Await, redirect, useLoaderData } from 'react-router'
 import { MyPlainTweet } from '~/components/tweet/PlainTweet'
+import { env } from '~/lib/env.server'
 import { TweetNotFound } from '~/lib/react-tweet'
-import { getTweets } from '~/lib/service/getTweet'
 import { extractTweetId } from '~/lib/utils'
 
 export async function loader({
   params,
+  request,
 }: Route.LoaderArgs): Promise<Response | {
   tweets: TweetData
+  enableTranslation: boolean
   tweetId?: string
 }> {
   const { id } = params
@@ -18,20 +22,29 @@ export async function loader({
     return {
       tweets: [],
       tweetId: id,
+      enableTranslation: false,
     }
   }
-  const tweets = await getTweets(tweetId)
-  // const { data: tweets } = await axios.get<TweetData>(`/api/tweet/get/${tweetId}`)
+  const translation = new URL(request.url).searchParams.get('translation') === 'true'
+  const enableTranslation = translation && env.ENABLE_AI_TRANSLATION
+
+  const { data: tweets } = await axios.post<TweetData>(`${env.HOSTNAME}/api/tweet/get/${tweetId}`, {
+    tweetId,
+    translationGlossary: '',
+    apiKey: env.GEMINI_API_KEY || '',
+    model: env.GEMINI_MODEL || '',
+    enableAITranslation: enableTranslation,
+  } satisfies GetTweetSchema)
 
   const isRetweet = tweets[0] && tweets[0].retweetedOrignalId && tweets[0].retweetedOrignalId !== tweets[0].id_str
 
   if (isRetweet) {
-    console.log(tweets)
     return redirect(`/tweets/${tweets[0]?.id_str}`)
   }
   return {
     tweets,
     tweetId,
+    enableTranslation,
   }
 }
 
@@ -48,6 +61,7 @@ function TweetContent() {
               <MyPlainTweet
                 tweets={resolvedTweet.tweets}
                 mainTweetId={resolvedTweet.tweetId}
+                enableTranslation={resolvedTweet.enableTranslation}
               />
             )
           : (
@@ -61,7 +75,7 @@ export default function Plain() {
   return (
     <div
       id="main-container"
-      className="max-w-fit max-h-fit min-w-[500px] bg-background font-sans antialiased"
+      className="max-w-fit max-h-fit min-w-125 bg-background font-sans antialiased"
     >
       <TweetContent />
     </div>
