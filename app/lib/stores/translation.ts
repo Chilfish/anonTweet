@@ -22,7 +22,7 @@ interface TranslationState {
   tweets: TweetData
   mainTweet: EnrichedTweet | null
   /** 存储推文ID到实体数组的映射，用于缓存翻译结果 */
-  translations: Record<string, Entity[]>
+  translations: Record<string, Entity[] | null>
 
   // === Settings Domain ===
   settings: TranslationSettings
@@ -46,9 +46,10 @@ interface TranslationState {
   deleteCustomTemplate: (templateId: string) => void
 
   // === Actions: Data ===
-  setTranslation: (tweetId: string, content: Entity[]) => void
-  getTranslation: (tweetId: string) => Entity[] | undefined
+  setTranslation: (tweetId: string, content: Entity[] | null) => void
+  getTranslation: (tweetId: string) => Entity[] | null | undefined
   deleteTranslation: (tweetId: string) => void
+  resetTranslation: (tweetId: string) => void
   setAllTweets: (data: TweetData, mainTweetId: string) => void
 
   // === Actions: UI ===
@@ -140,7 +141,7 @@ export const useTranslationStore = create<TranslationState>()(
       mainTweet: null,
 
       // UI Defaults
-      showTranslations: false,
+      showTranslations: true,
       showTranslationButton: false,
       editingTweetId: null,
       tweetElRef: null,
@@ -256,8 +257,8 @@ export const useTranslationStore = create<TranslationState>()(
           tweets: data,
           mainTweet: data.find(t => t.id_str === mainTweetId),
           translations: {
-            ...state.translations,
             ...extracted,
+            ...state.translations,
           },
         }))
       },
@@ -266,6 +267,13 @@ export const useTranslationStore = create<TranslationState>()(
         set((state) => {
           // 保持数据一致性：更新 Map 同时更新 Tweet 对象内的 entities
           // 这是一个副作用处理：确保 UI 渲染源（tweets数组）和缓存源（translations字典）同步
+          // 当 content 为 null (隐藏) 时，不更新 tweet.entities，仅更新 map
+          if (content === null) {
+            return {
+              translations: { ...state.translations, [tweetId]: null },
+            }
+          }
+
           const updateTweetEntities = (t: EnrichedTweet): EnrichedTweet =>
             t.id_str === tweetId ? { ...t, entities: content } : t
 
@@ -284,7 +292,9 @@ export const useTranslationStore = create<TranslationState>()(
 
       getTranslation: tweetId => get().translations[tweetId],
 
-      deleteTranslation: tweetId =>
+      deleteTranslation: tweetId => get().setTranslation(tweetId, null),
+
+      resetTranslation: tweetId =>
         set((state) => {
           const newTranslations = { ...state.translations }
           delete newTranslations[tweetId]

@@ -1,5 +1,5 @@
 import type { EnrichedTweet, Entity } from '~/types'
-import { BookA, Languages, LanguagesIcon, Save, Trash2 } from 'lucide-react'
+import { BookA, EyeOff, Languages, LanguagesIcon, RotateCcw, Save } from 'lucide-react'
 import React, { useCallback, useMemo, useState } from 'react'
 import { SettingsGroup, SettingsRow } from '~/components/settings/SettingsUI'
 import { DictionaryViewer } from '~/components/translation/DictionaryViewer'
@@ -18,6 +18,7 @@ import { Label } from '~/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover'
 import { Switch } from '~/components/ui/switch'
 import { Textarea } from '~/components/ui/textarea'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
 import { TweetBody } from '~/lib/react-tweet'
 import { useTranslationStore } from '~/lib/stores/translation'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
@@ -60,6 +61,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     getTranslation,
     setTranslation,
     deleteTranslation,
+    resetTranslation,
     hasTextContent,
   } = useTranslationStore()
 
@@ -171,8 +173,13 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     setIsOpen(false)
   }
 
-  const handleDelete = () => {
+  const handleHide = () => {
     deleteTranslation(tweetId)
+    setIsOpen(false)
+  }
+
+  const handleReset = () => {
+    resetTranslation(tweetId)
     setIsOpen(false)
   }
 
@@ -305,7 +312,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
               />
             )}
             >
-              <BookA className="size-4 mr-2" />
+              <BookA className="size-4" />
               词汇表
             </PopoverTrigger>
             <PopoverContent className="w-80 p-0" align="start" side="top">
@@ -314,20 +321,72 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
           </Popover>
 
           <div className="flex items-center gap-2">
-            {getTranslation(tweetId) && (
-              <Button
-                type="button"
-                variant="destructive"
-                size="sm"
-                onClick={handleDelete}
-              >
-                <Trash2 className="size-4 mr-2" />
-                删除
-              </Button>
+            {getTranslation(tweetId) !== undefined && (
+              <Tooltip>
+                <TooltipTrigger render={(
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleReset}
+                    title="重置为默认状态（移除人工翻译或取消隐藏）"
+                  />
+                )}
+                >
+                  <RotateCcw className="size-4 mr-2" />
+                  重置
+                </TooltipTrigger>
+                <TooltipContent>
+                  重置为默认状态（移除人工翻译或取消隐藏）
+                </TooltipContent>
+              </Tooltip>
+            )}
+
+            {getTranslation(tweetId) !== null && (
+              <Tooltip>
+                <TooltipTrigger render={(
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleReset}
+                  />
+                )}
+                >
+                  <RotateCcw className="size-4" />
+                  重置
+                </TooltipTrigger>
+                <TooltipContent>
+                  重置为默认状态（移除人工翻译或取消隐藏）
+                </TooltipContent>
+              </Tooltip>
+            )}
+
+            {getTranslation(tweetId) !== null && (
+              <Tooltip>
+                <TooltipTrigger render={(
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleHide}
+                  >
+                    <EyeOff className="size-4" />
+                    隐藏
+                  </Button>
+                )}
+                >
+                  <EyeOff className="size-4" />
+                  隐藏
+                </TooltipTrigger>
+                <TooltipContent>
+                  不再显示此推文的翻译
+                </TooltipContent>
+              </Tooltip>
             )}
 
             <Button type="submit" size="sm">
-              <Save className="size-4 mr-2" />
+              <Save className="size-4" />
               保存
             </Button>
           </div>

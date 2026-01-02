@@ -42,7 +42,8 @@ export async function action({ request }: Route.ActionArgs) {
   // map 允许并行启动所有请求
   await Promise.all(
     tweets.map(async (tweet) => {
-      if (tweet.autoTranslationEntities?.length || !enableAITranslation) {
+      const isZhTweet = tweet.lang === 'zh'
+      if (tweet.autoTranslationEntities?.length || !enableAITranslation || isZhTweet) {
         return
       }
 

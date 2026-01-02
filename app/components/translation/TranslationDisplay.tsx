@@ -1,6 +1,7 @@
 import type { EnrichedTweet } from '~/types'
 import React from 'react'
 import { TweetBody } from '~/lib/react-tweet/twitter-theme/tweet-body'
+import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { useTranslationStore } from '~/lib/stores/translation'
 
 interface TranslationDisplayProps {
@@ -13,27 +14,37 @@ export const TranslationDisplay: React.FC<TranslationDisplayProps> = ({
   originalTweet,
 }) => {
   const { settings, showTranslations, getTranslation } = useTranslationStore()
+  const { enableAITranslation } = useAppConfigStore()
   const { autoTranslationEntities } = originalTweet
-  const translation = getTranslation(tweetId) || autoTranslationEntities
 
-  // 检查是否应该显示翻译
-  const shouldShowTranslation = () => {
-    if (autoTranslationEntities?.length) {
-      return true
-    }
+  // getTranslation 返回值含义：
+  // - Entity[]: 存在人工编辑的翻译
+  // - null: 用户显式隐藏/删除了翻译
+  // - undefined: 无人工记录
+  const manualTranslation = getTranslation(tweetId)
 
-    // 全局翻译开关关闭
-    if (!showTranslations)
-      return false
-
-    return true
-  }
-
-  if (!shouldShowTranslation()) {
+  // 1. 全局开关检查
+  if (!showTranslations) {
     return null
   }
 
-  if (!translation) {
+  // 2. 显式隐藏检查：如果用户删除了翻译，则不再显示（即使有 AI 翻译也不显示）
+  if (manualTranslation === null) {
+    return null
+  }
+
+  // 3. 确定显示内容：人工翻译 > AI 翻译
+  let contentToShow = manualTranslation
+
+  if (!contentToShow) {
+    // 如果没有人工翻译，检查是否启用并存在 AI 翻译
+    if (enableAITranslation && autoTranslationEntities?.length) {
+      contentToShow = autoTranslationEntities
+    }
+  }
+
+  // 4. 如果最终没有可显示的内容，渲染 null
+  if (!contentToShow) {
     return null
   }
 
@@ -49,7 +60,7 @@ export const TranslationDisplay: React.FC<TranslationDisplayProps> = ({
         className="font-bold! mt-2!"
         tweet={{
           ...originalTweet,
-          entities: translation,
+          entities: contentToShow,
         }}
         isTranslated
       />
