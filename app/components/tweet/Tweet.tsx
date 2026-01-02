@@ -12,6 +12,7 @@ import {
 import { useTranslationStore } from '~/lib/stores/translation'
 import { cn } from '~/lib/utils'
 import { TweetLinkCard } from './TweetCard'
+import { TweetMediaAlt } from './TweetMediaAlt'
 import { TweetTextBody } from './TweetTextBody'
 
 type TweetVariant = 'thread' | 'quoted' | 'main' | 'main-in-thread'
@@ -55,6 +56,8 @@ function UnifiedTweet({ tweet, variant }: UnifiedTweetProps) {
         {tweet.mediaDetails?.length ? (
           <TweetMedia tweet={tweet} showCoverOnly={screenshoting} />
         ) : null}
+
+        <TweetMediaAlt tweet={tweet} />
 
         {tweet.card && <TweetLinkCard tweet={tweet} />}
 

@@ -31,7 +31,7 @@ interface TranslationEditorProps {
 
 // 辅助函数：判断是否跳过某些实体的翻译编辑（通常只编辑文本，URL/Mention 保持原样）
 function shouldSkipEntity(entity: Entity, originalTweet?: EnrichedTweet) {
-  if (entity.type === 'mention' || entity.type === 'media' || entity.type === 'url') {
+  if (entity.type === 'mention' || entity.type === 'media' || entity.type === 'url' || entity.type === 'separator') {
     return true
   }
 
@@ -118,8 +118,8 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     }
     else {
       // 3. 回退：使用原始实体 + 本地字典
-      baseEntities = (originalTweet.entities || []).map((e, i) => {
-        const entity = { ...e, index: i }
+      baseEntities = (originalTweet.entities || []).map((e) => {
+        const entity = { ...e }
         if (entity.type === 'hashtag') {
           const match = dictionaryEntries.find(d => d.original === entity.text.replace('#', ''))
           if (match) {
@@ -207,6 +207,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
         />
       )}
       >
+
         <LanguagesIcon className="size-4" />
       </DialogTrigger>
 
@@ -277,17 +278,24 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
 
                 const inputId = `entity-${entity.index}`
                 const isText = entity.type === 'text'
+                const isMediaAlt = entity.type === 'media_alt'
                 // 这里很关键：如果是 AI 结果，entity.text 已经是中文，所以 defaultValue 会直接显示中文
                 const displayValue = getEntityDisplayValue(entity)
 
                 return (
                   <div key={inputId} className="flex flex-col border-b last:border-0 bg-card">
                     <div className="flex items-center justify-between px-4 py-2 bg-muted/20 border-b border-border/40">
-                      <Label htmlFor={inputId} className="text-[10px] uppercase font-mono text-muted-foreground">
-                        {entity.type}
+                      <Label htmlFor={inputId} className="text-[10px] uppercase font-mono text-muted-foreground flex items-center gap-2">
+                        {isMediaAlt ? 'ALT TEXT' : entity.type}
+                        {isMediaAlt && (
+                          <span className="text-[10px] text-muted-foreground/70">
+                            图
+                            {entity.index - 20000 + 1}
+                          </span>
+                        )}
                       </Label>
                     </div>
-                    {isText ? (
+                    {isText || isMediaAlt ? (
                       <Textarea
                         id={inputId}
                         name={inputId}

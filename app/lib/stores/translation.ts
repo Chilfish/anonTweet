@@ -127,7 +127,7 @@ export const useTranslationStore = create<TranslationState>()(
 
       // UI Defaults
       showTranslations: true,
-      showTranslationButton: false,
+      showTranslationButton: true,
       editingTweetId: null,
       tweetElRef: null,
       screenshoting: false,

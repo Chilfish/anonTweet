@@ -71,6 +71,11 @@ export async function getDBTweet(tweetId: string): Promise<EnrichedTweet | null>
         if (idx > -1) {
           enrichedTweet.entities[idx]!.translation = entity.translation
         }
+
+        const isAlts = entity.type === 'media_alt'
+        if (isAlts) {
+          enrichedTweet.entities.push(entity)
+        }
       })
     }
 

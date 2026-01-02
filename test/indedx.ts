@@ -1,8 +1,16 @@
-import pMap from 'p-map'
-import { fetchTweet } from '~/lib/react-tweet/utils/get-tweet'
+import { generateEntityContext } from '~/lib/AITranslation'
+import { restoreEntities, serializeForAI } from '~/lib/react-tweet'
+import { getEnrichedTweet } from '~/lib/react-tweet/utils/get-tweet'
 
-await pMap(
-  Array.from({ length: 400 }, (_, i) => `2006561028054905${i}`),
-  async id => await fetchTweet(id),
-  { concurrency: 20 },
-)
+const tweet = await getEnrichedTweet('2006262603186835664')
+if (!tweet) {
+  process.exit(1)
+}
+
+const data = serializeForAI(tweet.entities)
+
+const entities = restoreEntities(data.maskedText, data.entityMap)
+
+const text = generateEntityContext(data.entityMap)
+
+console.log(data, entities, text)
