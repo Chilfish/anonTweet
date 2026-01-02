@@ -7,7 +7,7 @@ import 'dotenv/config'
 const serverEnvSchema = z.object({
   ENVIRONMENT: z.enum(['development', 'production']).default('development'),
 
-  TWEET_KEY: z.string().min(1),
+  TWEET_KEYS: z.string().min(1),
 
   DB_URL: z.url().optional(),
   ENABLE_DB_CACHE: z.stringbool().default(true),

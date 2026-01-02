@@ -1,4 +1,4 @@
-import type { Entity, EntityWithType, RawTweet } from '~/types'
+import type { Entity, EntityWithType, RawTweet, SeparatorEntity } from '~/types'
 
 // 用于 AI 交互的载荷
 export interface TranslationPayload {
@@ -147,7 +147,31 @@ export function getEntities(tweet: RawTweet, rawText: string): Entity[] {
   }
 
   // 重新标准化 index 确保连续
-  return result.map((e, i) => ({ ...e, index: i }))
+  const standardEntities = result.map((e, i) => ({ ...e, index: i }))
+
+  const legacy = tweet.legacy
+  const extendedEntities = legacy?.extended_entities || legacy?.entities
+  const mediaList = extendedEntities?.media || []
+
+  const altEntities: Entity[] = []
+  mediaList.forEach((media: any, i: number) => {
+    if (media.ext_alt_text) {
+      altEntities.push({
+        type: 'separator',
+        text: ' | ',
+        index: 30000 + i,
+        mediaIndex: i,
+      } as Entity)
+      altEntities.push({
+        type: 'media_alt',
+        text: media.ext_alt_text,
+        media_url: media.media_url_https,
+        index: 20000 + i,
+      } as Entity)
+    }
+  })
+
+  return [...standardEntities, ...altEntities]
 }
 
 /**
@@ -158,7 +182,7 @@ export function serializeForAI(entities: Entity[]): TranslationPayload {
   let maskedText = ''
   let pCounter = 0
   for (const entity of entities) {
-    if (entity.type === 'text') {
+    if (entity.type === 'text' || entity.type === 'media_alt') {
       maskedText += entity.text
     }
     else {
@@ -182,6 +206,8 @@ export function restoreEntities(
   // 正则捕获占位符，保留分隔符
   const parts = translatedText.split(/(<<__[A-Z]+_\d+__>>)/g)
   let newIndex = 0
+  let lastSeparator: SeparatorEntity | null = null
+
   for (const part of parts) {
     if (!part)
       continue
@@ -189,18 +215,37 @@ export function restoreEntities(
       // === 命中原有实体 (Hashtag, URL, Mention) ===
       // 直接复用原始对象，保留原始 text (如 #原本的Tag) 和 href
       const original = entityMap.get(part)!
+
+      if (original.type === 'separator') {
+        if ('mediaIndex' in original) {
+          lastSeparator = original as SeparatorEntity
+        }
+        continue
+      }
+
       result.push({
         ...original,
         index: newIndex++, // 更新排序索引
       })
     }
     else {
-      result.push({
-        type: 'text',
-        text: '',
-        index: newIndex++,
-        translation: part,
-      })
+      if (lastSeparator) {
+        result.push({
+          type: 'media_alt',
+          text: '',
+          translation: part,
+          index: 20000 + (lastSeparator.mediaIndex ?? 0),
+        })
+        lastSeparator = null
+      }
+      else {
+        result.push({
+          type: 'text',
+          text: '',
+          index: newIndex++,
+          translation: part,
+        })
+      }
     }
   }
   return result

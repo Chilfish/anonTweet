@@ -3,7 +3,7 @@ import { useProxyMedia } from '~/lib/stores/appConfig'
 
 export * from './date-utils'
 export * from './entitytParser'
-export * from './get-tweet'
+// export * from './get-tweet'
 export * from './parseTweet'
 
 export interface TweetCoreProps {
@@ -38,7 +38,11 @@ export function getMp4Videos(media: MediaAnimatedGif | MediaVideo) {
 export function getMp4Video(media: MediaAnimatedGif | MediaVideo) {
   const mp4Videos = getMp4Videos(media)
   // Skip the highest quality video and use the next quality
-  return mp4Videos.length > 1 ? mp4Videos[1]! : mp4Videos[0]!
+  const video = mp4Videos.length > 1 ? mp4Videos[1]! : mp4Videos[0]!
+
+  const proxyMedia = useProxyMedia()
+  video.url = proxyMedia(video.url, true)
+  return video
 }
 
 export function formatNumber(n: number): string {

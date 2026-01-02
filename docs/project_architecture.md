@@ -59,7 +59,7 @@ API 层作为 BFF，主要负责将异构数据源（Database, Twitter Private A
 用户画像与时间线数据的聚合。
 
 - **`GET /api/user/get/:username`**
-  - **逻辑**: 获取用户基础元数据。优先查库，失败则回源。
+  - **逻辑**: 获取用户基础元数据。支持通过 **用户名** 或 **用户 ID** 查询。优先查库，失败则回源。
 
 - **`GET /api/user/timeline/:username`**
   - **逻辑**: 获取指定用户的推文时间线，经过 `enrichTweet` 清洗。
@@ -83,7 +83,7 @@ API 层作为 BFF，主要负责将异构数据源（Database, Twitter Private A
     - 存储结构化 JSON 数据 (`EnrichedTweet`)。
     - `tweet_entities` 表存储翻译内容 (`autoTranslationEntities` 等)。
 2.  **Level 2: Upstream API (Source of Truth)**
-    - 基于 `rettiwt-api` 的逆向工程接口，仅在 Cache Miss 时调用。
+    - 基于 `rettiwt-api` 的逆向工程接口，通过 `RettiwtPool` 进行多 Key 调度，仅在 Cache Miss 时调用。
 3.  **Level 3: AI Engine (Transformation)**
     - 生成翻译数据，通过实体占位符 (Entity Placeholders) 保护推文中的链接、标签和提及。
 
@@ -94,6 +94,18 @@ API 层作为 BFF，主要负责将异构数据源（Database, Twitter Private A
 - 读取原始推文。
 - 读取/生成翻译内容 (Entity[])。
 - **Merge**: 将翻译实体注入 `EnrichedTweet` 对象。
+
+### 3.3 API Key 轮询缓冲池 (RettiwtPool)
+
+为了应对 Twitter 严格的 Rate Limit 限制，系统实现了基于 `RettiwtPool` 的多 Key 调度机制：
+
+1.  **多 Key 管理**: 支持配置多个 `TWEET_KEYS`，维护一个 Fetcher 实例池。
+2.  **自动轮询 (Round-Robin)**: 每次请求自动切换使用的 Key，实现负载均衡。
+3.  **故障转移与重试**:
+    - 捕获 `429 Too Many Requests` 错误。
+    - 触发指数退避策略。
+    - 自动轮询至下一个可用 Key 并重试请求。
+    - 若所有 Key 均耗尽额度，则向上层抛出异常。
 
 ---
 

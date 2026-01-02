@@ -45,10 +45,10 @@ interface TranslationSettings {
   apiKey: string // Google Gemini API Key
   model: string // 例如 "models/gemini-2.0-flash-exp"
   enableAITranslation: boolean // 是否开启 AI 自动翻译
-  
+
   // 显示风格
-  customSeparator: string 
-  selectedTemplateId: string 
+  customSeparator: string
+  selectedTemplateId: string
   separatorTemplates: SeparatorTemplate[]
 }
 ```

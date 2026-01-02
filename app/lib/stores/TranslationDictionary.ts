@@ -25,6 +25,7 @@ interface TranslationDictionaryState {
    */
   importEntries: (entries: Omit<TranslationDicEntry, 'id' | 'createdAt'>[]) => ImportResult
   clearEntries: () => void
+  getFormattedEntries: () => string
 }
 
 function generateId() {
@@ -126,6 +127,11 @@ export const useTranslationDictionaryStore = create<TranslationDictionaryState>(
       },
 
       clearEntries: () => set({ entries: [] }),
+
+      getFormattedEntries: () => {
+        const { entries } = get()
+        return entries.map(e => `${e.original} -> ${e.translated}`).join('\n')
+      },
     }),
     {
       name: 'translation-dictionary-storage',

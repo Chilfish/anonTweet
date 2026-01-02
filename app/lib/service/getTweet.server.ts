@@ -2,7 +2,7 @@ import type { EnrichedTweet } from '~/types'
 import { eq } from 'drizzle-orm'
 import { getDbClient, isDbAvailable } from '~/lib/database/db.server'
 import { tweet, tweetEntities } from '~/lib/database/schema'
-import { getEnrichedTweet } from '~/lib/react-tweet/utils/index'
+import { getEnrichedTweet } from '~/lib/react-tweet/utils/get-tweet'
 
 export async function insertToTweetDB(tweets: EnrichedTweet[]) {
   if (!isDbAvailable()) {
@@ -70,6 +70,11 @@ export async function getDBTweet(tweetId: string): Promise<EnrichedTweet | null>
         const idx = enrichedTweet.entities.findIndex(e => e.index === entity.index)
         if (idx > -1) {
           enrichedTweet.entities[idx]!.translation = entity.translation
+        }
+
+        const isAlts = entity.type === 'media_alt'
+        if (isAlts) {
+          enrichedTweet.entities.push(entity)
         }
       })
     }

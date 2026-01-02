@@ -17,6 +17,7 @@ import { toastManager } from '~/components/ui/toast'
 import { models } from '~/lib/constants'
 import { fetcher } from '~/lib/fetcher'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
+import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 
 export function AITranslationSettings() {
   const {
@@ -29,6 +30,8 @@ export function AITranslationSettings() {
     setGeminiModel,
     setTranslationGlossary,
   } = useAppConfigStore()
+
+  const { entries } = useTranslationDictionaryStore()
 
   const [isTesting, setIsTesting] = useState(false)
 
@@ -205,6 +208,15 @@ export function AITranslationSettings() {
               placeholder="例如：ひなぴよ -> Hinapiyo..."
               className="min-h-30 leading-relaxed"
             />
+            {entries.length > 0 && (
+              <p className="px-4 text-[10px] text-muted-foreground/60 leading-tight py-1">
+                已自动包含翻译词汇表中的
+                {' '}
+                {entries.length}
+                {' '}
+                条词条。
+              </p>
+            )}
           </SettingsGroup>
         </div>
       )}

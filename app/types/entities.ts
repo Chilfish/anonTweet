@@ -24,6 +24,16 @@ export interface SymbolEntity {
   text: string
 }
 
+export interface MediaAltEntity {
+  text: string
+  media_url: string
+}
+
+export interface SeparatorEntity {
+  text: string
+  mediaIndex?: number
+}
+
 interface TextEntity {
   type: 'text'
 }
@@ -36,6 +46,8 @@ export type EntityWithType
     | (UrlEntity & { type: 'url' })
     | (MediaEntity & { type: 'media' })
     | (SymbolEntity & { type: 'symbol' })
+    | (MediaAltEntity & { type: 'media_alt' })
+    | (SeparatorEntity & { type: 'separator' })
 
 export interface EntityBase {
   text: string
@@ -51,6 +63,8 @@ export type Entity = EntityBase & (
   | (UrlEntity & { type: 'url', href: string })
   | (MediaEntity & { type: 'media', href: string })
   | (SymbolEntity & { type: 'symbol', href: string })
+  | (MediaAltEntity & { type: 'media_alt' })
+  | (SeparatorEntity & { type: 'separator' })
 )
 
 /**
@@ -59,4 +73,6 @@ export type Entity = EntityBase & (
 export type TranslationEntity = EntityBase & (
   | TextEntity
   | (HashtagEntity & { type: 'hashtag', href: string })
+  | (MediaAltEntity & { type: 'media_alt' })
+  | (SeparatorEntity & { type: 'separator' })
 )

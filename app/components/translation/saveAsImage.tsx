@@ -41,7 +41,7 @@ export function SaveAsImageButton() {
     const flatedTweet = flatTweets(tweets)
     const data = flatedTweet.map((tweet) => {
       const entities = tweet.entities
-        .filter(entity => entity.type === 'hashtag' || entity.type === 'text')
+        .filter(entity => entity.type === 'hashtag' || entity.type === 'text' || entity.type === 'media_alt')
         .filter(entity => !!entity.translation?.trim())
       if (entities.length === 0)
         return null

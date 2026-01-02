@@ -31,6 +31,12 @@ export function generateEntityContext(entityMap: Map<string, Entity>): string {
       case 'media':
         contentInfo = 'Media Attachment'
         break
+      case 'separator':
+        contentInfo = 'Section Divider (Image Description follows)'
+        break
+      case 'media_alt':
+        contentInfo = 'Image Description (Alt Text)'
+        break
       default:
         contentInfo = entity.text
     }
@@ -56,7 +62,7 @@ You are a professional translator specializing in social media content localizat
 Translate the user's input text into **Simplified Chinese (简体中文)**.
 
 # Critical Rules for Entity Placeholders
-The input text contains placeholders like \`<<__TYPE_INDEX__>>\` (e.g., \`<<__URL_0__>>\`, \`<<__HASHTAG_1__>>\`).
+The input text contains placeholders like \`<<__TYPE_INDEX__>>\` (e.g., \`<<__URL_0__>>\`, \`<<__HASHTAG_1__>>\`, \`<<__SEPARATOR_1__>>\`).
 1. **IMMUTABLE**: You MUST preserve these placeholders EXACTLY as they appear. Do not translate, remove, or modify the characters inside the double brackets.
 2. **POSITIONING**: You MUST reorder these placeholders within the sentence to strictly follow natural Chinese grammar and word order.
 3. **CONTEXT**: Use the provided "Entity Reference" to understand what the placeholder represents (e.g., distinguishing a person from a topic), but DO NOT replace the placeholder with the reference content in your final output.
