@@ -15,7 +15,7 @@ export const models = [
     name: 'models/gemini-2.5-flash',
     text: 'Gemini 2.5 Flash',
   },
-]
+] as const
 
 export interface SeparatorTemplate {
   id: string

@@ -1,10 +1,7 @@
-import type { Ref } from 'react'
-import type { ThemeSettings } from '~/lib/stores/theme'
 import type { EnrichedTweet, TweetData } from '~/types'
 import { useMemo, useRef } from 'react'
 import { useElementSize } from '~/hooks/use-element-size'
 import { models } from '~/lib/constants'
-import { env } from '~/lib/env.server'
 import {
   TweetBody,
   TweetContainer,
@@ -21,8 +18,9 @@ function TweetTextBody({ tweet, enableTranslation }: { tweet: EnrichedTweet, ena
     return (<TweetBody tweet={tweet} isTranslated={false} />)
   }
 
+  const geminiModel = typeof __GEMINI_MODEL__ === 'undefined' ? 'models/gemini-3-flash-preview' : __GEMINI_MODEL__
   const separatorTemplate = `<div style="margin-top: 4px; color: #3285FD;">
-<b style="font-weight: bold; font-size: small;">由 ${models.find(m => m.name === env.GEMINI_MODEL)?.text || 'Gemini'} 翻译</b>
+<b style="font-weight: bold; font-size: small;">由 ${models.find(m => m.name === geminiModel)?.text || 'Gemini'} 翻译</b>
 <hr style="margin: 3px; border-top-width: 2px;">
 </div>`
 
@@ -110,8 +108,6 @@ interface MyTweetProps {
   tweets: TweetData
   mainTweetId: string
   enableTranslation: boolean
-  settings?: ThemeSettings
-  ref?: Ref<HTMLDivElement>
 }
 
 export function MyPlainTweet({ tweets, mainTweetId, enableTranslation }: MyTweetProps) {

@@ -3,6 +3,7 @@ import { reactRouter } from '@react-router/dev/vite'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
+import { env } from './app/lib/env.server'
 
 // TODO: REMOVE IT
 // process.exit(1)
@@ -42,6 +43,7 @@ export default defineConfig(({ isSsrBuild }) => ({
   define: {
     __GIT_HASH__: JSON.stringify(gitInfo.hash),
     __GIT_DATE__: JSON.stringify(gitInfo.date),
+    __GEMINI_MODEL__: JSON.stringify(env.GEMINI_MODEL),
   },
   build: {
     rollupOptions: {
