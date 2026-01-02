@@ -50,7 +50,8 @@ HOSTNAME="http://localhost:9080" # ⚠️ 截图服务回调地址，生产环�
 
 # ⚠️ 必需。用于服务端逆向获取推文数据流。
 # 若不配置，将受到严格的 Rate Limit 限制。
-TWEET_KEY="your_twitter_auth_token"
+# 支持配置多个 Key（用英文逗号分隔）以实现轮询负载均衡。
+TWEET_KEYS="your_twitter_auth_token_1,your_twitter_auth_token_2"
 
 # 启用 AI 翻译功能
 ENABLE_AI_TRANSLATION="true"
@@ -67,9 +68,9 @@ ENABLE_DB_CACHE="false"
 VERCEL="false"
 ```
 
-#### 🔑 关于 TWEET_KEY 的获取
+#### 🔑 关于 TWEET_KEYS 的获取
 
-本项目使用 Rettiwt-API 进行数据抓取。为获取完整访问权限并降低风控概率，需注入 Twitter 用户凭证。
+本项目使用 Rettiwt-API 进行数据抓取。为获取完整访问权限并降低风控概率，需注入 Twitter 用户凭证。支持配置多个账号凭证以应对高频请求时的 Rate Limit 问题。
 
 **操作步骤：**
 
@@ -78,7 +79,7 @@ VERCEL="false"
     - **Firefox**: [Rettiwt Auth Helper](https://addons.mozilla.org/en-US/firefox/addon/rettiwt-auth-helper)
 2.  建议使用浏览器的**无痕/隐私模式**登录 Twitter/X 账号。
 3.  登录后打开扩展，点击 `Get Key` / `Get API Key` 并复制生成的字符串。
-4.  将该字符串填入 `.env` 的 `TWEET_KEY` 字段。
+4.  将该字符串填入 `.env` 的 `TWEET_KEYS` 字段（多个 Key 用逗号分隔）。
 
 > **⚠️ Security Note**: 该 Key 本质上是账号 Cookies 的 Base64 编码，拥有完全账户权限，安全等级等同于你的账号+密码。请勿泄露。
 > **⚠️ Session Keep-alive**: 获取 Key 后，**请勿手动点击登出 (Log out)**，否则服务端 Session 将失效。直接关闭浏览器窗口即可。

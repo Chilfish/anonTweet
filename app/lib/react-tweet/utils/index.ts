@@ -3,7 +3,7 @@ import { useProxyMedia } from '~/lib/stores/appConfig'
 
 export * from './date-utils'
 export * from './entitytParser'
-export * from './get-tweet'
+// export * from './get-tweet'
 export * from './parseTweet'
 
 export interface TweetCoreProps {

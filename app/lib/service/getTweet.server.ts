@@ -2,7 +2,7 @@ import type { EnrichedTweet } from '~/types'
 import { eq } from 'drizzle-orm'
 import { getDbClient, isDbAvailable } from '~/lib/database/db.server'
 import { tweet, tweetEntities } from '~/lib/database/schema'
-import { getEnrichedTweet } from '~/lib/react-tweet/utils/index'
+import { getEnrichedTweet } from '~/lib/react-tweet/utils/get-tweet'
 
 export async function insertToTweetDB(tweets: EnrichedTweet[]) {
   if (!isDbAvailable()) {

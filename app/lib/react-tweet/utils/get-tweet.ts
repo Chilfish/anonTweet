@@ -1,42 +1,61 @@
 import type { IListTweetsResponse } from '~/lib/rettiwt-api/types/raw/list/Tweets'
 import type { ITweetDetailsResponse } from '~/lib/rettiwt-api/types/raw/tweet/Details'
+import type { IUserDetailsResponse } from '~/lib/rettiwt-api/types/raw/user/Details'
 import type { IUserTweetsResponse } from '~/lib/rettiwt-api/types/raw/user/Tweets'
-import type { EnrichedTweet, RawTweet } from '~/types'
-// import { writeFile } from 'node:fs/promises'
-import { FetcherService, ResourceType, Rettiwt } from '~/lib/rettiwt-api'
-import { RettiwtConfig } from '~/lib/rettiwt-api/models/RettiwtConfig'
+import type { EnrichedTweet, RawTweet, RawUser } from '~/types'
+import { ResourceType } from '~/lib/rettiwt-api'
+import { Extractors } from '~/lib/rettiwt-api/collections/Extractors'
+import { RettiwtPool } from '~/lib/SmartPool'
 import { enrichTweet } from './parseTweet'
 
-const TWEET_KEY = typeof process !== 'undefined' ? process.env.TWEET_KEY || '' : ''
+// config.ts
+const KEYS = (typeof process === 'undefined' ? '' : process.env.TWEET_KEYS || '').split(',').filter(Boolean)
 
-// console.log('Using TWEET_KEY:', TWEET_KEY ? 'Yes' : 'No')
-
-const configs = new RettiwtConfig({ apiKey: TWEET_KEY })
-const fetcher = new FetcherService(configs)
-const rettiwt = new Rettiwt(configs)
+// 初始化单例池
+export const twitterPool = new RettiwtPool(KEYS)
 
 export async function fetchTweet(id: string): Promise<RawTweet> {
-  return await fetcher
-    .request<ITweetDetailsResponse>(ResourceType.TWEET_DETAILS, { id })
-    .then(({ data }) => data.tweetResult.result)
+  return twitterPool.run(async (fetcher) => {
+    const response = await fetcher.request<ITweetDetailsResponse>(
+      ResourceType.TWEET_DETAILS,
+      { id },
+    )
+
+    return response.data.tweetResult.result
+  })
 }
 
 export async function fetchListTweets(id: string): Promise<RawTweet[]> {
-  return await fetcher
+  return twitterPool.run(async fetcher => fetcher
     .request<IListTweetsResponse>(ResourceType.LIST_TWEETS, { id })
     .then(({ data }) => (data.list?.tweets_timeline?.timeline?.instructions || [])
       .flatMap(instruction => instruction.entries.map(entry => entry.content.itemContent?.tweet_results?.result as unknown as RawTweet))
       .filter(tweet => !!tweet),
-    )
+    ),
+  )
 }
 
-export async function fetchUserDetails(username: string) {
-  return (await rettiwt.user.details(username)) || null
+export async function fetchUserDetails(id: string): Promise<RawUser | null> {
+  return twitterPool.run(async (fetcher) => {
+    let resource: ResourceType
+    if (id && Number.isNaN(Number(id))) {
+      resource = ResourceType.USER_DETAILS_BY_USERNAME
+    }
+    else {
+      resource = ResourceType.USER_DETAILS_BY_ID
+    }
+    if (!id) {
+      return null
+    }
+    const response = await fetcher.request<IUserDetailsResponse>(resource, { id })
+    const data = Extractors[resource](response)
+    return data || null
+  })
 }
 
 export async function fetchUserTweet(userId: string): Promise<RawTweet[]> {
-  return await fetcher
-    .request<IUserTweetsResponse>(ResourceType.USER_TIMELINE, { id: userId })
+  return twitterPool.run(async fetcher => fetcher
+    .request<IUserTweetsResponse>(ResourceType.USER_TIMELINE_AND_REPLIES, { id: userId })
     .then(({ data }) => {
       const rawTweets = data.user.result.timeline.timeline
         .instructions
@@ -59,7 +78,8 @@ export async function fetchUserTweet(userId: string): Promise<RawTweet[]> {
 
       return [...tweets1, ...tweets2].sort((a, b) => b.rest_id.localeCompare(a.rest_id))
     },
-    )
+    ),
+  )
 }
 
 export async function getEnrichedUserTweet(userId: string): Promise<EnrichedTweet[]> {

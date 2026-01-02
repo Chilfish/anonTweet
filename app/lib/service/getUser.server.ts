@@ -2,7 +2,7 @@ import type { RawUser } from '~/types'
 import { eq } from 'drizzle-orm'
 import { getDbClient, isDbAvailable } from '~/lib/database/db.server'
 import { tweetUser } from '~/lib/database/schema'
-import { fetchUserDetails } from '~/lib/react-tweet'
+import { fetchUserDetails } from '~/lib/react-tweet/utils/get-tweet'
 
 export async function getDBUser(username: string): Promise<RawUser | null> {
   // 1. 检查开关：如果没有 DB URL 或未开启缓存，直接走 API

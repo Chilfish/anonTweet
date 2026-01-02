@@ -31,7 +31,7 @@ export function AITranslationSettings() {
     setTranslationGlossary,
   } = useAppConfigStore()
 
-  const { getFormattedEntries, entries } = useTranslationDictionaryStore()
+  const { entries } = useTranslationDictionaryStore()
 
   const [isTesting, setIsTesting] = useState(false)
 
@@ -47,15 +47,12 @@ export function AITranslationSettings() {
 
     setIsTesting(true)
     try {
-      const dictEntries = getFormattedEntries()
-      const combinedGlossary = [dictEntries, translationGlossary].filter(Boolean).join('\n')
-
       const { data } = await fetcher.post('/api/ai-test', {
         apiKey: geminiApiKey,
         model: geminiModel,
         tweetId: '1',
         enableAITranslation: true,
-        translationGlossary: combinedGlossary || '1',
+        translationGlossary: '1',
       })
 
       if (data.success) {
