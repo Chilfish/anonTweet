@@ -30,14 +30,23 @@ interface TranslationEditorProps {
 }
 
 // 辅助函数：判断是否跳过某些实体的翻译编辑（通常只编辑文本，URL/Mention 保持原样）
-function shouldSkipEntity(entity: Entity) {
-  return (
-    entity.text === ' '
-    || entity.type === 'mention'
-    || entity.type === 'media'
-    // URL 有时需要保留以便上下文参考，但通常不翻译
-    || entity.type === 'url'
-  )
+function shouldSkipEntity(entity: Entity, originalTweet?: EnrichedTweet) {
+  if (entity.type === 'mention' || entity.type === 'media' || entity.type === 'url') {
+    return true
+  }
+
+  if (entity.type === 'text') {
+    // 优先基于原文判断：如果原文只是空白，则跳过
+    // 这样避免“用户清空翻译后保存，导致该实体被跳过”的问题
+    if (originalTweet?.entities?.[entity.index]) {
+      const originalText = originalTweet.entities[entity.index]?.text
+      return !originalText?.trim()
+    }
+
+    return (entity.text || entity.translation || '').trim() === ''
+  }
+
+  return false
 }
 
 // 辅助函数：获取显示文本（优先取 translation，没有则取 text）
@@ -263,7 +272,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
             </Label>
             <SettingsGroup>
               {editingEntities.map((entity) => {
-                if (shouldSkipEntity(entity))
+                if (shouldSkipEntity(entity, originalTweet))
                   return null
 
                 const inputId = `entity-${entity.index}`
