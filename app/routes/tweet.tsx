@@ -13,6 +13,7 @@ import { fetcher } from '~/lib/fetcher'
 import { TweetNotFound, TweetSkeleton } from '~/lib/react-tweet'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { useTranslationStore } from '~/lib/stores/translation'
+import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 import { extractTweetId } from '~/lib/utils'
 
 export function meta() {
@@ -50,6 +51,7 @@ export default function TweetPage() {
   const [isStoreReady, setIsStoreReady] = useState(false)
   const appConfig = useAppConfigStore()
   const { enableAITranslation, geminiApiKey, geminiModel, translationGlossary } = appConfig
+  const { getFormattedEntries } = useTranslationDictionaryStore()
 
   if (!tweetId) {
     return (
@@ -66,13 +68,18 @@ export default function TweetPage() {
 
   const { data: tweets, error, isLoading } = useSWR<TweetData>(
     (tweetId && isStoreReady) ? tweetId : null,
-    () => getTweets({
-      tweetId,
-      enableAITranslation,
-      translationGlossary,
-      apiKey: geminiApiKey,
-      model: geminiModel,
-    }),
+    () => {
+      const dictEntries = getFormattedEntries()
+      const combinedGlossary = [dictEntries, translationGlossary].filter(Boolean).join('\n')
+
+      return getTweets({
+        tweetId,
+        enableAITranslation,
+        translationGlossary: combinedGlossary,
+        apiKey: geminiApiKey,
+        model: geminiModel,
+      })
+    },
     {
       revalidateIfStale: false,
       revalidateOnFocus: false,

@@ -171,6 +171,9 @@ export function TranslationDictionaryManager() {
             条
           </span>
         </div>
+        <p className="px-1 text-[10px] text-muted-foreground/60 leading-tight">
+          在此添加的词汇将自动应用到 AI 翻译中，不会覆盖 AI 设置中的自定义术语表。
+        </p>
         <SettingsGroup>
           {/* Add Toggle */}
           <SettingsRow
