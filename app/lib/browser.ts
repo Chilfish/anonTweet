@@ -20,6 +20,12 @@ async function getLaunchOptions(): Promise<LaunchOptions> {
   ]
 
   if (env.VERCEL) {
+    // 加载 Noto Color Emoji (解决 Emoji 不显示)
+    // 这是一个相对标准的 Emoji 字体源
+    await chromium.font(
+      'https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf',
+    )
+
     // Vercel / AWS Lambda Configuration
     chromium.setGraphicsMode = false
     const viewport = {
@@ -35,7 +41,7 @@ async function getLaunchOptions(): Promise<LaunchOptions> {
       args: [...chromium.args, ...commonArgs],
       defaultViewport: viewport,
       executablePath: await chromium.executablePath(),
-      headless: 'shell',
+      headless: true,
     }
   }
   else {
@@ -44,7 +50,7 @@ async function getLaunchOptions(): Promise<LaunchOptions> {
     return {
       args: commonArgs,
       executablePath: executablePath(),
-      headless: 'shell',
+      headless: true,
       defaultViewport: { width: 1000, height: 1000, deviceScaleFactor: 2 },
     }
   }
@@ -92,6 +98,7 @@ export async function screenshotTweet(tweetId: string, enableTranslation: boolea
     const loadedSelector = '.tweet-loaded'
 
     await page.waitForSelector(loadedSelector, { visible: true, timeout: 20000 })
+    await page.evaluateHandle('document.fonts.ready')
 
     await page.waitForFunction(
       (selector) => {

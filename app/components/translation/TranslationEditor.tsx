@@ -321,27 +321,6 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
           </Popover>
 
           <div className="flex items-center gap-2">
-            {getTranslation(tweetId) !== undefined && (
-              <Tooltip>
-                <TooltipTrigger render={(
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleReset}
-                    title="重置为默认状态（移除人工翻译或取消隐藏）"
-                  />
-                )}
-                >
-                  <RotateCcw className="size-4 mr-2" />
-                  重置
-                </TooltipTrigger>
-                <TooltipContent>
-                  重置为默认状态（移除人工翻译或取消隐藏）
-                </TooltipContent>
-              </Tooltip>
-            )}
-
             {getTranslation(tweetId) !== null && (
               <Tooltip>
                 <TooltipTrigger render={(
