@@ -1,41 +1,21 @@
 import axios from 'axios'
-import { domToPng } from 'modern-screenshot'
-// import { toast } from '~/lib/utils'
+import { domToJpeg, domToPng } from 'modern-screenshot'
 import { Button } from '~/components/ui/button'
 import { toastManager } from '~/components/ui/toast'
+import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { useTranslationStore } from '~/lib/stores/translation'
 import { flatTweets } from '~/lib/utils'
 
-function toastAction() {
-  const dontShowAgain = localStorage.getItem('dontShowAgain') === 'true'
-  if (dontShowAgain) {
-    return
-  }
-  const id = toastManager.add({
-    actionProps: {
-      children: '不再提醒',
-      onClick: () => {
-        toastManager.close(id)
-        localStorage.setItem('dontShowAgain', 'true')
-      },
-    },
-    description: '需要先登录才能保存翻译结果。',
-    timeout: 1000000,
-    title: '尚未登录',
-    type: 'error',
-  })
-}
-
-function saveAsImage(png: string, fileName: string) {
+function saveAsImage(dataUrl: string, fileName: string) {
   const a = document.createElement('a')
-  a.href = png
-  a.download = `${fileName}.png`
+  a.href = dataUrl
+  a.download = fileName
   a.click()
-  URL.revokeObjectURL(a.href)
 }
 
 export function SaveAsImageButton() {
   const { tweetElRef, mainTweet, setShowTranslationButton, setScreenshoting, showTranslations, tweets } = useTranslationStore()
+  const { screenshotFormat } = useAppConfigStore()
 
   async function submitTweet() {
     const flatedTweet = flatTweets(tweets)
@@ -103,11 +83,18 @@ export function SaveAsImageButton() {
 
     await new Promise(resolve => requestAnimationFrame(resolve))
 
-    const png = await domToPng(tweetElRef, {
-      quality: 1,
-      scale: 1.7,
-    })
-    if (png) {
+    const dataUrl = await (screenshotFormat === 'png'
+      ? domToPng(tweetElRef, {
+          quality: 1,
+          scale: 1.7,
+        })
+      : domToJpeg(tweetElRef, {
+          quality: 1,
+          scale: 2,
+          backgroundColor: '#ffffff',
+        }))
+
+    if (dataUrl) {
       const now = new Date().toLocaleString('zh-CN', {
         year: 'numeric',
         month: '2-digit',
@@ -116,15 +103,15 @@ export function SaveAsImageButton() {
         minute: '2-digit',
         second: '2-digit',
       })
-      const fileName = `${mainTweet.user.screen_name}-${mainTweet.id_str}-${now}`
-      saveAsImage(png, fileName)
+      const fileName = `${mainTweet.user.screen_name}-${mainTweet.id_str}-${now}.${screenshotFormat === 'png' ? 'png' : 'jpg'}`
+      saveAsImage(dataUrl, fileName)
       toastManager.add({
         title: '推文截图保存成功',
         type: 'success',
       })
     }
     else {
-      console.log('png is null', { png, tweetElRef, mainTweet })
+      console.log('dataUrl is null', { dataUrl, tweetElRef, mainTweet })
       toastManager.add({
         title: '图片保存失败',
         type: 'error',
