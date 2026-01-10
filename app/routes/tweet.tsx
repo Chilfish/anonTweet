@@ -3,12 +3,8 @@ import type { TweetData } from '~/types'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import useSWR from 'swr'
-import { SettingsPanel } from '~/components/settings/SettingsPanel'
-import { BackButton } from '~/components/translation/BackButton'
-import { DownloadMedia } from '~/components/translation/DownloadMedia'
-import { SaveAsImageButton } from '~/components/translation/saveAsImage'
-import { ToggleTransButton } from '~/components/translation/ToggleTransButton'
 import { MyTweet } from '~/components/tweet/Tweet'
+import { TweetHeader } from '~/components/tweet/TweetHeader'
 import { fetcher } from '~/lib/fetcher'
 import { TweetNotFound, TweetSkeleton } from '~/lib/react-tweet'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
@@ -31,18 +27,6 @@ async function getTweets(args: GetTweetSchema): Promise<TweetData> {
   return data
 }
 
-const Header = (
-  <div className="flex items-center w-full gap-1 mb-6">
-    <BackButton />
-    <ToggleTransButton />
-    <SaveAsImageButton />
-    <SettingsPanel />
-    <DownloadMedia />
-    {/* <PubToBili /> */}
-    {/* <UpdateTranslation /> */}
-  </div>
-)
-
 export default function TweetPage() {
   const { id } = useParams()
   const tweetId = id ? extractTweetId(id) : null
@@ -56,7 +40,7 @@ export default function TweetPage() {
   if (!tweetId) {
     return (
       <>
-        {Header}
+        <TweetHeader />
         <TweetNotFound tweetId={id} />
       </>
     )
@@ -108,7 +92,7 @@ export default function TweetPage() {
   if (isLoading || isRetweet || !isStoreReady) {
     return (
       <>
-        {Header}
+        <TweetHeader />
         <div className="w-full max-w-2xl">
           <TweetSkeleton />
         </div>
@@ -120,7 +104,7 @@ export default function TweetPage() {
     console.error(error)
     return (
       <>
-        {Header}
+        <TweetHeader />
         <TweetNotFound tweetId={tweetId} error={error} />
       </>
     )
@@ -128,7 +112,7 @@ export default function TweetPage() {
 
   return (
     <>
-      {Header}
+      <TweetHeader />
       <MyTweet
         tweets={tweets}
         mainTweetId={tweetId}

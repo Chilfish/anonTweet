@@ -1,21 +1,27 @@
+import type { ComponentProps } from 'react'
 import { Button } from '~/components/ui/button'
 import { useTranslationStore } from '~/lib/stores/translation'
+import { cn } from '~/lib/utils'
 
-export function ToggleTransButton() {
-  const { setShowTranslations, setShowTranslationButton, showTranslations } = useTranslationStore()
+export function ToggleTransButton({ className, ...props }: ComponentProps<typeof Button>) {
+  const { setShowTranslations, showTranslations, setShowTranslationButton } = useTranslationStore()
   function toggleTranslations() {
     const target = !showTranslations
-    setShowTranslations(target)
     setShowTranslationButton(target)
+    setShowTranslations(target)
   }
 
   return (
     <Button
       variant="secondary"
-      onClick={toggleTranslations}
-      className="h-8 px-3 text-sm font-medium transition-all duration-200"
+      {...props}
+      onClick={(e) => {
+        toggleTranslations()
+        props.onClick?.(e)
+      }}
+      className={cn('h-8 px-3 text-sm font-medium transition-all duration-200', className)}
     >
-      {showTranslations ? '隐藏翻译' : '开始翻译'}
+      {props.children ?? (showTranslations ? '隐藏翻译' : '开始翻译')}
     </Button>
   )
 }

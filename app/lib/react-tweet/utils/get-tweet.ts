@@ -109,7 +109,7 @@ export async function getEnrichedTweet(
   if (!tweet) {
     return null
   }
-  // await writeFile('data/tweet.json', JSON.stringify(tweet, null, 2), 'utf8')
+  // await writeFile('build/tweet.json', JSON.stringify(tweet, null, 2), 'utf8')
   try {
     const richTweet = enrichTweet(tweet)
     return richTweet

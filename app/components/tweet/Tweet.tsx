@@ -30,7 +30,7 @@ function UnifiedTweet({ tweet, variant }: UnifiedTweetProps) {
 
   const containerClasses = cn({
     'p-2 sm:p-4! border-2 rounded-2xl mt-2!': isQuoted,
-    'border-none! px-0! py-2! relative': isThread,
+    'border-none! px-0! py-3! relative': isThread,
   })
 
   const bodyContainerClasses = cn({
@@ -40,16 +40,17 @@ function UnifiedTweet({ tweet, variant }: UnifiedTweetProps) {
   const quotedTweet = tweet.quotedTweet
 
   return (
-    <div className={containerClasses}>
-      <div className="flex items-center justify-between">
-        <TweetHeader
-          tweet={tweet}
-          className={cn({ 'pb-1!': isThread })}
-          createdAtInline
-          inQuote={isQuoted}
-        />
-        <TranslationEditor originalTweet={tweet} />
-      </div>
+    <div className={cn(containerClasses, 'relative')}>
+      <TweetHeader
+        tweet={tweet}
+        className={cn({ 'pb-1!': isThread })}
+        createdAtInline
+        inQuote={isQuoted}
+      />
+      <TranslationEditor
+        originalTweet={tweet}
+        className="absolute top-2 right-1"
+      />
       <div className={bodyContainerClasses}>
         <TweetTextBody tweet={tweet} />
 

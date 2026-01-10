@@ -27,19 +27,17 @@ export function DictionaryViewer() {
 
   return (
     <div className="flex flex-col gap-3 max-h-80">
-      <div className="sticky top-0 z-10">
-        <InputGroup>
-          <InputGroupAddon align="inline-start">
-            <SearchIcon className="size-4" />
-          </InputGroupAddon>
-          <InputGroupInput
-            placeholder="搜索词汇..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="pl-8 h-9"
-          />
-        </InputGroup>
-      </div>
+      <InputGroup>
+        <InputGroupAddon align="inline-start">
+          <SearchIcon className="size-4" />
+        </InputGroupAddon>
+        <InputGroupInput
+          placeholder="搜索词汇..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="pl-8 h-9"
+        />
+      </InputGroup>
 
       <ScrollArea className="flex-1">
         {filtered.length === 0 ? (
