@@ -1,5 +1,4 @@
 export * from './icons/index'
-export * from './tweet-actions'
 export * from './tweet-body'
 export * from './tweet-container'
 export * from './tweet-header'

@@ -4,6 +4,7 @@
  * @public
  */
 export interface IErrorData {
+  data: unknown
   errors: IErrorDetails[]
 }
 

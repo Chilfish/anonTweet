@@ -7,6 +7,7 @@ import { ResourceType } from '~/lib/rettiwt-api'
 import { Extractors } from '~/lib/rettiwt-api/collections/Extractors'
 import { RettiwtPool } from '~/lib/SmartPool'
 import { enrichTweet } from './parseTweet'
+// import { writeFile } from 'node:fs/promises'
 
 // config.ts
 const KEYS = (typeof process === 'undefined' ? '' : process.env.TWEET_KEYS || '').split(',').filter(Boolean)
@@ -108,6 +109,7 @@ export async function getEnrichedTweet(
   if (!tweet) {
     return null
   }
+  // await writeFile('data/tweet.json', JSON.stringify(tweet, null, 2), 'utf8')
   try {
     const richTweet = enrichTweet(tweet)
     return richTweet

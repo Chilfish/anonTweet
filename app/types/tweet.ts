@@ -23,7 +23,7 @@ export interface TweetBase {
   /**
    * Text range of the tweet text.
    */
-  display_text_range: number[]
+  // display_text_range: number[]
   /**
    * All the entities that are part of the tweet. Like hashtags, mentions, urls, etc.
    */
@@ -53,11 +53,11 @@ export interface TweetBase {
  */
 export interface Tweet extends TweetBase {
   __typename: 'Tweet'
-  favorite_count: number
+  // favorite_count: number
   mediaDetails?: MediaDetails[]
   // photos?: TweetPhoto[]
   // video?: TweetVideo
-  conversation_count: number
+  // conversation_count: number
   news_action_type: 'conversation'
   quoted_tweet?: QuotedTweet
   in_reply_to_status_id_str?: string

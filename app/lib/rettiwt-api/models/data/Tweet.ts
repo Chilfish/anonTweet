@@ -22,24 +22,24 @@ export class Tweet implements ITweet {
   /** The raw tweet details. */
   private readonly _raw: IRawTweet
 
-  public bookmarkCount: number
+  public bookmarkCount?: number
   public conversationId: string
   public createdAt: string
   public entities: TweetEntities
   public fullText: string
   public id: string
   public lang: string
-  public likeCount: number
+  public likeCount?: number
   public media?: TweetMedia[]
-  public quoteCount: number
+  public quoteCount?: number
   public quoted?: Tweet
-  public replyCount: number
+  public replyCount?: number
   public replyTo?: string
-  public retweetCount: number
+  public retweetCount?: number
   public retweetedTweet?: Tweet
   public tweetBy: User
   public url: string
-  public viewCount: number
+  public viewCount?: number
 
   /**
    * @param tweet - The raw tweet details.
@@ -53,14 +53,16 @@ export class Tweet implements ITweet {
     this.entities = new TweetEntities(tweet.legacy.entities)
     this.media = tweet.legacy.extended_entities?.media?.map(media => new TweetMedia(media))
     this.quoted = this._getQuotedTweet(tweet)
-    this.fullText = tweet.note_tweet ? tweet.note_tweet.note_tweet_results.result.text : tweet.legacy.full_text
+    this.fullText = tweet.note_tweet?.note_tweet_results?.result?.text
+      ? tweet.note_tweet.note_tweet_results.result.text
+      : tweet.legacy.full_text
     this.replyTo = tweet.legacy.in_reply_to_status_id_str
     this.lang = tweet.legacy.lang
     this.quoteCount = tweet.legacy.quote_count
     this.replyCount = tweet.legacy.reply_count
     this.retweetCount = tweet.legacy.retweet_count
     this.likeCount = tweet.legacy.favorite_count
-    this.viewCount = tweet.views.count ? Number.parseInt(tweet.views.count) : 0
+    this.viewCount = tweet.views?.count ? Number.parseInt(tweet.views.count) : undefined
     this.bookmarkCount = tweet.legacy.bookmark_count
     this.retweetedTweet = this._getRetweetedTweet(tweet)
     this.url = `https://x.com/${this.tweetBy.userName}/status/${this.id}`
@@ -272,7 +274,7 @@ export class Tweet implements ITweet {
  *
  * @public
  */
-export class TweetEntities {
+export class TweetEntities implements ITweetEntities {
   /** The list of hashtags mentioned in the tweet. */
   public hashtags: string[] = []
 
@@ -325,7 +327,10 @@ export class TweetEntities {
  *
  * @public
  */
-export class TweetMedia {
+export class TweetMedia implements ITweetMedia {
+  /** The ID of the media. */
+  public id: string
+
   /** The thumbnail URL for the video content of the tweet. */
   public thumbnailUrl?: string
 
@@ -339,6 +344,8 @@ export class TweetMedia {
    * @param media - The raw media details.
    */
   public constructor(media: IRawExtendedMedia) {
+    this.id = media.id_str
+
     // If the media is a photo
     if (media.type === RawMediaType.PHOTO) {
       this.type = MediaType.PHOTO
@@ -347,7 +354,7 @@ export class TweetMedia {
     // If the media is a gif
     else if (media.type === RawMediaType.GIF) {
       this.type = MediaType.GIF
-      this.url = media.video_info?.variants[0]?.url as string
+      this.url = media.video_info?.variants[0].url as string
     }
     // If the media is a video
     else {
@@ -374,6 +381,7 @@ export class TweetMedia {
    */
   public toJSON(): ITweetMedia {
     return {
+      id: this.id,
       thumbnailUrl: this.thumbnailUrl,
       type: this.type,
       url: this.url,

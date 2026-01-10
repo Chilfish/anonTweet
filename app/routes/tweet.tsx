@@ -121,7 +121,7 @@ export default function TweetPage() {
     return (
       <>
         {Header}
-        <TweetNotFound tweetId={tweetId} />
+        <TweetNotFound tweetId={tweetId} error={error} />
       </>
     )
   }

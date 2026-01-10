@@ -84,6 +84,38 @@ function createUserCommand(rettiwt: Rettiwt): Command {
       }
     })
 
+  user.command('bookmark-folders')
+    .description('Fetch your list of bookmark folders')
+    .argument('[cursor]', 'The cursor to the batch of bookmark folders to fetch')
+    .action(async (cursor?: string) => {
+      try {
+        const folders = await rettiwt.user.bookmarkFolders(cursor)
+        output(folders)
+      }
+      catch (error) {
+        output(error)
+      }
+    })
+
+  user.command('bookmark-folder-tweets')
+    .description('Fetch tweets from a specific bookmark folder')
+    .argument('<folderId>', 'The ID of the bookmark folder')
+    .argument('[count]', 'The number of tweets to fetch')
+    .argument('[cursor]', 'The cursor to the batch of tweets to fetch')
+    .action(async (folderId: string, count?: string, cursor?: string) => {
+      try {
+        const tweets = await rettiwt.user.bookmarkFolderTweets(
+          folderId,
+          count ? Number.parseInt(count) : undefined,
+          cursor,
+        )
+        output(tweets)
+      }
+      catch (error) {
+        output(error)
+      }
+    })
+
   // Details
   user.command('details')
     .description('Fetch the details of the user with the given id/username')
@@ -291,6 +323,28 @@ function createUserCommand(rettiwt: Rettiwt): Command {
       }
     })
 
+  // Update Profile
+  user.command('update-profile')
+    .description('Update your profile information')
+    .option('-n, --name <string>', 'Display name (max 50 characters)')
+    .option('-u, --url <string>', 'Profile URL')
+    .option('-l, --location <string>', 'Location (max 30 characters)')
+    .option('-d, --description <string>', 'Description/bio (max 160 characters)')
+    .action(async (options?: UserProfileUpdateOptions) => {
+      try {
+        const result = await rettiwt.user.updateProfile({
+          name: options?.name,
+          url: options?.url,
+          location: options?.location,
+          description: options?.description,
+        })
+        output(result)
+      }
+      catch (error) {
+        output(error)
+      }
+    })
+
   return user
 }
 
@@ -303,6 +357,16 @@ interface UserAnalyticsOptions {
   granularity?: string
   metrics?: string
   verifiedFollowers?: boolean
+}
+
+/**
+ * The options for updating user profile.
+ */
+interface UserProfileUpdateOptions {
+  name?: string
+  url?: string
+  location?: string
+  description?: string
 }
 
 export default createUserCommand

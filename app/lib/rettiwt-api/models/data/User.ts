@@ -20,8 +20,8 @@ export class User implements IUser {
   public followingsCount: number
   public fullName: string
   public id: string
-  public isFollowed: boolean
-  public isFollowing: boolean
+  public isFollowed?: boolean
+  public isFollowing?: boolean
   public isVerified: boolean
   public likeCount: number
   public location?: string
@@ -37,21 +37,21 @@ export class User implements IUser {
   public constructor(user: IRawUser) {
     this._raw = { ...user }
     this.id = user.rest_id
-    this.userName = user.legacy.screen_name
-    this.fullName = user.legacy.name
-    this.createdAt = new Date(user.legacy.created_at).toISOString()
+    this.userName = user.core?.screen_name ?? user.legacy.screen_name ?? ''
+    this.fullName = user.core?.name ?? user.legacy.name ?? ''
+    this.createdAt = new Date(user.core?.created_at ?? user.legacy.created_at ?? 0).toISOString()
     this.description = user.legacy.description.length ? user.legacy.description : undefined
-    this.isFollowed = user.legacy.following ?? false
-    this.isFollowing = user.legacy.followed_by ?? false
+    this.isFollowed = user.legacy.following
+    this.isFollowing = user.legacy.followed_by
     this.isVerified = user.is_blue_verified
     this.likeCount = user.legacy.favourites_count
     this.followersCount = user.legacy.followers_count
     this.followingsCount = user.legacy.friends_count
     this.statusesCount = user.legacy.statuses_count
-    this.location = user.legacy.location.length ? user.legacy.location : undefined
+    this.location = user.location?.location ?? user.legacy.location ?? undefined
     this.pinnedTweet = user.legacy.pinned_tweet_ids_str[0]
     this.profileBanner = user.legacy.profile_banner_url
-    this.profileImage = user.legacy.profile_image_url_https
+    this.profileImage = user.avatar?.image_url ?? user.legacy.profile_image_url_https ?? ''
   }
 
   /** The raw user details. */
@@ -75,7 +75,7 @@ export class User implements IUser {
 
     // Deserializing valid data
     for (const item of extract) {
-      if (item.legacy && item.legacy.created_at) {
+      if (item.legacy && (item.core?.created_at || item.legacy.created_at)) {
         // Logging
         LogService.log(LogActions.DESERIALIZE, { id: item.rest_id })
 
@@ -113,7 +113,7 @@ export class User implements IUser {
 
     // Deserializing valid data
     for (const item of extract) {
-      if (item.legacy && item.legacy.created_at) {
+      if (item.legacy && (item.core?.created_at || item.legacy.created_at)) {
         // Logging
         LogService.log(LogActions.DESERIALIZE, { id: item.rest_id })
 

@@ -3,9 +3,7 @@ import type {
   LinkPreviewCard,
   MediaDetails,
   RawTweet,
-  TweetPhoto,
   TweetUser,
-  TweetVideo,
 } from '~/types'
 import { getEntities } from './entitytParser'
 
@@ -31,10 +29,7 @@ export function enrichTweet(sourceData: RawTweet, retweetedOrignalId?: string): 
     id_str: tweet.rest_id,
     lang: tweet.legacy.lang,
     url: tweetUrl,
-    favorite_count: tweet.legacy.favorite_count,
     created_at: tweet.legacy.created_at,
-    conversation_count: tweet.legacy.reply_count,
-    display_text_range: tweet.legacy.display_text_range as [number, number],
     __typename: 'Tweet',
     text,
     user,
@@ -56,14 +51,14 @@ export function transformUserResponse(sourceData: RawTweet): TweetUser {
 
   const transformedUser = {
     id_str: RawTweet.rest_id,
-    name: legacy.name,
-    screen_name: legacy.screen_name,
+    name: RawTweet.core.name,
+    screen_name: RawTweet.core.screen_name,
     is_blue_verified: RawTweet.is_blue_verified,
     profile_image_shape: RawTweet.profile_image_shape as TweetUser['profile_image_shape'],
     verified: legacy.verified,
     // @ts-expect-error: The verified_type is not always defined
     verified_type: legacy.verified_type,
-    profile_image_url_https: legacy.profile_image_url_https,
+    profile_image_url_https: RawTweet.avatar.image_url,
   }
 
   return transformedUser
@@ -177,66 +172,6 @@ export function mapTwitterCard(cardData: any): LinkPreviewCard | undefined {
   }
 
   return card
-}
-
-function mapPhotoEntities(tweet: RawTweet): TweetPhoto[] | undefined {
-  const mediaEntities = tweet.legacy.entities.media || tweet.legacy.extended_entities?.media
-
-  if (!mediaEntities) {
-    return undefined
-  }
-
-  const photos = mediaEntities.filter(media => media.type === 'photo')
-
-  if (photos.length === 0) {
-    return undefined
-  }
-
-  return photos.map(photo => ({
-    backgroundColor: {
-      red: 0,
-      green: 0,
-      blue: 0,
-    },
-    cropCandidates: photo.original_info?.focus_rects || [],
-    expandedUrl: photo.expanded_url,
-    url: photo.media_url_https,
-    width: photo.original_info?.width || photo.sizes?.large?.w || 0,
-    height: photo.original_info?.height || photo.sizes?.large?.h || 0,
-  }))
-}
-
-function mapVideoEntities(tweet: RawTweet): TweetVideo | undefined {
-  const mediaEntities = tweet.legacy.entities.media || tweet.legacy.extended_entities?.media
-
-  if (!mediaEntities) {
-    return undefined
-  }
-
-  const video = mediaEntities.find(media => media.type === 'video')
-
-  if (!video || !video.video_info) {
-    return undefined
-  }
-
-  return {
-    aspectRatio: video.video_info.aspect_ratio as [number, number],
-    contentType: 'video/mp4',
-    durationMs: video.video_info.duration_millis || 0,
-    mediaAvailability: {
-      status: video.ext_media_availability?.status || 'Available',
-    },
-    poster: video.media_url_https,
-    variants: video.video_info.variants.map(variant => ({
-      type: variant.content_type,
-      src: variant.url,
-    })),
-    videoId: {
-      type: 'tweet',
-      id: video.id_str || '',
-    },
-    viewCount: 0,
-  }
 }
 
 export function mapMediaDetails(tweet: RawTweet): MediaDetails[] | undefined {

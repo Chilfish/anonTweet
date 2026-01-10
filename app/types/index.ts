@@ -24,7 +24,7 @@ export type EnrichedTweet = Omit<Tweet, OmitTypes> & {
   quoted_tweet_id?: string
   quotedTweet?: EnrichedTweet
   card?: LinkPreviewCard
-  conversation_count: number
+  // conversation_count: number
   retweetedOrignalId?: string
 }
 

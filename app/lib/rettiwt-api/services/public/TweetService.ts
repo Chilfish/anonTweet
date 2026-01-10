@@ -5,6 +5,7 @@ import type { User } from '../../models/data/User'
 import type { RettiwtConfig } from '../../models/RettiwtConfig'
 import type { ITweetFilter } from '../../types/args/FetchArgs'
 import type { INewTweet } from '../../types/args/PostArgs'
+import type { IMediaInitializeUploadResponse } from '../../types/raw/media/InitalizeUpload'
 
 import type { ITweetBookmarkResponse } from '../../types/raw/tweet/Bookmark'
 import type { ITweetDetailsResponse } from '../../types/raw/tweet/Details'
@@ -23,6 +24,7 @@ import type { ITweetUnlikeResponse } from '../../types/raw/tweet/Unlike'
 import type { ITweetUnpostResponse } from '../../types/raw/tweet/Unpost'
 import type { ITweetUnretweetResponse } from '../../types/raw/tweet/Unretweet'
 import type { ITweetUnscheduleResponse } from '../../types/raw/tweet/Unschedule'
+import { statSync } from 'node:fs'
 import { Extractors } from '../../collections/Extractors'
 import { ResourceType } from '../../enums/Resource'
 import { TweetRepliesSortType } from '../../enums/Tweet'
@@ -62,10 +64,10 @@ export class TweetService extends FetcherService {
    * // Bookmarking the Tweet with id '1234567890'
    * rettiwt.tweet.bookmark('1234567890')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -107,10 +109,10 @@ export class TweetService extends FetcherService {
    * // Fetching the details of the tweet with the id '1234567890'
    * rettiwt.tweet.details('1234567890')
    * .then(res => {
-   *   console.log(res);  # 'res' is a single tweet
+   *  console.log(res); # 'res' is a single tweet
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    *
@@ -126,10 +128,10 @@ export class TweetService extends FetcherService {
    * // Fetching the details of the tweets with IDs '123', '456', '789'
    * rettiwt.tweet.details(['123', '456', '789'])
    * .then(res => {
-   *   console.log(res);  # 'res' is an array of tweets
+   *  console.log(res); # 'res' is an array of tweets
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -192,10 +194,10 @@ export class TweetService extends FetcherService {
    * // Liking the Tweet with id '1234567890'
    * rettiwt.tweet.like('1234567890')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -233,10 +235,10 @@ export class TweetService extends FetcherService {
    * // Fetching the most recent 100 likers of the Tweet with id '1234567890'
    * rettiwt.tweet.likers('1234567890')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -275,10 +277,10 @@ export class TweetService extends FetcherService {
    * // Posting a tweet to twitter
    * rettiwt.tweet.post({ text: 'Hello World!' })
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    *
@@ -294,10 +296,10 @@ export class TweetService extends FetcherService {
    * // Posting a tweet, containing an image with ID '1234567890', to twitter
    * rettiwt.tweet.post({ text: 'What a nice view!', media: [{ id: '1234567890' }] })
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    *
@@ -313,10 +315,10 @@ export class TweetService extends FetcherService {
    * // Posting a simple text reply, to a tweet with id "1234567890"
    * rettiwt.tweet.post({ text: 'Hello!', replyTo: "1234567890" })
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    *
@@ -332,10 +334,10 @@ export class TweetService extends FetcherService {
    * // Posting a simple text tweet, quoting a tweet with id "1234567890"
    * rettiwt.tweet.post({ text: 'Hello!', quote: "1234567890" })
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -375,10 +377,10 @@ export class TweetService extends FetcherService {
    * // Fetching the first 100 replies to the Tweet with id '1234567890'
    * rettiwt.tweet.replies('1234567890')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    *
@@ -424,10 +426,10 @@ export class TweetService extends FetcherService {
    * // Retweeting the Tweet with id '1234567890'
    * rettiwt.tweet.retweet('1234567890')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -463,10 +465,10 @@ export class TweetService extends FetcherService {
    * // Fetching the most recent 100 retweeters of the Tweet with id '1234567890'
    * rettiwt.tweet.retweeters('1234567890')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -505,10 +507,10 @@ export class TweetService extends FetcherService {
    * // Scheduling a tweet to posted at 19th of August, 2024, at 11:59:00 AM, in local time
    * rettiwt.tweet.schedule({ text: 'Hello World!', scheduleFor: new Date('2024-08-19 23:59:00') })
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    *
@@ -549,10 +551,10 @@ export class TweetService extends FetcherService {
    * // Fetching the most recent 5 tweets from user 'user1'
    * rettiwt.tweet.search({ fromUsers: ['user1'] }, 5)
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    *
@@ -597,15 +599,15 @@ export class TweetService extends FetcherService {
    *
    * // Creating a function that streams all new tweets from the user 'user1'
    * async function streamTweets() {
-   *   try {
-   *     // Awaiting for the tweets returned by the AsyncGenerator returned by the method
-   *     for await (const tweet of rettiwt.tweet.stream({ fromUsers: ['user1'] }, 5000)) {
-   *       console.log(tweet.fullText);
-   *     }
+   *  try {
+   *   // Awaiting for the tweets returned by the AsyncGenerator returned by the method
+   *   for await (const tweet of rettiwt.tweet.stream({ fromUsers: ['user1'] }, 5000)) {
+   *    console.log(tweet.fullText);
    *   }
-   *   catch (err) {
-   *     console.log(err);
-   *   }
+   *  }
+   *  catch (err) {
+   *   console.log(err);
+   *  }
    * }
    *
    * // Calling the function
@@ -633,7 +635,7 @@ export class TweetService extends FetcherService {
 
       // Store the most recent tweet ID from this batch
       if (tweets.list.length > 0 && cursor === undefined) {
-        nextSinceId = tweets.list[0]!.id
+        nextSinceId = tweets.list[0].id
       }
 
       // If there are more tweets to fetch, adjust the cursor value
@@ -666,10 +668,10 @@ export class TweetService extends FetcherService {
    * // Unbookmarking the tweet with id '1234567890'
    * rettiwt.tweet.unbookmark('1234567890')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -703,10 +705,10 @@ export class TweetService extends FetcherService {
    * // Unliking the Tweet with id '1234567890'
    * rettiwt.tweet.unlike('1234567890')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -740,10 +742,10 @@ export class TweetService extends FetcherService {
    * // Unposting the Tweet with id '1234567890'
    * rettiwt.tweet.unpost('1234567890')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -777,10 +779,10 @@ export class TweetService extends FetcherService {
    * // Unretweeting the Tweet with id '1234567890'
    * rettiwt.tweet.unretweet('1234567890')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -814,10 +816,10 @@ export class TweetService extends FetcherService {
    * // Unscheduling the Tweet with id '1234567890'
    * rettiwt.tweet.unschedule('1234567890')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -851,10 +853,10 @@ export class TweetService extends FetcherService {
    * // Uploading a file called mountains.jpg
    * rettiwt.tweet.upload('mountains.jpg')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    *
@@ -865,20 +867,20 @@ export class TweetService extends FetcherService {
    * - Instead of a path to the media, an ArrayBuffer containing the media can also be uploaded.
    */
   public async upload(media: string | ArrayBuffer): Promise<string> {
-    // // INITIALIZE
-    // const size = typeof media === 'string' ? statSync(media).size : media.byteLength
-    // const id: string = (
-    //   await this.request<IMediaInitializeUploadResponse>(ResourceType.MEDIA_UPLOAD_INITIALIZE, {
-    //     upload: { size },
-    //   })
-    // ).media_id_string
+    // INITIALIZE
+    const size = typeof media === 'string' ? statSync(media).size : media.byteLength
+    const id: string = (
+      await this.request<IMediaInitializeUploadResponse>(ResourceType.MEDIA_UPLOAD_INITIALIZE, {
+        upload: { size },
+      })
+    ).media_id_string
 
-    // // APPEND
-    // await this.request<unknown>(ResourceType.MEDIA_UPLOAD_APPEND, { upload: { id, media } })
+    // APPEND
+    await this.request<unknown>(ResourceType.MEDIA_UPLOAD_APPEND, { upload: { id, media } })
 
-    // // FINALIZE
-    // await this.request<unknown>(ResourceType.MEDIA_UPLOAD_FINALIZE, { upload: { id } })
+    // FINALIZE
+    await this.request<unknown>(ResourceType.MEDIA_UPLOAD_FINALIZE, { upload: { id } })
 
-    return 'not_implemented_yet'
+    return id
   }
 }

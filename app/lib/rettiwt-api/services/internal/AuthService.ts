@@ -63,7 +63,7 @@ export class AuthService {
 
     // If user id was found
     if (searchResults) {
-      return searchResults[0]!
+      return searchResults[0]
     }
     // If user id was not found
     else {
@@ -86,11 +86,11 @@ export class AuthService {
    * // Logging in an getting a new guest key
    * rettiwt.auth.guest()
    * .then(guestKey => {
-   *   // Use the guest key
-   *   ...
+   *  // Use the guest key
+   *  ...
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -101,10 +101,12 @@ export class AuthService {
     // Getting the guest token
     await axios
       .post<{
+
       guest_token: string
+
     }>('https://api.twitter.com/1.1/guest/activate.json', undefined, {
         headers: cred.toHeader(),
-        // httpsAgent: this._config.httpsAgent,
+        httpsAgent: this._config.httpsAgent,
       })
       .then((res) => {
         cred.guestToken = res.data.guest_token

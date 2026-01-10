@@ -38,14 +38,14 @@ export interface IFetchArgs {
    * - Works only for cursored resources.
    * - Does not work for {@link ResourceType.TWEET_REPLIES}.
    * - Must be \<= 20 for:
-   *   - {@link ResourceType.USER_TIMELINE}
-   *   - {@link ResourceType.USER_TIMELINE}
-   *   - {@link ResourceType.USER_TIMELINE_AND_REPLIES}
+   *  - {@link ResourceType.USER_TIMELINE}
+   *  - {@link ResourceType.USER_TIMELINE}
+   *  - {@link ResourceType.USER_TIMELINE_AND_REPLIES}
    * - Must be \<= 100 for all other cursored resources.
    * - Due a bug on Twitter's end, count does not work for {@link ResourceType.USER_FOLLOWERS} and {@link ResourceType.USER_FOLLOWING}.
    * - Has not effect for:
-   *   - {@link ResourceType.USER_FEED_FOLLOWED}
-   *   - {@link ResourceType.USER_FEED_RECOMMENDED}
+   *  - {@link ResourceType.USER_FEED_FOLLOWED}
+   *  - {@link ResourceType.USER_FEED_RECOMMENDED}
    */
   count?: number
 

@@ -64,7 +64,7 @@ export function useProxyMedia() {
   const mediaProxyUrl = useAppConfigStore(s => s.mediaProxyUrl)
 
   return (url: string, force?: boolean) => {
-    if (url.startsWith(mediaProxyUrl))
+    if (url?.startsWith(mediaProxyUrl))
       return url
 
     if (enableMediaProxy || force)

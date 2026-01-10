@@ -1,6 +1,6 @@
 import type { AxiosRequestConfig } from 'axios'
 
-// import fs from 'node:fs'
+import fs from 'node:fs'
 import FormData from 'form-data'
 
 /**
@@ -15,15 +15,17 @@ export class MediaRequests {
    */
   public static appendUpload(id: string, media: string | ArrayBuffer): AxiosRequestConfig {
     const data = new FormData()
-    // data.append('media', typeof media === 'string' ? fs.createReadStream(media) : Buffer.from(media))
+    data.append('media', typeof media === 'string' ? fs.createReadStream(media) : Buffer.from(media))
     return {
       method: 'post',
       headers: { referer: 'https://x.com' },
       url: 'https://upload.x.com/i/media/upload.json',
       params: {
+
         command: 'APPEND',
         media_id: id,
         segment_index: 0,
+
       },
       data,
     }
@@ -38,8 +40,10 @@ export class MediaRequests {
       headers: { referer: 'https://x.com' },
       url: 'https://upload.x.com/i/media/upload.json',
       params: {
+
         command: 'FINALIZE',
         media_id: id,
+
       },
     }
   }
@@ -53,8 +57,10 @@ export class MediaRequests {
       headers: { referer: 'https://x.com' },
       url: 'https://upload.x.com/i/media/upload.json',
       params: {
+
         command: 'INIT',
         total_bytes: size,
+
       },
     }
   }
