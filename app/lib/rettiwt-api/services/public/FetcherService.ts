@@ -3,13 +3,12 @@ import type { ResourceType } from '../../enums/Resource'
 import type { RettiwtConfig } from '../../models/RettiwtConfig'
 import type { IFetchArgs } from '../../types/args/FetchArgs'
 import type { IPostArgs } from '../../types/args/PostArgs'
-
 import type { ITransactionHeader } from '../../types/auth/TransactionHeader'
 import type { IErrorHandler } from '../../types/ErrorHandler'
 import type { IErrorData } from '../../types/raw/base/Error'
 import axios, { isAxiosError } from 'axios'
 import { Cookie } from 'cookiejar'
-import { JSDOM } from 'jsdom'
+import { Window } from 'happy-dom'
 import { ClientTransaction } from 'x-client-transaction-id'
 import { AllowGuestAuthenticationGroup, FetchResourcesGroup, PostResourcesGroup } from '../../collections/Groups'
 import { Requests } from '../../collections/Requests'
@@ -127,50 +126,47 @@ export class FetcherService {
   }
 
   private async _handleXMigration(): Promise<Document> {
-    // Fetch X.com homepage
+    const parseHtml = (html: string) => {
+      const window = new Window({
+        url: 'https://x.com',
+        settings: {
+          disableJavaScriptFileLoading: true,
+          disableJavaScriptEvaluation: true,
+          disableCSSFileLoading: true,
+        },
+      })
+      window.document.write(html)
+      return window.document
+    }
     const homePageResponse = await axios.get<string>('https://x.com', {
       headers: this.config.headers,
       httpAgent: this.config.httpsAgent,
       httpsAgent: this.config.httpsAgent,
     })
-
-    // Parse HTML using linkedom
-    let dom = new JSDOM(homePageResponse.data)
-    let document = dom.window.document
-
+    let document = parseHtml(homePageResponse.data)
     // Check for migration redirection links
     const migrationRedirectionRegex = /(https?:\/\/(?:www\.)?(twitter|x)\.com(\/x)?\/migrate([/?])?tok=[\w%\-]+)+/i
-
     const metaRefresh = document.querySelector('meta[http-equiv=\'refresh\']')
     const metaContent = metaRefresh ? metaRefresh.getAttribute('content') || '' : ''
-
     const migrationRedirectionUrl
       = migrationRedirectionRegex.exec(metaContent) || migrationRedirectionRegex.exec(homePageResponse.data)
-
     if (migrationRedirectionUrl) {
-      // Follow redirection URL
       const redirectResponse = await axios.get<string>(migrationRedirectionUrl[0], {
         httpAgent: this.config.httpsAgent,
         httpsAgent: this.config.httpsAgent,
       })
-
-      dom = new JSDOM(redirectResponse.data)
-      document = dom.window.document
+      document = parseHtml(redirectResponse.data)
     }
-
-    // Handle migration form if present
     const migrationForm
       = document.querySelector('form[name=\'f\']')
         || document.querySelector('form[action=\'https://x.com/x/migrate\']')
-
     if (migrationForm) {
       const url = migrationForm.getAttribute('action') || 'https://x.com/x/migrate'
       const method = migrationForm.getAttribute('method') || 'POST'
-
       // Collect form input fields
       const requestPayload = new FormData()
-
       const inputFields = migrationForm.querySelectorAll('input')
+
       for (const element of Array.from(inputFields)) {
         const name = element.getAttribute('name')
         const value = element.getAttribute('value')
@@ -178,28 +174,21 @@ export class FetcherService {
           requestPayload.append(name, value)
         }
       }
-
       // Submit form using POST request
       const formResponse = await axios.request<string>({
         method,
         url,
         data: requestPayload,
         headers: {
-
           'Content-Type': 'multipart/form-data',
           ...this.config.headers,
-
         },
         httpAgent: this.config.httpsAgent,
         httpsAgent: this.config.httpsAgent,
       })
-
-      dom = new JSDOM(formResponse.data)
-      document = dom.window.document
+      document = parseHtml(formResponse.data)
     }
-
-    // Return final DOM document
-    return document
+    return document as unknown as Document
   }
 
   /**
