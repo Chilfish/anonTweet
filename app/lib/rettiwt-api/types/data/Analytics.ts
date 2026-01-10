@@ -1,4 +1,4 @@
-import type { IAnalyticsMetric } from '../raw/base/Analytic'
+import type { IAnalyticsMetric } from '../../types/raw/base/Analytic'
 /**
  * The details of the analytic result of the connected User.
  *

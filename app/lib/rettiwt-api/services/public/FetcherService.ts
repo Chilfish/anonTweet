@@ -1,13 +1,15 @@
+import type { AxiosError } from 'axios'
 import type { ResourceType } from '../../enums/Resource'
 import type { RettiwtConfig } from '../../models/RettiwtConfig'
 import type { IFetchArgs } from '../../types/args/FetchArgs'
-
 import type { IPostArgs } from '../../types/args/PostArgs'
 import type { ITransactionHeader } from '../../types/auth/TransactionHeader'
 import type { IErrorHandler } from '../../types/ErrorHandler'
+import type { IErrorData } from '../../types/raw/base/Error'
 import axios, { isAxiosError } from 'axios'
 import { Cookie } from 'cookiejar'
-import { ClientTransaction, handleXMigration } from 'x-client-transaction-id'
+import { Window } from 'happy-dom'
+import { ClientTransaction } from 'x-client-transaction-id'
 import { AllowGuestAuthenticationGroup, FetchResourcesGroup, PostResourcesGroup } from '../../collections/Groups'
 import { Requests } from '../../collections/Requests'
 import { ApiErrors } from '../../enums/Api'
@@ -15,6 +17,7 @@ import { LogActions } from '../../enums/Logging'
 import { FetchArgs } from '../../models/args/FetchArgs'
 import { PostArgs } from '../../models/args/PostArgs'
 import { AuthCredential } from '../../models/auth/AuthCredential'
+import { TwitterError } from '../../models/errors/TwitterError'
 
 import { AuthService } from '../internal/AuthService'
 import { ErrorService } from '../internal/ErrorService'
@@ -104,7 +107,7 @@ export class FetcherService {
    */
   private async _getTransactionHeader(method: string, url: string): Promise<ITransactionHeader> {
     // Get the X homepage HTML document (using utility function)
-    const document = await handleXMigration()
+    const document = await this._handleXMigration()
 
     // Create and initialize ClientTransaction instance
     const transaction = await ClientTransaction.create(document)
@@ -116,8 +119,76 @@ export class FetcherService {
     const tid = await transaction.generateTransactionId(method.toUpperCase(), path)
 
     return {
+
       'x-client-transaction-id': tid,
+
     }
+  }
+
+  private async _handleXMigration(): Promise<Document> {
+    const parseHtml = (html: string) => {
+      const window = new Window({
+        url: 'https://x.com',
+        settings: {
+          disableJavaScriptFileLoading: true,
+          disableJavaScriptEvaluation: true,
+          disableCSSFileLoading: true,
+        },
+      })
+      window.document.write(html)
+      return window.document
+    }
+    const homePageResponse = await axios.get<string>('https://x.com', {
+      headers: this.config.headers,
+      httpAgent: this.config.httpsAgent,
+      httpsAgent: this.config.httpsAgent,
+    })
+    let document = parseHtml(homePageResponse.data)
+    // Check for migration redirection links
+    const migrationRedirectionRegex = /(https?:\/\/(?:www\.)?(twitter|x)\.com(\/x)?\/migrate([/?])?tok=[\w%\-]+)+/i
+    const metaRefresh = document.querySelector('meta[http-equiv=\'refresh\']')
+    const metaContent = metaRefresh ? metaRefresh.getAttribute('content') || '' : ''
+    const migrationRedirectionUrl
+      = migrationRedirectionRegex.exec(metaContent) || migrationRedirectionRegex.exec(homePageResponse.data)
+    if (migrationRedirectionUrl) {
+      const redirectResponse = await axios.get<string>(migrationRedirectionUrl[0], {
+        httpAgent: this.config.httpsAgent,
+        httpsAgent: this.config.httpsAgent,
+      })
+      document = parseHtml(redirectResponse.data)
+    }
+    const migrationForm
+      = document.querySelector('form[name=\'f\']')
+        || document.querySelector('form[action=\'https://x.com/x/migrate\']')
+    if (migrationForm) {
+      const url = migrationForm.getAttribute('action') || 'https://x.com/x/migrate'
+      const method = migrationForm.getAttribute('method') || 'POST'
+      // Collect form input fields
+      const requestPayload = new FormData()
+      const inputFields = migrationForm.querySelectorAll('input')
+
+      for (const element of Array.from(inputFields)) {
+        const name = element.getAttribute('name')
+        const value = element.getAttribute('value')
+        if (name && value) {
+          requestPayload.append(name, value)
+        }
+      }
+      // Submit form using POST request
+      const formResponse = await axios.request<string>({
+        method,
+        url,
+        data: requestPayload,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          ...this.config.headers,
+        },
+        httpAgent: this.config.httpsAgent,
+        httpsAgent: this.config.httpsAgent,
+      })
+      document = parseHtml(formResponse.data)
+    }
+    return document as unknown as Document
   }
 
   /**
@@ -189,10 +260,10 @@ export class FetcherService {
    * // Fetching the details of the User with username 'user1'
    * fetcher.request(ResourceType.USER_DETAILS_BY_USERNAME, { id: 'user1' })
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -224,8 +295,8 @@ export class FetcherService {
       ...cred.toHeader(),
       ...this.config.headers,
     }
-    // config.httpAgent = this.config.httpsAgent
-    // config.httpsAgent = this.config.httpsAgent
+    config.httpAgent = this.config.httpsAgent
+    config.httpsAgent = this.config.httpsAgent
     config.timeout = this._timeout
 
     // Using retries for error 404
@@ -234,15 +305,39 @@ export class FetcherService {
       try {
         // Getting and appending transaction information
         config.headers = {
-          ...config.headers,
           ...(await this._getTransactionHeader(config.method ?? '', config.url ?? '')),
+          ...config.headers,
         }
 
         // Introducing a delay
         await this._wait()
 
+        // Getting the response body
+        const responseData = (await axios<T>(config)).data
+
+        // Check for Twitter API errors in response body
+        // Type guard to check if response contains errors
+        const potentialErrorResponse = responseData as unknown as Partial<IErrorData>
+        if (
+          potentialErrorResponse.errors
+          && Array.isArray(potentialErrorResponse.errors)
+          && (potentialErrorResponse.data === undefined
+            || JSON.stringify(potentialErrorResponse.data) === JSON.stringify({}))
+        ) {
+          // Throw TwitterError using existing error class
+          const axiosError = {
+            response: {
+              data: { errors: potentialErrorResponse.errors },
+              status: 200,
+            },
+            message: potentialErrorResponse.errors[0]?.message ?? 'Twitter API Error',
+            status: 200,
+          } as AxiosError<IErrorData>
+          throw new TwitterError(axiosError)
+        }
+
         // Returning the reponse body
-        return (await axios<T>(config)).data
+        return responseData
       }
       catch (err) {
         // If it's an error 404, retry
@@ -253,7 +348,6 @@ export class FetcherService {
         // Else, delegate error handling
         else {
           this._errorHandler.handle(err)
-          throw err
         }
       }
       finally {

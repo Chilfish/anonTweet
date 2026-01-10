@@ -1,3 +1,4 @@
+import type { IBookmarkFolder } from './BookmarkFolder'
 import type { IConversation } from './Conversation'
 import type { IDirectMessage } from './DirectMessage'
 import type { IList } from './List'
@@ -12,7 +13,9 @@ import type { IUser } from './User'
  *
  * @public
  */
-export interface ICursoredData<T extends IDirectMessage | IConversation | INotification | ITweet | IUser | IList> {
+export interface ICursoredData<
+  T extends IDirectMessage | IConversation | INotification | ITweet | IUser | IList | IBookmarkFolder,
+> {
   /** The batch of data of the given type. */
   list: T[]
 

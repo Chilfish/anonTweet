@@ -1,12 +1,16 @@
 import type { Analytics } from '../../models/data/Analytics'
+import type { BookmarkFolder } from '../../models/data/BookmarkFolder'
 import type { CursoredData } from '../../models/data/CursoredData'
 import type { List } from '../../models/data/List'
 import type { Notification } from '../../models/data/Notification'
 import type { Tweet } from '../../models/data/Tweet'
 import type { User } from '../../models/data/User'
 import type { RettiwtConfig } from '../../models/RettiwtConfig'
+import type { IProfileUpdateOptions } from '../../types/args/ProfileArgs'
 import type { IUserAffiliatesResponse } from '../../types/raw/user/Affiliates'
 import type { IUserAnalyticsResponse } from '../../types/raw/user/Analytics'
+import type { IUserBookmarkFoldersResponse } from '../../types/raw/user/BookmarkFolders'
+import type { IUserBookmarkFolderTweetsResponse } from '../../types/raw/user/BookmarkFolderTweets'
 import type { IUserBookmarksResponse } from '../../types/raw/user/Bookmarks'
 import type { IUserDetailsResponse } from '../../types/raw/user/Details'
 import type { IUserDetailsBulkResponse } from '../../types/raw/user/DetailsBulk'
@@ -19,6 +23,7 @@ import type { IUserLikesResponse } from '../../types/raw/user/Likes'
 import type { IUserListsResponse } from '../../types/raw/user/Lists'
 import type { IUserMediaResponse } from '../../types/raw/user/Media'
 import type { IUserNotificationsResponse } from '../../types/raw/user/Notifications'
+import type { IUserProfileUpdateResponse } from '../../types/raw/user/ProfileUpdate'
 import type { IUserRecommendedResponse } from '../../types/raw/user/Recommended'
 import type { IUserSubscriptionsResponse } from '../../types/raw/user/Subscriptions'
 import type { IUserTweetsResponse } from '../../types/raw/user/Tweets'
@@ -27,6 +32,7 @@ import type { IUserUnfollowResponse } from '../../types/raw/user/Unfollow'
 import { Extractors } from '../../collections/Extractors'
 import { RawAnalyticsGranularity, RawAnalyticsMetric } from '../../enums/raw/Analytics'
 import { ResourceType } from '../../enums/Resource'
+import { ProfileUpdateOptions } from '../../models/args/ProfileArgs'
 
 import { FetcherService } from './FetcherService'
 
@@ -65,10 +71,10 @@ export class UserService extends FetcherService {
    * // Fetching the first 100 affiliates of the User with id '1234567890'
    * rettiwt.user.affiliates('1234567890')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -112,7 +118,7 @@ export class UserService extends FetcherService {
    *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -147,6 +153,88 @@ export class UserService extends FetcherService {
   }
 
   /**
+   * Get the list of tweets in a specific bookmark folder of the logged in user.
+   *
+   * @param folderId - The ID of the bookmark folder.
+   * @param count - The number of tweets to fetch, must be \<= 100.
+   * @param cursor - The cursor to the batch of tweets to fetch.
+   *
+   * @returns The list of tweets in the bookmark folder.
+   *
+   * @example
+   *
+   * ```ts
+   * import { Rettiwt } from 'rettiwt-api';
+   *
+   * // Creating a new Rettiwt instance using the given 'API_KEY'
+   * const rettiwt = new Rettiwt({ apiKey: API_KEY });
+   *
+   * // Fetching the first 100 tweets from bookmark folder with ID '2001752149647049173'
+   * rettiwt.user.bookmarkFolderTweets('2001752149647049173')
+   * .then(res => {
+   *  console.log(res);
+   * })
+   * .catch(err => {
+   *  console.log(err);
+   * });
+   * ```
+   */
+  public async bookmarkFolderTweets(folderId: string, count?: number, cursor?: string): Promise<CursoredData<Tweet>> {
+    const resource = ResourceType.USER_BOOKMARK_FOLDER_TWEETS
+
+    // Fetching raw list of tweets from folder
+    const response = await this.request<IUserBookmarkFolderTweetsResponse>(resource, {
+      id: folderId,
+      count,
+      cursor,
+    })
+
+    // Deserializing response
+    const data = Extractors[resource](response)
+
+    return data
+  }
+
+  /**
+   * Get the list of bookmark folders of the logged in user.
+   *
+   * @param cursor - The cursor to the batch of bookmark folders to fetch.
+   *
+   * @returns The list of bookmark folders.
+   *
+   * @example
+   *
+   * ```ts
+   * import { Rettiwt } from 'rettiwt-api';
+   *
+   * // Creating a new Rettiwt instance using the given 'API_KEY'
+   * const rettiwt = new Rettiwt({ apiKey: API_KEY });
+   *
+   * // Fetching all bookmark folders of the logged in user
+   * rettiwt.user.bookmarkFolders()
+   * .then(res => {
+   *  console.log(res);
+   * })
+   * .catch(err => {
+   *  console.log(err);
+   * });
+   * ```
+   */
+  public async bookmarkFolders(cursor?: string): Promise<CursoredData<BookmarkFolder>> {
+    const resource = ResourceType.USER_BOOKMARK_FOLDERS
+
+    // Fetching raw list of bookmark folders
+    const response = await this.request<IUserBookmarkFoldersResponse>(resource, {
+      cursor,
+    })
+
+    // Deserializing response
+    const data = Extractors[resource](response)
+
+    return data
+  }
+
+  /**
    * Get the list of bookmarks of the logged in user.
    *
    * @param count - The number of bookmakrs to fetch, must be \<= 100.
@@ -165,10 +253,10 @@ export class UserService extends FetcherService {
    * // Fetching the most recent 100 liked Tweets of the logged in User
    * rettiwt.user.bookmarks()
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -203,10 +291,10 @@ export class UserService extends FetcherService {
    * // Fetching the details of the User
    * rettiwt.user.details()
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -228,13 +316,13 @@ export class UserService extends FetcherService {
    * // Creating a new Rettiwt instance using the given 'API_KEY'
    * const rettiwt = new Rettiwt({ apiKey: API_KEY });
    *
-   * // Fetching the details of the User with username 'user1'
-   * rettiwt.user.details('user1')
+   * // Fetching the details of the User with username 'user1' or '@user1'
+   * rettiwt.user.details('user1') // or @user1
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    *
@@ -250,10 +338,10 @@ export class UserService extends FetcherService {
    * // Fetching the details of the User with id '1234567890'
    * rettiwt.user.details('1234567890')
    * .then(res => {
-   *   console.log(res);  # 'res' is a single tweet
+   *  console.log(res); # 'res' is a single tweet
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -277,10 +365,10 @@ export class UserService extends FetcherService {
    * // Fetching the details of the users with IDs '123', '456', '789'
    * rettiwt.user.details(['123', '456', '789'])
    * .then(res => {
-   *   console.log(res);  # 'res' is an array of users
+   *  console.log(res); # 'res' is an array of users
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -306,6 +394,9 @@ export class UserService extends FetcherService {
       // If username is given
       if (id && isNaN(Number(id))) {
         resource = ResourceType.USER_DETAILS_BY_USERNAME
+        if (id?.startsWith('@')) {
+          id = id.slice(1)
+        }
       }
       // If id is given (or not, for self details)
       else {
@@ -347,10 +438,10 @@ export class UserService extends FetcherService {
    * // Following the User with id '1234567890'
    * rettiwt.user.follow('1234567890')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -384,10 +475,10 @@ export class UserService extends FetcherService {
    * // Fetching the first 35 followed feed items of the logged-in user
    * rettiwt.user.followed()
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    *
@@ -427,10 +518,10 @@ export class UserService extends FetcherService {
    * // Fetching the first 100 followers of the User with id '1234567890'
    * rettiwt.user.followers('1234567890')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -470,10 +561,10 @@ export class UserService extends FetcherService {
    * // Fetching the first 100 following of the User with id '1234567890'
    * rettiwt.user.following('1234567890')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -513,10 +604,10 @@ export class UserService extends FetcherService {
    * // Fetching the top 100 highlights of the User with id '1234567890'
    * rettiwt.user.highlights('1234567890')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -555,10 +646,10 @@ export class UserService extends FetcherService {
    * // Fetching the most recent 100 liked Tweets of the logged in User
    * rettiwt.user.likes()
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -595,12 +686,12 @@ export class UserService extends FetcherService {
    * const rettiwt = new Rettiwt({ apiKey: API_KEY });
    *
    * // Fetching the first 100 Lists of the logged in User
-   * rettiwt.user.likes()
+   * rettiwt.user.lists()
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -640,10 +731,10 @@ export class UserService extends FetcherService {
    * // Fetching the first 100 timeline media tweets of the User with id '1234567890'
    * rettiwt.user.timeline('1234567890')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -680,15 +771,15 @@ export class UserService extends FetcherService {
    *
    * // Creating a function that streams all new notifications
    * async function streamNotifications() {
-   *   try {
-   *     // Awaiting for the notifications returned by the AsyncGenerator returned by the method
-   *     for await (const notification of rettiwt.user.notifications(5000)) {
-   *       console.log(notification.message);
-   *     }
+   *  try {
+   *   // Awaiting for the notifications returned by the AsyncGenerator returned by the method
+   *   for await (const notification of rettiwt.user.notifications(5000)) {
+   *    console.log(notification.message);
    *   }
-   *   catch (err) {
-   *     console.log(err);
-   *   }
+   *  }
+   *  catch (err) {
+   *   console.log(err);
+   *  }
    * }
    *
    * // Calling the function
@@ -754,10 +845,10 @@ export class UserService extends FetcherService {
    * // Fetching the first 35 recommended feed items of the logged-in user
    * rettiwt.user.recommended()
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    *
@@ -797,10 +888,10 @@ export class UserService extends FetcherService {
    * // Fetching the first 100 timeline replies of the User with id '1234567890'
    * rettiwt.user.replies('1234567890')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    *
@@ -827,8 +918,6 @@ export class UserService extends FetcherService {
   /**
    * Get the list of subscriptions of a user.
    *
-   * @deprecated Currently not working.
-   *
    * @param id - The ID of the target user. If no ID is provided, the logged-in user's ID is used.
    * @param count - The number of subscriptions to fetch, must be \<= 100.
    * @param cursor - The cursor to the batch of subscriptions to fetch.
@@ -846,10 +935,10 @@ export class UserService extends FetcherService {
    * // Fetching the first 100 subscriptions of the User with id '1234567890'
    * rettiwt.user.subscriptions('1234567890')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -889,10 +978,10 @@ export class UserService extends FetcherService {
    * // Fetching the first 20 timeline tweets of the User with id '1234567890'
    * rettiwt.user.timeline('1234567890')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    *
@@ -935,10 +1024,10 @@ export class UserService extends FetcherService {
    * // Unfollowing the User with id '12345678'
    * rettiwt.user.unfollow('12345678')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -947,6 +1036,71 @@ export class UserService extends FetcherService {
 
     // Unfollowing the user
     const response = await this.request<IUserUnfollowResponse>(ResourceType.USER_UNFOLLOW, { id })
+
+    // Deserializing the response
+    const data = Extractors[resource](response) ?? false
+
+    return data
+  }
+
+  /**
+   * Update the logged in user's profile.
+   *
+   * @param options - The profile update options.
+   *
+   * @returns Whether the profile update was successful or not.
+   *
+   * @example
+   *
+   * #### Updating only the display name
+   * ```ts
+   * import { Rettiwt } from 'rettiwt-api';
+   *
+   * // Creating a new Rettiwt instance using the given 'API_KEY'
+   * const rettiwt = new Rettiwt({ apiKey: API_KEY });
+   *
+   * // Updating the display name of the logged in user
+   * rettiwt.user.updateProfile({ name: 'New Display Name' })
+   * .then(res => {
+   *  console.log(res);
+   * })
+   * .catch(err => {
+   *  console.log(err);
+   * });
+   * ```
+   *
+   * @example
+   *
+   * #### Updating multiple profile fields
+   * ```ts
+   * import { Rettiwt } from 'rettiwt-api';
+   *
+   * // Creating a new Rettiwt instance using the given 'API_KEY'
+   * const rettiwt = new Rettiwt({ apiKey: API_KEY });
+   *
+   * // Updating multiple profile fields
+   * rettiwt.user.updateProfile({
+   *  name: 'New Display Name',
+   *  location: 'Istanbul',
+   *  description: 'Hello world!',
+   *  url: 'https://example.com'
+   * })
+   * .then(res => {
+   *  console.log(res);
+   * })
+   * .catch(err => {
+   *  console.log(err);
+   * });
+   * ```
+   */
+  public async updateProfile(options: IProfileUpdateOptions): Promise<boolean> {
+    const resource = ResourceType.USER_PROFILE_UPDATE
+
+    // Validating the options
+    const validatedOptions = new ProfileUpdateOptions(options)
+
+    // Updating the profile
+    const response = await this.request<IUserProfileUpdateResponse>(resource, { profileOptions: validatedOptions })
 
     // Deserializing the response
     const data = Extractors[resource](response) ?? false

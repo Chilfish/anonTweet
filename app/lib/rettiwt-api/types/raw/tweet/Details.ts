@@ -53,6 +53,14 @@ interface Result2 {
   legacy: Legacy
   professional: Professional
   verified_phone_status: boolean
+  core: {
+    created_at: string
+    name: string
+    screen_name: string
+  }
+  avatar: {
+    image_url: string
+  }
 }
 
 interface AffiliatesHighlightedLabel {}
@@ -160,24 +168,10 @@ interface Result3 {
 }
 
 interface EntitySet {
-  user_mentions: {
-    id_str: string
-    name: string
-    screen_name: string
-    indices: [number, number]
-  }[]
-  urls: {
-    display_url: string
-    expanded_url: string
-    url: string
-    indices: [number, number]
-  }[]
-  hashtags: {
-    text: string
-    indices: [number, number]
-  }[]
+  user_mentions: any[]
+  urls: any[]
+  hashtags: any[]
   symbols: any[]
-  media: any[]
 }
 
 interface Richtext {

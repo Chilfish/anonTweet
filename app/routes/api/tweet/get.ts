@@ -1,7 +1,9 @@
 import type { Route } from './+types/get'
+import type { TweetData } from '~/types'
 import { data } from 'react-router'
 import z from 'zod'
 import { autoTranslateTweet } from '~/lib/AITranslation'
+import { TwitterError } from '~/lib/rettiwt-api'
 import { getTweets } from '~/lib/service/getTweet'
 import { getDBTweet, insertToTweetDB } from '~/lib/service/getTweet.server'
 import { extractTweetId } from '~/lib/utils'
@@ -35,7 +37,19 @@ export async function action({ request }: Route.ActionArgs) {
     return []
   }
 
-  const tweets = await getTweets(tweetId, getDBTweet)
+  let tweets: TweetData = []
+  try {
+    tweets = await getTweets(tweetId, getDBTweet)
+  }
+  catch (error: any) {
+    if (error instanceof TwitterError) {
+      return {
+        ...error,
+        details: error.details.map(m => m.message).join('\n'),
+      }
+    }
+    return []
+  }
 
   // 并发处理所有推文的翻译（适用于 Thread/Conversation）
   // 使用 Promise.allSettled 或 Promise.all 都可以，这里直接用 Promise.all 等待完成
@@ -80,6 +94,12 @@ export async function loader({
   if (!tweetId) {
     return []
   }
-  const tweets = await getTweets(tweetId, getDBTweet)
-  return tweets
+  try {
+    const tweets = await getTweets(tweetId, getDBTweet)
+    return tweets
+  }
+  catch (error: unknown) {
+    console.log('error in server', error)
+    return []
+  }
 }

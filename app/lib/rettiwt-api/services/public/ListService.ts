@@ -42,10 +42,10 @@ export class ListService extends FetcherService {
    * // Adding a user with ID '123456789' as a member to the list with ID '987654321'
    * rettiwt.list.addMember('987654321', '123456789')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -86,10 +86,10 @@ export class ListService extends FetcherService {
    * // Fetching the details of the list with the id '1234567890'
    * rettiwt.list.details('1234567890')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -125,10 +125,10 @@ export class ListService extends FetcherService {
    * // Fetching the first 100 members of the Twitter list with id '1234567890'
    * rettiwt.list.members('1234567890')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    *
@@ -169,10 +169,10 @@ export class ListService extends FetcherService {
    * // Removing a user with ID '123456789' from the member of the list with ID '987654321'
    * rettiwt.list.removeMember('987654321', '123456789')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    */
@@ -211,10 +211,10 @@ export class ListService extends FetcherService {
    * // Fetching the most recent 100 tweets of the Twitter list with id '1234567890'
    * rettiwt.list.tweets('1234567890')
    * .then(res => {
-   *   console.log(res);
+   *  console.log(res);
    * })
    * .catch(err => {
-   *   console.log(err);
+   *  console.log(err);
    * });
    * ```
    *

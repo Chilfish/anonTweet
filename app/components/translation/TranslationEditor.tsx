@@ -200,15 +200,14 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
       <DialogTrigger render={(
         <Button
           variant="secondary"
-          size="icon"
+          size="icon-sm"
           onClick={handleOpen}
-          className={`${className} ml-auto`}
+          className={`${className} ml-auto bg-transparent`}
           data-testid="translation-editor-button"
         />
       )}
       >
-
-        <LanguagesIcon className="size-4" />
+        <LanguagesIcon className="size-3.5 text-muted-foreground" />
       </DialogTrigger>
 
       <DialogContent render={<form onSubmit={handleSave} />} className="max-w-xl">

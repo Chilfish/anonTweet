@@ -1,3 +1,4 @@
+import type { ComponentProps } from 'react'
 import axios from 'axios'
 import { domToJpeg, domToPng } from 'modern-screenshot'
 import { Button } from '~/components/ui/button'
@@ -13,7 +14,7 @@ function saveAsImage(dataUrl: string, fileName: string) {
   a.click()
 }
 
-export function SaveAsImageButton() {
+export function SaveAsImageButton(props: ComponentProps<typeof Button>) {
   const { tweetElRef, mainTweet, setShowTranslationButton, setScreenshoting, showTranslations, tweets } = useTranslationStore()
   const { screenshotFormat } = useAppConfigStore()
 
@@ -81,7 +82,7 @@ export function SaveAsImageButton() {
     // }
     setShowTranslationButton(false)
 
-    await new Promise(resolve => requestAnimationFrame(resolve))
+    await new Promise(resolve => setTimeout(resolve, 300))
 
     const dataUrl = await (screenshotFormat === 'png'
       ? domToPng(tweetElRef, {
@@ -127,9 +128,10 @@ export function SaveAsImageButton() {
 
   return (
     <Button
+      {...props}
       onClick={onSaveAsImage}
     >
-      截图
+      {props.children ?? '截图'}
     </Button>
   )
 }

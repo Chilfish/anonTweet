@@ -1,4 +1,3 @@
-import { SettingsIcon } from 'lucide-react'
 import React, { useState } from 'react'
 import { Button } from '~/components/ui/button'
 import {
@@ -8,7 +7,6 @@ import {
   DialogPanel,
   DialogPopup,
   DialogTitle,
-  DialogTrigger,
 } from '~/components/ui/dialog'
 import { Tabs, TabsList, TabsPanel, TabsTab } from '~/components/ui/tabs'
 import { AITranslationSettings } from './AITranslationSettings'
@@ -44,15 +42,28 @@ export function SettingsBody() {
   )
 }
 
-export function SettingsPanel() {
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+interface SettingsPanelProps {
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  trigger?: React.ReactNode
+}
+
+export function SettingsPanel({ open, onOpenChange, trigger }: SettingsPanelProps = {}) {
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isControlled = open !== undefined
+  const isOpen = isControlled ? open : internalOpen
+
+  const setIsOpen = (value: boolean) => {
+    if (isControlled) {
+      onOpenChange?.(value)
+    }
+    else {
+      setInternalOpen(value)
+    }
+  }
 
   return (
-    <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-      <DialogTrigger render={<Button variant="ghost" size="icon" />}>
-        <SettingsIcon className="size-5" />
-      </DialogTrigger>
-
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogPopup>
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">设置</DialogTitle>
@@ -62,7 +73,7 @@ export function SettingsPanel() {
 
         <DialogFooter>
           <Button
-            onClick={() => setIsSettingsOpen(false)}
+            onClick={() => setIsOpen(false)}
             className="text-sm"
           >
             完成

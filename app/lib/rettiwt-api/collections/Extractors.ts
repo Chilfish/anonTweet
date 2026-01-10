@@ -1,3 +1,4 @@
+import type { BookmarkFolder } from '../models/data/BookmarkFolder'
 import type { Notification } from '../models/data/Notification'
 import type { IConversationTimelineResponse } from '../types/raw/dm/Conversation'
 import type { IInboxInitialResponse } from '../types/raw/dm/InboxInitial'
@@ -26,6 +27,8 @@ import type { ITweetUnretweetResponse } from '../types/raw/tweet/Unretweet'
 import type { ITweetUnscheduleResponse } from '../types/raw/tweet/Unschedule'
 import type { IUserAffiliatesResponse } from '../types/raw/user/Affiliates'
 import type { IUserAnalyticsResponse } from '../types/raw/user/Analytics'
+import type { IUserBookmarkFoldersResponse } from '../types/raw/user/BookmarkFolders'
+import type { IUserBookmarkFolderTweetsResponse } from '../types/raw/user/BookmarkFolderTweets'
 import type { IUserBookmarksResponse } from '../types/raw/user/Bookmarks'
 import type { IUserDetailsResponse } from '../types/raw/user/Details'
 import type { IUserDetailsBulkResponse } from '../types/raw/user/DetailsBulk'
@@ -38,6 +41,7 @@ import type { IUserLikesResponse } from '../types/raw/user/Likes'
 import type { IUserListsResponse } from '../types/raw/user/Lists'
 import type { IUserMediaResponse } from '../types/raw/user/Media'
 import type { IUserNotificationsResponse } from '../types/raw/user/Notifications'
+import type { IUserProfileUpdateResponse } from '../types/raw/user/ProfileUpdate'
 import type { IUserRecommendedResponse } from '../types/raw/user/Recommended'
 import type { IUserSubscriptionsResponse } from '../types/raw/user/Subscriptions'
 import type { IUserTweetsResponse } from '../types/raw/user/Tweets'
@@ -109,6 +113,10 @@ export const Extractors = {
     new Analytics(response.data.viewer_v2.user_results.result),
   USER_BOOKMARKS: (response: IUserBookmarksResponse): CursoredData<Tweet> =>
     new CursoredData<Tweet>(response, BaseType.TWEET),
+  USER_BOOKMARK_FOLDERS: (response: IUserBookmarkFoldersResponse): CursoredData<BookmarkFolder> =>
+    new CursoredData<BookmarkFolder>(response, BaseType.BOOKMARK_FOLDER),
+  USER_BOOKMARK_FOLDER_TWEETS: (response: IUserBookmarkFolderTweetsResponse): CursoredData<Tweet> =>
+    new CursoredData<Tweet>(response, BaseType.TWEET),
   USER_DETAILS_BY_USERNAME: (response: IUserDetailsResponse): User | undefined => User.single(response),
   USER_DETAILS_BY_ID: (response: IUserDetailsResponse): User | undefined => User.single(response),
   USER_DETAILS_BY_IDS_BULK: (response: IUserDetailsBulkResponse, ids: string[]): User[] =>
@@ -138,5 +146,5 @@ export const Extractors = {
   USER_TIMELINE_AND_REPLIES: (response: IUserTweetsAndRepliesResponse): CursoredData<Tweet> =>
     new CursoredData<Tweet>(response, BaseType.TWEET),
   USER_UNFOLLOW: (response: IUserUnfollowResponse): boolean => (!!response?.id),
-
+  USER_PROFILE_UPDATE: (response: IUserProfileUpdateResponse): boolean => (!!response?.name),
 }

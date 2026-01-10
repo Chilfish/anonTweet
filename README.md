@@ -108,7 +108,7 @@ bun run dev
 
 ### Vercel 部署
 
-本项目针对 Vercel Serverless 环境进行了深度适配。
+本项目针对 Vercel Serverless 环境进行了适配。
 
 1.  在 Vercel 项目设置中，务必添加环境变量 `VERCEL="true"` 以激活 React Router 的适配器逻辑。
 2.  配置 `GEMINI_API_KEY` 以启用线上的翻译服务。
@@ -118,7 +118,7 @@ bun run dev
 
 ### External Libraries Refactoring
 
-项目包含部分深度定制的第三方库核心，位于 `app/lib/` 目录下：
+项目包含部分定制的第三方库核心，位于 `app/lib/` 目录下：
 
 - **`react-tweet`**: 经深度修改以适配 Tailwind v4，并增加了对 AI 翻译实体（Auto Translation Entities）的渲染支持。
 - **`rettiwt-api`**: 针对最新的 Twitter GraphQL 接口进行了逆向工程适配，增强了数据获取的稳定性。

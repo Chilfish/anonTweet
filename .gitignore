@@ -5,7 +5,7 @@
 /.react-router/
 /build/
 .env
-data/
+./data/
 tmp/
 
 *storybook.log

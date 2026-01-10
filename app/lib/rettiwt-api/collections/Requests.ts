@@ -62,6 +62,9 @@ export const Requests: { [key in keyof typeof ResourceType]: (args: IFetchArgs |
       args.showVerifiedFollowers!,
     ),
   USER_BOOKMARKS: (args: IFetchArgs) => UserRequests.bookmarks(args.count, args.cursor),
+  USER_BOOKMARK_FOLDERS: (args: IFetchArgs) => UserRequests.bookmarkFolders(args.cursor),
+  USER_BOOKMARK_FOLDER_TWEETS: (args: IFetchArgs) =>
+    UserRequests.bookmarkFolderTweets(args.id!, args.count, args.cursor),
   USER_DETAILS_BY_USERNAME: (args: IFetchArgs) => UserRequests.detailsByUsername(args.id!),
   USER_DETAILS_BY_ID: (args: IFetchArgs) => UserRequests.detailsById(args.id!),
   USER_DETAILS_BY_IDS_BULK: (args: IFetchArgs) => UserRequests.bulkDetailsByIds(args.ids!),
@@ -78,6 +81,7 @@ export const Requests: { [key in keyof typeof ResourceType]: (args: IFetchArgs |
   USER_SUBSCRIPTIONS: (args: IFetchArgs) => UserRequests.subscriptions(args.id!, args.count, args.cursor),
   USER_TIMELINE: (args: IFetchArgs) => UserRequests.tweets(args.id!, args.count, args.cursor),
   USER_TIMELINE_AND_REPLIES: (args: IFetchArgs) => UserRequests.tweetsAndReplies(args.id!, args.count, args.cursor),
-  USER_UNFOLLOW: (args: IPostArgs) => UserRequests.follow(args.id!),
+  USER_UNFOLLOW: (args: IPostArgs) => UserRequests.unfollow(args.id!),
+  USER_PROFILE_UPDATE: (args: IPostArgs) => UserRequests.updateProfile(args.profileOptions!),
 
 }

@@ -55,6 +55,8 @@ Rettiwt-API can be used with or without logging in to Twitter. As such, the two 
   - User Affiliates
   - User Analytics (Only for Premium accounts)
   - User Bookmarks
+  - User Bookmark Folders
+  - User Bookmark Folder Tweets
   - User Details - Single (by ID and Username) and Bulk (by ID only)
   - User Follow
   - User Followed Feed
@@ -70,6 +72,7 @@ Rettiwt-API can be used with or without logging in to Twitter. As such, the two 
   - User Subscriptions
   - User Timeline
   - User Unfollow
+  - User Profile Update
 
 By default, Rettiwt-API uses 'guest' authentication. If however, access to the full set of resources is required, 'user' authentication can be used. This is done by using the cookies associated with your Twitter/X account, and encoding them into an `API_KEY` for convenience. The said `API_KEY` can be obtained by using a browser extension, as follows:
 
@@ -197,10 +200,10 @@ const rettiwt = new Rettiwt();
 // Fetching the details of the user whose username is <username>
 rettiwt.user.details('<username>')
 .then(details => {
-  ...
+	...
 })
 .catch(error => {
-  ...
+	...
 });
 ```
 
@@ -214,18 +217,18 @@ const rettiwt = new Rettiwt({ apiKey: API_KEY });
 
 /**
  * Fetching the list of tweets that:
- *   - are made by a user with username <username>,
- *   - contain the words <word1> and <word2>
+ * 	- are made by a user with username <username>,
+ * 	- contain the words <word1> and <word2>
  */
 rettiwt.tweet.search({
-  fromUsers: ['<username>'],
-  includeWords: ['<word1>', '<word2>']
+	fromUsers: ['<username>'],
+	includeWords: ['<word1>', '<word2>']
 })
 .then(data => {
-  ...
+	...
 })
 .catch(err => {
-  ...
+	...
 });
 ```
 
@@ -243,22 +246,22 @@ const rettiwt = new Rettiwt({ apiKey: API_KEY });
 
 /**
  * Fetching the list of tweets that:
- *   - are made by a user with username <username>,
- *   - contain the words <word1> and <word2>
+ * 	- are made by a user with username <username>,
+ * 	- contain the words <word1> and <word2>
  *
  * 'data' is the response object received in the previous example.
  *
  * 'count' is a number less or equal to 20 (the quantity of tweets to return)
  */
 rettiwt.tweet.search({
-  fromUsers: ['<username>'],
-  includeWords: ['<word1>', '<word2>']
+	fromUsers: ['<username>'],
+	includeWords: ['<word1>', '<word2>']
 }, count, data.next.value)
 .then(data => {
-  ...
+	...
 })
 .catch(err => {
-  ...
+	...
 });
 ```
 
@@ -276,10 +279,10 @@ const rettiwt = new Rettiwt();
 rettiwt.auth.login('<email>', '<username>', '<password>')
 .then(apiKey => {
     // Use the API_KEY
-  ...
+	...
 })
 .catch(err => {
-  console.log(err);
+	console.log(err);
 });
 ```
 
@@ -327,7 +330,7 @@ const rettiwt = new Rettiwt();
 // Fetching the details of the user whose username is <username>
 rettiwt.user.details('<username>')
 .then(details => {
-  console.log(details);
+	console.log(details);
     // {
     //     "createdAt": "2021-07-24T14:25:32.000Z",
     //     "description": "Coder, Gamer and Tech Enthusiast",
@@ -401,7 +404,7 @@ rettiwt.user.details('<username>')
 
 })
 .catch(error => {
-  ...
+	...
 });
 ```
 
@@ -482,6 +485,8 @@ So far, the following operations are supported:
 - [Getting the list of users affiliated with the given user](https://rishikant181.github.io/Rettiwt-API/classes/UserService.html#affiliates)
 - [Getting the analytics of the logged-in user (premium accounts only)](https://rishikant181.github.io/Rettiwt-API/classes/UserService.html#analytics)
 - [Getting the list of tweets bookmarked by the logged-in user](https://rishikant181.github.io/Rettiwt-API/classes/UserService.html#bookmarks)
+- [Getting the list of bookmark folders of the logged-in user](https://rishikant181.github.io/Rettiwt-API/classes/UserService.html#bookmarkFolders)
+- [Getting the list of tweets in a specific bookmark folder](https://rishikant181.github.io/Rettiwt-API/classes/UserService.html#bookmarkFolderTweets)
 - [Getting the details of a user/multiple users](https://rishikant181.github.io/Rettiwt-API/classes/UserService.html#details)
 - [Following a given user](https://rishikant181.github.io/Rettiwt-API/classes/UserService.html#follow)
 - [Getting the followed feed of the logged-in user](https://rishikant181.github.io/Rettiwt-API/classes/UserService.html#followed)
@@ -496,6 +501,7 @@ So far, the following operations are supported:
 - [Getting the replies timeline of the given user](https://rishikant181.github.io/Rettiwt-API/classes/UserService.html#replies)
 - [Getting the tweet timeline of the given user](https://rishikant181.github.io/Rettiwt-API/classes/UserService.html#timeline)
 - [Unfollowing a given user](https://rishikant181.github.io/Rettiwt-API/classes/UserService.html#unfollow)
+- [Updating the profile of the logged-in user](https://rishikant181.github.io/Rettiwt-API/classes/UserService.html#updateProfile)
 
 ## CLI Usage
 
