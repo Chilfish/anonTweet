@@ -64,13 +64,13 @@ function createDownloadItem(
   const formattedDate = formatDate(tweetDate, 'yyyymmdd_hhmmss')
 
   const suffix = index > 0 ? `-${index}` : ''
-  const ext = type === 'photo' ? 'png' : 'mp4'
+  const ext = type === 'photo' ? 'jpg' : 'mp4'
 
   const filename = `${username}-${id}-${formattedDate}${suffix}.${ext}`
 
   const downloadUrl = new URL(url)
   if (type === 'photo') {
-    downloadUrl.searchParams.set('format', 'png') // 强制统一为 png
+    downloadUrl.searchParams.set('format', 'jpg') // 强制统一为 jpg
     downloadUrl.searchParams.set('name', 'large') // 请求大图
   }
 

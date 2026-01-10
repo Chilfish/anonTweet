@@ -2,9 +2,11 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 export type Theme = 'light' | 'dark' | 'system'
+export type ScreenshotFormat = 'png' | 'jpeg'
 
 export interface AppConfigs {
   theme: Theme
+  screenshotFormat: ScreenshotFormat
   showActions: boolean
   enableMediaProxy: boolean
   mediaProxyUrl: string
@@ -16,6 +18,7 @@ export interface AppConfigs {
 
 interface AppConfigState extends AppConfigs {
   setTheme: (theme: Theme) => void
+  setScreenshotFormat: (format: ScreenshotFormat) => void
   setShowActions: (showActions: boolean) => void
 
   setEnableMediaProxy: (enableMediaProxy: boolean) => void
@@ -30,6 +33,7 @@ export const useAppConfigStore = create<AppConfigState>()(
   persist(
     set => ({
       theme: 'light',
+      screenshotFormat: 'jpeg',
       showActions: false,
       enableMediaProxy: false,
       mediaProxyUrl: 'https://proxy.chilfish.top/',
@@ -42,6 +46,7 @@ export const useAppConfigStore = create<AppConfigState>()(
       setMediaProxyUrl: mediaProxyUrl => set({ mediaProxyUrl }),
       setEnableAITranslation: enableAITranslation => set({ enableAITranslation }),
       setTheme: theme => set({ theme }),
+      setScreenshotFormat: screenshotFormat => set({ screenshotFormat }),
       setShowActions: showActions => set({ showActions }),
       setGeminiApiKey: geminiApiKey => set({ geminiApiKey }),
       setGeminiModel: geminiModel => set({ geminiModel }),

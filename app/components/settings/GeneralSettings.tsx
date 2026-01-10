@@ -1,5 +1,12 @@
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select'
 import { Switch } from '~/components/ui/switch'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 
@@ -12,6 +19,8 @@ export function GeneralSettings() {
     mediaProxyUrl,
     setEnableMediaProxy,
     setMediaProxyUrl,
+    screenshotFormat,
+    setScreenshotFormat,
   } = useAppConfigStore()
 
   return (
@@ -24,6 +33,26 @@ export function GeneralSettings() {
               <span className="text-sm font-medium">主题模式</span>
             </div>
             <ThemeSelector />
+          </SettingsRow>
+          <SettingsRow>
+            <div className="flex flex-col gap-1">
+              <span className="text-sm font-medium">截图格式</span>
+              <span className="text-xs text-muted-foreground">
+                JPEG 体积小，PNG 支持圆角边框
+              </span>
+            </div>
+            <Select
+              value={screenshotFormat}
+              onValueChange={(val: any) => setScreenshotFormat(val)}
+            >
+              <SelectTrigger className="h-8 w-[100px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent alignItemWithTrigger={false}>
+                <SelectItem value="png">PNG</SelectItem>
+                <SelectItem value="jpeg">JPEG</SelectItem>
+              </SelectContent>
+            </Select>
           </SettingsRow>
         </SettingsGroup>
       </div>
