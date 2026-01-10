@@ -1,7 +1,6 @@
 import { execSync } from 'node:child_process'
 import { reactRouter } from '@react-router/dev/vite'
 import tailwindcss from '@tailwindcss/vite'
-import { reactRouterHonoServer } from 'react-router-hono-server/dev'
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import { env } from './app/lib/env.server'
@@ -31,10 +30,6 @@ const gitInfo = getGitInfo()
 
 export default defineConfig(({ isSsrBuild }) => ({
   plugins: [
-    reactRouterHonoServer({
-      serverEntryPoint: 'server/app.ts',
-      runtime: 'node',
-    }),
     tailwindcss(),
     reactRouter(),
     tsconfigPaths(),
@@ -52,7 +47,7 @@ export default defineConfig(({ isSsrBuild }) => ({
   },
   build: {
     rollupOptions: {
-      input: isSsrBuild ? './server/app.ts' : undefined,
+      input: isSsrBuild ? './app/server.ts' : undefined,
     },
   },
 }))

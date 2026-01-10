@@ -5,7 +5,9 @@ const isInVercel = process.env.VERCEL === 'true'
 
 const config: Config = {
   ssr: true,
-  presets: [vercelPreset()],
+  presets: [
+    vercelPreset(),
+  ],
   future: {
     v8_middleware: true,
     // unstable_viteEnvironmentApi: true,

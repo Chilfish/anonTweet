@@ -58,7 +58,6 @@
   "devDependencies": {
     "@antfu/eslint-config": "^6.7.3",
     "@chromatic-com/storybook": "^4.1.3",
-    "@hono/node-server": "^1.19.8",
     "@react-router/dev": "^7.12.0",
     "@storybook/addon-a11y": "^10.1.11",
     "@storybook/addon-docs": "^10.1.11",
@@ -75,9 +74,7 @@
     "eslint": "^9.39.2",
     "eslint-plugin-format": "^1.2.0",
     "eslint-plugin-storybook": "^10.1.11",
-    "hono": "^4.11.3",
     "lefthook": "^2.0.13",
-    "react-router-hono-server": "^2.22.0",
     "storybook": "^10.1.11",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
