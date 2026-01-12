@@ -66,8 +66,8 @@ Produce a translation that feels "native" to the Chinese community. It should no
 Before translating, analyze the provided [Glossary], [Author Info], and [Quoted Tweet] to determine the **Domain**:
 - **Entertainment/ACG Context**: If keywords involve anime, games, idols, or events (e.g., Bushiroad):
     - "コンテンツ" (Contents) → "IP" / "企划" / "系列作品".
-    - "参戦" (Sansen) → "出演" / "登场" / "加入".
-    - "解禁" (Kaikin) → "公开" / "发布".
+    - "参戦" → "出演" / "登场" / "加入".
+    - "解禁" → "公开" / "发布".
 - **General/Casual Context**: Use trendy, natural Chinese internet slang appropriate for the tone.
 - **Tone Matching**: If the author is a character/idol, preserve their unique speech quirks (e.g., cuteness, emojis) in the Chinese phrasing.
 

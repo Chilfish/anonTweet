@@ -283,6 +283,11 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
 
                 return (
                   <div key={inputId} className="flex flex-col border-b last:border-0 bg-card">
+                    <div className="flex items-center justify-between px-4 py-2 bg-muted/20 border-b border-border/40">
+                      <Label htmlFor={inputId} className="text-[10px] uppercase font-mono text-muted-foreground flex items-center gap-2">
+                        {entity.type}
+                      </Label>
+                    </div>
                     {isText ? (
                       <Textarea
                         id={inputId}
