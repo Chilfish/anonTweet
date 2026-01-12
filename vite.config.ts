@@ -47,7 +47,8 @@ export default defineConfig(({ isSsrBuild }) => ({
   },
   build: {
     rollupOptions: {
-      input: isSsrBuild ? './app/server.ts' : undefined,
+      input: isSsrBuild ? './server/app.ts' : undefined,
+      // input: isSsrBuild ? './server/express.ts' : undefined,
     },
   },
 }))

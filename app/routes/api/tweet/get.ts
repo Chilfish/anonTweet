@@ -95,11 +95,16 @@ export async function loader({
     return []
   }
   try {
-    const tweets = await getTweets(tweetId, getDBTweet)
+    const tweets = await getTweets(tweetId)
     return tweets
   }
-  catch (error: unknown) {
-    console.log('error in server', error)
-    return []
+  catch (error: any) {
+    console.log(`Error fetching tweets for ${tweetId}: ${error.message}`)
+    return data({
+      error: 'Failed to fetch tweets',
+      message: `无法获取推文，${error.message}`,
+    }, {
+      status: error.status || 500,
+    })
   }
 }

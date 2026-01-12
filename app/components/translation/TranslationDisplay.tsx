@@ -14,7 +14,7 @@ export const TranslationDisplay: React.FC<TranslationDisplayProps> = ({
   originalTweet,
 }) => {
   const { settings } = useTranslationStore()
-  const { shouldShow, entities } = useTweetTranslation(originalTweet)
+  const { shouldShow, entities } = useTweetTranslation(originalTweet, 'body')
 
   if (!shouldShow || !entities) {
     return null

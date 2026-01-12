@@ -1,5 +1,5 @@
 import type { TwitterComponents } from './types'
-import type { EnrichedQuotedTweet, EnrichedTweet, MediaDetails } from '~/types'
+import type { EnrichedTweet, MediaDetails } from '~/types'
 import clsx from 'clsx'
 import { Fragment } from 'react'
 import { getMediaUrl } from '../utils'
@@ -27,7 +27,7 @@ function getSkeletonStyle(media: MediaDetails, itemCount: number) {
 }
 
 interface Props {
-  tweet: EnrichedTweet | EnrichedQuotedTweet
+  tweet: EnrichedTweet
   components?: TwitterComponents
   quoted?: boolean
   showCoverOnly?: boolean
@@ -37,11 +37,14 @@ export function TweetMedia({ tweet, components, quoted, showCoverOnly }: Props) 
   const length = tweet.mediaDetails?.length ?? 0
   const Img = components?.MediaImg ?? MediaImg
 
+  const isInlineMedia = !!tweet.isInlineMeida
+
   return (
     <div className={clsx(s.root, !quoted && s.rounded)}>
       <div
         className={clsx(
           s.mediaWrapper,
+          isInlineMedia && s.inlineMedia,
           length > 1 && s.grid2Columns,
           length === 3 && s.grid3,
           length > 4 && s.grid2x2,

@@ -185,7 +185,10 @@ interface RichtextTag {
 }
 
 interface Media {
-  inline_media: any[]
+  inline_media: {
+    media_id: string
+    index: number
+  }[]
 }
 
 interface Legacy2 {

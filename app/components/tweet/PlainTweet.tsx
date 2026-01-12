@@ -10,6 +10,7 @@ import {
 } from '~/lib/react-tweet'
 import { cn } from '~/lib/utils'
 import { TweetLinkCard } from './TweetCard'
+import { TweetMediaAlt } from './TweetMediaAlt'
 
 function TweetTextBody({ tweet, enableTranslation }: { tweet: EnrichedTweet, enableTranslation: boolean }) {
   const translation = enableTranslation ? tweet.autoTranslationEntities : null
@@ -61,7 +62,7 @@ function UnifiedTweet({ tweet, variant, enableTranslation }: UnifiedTweetProps) 
 
   const containerClasses = cn({
     'p-2 sm:p-4! border-2 rounded-2xl mt-2!': isQuoted,
-    'border-none! px-0! py-2! relative': isThread,
+    'border-none! px-0! py-3! relative': isThread,
   })
 
   const bodyContainerClasses = cn({
@@ -71,15 +72,13 @@ function UnifiedTweet({ tweet, variant, enableTranslation }: UnifiedTweetProps) 
   const quotedTweet = tweet.quotedTweet
 
   return (
-    <div className={containerClasses}>
-      <div className="flex items-center justify-between">
-        <TweetHeader
-          tweet={tweet}
-          className={cn({ 'pb-1!': isThread })}
-          createdAtInline
-          inQuote={isQuoted}
-        />
-      </div>
+    <div className={cn(containerClasses, 'relative')}>
+      <TweetHeader
+        tweet={tweet}
+        className={cn({ 'pb-1!': isThread })}
+        createdAtInline
+        inQuote={isQuoted}
+      />
       <div className={bodyContainerClasses}>
         <TweetTextBody
           tweet={tweet}
@@ -89,6 +88,8 @@ function UnifiedTweet({ tweet, variant, enableTranslation }: UnifiedTweetProps) 
         {tweet.mediaDetails?.length ? (
           <TweetMedia tweet={tweet} showCoverOnly={true} />
         ) : null}
+
+        <TweetMediaAlt tweet={tweet} />
 
         {tweet.card && <TweetLinkCard tweet={tweet} />}
 

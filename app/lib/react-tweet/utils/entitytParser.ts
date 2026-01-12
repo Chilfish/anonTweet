@@ -174,6 +174,33 @@ export function getEntities(tweet: RawTweet, rawText: string): Entity[] {
   return [...standardEntities, ...altEntities]
 }
 
+export function getMediaAltEntities(tweet: RawTweet): Entity[] {
+  const legacy = tweet.legacy
+  const extendedEntities = legacy?.extended_entities || legacy?.entities
+  const mediaList = extendedEntities?.media || []
+
+  const altEntities: Entity[] = []
+  mediaList.forEach((media: any, i: number) => {
+    if (media.ext_alt_text) {
+      // 这里的 Separator 主要是为了让 AI 理解上下文分隔
+      // 实际翻译逻辑中可能会被过滤或特殊处理
+      // altEntities.push({
+      //   type: 'separator',
+      //   text: ' | ',
+      //   index: 30000 + i,
+      //   mediaIndex: i,
+      // } as Entity)
+      altEntities.push({
+        type: 'media_alt',
+        text: media.ext_alt_text,
+        media_url: media.media_url_https,
+        index: 20000 + i,
+      } as Entity)
+    }
+  })
+  return altEntities
+}
+
 /**
  * 序列化：将 Entity 数组转换为带占位符的字符串
  */

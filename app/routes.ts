@@ -11,19 +11,19 @@ export default [
   route('plain-tweet/:id', 'routes/plain.tsx'),
   layout('routes/layout.tsx', [
     index('routes/home.tsx'),
-    // route('/list/:id', 'routes/list.tsx'),
+    route('/list/:id', 'routes/list.tsx'),
     route('/tweets/:id', 'routes/tweet.tsx'),
-    // route('/bili', 'routes/bili.tsx'),
+    route('/bili', 'routes/bili.tsx'),
   ]),
 
   ...prefix('api', [
-    // route('bili-post', 'routes/api/bili-post.tsx'),
+    route('bili-post', 'routes/api/bili-post.tsx'),
     route('ai-test', 'routes/api/ai-test.ts'),
 
     ...prefix('tweet', [
       route('get/:id', 'routes/api/tweet/get.ts'),
       route('set', 'routes/api/tweet/set.ts'),
-      // route('list/:id', 'routes/api/tweet/list.ts'),
+      route('list/:id', 'routes/api/tweet/list.ts'),
     ]),
 
     ...prefix('user', [

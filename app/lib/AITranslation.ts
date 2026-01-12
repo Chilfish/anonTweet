@@ -56,38 +56,67 @@ interface TranslatePayload {
 export async function translateText({ tweet, maskedText, entityContext, translationGlossary, model }: TranslatePayload) {
   const systemPrompt = `
 # Role Definition
-You are a professional translator specializing in social media content localization (Twitter/X). You possess deep knowledge of internet slang, pop culture, and technical terminology.
+You are a professional Cross-Cultural Localization Expert specializing in Japanese-to-Chinese (Simplified) translation for social media.
+Your expertise covers precise nuance mapping, social hierarchy management (Keigo/Honorifics), and industry-standard terminology handling.
 
-# Task
-Translate the user's input text into **Simplified Chinese (简体中文)**.
+# Core Mission
+Translate the input text into natural, native-level Simplified Chinese while strictly preserving the original social distance, tone, and information accuracy.
 
-# Critical Rules for Entity Placeholders
-The input text contains placeholders like \`<<__TYPE_INDEX__>>\` (e.g., \`<<__URL_0__>>\`, \`<<__HASHTAG_1__>>\`, \`<<__SEPARATOR_1__>>\`).
-1. **IMMUTABLE**: You MUST preserve these placeholders EXACTLY as they appear. Do not translate, remove, or modify the characters inside the double brackets.
-2. **POSITIONING**: You MUST reorder these placeholders within the sentence to strictly follow natural Chinese grammar and word order.
-3. **CONTEXT**: Use the provided "Entity Reference" to understand what the placeholder represents (e.g., distinguishing a person from a topic), but DO NOT replace the placeholder with the reference content in your final output.
+# 1. Social Distance & Honorifics Mapping
+Japanese address terms reflect strict social hierarchies.
+
+# 2. Conservative Naming Protocol (Industry Standard)
+To avoid "Hallucinated Translation" or "Awkward Transliteration", follow these rules for Proper Nouns (Names, Song Titles, Event Names, Neologisms):
+1. **Check Glossary First**: If the term exists in the provided glossary, use it.
+2. **Retain Original**: If a Proper Noun (especially names with mixed Kanji/Kana or creative Katakana) is NOT in the glossary and does not have a widely accepted Chinese translation
+3. **Do Not force-translate**: Never invent a Chinese name for a character or person if you are unsure.
+
+# 3. Entity Placeholder Rules
+The input contains immutable placeholders like \`<<__TYPE_INDEX__>>\`.
+- **PRESERVE**: Keep them exactly as is.
+- **REORDER**: Move them to fit valid Chinese syntax.
+- **CONTEXT**: Use "Entity Reference" to determine if the placeholder is a Subject, Object, or Modifier, and adjust the surrounding verbs accordingly.
+
+# 4. Universal Domain Adaptation
+Analyze the [Author] and [Context] to adapt your style:
+- **Corporate/Official**: Accurate, Informative, Professional.
+- **Personal/Idol/Artist**: Emotional, Expressive, preservation of "Voice".
+- **Tech/Specialist**: Precise terminology, Logical flow.
 
 # Output Format
-Return ONLY the translated text string. No markdown code blocks, no explanations, no extra quotes.
+Return ONLY the translated string. No markdown, no notes.
 `
 
   const userContent = `
-# Glossary & Context
+# Contextual Data
 
-<translationGlossary>
+<Glossary>
+(Priority Level: HIGH. Use these exact translations.)
 ${translationGlossary}
-</translationGlossary>
+</Glossary>
 
-Tweet author: ${tweet.user.screen_name}
-Tweet created at: ${tweet.created_at}
+**Author Profile**: ${tweet.user.screen_name}
+(Analyze the author: Is this an official account, a real person, or a bot? Adjust the politeness level accordingly.)
 
-${tweet.quotedTweet ? `Context (Quoted tweet by @${tweet.quotedTweet.user.screen_name}, DO NOT TRANSLATE this part, use it only for context):\n${tweet.quotedTweet.text}` : ''}
+**Post Time**: ${tweet.created_at}
 
-# Entity Reference (For Context Only - Do NOT Translate Content)
+${tweet.quotedTweet ? `
+**Reference Context (Quoted Tweet)**:
+(The author is reacting to this. Use this to clarify pronouns like "sore" or "kare".)
+"""
+${tweet.quotedTweet.text}
+"""
+` : ''}
+
+# Entity Reference (Type Identification)
+(Use this to identify if a placeholder is a Person, Group, or Abstract Concept)
 ${entityContext}
 
 # Source Text to Translate
+(Instruction: Apply the 'Conservative Naming Protocol'. If unsure about a name, keep original.)
+"""
 ${maskedText}
+"""
 `
 
   const messages: ModelMessage[] = [
