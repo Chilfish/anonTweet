@@ -1,4 +1,5 @@
 import type { EnrichedTweet } from '~/types'
+import { AltTranslationEditor } from '~/components/translation/AltTranslationEditor'
 import { useTweetTranslation } from '~/hooks/use-tweet-translation'
 import { useTranslationStore } from '~/lib/stores/translation'
 
@@ -19,10 +20,11 @@ export function TweetMediaAlt({ tweet }: { tweet: EnrichedTweet }) {
 
   return (
     <div className="mt-3 overflow-hidden rounded-xl border border-border/20 bg-muted/30">
-      <div className="border-b border-border/10 bg-muted/40 px-3 py-1.5">
+      <div className="flex items-center justify-between border-b border-border/10 bg-muted/40 px-3 py-1.5">
         <span className="text-[11px] font-medium text-muted-foreground">
           图片描述
         </span>
+        <AltTranslationEditor originalTweet={tweet} />
       </div>
       <div className="space-y-4 p-3.5">
         {tweet.mediaDetails.map((media, i) => {

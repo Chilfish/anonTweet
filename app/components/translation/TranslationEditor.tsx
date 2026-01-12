@@ -31,7 +31,7 @@ interface TranslationEditorProps {
 
 // 辅助函数：判断是否跳过某些实体的翻译编辑（通常只编辑文本，URL/Mention 保持原样）
 function shouldSkipEntity(entity: Entity, originalTweet?: EnrichedTweet) {
-  if (entity.type === 'mention' || entity.type === 'media' || entity.type === 'url' || entity.type === 'separator') {
+  if (entity.type === 'mention' || entity.type === 'media' || entity.type === 'url' || entity.type === 'separator' || entity.type === 'media_alt') {
     return true
   }
 
