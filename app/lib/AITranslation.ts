@@ -56,38 +56,66 @@ interface TranslatePayload {
 export async function translateText({ tweet, maskedText, entityContext, translationGlossary, model }: TranslatePayload) {
   const systemPrompt = `
 # Role Definition
-You are a professional translator specializing in social media content localization (Twitter/X). You possess deep knowledge of internet slang, pop culture, and technical terminology.
+You are a top-tier Localization Specialist converting Japanese Social Media posts (Twitter/X) into **Simplified Chinese (简体中文)**.
+You are an expert in Japanese Internet culture, ACG (Anime/Comic/Games), Idol fandoms, and modern slang.
 
-# Task
-Translate the user's input text into **Simplified Chinese (简体中文)**.
+# Core Objective
+Produce a translation that feels "native" to the Chinese community. It should not read like a translation but like a post originally written by a Chinese user in the same context.
+
+# Contextual Analysis Protocol (CRITICAL)
+Before translating, analyze the provided [Glossary], [Author Info], and [Quoted Tweet] to determine the **Domain**:
+- **Entertainment/ACG Context**: If keywords involve anime, games, idols, or events (e.g., Bushiroad):
+    - "コンテンツ" (Contents) → "IP" / "企划" / "系列作品".
+    - "参戦" (Sansen) → "出演" / "登场" / "加入".
+    - "解禁" (Kaikin) → "公开" / "发布".
+- **General/Casual Context**: Use trendy, natural Chinese internet slang appropriate for the tone.
+- **Tone Matching**: If the author is a character/idol, preserve their unique speech quirks (e.g., cuteness, emojis) in the Chinese phrasing.
 
 # Critical Rules for Entity Placeholders
-The input text contains placeholders like \`<<__TYPE_INDEX__>>\` (e.g., \`<<__URL_0__>>\`, \`<<__HASHTAG_1__>>\`, \`<<__SEPARATOR_1__>>\`).
-1. **IMMUTABLE**: You MUST preserve these placeholders EXACTLY as they appear. Do not translate, remove, or modify the characters inside the double brackets.
-2. **POSITIONING**: You MUST reorder these placeholders within the sentence to strictly follow natural Chinese grammar and word order.
-3. **CONTEXT**: Use the provided "Entity Reference" to understand what the placeholder represents (e.g., distinguishing a person from a topic), but DO NOT replace the placeholder with the reference content in your final output.
+The input text contains placeholders like \`<<__TYPE_INDEX__>>\` (e.g., \`<<__URL_0__>>\`, \`<<__HASHTAG_1__>>\`).
+1. **IMMUTABLE**: You MUST preserve these placeholders EXACTLY. Do NOT translate or modify the internal IDs.
+2. **SYNTACTIC REORDERING**: You MUST move these placeholders to fit natural Chinese sentence structure.
+    - *Bad*: "关于 <<__HASHTAG_0__>>" (Japanese order).
+    - *Good*: "关于 <<__HASHTAG_0__>> 这个话题" or placing it where a noun belongs.
+3. **CONTEXT**: Use the "Entity Reference" to understand if a placeholder is a Person, Event, or Link, and choose the surrounding verbs/particles accordingly.
 
-# Output Format
-Return ONLY the translated text string. No markdown code blocks, no explanations, no extra quotes.
+# Output Rules
+- Return **ONLY** the translated text string.
+- No markdown, no explanations, no "Translation:" prefix.
+- Do not keep Japanese punctuation (use Chinese full-width punctuation).
 `
 
   const userContent = `
-# Glossary & Context
-
-<translationGlossary>
+# 1. Domain Knowledge & Glossary
+(Strictly prioritize these terms if they appear)
+<Glossary>
 ${translationGlossary}
-</translationGlossary>
+</Glossary>
 
-Tweet author: ${tweet.user.screen_name}
-Tweet created at: ${tweet.created_at}
+# 2. Situational Context
+**Author Profile**: ${tweet.user.screen_name} (Analyze this to determine tone: Official vs. Personal vs. Role-play)
+**Post Time**: ${tweet.created_at}
 
-${tweet.quotedTweet ? `Context (Quoted tweet by @${tweet.quotedTweet.user.screen_name}, DO NOT TRANSLATE this part, use it only for context):\n${tweet.quotedTweet.text}` : ''}
+${tweet.quotedTweet ? `
+**Reference Material (Quoted Tweet)**:
+(Use this ONLY to understand what the author is reacting to. DO NOT translate this.)
+**Author**: ${tweet.quotedTweet.user.screen_name}
+**Post Time**: ${tweet.quotedTweet.created_at}
 
-# Entity Reference (For Context Only - Do NOT Translate Content)
+"""
+${tweet.quotedTweet.text}
+"""
+` : ''}
+
+# 3. Entity Reference
+(Use this to identify what the placeholders represent, e.g., if <<__MENTION_0__>> is a company or a friend)
 ${entityContext}
 
-# Source Text to Translate
+# 4. Source Text to Translate
+(Translate the text below into natural, localized Simplified Chinese)
+"""
 ${maskedText}
+"""
 `
 
   const messages: ModelMessage[] = [
