@@ -9,6 +9,7 @@ export interface VideoInfo {
 
 interface MediaBase {
   media_url_https: string
+  index: number
   original_info: {
     height: number
     width: number

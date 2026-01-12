@@ -39,6 +39,7 @@ export function enrichTweet(sourceData: RawTweet, retweetedOrignalId?: string): 
     card: mapTwitterCard(tweet.card),
     mediaDetails: mapMediaDetails(tweet),
     retweetedOrignalId,
+    isInlineMeida: !!tweet.note_tweet?.note_tweet_results?.result?.media?.inline_media?.length,
     // photos: mapPhotoEntities(tweet),
     // video: mapVideoEntities(tweet),
     // parent: parentTweet(tweet),
@@ -179,9 +180,14 @@ export function mapMediaDetails(tweet: RawTweet): MediaDetails[] | undefined {
   if (!mediaEntities || mediaEntities.length === 0)
     return undefined
 
-  return mediaEntities.map((media) => {
-    // 提取公共基础字段
+  const noteMedia = tweet.note_tweet?.note_tweet_results?.result?.media?.inline_media || []
+
+  return mediaEntities.map((media, idx) => {
+    const mediaNoteIdx = noteMedia.findIndex(m => m.media_id === media.id_str)
+    const mediaIdx = mediaNoteIdx === -1 ? idx : mediaNoteIdx
+
     const baseMedia = {
+      index: mediaIdx,
       media_url_https: media.media_url_https,
       original_info: {
         height: media.original_info.height,
@@ -231,4 +237,5 @@ export function mapMediaDetails(tweet: RawTweet): MediaDetails[] | undefined {
       type: 'photo' as const,
     }
   })
+    .sort((a, b) => a.index - b.index)
 }

@@ -51,3 +51,17 @@
   object-fit: cover;
   object-position: center;
 }
+
+.mediaWrapper.inlineMedia {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.inlineMedia .image {
+  position: relative;
+}
+
+.inlineMedia .skeleton {
+  display: none;
+}
