@@ -2,6 +2,7 @@ import {
   Download,
   EyeIcon,
   EyeOff,
+  FileText,
   MoreHorizontal,
   Settings,
 } from 'lucide-react'
@@ -21,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
 import { downloadFiles } from '~/lib/downloader'
+import { generateMarkdownFromTweets } from '~/lib/markdown'
 import { useTranslationStore } from '~/lib/stores/translation'
 import { toast } from '~/lib/utils'
 
@@ -45,7 +47,9 @@ export function TweetHeader() {
       await downloadFiles(mediaItems, {
         onError: (error, filename) => {
           console.error(`[DownloadError] File: ${filename}`, error)
-          toast.error(`文件下载失败: ${filename}`)
+          toast.error(`文件下载失败: ${filename}`, {
+            description: `${error}`,
+          })
         },
       })
       toast.success(`下载任务结束`, {
@@ -54,7 +58,23 @@ export function TweetHeader() {
     }
     catch (globalError) {
       console.error('[MediaDownloader] Critical Failure', globalError)
-      toast.error('批量下载进程异常终止')
+      toast.error('批量下载进程异常终止', {
+        description: `${globalError}`,
+      })
+    }
+  }
+
+  const handleCopyMarkdown = async () => {
+    try {
+      const markdown = generateMarkdownFromTweets(tweets)
+      await navigator.clipboard.writeText(markdown)
+      toast.success('已复制 Markdown 到剪贴板')
+    }
+    catch (error) {
+      console.error('Failed to copy markdown:', error)
+      toast.error('复制失败', {
+        description: `请确保浏览器可写剪贴板。${error}`,
+      })
     }
   }
 
@@ -97,6 +117,15 @@ export function TweetHeader() {
             >
               <Download className="h-4 w-4" />
               <span>下载媒体</span>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={handleCopyMarkdown}
+              disabled={tweets.length === 0}
+              className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium focus:bg-muted/50"
+            >
+              <FileText className="h-4 w-4" />
+              <span>复制为Markdown</span>
             </DropdownMenuItem>
 
             <DropdownMenuSeparator className="my-1 opacity-50" />
