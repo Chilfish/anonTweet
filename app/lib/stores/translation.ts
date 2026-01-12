@@ -19,6 +19,8 @@ interface TranslationState {
   mainTweet: EnrichedTweet | null
   /** 存储推文ID到实体数组的映射，用于缓存翻译结果 */
   translations: Record<string, Entity[] | null>
+  /** 存储推文ID到显示状态的映射 */
+  translationVisibility: Record<string, { body: boolean, alt: boolean }>
 
   // === Settings Domain ===
   settings: TranslationSettings
@@ -44,6 +46,8 @@ interface TranslationState {
   // === Actions: Data ===
   setTranslation: (tweetId: string, content: Entity[] | null) => void
   getTranslation: (tweetId: string) => Entity[] | null | undefined
+  getTranslationVisibility: (tweetId: string) => { body: boolean, alt: boolean }
+  setTranslationVisibility: (tweetId: string, visibility: Partial<{ body: boolean, alt: boolean }>) => void
   deleteTranslation: (tweetId: string) => void
   resetTranslation: (tweetId: string) => void
   setAllTweets: (data: TweetData, mainTweetId: string) => void
@@ -122,6 +126,7 @@ export const useTranslationStore = create<TranslationState>()(
       // --- Initial State ---
       settings: DEFAULT_SETTINGS,
       translations: {},
+      translationVisibility: {},
       tweets: [],
       mainTweet: null,
 
@@ -277,13 +282,32 @@ export const useTranslationStore = create<TranslationState>()(
 
       getTranslation: tweetId => get().translations[tweetId],
 
-      deleteTranslation: tweetId => get().setTranslation(tweetId, null),
+      getTranslationVisibility: tweetId =>
+        get().translationVisibility[tweetId] || { body: true, alt: true },
+
+      setTranslationVisibility: (tweetId, visibility) =>
+        set((state) => {
+          const current = state.translationVisibility[tweetId] || { body: true, alt: true }
+          return {
+            translationVisibility: {
+              ...state.translationVisibility,
+              [tweetId]: { ...current, ...visibility },
+            },
+          }
+        }),
+
+      deleteTranslation: tweetId => get().setTranslationVisibility(tweetId, { body: false, alt: false }),
 
       resetTranslation: tweetId =>
         set((state) => {
           const newTranslations = { ...state.translations }
           delete newTranslations[tweetId]
-          return { translations: newTranslations }
+          const newVisibility = { ...state.translationVisibility }
+          delete newVisibility[tweetId] // Reset visibility to default (true)
+          return {
+            translations: newTranslations,
+            translationVisibility: newVisibility,
+          }
         }),
 
       setShowTranslations: show => set({ showTranslations: show }),

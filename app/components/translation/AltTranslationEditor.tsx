@@ -1,5 +1,5 @@
 import type { EnrichedTweet, Entity } from '~/types'
-import { BookA, Languages, LanguagesIcon, Save } from 'lucide-react'
+import { BookA, EyeOff, Languages, LanguagesIcon, RotateCcw, Save } from 'lucide-react'
 import React, { useCallback, useMemo, useState } from 'react'
 import { SettingsGroup } from '~/components/settings/SettingsUI'
 import { DictionaryViewer } from '~/components/translation/DictionaryViewer'
@@ -16,6 +16,7 @@ import {
 import { Label } from '~/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover'
 import { Textarea } from '~/components/ui/textarea'
+import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
 import { useTranslationStore } from '~/lib/stores/translation'
 import { decodeHtmlEntities } from '~/lib/utils'
 
@@ -47,6 +48,8 @@ export const AltTranslationEditor: React.FC<AltTranslationEditorProps> = ({
     showTranslationButton,
     getTranslation,
     setTranslation,
+    setTranslationVisibility,
+    resetTranslation,
   } = useTranslationStore()
 
   const isVisible = useMemo(() => {
@@ -117,6 +120,19 @@ export const AltTranslationEditor: React.FC<AltTranslationEditorProps> = ({
     })
 
     setTranslation(tweetId, finalTranslations)
+    // 保存时确保可见
+    setTranslationVisibility(tweetId, { alt: true })
+    setIsOpen(false)
+  }
+
+  const handleHide = () => {
+    setTranslationVisibility(tweetId, { alt: false })
+    setIsOpen(false)
+  }
+
+  const handleReset = () => {
+    resetTranslation(tweetId)
+    // resetTranslation already resets visibility to default (true) in store logic
     setIsOpen(false)
   }
 
@@ -214,6 +230,49 @@ export const AltTranslationEditor: React.FC<AltTranslationEditorProps> = ({
           </Popover>
 
           <div className="flex items-center gap-2">
+            {getTranslation(tweetId) !== null && (
+              <Tooltip>
+                <TooltipTrigger render={(
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleReset}
+                  />
+                )}
+                >
+                  <RotateCcw className="size-4" />
+                  重置
+                </TooltipTrigger>
+                <TooltipContent>
+                  重置为默认状态（移除人工翻译或取消隐藏）
+                </TooltipContent>
+              </Tooltip>
+            )}
+
+            {getTranslation(tweetId) !== null && (
+              <Tooltip>
+                <TooltipTrigger render={(
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleHide}
+                  >
+                    <EyeOff className="size-4" />
+                    隐藏
+                  </Button>
+                )}
+                >
+                  <EyeOff className="size-4" />
+                  隐藏
+                </TooltipTrigger>
+                <TooltipContent>
+                  不再显示此推文的翻译
+                </TooltipContent>
+              </Tooltip>
+            )}
+
             <Button type="submit" size="sm">
               <Save className="size-4" />
               保存

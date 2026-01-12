@@ -4,7 +4,7 @@ import { useTweetTranslation } from '~/hooks/use-tweet-translation'
 import { useTranslationStore } from '~/lib/stores/translation'
 
 export function TweetMediaAlt({ tweet }: { tweet: EnrichedTweet }) {
-  const { entities } = useTweetTranslation(tweet)
+  const { entities } = useTweetTranslation(tweet, 'alt')
   const { settings } = useTranslationStore()
 
   if (!tweet.mediaDetails?.length)
@@ -26,7 +26,7 @@ export function TweetMediaAlt({ tweet }: { tweet: EnrichedTweet }) {
         </span>
         <AltTranslationEditor originalTweet={tweet} />
       </div>
-      <div className="space-y-4 p-3.5">
+      <div className="space-y-4 py-3 px-2">
         {tweet.mediaDetails.map((media, i) => {
           if (media.type !== 'photo' || !media.ext_alt_text)
             return null
@@ -39,7 +39,7 @@ export function TweetMediaAlt({ tweet }: { tweet: EnrichedTweet }) {
           const translation = translationEntity?.translation
 
           return (
-            <div key={i} className="flex gap-3 text-sm">
+            <div key={i} className="flex gap-2 text-sm">
               <span className="mt-0.5 flex h-fit shrink-0 items-center justify-center rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium shadow-sm ring-1 ring-inset ring-border/50">
                 图
                 {' '}

@@ -69,7 +69,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     showTranslationButton,
     getTranslation,
     setTranslation,
-    deleteTranslation,
+    setTranslationVisibility,
     resetTranslation,
     hasTextContent,
   } = useTranslationStore()
@@ -179,11 +179,12 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     }
 
     setTranslation(tweetId, finalTranslations)
+    setTranslationVisibility(tweetId, { body: true })
     setIsOpen(false)
   }
 
   const handleHide = () => {
-    deleteTranslation(tweetId)
+    setTranslationVisibility(tweetId, { body: false })
     setIsOpen(false)
   }
 
@@ -277,24 +278,12 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
 
                 const inputId = `entity-${entity.index}`
                 const isText = entity.type === 'text'
-                const isMediaAlt = entity.type === 'media_alt'
                 // 这里很关键：如果是 AI 结果，entity.text 已经是中文，所以 defaultValue 会直接显示中文
                 const displayValue = getEntityDisplayValue(entity)
 
                 return (
                   <div key={inputId} className="flex flex-col border-b last:border-0 bg-card">
-                    <div className="flex items-center justify-between px-4 py-2 bg-muted/20 border-b border-border/40">
-                      <Label htmlFor={inputId} className="text-[10px] uppercase font-mono text-muted-foreground flex items-center gap-2">
-                        {isMediaAlt ? 'ALT TEXT' : entity.type}
-                        {isMediaAlt && (
-                          <span className="text-[10px] text-muted-foreground/70">
-                            图
-                            {entity.index - 20000 + 1}
-                          </span>
-                        )}
-                      </Label>
-                    </div>
-                    {isText || isMediaAlt ? (
+                    {isText ? (
                       <Textarea
                         id={inputId}
                         name={inputId}
