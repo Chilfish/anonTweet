@@ -3,7 +3,7 @@ import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { useTranslationStore } from '~/lib/stores/translation'
 
 export function useTweetTranslation(tweet: EnrichedTweet, type: 'body' | 'alt' = 'body') {
-  const { showTranslations, getTranslation, getTranslationVisibility } = useTranslationStore()
+  const { translationMode, getTranslation, getTranslationVisibility } = useTranslationStore()
   const { enableAITranslation } = useAppConfigStore()
   const tweetId = tweet.id_str
 
@@ -15,7 +15,7 @@ export function useTweetTranslation(tweet: EnrichedTweet, type: 'body' | 'alt' =
   const visibility = getTranslationVisibility(tweetId)
 
   // 1. 全局开关检查
-  if (!showTranslations) {
+  if (translationMode === 'original') {
     return { shouldShow: false, entities: null }
   }
 

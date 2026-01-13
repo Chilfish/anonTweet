@@ -15,7 +15,7 @@ function saveAsImage(dataUrl: string, fileName: string) {
 }
 
 export function SaveAsImageButton(props: ComponentProps<typeof Button>) {
-  const { tweetElRef, mainTweet, setShowTranslationButton, setScreenshoting, showTranslations, tweets } = useTranslationStore()
+  const { tweetElRef, mainTweet, setShowTranslationButton, setScreenshoting, translationMode, tweets } = useTranslationStore()
   const { screenshotFormat } = useAppConfigStore()
 
   async function submitTweet() {
@@ -121,7 +121,7 @@ export function SaveAsImageButton(props: ComponentProps<typeof Button>) {
     await submitTweet()
     // 恢复翻译按钮显示
     setScreenshoting(false)
-    if (showTranslations) {
+    if (translationMode !== 'original') {
       setShowTranslationButton(true)
     }
   }

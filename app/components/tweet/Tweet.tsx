@@ -20,9 +20,10 @@ type TweetVariant = 'thread' | 'quoted' | 'main' | 'main-in-thread'
 interface UnifiedTweetProps {
   tweet: EnrichedTweet
   variant: TweetVariant
+  isParentTweet: boolean
 }
 
-function UnifiedTweet({ tweet, variant }: UnifiedTweetProps) {
+function UnifiedTweet({ tweet, variant, isParentTweet }: UnifiedTweetProps) {
   const { screenshoting } = useTranslationStore()
   const isQuoted = variant === 'quoted'
   const isThread = variant === 'thread'
@@ -30,7 +31,8 @@ function UnifiedTweet({ tweet, variant }: UnifiedTweetProps) {
 
   const containerClasses = cn({
     'p-2 sm:p-4! border-2 rounded-2xl mt-2!': isQuoted,
-    'border-none! px-0! py-3! relative': isThread,
+    'relative': isThread,
+    'pb-3!': isParentTweet,
   })
 
   const bodyContainerClasses = cn({
@@ -64,6 +66,7 @@ function UnifiedTweet({ tweet, variant }: UnifiedTweetProps) {
 
         {quotedTweet && (
           <UnifiedTweet
+            isParentTweet={false}
             tweet={quotedTweet}
             variant="quoted"
           />
@@ -121,6 +124,7 @@ export function MyTweet({ tweets, mainTweetId, containerClassName }: MyTweetProp
             <UnifiedTweet
               key={parentTweet.id_str}
               tweet={parentTweet}
+              isParentTweet={true}
               variant="thread"
             />
           ))}
@@ -136,6 +140,7 @@ export function MyTweet({ tweets, mainTweetId, containerClassName }: MyTweetProp
 
       <article ref={mainTweetRef}>
         <UnifiedTweet
+          isParentTweet={false}
           tweet={mainTweet}
           variant={hasThread ? 'main-in-thread' : 'main'}
         />
