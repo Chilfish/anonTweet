@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 
 export type Theme = 'light' | 'dark' | 'system'
 export type ScreenshotFormat = 'png' | 'jpeg'
+export type ThinkingLevel = 'minimal' | 'low' | 'medium' | 'high'
 
 export interface AppConfigs {
   theme: Theme
@@ -13,6 +14,7 @@ export interface AppConfigs {
   enableAITranslation: boolean
   geminiApiKey: string
   geminiModel: string
+  geminiThinkingLevel: ThinkingLevel
   translationGlossary: string
 }
 
@@ -26,6 +28,7 @@ interface AppConfigState extends AppConfigs {
   setEnableAITranslation: (enable: boolean) => void
   setGeminiApiKey: (apiKey: string) => void
   setGeminiModel: (model: string) => void
+  setGeminiThinkingLevel: (level: ThinkingLevel) => void
   setTranslationGlossary: (glossary: string) => void
 }
 
@@ -40,6 +43,7 @@ export const useAppConfigStore = create<AppConfigState>()(
       enableAITranslation: false,
       geminiApiKey: '',
       geminiModel: 'models/gemini-3-flash-preview',
+      geminiThinkingLevel: 'minimal',
       translationGlossary: '',
 
       setEnableMediaProxy: enableMediaProxy => set({ enableMediaProxy }),
@@ -50,6 +54,7 @@ export const useAppConfigStore = create<AppConfigState>()(
       setShowActions: showActions => set({ showActions }),
       setGeminiApiKey: geminiApiKey => set({ geminiApiKey }),
       setGeminiModel: geminiModel => set({ geminiModel }),
+      setGeminiThinkingLevel: geminiThinkingLevel => set({ geminiThinkingLevel }),
       setTranslationGlossary: translationGlossary => set({ translationGlossary }),
     }),
     {

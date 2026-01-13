@@ -24,6 +24,7 @@ export const getTweetSchema = z.object({
   enableAITranslation: z.boolean().default(false),
   apiKey: z.string().optional(),
   model: z.string().optional(),
+  thinkingLevel: z.enum(['minimal', 'low', 'medium', 'high']).optional(),
   translationGlossary: z.string().optional(),
 })
 

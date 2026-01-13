@@ -24,10 +24,12 @@ export function AITranslationSettings() {
     enableAITranslation,
     geminiApiKey,
     geminiModel,
+    geminiThinkingLevel,
     translationGlossary,
     setEnableAITranslation,
     setGeminiApiKey,
     setGeminiModel,
+    setGeminiThinkingLevel,
     setTranslationGlossary,
   } = useAppConfigStore()
 
@@ -50,6 +52,7 @@ export function AITranslationSettings() {
       const { data } = await fetcher.post('/api/ai-test', {
         apiKey: geminiApiKey,
         model: geminiModel,
+        thinkingLevel: geminiThinkingLevel,
         tweetId: '1',
         enableAITranslation: true,
         translationGlossary: '1',
@@ -136,7 +139,24 @@ export function AITranslationSettings() {
                   模型选择
                 </Label>
                 <div className="flex-1 flex justify-end">
-                  <Select value={geminiModel} onValueChange={val => val && setGeminiModel(val)}>
+                  <Select
+                    value={geminiModel}
+                    onValueChange={(val) => {
+                      if (!val)
+                        return
+                      setGeminiModel(val)
+                      // 切换模型时，如果当前思考程度不被支持，重置为第一个可用选项或 minimal
+                      const nextModel = models.find(m => m.name === val)
+                      if (nextModel?.thinkingType === 'level' && nextModel.supportedLevels) {
+                        if (!nextModel.supportedLevels.includes(geminiThinkingLevel)) {
+                          setGeminiThinkingLevel(nextModel.supportedLevels[0]!)
+                        }
+                      }
+                      else if (nextModel?.thinkingType === 'budget') {
+                        // Gemini 2.5 统一映射，不需要重置，除非需要
+                      }
+                    }}
+                  >
                     <SelectTrigger className="w-fit">
                       <SelectValue>
                         {models.find(model => model.name === geminiModel)?.text || '选择模型'}
@@ -154,6 +174,53 @@ export function AITranslationSettings() {
                   </Select>
                 </div>
               </SettingsRow>
+
+              {models.find(m => m.name === geminiModel)?.thinkingType !== 'none' && (
+                <SettingsRow>
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="gemini-thinking-level" className="text-sm font-medium">
+                      思考程度
+                    </Label>
+                    <span className="text-xs text-muted-foreground">
+                      控制模型翻译时的思考深度，影响翻译耗时
+                    </span>
+                  </div>
+                  <div className="flex-1 flex justify-end">
+                    <Select
+                      value={geminiThinkingLevel}
+                      onValueChange={val => val && setGeminiThinkingLevel(val as any)}
+                    >
+                      <SelectTrigger className="w-fit h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(() => {
+                          const currentModel = models.find(m => m.name === geminiModel)
+                          if (currentModel?.thinkingType === 'level' && currentModel.supportedLevels) {
+                            return (
+                              <>
+                                {currentModel.supportedLevels.includes('minimal') && <SelectItem value="minimal">最低 (Minimal)</SelectItem>}
+                                {currentModel.supportedLevels.includes('low') && <SelectItem value="low">较低 (Low)</SelectItem>}
+                                {currentModel.supportedLevels.includes('medium') && <SelectItem value="medium">中等 (Medium)</SelectItem>}
+                                {currentModel.supportedLevels.includes('high') && <SelectItem value="high">最高 (High)</SelectItem>}
+                              </>
+                            )
+                          }
+                          // 默认显示所有（针对 budget 类型或 fallback）
+                          return (
+                            <>
+                              <SelectItem value="minimal">最低 (Minimal)</SelectItem>
+                              <SelectItem value="low">较低 (Low)</SelectItem>
+                              <SelectItem value="medium">中等 (Medium)</SelectItem>
+                              <SelectItem value="high">最高 (High)</SelectItem>
+                            </>
+                          )
+                        })()}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </SettingsRow>
+              )}
 
               <SettingsRow>
                 <div className="flex flex-col gap-1">
