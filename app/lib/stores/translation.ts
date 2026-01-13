@@ -5,6 +5,8 @@ import { persist } from 'zustand/middleware'
 import { DEFAULT_TEMPLATES } from '~/lib/constants'
 import { flatTweets } from '~/lib/utils'
 
+export type TranslationMode = 'bilingual' | 'original' | 'translation'
+
 interface TranslationSettings {
   enabled: boolean
   customSeparator: string
@@ -26,7 +28,7 @@ interface TranslationState {
   settings: TranslationSettings
 
   // === UI Domain ===
-  showTranslations: boolean
+  translationMode: TranslationMode
   showTranslationButton: boolean
   editingTweetId: string | null
   tweetElRef: HTMLDivElement | null
@@ -53,7 +55,7 @@ interface TranslationState {
   setAllTweets: (data: TweetData, mainTweetId: string) => void
 
   // === Actions: UI ===
-  setShowTranslations: (show: boolean) => void
+  setTranslationMode: (mode: TranslationMode) => void
   setScreenshoting: (screenshoting: boolean) => void
   setEditingTweetId: (tweetId: string | null) => void
   setShowTranslationButton: (show: boolean) => void
@@ -131,7 +133,7 @@ export const useTranslationStore = create<TranslationState>()(
       mainTweet: null,
 
       // UI Defaults
-      showTranslations: true,
+      translationMode: 'bilingual',
       showTranslationButton: true,
       editingTweetId: null,
       tweetElRef: null,
@@ -310,7 +312,7 @@ export const useTranslationStore = create<TranslationState>()(
           }
         }),
 
-      setShowTranslations: show => set({ showTranslations: show }),
+      setTranslationMode: mode => set({ translationMode: mode }),
       setShowTranslationButton: show => set({ showTranslationButton: show }),
       setEditingTweetId: tweetId => set({ editingTweetId: tweetId }),
       setTweetElRef: ref => set({ tweetElRef: ref }),
@@ -320,14 +322,15 @@ export const useTranslationStore = create<TranslationState>()(
     }),
     {
       name: 'translation-store',
-      version: 3,
+      version: 4,
       // 持久化白名单：只持久化设置，不持久化推文数据和UI状态
       partialize: state => ({
         settings: state.settings,
+        translationMode: state.translationMode,
       }),
       migrate: (state: any, version) => {
         if (version === 2) {
-          (state as TranslationState).settings.separatorTemplates.push({
+          (state as any).settings.separatorTemplates.push({
             id: 'preset-gemini',
             name: 'Gemini 翻译风格',
             html: `<div style="margin-top: 4px; color: #3285FD;">
@@ -335,6 +338,16 @@ export const useTranslationStore = create<TranslationState>()(
   <hr style="margin: 3px; border-top-width: 2px;">
 </div>`,
           })
+        }
+        if (version < 4) {
+          // 迁移 showTranslations 到 translationMode
+          if (state && typeof state.showTranslations === 'boolean') {
+            state.translationMode = state.showTranslations ? 'bilingual' : 'original'
+            delete state.showTranslations
+          }
+          else if (state && !state.translationMode) {
+            state.translationMode = 'bilingual'
+          }
         }
         return state
       },
