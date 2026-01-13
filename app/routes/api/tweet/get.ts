@@ -1,5 +1,5 @@
 import type { Route } from './+types/get'
-import type { TweetData } from '~/types'
+import type { Entity, TweetData } from '~/types'
 import { data } from 'react-router'
 import z from 'zod'
 import { autoTranslateTweet } from '~/lib/AITranslation'
@@ -74,14 +74,25 @@ export async function action({ request }: Route.ActionArgs) {
       }
 
       try {
-        // 只有当推文是主要推文或者是 Thread 的一部分时才翻译，避免翻译过多无关回复（可选优化）
-        tweet.autoTranslationEntities = await autoTranslateTweet({
-          tweet,
-          apiKey,
-          model,
-          thinkingLevel,
-          translationGlossary,
-        })
+        const [mainTweet, quotedTweet] = await Promise.all([
+          autoTranslateTweet({
+            tweet,
+            apiKey,
+            model,
+            thinkingLevel,
+            translationGlossary,
+          }),
+          tweet.quotedTweet ? autoTranslateTweet({
+            tweet: tweet.quotedTweet,
+            apiKey,
+            model,
+            thinkingLevel,
+            translationGlossary,
+          }) : [] as Entity[],
+        ])
+        tweet.autoTranslationEntities = mainTweet
+        tweet.quotedTweet && (tweet.quotedTweet.autoTranslationEntities = quotedTweet)
+
         await insertToTweetDB([tweet])
       }
       catch (e) {
