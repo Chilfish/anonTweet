@@ -298,9 +298,9 @@ export const useTranslationStore = create<TranslationState>()(
           }
         }),
 
-      deleteTranslation: tweetId => get().setTranslationVisibility(tweetId, { body: false, alt: false }),
+      resetTranslation: tweetId => get().setTranslationVisibility(tweetId, { body: false, alt: false }),
 
-      resetTranslation: tweetId =>
+      deleteTranslation: tweetId =>
         set((state) => {
           const newTranslations = { ...state.translations }
           delete newTranslations[tweetId]
