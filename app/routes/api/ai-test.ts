@@ -1,9 +1,11 @@
+import type { GoogleGenerativeAIProviderOptions } from '@ai-sdk/google'
 import type { ModelMessage } from 'ai'
 import type { Route } from './+types/ai-test'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { generateText } from 'ai'
 import { data } from 'react-router'
 import z from 'zod'
+import { getThinkingConfig } from '~/lib/AITranslation'
 import { getTweetSchema } from '~/lib/validations/tweet'
 
 export async function action({ request }: Route.ActionArgs) {
@@ -20,7 +22,12 @@ export async function action({ request }: Route.ActionArgs) {
     })
   }
 
-  const { tweetId: _id, apiKey, model } = submission.data || {
+  const {
+    tweetId: _id,
+    apiKey,
+    model,
+    thinkingLevel,
+  } = submission.data || {
     tweetId: '233',
     enableAITranslation: false,
     apiKey: '',
@@ -37,10 +44,17 @@ export async function action({ request }: Route.ActionArgs) {
       { role: 'user', content: 'hello' },
     ]
 
+    const thinkingConfig = getThinkingConfig(model!, thinkingLevel)
+
     const response = await generateText({
       model: gemini(model!),
       messages,
       temperature: 1,
+      providerOptions: {
+        google: {
+          thinkingConfig,
+        } satisfies GoogleGenerativeAIProviderOptions,
+      },
     })
     const text = response.text.trim()
     return data({
@@ -50,6 +64,7 @@ export async function action({ request }: Route.ActionArgs) {
         model,
         messages,
         temperature: 1,
+        thinkingConfig,
       },
       status: 200,
       message: `Text generated successfully`,

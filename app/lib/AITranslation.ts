@@ -1,11 +1,44 @@
+import type { GoogleGenerativeAIProviderOptions } from '@ai-sdk/google'
 import type { LanguageModel, ModelMessage } from 'ai'
+import type { ThinkingLevel } from '~/lib/stores/appConfig'
 import type { EnrichedTweet, Entity } from '~/types'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { generateText } from 'ai'
+import { models } from '~/lib/constants'
 import {
   restoreEntities,
   serializeForAI,
 } from '~/lib/react-tweet'
+
+/**
+ * 将思考程度映射为 Gemini 2.5 的 thinkingBudget (token 数)
+ */
+export function mapLevelToBudget(level: ThinkingLevel): number {
+  switch (level) {
+    case 'minimal': return 0
+    case 'low': return 1024
+    case 'medium': return 4096
+    case 'high': return 16384
+    default: return 0
+  }
+}
+
+/**
+ * 获取对应模型的思考配置
+ */
+export function getThinkingConfig(modelName: string, level: ThinkingLevel = 'minimal') {
+  const modelConfig = models.find(m => m.name === modelName)
+  const thinkingConfig: any = { includeThoughts: false }
+
+  if (modelConfig?.thinkingType === 'level') {
+    thinkingConfig.thinkingLevel = level
+  }
+  else if (modelConfig?.thinkingType === 'budget') {
+    thinkingConfig.thinkingBudget = mapLevelToBudget(level)
+  }
+
+  return thinkingConfig
+}
 
 /**
  * 将实体 Map 转换为 AI 可读的参考文本
@@ -51,9 +84,19 @@ interface TranslatePayload {
   entityContext: string
   translationGlossary?: string
   model: LanguageModel
+  modelName: string
+  thinkingLevel?: ThinkingLevel
 }
 
-export async function translateText({ tweet, maskedText, entityContext, translationGlossary, model }: TranslatePayload) {
+export async function translateText({
+  tweet,
+  maskedText,
+  entityContext,
+  translationGlossary,
+  model,
+  modelName,
+  thinkingLevel = 'minimal',
+}: TranslatePayload) {
   const systemPrompt = `
 # Role Definition
 You are a professional Cross-Cultural Localization Expert specializing in Japanese-to-Chinese (Simplified) translation for social media.
@@ -124,11 +167,18 @@ ${maskedText}
     { role: 'user', content: userContent },
   ]
 
+  const thinkingConfig = getThinkingConfig(modelName, thinkingLevel)
+
   try {
     const response = await generateText({
       model,
       messages,
       temperature: 1,
+      providerOptions: {
+        google: {
+          thinkingConfig,
+        } satisfies GoogleGenerativeAIProviderOptions,
+      },
     })
     return response.text.trim()
   }
@@ -143,9 +193,16 @@ interface TranslationOptions {
   apiKey: string
   translationGlossary?: string
   tweet: EnrichedTweet
+  thinkingLevel?: ThinkingLevel
 }
 
-export async function autoTranslateTweet({ tweet, model, translationGlossary, apiKey }: TranslationOptions) {
+export async function autoTranslateTweet({
+  tweet,
+  model,
+  translationGlossary,
+  apiKey,
+  thinkingLevel,
+}: TranslationOptions) {
   const { entityMap, maskedText } = serializeForAI(tweet.entities)
   if (!maskedText.trim()) {
     return []
@@ -161,7 +218,9 @@ export async function autoTranslateTweet({ tweet, model, translationGlossary, ap
     maskedText,
     entityContext,
     model: gemini(model),
+    modelName: model,
     translationGlossary,
+    thinkingLevel,
   })
   if (!translatedTextString) {
     return []

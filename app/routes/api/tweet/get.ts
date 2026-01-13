@@ -23,7 +23,14 @@ export async function action({ request }: Route.ActionArgs) {
     })
   }
 
-  const { tweetId: _id, enableAITranslation, apiKey, model, translationGlossary } = submission.data || {
+  const {
+    tweetId: _id,
+    enableAITranslation,
+    apiKey,
+    model,
+    thinkingLevel,
+    translationGlossary,
+  } = submission.data || {
     tweetId: '',
     enableAITranslation: false,
     apiKey: '',
@@ -72,6 +79,7 @@ export async function action({ request }: Route.ActionArgs) {
           tweet,
           apiKey,
           model,
+          thinkingLevel,
           translationGlossary,
         })
         await insertToTweetDB([tweet])
