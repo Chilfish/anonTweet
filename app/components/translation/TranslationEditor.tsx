@@ -1,5 +1,5 @@
 import type { EnrichedTweet, Entity } from '~/types'
-import { BookA, EyeOff, Languages, LanguagesIcon, RotateCcw, Save } from 'lucide-react'
+import { BookA, Languages, LanguagesIcon, Save, Trash2Icon } from 'lucide-react'
 import React, { useCallback, useMemo, useState } from 'react'
 import { SettingsGroup, SettingsRow } from '~/components/settings/SettingsUI'
 import { DictionaryViewer } from '~/components/translation/DictionaryViewer'
@@ -72,6 +72,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     setTranslationVisibility,
     resetTranslation,
     hasTextContent,
+    deleteTranslation,
   } = useTranslationStore()
 
   const dictionaryEntries = useTranslationDictionaryStore(state => state.entries)
@@ -183,8 +184,8 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     setIsOpen(false)
   }
 
-  const handleHide = () => {
-    setTranslationVisibility(tweetId, { body: false })
+  const handleDelete = () => {
+    deleteTranslation(tweetId)
     setIsOpen(false)
   }
 
@@ -331,7 +332,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
           </Popover>
 
           <div className="flex items-center gap-2">
-            {getTranslation(tweetId) !== null && (
+            {/* {getTranslation(tweetId) !== null && (
               <Tooltip>
                 <TooltipTrigger render={(
                   <Button
@@ -349,7 +350,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
                   重置为默认状态（移除人工翻译或取消隐藏）
                 </TooltipContent>
               </Tooltip>
-            )}
+            )} */}
 
             {getTranslation(tweetId) !== null && (
               <Tooltip>
@@ -358,18 +359,15 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
                     type="button"
                     variant="destructive"
                     size="sm"
-                    onClick={handleHide}
-                  >
-                    <EyeOff className="size-4" />
-                    隐藏
-                  </Button>
+                    onClick={handleDelete}
+                  />
                 )}
                 >
-                  <EyeOff className="size-4" />
-                  隐藏
+                  <Trash2Icon className="size-4" />
+                  删除
                 </TooltipTrigger>
                 <TooltipContent>
-                  不再显示此推文的翻译
+                  删除此推文的翻译
                 </TooltipContent>
               </Tooltip>
             )}
