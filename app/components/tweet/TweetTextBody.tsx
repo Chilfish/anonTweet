@@ -5,10 +5,10 @@ import { useTranslationStore } from '~/lib/stores/translation'
 
 export function TweetTextBody({ tweet }: { tweet: EnrichedTweet }) {
   const { translationMode, translations } = useTranslationStore()
-  const hasTranslation = translations[tweet.id_str] !== undefined
+  const hasTranslation = translations[tweet.id_str] !== undefined || !!tweet.autoTranslationEntities?.length
   const isShowRawText = translationMode !== 'translation' || !hasTranslation
 
-  console.log(translationMode, translations)
+  // console.log(translationMode, hasTranslation)
 
   return (
     <>

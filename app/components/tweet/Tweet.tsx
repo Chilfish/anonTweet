@@ -30,7 +30,7 @@ function UnifiedTweet({ tweet, variant, isParentTweet }: UnifiedTweetProps) {
   const isMainInThread = variant === 'main-in-thread'
 
   const containerClasses = cn({
-    'p-2 sm:p-4! border-2 rounded-2xl mt-2!': isQuoted,
+    'p-3 border-2 rounded-2xl mt-2!': isQuoted,
     'relative': isThread,
     'pb-3!': isParentTweet,
   })
