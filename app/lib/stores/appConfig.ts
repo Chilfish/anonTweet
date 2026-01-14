@@ -16,6 +16,7 @@ export interface AppConfigs {
   geminiModel: string
   geminiThinkingLevel: ThinkingLevel
   translationGlossary: string
+  isInlineMedia: boolean
 }
 
 interface AppConfigState extends AppConfigs {
@@ -30,6 +31,7 @@ interface AppConfigState extends AppConfigs {
   setGeminiModel: (model: string) => void
   setGeminiThinkingLevel: (level: ThinkingLevel) => void
   setTranslationGlossary: (glossary: string) => void
+  setIsInlineMedia: (isInlineMedia: boolean) => void
 }
 
 export const useAppConfigStore = create<AppConfigState>()(
@@ -45,6 +47,7 @@ export const useAppConfigStore = create<AppConfigState>()(
       geminiModel: 'models/gemini-3-flash-preview',
       geminiThinkingLevel: 'minimal',
       translationGlossary: '',
+      isInlineMedia: false,
 
       setEnableMediaProxy: enableMediaProxy => set({ enableMediaProxy }),
       setMediaProxyUrl: mediaProxyUrl => set({ mediaProxyUrl }),
@@ -56,6 +59,7 @@ export const useAppConfigStore = create<AppConfigState>()(
       setGeminiModel: geminiModel => set({ geminiModel }),
       setGeminiThinkingLevel: geminiThinkingLevel => set({ geminiThinkingLevel }),
       setTranslationGlossary: translationGlossary => set({ translationGlossary }),
+      setIsInlineMedia: isInlineMedia => set({ isInlineMedia }),
     }),
     {
       name: 'app-config-store',

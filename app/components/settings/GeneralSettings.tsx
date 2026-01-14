@@ -21,6 +21,8 @@ export function GeneralSettings() {
     setMediaProxyUrl,
     screenshotFormat,
     setScreenshotFormat,
+    isInlineMedia,
+    setIsInlineMedia,
   } = useAppConfigStore()
 
   return (
@@ -53,6 +55,18 @@ export function GeneralSettings() {
                 <SelectItem value="jpeg">JPEG</SelectItem>
               </SelectContent>
             </Select>
+          </SettingsRow>
+          <SettingsRow>
+            <div className="flex flex-col gap-1">
+              <span className="text-sm font-medium">媒体竖向排列</span>
+              <span className="text-xs text-muted-foreground">
+                按顺序垂直展示媒体，不使用宫格
+              </span>
+            </div>
+            <Switch
+              checked={isInlineMedia}
+              onCheckedChange={setIsInlineMedia}
+            />
           </SettingsRow>
         </SettingsGroup>
       </div>
