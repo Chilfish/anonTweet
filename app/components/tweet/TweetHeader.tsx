@@ -115,6 +115,8 @@ export function TweetHeader() {
               <span>设置</span>
             </DropdownMenuItem>
 
+            <DropdownMenuSeparator />
+
             <DropdownMenuItem
               onClick={handleDownload}
               disabled={tweets.length === 0}
@@ -151,8 +153,6 @@ export function TweetHeader() {
               <FileText className="h-4 w-4" />
               <span>复制为Markdown</span>
             </DropdownMenuItem>
-
-            <DropdownMenuSeparator className="my-1 opacity-50" />
 
             <DropdownMenuCheckboxItem
               checked={!showTranslationButton}
