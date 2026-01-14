@@ -14,8 +14,18 @@ import {
 import { useTranslationStore } from '~/lib/stores/translation'
 import { cn } from '~/lib/utils'
 
-export function ToggleTransButton({ className, ...props }: ComponentProps<typeof Button>) {
-  const { translationMode, setTranslationMode, setShowTranslationButton } = useTranslationStore()
+interface ToggleTransButtonProps extends ComponentProps<typeof Button> {
+  tweetId?: string
+}
+
+export function ToggleTransButton({ className, tweetId, ...props }: ToggleTransButtonProps) {
+  const {
+    translationMode,
+    setTranslationMode,
+    setShowTranslationButton,
+    tweetTranslationModes,
+    setTweetTranslationMode,
+  } = useTranslationStore()
 
   const modes = [
     {
@@ -35,12 +45,22 @@ export function ToggleTransButton({ className, ...props }: ComponentProps<typeof
     },
   ] as const
 
-  const currentMode = modes.find(m => m.value === translationMode) || modes[1]
+  // 如果提供了 tweetId，优先使用该推文的独立设置，否则回退到全局设置
+  const effectiveMode = tweetId
+    ? (tweetTranslationModes[tweetId] || translationMode)
+    : translationMode
+
+  const currentMode = modes.find(m => m.value === effectiveMode) || modes[1]
 
   const handleModeChange = (mode: typeof modes[number]['value']) => {
-    setTranslationMode(mode)
-    // 只有在非 original 模式下才显示推文下方的翻译按钮
-    setShowTranslationButton(mode !== 'original')
+    if (tweetId) {
+      setTweetTranslationMode(tweetId, mode)
+    }
+    else {
+      setTranslationMode(mode)
+      // 只有在非 original 模式下才显示推文下方的翻译按钮
+      setShowTranslationButton(mode !== 'original')
+    }
   }
 
   return (
@@ -65,7 +85,7 @@ export function ToggleTransButton({ className, ...props }: ComponentProps<typeof
             onClick={() => handleModeChange(mode.value)}
             className={cn(
               'flex items-center gap-2 cursor-pointer',
-              translationMode === mode.value && 'bg-muted font-bold',
+              effectiveMode === mode.value && 'bg-muted font-bold',
             )}
           >
             <mode.icon className="h-4 w-4" />

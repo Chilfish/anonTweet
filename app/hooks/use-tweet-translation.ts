@@ -3,9 +3,16 @@ import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { useTranslationStore } from '~/lib/stores/translation'
 
 export function useTweetTranslation(tweet: EnrichedTweet, type: 'body' | 'alt' = 'body') {
-  const { translationMode, getTranslation, getTranslationVisibility } = useTranslationStore()
+  const {
+    translationMode,
+    tweetTranslationModes,
+    getTranslation,
+    getTranslationVisibility,
+  } = useTranslationStore()
   const { enableAITranslation } = useAppConfigStore()
   const tweetId = tweet.id_str
+
+  const mode = tweetTranslationModes[tweetId] || translationMode
 
   // getTranslation 返回值含义：
   // - Entity[]: 存在人工编辑的翻译（或初始化时提取的翻译）
@@ -14,8 +21,8 @@ export function useTweetTranslation(tweet: EnrichedTweet, type: 'body' | 'alt' =
   const manualTranslation = getTranslation(tweetId)
   const visibility = getTranslationVisibility(tweetId)
 
-  // 1. 全局开关检查
-  if (translationMode === 'original') {
+  // 1. 模式检查
+  if (mode === 'original') {
     return { shouldShow: false, entities: null }
   }
 

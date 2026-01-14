@@ -4,11 +4,11 @@ import { TweetBody } from '~/lib/react-tweet'
 import { useTranslationStore } from '~/lib/stores/translation'
 
 export function TweetTextBody({ tweet }: { tweet: EnrichedTweet }) {
-  const { translationMode, translations } = useTranslationStore()
-  const hasTranslation = translations[tweet.id_str] !== undefined || !!tweet.autoTranslationEntities?.length
-  const isShowRawText = translationMode !== 'translation' || !hasTranslation
+  const { translationMode, tweetTranslationModes, translations } = useTranslationStore()
 
-  // console.log(translationMode, hasTranslation)
+  const mode = tweetTranslationModes[tweet.id_str] || translationMode
+  const hasTranslation = translations[tweet.id_str] !== undefined || !!tweet.autoTranslationEntities?.length
+  const isShowRawText = mode !== 'translation' || !hasTranslation
 
   return (
     <>

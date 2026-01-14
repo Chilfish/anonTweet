@@ -23,6 +23,8 @@ interface TranslationState {
   translations: Record<string, Entity[] | null>
   /** 存储推文ID到显示状态的映射 */
   translationVisibility: Record<string, { body: boolean, alt: boolean }>
+  /** 存储推文ID到翻译模式的映射 (Per-tweet override) */
+  tweetTranslationModes: Record<string, TranslationMode>
 
   // === Settings Domain ===
   settings: TranslationSettings
@@ -56,6 +58,8 @@ interface TranslationState {
 
   // === Actions: UI ===
   setTranslationMode: (mode: TranslationMode) => void
+  setTweetTranslationMode: (tweetId: string, mode: TranslationMode) => void
+  getTweetTranslationMode: (tweetId: string) => TranslationMode
   setScreenshoting: (screenshoting: boolean) => void
   setEditingTweetId: (tweetId: string | null) => void
   setShowTranslationButton: (show: boolean) => void
@@ -129,6 +133,7 @@ export const useTranslationStore = create<TranslationState>()(
       settings: DEFAULT_SETTINGS,
       translations: {},
       translationVisibility: {},
+      tweetTranslationModes: {},
       tweets: [],
       mainTweet: null,
 
@@ -312,7 +317,25 @@ export const useTranslationStore = create<TranslationState>()(
           }
         }),
 
-      setTranslationMode: mode => set({ translationMode: mode }),
+      setTranslationMode: mode =>
+        set({
+          translationMode: mode,
+          tweetTranslationModes: {}, // Global setting overrides all individual settings
+        }),
+
+      setTweetTranslationMode: (tweetId, mode) =>
+        set(state => ({
+          tweetTranslationModes: {
+            ...state.tweetTranslationModes,
+            [tweetId]: mode,
+          },
+        })),
+
+      getTweetTranslationMode: (tweetId) => {
+        const state = get()
+        return state.tweetTranslationModes[tweetId] || state.translationMode
+      },
+
       setShowTranslationButton: show => set({ showTranslationButton: show }),
       setEditingTweetId: tweetId => set({ editingTweetId: tweetId }),
       setTweetElRef: ref => set({ tweetElRef: ref }),

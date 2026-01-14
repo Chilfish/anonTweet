@@ -3,6 +3,7 @@ import { BookA, Languages, LanguagesIcon, Save, Trash2Icon } from 'lucide-react'
 import React, { useCallback, useMemo, useState } from 'react'
 import { SettingsGroup, SettingsRow } from '~/components/settings/SettingsUI'
 import { DictionaryViewer } from '~/components/translation/DictionaryViewer'
+import { ToggleTransButton } from '~/components/translation/ToggleTransButton'
 import { Button } from '~/components/ui/button'
 import {
   Dialog,
@@ -314,22 +315,30 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
         </DialogPanel>
 
         <DialogFooter className="flex-row items-center justify-between gap-2 sm:justify-between">
-          <Popover>
-            <PopoverTrigger render={(
-              <Button
-                variant="ghost"
-                className="text-muted-foreground hover:text-foreground"
-                title="查看词汇表"
-              />
-            )}
-            >
-              <BookA className="size-4" />
-              词汇表
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-0" align="start" side="top">
-              <DictionaryViewer />
-            </PopoverContent>
-          </Popover>
+          <div className="flex items-center gap-2">
+            <Popover>
+              <PopoverTrigger render={(
+                <Button
+                  variant="ghost"
+                  className="text-muted-foreground hover:text-foreground"
+                  title="查看词汇表"
+                />
+              )}
+              >
+                <BookA className="size-4" />
+                词汇表
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-0" align="start" side="top">
+                <DictionaryViewer />
+              </PopoverContent>
+            </Popover>
+
+            <ToggleTransButton
+              tweetId={tweetId}
+              variant="ghost"
+              className="text-muted-foreground hover:text-foreground px-2"
+            />
+          </div>
 
           <div className="flex items-center gap-2">
             {/* {getTranslation(tweetId) !== null && (
