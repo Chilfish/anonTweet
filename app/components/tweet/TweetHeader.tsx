@@ -3,7 +3,9 @@ import {
   EyeIcon,
   EyeOff,
   FileText,
+  LayoutGrid,
   MoreHorizontal,
+  Rows4Icon,
   Settings,
 } from 'lucide-react'
 import { useState } from 'react'
@@ -23,6 +25,7 @@ import {
 } from '~/components/ui/dropdown-menu'
 import { downloadFiles } from '~/lib/downloader'
 import { generateMarkdownFromTweets } from '~/lib/markdown'
+import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { useTranslationStore } from '~/lib/stores/translation'
 import { toast } from '~/lib/utils'
 
@@ -33,6 +36,8 @@ export function TweetHeader() {
     showTranslationButton,
     setShowTranslationButton,
   } = useTranslationStore()
+
+  const { isInlineMedia, setIsInlineMedia } = useAppConfigStore()
 
   const handleDownload = async () => {
     const mediaItems = extractDownloadItemsFromTweets(tweets)
@@ -118,6 +123,25 @@ export function TweetHeader() {
               <Download className="h-4 w-4" />
               <span>下载媒体</span>
             </DropdownMenuItem>
+
+            <DropdownMenuCheckboxItem
+              checked={isInlineMedia}
+              onCheckedChange={setIsInlineMedia}
+              className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium focus:bg-muted/50"
+            >
+              <span className="flex items-center gap-2">
+                {
+                  isInlineMedia
+                    ? <LayoutGrid className="h-4 w-4" />
+                    : <Rows4Icon className="h-4 w-4" />
+                }
+                <span>
+                  媒体按
+                  {isInlineMedia ? '宫格' : '竖向'}
+                  排列
+                </span>
+              </span>
+            </DropdownMenuCheckboxItem>
 
             <DropdownMenuItem
               onClick={handleCopyMarkdown}

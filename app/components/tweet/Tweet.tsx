@@ -9,6 +9,7 @@ import {
   TweetHeader,
   TweetMedia,
 } from '~/lib/react-tweet'
+import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { useTranslationStore } from '~/lib/stores/translation'
 import { cn } from '~/lib/utils'
 import { TweetLinkCard } from './TweetCard'
@@ -25,6 +26,7 @@ interface UnifiedTweetProps {
 
 function UnifiedTweet({ tweet, variant, isParentTweet }: UnifiedTweetProps) {
   const { screenshoting } = useTranslationStore()
+  const { isInlineMedia } = useAppConfigStore()
   const isQuoted = variant === 'quoted'
   const isThread = variant === 'thread'
   const isMainInThread = variant === 'main-in-thread'
@@ -57,7 +59,13 @@ function UnifiedTweet({ tweet, variant, isParentTweet }: UnifiedTweetProps) {
         <TweetTextBody tweet={tweet} />
 
         {tweet.mediaDetails?.length ? (
-          <TweetMedia tweet={tweet} showCoverOnly={screenshoting} />
+          <TweetMedia
+            tweet={{
+              ...tweet,
+              isInlineMeida: isInlineMedia || tweet.isInlineMeida,
+            }}
+            showCoverOnly={screenshoting}
+          />
         ) : null}
 
         <TweetMediaAlt tweet={tweet} />

@@ -15,7 +15,7 @@
   white-space: nowrap;
 }
 .videoButton {
-  position: relative;
+  position: absolute;
   display: flex;
   width: 48px;
   height: 48px;
