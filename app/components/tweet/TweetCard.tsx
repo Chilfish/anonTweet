@@ -1,5 +1,6 @@
 import type { EnrichedTweet } from '~/types'
 import { useMemo, useState } from 'react'
+import { MediaImage } from '~/components/ui/media'
 import { useProxyMedia } from '~/lib/stores/appConfig'
 import { cn } from '~/lib/utils'
 
@@ -51,7 +52,7 @@ function CardImage({ imageUrl, altText, isLarge = false }: CardImageProps) {
         isLarge ? 'aspect-[16/9]' : 'w-20 h-20 flex-shrink-0',
       )}
     >
-      <img
+      <MediaImage
         src={proxyMedia(imageUrl)}
         alt={altText}
         className={cn(

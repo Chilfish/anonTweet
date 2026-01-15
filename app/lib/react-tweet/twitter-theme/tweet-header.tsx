@@ -1,4 +1,5 @@
 import type { EnrichedTweet } from '~/types'
+import { MediaImage } from '~/components/ui/media'
 import { useProxyMedia } from '~/lib/stores/appConfig'
 import { cn } from '~/lib/utils'
 import { TweetInfoCreatedAt } from './components'
@@ -31,7 +32,7 @@ export function TweetHeader({ tweet, inQuote, className }: Props) {
             'z-10',
           )}
         >
-          <img
+          <MediaImage
             src={proxyMedia(user.profile_image_url_https)}
             alt={user.name}
             className={s.avatarImg}
