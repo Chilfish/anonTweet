@@ -236,17 +236,12 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
           <div className="space-y-2">
             <Label className="px-1 text-xs font-medium text-muted-foreground">句首补充</Label>
             <SettingsGroup>
-              <SettingsRow>
-                <div className="flex flex-col gap-0.5">
-                  <Label htmlFor="enable-prepend" className="text-sm font-medium">
-                    启用句首补充
-                  </Label>
-                  <span className="text-xs text-muted-foreground">
-                    用于调整语序或补充上下文
-                  </span>
-                </div>
+              <SettingsRow
+                label="启用句首补充"
+                description="用于调整语序或补充上下文"
+                id="enable-prepend"
+              >
                 <Switch
-                  id="enable-prepend"
                   checked={enablePrepend}
                   onCheckedChange={setEnablePrepend}
                 />

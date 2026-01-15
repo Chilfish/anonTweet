@@ -123,7 +123,7 @@ export function AITranslationSettings() {
                   value={geminiApiKey}
                   onChange={e => setGeminiApiKey(e.target.value)}
                   placeholder="输入 Gemini API Key"
-                  className="text-right h-8 min-w-64"
+                  className="text-right h-8 sm:min-w-64"
                 />
               </SettingsRow>
 
