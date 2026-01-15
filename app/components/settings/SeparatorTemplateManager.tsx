@@ -68,10 +68,11 @@ function TemplateEditor({
       <div className="space-y-2">
         <h4 className="px-1 text-sm font-medium text-muted-foreground">配置</h4>
         <SettingsGroup>
-          <SettingsRow>
-            <Label htmlFor={`tpl-name-${id}`} className="w-20 shrink-0 font-medium">名称</Label>
+          <SettingsRow
+            label="名称"
+            id={`tpl-name-${id}`}
+          >
             <Input
-              id={`tpl-name-${id}`}
               value={name}
               onChange={e => setName(e.target.value)}
               disabled={isReadOnly}
@@ -194,8 +195,10 @@ export function SeparatorTemplateManager() {
           ? (
               <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
                 <SettingsGroup>
-                  <SettingsRow>
-                    <Label className="w-20 shrink-0 font-medium">名称</Label>
+                  <SettingsRow
+                    label="名称"
+                    id="template-name"
+                  >
                     <Input
                       value={newTemplate.name}
                       onChange={e => setNewTemplate(prev => ({ ...prev, name: e.target.value }))}
@@ -231,8 +234,9 @@ export function SeparatorTemplateManager() {
           : (
               <>
                 <SettingsGroup>
-                  <SettingsRow>
-                    <Label className="shrink-0 font-medium">当前应用</Label>
+                  <SettingsRow
+                    label="当前应用"
+                  >
                     <div className="flex-1 min-w-0 flex justify-end">
                       <Select
                         value={selectedTemplate?.id}

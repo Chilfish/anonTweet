@@ -179,8 +179,8 @@ export function TranslationDictionaryManager() {
           <SettingsRow
             className="cursor-pointer hover:bg-muted/50 transition-colors"
             onClick={() => setShowAddForm(!showAddForm)}
+            label="添加新词汇"
           >
-            <span className="text-sm font-medium text-primary">添加新词汇...</span>
             <Button size="icon" variant="ghost" className="h-6 w-6 pointer-events-none">
               {showAddForm ? <X className="size-4" /> : <Plus className="size-4" />}
             </Button>
@@ -212,8 +212,9 @@ export function TranslationDictionaryManager() {
           )}
 
           {/* Import / Export */}
-          <SettingsRow>
-            <span className="text-sm font-medium">数据备份</span>
+          <SettingsRow
+            label="数据备份"
+          >
             <div className="flex gap-2">
               <Button variant="outline" size="sm" className="h-8" onClick={handleExport}>
                 <FileDown className="size-3.5 mr-1" />
@@ -260,11 +261,12 @@ export function TranslationDictionaryManager() {
               )
             : (
                 filteredEntries.map(entry => (
-                  <SettingsRow key={entry.id} className="items-start py-3 gap-3">
-                    <div className="flex flex-col gap-1 flex-1 min-w-0">
-                      <span className="text-sm font-medium break-words leading-relaxed">{entry.original}</span>
-                      <span className="text-xs text-muted-foreground break-words leading-relaxed">{entry.translated}</span>
-                    </div>
+                  <SettingsRow
+                    key={entry.id}
+                    className="items-start py-3 gap-3"
+                    label={entry.original}
+                    description={entry.translated}
+                  >
                     <div className="flex shrink-0 items-center gap-1 -mr-2">
                       <Button
                         size="icon"
