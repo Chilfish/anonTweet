@@ -129,10 +129,7 @@ const MediaImage = React.forwardRef<HTMLImageElement, MediaImageProps>(
     const showImage = status === 'success' || status === 'loading' // Image stays in DOM to trigger onLoad
 
     return (
-      <div
-        className={cn(mediaContainerVariants({ isLoaded: status === 'success' }), containerClassName)}
-        data-status={status}
-      >
+      <>
         {showImage && (
           <img
             ref={mergedRef}
@@ -141,6 +138,8 @@ const MediaImage = React.forwardRef<HTMLImageElement, MediaImageProps>(
             data-status={status}
             loading="lazy"
             className={cn(
+              mediaContainerVariants({ isLoaded: status === 'success' }),
+              containerClassName,
               'size-full object-cover transition-opacity duration-300',
               status === 'loading' ? 'opacity-0' : 'opacity-100',
               className,
@@ -151,7 +150,7 @@ const MediaImage = React.forwardRef<HTMLImageElement, MediaImageProps>(
 
         {showLoading && (loadingFallback || <MediaLoading />)}
         {showError && (errorFallback || <MediaFallback />)}
-      </div>
+      </>
     )
   },
 )
