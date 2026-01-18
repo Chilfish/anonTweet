@@ -1,9 +1,10 @@
 import type { IListTweetsResponse } from '~/lib/rettiwt-api/types/raw/list/Tweets'
 import type { ITweetDetailsResponse } from '~/lib/rettiwt-api/types/raw/tweet/Details'
+import type { ITweetRepliesResponse } from '~/lib/rettiwt-api/types/raw/tweet/Replies'
 import type { IUserDetailsResponse } from '~/lib/rettiwt-api/types/raw/user/Details'
 import type { IUserTweetsResponse } from '~/lib/rettiwt-api/types/raw/user/Tweets'
 import type { EnrichedTweet, RawTweet, RawUser } from '~/types'
-import { ResourceType } from '~/lib/rettiwt-api'
+import { ResourceType, TweetRepliesSortType } from '~/lib/rettiwt-api'
 import { Extractors } from '~/lib/rettiwt-api/collections/Extractors'
 import { RettiwtPool } from '~/lib/SmartPool'
 import { enrichTweet } from './parseTweet'
@@ -81,6 +82,28 @@ export async function fetchUserTweet(userId: string): Promise<RawTweet[]> {
     },
     ),
   )
+}
+
+export async function fetchReplies(tweetId: string): Promise<RawTweet[]> {
+  return await twitterPool.run(async (fetcher) => {
+    const response = await fetcher.request<ITweetRepliesResponse>(
+      ResourceType.TWEET_REPLIES,
+      {
+        id: tweetId,
+        sortBy: TweetRepliesSortType.LIKES,
+      },
+    )
+    const data = response.data
+      .threaded_conversation_with_injections_v2
+      .instructions
+      .filter(t => t.type === 'TimelineAddEntries')
+
+    const comments = data.flatMap(t => t.entries?.filter(d => d.content.entryType === 'TimelineTimelineModule') || [])
+      .flatMap(entry => (entry.content.items || []).map(d => d.item.itemContent.tweet_results.result))
+      .filter(result => !!result)
+
+    return comments as unknown as RawTweet[]
+  })
 }
 
 export async function getEnrichedUserTweet(userId: string): Promise<EnrichedTweet[]> {

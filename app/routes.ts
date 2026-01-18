@@ -24,6 +24,7 @@ export default [
       route('get/:id', 'routes/api/tweet/get.ts'),
       route('set', 'routes/api/tweet/set.ts'),
       route('list/:id', 'routes/api/tweet/list.ts'),
+      route('/replies/:id', 'routes/api/tweet/replies.ts'),
     ]),
 
     ...prefix('user', [

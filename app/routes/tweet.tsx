@@ -116,6 +116,7 @@ export default function TweetPage() {
       <MyTweet
         tweets={tweets}
         mainTweetId={tweetId}
+        showComments={true}
       />
     </>
   )
