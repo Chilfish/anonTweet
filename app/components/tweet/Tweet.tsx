@@ -118,7 +118,7 @@ function TweetComment({ tweet, isParentTweet }: { tweet: EnrichedTweet, isParent
     >
       <div
         style={{
-          height: mainTweetHeight > 0 ? `calc(100% - ${mainTweetHeight}px - ${commentsHeight}px)` : 'calc(100% - 3rem)',
+          height: mainTweetHeight > 0 ? `calc(100% - ${mainTweetHeight}px - ${commentsHeight}px - 1rem)` : 'calc(100% - 3rem)',
         }}
         className="absolute z-0 left-[1.1rem] top-4 w-[2px] bg-[#cfd9de] sm:left-[1.3rem] dark:bg-[#333639]"
       />
@@ -167,6 +167,8 @@ export function MyTweet({
       excludeUsers,
     })
   }, [tweets, mainTweetId, showComments, filterUnrelated, excludeUsers])
+
+  // console.log(commentThreads)
 
   const hasThread = parentTweets.length > 0
   const mainTweetRef = useRef<HTMLDivElement | null>(null)

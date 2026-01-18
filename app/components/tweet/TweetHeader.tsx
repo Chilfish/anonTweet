@@ -1,9 +1,12 @@
+import type { TweetData } from '~/types'
 import {
   Download,
   EyeIcon,
   EyeOff,
   FileText,
   LayoutGrid,
+  Loader2,
+  MessageCircle,
   MoreHorizontal,
   Rows4Icon,
   Settings,
@@ -24,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
 import { downloadFiles } from '~/lib/downloader'
+import { fetcher } from '~/lib/fetcher'
 import { generateMarkdownFromTweets } from '~/lib/markdown'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { useTranslationStore } from '~/lib/stores/translation'
@@ -31,13 +35,42 @@ import { toast } from '~/lib/utils'
 
 export function TweetHeader() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [isLoadingComments, setIsLoadingComments] = useState(false)
   const {
     tweets,
+    mainTweet,
+    appendTweets,
     showTranslationButton,
     setShowTranslationButton,
   } = useTranslationStore()
 
   const { isInlineMedia, setIsInlineMedia } = useAppConfigStore()
+
+  const handleLoadComments = async () => {
+    if (!mainTweet)
+      return
+
+    setIsLoadingComments(true)
+    try {
+      const { data } = await fetcher.get<TweetData>(`/api/tweet/replies/${mainTweet.id_str}`)
+      if (data && data.length > 0) {
+        appendTweets(data)
+        toast.success(`已获取 ${data.length} 条评论`)
+      }
+      else {
+        toast.info('未找到更多评论')
+      }
+    }
+    catch (error) {
+      console.error('Failed to load comments:', error)
+      toast.error('加载评论失败', {
+        description: `${error}`,
+      })
+    }
+    finally {
+      setIsLoadingComments(false)
+    }
+  }
 
   const handleDownload = async () => {
     const mediaItems = extractDownloadItemsFromTweets(tweets)
@@ -88,6 +121,17 @@ export function TweetHeader() {
       <BackButton />
 
       <div className="flex items-center gap-1 sm:gap-2">
+        <Button
+          variant="secondary"
+          onClick={handleLoadComments}
+          disabled={!mainTweet || isLoadingComments}
+        >
+          {isLoadingComments
+            ? <Loader2 className="size-4 animate-spin" />
+            : <MessageCircle className="size-4" />}
+          <span className="hidden sm:inline">加载评论</span>
+        </Button>
+
         <ToggleTransButton />
         <SaveAsImageButton />
 

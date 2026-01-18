@@ -67,13 +67,13 @@ export function ToggleTransButton({ className, tweetId, ...props }: ToggleTransB
     <DropdownMenu>
       <DropdownMenuTrigger render={(
         <Button
-          variant="secondary"
           {...props}
-          className={cn('h-8 px-3 text-sm font-medium transition-all duration-200 gap-2', className)}
+          variant="secondary"
+          className={cn('text-sm font-medium transition-all duration-200', className)}
         />
       )}
       >
-        <currentMode.icon className="h-4 w-4" />
+        <currentMode.icon className="sise-4" />
         <span className="hidden sm:inline">
           {currentMode.label}
         </span>
@@ -88,7 +88,7 @@ export function ToggleTransButton({ className, tweetId, ...props }: ToggleTransB
               effectiveMode === mode.value && 'bg-muted font-bold',
             )}
           >
-            <mode.icon className="h-4 w-4" />
+            <mode.icon className="size-4" />
             <span>{mode.label}</span>
           </DropdownMenuItem>
         ))}

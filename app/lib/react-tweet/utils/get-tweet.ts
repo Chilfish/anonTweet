@@ -98,11 +98,16 @@ export async function fetchReplies(tweetId: string): Promise<RawTweet[]> {
       .instructions
       .filter(t => t.type === 'TimelineAddEntries')
 
+    const mainTweet = (data.flatMap(d => d.entries?.filter(e => e.content.entryType === 'TimelineTimelineItem') || [])
+      .flatMap(entry => (entry.content.itemContent?.tweet_results.result))
+      .filter(result => !!result)
+      .at(0) || {}) as RawTweet
+
     const comments = data.flatMap(t => t.entries?.filter(d => d.content.entryType === 'TimelineTimelineModule') || [])
       .flatMap(entry => (entry.content.items || []).map(d => d.item.itemContent.tweet_results.result))
       .filter(result => !!result)
 
-    return comments as unknown as RawTweet[]
+    return [...comments as unknown as RawTweet[], mainTweet]
   })
 }
 

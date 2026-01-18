@@ -31,7 +31,7 @@ export default function TweetPage() {
   const { id } = useParams()
   const tweetId = id ? extractTweetId(id) : null
   const navigate = useNavigate()
-  const { setAllTweets } = useTranslationStore()
+  const { setAllTweets, tweets: storeTweets, mainTweet: storeMainTweet } = useTranslationStore()
   const [isStoreReady, setIsStoreReady] = useState(false)
   const appConfig = useAppConfigStore()
   const { enableAITranslation, geminiApiKey, geminiModel, translationGlossary } = appConfig
@@ -110,11 +110,16 @@ export default function TweetPage() {
     )
   }
 
+  // Prefer store data if it matches current tweet (allows for updates like loading comments)
+  const displayTweets = (storeMainTweet?.id_str === tweetId && storeTweets.length > 0)
+    ? storeTweets
+    : tweets
+
   return (
     <>
       <TweetHeader />
       <MyTweet
-        tweets={tweets}
+        tweets={displayTweets}
         mainTweetId={tweetId}
         showComments={true}
       />

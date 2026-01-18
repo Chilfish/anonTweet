@@ -55,6 +55,7 @@ interface TranslationState {
   deleteTranslation: (tweetId: string) => void
   resetTranslation: (tweetId: string) => void
   setAllTweets: (data: TweetData, mainTweetId: string) => void
+  appendTweets: (data: TweetData) => void
 
   // === Actions: UI ===
   setTranslationMode: (mode: TranslationMode) => void
@@ -253,6 +254,25 @@ export const useTranslationStore = create<TranslationState>()(
         set(state => ({
           tweets: data,
           mainTweet: data.find(t => t.id_str === mainTweetId),
+          translations: {
+            ...extracted,
+            ...state.translations,
+          },
+        }))
+      },
+
+      appendTweets: (data) => {
+        const state = get()
+        const existingIds = new Set(state.tweets.map(t => t.id_str))
+        const newTweets = data.filter(t => !existingIds.has(t.id_str))
+
+        if (newTweets.length === 0)
+          return
+
+        const extracted = extractTranslationsFromEntities(newTweets)
+
+        set(state => ({
+          tweets: [...state.tweets, ...newTweets],
           translations: {
             ...extracted,
             ...state.translations,

@@ -86,27 +86,3 @@ export async function getDBTweet(tweetId: string): Promise<EnrichedTweet | null>
     return await getEnrichedTweet(tweetId)
   }
 }
-
-/**
- * 从本地json缓存文件获取tweet
- */
-export async function getLocalTweet(tweetId: string): Promise<EnrichedTweet | null> {
-  const { access, readFile, writeFile } = await import('node:fs/promises')
-  const path = await import('node:path')
-
-  const dir = 'cache'
-  const filePath = path.join(dir, `${tweetId}.json`)
-
-  const isFileExists = await access(filePath).then(() => true).catch(() => false)
-
-  if (!isFileExists) {
-    const tweet = await getEnrichedTweet(tweetId)
-    await writeFile(filePath, JSON.stringify(tweet))
-    return tweet
-  }
-
-  const fileContent = await readFile(filePath, 'utf8')
-  const tweet = JSON.parse(fileContent)
-
-  return tweet
-}

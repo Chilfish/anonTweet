@@ -68,11 +68,13 @@ export function flatTweets(tweets: EnrichedTweet[]): EnrichedTweet[] {
   })
 }
 
+const toastTimeout = 3000
 export const toast = {
   success: (title: string, args?: { description: string }) => {
     toastManager.add({
       title,
       type: 'success',
+      timeout: toastTimeout,
       ...args,
     })
   },
@@ -80,6 +82,7 @@ export const toast = {
     toastManager.add({
       title,
       type: 'error',
+      timeout: toastTimeout,
       ...args,
     })
   },
@@ -87,6 +90,7 @@ export const toast = {
     toastManager.add({
       title,
       type: 'info',
+      timeout: toastTimeout,
       ...args,
     })
   },
