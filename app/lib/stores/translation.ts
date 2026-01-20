@@ -35,6 +35,9 @@ interface TranslationState {
   editingTweetId: string | null
   tweetElRef: HTMLDivElement | null
   screenshoting: boolean
+  isSelectionMode: boolean
+  selectedTweetIds: string[]
+  isCapturingSelected: boolean
 
   // === Actions: Settings ===
   updateSettings: (settings: Partial<TranslationSettings>) => void
@@ -65,6 +68,10 @@ interface TranslationState {
   setEditingTweetId: (tweetId: string | null) => void
   setShowTranslationButton: (show: boolean) => void
   setTweetElRef: (ref: HTMLDivElement) => void
+  toggleSelectionMode: (enabled?: boolean) => void
+  toggleTweetSelection: (tweetId: string) => void
+  selectAllTweets: (selected?: boolean) => void
+  setIsCapturingSelected: (isCapturing: boolean) => void
 
   // === Utils ===
   hasTextContent: (text?: string) => boolean
@@ -144,6 +151,9 @@ export const useTranslationStore = create<TranslationState>()(
       editingTweetId: null,
       tweetElRef: null,
       screenshoting: false,
+      isSelectionMode: false,
+      selectedTweetIds: [],
+      isCapturingSelected: false,
 
       updateSettings: newSettings =>
         set(state => ({
@@ -360,6 +370,38 @@ export const useTranslationStore = create<TranslationState>()(
       setEditingTweetId: tweetId => set({ editingTweetId: tweetId }),
       setTweetElRef: ref => set({ tweetElRef: ref }),
       setScreenshoting: screenshoting => set({ screenshoting }),
+
+      toggleSelectionMode: enabled =>
+        set((state) => {
+          const nextMode = enabled ?? !state.isSelectionMode
+          return {
+            isSelectionMode: nextMode,
+            selectedTweetIds: [],
+          }
+        }),
+
+      toggleTweetSelection: tweetId =>
+        set((state) => {
+          const isSelected = state.selectedTweetIds.includes(tweetId)
+          console.log(isSelected, tweetId)
+          return {
+            selectedTweetIds: isSelected
+              ? state.selectedTweetIds.filter(id => id !== tweetId)
+              : [...state.selectedTweetIds, tweetId],
+          }
+        }),
+
+      selectAllTweets: (selected = true) =>
+        set((state) => {
+          if (!selected) {
+            return { selectedTweetIds: [] }
+          }
+          return {
+            selectedTweetIds: state.tweets.map(t => t.id_str),
+          }
+        }),
+
+      setIsCapturingSelected: isCapturing => set({ isCapturingSelected: isCapturing }),
 
       hasTextContent: checkTextContent,
     }),

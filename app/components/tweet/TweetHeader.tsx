@@ -1,227 +1,47 @@
-import type { TweetData } from '~/types'
-import {
-  Download,
-  EyeIcon,
-  EyeOff,
-  FileText,
-  LayoutGrid,
-  Loader2,
-  MessageCircle,
-  MoreHorizontal,
-  Rows4Icon,
-  Settings,
-} from 'lucide-react'
-import { useState } from 'react'
-import { SettingsPanel } from '~/components/settings/SettingsPanel'
+import { Loader2, MessageCircle } from 'lucide-react'
 import { BackButton } from '~/components/translation/BackButton'
-import { extractDownloadItemsFromTweets } from '~/components/translation/DownloadMedia'
-import { SaveAsImageButton } from '~/components/translation/saveAsImage'
+import { SaveAsImageButton } from '~/components/translation/SaveAsImageButton'
 import { ToggleTransButton } from '~/components/translation/ToggleTransButton'
 import { Button } from '~/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '~/components/ui/dropdown-menu'
-import { downloadFiles } from '~/lib/downloader'
-import { fetcher } from '~/lib/fetcher'
-import { generateMarkdownFromTweets } from '~/lib/markdown'
-import { useAppConfigStore } from '~/lib/stores/appConfig'
-import { useTranslationStore } from '~/lib/stores/translation'
-import { toast } from '~/lib/utils'
+import { useTweetOperations } from '~/hooks/use-tweet-operations'
+import { TweetOptionsMenu } from './TweetOptionsMenu'
 
 export function TweetHeader() {
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [isLoadingComments, setIsLoadingComments] = useState(false)
+  // 1. 挂载业务逻辑 Hook
   const {
-    tweets,
-    mainTweet,
-    appendTweets,
-    showTranslationButton,
-    setShowTranslationButton,
-  } = useTranslationStore()
-
-  const { isInlineMedia, setIsInlineMedia } = useAppConfigStore()
-
-  const handleLoadComments = async () => {
-    if (!mainTweet)
-      return
-
-    setIsLoadingComments(true)
-    try {
-      const { data } = await fetcher.get<TweetData>(`/api/tweet/replies/${mainTweet.id_str}`)
-      if (data && data.length > 0) {
-        appendTweets(data)
-        toast.success(`已获取 ${data.length} 条评论`)
-      }
-      else {
-        toast.info('未找到更多评论')
-      }
-    }
-    catch (error) {
-      console.error('Failed to load comments:', error)
-      toast.error('加载评论失败', {
-        description: `${error}`,
-      })
-    }
-    finally {
-      setIsLoadingComments(false)
-    }
-  }
-
-  const handleDownload = async () => {
-    const mediaItems = extractDownloadItemsFromTweets(tweets)
-
-    if (mediaItems.length === 0) {
-      toast.info('未检测到可下载的媒体资源')
-      return
-    }
-
-    toast.info('正在解析并下载媒体...')
-    try {
-      await downloadFiles(mediaItems, {
-        onError: (error, filename) => {
-          console.error(`[DownloadError] File: ${filename}`, error)
-          toast.error(`文件下载失败: ${filename}`, {
-            description: `${error}`,
-          })
-        },
-      })
-      toast.success(`下载任务结束`, {
-        description: `成功处理 ${mediaItems.length} 个文件`,
-      })
-    }
-    catch (globalError) {
-      console.error('[MediaDownloader] Critical Failure', globalError)
-      toast.error('批量下载进程异常终止', {
-        description: `${globalError}`,
-      })
-    }
-  }
-
-  const handleCopyMarkdown = async () => {
-    try {
-      const markdown = generateMarkdownFromTweets(tweets)
-      await navigator.clipboard.writeText(markdown)
-      toast.success('已复制 Markdown 到剪贴板')
-    }
-    catch (error) {
-      console.error('Failed to copy markdown:', error)
-      toast.error('复制失败', {
-        description: `请确保浏览器可写剪贴板。${error}`,
-      })
-    }
-  }
+    isLoadingComments,
+    loadComments,
+    downloadMedia,
+    copyMarkdown,
+    hasTweets,
+    hasMainTweet,
+  } = useTweetOperations()
 
   return (
     <div className="mb-4 flex w-full items-center justify-between gap-2 px-1 py-2 sm:mb-6 sm:px-0">
+      {/* 左侧：导航 */}
       <BackButton />
 
+      {/* 右侧：操作区 */}
       <div className="flex items-center gap-1 sm:gap-2">
         <Button
           variant="secondary"
-          onClick={handleLoadComments}
-          disabled={!mainTweet || isLoadingComments}
+          onClick={loadComments}
+          disabled={!hasMainTweet || isLoadingComments}
         >
           {isLoadingComments
             ? <Loader2 className="size-4 animate-spin" />
             : <MessageCircle className="size-4" />}
-          <span className="hidden sm:inline">加载评论</span>
+          <span className="hidden sm:inline ml-2">加载评论</span>
         </Button>
 
         <ToggleTransButton />
         <SaveAsImageButton />
 
-        <DropdownMenu>
-          <DropdownMenuTrigger render={(
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
-            />
-          )}
-          >
-            <MoreHorizontal className="h-5 w-5" />
-            <span className="sr-only">更多选项</span>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="w-fit rounded-xl p-1.5 shadow-lg border border-muted"
-          >
-            <DropdownMenuItem
-              onClick={() => setIsSettingsOpen(true)}
-              className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium focus:bg-muted/50"
-            >
-              <Settings className="h-4 w-4" />
-              <span>设置</span>
-            </DropdownMenuItem>
-
-            <DropdownMenuSeparator />
-
-            <DropdownMenuItem
-              onClick={handleDownload}
-              disabled={tweets.length === 0}
-              className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium focus:bg-muted/50"
-            >
-              <Download className="h-4 w-4" />
-              <span>下载媒体</span>
-            </DropdownMenuItem>
-
-            <DropdownMenuCheckboxItem
-              checked={isInlineMedia}
-              onCheckedChange={setIsInlineMedia}
-              className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium focus:bg-muted/50"
-            >
-              <span className="flex items-center gap-2">
-                {
-                  isInlineMedia
-                    ? <LayoutGrid className="h-4 w-4" />
-                    : <Rows4Icon className="h-4 w-4" />
-                }
-                <span>
-                  媒体按
-                  {isInlineMedia ? '宫格' : '竖向'}
-                  排列
-                </span>
-              </span>
-            </DropdownMenuCheckboxItem>
-
-            <DropdownMenuItem
-              onClick={handleCopyMarkdown}
-              disabled={tweets.length === 0}
-              className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium focus:bg-muted/50"
-            >
-              <FileText className="h-4 w-4" />
-              <span>复制为Markdown</span>
-            </DropdownMenuItem>
-
-            <DropdownMenuCheckboxItem
-              checked={!showTranslationButton}
-              onCheckedChange={checked => setShowTranslationButton(!checked)}
-              className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium focus:bg-muted/50"
-            >
-              <span className="flex items-center gap-2">
-                {
-                  showTranslationButton
-                    ? <EyeIcon className="h-4 w-4" />
-                    : <EyeOff className="h-4 w-4" />
-                }
-                <span>
-                  {showTranslationButton ? '隐藏' : '显示'}
-                  翻译按钮
-                </span>
-              </span>
-            </DropdownMenuCheckboxItem>
-
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <SettingsPanel
-          open={isSettingsOpen}
-          onOpenChange={setIsSettingsOpen}
+        <TweetOptionsMenu
+          onDownload={downloadMedia}
+          onCopyMarkdown={copyMarkdown}
+          disableActions={!hasTweets}
         />
       </div>
     </div>
