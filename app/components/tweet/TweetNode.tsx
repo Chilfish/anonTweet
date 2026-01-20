@@ -15,9 +15,15 @@ interface TweetNodeProps {
   tweet: EnrichedTweet
   variant: TweetVariant
   hasParent?: boolean
+  avatarSize: 'small' | 'medium'
 }
 
-export const TweetNode = forwardRef<HTMLDivElement, TweetNodeProps>(({ tweet, variant, hasParent }, ref) => {
+export const TweetNode = forwardRef<HTMLDivElement, TweetNodeProps>(({
+  tweet,
+  variant,
+  hasParent,
+  avatarSize = 'medium',
+}, ref) => {
   const { screenshoting } = useTranslationStore()
   const { isInlineMedia } = useAppConfigStore()
 
@@ -40,7 +46,7 @@ export const TweetNode = forwardRef<HTMLDivElement, TweetNodeProps>(({ tweet, va
         tweet={tweet}
         className={styles.header}
         createdAtInline
-        inQuote={isQuoted}
+        avatarSize={avatarSize}
       />
 
       <TranslationEditor originalTweet={tweet} className="absolute top-2 right-1" />
@@ -63,6 +69,7 @@ export const TweetNode = forwardRef<HTMLDivElement, TweetNodeProps>(({ tweet, va
             tweet={tweet.quotedTweet}
             variant="quoted"
             hasParent={false}
+            avatarSize={avatarSize}
           />
         )}
       </div>

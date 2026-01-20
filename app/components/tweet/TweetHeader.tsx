@@ -32,7 +32,7 @@ export function TweetHeader() {
           {isLoadingComments
             ? <Loader2 className="size-4 animate-spin" />
             : <MessageCircle className="size-4" />}
-          <span className="hidden sm:inline ml-2">加载评论</span>
+          <span className="hidden sm:inline">加载评论</span>
         </Button>
 
         <ToggleTransButton />

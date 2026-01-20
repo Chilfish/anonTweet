@@ -32,7 +32,7 @@ export function MyTweet({
   excludeUsers,
 }: MyTweetProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const { setTweetElRef, isCapturingSelected } = useTranslationStore()
+  const { setTweetElRef, setCommentsCount, isCapturingSelected } = useTranslationStore()
 
   useEffect(() => {
     if (containerRef.current)
@@ -40,7 +40,9 @@ export function MyTweet({
   }, [setTweetElRef])
 
   const { mainTweet, ancestors, commentThreads } = useMemo(() => {
-    return organizeTweets(tweets, mainTweetId, { showComments, filterUnrelated, excludeUsers })
+    const data = organizeTweets(tweets, mainTweetId, { showComments, filterUnrelated, excludeUsers })
+    setCommentsCount(data.commentThreads.length)
+    return data
   }, [tweets, mainTweetId, showComments, filterUnrelated, excludeUsers])
 
   const mainTweetRef = useRef<HTMLDivElement>(null)
@@ -50,6 +52,7 @@ export function MyTweet({
     return null
 
   const hasThread = ancestors.length > 0
+  const hasComments = !!(showComments && commentThreads.length)
 
   return (
     <TweetContainer
@@ -61,15 +64,20 @@ export function MyTweet({
         {/* 1. 祖先节点 (Context) */}
         {hasThread && (
           <>
-            {ancestors.map(parentTweet => (
-              <SelectableTweetWrapper key={parentTweet.id_str} tweetId={parentTweet.id_str}>
-                <TweetNode
-                  tweet={parentTweet}
-                  variant="thread"
-                  hasParent={true}
-                />
-              </SelectableTweetWrapper>
-            ))}
+            {ancestors.map((parentTweet) => {
+              return (
+                <SelectableTweetWrapper
+                  key={parentTweet.id_str}
+                  tweetId={parentTweet.id_str}
+                >
+                  <TweetNode
+                    tweet={parentTweet}
+                    variant="thread"
+                    hasParent={true}
+                  />
+                </SelectableTweetWrapper>
+              )
+            })}
 
             {/* 祖先节点到底部的连线 (只在非截图或全部显示时出现) */}
             <ThreadLine
@@ -82,7 +90,7 @@ export function MyTweet({
         {/* 2. 主推文 (Main Focus) */}
         <SelectableTweetWrapper
           tweetId={mainTweet.id_str}
-          ignoreCaptureFilter // 主推文通常不应该被过滤掉，除非有特殊需求
+          className={cn(hasComments && 'pb-4 border-b border-[#cfd9de] dark:border-[#333639]')}
         >
           <article className="relative">
             <TweetNode
@@ -90,18 +98,19 @@ export function MyTweet({
               tweet={mainTweet}
               variant={hasThread ? 'main-in-thread' : 'main'}
               hasParent={false}
+              avatarSize="medium"
             />
           </article>
         </SelectableTweetWrapper>
       </div>
 
       {/* 3. 评论区 (Replies) */}
-      {showComments && commentThreads.length > 0 && (
-        <div className="mt-4 border-t border-[#cfd9de] dark:border-[#333639] pt-2">
+      {hasComments && (
+        <section>
           {commentThreads.map(thread => (
             <CommentBranch key={thread.id_str} tweet={thread} />
           ))}
-        </div>
+        </section>
       )}
     </TweetContainer>
   )

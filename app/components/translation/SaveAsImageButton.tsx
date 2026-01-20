@@ -1,4 +1,6 @@
 import type { ComponentProps } from 'react'
+import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
+import { useState } from 'react'
 import { Button } from '~/components/ui/button'
 import {
   DropdownMenu,
@@ -18,7 +20,7 @@ function SelectionModeActions({
   disabled,
 }: any) {
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-1">
       <Button variant="outline" onClick={onToggleSelectAll} disabled={disabled}>
         {isAllSelected ? '全不选' : '全选'}
       </Button>
@@ -40,22 +42,23 @@ function DropdownActions({
   disabled,
   buttonProps,
 }: any) {
+  const [open, setOpen] = useState(false)
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger render={(
-        <Button {...buttonProps} disabled={disabled} />
-      )}
-      >
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger render={<Button {...buttonProps} disabled={disabled} />}>
         截图
-        {' '}
-        <span className="ml-1 text-xs">▼</span>
+        {open ? (
+          <ChevronUpIcon className="size-4" />
+        ) : (
+          <ChevronDownIcon className="size-4" />
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={onFullScreenshot}>
-          全屏截图
+          截图所有推文
         </DropdownMenuItem>
         <DropdownMenuItem onClick={onManualSelect}>
-          手动选择...
+          选择推文截图
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -65,6 +68,8 @@ function DropdownActions({
 export function SaveAsImageButton(props: ComponentProps<typeof Button>) {
   const {
     tweets,
+    mainTweet,
+    commentsCount,
     isSelectionMode,
     toggleSelectionMode,
     selectedTweetIds,
@@ -72,12 +77,13 @@ export function SaveAsImageButton(props: ComponentProps<typeof Button>) {
     setShowTranslationButton,
   } = useTranslationStore()
 
-  // 所有的脏逻辑都在这里面
   const { handleScreenshot, isCapturing } = useScreenshotAction({ tweets })
 
-  // 1. 渲染选择模式 (Priority 1)
+  // 1. 渲染选择模式
   if (isSelectionMode) {
-    const isAllSelected = tweets.length > 0 && selectedTweetIds.length === tweets.length
+    // 修正计算逻辑：总数 = 评论数 + 主推文(如果有)
+    const totalCount = tweets.length + (mainTweet ? 1 : 0)
+    const isAllSelected = totalCount > 0 && selectedTweetIds.length === totalCount
 
     return (
       <SelectionModeActions
@@ -86,13 +92,13 @@ export function SaveAsImageButton(props: ComponentProps<typeof Button>) {
         count={selectedTweetIds.length}
         onToggleSelectAll={() => selectAllTweets(!isAllSelected)}
         onCancel={() => toggleSelectionMode(false)}
-        onConfirm={() => handleScreenshot(true)} // true = use selection
+        onConfirm={() => handleScreenshot(true)}
       />
     )
   }
 
-  // 2. 渲染多推文模式 (Priority 2)
-  if (tweets.length > 1) {
+  // 2. 渲染多推文模式 (如果有评论)
+  if (commentsCount > 0) {
     return (
       <DropdownActions
         disabled={isCapturing}
@@ -106,7 +112,7 @@ export function SaveAsImageButton(props: ComponentProps<typeof Button>) {
     )
   }
 
-  // 3. 渲染单推文/默认模式 (Fallback)
+  // 3. 渲染单推文/默认模式 (只有主推文或没有任何数据)
   return (
     <Button
       {...props}

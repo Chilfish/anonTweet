@@ -7,16 +7,24 @@ interface SelectableTweetWrapperProps {
   tweetId: string
   children: ReactNode
   className?: string
-  ignoreCaptureFilter?: boolean // 主推文可能无论如何都要显示
 }
 
-export function SelectableTweetWrapper({ tweetId, children, className, ignoreCaptureFilter }: SelectableTweetWrapperProps) {
-  const { isSelectionMode, selectedTweetIds, toggleTweetSelection, isCapturingSelected } = useTranslationStore()
+export function SelectableTweetWrapper({
+  tweetId,
+  children,
+  className,
+}: SelectableTweetWrapperProps) {
+  const {
+    isSelectionMode,
+    selectedTweetIds,
+    toggleTweetSelection,
+    isCapturingSelected,
+  } = useTranslationStore()
 
   const isSelected = selectedTweetIds.includes(tweetId)
 
-  // 核心业务：如果是截图模式且未被选中，则隐藏（除非强制忽略过滤）
-  if (isCapturingSelected && !isSelected && !ignoreCaptureFilter) {
+  // 核心业务：如果是截图模式且未被选中，则隐藏
+  if (isCapturingSelected && !isSelected) {
     return null
   }
 
@@ -24,16 +32,31 @@ export function SelectableTweetWrapper({ tweetId, children, className, ignoreCap
     <div
       data-tweet-id={tweetId}
       data-selected={isSelected}
-      className={cn('relative transition-all duration-300', className)}
+      className={cn(
+        'relative transition-all duration-300 ease-in-out',
+        className,
+      )}
+      onClick={(e) => {
+        // 允许点击整个区域来选中，体验更好
+        if (isSelectionMode) {
+          e.stopPropagation()
+          e.preventDefault()
+          toggleTweetSelection(tweetId)
+        }
+      }}
     >
       {isSelectionMode && (
-        <Checkbox
-          data-ignore-screenshot="true"
-          className="absolute right-4 top-4 z-10"
-          checked={isSelected}
-          onCheckedChange={() => toggleTweetSelection(tweetId)}
-          onClick={e => e.stopPropagation()}
-        />
+        <div className="absolute top-4 right-4 z-20 flex items-center justify-center">
+          <Checkbox
+            data-ignore-screenshot="true"
+            className="size-4 border-2 border-primary"
+            checked={isSelected}
+            // onCheckedChange 已经通过外层 div 的 onClick 处理了，这里只需展示状态，
+            // 或者保留 onCheckedChange 以支持精确点击
+            onCheckedChange={() => toggleTweetSelection(tweetId)}
+            onClick={e => e.stopPropagation()}
+          />
+        </div>
       )}
       {children}
     </div>

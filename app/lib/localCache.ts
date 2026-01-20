@@ -18,7 +18,7 @@ export async function getLocalCache<T>({ id, getter, type }: CacheArgs): Promise
   if (!isFileExists) {
     const data = await getter()
     await writeFile(filePath, JSON.stringify(data))
-    return data
+    return data as T
   }
 
   const fileContent = await readFile(filePath, 'utf8')

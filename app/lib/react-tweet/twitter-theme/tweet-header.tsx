@@ -7,17 +7,17 @@ import { VerifiedBadge } from './verified-badge'
 
 interface Props {
   tweet: EnrichedTweet
-  inQuote?: boolean
+  avatarSize: 'small' | 'medium'
   className?: string
   createdAtInline?: boolean
 }
 
-export function TweetHeader({ tweet, inQuote, className }: Props) {
+export function TweetHeader({ tweet, avatarSize, className }: Props) {
   const { user } = tweet
   const proxyMedia = useProxyMedia()
 
   return (
-    <div className={cn(s.header, className, inQuote && s.inQuote)}>
+    <div className={cn(s.header, className, avatarSize === 'small' && s.inQuote)}>
       <a
         href={tweet.url}
         className={s.avatar}

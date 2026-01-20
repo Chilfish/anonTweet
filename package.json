@@ -70,6 +70,7 @@
     "@types/react": "^19.2.7",
     "@vercel/react-router": "^1.2.4",
     "@vitest/coverage-v8": "^4.0.16",
+    "baseline-browser-mapping": "^2.9.16",
     "compression": "^1.8.1",
     "cross-env": "^10.1.0",
     "drizzle-kit": "~0.31.8",
