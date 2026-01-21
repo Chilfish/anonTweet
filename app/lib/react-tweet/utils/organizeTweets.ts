@@ -149,11 +149,13 @@ export function organizeTweets(
     return results
   }
 
+  const commentThreads = buildTree(mainTweetId)
+
   return {
     mainTweet,
     ancestors,
     // Start building from main tweet. The parentAuthor param was removed as it's no longer needed for logic.
-    commentThreads: buildTree(mainTweetId),
+    commentThreads,
     allowedAuthors: Array.from(allowedAuthors),
   }
 }

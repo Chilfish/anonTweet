@@ -1,5 +1,5 @@
 import type { Route } from './+types/get'
-import type { Entity, TweetData } from '~/types'
+import type { TweetData } from '~/types'
 import { data } from 'react-router'
 import z from 'zod'
 import { autoTranslateTweet } from '~/lib/AITranslation'
@@ -75,20 +75,24 @@ export async function action({ request }: Route.ActionArgs) {
 
       try {
         const [mainTweet, quotedTweet] = await Promise.all([
-          autoTranslateTweet({
-            tweet,
-            apiKey,
-            model,
-            thinkingLevel,
-            translationGlossary,
-          }),
-          tweet.quotedTweet ? autoTranslateTweet({
-            tweet: tweet.quotedTweet,
-            apiKey,
-            model,
-            thinkingLevel,
-            translationGlossary,
-          }) : [] as Entity[],
+          tweet.autoTranslationEntities?.length
+            ? autoTranslateTweet({
+                tweet,
+                apiKey,
+                model,
+                thinkingLevel,
+                translationGlossary,
+              })
+            : [],
+          tweet.quotedTweet && tweet.quotedTweet.autoTranslationEntities?.length
+            ? autoTranslateTweet({
+                tweet: tweet.quotedTweet,
+                apiKey,
+                model,
+                thinkingLevel,
+                translationGlossary,
+              })
+            : [],
         ])
         tweet.autoTranslationEntities = mainTweet
         tweet.quotedTweet && (tweet.quotedTweet.autoTranslationEntities = quotedTweet)

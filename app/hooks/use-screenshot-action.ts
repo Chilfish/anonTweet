@@ -1,3 +1,4 @@
+import type { EnrichedTweet } from '~/types'
 import { domToJpeg, domToPng } from 'modern-screenshot'
 import { useCallback, useState } from 'react'
 import { toastManager } from '~/components/ui/toast'
@@ -12,7 +13,7 @@ import {
 import { useTranslationUIStore } from '~/lib/stores/translationUI'
 
 interface UseScreenshotActionProps {
-  tweets: any[] // 根据实际类型定义
+  tweets: EnrichedTweet[]
 }
 
 export function useScreenshotAction({ tweets }: UseScreenshotActionProps) {

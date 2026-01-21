@@ -11,7 +11,7 @@ export function useTweetOperations() {
   const [isLoadingComments, setIsLoadingComments] = useState(false)
   const tweets = useTweets()
   const mainTweet = useMainTweet()
-  const { appendTweets } = useTranslationActions()
+  const { appendTweets, setCommentIds } = useTranslationActions()
 
   const loadComments = async () => {
     if (!mainTweet)
@@ -21,6 +21,7 @@ export function useTweetOperations() {
       const { data } = await fetcher.get<TweetData>(`/api/tweet/replies/${mainTweet.id_str}`)
       if (data && data.length > 0) {
         appendTweets(data)
+        setCommentIds(data.map(tweet => tweet.id_str))
         toast.success(`已获取 ${data.length} 条评论`, {
           description: '默认仅筛选出与博主有互动的回复',
         })

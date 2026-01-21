@@ -156,7 +156,7 @@ const createSettingsSlice: StateCreator<
 interface DataSlice {
   tweets: TweetData
   mainTweet: EnrichedTweet | null
-  commentsCount: number
+  commentIds: string[]
   translations: Record<string, Entity[] | null>
   translationVisibility: Record<string, { body: boolean, alt: boolean }>
   tweetTranslationModes: Record<string, TranslationMode>
@@ -165,7 +165,7 @@ interface DataSlice {
   // Data Actions
   setAllTweets: (data: TweetData, mainTweetId: string) => void
   appendTweets: (data: TweetData) => void
-  setCommentsCount: (count: number) => void
+  setCommentIds: (ids: string[]) => void
   setTranslation: (tweetId: string, content: Entity[] | null) => void
   getTranslation: (tweetId: string) => Entity[] | null | undefined
   deleteTranslation: (tweetId: string) => void
@@ -189,14 +189,14 @@ const createDataSlice: StateCreator<
   // --- State ---
   tweets: [],
   mainTweet: null,
-  commentsCount: 0,
+  commentIds: [],
   translations: {},
   translationVisibility: {},
   tweetTranslationModes: {},
   translationMode: 'bilingual',
 
   // --- Actions ---
-  setCommentsCount: count => set({ commentsCount: count }),
+  setCommentIds: ids => set({ commentIds: ids }),
 
   setAllTweets: (data, mainTweetId) => {
     const extracted = extractTranslationsFromEntities(data)

@@ -51,7 +51,7 @@ export function MyTweet({
 }: MyTweetProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const { setTweetElRef } = useTranslationUIActions()
-  const { setCommentsCount } = useTranslationActions()
+  const { setCommentIds } = useTranslationActions()
   const isCapturingSelected = useIsCapturingSelected()
   const { filterUnrelated: storeFilterUnrelated } = useTranslationSettings()
 
@@ -67,8 +67,8 @@ export function MyTweet({
   }, [tweets, mainTweetId, showComments, filterUnrelated, excludeUsers])
 
   useEffect(() => {
-    setCommentsCount(commentThreads.length)
-  }, [commentThreads.length, setCommentsCount])
+    setCommentIds(commentThreads.map(thread => thread.id_str))
+  }, [commentThreads.length, setCommentIds])
 
   const mainTweetRef = useRef<HTMLDivElement>(null)
 

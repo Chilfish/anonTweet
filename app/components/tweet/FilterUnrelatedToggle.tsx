@@ -5,13 +5,13 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '~/components/ui/tooltip'
-import { useCommentsCount, useTranslationActions, useTranslationSettings } from '~/lib/stores/hooks'
+import { useCommentIds, useTranslationActions, useTranslationSettings } from '~/lib/stores/hooks'
 import { cn } from '~/lib/utils'
 
 export function FilterUnrelatedToggle() {
   const { filterUnrelated } = useTranslationSettings()
   const { updateSettings } = useTranslationActions()
-  const commentsCount = useCommentsCount()
+  const commentsCount = useCommentIds().length
 
   // 只有在加载出评论（commentsCount > 0）时才显示此开关
   if (commentsCount === 0) {

@@ -17,5 +17,5 @@ export async function loader({
 }: Route.LoaderArgs): Promise<TweetData> {
   const { id } = params
   const data = await getLocalReplies(id)
-  return data
+  return data.filter(tweet => tweet.id_str !== id)
 }

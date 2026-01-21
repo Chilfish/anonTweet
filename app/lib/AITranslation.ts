@@ -180,7 +180,9 @@ ${maskedText}
         } satisfies GoogleGenerativeAIProviderOptions,
       },
     })
-    return response.text.trim()
+    const text = response.text.trim()
+
+    return text.replace(/^thought[ful].*\n/g, '')
   }
   catch (error) {
     console.error('AI Translation Failed:', error)

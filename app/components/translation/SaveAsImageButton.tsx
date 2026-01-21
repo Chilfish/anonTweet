@@ -10,7 +10,8 @@ import {
 } from '~/components/ui/dropdown-menu'
 import { useScreenshotAction } from '~/hooks/use-screenshot-action'
 import {
-  useCommentsCount,
+  useCommentIds,
+  useExcludeCommentsTweets,
   useMainTweet,
   useTranslationUIActions,
   useTweets,
@@ -74,12 +75,13 @@ function DropdownActions({
 export function SaveAsImageButton(props: ComponentProps<typeof Button>) {
   const tweets = useTweets()
   const mainTweet = useMainTweet()
-  const commentsCount = useCommentsCount()
+  const excludeCommentsTweets = useExcludeCommentsTweets()
+  const commentsCount = useCommentIds().length
   const { isSelectionMode, selectedTweetIds } = useUIState()
   const { toggleSelectionMode, selectAllTweets, setShowTranslationButton }
     = useTranslationUIActions()
 
-  const { handleScreenshot, isCapturing } = useScreenshotAction({ tweets })
+  const { handleScreenshot, isCapturing } = useScreenshotAction({ tweets: excludeCommentsTweets })
 
   // 1. 渲染选择模式
   if (isSelectionMode) {

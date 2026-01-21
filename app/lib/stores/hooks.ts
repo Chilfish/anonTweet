@@ -1,4 +1,6 @@
 import type { StoreApi, UseBoundStore } from 'zustand'
+import type { EnrichedTweet } from '~/types'
+import { useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { useAppConfigStore } from './appConfig'
 import { useTranslationStore } from './translation'
@@ -52,7 +54,7 @@ export function useTranslationActions() {
       deleteCustomTemplate: state.deleteCustomTemplate,
       setAllTweets: state.setAllTweets,
       appendTweets: state.appendTweets,
-      setCommentsCount: state.setCommentsCount,
+      setCommentIds: state.setCommentIds,
       setTranslation: state.setTranslation,
       // 注意：getTranslation 是 getter，不应在渲染期间直接作为数据源依赖，
       // 而是应该在事件回调中使用，或者使用下方的 useTweetTranslation
@@ -168,8 +170,29 @@ export function useMainTweet() {
   return useTranslationStore(useShallow(state => state.mainTweet))
 }
 
-export function useCommentsCount() {
-  return useTranslationStore(state => state.commentsCount)
+export function useExcludeCommentsTweets(): EnrichedTweet[] {
+  const tweets = useTweets()
+  const commentIds = useCommentIds()
+  return useMemo(() => {
+    const excludedSet = new Set(commentIds)
+
+    const seenIds = new Set<string>()
+    return tweets.filter((tweet) => {
+      const id = tweet.id_str
+      if (excludedSet.has(id)) {
+        return false
+      }
+      if (seenIds.has(id)) {
+        return false
+      }
+      seenIds.add(id)
+      return true
+    })
+  }, [tweets, commentIds])
+}
+
+export function useCommentIds() {
+  return useTranslationStore(state => state.commentIds)
 }
 
 export function useGlobalTranslationMode() {
