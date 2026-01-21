@@ -1,16 +1,20 @@
 import type { GetTweetSchema } from '~/lib/validations/tweet'
 import type { TweetData } from '~/types'
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import useSWR from 'swr'
+import { useShallow } from 'zustand/react/shallow'
 import { MyTweet } from '~/components/tweet/Tweet'
 import { TweetHeader } from '~/components/tweet/TweetHeader'
 import { fetcher } from '~/lib/fetcher'
 import { TweetNotFound, TweetSkeleton } from '~/lib/react-tweet'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
-import { useTranslationStore } from '~/lib/stores/translation'
+import { useMainTweet, useTranslationActions, useTweets } from '~/lib/stores/hooks'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 import { extractTweetId } from '~/lib/utils'
+
+const MemoizedMyTweet = memo(MyTweet)
+const MemoizedTweetHeader = memo(TweetHeader)
 
 export function meta() {
   return [
@@ -31,16 +35,29 @@ export default function TweetPage() {
   const { id } = useParams()
   const tweetId = id ? extractTweetId(id) : null
   const navigate = useNavigate()
-  const { setAllTweets, tweets: storeTweets, mainTweet: storeMainTweet } = useTranslationStore()
+  const { setAllTweets } = useTranslationActions()
+  const storeTweets = useTweets()
+  const storeMainTweet = useMainTweet()
   const [isStoreReady, setIsStoreReady] = useState(false)
-  const appConfig = useAppConfigStore()
-  const { enableAITranslation, geminiApiKey, geminiModel, translationGlossary } = appConfig
-  const { getFormattedEntries } = useTranslationDictionaryStore()
+
+  const {
+    enableAITranslation,
+    geminiApiKey,
+    geminiModel,
+    translationGlossary,
+  } = useAppConfigStore(useShallow(state => ({
+    enableAITranslation: state.enableAITranslation,
+    geminiApiKey: state.geminiApiKey,
+    geminiModel: state.geminiModel,
+    translationGlossary: state.translationGlossary,
+  })))
+
+  const getFormattedEntries = useTranslationDictionaryStore(state => state.getFormattedEntries)
 
   if (!tweetId) {
     return (
       <>
-        <TweetHeader />
+        <MemoizedTweetHeader />
         <TweetNotFound tweetId={id} />
       </>
     )
@@ -89,10 +106,17 @@ export default function TweetPage() {
   // Check for retweet to show skeleton while redirecting
   const isRetweet = tweets?.[0]?.retweetedOrignalId && tweets[0].retweetedOrignalId !== tweets[0].id_str
 
+  // Prefer store data if it matches current tweet (allows for updates like loading comments)
+  const displayTweets = useMemo(() => {
+    return (storeMainTweet?.id_str === tweetId && storeTweets.length > 0)
+      ? storeTweets
+      : tweets
+  }, [storeMainTweet?.id_str, tweetId, storeTweets, tweets])
+
   if (isLoading || isRetweet || !isStoreReady) {
     return (
       <>
-        <TweetHeader />
+        <MemoizedTweetHeader />
         <div className="w-full max-w-2xl">
           <TweetSkeleton />
         </div>
@@ -104,22 +128,17 @@ export default function TweetPage() {
     console.error(error)
     return (
       <>
-        <TweetHeader />
+        <MemoizedTweetHeader />
         <TweetNotFound tweetId={tweetId} error={error} />
       </>
     )
   }
 
-  // Prefer store data if it matches current tweet (allows for updates like loading comments)
-  const displayTweets = (storeMainTweet?.id_str === tweetId && storeTweets.length > 0)
-    ? storeTweets
-    : tweets
-
   return (
     <>
-      <TweetHeader />
-      <MyTweet
-        tweets={displayTweets}
+      <MemoizedTweetHeader />
+      <MemoizedMyTweet
+        tweets={displayTweets || []}
         mainTweetId={tweetId}
         showComments={true}
       />

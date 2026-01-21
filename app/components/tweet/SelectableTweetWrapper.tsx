@@ -1,6 +1,12 @@
 import type { ReactNode } from 'react'
+import { memo, useCallback } from 'react'
 import { Checkbox } from '~/components/ui/checkbox'
-import { useTranslationUIActions, useUIState } from '~/lib/stores/hooks'
+import {
+  useIsCapturingSelected,
+  useIsSelectionMode,
+  useIsTweetSelected,
+  useTranslationUIActions,
+} from '~/lib/stores/hooks'
 import { cn } from '~/lib/utils'
 
 interface SelectableTweetWrapperProps {
@@ -9,15 +15,32 @@ interface SelectableTweetWrapperProps {
   className?: string
 }
 
-export function SelectableTweetWrapper({
+function SelectableTweetWrapperComponent({
   tweetId,
   children,
   className,
 }: SelectableTweetWrapperProps) {
-  const { isSelectionMode, selectedTweetIds, isCapturingSelected } = useUIState()
+  const isSelectionMode = useIsSelectionMode()
+  const isCapturingSelected = useIsCapturingSelected()
+  const isSelected = useIsTweetSelected(tweetId)
   const { toggleTweetSelection } = useTranslationUIActions()
 
-  const isSelected = selectedTweetIds.includes(tweetId)
+  const handleToggle = useCallback(() => {
+    toggleTweetSelection(tweetId)
+  }, [toggleTweetSelection, tweetId])
+
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    // 允许点击整个区域来选中，体验更好
+    if (isSelectionMode) {
+      e.stopPropagation()
+      e.preventDefault()
+      toggleTweetSelection(tweetId)
+    }
+  }, [isSelectionMode, toggleTweetSelection, tweetId])
+
+  const handleCheckboxClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
+  }, [])
 
   // 核心业务：如果是截图模式且未被选中，则隐藏
   if (isCapturingSelected && !isSelected) {
@@ -32,14 +55,7 @@ export function SelectableTweetWrapper({
         'relative transition-all duration-300 ease-in-out',
         className,
       )}
-      onClick={(e) => {
-        // 允许点击整个区域来选中，体验更好
-        if (isSelectionMode) {
-          e.stopPropagation()
-          e.preventDefault()
-          toggleTweetSelection(tweetId)
-        }
-      }}
+      onClick={handleClick}
     >
       {isSelectionMode && (
         <div className="absolute top-4 right-4 z-20 flex items-center justify-center">
@@ -49,8 +65,8 @@ export function SelectableTweetWrapper({
             checked={isSelected}
             // onCheckedChange 已经通过外层 div 的 onClick 处理了，这里只需展示状态，
             // 或者保留 onCheckedChange 以支持精确点击
-            onCheckedChange={() => toggleTweetSelection(tweetId)}
-            onClick={e => e.stopPropagation()}
+            onCheckedChange={handleToggle}
+            onClick={handleCheckboxClick}
           />
         </div>
       )}
@@ -58,3 +74,5 @@ export function SelectableTweetWrapper({
     </div>
   )
 }
+
+export const SelectableTweetWrapper = memo(SelectableTweetWrapperComponent)

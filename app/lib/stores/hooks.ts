@@ -102,11 +102,27 @@ export function useUIState() {
   )
 }
 
+export function useShowTranslationButton() {
+  return useTranslationUIStore(state => state.showTranslationButton)
+}
+
 /**
  * 检查推文是否被选中
  */
 export function useIsTweetSelected(tweetId: string) {
   return useTranslationUIStore(state => state.selectedTweetIds.includes(tweetId))
+}
+
+export function useIsSelectionMode() {
+  return useTranslationUIStore(state => state.isSelectionMode)
+}
+
+export function useIsCapturingSelected() {
+  return useTranslationUIStore(state => state.isCapturingSelected)
+}
+
+export function useScreenshoting() {
+  return useTranslationUIStore(state => state.screenshoting)
 }
 
 export function useSelectedCount() {

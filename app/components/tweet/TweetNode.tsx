@@ -1,9 +1,9 @@
 import type { EnrichedTweet } from '~/types'
-import { forwardRef } from 'react'
+import { forwardRef, memo } from 'react'
 import { TranslationEditor } from '~/components/translation/TranslationEditor'
 import { TweetHeader, TweetMedia } from '~/lib/react-tweet'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
-import { useUIState } from '~/lib/stores/hooks'
+import { useScreenshoting } from '~/lib/stores/hooks'
 import { cn } from '~/lib/utils'
 import { TweetLinkCard } from './TweetCard'
 import { TweetMediaAlt } from './TweetMediaAlt'
@@ -17,13 +17,13 @@ interface TweetNodeProps {
   hasParent?: boolean
 }
 
-export const TweetNode = forwardRef<HTMLDivElement, TweetNodeProps>(({
+export const TweetNode = memo(forwardRef<HTMLDivElement, TweetNodeProps>(({
   tweet,
   variant,
   hasParent,
 }, ref) => {
-  const { screenshoting } = useUIState()
-  const { isInlineMedia } = useAppConfigStore()
+  const screenshoting = useScreenshoting()
+  const isInlineMedia = useAppConfigStore(state => state.isInlineMedia)
 
   const isQuoted = variant === 'quoted'
   const isThreadContext = variant === 'thread' || variant === 'main-in-thread'
@@ -73,6 +73,6 @@ export const TweetNode = forwardRef<HTMLDivElement, TweetNodeProps>(({
       </div>
     </div>
   )
-})
+}))
 
 TweetNode.displayName = 'TweetNode'

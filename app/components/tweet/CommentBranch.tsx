@@ -1,7 +1,7 @@
 import type { EnrichedTweet } from '~/types'
-import { createRef, useMemo, useRef } from 'react'
+import { createRef, memo, useMemo, useRef } from 'react'
 import { useElementSize } from '~/hooks/use-element-size'
-import { useUIState } from '~/lib/stores/hooks'
+import { useIsCapturingSelected, useIsTweetSelected } from '~/lib/stores/hooks'
 import { SelectableTweetWrapper } from './SelectableTweetWrapper'
 import { ThreadLine } from './ThreadLine'
 import { TweetNode } from './TweetNode'
@@ -15,15 +15,11 @@ interface CommentBranchProps {
 // 基于 py-2 (8px) + 头像中心偏移 (约12-16px) 的估算值，24px 是一个较为通用的对齐点
 const AVATAR_CENTER_Y_OFFSET = 24
 
-export function CommentBranch({ tweet, ref }: CommentBranchProps) {
+function CommentBranchComponent({ tweet, ref }: CommentBranchProps) {
   const replies = tweet.comments || []
   const hasReplies = replies.length > 0
-  const {
-    selectedTweetIds,
-    isCapturingSelected,
-  } = useUIState()
-
-  const isSelected = selectedTweetIds.includes(tweet.id_str)
+  const isCapturingSelected = useIsCapturingSelected()
+  const isSelected = useIsTweetSelected(tweet.id_str)
 
   const nodeRef = useRef<HTMLDivElement>(null)
 
@@ -86,3 +82,5 @@ export function CommentBranch({ tweet, ref }: CommentBranchProps) {
     </div>
   )
 }
+
+export const CommentBranch = memo(CommentBranchComponent)

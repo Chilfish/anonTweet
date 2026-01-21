@@ -1,6 +1,6 @@
 import type { EnrichedTweet, Entity } from '~/types'
 import { BookA, Languages, LanguagesIcon, Save, Trash2Icon } from 'lucide-react'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { memo, useCallback, useMemo, useState } from 'react'
 import { SettingsGroup, SettingsRow } from '~/components/settings/SettingsUI'
 import { DictionaryViewer } from '~/components/translation/DictionaryViewer'
 import { ToggleTransButton } from '~/components/translation/ToggleTransButton'
@@ -21,7 +21,7 @@ import { Switch } from '~/components/ui/switch'
 import { Textarea } from '~/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
 import { TweetBody } from '~/lib/react-tweet'
-import { useTranslationActions, useUIState } from '~/lib/stores/hooks'
+import { useShowTranslationButton, useTranslationActions } from '~/lib/stores/hooks'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 import { decodeHtmlEntities } from '~/lib/utils'
 
@@ -55,7 +55,7 @@ function getEntityDisplayValue(entity: Entity) {
   return decodeHtmlEntities(entity.translation || entity.text)
 }
 
-export const TranslationEditor: React.FC<TranslationEditorProps> = ({
+export const TranslationEditor: React.FC<TranslationEditorProps> = memo(({
   originalTweet,
   className,
 }) => {
@@ -66,7 +66,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
   const [enablePrepend, setEnablePrepend] = useState(false)
   const [prependText, setPrependText] = useState('')
 
-  const { showTranslationButton } = useUIState()
+  const showTranslationButton = useShowTranslationButton()
   const {
     getTranslation,
     setTranslation,
@@ -76,13 +76,12 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     deleteTranslation,
   } = useTranslationActions()
 
-  const dictionaryEntries = useTranslationDictionaryStore(state => state.entries)
-
   const isVisible = useMemo(() => {
     return hasTextContent(originalTweet.text) && showTranslationButton
   }, [originalTweet.text, showTranslationButton, hasTextContent])
 
   const handleOpen = useCallback(() => {
+    const dictionaryEntries = useTranslationDictionaryStore.getState().entries
     // 1. 优先获取用户本地保存的“人工精修”翻译
     const existing = getTranslation(tweetId)
     const tweetWithAuto = originalTweet as EnrichedTweet
@@ -147,9 +146,9 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
 
     setEditingEntities(baseEntities)
     setIsOpen(true)
-  }, [tweetId, getTranslation, originalTweet, dictionaryEntries])
+  }, [tweetId, getTranslation, originalTweet])
 
-  const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSave = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
 
@@ -183,17 +182,17 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     setTranslation(tweetId, finalTranslations)
     setTranslationVisibility(tweetId, { body: true })
     setIsOpen(false)
-  }
+  }, [editingEntities, enablePrepend, setTranslation, tweetId, setTranslationVisibility])
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     deleteTranslation(tweetId)
     setIsOpen(false)
-  }
+  }, [deleteTranslation, tweetId])
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     resetTranslation(tweetId)
     setIsOpen(false)
-  }
+  }, [resetTranslation, tweetId])
 
   if (!isVisible)
     return null
@@ -390,4 +389,6 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
       </DialogContent>
     </Dialog>
   )
-}
+})
+
+TranslationEditor.displayName = 'TranslationEditor'

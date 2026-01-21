@@ -1,9 +1,10 @@
 import type { EnrichedTweet } from '~/types'
+import { memo } from 'react'
 import { TranslationDisplay } from '~/components/translation/TranslationDisplay'
 import { TweetBody } from '~/lib/react-tweet'
 import { useGlobalTranslationMode, useTranslations } from '~/lib/stores/hooks'
 
-export function TweetTextBody({ tweet }: { tweet: EnrichedTweet }) {
+function TweetTextBodyComponent({ tweet }: { tweet: EnrichedTweet }) {
   const { translationMode, tweetTranslationModes } = useGlobalTranslationMode()
   const translations = useTranslations()
 
@@ -23,3 +24,5 @@ export function TweetTextBody({ tweet }: { tweet: EnrichedTweet }) {
     </>
   )
 }
+
+export const TweetTextBody = memo(TweetTextBodyComponent)

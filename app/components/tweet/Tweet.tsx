@@ -1,11 +1,11 @@
 import type { Ref } from 'react'
 import type { AppConfigs } from '~/lib/stores/appConfig'
 import type { TweetData } from '~/types'
-import { useEffect, useMemo, useRef } from 'react'
+import { memo, useEffect, useMemo, useRef } from 'react'
 import { useElementSize } from '~/hooks/use-element-size'
 import { TweetContainer } from '~/lib/react-tweet'
 import { organizeTweets } from '~/lib/react-tweet/utils/organizeTweets'
-import { useTranslationActions, useTranslationUIActions, useUIState } from '~/lib/stores/hooks'
+import { useIsCapturingSelected, useTranslationActions, useTranslationUIActions } from '~/lib/stores/hooks'
 import { cn } from '~/lib/utils'
 import { CommentBranch } from './CommentBranch'
 import { SelectableTweetWrapper } from './SelectableTweetWrapper'
@@ -23,18 +23,18 @@ interface MyTweetProps {
   excludeUsers?: string[]
 }
 
-export function MyTweet({
+export const MyTweet = memo(({
   tweets,
   mainTweetId,
   containerClassName,
   showComments,
   filterUnrelated,
   excludeUsers,
-}: MyTweetProps) {
+}: MyTweetProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const { setTweetElRef } = useTranslationUIActions()
   const { setCommentsCount } = useTranslationActions()
-  const { isCapturingSelected } = useUIState()
+  const isCapturingSelected = useIsCapturingSelected()
 
   useEffect(() => {
     if (containerRef.current)
@@ -115,4 +115,6 @@ export function MyTweet({
       )}
     </TweetContainer>
   )
-}
+})
+
+MyTweet.displayName = 'MyTweet'
