@@ -1,7 +1,6 @@
-import type { Ref } from 'react'
+import type { memo, Ref, type RefObject, useEffect, useMemo, useRef } from 'react'
 import type { AppConfigs } from '~/lib/stores/appConfig'
 import type { TweetData } from '~/types'
-import { memo, useEffect, useMemo, useRef } from 'react'
 import { useElementSize } from '~/hooks/use-element-size'
 import { TweetContainer } from '~/lib/react-tweet'
 import { organizeTweets } from '~/lib/react-tweet/utils/organizeTweets'
@@ -23,6 +22,19 @@ interface MyTweetProps {
   excludeUsers?: string[]
 }
 
+const MainThreadLine = memo(({ mainTweetRef, visible }: {
+  mainTweetRef: RefObject<HTMLDivElement | null>
+  visible: boolean
+}) => {
+  const { height } = useElementSize(mainTweetRef)
+  return (
+    <ThreadLine
+      visible={visible}
+      bottomOffset={height}
+    />
+  )
+})
+
 export const MyTweet = memo(({
   tweets,
   mainTweetId,
@@ -42,13 +54,14 @@ export const MyTweet = memo(({
   }, [setTweetElRef])
 
   const { mainTweet, ancestors, commentThreads } = useMemo(() => {
-    const data = organizeTweets(tweets, mainTweetId, { showComments, filterUnrelated, excludeUsers })
-    setCommentsCount(data.commentThreads.length)
-    return data
+    return organizeTweets(tweets, mainTweetId, { showComments, filterUnrelated, excludeUsers })
   }, [tweets, mainTweetId, showComments, filterUnrelated, excludeUsers])
 
+  useEffect(() => {
+    setCommentsCount(commentThreads.length)
+  }, [commentThreads.length, setCommentsCount])
+
   const mainTweetRef = useRef<HTMLDivElement>(null)
-  const { height: mainTweetHeight } = useElementSize(mainTweetRef)
 
   if (!mainTweet)
     return null
@@ -82,9 +95,9 @@ export const MyTweet = memo(({
             })}
 
             {/* 祖先节点到底部的连线 (只在非截图或全部显示时出现) */}
-            <ThreadLine
+            <MainThreadLine
+              mainTweetRef={mainTweetRef}
               visible={!isCapturingSelected}
-              bottomOffset={mainTweetHeight}
             />
           </>
         )}

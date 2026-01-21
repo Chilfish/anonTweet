@@ -12,11 +12,13 @@ import { cn } from '~/lib/utils'
 interface SelectableTweetWrapperProps {
   tweetId: string
   children: ReactNode
+  show?: boolean
   className?: string
 }
 
 function SelectableTweetWrapperComponent({
   tweetId,
+  show = true,
   children,
   className,
 }: SelectableTweetWrapperProps) {
@@ -45,6 +47,10 @@ function SelectableTweetWrapperComponent({
   // 核心业务：如果是截图模式且未被选中，则隐藏
   if (isCapturingSelected && !isSelected) {
     return null
+  }
+
+  if (!show) {
+    return children
   }
 
   return (

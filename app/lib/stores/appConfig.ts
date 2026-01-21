@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
@@ -72,7 +73,7 @@ export function useProxyMedia() {
   const enableMediaProxy = useAppConfigStore(s => s.enableMediaProxy)
   const mediaProxyUrl = useAppConfigStore(s => s.mediaProxyUrl)
 
-  return (url: string, force?: boolean) => {
+  return useCallback((url: string, force?: boolean) => {
     if (!url)
       return ''
     if (url.startsWith(mediaProxyUrl))
@@ -80,5 +81,5 @@ export function useProxyMedia() {
     if (enableMediaProxy || force)
       return `${mediaProxyUrl}${url}`
     return url
-  }
+  }, [enableMediaProxy, mediaProxyUrl])
 }

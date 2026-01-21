@@ -18,7 +18,11 @@ export function useElementSize<T extends HTMLElement = HTMLDivElement>(
       if (!entries || entries.length === 0)
         return
       const { width, height } = entries[0]?.contentRect || { width: 0, height: 0 }
-      setSize({ width, height })
+      setSize((prev) => {
+        if (prev.width === width && prev.height === height)
+          return prev
+        return { width, height }
+      })
     })
 
     resizeObserver.observe(element)

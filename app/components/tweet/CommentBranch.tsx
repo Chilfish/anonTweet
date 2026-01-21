@@ -9,6 +9,7 @@ import { TweetNode } from './TweetNode'
 interface CommentBranchProps {
   tweet: EnrichedTweet
   ref?: React.RefObject<HTMLDivElement | null>
+  isTopLevel?: boolean
 }
 
 // 常量：头像中心相对于 TweetNode 顶部的距离
@@ -38,7 +39,7 @@ const BranchThreadLine = memo(({ lastChildNode }: { lastChildNode: HTMLElement |
   )
 })
 
-function CommentBranchComponent({ tweet, ref }: CommentBranchProps) {
+function CommentBranchComponent({ tweet, ref, isTopLevel = true }: CommentBranchProps) {
   const replies = tweet.comments || EMPTY_REPLIES
   const hasReplies = replies.length > 0
   const isCapturingSelected = useIsCapturingSelected()
@@ -54,6 +55,7 @@ function CommentBranchComponent({ tweet, ref }: CommentBranchProps) {
   const tweetContent = useMemo(() => (
     <SelectableTweetWrapper
       tweetId={tweet.id_str}
+      show={isTopLevel && !!tweet.comments?.length}
     >
       <TweetNode
         ref={nodeRef}
@@ -62,12 +64,13 @@ function CommentBranchComponent({ tweet, ref }: CommentBranchProps) {
         hasParent={hasReplies}
       />
     </SelectableTweetWrapper>
-  ), [tweet, hasReplies])
+  ), [tweet, hasReplies, isTopLevel])
 
   const repliesContent = useMemo(() => replies.map((reply, index) => (
     <CommentBranch
       key={reply.id_str}
       tweet={reply}
+      isTopLevel={false}
       ref={index === replies.length - 1 ? lastChildRef : undefined}
     />
   )), [replies, lastChildRef])
