@@ -3,7 +3,13 @@ import { useCallback, useState } from 'react'
 import { toastManager } from '~/components/ui/toast'
 import { syncTranslationData } from '~/lib/service/translationSync'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
-import { useTranslationStore } from '~/lib/stores/translation'
+import {
+  useGlobalTranslationMode,
+  useMainTweet,
+  useTranslationUIActions,
+  useUIState,
+} from '~/lib/stores/hooks'
+import { useTranslationUIStore } from '~/lib/stores/translationUI'
 
 interface UseScreenshotActionProps {
   tweets: any[] // 根据实际类型定义
@@ -11,16 +17,16 @@ interface UseScreenshotActionProps {
 
 export function useScreenshotAction({ tweets }: UseScreenshotActionProps) {
   const [isCapturing, setIsCapturing] = useState(false)
+
+  const { tweetElRef, selectedTweetIds } = useUIState()
+  const mainTweet = useMainTweet()
+  const { translationMode } = useGlobalTranslationMode()
   const {
-    tweetElRef,
-    mainTweet,
     setScreenshoting,
     setShowTranslationButton,
     setIsCapturingSelected,
     toggleSelectionMode,
-    selectedTweetIds,
-    translationMode,
-  } = useTranslationStore()
+  } = useTranslationUIActions()
 
   const { screenshotFormat } = useAppConfigStore()
 
@@ -72,7 +78,7 @@ export function useScreenshotAction({ tweets }: UseScreenshotActionProps) {
     if (useSelection) {
       setIsCapturingSelected(true)
       // 临时 hack: 直接操作 store 关闭选择模式以隐藏 checkbox，但保留 selectedIds
-      useTranslationStore.setState({ isSelectionMode: false })
+      useTranslationUIStore.setState({ isSelectionMode: false })
     }
 
     // 等待 DOM 更新 (React Render + Layout paint)

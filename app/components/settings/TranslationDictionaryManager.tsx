@@ -14,7 +14,8 @@ import {
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { toastManager } from '~/components/ui/toast'
-import { downloadExcel, parseExcel, useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
+import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
+import { downloadExcel, parseExcel } from '~/lib/utils'
 import { SettingsGroup, SettingsRow } from './SettingsUI'
 
 export function TranslationDictionaryManager() {

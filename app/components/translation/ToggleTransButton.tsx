@@ -11,7 +11,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
-import { useTranslationStore } from '~/lib/stores/translation'
+import {
+  useGlobalTranslationMode,
+  useTranslationActions,
+  useTranslationUIActions,
+} from '~/lib/stores/hooks'
 import { cn } from '~/lib/utils'
 
 interface ToggleTransButtonProps extends ComponentProps<typeof Button> {
@@ -19,13 +23,9 @@ interface ToggleTransButtonProps extends ComponentProps<typeof Button> {
 }
 
 export function ToggleTransButton({ className, tweetId, ...props }: ToggleTransButtonProps) {
-  const {
-    translationMode,
-    setTranslationMode,
-    setShowTranslationButton,
-    tweetTranslationModes,
-    setTweetTranslationMode,
-  } = useTranslationStore()
+  const { translationMode, tweetTranslationModes } = useGlobalTranslationMode()
+  const { setTranslationMode, setTweetTranslationMode } = useTranslationActions()
+  const { setShowTranslationButton } = useTranslationUIActions()
 
   const modes = [
     {

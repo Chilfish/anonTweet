@@ -1,11 +1,11 @@
 import type { EnrichedTweet } from '~/types'
 import { AltTranslationEditor } from '~/components/translation/AltTranslationEditor'
 import { useTweetTranslation } from '~/hooks/use-tweet-translation'
-import { useTranslationStore } from '~/lib/stores/translation'
+import { useTranslationSettings } from '~/lib/stores/hooks'
 
 export function TweetMediaAlt({ tweet }: { tweet: EnrichedTweet }) {
   const { entities } = useTweetTranslation(tweet, 'alt')
-  const { settings } = useTranslationStore()
+  const settings = useTranslationSettings()
 
   if (!tweet.mediaDetails?.length)
     return null

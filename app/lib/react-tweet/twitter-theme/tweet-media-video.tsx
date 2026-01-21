@@ -1,4 +1,4 @@
-import type { EnrichedQuotedTweet, EnrichedTweet, MediaAnimatedGif, MediaVideo } from '~/types'
+import type { EnrichedTweet, MediaAnimatedGif, MediaVideo } from '~/types'
 import clsx from 'clsx'
 import { useState } from 'react'
 import {
@@ -10,7 +10,7 @@ import s from './tweet-media-video.module.css'
 import mediaStyles from './tweet-media.module.css'
 
 interface Props {
-  tweet: EnrichedTweet | EnrichedQuotedTweet
+  tweet: EnrichedTweet
   media: MediaAnimatedGif | MediaVideo
   showCoverOnly?: boolean
 }

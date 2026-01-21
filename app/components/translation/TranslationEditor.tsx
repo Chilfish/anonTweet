@@ -21,7 +21,7 @@ import { Switch } from '~/components/ui/switch'
 import { Textarea } from '~/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
 import { TweetBody } from '~/lib/react-tweet'
-import { useTranslationStore } from '~/lib/stores/translation'
+import { useTranslationActions, useUIState } from '~/lib/stores/hooks'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 import { decodeHtmlEntities } from '~/lib/utils'
 
@@ -66,15 +66,15 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
   const [enablePrepend, setEnablePrepend] = useState(false)
   const [prependText, setPrependText] = useState('')
 
+  const { showTranslationButton } = useUIState()
   const {
-    showTranslationButton,
     getTranslation,
     setTranslation,
     setTranslationVisibility,
     resetTranslation,
     hasTextContent,
     deleteTranslation,
-  } = useTranslationStore()
+  } = useTranslationActions()
 
   const dictionaryEntries = useTranslationDictionaryStore(state => state.entries)
 

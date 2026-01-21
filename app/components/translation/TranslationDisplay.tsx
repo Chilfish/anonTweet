@@ -2,7 +2,7 @@ import type { EnrichedTweet } from '~/types'
 import React from 'react'
 import { useTweetTranslation } from '~/hooks/use-tweet-translation'
 import { TweetBody } from '~/lib/react-tweet/twitter-theme/tweet-body'
-import { useTranslationStore } from '~/lib/stores/translation'
+import { useTranslationSettings } from '~/lib/stores/hooks'
 
 interface TranslationDisplayProps {
   tweetId: string
@@ -13,7 +13,7 @@ export const TranslationDisplay: React.FC<TranslationDisplayProps> = ({
   tweetId,
   originalTweet,
 }) => {
-  const { settings } = useTranslationStore()
+  const settings = useTranslationSettings()
   const { shouldShow, entities } = useTweetTranslation(originalTweet, 'body')
 
   if (!shouldShow || !entities) {

@@ -20,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
-import { useTranslationStore } from '~/lib/stores/translation'
+import { useTranslationUIActions, useUIState } from '~/lib/stores/hooks'
 
 interface TweetOptionsMenuProps {
   onDownload: () => void
@@ -31,7 +31,8 @@ interface TweetOptionsMenuProps {
 export function TweetOptionsMenu({ onDownload, onCopyMarkdown, disableActions }: TweetOptionsMenuProps) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const { isInlineMedia, setIsInlineMedia } = useAppConfigStore()
-  const { showTranslationButton, setShowTranslationButton } = useTranslationStore()
+  const { showTranslationButton } = useUIState()
+  const { setShowTranslationButton } = useTranslationUIActions()
 
   return (
     <>

@@ -3,7 +3,7 @@ import { forwardRef } from 'react'
 import { TranslationEditor } from '~/components/translation/TranslationEditor'
 import { TweetHeader, TweetMedia } from '~/lib/react-tweet'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
-import { useTranslationStore } from '~/lib/stores/translation'
+import { useUIState } from '~/lib/stores/hooks'
 import { cn } from '~/lib/utils'
 import { TweetLinkCard } from './TweetCard'
 import { TweetMediaAlt } from './TweetMediaAlt'
@@ -22,7 +22,7 @@ export const TweetNode = forwardRef<HTMLDivElement, TweetNodeProps>(({
   variant,
   hasParent,
 }, ref) => {
-  const { screenshoting } = useTranslationStore()
+  const { screenshoting } = useUIState()
   const { isInlineMedia } = useAppConfigStore()
 
   const isQuoted = variant === 'quoted'

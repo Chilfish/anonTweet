@@ -9,7 +9,13 @@ import {
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
 import { useScreenshotAction } from '~/hooks/use-screenshot-action'
-import { useTranslationStore } from '~/lib/stores/translation'
+import {
+  useCommentsCount,
+  useMainTweet,
+  useTranslationUIActions,
+  useTweets,
+  useUIState,
+} from '~/lib/stores/hooks'
 
 function SelectionModeActions({
   onConfirm,
@@ -66,16 +72,12 @@ function DropdownActions({
 }
 
 export function SaveAsImageButton(props: ComponentProps<typeof Button>) {
-  const {
-    tweets,
-    mainTweet,
-    commentsCount,
-    isSelectionMode,
-    toggleSelectionMode,
-    selectedTweetIds,
-    selectAllTweets,
-    setShowTranslationButton,
-  } = useTranslationStore()
+  const tweets = useTweets()
+  const mainTweet = useMainTweet()
+  const commentsCount = useCommentsCount()
+  const { isSelectionMode, selectedTweetIds } = useUIState()
+  const { toggleSelectionMode, selectAllTweets, setShowTranslationButton }
+    = useTranslationUIActions()
 
   const { handleScreenshot, isCapturing } = useScreenshotAction({ tweets })
 

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Checkbox } from '~/components/ui/checkbox'
-import { useTranslationStore } from '~/lib/stores/translation'
+import { useTranslationUIActions, useUIState } from '~/lib/stores/hooks'
 import { cn } from '~/lib/utils'
 
 interface SelectableTweetWrapperProps {
@@ -14,12 +14,8 @@ export function SelectableTweetWrapper({
   children,
   className,
 }: SelectableTweetWrapperProps) {
-  const {
-    isSelectionMode,
-    selectedTweetIds,
-    toggleTweetSelection,
-    isCapturingSelected,
-  } = useTranslationStore()
+  const { isSelectionMode, selectedTweetIds, isCapturingSelected } = useUIState()
+  const { toggleTweetSelection } = useTranslationUIActions()
 
   const isSelected = selectedTweetIds.includes(tweetId)
 

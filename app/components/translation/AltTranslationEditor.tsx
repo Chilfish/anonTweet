@@ -17,7 +17,7 @@ import { Label } from '~/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover'
 import { Textarea } from '~/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
-import { useTranslationStore } from '~/lib/stores/translation'
+import { useTranslationActions, useUIState } from '~/lib/stores/hooks'
 import { decodeHtmlEntities } from '~/lib/utils'
 
 interface AltTranslationEditorProps {
@@ -44,13 +44,13 @@ export const AltTranslationEditor: React.FC<AltTranslationEditorProps> = ({
   const [isOpen, setIsOpen] = useState(false)
   const [editingEntities, setEditingEntities] = useState<Entity[]>([])
 
+  const { showTranslationButton } = useUIState()
   const {
-    showTranslationButton,
     getTranslation,
     setTranslation,
     setTranslationVisibility,
     resetTranslation,
-  } = useTranslationStore()
+  } = useTranslationActions()
 
   const isVisible = useMemo(() => {
     // 只要有媒体Alt就显示，或者根据业务逻辑

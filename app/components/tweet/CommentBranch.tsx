@@ -1,7 +1,7 @@
 import type { EnrichedTweet } from '~/types'
 import { createRef, useMemo, useRef } from 'react'
 import { useElementSize } from '~/hooks/use-element-size'
-import { useTranslationStore } from '~/lib/stores/translation'
+import { useUIState } from '~/lib/stores/hooks'
 import { SelectableTweetWrapper } from './SelectableTweetWrapper'
 import { ThreadLine } from './ThreadLine'
 import { TweetNode } from './TweetNode'
@@ -21,7 +21,7 @@ export function CommentBranch({ tweet, ref }: CommentBranchProps) {
   const {
     selectedTweetIds,
     isCapturingSelected,
-  } = useTranslationStore()
+  } = useUIState()
 
   const isSelected = selectedTweetIds.includes(tweet.id_str)
 
