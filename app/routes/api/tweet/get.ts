@@ -75,7 +75,7 @@ export async function action({ request }: Route.ActionArgs) {
 
       try {
         const [mainTweet, quotedTweet] = await Promise.all([
-          tweet.autoTranslationEntities?.length
+          !tweet.autoTranslationEntities?.length
             ? autoTranslateTweet({
                 tweet,
                 apiKey,
@@ -84,7 +84,7 @@ export async function action({ request }: Route.ActionArgs) {
                 translationGlossary,
               })
             : [],
-          tweet.quotedTweet && tweet.quotedTweet.autoTranslationEntities?.length
+          tweet.quotedTweet && !tweet.quotedTweet.autoTranslationEntities?.length
             ? autoTranslateTweet({
                 tweet: tweet.quotedTweet,
                 apiKey,
