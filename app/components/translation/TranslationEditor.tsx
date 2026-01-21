@@ -1,6 +1,6 @@
 import type { EnrichedTweet, Entity } from '~/types'
-import { BookA, Languages, LanguagesIcon, Save, Trash2Icon } from 'lucide-react'
-import React, { useCallback, useMemo, useState } from 'react'
+import { BookA, Languages, LanguagesIcon, Loader2, Save, Sparkles, Trash2Icon } from 'lucide-react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { SettingsGroup, SettingsRow } from '~/components/settings/SettingsUI'
 import { DictionaryViewer } from '~/components/translation/DictionaryViewer'
 import { ToggleTransButton } from '~/components/translation/ToggleTransButton'
@@ -20,10 +20,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover
 import { Switch } from '~/components/ui/switch'
 import { Textarea } from '~/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
+import { fetcher } from '~/lib/fetcher'
 import { TweetBody } from '~/lib/react-tweet'
+import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { useShowTranslationButton, useTranslationActions } from '~/lib/stores/hooks'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
-import { decodeHtmlEntities } from '~/lib/utils'
+import { decodeHtmlEntities, toast } from '~/lib/utils'
 
 interface TranslationEditorProps {
   originalTweet: EnrichedTweet
@@ -61,10 +63,21 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
 }) => {
   const tweetId = originalTweet.id_str
   const [isOpen, setIsOpen] = useState(false)
+  const [isAITranslating, setIsAITranslating] = useState(false)
+  const formRef = useRef<HTMLFormElement>(null)
 
   const [editingEntities, setEditingEntities] = useState<Entity[]>([])
   const [enablePrepend, setEnablePrepend] = useState(false)
   const [prependText, setPrependText] = useState('')
+
+  // AI 翻译配置
+  const {
+    enableAITranslation,
+    geminiApiKey,
+    geminiModel,
+    geminiThinkingLevel,
+    translationGlossary,
+  } = useAppConfigStore()
 
   const showTranslationButton = useShowTranslationButton()
   const {
@@ -182,6 +195,65 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     setIsOpen(false)
   }, [resetTranslation, tweetId])
 
+  // AI 翻译功能
+  const handleAITranslation = useCallback(async () => {
+    if (!geminiApiKey || !geminiModel) {
+      toast.error('请先在设置中配置 AI 翻译的 API Key 和模型')
+      return
+    }
+
+    setIsAITranslating(true)
+    try {
+      const { data } = await fetcher.post('/api/ai-translation', {
+        tweetId,
+        enableAITranslation: true,
+        apiKey: geminiApiKey,
+        model: geminiModel,
+        thinkingLevel: geminiThinkingLevel,
+        translationGlossary,
+      })
+
+      if (data.success && data.data?.autoTranslationEntities) {
+        const aiTranslations = data.data.autoTranslationEntities as Entity[]
+
+        // 将 AI 翻译结果合并到当前编辑的实体中
+        const updatedEntities = editingEntities.map((entity) => {
+          const aiEntity = aiTranslations.find(e => e.index === entity.index)
+          if (aiEntity) {
+            return {
+              ...entity,
+              translation: aiEntity.translation || aiEntity.text,
+            }
+          }
+          return entity
+        })
+
+        setEditingEntities(updatedEntities)
+
+        // 更新表单中的输入值
+        if (formRef.current) {
+          updatedEntities.forEach((entity) => {
+            const input = formRef.current?.querySelector(`[name="entity-${entity.index}"]`) as HTMLInputElement | HTMLTextAreaElement | null
+            if (input && entity.translation) {
+              input.value = entity.translation
+            }
+          })
+        }
+
+        toast.success('AI 翻译完成')
+      }
+      else {
+        toast.error(data.message || 'AI 翻译失败')
+      }
+    }
+    catch (error: any) {
+      toast.error(error.message || 'AI 翻译请求失败')
+    }
+    finally {
+      setIsAITranslating(false)
+    }
+  }, [tweetId, geminiApiKey, geminiModel, geminiThinkingLevel, translationGlossary, editingEntities])
+
   if (!isVisible)
     return null
 
@@ -201,7 +273,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
       </DialogTrigger>
 
       {isOpen && (
-        <DialogContent render={<form onSubmit={handleSave} />} className="max-w-xl">
+        <DialogContent render={<form ref={formRef} onSubmit={handleSave} />} className="max-w-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Languages className="size-5" />
@@ -303,7 +375,32 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
           </DialogPanel>
 
           <DialogFooter className="flex-row items-center justify-between gap-2 sm:justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              {/* AI 翻译按钮 */}
+              {enableAITranslation && (
+                <Tooltip>
+                  <TooltipTrigger render={(
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleAITranslation}
+                      disabled={isAITranslating}
+                      className="text-muted-foreground hover:text-foreground"
+                    />
+                  )}
+                  >
+                    {isAITranslating
+                      ? <Loader2 className="size-4 animate-spin" />
+                      : <Sparkles className="size-4" />}
+                    AI 翻译
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    使用 AI 自动翻译推文
+                  </TooltipContent>
+                </Tooltip>
+              )}
+
               <Popover>
                 <PopoverTrigger render={(
                   <Button
@@ -323,32 +420,11 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
 
               <ToggleTransButton
                 tweetId={tweetId}
-                variant="ghost"
-                className="text-muted-foreground hover:text-foreground px-2"
+                className="text-muted-foreground hover:text-foreground"
               />
             </div>
 
             <div className="flex items-center gap-2">
-              {/* {getTranslation(tweetId) !== null && (
-              <Tooltip>
-                <TooltipTrigger render={(
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleReset}
-                  />
-                )}
-                >
-                  <RotateCcw className="size-4" />
-                  重置
-                </TooltipTrigger>
-                <TooltipContent>
-                  重置为默认状态（移除人工翻译或取消隐藏）
-                </TooltipContent>
-              </Tooltip>
-            )} */}
-
               {getTranslation(tweetId) !== null && (
                 <Tooltip>
                   <TooltipTrigger render={(
