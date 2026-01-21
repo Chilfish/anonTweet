@@ -82,54 +82,45 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
 
   const handleOpen = useCallback(() => {
     const dictionaryEntries = useTranslationDictionaryStore.getState().entries
-    // 1. 优先获取用户本地保存的“人工精修”翻译
     const existing = getTranslation(tweetId)
     const tweetWithAuto = originalTweet as EnrichedTweet
 
-    let baseEntities: Entity[] = []
+    // 1. 始终以原始实体作为结构基础，确保原文 (.text) 字段存在
+    let baseEntities: Entity[] = JSON.parse(JSON.stringify(originalTweet.entities || []))
 
     if (existing && existing.length > 0) {
-      // 命中本地缓存，深拷贝
-      baseEntities = JSON.parse(JSON.stringify(existing))
+      // 情况 A: 命中本地保存的“人工精修”翻译
+      // 我们将保存的 translation 合并到原始实体中
+      baseEntities = baseEntities.map((original) => {
+        const found = existing.find(e => e.index === original.index)
+        return found ? { ...original, translation: found.translation } : original
+      })
+
+      // 恢复特殊的句首补充 (index -1)
+      const prepend = existing.find(e => e.index === -1)
+      if (prepend)
+        baseEntities.push(JSON.parse(JSON.stringify(prepend)))
     }
     else if (tweetWithAuto.autoTranslationEntities && tweetWithAuto.autoTranslationEntities.length > 0) {
-      // 2. 命中服务端 AI 翻译
-      // AI 翻译的结果（autoTranslationEntities）已经是结构化好的 Entity 数组，
-      // 其中 .text 字段存放的是中文。
-      // 我们直接将其作为编辑器的基础状态。
-      baseEntities = JSON.parse(JSON.stringify(tweetWithAuto.autoTranslationEntities))
-
-      // 额外处理：如果希望字典逻辑也能覆盖 AI 没处理好的 Hashtag
-      baseEntities = baseEntities.map((e) => {
-        // 确保 index 存在，虽然 API-v2 解析器通常会带上
-        // 同时，对于 text 类型的节点，虽然 .text 已经是中文，
-        // 但为了数据模型的一致性（保存时是存到 translation 字段），
-        // 我们可以选择把 .text 复制给 .translation，或者保持现状（因为编辑器读取逻辑支持 fallback 到 text）
-        // 这里保持现状即可，因为下面的 Dictionary 逻辑只针对 hashtag
-
-        if (e.type === 'hashtag') {
-          // 尝试对 AI 结果中的标签再次应用本地字典（如果 AI 没翻译标签的话）
-          const match = dictionaryEntries.find(d => d.original === e.text.replace('#', ''))
-          if (match && !e.translation) {
-            e.translation = `#${match.translated}`
-          }
-        }
-        return e
+      // 情况 B: 命中服务端 AI 翻译
+      // AI 结果可能缺失 text (原文)，或者 text 存放的是译文。我们只取其译文部分。
+      baseEntities = baseEntities.map((original) => {
+        const found = tweetWithAuto.autoTranslationEntities?.find(e => e.index === original.index)
+        const translation = found?.translation || found?.text
+        return found ? { ...original, translation } : original
       })
     }
-    else {
-      // 3. 回退：使用原始实体 + 本地字典
-      baseEntities = (originalTweet.entities || []).map((e) => {
-        const entity = { ...e }
-        if (entity.type === 'hashtag') {
-          const match = dictionaryEntries.find(d => d.original === entity.text.replace('#', ''))
-          if (match) {
-            entity.translation = `#${match.translated}`
-          }
+
+    // 2. 统一应用本地字典增强（针对 Hashtag 等）
+    baseEntities = baseEntities.map((entity) => {
+      if (entity.type === 'hashtag') {
+        const match = dictionaryEntries.find(d => d.original === entity.text.replace('#', ''))
+        if (match && !entity.translation) {
+          entity.translation = `#${match.translated}`
         }
-        return entity
-      })
-    }
+      }
+      return entity
+    })
 
     // 处理句首补充逻辑 (index 为 -1 的特殊实体)
     const prependIndex = baseEntities.findIndex(e => e.index === -1)
@@ -156,13 +147,10 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
       const inputName = `entity-${entity.index}`
       const inputValue = formData.get(inputName) as string
 
-      // 注意：如果是基于 AI 翻译（text 已经是中文），用户没有修改直接保存，
-      // inputValue 会是那个中文。
-      // 我们将其存入 translation 字段。
-      // 这样以后读取时，translation 字段就有值了，符合数据模型。
+      // 将表单输入的译文存入 translation 字段，保持原文 .text 不变
       return {
         ...entity,
-        translation: inputValue !== null ? inputValue : entity.translation,
+        translation: inputValue !== null ? (inputValue as string) : entity.translation,
       }
     })
 
