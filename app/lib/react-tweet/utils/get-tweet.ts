@@ -117,12 +117,14 @@ export async function getEnrichedUserTweet(userId: string): Promise<EnrichedTwee
   return tweets
     .map((tweet) => {
       const enrichedTweet = enrichTweet(tweet)
-      if (tweet.quoted_status_result?.result) {
+      if (tweet.quoted_status_result?.result && enrichedTweet) {
         const quotedTweet = enrichTweet(tweet.quoted_status_result.result)
-        enrichedTweet.quotedTweet = quotedTweet
+        if (quotedTweet)
+          enrichedTweet.quotedTweet = quotedTweet
       }
       return enrichedTweet
     })
+    .filter(tweet => !!tweet)
     .filter((tweet) => {
       const isAd = tweet.user.id_str !== userId && !tweet.retweetedOrignalId
 

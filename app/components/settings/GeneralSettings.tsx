@@ -10,6 +10,7 @@ import {
 import { Switch } from '~/components/ui/switch'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 
+import { useTranslationActions, useTranslationSettings } from '~/lib/stores/hooks'
 import { SettingsGroup, SettingsRow } from './SettingsUI'
 import { ThemeSelector } from './ThemeSwitcher'
 
@@ -24,6 +25,9 @@ export function GeneralSettings() {
     isInlineMedia,
     setIsInlineMedia,
   } = useAppConfigStore()
+
+  const { filterUnrelated } = useTranslationSettings()
+  const { updateSettings } = useTranslationActions()
 
   return (
     <div className="space-y-6 p-1">
@@ -66,6 +70,19 @@ export function GeneralSettings() {
             <Switch
               checked={isInlineMedia}
               onCheckedChange={setIsInlineMedia}
+            />
+          </SettingsRow>
+
+          <SettingsRow>
+            <div className="flex flex-col gap-1">
+              <span className="text-sm font-medium">默认过滤无关评论</span>
+              <span className="text-xs text-muted-foreground">
+                过滤与博主无互动的评论
+              </span>
+            </div>
+            <Switch
+              checked={filterUnrelated}
+              onCheckedChange={value => updateSettings({ filterUnrelated: value })}
             />
           </SettingsRow>
         </SettingsGroup>

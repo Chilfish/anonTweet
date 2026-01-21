@@ -8,7 +8,7 @@ function getLocalReplies(tweetId: string) {
   return getLocalCache({
     id: tweetId,
     type: 'replies',
-    getter: () => fetchReplies(tweetId).then(d => d.map(t => enrichTweet(t))),
+    getter: () => fetchReplies(tweetId).then(d => d.map(t => enrichTweet(t)).filter(tweet => !!tweet)),
   })
 }
 

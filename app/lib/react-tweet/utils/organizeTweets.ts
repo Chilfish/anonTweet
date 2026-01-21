@@ -25,7 +25,7 @@ export function organizeTweets(
 ): OrganizedTweets {
   const {
     showComments = true,
-    filterUnrelated = true,
+    filterUnrelated = false,
     excludeUsers = [],
     allowedAuthors: providedAllowedAuthors,
   } = options

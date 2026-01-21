@@ -32,6 +32,9 @@ interface Result {
   in_reply_to_status_id_str?: string
   quoted_status_result?: TweetResult
   card?: any
+  tombstone?: {
+    __typename: 'TextTombstone'
+  }
 }
 
 interface Core {

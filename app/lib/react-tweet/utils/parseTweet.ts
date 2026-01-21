@@ -10,7 +10,10 @@ import { getEntities } from './entitytParser'
 /**
  * Enriches a tweet with additional data used to more easily use the tweet in a UI.
  */
-export function enrichTweet(sourceData: RawTweet, retweetedOrignalId?: string): EnrichedTweet {
+export function enrichTweet(sourceData: RawTweet, retweetedOrignalId?: string): EnrichedTweet | null {
+  if (!sourceData || sourceData?.__typename === 'TweetTombstone')
+    return null
+
   if (sourceData.legacy?.retweeted_status_result) {
     return enrichTweet(sourceData.legacy.retweeted_status_result.result, sourceData.legacy.id_str)
   }

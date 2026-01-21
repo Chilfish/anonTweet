@@ -3,13 +3,11 @@ import type { TweetData } from '~/types'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import useSWR from 'swr'
-import { useShallow } from 'zustand/react/shallow'
 import { MyTweet } from '~/components/tweet/Tweet'
 import { TweetHeader } from '~/components/tweet/TweetHeader'
 import { fetcher } from '~/lib/fetcher'
 import { TweetNotFound, TweetSkeleton } from '~/lib/react-tweet'
-import { useAppConfigStore } from '~/lib/stores/appConfig'
-import { useMainTweet, useTranslationActions, useTweets } from '~/lib/stores/hooks'
+import { useAIConfig, useMainTweet, useTranslationActions, useTweets } from '~/lib/stores/hooks'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 import { extractTweetId } from '~/lib/utils'
 
@@ -42,12 +40,7 @@ export default function TweetPage() {
     geminiApiKey,
     geminiModel,
     translationGlossary,
-  } = useAppConfigStore(useShallow(state => ({
-    enableAITranslation: state.enableAITranslation,
-    geminiApiKey: state.geminiApiKey,
-    geminiModel: state.geminiModel,
-    translationGlossary: state.translationGlossary,
-  })))
+  } = useAIConfig()
 
   const getFormattedEntries = useTranslationDictionaryStore(state => state.getFormattedEntries)
 

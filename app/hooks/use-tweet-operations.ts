@@ -4,12 +4,14 @@ import { extractDownloadItemsFromTweets } from '~/components/translation/Downloa
 import { downloadFiles } from '~/lib/downloader'
 import { fetcher } from '~/lib/fetcher'
 import { generateMarkdownFromTweets } from '~/lib/markdown'
-import { useTranslationStore } from '~/lib/stores/translation'
+import { useMainTweet, useTranslationActions, useTweets } from '~/lib/stores/hooks'
 import { toast } from '~/lib/utils'
 
 export function useTweetOperations() {
   const [isLoadingComments, setIsLoadingComments] = useState(false)
-  const { tweets, mainTweet, appendTweets } = useTranslationStore()
+  const tweets = useTweets()
+  const mainTweet = useMainTweet()
+  const { appendTweets } = useTranslationActions()
 
   const loadComments = async () => {
     if (!mainTweet)
@@ -20,12 +22,12 @@ export function useTweetOperations() {
       if (data && data.length > 0) {
         appendTweets(data)
         toast.success(`已获取 ${data.length} 条评论`, {
-          description: '仅筛选出了与博主有互动的回复',
+          description: '默认仅筛选出与博主有互动的回复',
         })
       }
       else {
         toast.info('未找到更多评论', {
-          description: '仅会筛选出与博主有互动的回复',
+          description: '默认仅会筛选出与博主有互动的回复',
         })
       }
     }

@@ -21,6 +21,18 @@ function createSelectors<S extends UseBoundStore<StoreApi<object>>>(_store: S) {
   return store
 }
 
+export function useAIConfig() {
+  return useAppConfigStore(
+    useShallow(state => ({
+      geminiApiKey: state.geminiApiKey,
+      geminiModel: state.geminiModel,
+      enableAITranslation: state.enableAITranslation,
+      geminiThinkingLevel: state.geminiThinkingLevel,
+      translationGlossary: state.translationGlossary,
+    })),
+  )
+}
+
 /**
  * 专门用于获取操作函数。
  * 原理：我们只订阅 actions 部分，由于 Zustand 的 actions 函数引用是稳定的，

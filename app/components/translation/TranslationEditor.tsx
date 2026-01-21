@@ -22,8 +22,7 @@ import { Textarea } from '~/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
 import { fetcher } from '~/lib/fetcher'
 import { TweetBody } from '~/lib/react-tweet'
-import { useAppConfigStore } from '~/lib/stores/appConfig'
-import { useShowTranslationButton, useTranslationActions } from '~/lib/stores/hooks'
+import { useAIConfig, useShowTranslationButton, useTranslationActions } from '~/lib/stores/hooks'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 import { decodeHtmlEntities, toast } from '~/lib/utils'
 
@@ -77,8 +76,9 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     geminiModel,
     geminiThinkingLevel,
     translationGlossary,
-  } = useAppConfigStore()
+  } = useAIConfig()
 
+  const dictEntries = useTranslationDictionaryStore(state => state.getFormattedEntries)
   const showTranslationButton = useShowTranslationButton()
   const {
     getTranslation,
@@ -202,15 +202,22 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
       return
     }
 
+    if (originalTweet.autoTranslationEntities?.length) {
+      toast.info('已有 AI 翻译')
+      return
+    }
+
     setIsAITranslating(true)
     try {
+      const combinedGlossary = [dictEntries(), translationGlossary].filter(Boolean).join('\n')
+
       const { data } = await fetcher.post('/api/ai-translation', {
-        tweetId,
+        tweet: originalTweet,
         enableAITranslation: true,
         apiKey: geminiApiKey,
         model: geminiModel,
         thinkingLevel: geminiThinkingLevel,
-        translationGlossary,
+        translationGlossary: combinedGlossary,
       })
 
       if (data.success && data.data?.autoTranslationEntities) {
