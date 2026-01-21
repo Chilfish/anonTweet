@@ -1,5 +1,5 @@
 import type { EnrichedTweet } from '~/types'
-import { forwardRef, memo, useMemo } from 'react'
+import { forwardRef, useMemo } from 'react'
 import { TranslationEditor } from '~/components/translation/TranslationEditor'
 import { TweetHeader, TweetMedia } from '~/lib/react-tweet'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
@@ -17,7 +17,7 @@ interface TweetNodeProps {
   hasParent?: boolean
 }
 
-const TweetMediaSection = memo(({ tweet }: { tweet: EnrichedTweet }) => {
+function TweetMediaSection({ tweet }: { tweet: EnrichedTweet }) {
   const screenshoting = useScreenshoting()
   const isInlineMedia = useAppConfigStore(state => state.isInlineMedia)
 
@@ -35,9 +35,9 @@ const TweetMediaSection = memo(({ tweet }: { tweet: EnrichedTweet }) => {
       showCoverOnly={screenshoting}
     />
   )
-})
+}
 
-export const TweetNode = memo(forwardRef<HTMLDivElement, TweetNodeProps>(({
+export const TweetNode = forwardRef<HTMLDivElement, TweetNodeProps>(({
   tweet,
   variant,
   hasParent,
@@ -85,6 +85,6 @@ export const TweetNode = memo(forwardRef<HTMLDivElement, TweetNodeProps>(({
       </div>
     </div>
   )
-}))
+})
 
 TweetNode.displayName = 'TweetNode'

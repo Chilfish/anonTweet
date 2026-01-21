@@ -26,7 +26,7 @@ interface UIActions {
   resetUI: () => void
 }
 
-export const useTranslationUIStore = create<UIState & UIActions>((set, get) => ({
+export const useTranslationUIStore = create<UIState & UIActions>()((set, get) => ({
   showTranslationButton: true,
   editingTweetId: null,
   tweetElRef: null,

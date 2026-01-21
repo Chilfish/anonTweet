@@ -1,6 +1,25 @@
+import type { StoreApi, UseBoundStore } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
+import { useAppConfigStore } from './appConfig'
 import { useTranslationStore } from './translation'
+import { useTranslationDictionaryStore } from './TranslationDictionary'
 import { useTranslationUIStore } from './translationUI'
+
+const DEFAULT_VISIBILITY = { body: true, alt: true }
+
+type WithSelectors<S> = S extends { getState: () => infer T }
+  ? S & { use: { [K in keyof T]: () => T[K] } }
+  : never
+
+function createSelectors<S extends UseBoundStore<StoreApi<object>>>(_store: S) {
+  const store = _store as WithSelectors<typeof _store>
+  store.use = {}
+  for (const k of Object.keys(store.getState())) {
+    ;(store.use as any)[k] = () => store(s => s[k as keyof typeof s])
+  }
+
+  return store
+}
 
 /**
  * 专门用于获取操作函数。
@@ -67,7 +86,7 @@ export function useTweetTranslation(tweetId: string) {
  */
 export function useTweetVisibility(tweetId: string) {
   return useTranslationStore(state =>
-    state.translationVisibility[tweetId] || { body: true, alt: true },
+    state.translationVisibility[tweetId] || DEFAULT_VISIBILITY,
   )
 }
 
@@ -152,4 +171,19 @@ export function useGlobalTranslationMode() {
 
 export function useTranslations() {
   return useTranslationStore(useShallow(state => state.translations))
+}
+
+/**
+ * Hydration status hooks to prevent Next.js hydration mismatch
+ */
+export function useTranslationHydrated() {
+  return useTranslationStore(state => state._hasHydrated)
+}
+
+export function useAppConfigHydrated() {
+  return useAppConfigStore(state => state._hasHydrated)
+}
+
+export function useDictionaryHydrated() {
+  return useTranslationDictionaryStore(state => state._hasHydrated)
 }

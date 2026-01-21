@@ -1,9 +1,8 @@
 import type { EnrichedTweet } from '~/types'
-import { memo } from 'react'
 import { formatDate } from '../utils'
 import s from './tweet-info-created-at.module.css'
 
-function TweetInfoCreatedAtComponent({ tweet }: { tweet: EnrichedTweet }) {
+export function TweetInfoCreatedAt({ tweet }: { tweet: EnrichedTweet }) {
   const createdAt = new Date(tweet.created_at)
   const formattedCreatedAtDate = formatDate(createdAt)
 
@@ -24,5 +23,3 @@ function TweetInfoCreatedAtComponent({ tweet }: { tweet: EnrichedTweet }) {
     </a>
   )
 }
-
-export const TweetInfoCreatedAt = memo(TweetInfoCreatedAtComponent)

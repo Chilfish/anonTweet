@@ -1,6 +1,6 @@
 import type { GetTweetSchema } from '~/lib/validations/tweet'
 import type { TweetData } from '~/types'
-import { memo, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import useSWR from 'swr'
 import { useShallow } from 'zustand/react/shallow'
@@ -12,9 +12,6 @@ import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { useMainTweet, useTranslationActions, useTweets } from '~/lib/stores/hooks'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 import { extractTweetId } from '~/lib/utils'
-
-const MemoizedMyTweet = memo(MyTweet)
-const MemoizedTweetHeader = memo(TweetHeader)
 
 export function meta() {
   return [
@@ -57,7 +54,7 @@ export default function TweetPage() {
   if (!tweetId) {
     return (
       <>
-        <MemoizedTweetHeader />
+        <TweetHeader />
         <TweetNotFound tweetId={id} />
       </>
     )
@@ -116,7 +113,7 @@ export default function TweetPage() {
   if (isLoading || isRetweet || !isStoreReady) {
     return (
       <>
-        <MemoizedTweetHeader />
+        <TweetHeader />
         <div className="w-full max-w-2xl">
           <TweetSkeleton />
         </div>
@@ -128,7 +125,7 @@ export default function TweetPage() {
     console.error(error)
     return (
       <>
-        <MemoizedTweetHeader />
+        <TweetHeader />
         <TweetNotFound tweetId={tweetId} error={error} />
       </>
     )
@@ -136,8 +133,8 @@ export default function TweetPage() {
 
   return (
     <>
-      <MemoizedTweetHeader />
-      <MemoizedMyTweet
+      <TweetHeader />
+      <MyTweet
         tweets={displayTweets || []}
         mainTweetId={tweetId}
         showComments={true}

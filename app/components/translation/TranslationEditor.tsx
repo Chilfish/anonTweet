@@ -1,6 +1,6 @@
 import type { EnrichedTweet, Entity } from '~/types'
 import { BookA, Languages, LanguagesIcon, Save, Trash2Icon } from 'lucide-react'
-import React, { memo, useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { SettingsGroup, SettingsRow } from '~/components/settings/SettingsUI'
 import { DictionaryViewer } from '~/components/translation/DictionaryViewer'
 import { ToggleTransButton } from '~/components/translation/ToggleTransButton'
@@ -55,7 +55,7 @@ function getEntityDisplayValue(entity: Entity) {
   return decodeHtmlEntities(entity.translation || entity.text)
 }
 
-export const TranslationEditor: React.FC<TranslationEditorProps> = memo(({
+export const TranslationEditor: React.FC<TranslationEditorProps> = ({
   originalTweet,
   className,
 }) => {
@@ -391,6 +391,6 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = memo(({
       )}
     </Dialog>
   )
-})
+}
 
 TranslationEditor.displayName = 'TranslationEditor'

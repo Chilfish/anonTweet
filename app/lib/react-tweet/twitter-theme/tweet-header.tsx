@@ -1,5 +1,4 @@
 import type { EnrichedTweet } from '~/types'
-import { memo } from 'react'
 import { useProxyMedia } from '~/lib/stores/appConfig'
 import { cn } from '~/lib/utils'
 import { TweetInfoCreatedAt } from './components'
@@ -13,7 +12,7 @@ interface Props {
   createdAtInline?: boolean
 }
 
-function TweetHeaderComponent({ tweet, avatarSize, className }: Props) {
+export function TweetHeader({ tweet, avatarSize, className }: Props) {
   const { user } = tweet
   const proxyMedia = useProxyMedia()
 
@@ -78,5 +77,3 @@ function TweetHeaderComponent({ tweet, avatarSize, className }: Props) {
     </div>
   )
 }
-
-export const TweetHeader = memo(TweetHeaderComponent)

@@ -1,4 +1,5 @@
 import type { EnrichedTweet, Entity } from '~/types'
+import { useShallow } from 'zustand/react/shallow'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { useTranslationStore } from '~/lib/stores/translation'
 
@@ -6,20 +7,20 @@ export function useTweetTranslation(tweet: EnrichedTweet, type: 'body' | 'alt' =
   const {
     translationMode,
     tweetTranslationModes,
-    getTranslation,
-    getTranslationVisibility,
-  } = useTranslationStore()
-  const { enableAITranslation } = useAppConfigStore()
+    translations,
+    translationVisibility,
+  } = useTranslationStore(
+    useShallow(state => ({
+      translationMode: state.translationMode,
+      tweetTranslationModes: state.tweetTranslationModes,
+      translations: state.translations,
+      translationVisibility: state.translationVisibility,
+    })),
+  )
+  const enableAITranslation = useAppConfigStore(state => state.enableAITranslation)
   const tweetId = tweet.id_str
 
   const mode = tweetTranslationModes[tweetId] || translationMode
-
-  // getTranslation 返回值含义：
-  // - Entity[]: 存在人工编辑的翻译（或初始化时提取的翻译）
-  // - null: 用户显式隐藏/删除了翻译 (legacy behavior)
-  // - undefined: 无人工记录
-  const manualTranslation = getTranslation(tweetId)
-  const visibility = getTranslationVisibility(tweetId)
 
   // 1. 模式检查
   if (mode === 'original') {
@@ -27,7 +28,7 @@ export function useTweetTranslation(tweet: EnrichedTweet, type: 'body' | 'alt' =
   }
 
   // 2. 显式隐藏检查 (Visibility Priority)
-  // 如果对应的 visibility 为 false，则不显示
+  const visibility = translationVisibility[tweetId] || { body: true, alt: true }
   if (type === 'body' && !visibility.body) {
     return { shouldShow: false, entities: null }
   }
@@ -35,22 +36,29 @@ export function useTweetTranslation(tweet: EnrichedTweet, type: 'body' | 'alt' =
     return { shouldShow: false, entities: null }
   }
 
-  // Legacy fallback: 如果 manualTranslation 为 null (旧的 hidden 状态)，也不显示
-  if (manualTranslation === null) {
-    return { shouldShow: false, entities: null }
-  }
-
-  // 3. 确定显示内容：人工翻译 > AI 翻译
+  // 3. 确定显示内容：人工记录 > AI 翻译 > 传入数据兜底
   let entities: Entity[] | null = null
+
+  // 检查 Store 中的人工翻译记录
+  const manualTranslation = translations[tweetId]
 
   if (manualTranslation) {
     entities = manualTranslation
   }
+  // 检查 AI 翻译
   else if (enableAITranslation && tweet.autoTranslationEntities?.length) {
     entities = tweet.autoTranslationEntities
   }
+  // 兜底：如果传入的 tweet.entities 本身就包含翻译内容
+  else if (tweet.entities?.some(e => e.translation)) {
+    entities = tweet.entities
+  }
 
-  // 4. 最终决定是否显示
+  // Legacy fallback: 如果被显式设为 null
+  if (manualTranslation === null) {
+    return { shouldShow: false, entities: null }
+  }
+
   const shouldShow = !!entities
 
   return { shouldShow, entities }

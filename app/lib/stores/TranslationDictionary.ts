@@ -15,6 +15,8 @@ interface ImportResult {
 }
 
 interface TranslationDictionaryState {
+  _hasHydrated: boolean
+  setHasHydrated: (state: boolean) => void
   entries: TranslationDicEntry[]
   // Actions
   addEntry: (entry: Omit<TranslationDicEntry, 'id' | 'createdAt'>) => void
@@ -32,6 +34,8 @@ interface TranslationDictionaryState {
 export const useTranslationDictionaryStore = create<TranslationDictionaryState>()(
   persist(
     (set, get) => ({
+      _hasHydrated: false,
+      setHasHydrated: state => set({ _hasHydrated: state }),
       entries: [],
 
       addEntry: entry => set(state => ({
@@ -88,6 +92,12 @@ export const useTranslationDictionaryStore = create<TranslationDictionaryState>(
     {
       name: 'translation-dictionary-storage',
       storage: createJSONStorage(() => localStorage),
+      onRehydrateStorage: (state) => {
+        return () => state?.setHasHydrated(true)
+      },
+      partialize: state => ({
+        entries: state.entries,
+      }),
     },
   ),
 )

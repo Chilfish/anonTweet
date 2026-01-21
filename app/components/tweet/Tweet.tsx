@@ -1,7 +1,7 @@
 import type { Ref, RefObject } from 'react'
 import type { AppConfigs } from '~/lib/stores/appConfig'
 import type { TweetData } from '~/types'
-import { memo, useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useElementSize } from '~/hooks/use-element-size'
 import { TweetContainer } from '~/lib/react-tweet'
 import { organizeTweets } from '~/lib/react-tweet/utils/organizeTweets'
@@ -23,10 +23,10 @@ interface MyTweetProps {
   excludeUsers?: string[]
 }
 
-const MainThreadLine = memo(({ mainTweetRef, visible }: {
+function MainThreadLine({ mainTweetRef, visible }: {
   mainTweetRef: RefObject<HTMLDivElement | null>
   visible: boolean
-}) => {
+}) {
   const { height } = useElementSize(mainTweetRef)
   return (
     <ThreadLine
@@ -34,16 +34,16 @@ const MainThreadLine = memo(({ mainTweetRef, visible }: {
       bottomOffset={height}
     />
   )
-})
+}
 
-export const MyTweet = memo(({
+export function MyTweet({
   tweets,
   mainTweetId,
   containerClassName,
   showComments,
   filterUnrelated,
   excludeUsers,
-}: MyTweetProps) => {
+}: MyTweetProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const { setTweetElRef } = useTranslationUIActions()
   const { setCommentsCount } = useTranslationActions()
@@ -129,6 +129,6 @@ export const MyTweet = memo(({
       )}
     </TweetContainer>
   )
-})
+}
 
 MyTweet.displayName = 'MyTweet'

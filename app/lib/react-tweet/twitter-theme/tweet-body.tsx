@@ -1,5 +1,4 @@
 import type { EnrichedTweet } from '~/types'
-import { memo } from 'react'
 import { cn } from '~/lib/utils'
 import s from './tweet-body.module.css'
 import { TweetLink } from './tweet-link'
@@ -11,7 +10,7 @@ interface TweetBodyProps {
   className?: string
 }
 
-function TweetBodyComponent({ tweet, isTranslated, lang, className }: TweetBodyProps) {
+export function TweetBody({ tweet, isTranslated, lang, className }: TweetBodyProps) {
   return (
     <p
       className={cn(s.root, className)}
@@ -58,5 +57,3 @@ function TweetBodyComponent({ tweet, isTranslated, lang, className }: TweetBodyP
     </p>
   )
 }
-
-export const TweetBody = memo(TweetBodyComponent)

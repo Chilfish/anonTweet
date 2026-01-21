@@ -49,7 +49,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
         {/* <script
-          crossOrigin="anonymous"
           src="//unpkg.com/react-scan/dist/auto.global.js"
         /> */}
         <link rel="stylesheet" href={stylesheet} precedence="high" />
