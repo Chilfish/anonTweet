@@ -212,135 +212,136 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = memo(({
         <LanguagesIcon className="size-3.5 text-muted-foreground" />
       </DialogTrigger>
 
-      <DialogContent render={<form onSubmit={handleSave} />} className="max-w-xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Languages className="size-5" />
-            翻译推文
-          </DialogTitle>
-        </DialogHeader>
+      {isOpen && (
+        <DialogContent render={<form onSubmit={handleSave} />} className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Languages className="size-5" />
+              翻译推文
+            </DialogTitle>
+          </DialogHeader>
 
-        <DialogPanel className="space-y-6">
-          {/* 原文预览：始终显示最原始的推文，供对照 */}
-          <div className="space-y-2">
-            <Label className="px-1 text-xs font-medium text-muted-foreground">原文对照</Label>
-            <SettingsGroup className="bg-muted/30 border-dashed">
-              <div className="p-4">
-                <TweetBody tweet={originalTweet} isTranslated={false} />
-              </div>
-            </SettingsGroup>
-          </div>
-
-          {/* 句首补充 */}
-          <div className="space-y-2">
-            <Label className="px-1 text-xs font-medium text-muted-foreground">句首补充</Label>
-            <SettingsGroup>
-              <SettingsRow>
-                <div className="flex flex-col gap-0.5">
-                  <Label htmlFor="enable-prepend" className="text-sm font-medium">
-                    启用句首补充
-                  </Label>
-                  <span className="text-xs text-muted-foreground">
-                    用于调整语序或补充上下文
-                  </span>
+          <DialogPanel className="space-y-6">
+            {/* 原文预览：始终显示最原始的推文，供对照 */}
+            <div className="space-y-2">
+              <Label className="px-1 text-xs font-medium text-muted-foreground">原文对照</Label>
+              <SettingsGroup className="bg-muted/30 border-dashed">
+                <div className="p-4">
+                  <TweetBody tweet={originalTweet} isTranslated={false} />
                 </div>
-                <Switch
-                  id="enable-prepend"
-                  checked={enablePrepend}
-                  onCheckedChange={setEnablePrepend}
-                />
-              </SettingsRow>
-              {enablePrepend && (
-                <div className="border-t bg-card animate-in fade-in slide-in-from-top-1 duration-200">
-                  <Textarea
-                    id="prepend-text"
-                    name="prepend-text"
-                    defaultValue={prependText}
-                    placeholder="输入句首补充内容..."
-                    className="min-h-12 border-none shadow-none rounded-none bg-transparent resize-none text-sm"
+              </SettingsGroup>
+            </div>
+
+            {/* 句首补充 */}
+            <div className="space-y-2">
+              <Label className="px-1 text-xs font-medium text-muted-foreground">句首补充</Label>
+              <SettingsGroup>
+                <SettingsRow>
+                  <div className="flex flex-col gap-0.5">
+                    <Label htmlFor="enable-prepend" className="text-sm font-medium">
+                      启用句首补充
+                    </Label>
+                    <span className="text-xs text-muted-foreground">
+                      用于调整语序或补充上下文
+                    </span>
+                  </div>
+                  <Switch
+                    id="enable-prepend"
+                    checked={enablePrepend}
+                    onCheckedChange={setEnablePrepend}
                   />
-                </div>
-              )}
-            </SettingsGroup>
-          </div>
+                </SettingsRow>
+                {enablePrepend && (
+                  <div className="border-t bg-card animate-in fade-in slide-in-from-top-1 duration-200">
+                    <Textarea
+                      id="prepend-text"
+                      name="prepend-text"
+                      defaultValue={prependText}
+                      placeholder="输入句首补充内容..."
+                      className="min-h-12 border-none shadow-none rounded-none bg-transparent resize-none text-sm"
+                    />
+                  </div>
+                )}
+              </SettingsGroup>
+            </div>
 
-          {/* 译文编辑 */}
-          <div className="space-y-2">
-            <Label className="px-1 text-xs font-medium text-muted-foreground">
-              {/* 动态提示当前编辑的基础内容来源 */}
-              {(originalTweet as EnrichedTweet).autoTranslationEntities?.length && !getTranslation(tweetId)
-                ? '编辑 AI 翻译结果'
-                : '译文编辑'}
-            </Label>
-            <SettingsGroup>
-              {editingEntities.map((entity) => {
-                if (shouldSkipEntity(entity, originalTweet))
-                  return null
+            {/* 译文编辑 */}
+            <div className="space-y-2">
+              <Label className="px-1 text-xs font-medium text-muted-foreground">
+                {/* 动态提示当前编辑的基础内容来源 */}
+                {(originalTweet as EnrichedTweet).autoTranslationEntities?.length && !getTranslation(tweetId)
+                  ? '编辑 AI 翻译结果'
+                  : '译文编辑'}
+              </Label>
+              <SettingsGroup>
+                {editingEntities.map((entity) => {
+                  if (shouldSkipEntity(entity, originalTweet))
+                    return null
 
-                const inputId = `entity-${entity.index}`
-                const isText = entity.type === 'text'
-                // 这里很关键：如果是 AI 结果，entity.text 已经是中文，所以 defaultValue 会直接显示中文
-                const displayValue = getEntityDisplayValue(entity)
+                  const inputId = `entity-${entity.index}`
+                  const isText = entity.type === 'text'
+                  // 这里很关键：如果是 AI 结果，entity.text 已经是中文，所以 defaultValue 会直接显示中文
+                  const displayValue = getEntityDisplayValue(entity)
 
-                return (
-                  <div key={inputId} className="flex flex-col border-b last:border-0 bg-card">
-                    <div className="flex items-center justify-between px-4 py-2 bg-muted/20 border-b border-border/40">
-                      <Label htmlFor={inputId} className="text-[10px] uppercase font-mono text-muted-foreground flex items-center gap-2">
-                        {entity.type}
-                      </Label>
-                    </div>
-                    {isText ? (
-                      <Textarea
-                        id={inputId}
-                        name={inputId}
-                        defaultValue={displayValue}
-                        className="min-h-8 border-none shadow-none rounded-none bg-transparent resize-none text-sm leading-relaxed"
-                      />
-                    ) : (
-                      <div className="p-2">
-                        <Input
+                  return (
+                    <div key={inputId} className="flex flex-col border-b last:border-0 bg-card">
+                      <div className="flex items-center justify-between px-4 py-2 bg-muted/20 border-b border-border/40">
+                        <Label htmlFor={inputId} className="text-[10px] uppercase font-mono text-muted-foreground flex items-center gap-2">
+                          {entity.type}
+                        </Label>
+                      </div>
+                      {isText ? (
+                        <Textarea
                           id={inputId}
                           name={inputId}
                           defaultValue={displayValue}
-                          className="border-none shadow-none focus-visible:ring-0 bg-muted/30 h-9"
+                          className="min-h-8 border-none shadow-none rounded-none bg-transparent resize-none text-sm leading-relaxed"
                         />
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </SettingsGroup>
-          </div>
-        </DialogPanel>
+                      ) : (
+                        <div className="p-2">
+                          <Input
+                            id={inputId}
+                            name={inputId}
+                            defaultValue={displayValue}
+                            className="border-none shadow-none focus-visible:ring-0 bg-muted/30 h-9"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </SettingsGroup>
+            </div>
+          </DialogPanel>
 
-        <DialogFooter className="flex-row items-center justify-between gap-2 sm:justify-between">
-          <div className="flex items-center gap-2">
-            <Popover>
-              <PopoverTrigger render={(
-                <Button
-                  variant="ghost"
-                  className="text-muted-foreground hover:text-foreground"
-                  title="查看词汇表"
-                />
-              )}
-              >
-                <BookA className="size-4" />
-                词汇表
-              </PopoverTrigger>
-              <PopoverContent className="w-80 p-0" align="start" side="top">
-                <DictionaryViewer />
-              </PopoverContent>
-            </Popover>
+          <DialogFooter className="flex-row items-center justify-between gap-2 sm:justify-between">
+            <div className="flex items-center gap-2">
+              <Popover>
+                <PopoverTrigger render={(
+                  <Button
+                    variant="ghost"
+                    className="text-muted-foreground hover:text-foreground"
+                    title="查看词汇表"
+                  />
+                )}
+                >
+                  <BookA className="size-4" />
+                  词汇表
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-0" align="start" side="top">
+                  <DictionaryViewer />
+                </PopoverContent>
+              </Popover>
 
-            <ToggleTransButton
-              tweetId={tweetId}
-              variant="ghost"
-              className="text-muted-foreground hover:text-foreground px-2"
-            />
-          </div>
+              <ToggleTransButton
+                tweetId={tweetId}
+                variant="ghost"
+                className="text-muted-foreground hover:text-foreground px-2"
+              />
+            </div>
 
-          <div className="flex items-center gap-2">
-            {/* {getTranslation(tweetId) !== null && (
+            <div className="flex items-center gap-2">
+              {/* {getTranslation(tweetId) !== null && (
               <Tooltip>
                 <TooltipTrigger render={(
                   <Button
@@ -360,33 +361,34 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = memo(({
               </Tooltip>
             )} */}
 
-            {getTranslation(tweetId) !== null && (
-              <Tooltip>
-                <TooltipTrigger render={(
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    onClick={handleDelete}
-                  />
-                )}
-                >
-                  <Trash2Icon className="size-4" />
-                  删除
-                </TooltipTrigger>
-                <TooltipContent>
-                  删除此推文的翻译
-                </TooltipContent>
-              </Tooltip>
-            )}
+              {getTranslation(tweetId) !== null && (
+                <Tooltip>
+                  <TooltipTrigger render={(
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleDelete}
+                    />
+                  )}
+                  >
+                    <Trash2Icon className="size-4" />
+                    删除
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    删除此推文的翻译
+                  </TooltipContent>
+                </Tooltip>
+              )}
 
-            <Button type="submit" size="sm">
-              <Save className="size-4" />
-              保存
-            </Button>
-          </div>
-        </DialogFooter>
-      </DialogContent>
+              <Button type="submit" size="sm">
+                <Save className="size-4" />
+                保存
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      )}
     </Dialog>
   )
 })

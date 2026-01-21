@@ -1,5 +1,5 @@
 import type { EnrichedTweet } from '~/types'
-import { createRef, memo, useMemo, useRef } from 'react'
+import { memo, useCallback, useMemo, useRef, useState } from 'react'
 import { useElementSize } from '~/hooks/use-element-size'
 import { useIsCapturingSelected, useIsTweetSelected } from '~/lib/stores/hooks'
 import { SelectableTweetWrapper } from './SelectableTweetWrapper'
@@ -14,29 +14,10 @@ interface CommentBranchProps {
 // 常量：头像中心相对于 TweetNode 顶部的距离
 // 基于 py-2 (8px) + 头像中心偏移 (约12-16px) 的估算值，24px 是一个较为通用的对齐点
 const AVATAR_CENTER_Y_OFFSET = 24
+const EMPTY_REPLIES: EnrichedTweet[] = []
 
-function CommentBranchComponent({ tweet, ref }: CommentBranchProps) {
-  const replies = tweet.comments || []
-  const hasReplies = replies.length > 0
-  const isCapturingSelected = useIsCapturingSelected()
-  const isSelected = useIsTweetSelected(tweet.id_str)
-
-  const nodeRef = useRef<HTMLDivElement>(null)
-
-  // 当 isCapturingSelected 变化时（例如从隐藏状态恢复显示），
-  // 我们强制生成一个新的 ref 对象。这会触发 useElementSize 内部的 Effect 重新执行，
-  // 确保能正确 hook 到重新创建的 DOM 节点上进行测量。
-  // 如果仅使用 useRef，ref 对象引用不变，子组件重新挂载时测量逻辑不会被激活。
-  const lastChildRef = useMemo(
-    () => createRef<HTMLDivElement>(),
-    [isCapturingSelected],
-  )
-
-  const { height: lastChildHeight } = useElementSize(lastChildRef)
-
-  if (isCapturingSelected && !isSelected) {
-    return null
-  }
+const BranchThreadLine = memo(({ lastChildNode }: { lastChildNode: HTMLElement | null }) => {
+  const { height: lastChildHeight } = useElementSize(lastChildNode)
 
   // 1. 计算 Top Offset
   // 这里的公式是为了让线条起始点对齐第一个头像的中心
@@ -50,35 +31,63 @@ function CommentBranchComponent({ tweet, ref }: CommentBranchProps) {
   const lineBottomOffset = Math.max(0, lastChildHeight - AVATAR_CENTER_Y_OFFSET)
 
   return (
+    <ThreadLine
+      topOffset={lineTopOffset}
+      bottomOffset={lineBottomOffset}
+    />
+  )
+})
+
+function CommentBranchComponent({ tweet, ref }: CommentBranchProps) {
+  const replies = tweet.comments || EMPTY_REPLIES
+  const hasReplies = replies.length > 0
+  const isCapturingSelected = useIsCapturingSelected()
+  const isSelected = useIsTweetSelected(tweet.id_str)
+
+  const nodeRef = useRef<HTMLDivElement>(null)
+  const [lastChildNode, setLastChildNode] = useState<HTMLDivElement | null>(null)
+
+  const lastChildRef = useCallback((node: HTMLDivElement | null) => {
+    setLastChildNode(node)
+  }, [])
+
+  const tweetContent = useMemo(() => (
+    <SelectableTweetWrapper
+      tweetId={tweet.id_str}
+    >
+      <TweetNode
+        ref={nodeRef}
+        tweet={tweet}
+        variant={hasReplies ? 'thread' : 'main-in-thread'}
+        hasParent={hasReplies}
+      />
+    </SelectableTweetWrapper>
+  ), [tweet, hasReplies])
+
+  const repliesContent = useMemo(() => replies.map((reply, index) => (
+    <CommentBranch
+      key={reply.id_str}
+      tweet={reply}
+      ref={index === replies.length - 1 ? lastChildRef : undefined}
+    />
+  )), [replies, lastChildRef])
+
+  if (isCapturingSelected && !isSelected) {
+    return null
+  }
+
+  return (
     <div
       className="border-b border-[#cfd9de]/30 py-2 last:border-b-0 last:pb-0 dark:border-[#333639]/30 relative"
       ref={ref}
     >
       {hasReplies && (
-        <ThreadLine
-          topOffset={lineTopOffset}
-          bottomOffset={lineBottomOffset}
-        />
+        <BranchThreadLine lastChildNode={lastChildNode} />
       )}
 
-      <SelectableTweetWrapper
-        tweetId={tweet.id_str}
-      >
-        <TweetNode
-          ref={nodeRef}
-          tweet={tweet}
-          variant={hasReplies ? 'thread' : 'main-in-thread'}
-          hasParent={hasReplies}
-        />
-      </SelectableTweetWrapper>
+      {tweetContent}
 
-      {hasReplies && replies.map((reply, index) => (
-        <CommentBranch
-          key={reply.id_str}
-          tweet={reply}
-          ref={index === replies.length - 1 ? lastChildRef : useRef(null)}
-        />
-      ))}
+      {hasReplies && repliesContent}
     </div>
   )
 }
