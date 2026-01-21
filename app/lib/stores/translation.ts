@@ -16,6 +16,7 @@ interface SettingsState {
   enabled: boolean
   customSeparator: string
   selectedTemplateId: string
+  filterUnrelated: boolean
   separatorTemplates: SeparatorTemplate[]
   customTemplates: SeparatorTemplate[]
 }
@@ -24,6 +25,7 @@ const DEFAULT_SETTINGS: SettingsState = {
   enabled: true,
   customSeparator: DEFAULT_TEMPLATES[0]!.html,
   selectedTemplateId: DEFAULT_TEMPLATES[0]!.id,
+  filterUnrelated: true,
   separatorTemplates: DEFAULT_TEMPLATES,
   customTemplates: [],
 }

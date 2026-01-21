@@ -4,6 +4,7 @@ import { SaveAsImageButton } from '~/components/translation/SaveAsImageButton'
 import { ToggleTransButton } from '~/components/translation/ToggleTransButton'
 import { Button } from '~/components/ui/button'
 import { useTweetOperations } from '~/hooks/use-tweet-operations'
+import { FilterUnrelatedToggle } from './FilterUnrelatedToggle'
 import { TweetOptionsMenu } from './TweetOptionsMenu'
 
 export function TweetHeader() {
@@ -24,6 +25,8 @@ export function TweetHeader() {
 
       {/* 右侧：操作区 */}
       <div className="flex items-center gap-1 sm:gap-2">
+        <FilterUnrelatedToggle />
+
         <Button
           variant="secondary"
           onClick={loadComments}

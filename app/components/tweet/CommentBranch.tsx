@@ -55,7 +55,7 @@ function CommentBranchComponent({ tweet, ref, isTopLevel = true }: CommentBranch
   const tweetContent = useMemo(() => (
     <SelectableTweetWrapper
       tweetId={tweet.id_str}
-      show={isTopLevel && !!tweet.comments?.length}
+      show={isTopLevel}
     >
       <TweetNode
         ref={nodeRef}

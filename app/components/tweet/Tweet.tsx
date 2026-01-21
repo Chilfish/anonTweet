@@ -5,7 +5,12 @@ import { useEffect, useMemo, useRef } from 'react'
 import { useElementSize } from '~/hooks/use-element-size'
 import { TweetContainer } from '~/lib/react-tweet'
 import { organizeTweets } from '~/lib/react-tweet/utils/organizeTweets'
-import { useIsCapturingSelected, useTranslationActions, useTranslationUIActions } from '~/lib/stores/hooks'
+import {
+  useIsCapturingSelected,
+  useTranslationActions,
+  useTranslationSettings,
+  useTranslationUIActions,
+} from '~/lib/stores/hooks'
 import { cn } from '~/lib/utils'
 import { CommentBranch } from './CommentBranch'
 import { SelectableTweetWrapper } from './SelectableTweetWrapper'
@@ -41,13 +46,16 @@ export function MyTweet({
   mainTweetId,
   containerClassName,
   showComments,
-  filterUnrelated,
+  filterUnrelated: propFilterUnrelated,
   excludeUsers,
 }: MyTweetProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const { setTweetElRef } = useTranslationUIActions()
   const { setCommentsCount } = useTranslationActions()
   const isCapturingSelected = useIsCapturingSelected()
+  const { filterUnrelated: storeFilterUnrelated } = useTranslationSettings()
+
+  const filterUnrelated = propFilterUnrelated ?? storeFilterUnrelated
 
   useEffect(() => {
     if (containerRef.current)
