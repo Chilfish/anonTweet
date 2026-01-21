@@ -13,7 +13,7 @@ app.disable('x-powered-by')
 console.log('Starting production server')
 app.use(
   '/assets',
-  express.static('../build/client/assets', { immutable: true, maxAge: '1y' }),
+  express.static('build/client/assets', { immutable: true, maxAge: '1y' }),
 )
 app.use(morgan('tiny'))
 app.use(express.static('../build/client', { maxAge: '1h' }))
