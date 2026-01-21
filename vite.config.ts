@@ -1,12 +1,12 @@
 import { execSync } from 'node:child_process'
+import fs from 'node:fs'
+import path from 'node:path'
 import { reactRouter } from '@react-router/dev/vite'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import { env } from './app/lib/env.server'
 
-// TODO: REMOVE IT
-// process.exit(1)
 // 获取 git 信息
 function getGitInfo() {
   try {
@@ -23,6 +23,13 @@ function getGitInfo() {
       hash: 'unknown',
       date: 'unknown',
     }
+  }
+}
+
+if (env.ENABLE_LOCAL_CACHE) {
+  const dir = path.join(process.cwd(), 'cache')
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir)
   }
 }
 

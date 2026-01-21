@@ -1,17 +1,16 @@
 import type { Route } from './+types/get'
-import type { EnrichedTweet, Entity, TweetData } from '~/types'
+import type { Entity, TweetData } from '~/types'
 import { data } from 'react-router'
 import z from 'zod'
 import { autoTranslateTweet } from '~/lib/AITranslation'
 import { getLocalCache } from '~/lib/localCache'
-import { getEnrichedTweet } from '~/lib/react-tweet/utils/get-tweet'
 import { TwitterError } from '~/lib/rettiwt-api'
 import { getTweets } from '~/lib/service/getTweet'
-import { insertToTweetDB } from '~/lib/service/getTweet.server'
+import { getDBTweet, insertToTweetDB } from '~/lib/service/getTweet.server'
 import { extractTweetId } from '~/lib/utils'
 import { getTweetSchema } from '~/lib/validations/tweet'
 
-const getLocalTweet = (tweetId: string) => getLocalCache<EnrichedTweet>({ id: tweetId, type: 'tweet', getter: () => getEnrichedTweet(tweetId) })
+const getLocalTweet = (tweetId: string) => getLocalCache({ id: tweetId, type: 'tweet', getter: () => getDBTweet(tweetId) })
 
 export async function action({ request }: Route.ActionArgs) {
   const jsonData = await request.json()

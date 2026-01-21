@@ -8,6 +8,7 @@ import { TweetNode } from './TweetNode'
 
 interface CommentBranchProps {
   tweet: EnrichedTweet
+  ref?: React.RefObject<HTMLDivElement | null>
 }
 
 // 常量：头像中心相对于 TweetNode 顶部的距离
@@ -16,7 +17,7 @@ interface CommentBranchProps {
 // 如果是 py-2 (8px) + 32px 头像，中心在 24px。请根据实际调整此值。
 const AVATAR_CENTER_Y_OFFSET = 24
 
-export function CommentBranch({ tweet }: CommentBranchProps) {
+export function CommentBranch({ tweet, ref }: CommentBranchProps) {
   const replies = tweet.comments || []
   const hasReplies = replies.length > 0
   const {
@@ -75,7 +76,10 @@ export function CommentBranch({ tweet }: CommentBranchProps) {
   const bottomCorrection = Math.max(0, lastChildHeight - AVATAR_CENTER_Y_OFFSET)
 
   return (
-    <div className="border-b border-[#cfd9de]/30 py-2 last:border-b-0 dark:border-[#333639]/30 relative">
+    <div
+      className="border-b border-[#cfd9de]/30 py-2 last:border-b-0 dark:border-[#333639]/30 relative"
+      ref={ref}
+    >
       <SelectableTweetWrapper
         tweetId={tweet.id_str}
       >
@@ -99,11 +103,13 @@ export function CommentBranch({ tweet }: CommentBranchProps) {
         />
       </SelectableTweetWrapper>
 
-      <div ref={childrenRef}>
-        {hasReplies && replies.map(reply => (
-          <CommentBranch key={reply.id_str} tweet={reply} />
-        ))}
-      </div>
+      {hasReplies && replies.map(reply => (
+        <CommentBranch
+          key={reply.id_str}
+          tweet={reply}
+          ref={childrenRef}
+        />
+      ))}
     </div>
   )
 }
