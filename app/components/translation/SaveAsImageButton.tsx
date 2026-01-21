@@ -28,7 +28,7 @@ function SelectionModeActions({
         取消
       </Button>
       <Button onClick={onConfirm} disabled={disabled}>
-        确认 (
+        截图 (
         {count}
         )
       </Button>

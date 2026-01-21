@@ -98,7 +98,6 @@ export function MyTweet({
               tweet={mainTweet}
               variant={hasThread ? 'main-in-thread' : 'main'}
               hasParent={false}
-              avatarSize="medium"
             />
           </article>
         </SelectableTweetWrapper>

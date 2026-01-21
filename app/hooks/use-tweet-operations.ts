@@ -19,10 +19,14 @@ export function useTweetOperations() {
       const { data } = await fetcher.get<TweetData>(`/api/tweet/replies/${mainTweet.id_str}`)
       if (data && data.length > 0) {
         appendTweets(data)
-        toast.success(`已获取 ${data.length} 条评论`)
+        toast.success(`已获取 ${data.length} 条评论`, {
+          description: '仅筛选出了与博主有互动的回复',
+        })
       }
       else {
-        toast.info('未找到更多评论')
+        toast.info('未找到更多评论', {
+          description: '仅会筛选出与博主有互动的回复',
+        })
       }
     }
     catch (error) {

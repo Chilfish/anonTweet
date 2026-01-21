@@ -15,20 +15,19 @@ interface TweetNodeProps {
   tweet: EnrichedTweet
   variant: TweetVariant
   hasParent?: boolean
-  avatarSize: 'small' | 'medium'
 }
 
 export const TweetNode = forwardRef<HTMLDivElement, TweetNodeProps>(({
   tweet,
   variant,
   hasParent,
-  avatarSize = 'medium',
 }, ref) => {
   const { screenshoting } = useTranslationStore()
   const { isInlineMedia } = useAppConfigStore()
 
   const isQuoted = variant === 'quoted'
   const isThreadContext = variant === 'thread' || variant === 'main-in-thread'
+  const avatarSize = isThreadContext ? 'small' : 'medium'
 
   // 样式映射表，替代混乱的 cn
   const styles = {
@@ -69,7 +68,6 @@ export const TweetNode = forwardRef<HTMLDivElement, TweetNodeProps>(({
             tweet={tweet.quotedTweet}
             variant="quoted"
             hasParent={false}
-            avatarSize={avatarSize}
           />
         )}
       </div>

@@ -7,7 +7,7 @@ import { VerifiedBadge } from './verified-badge'
 
 interface Props {
   tweet: EnrichedTweet
-  avatarSize: 'small' | 'medium'
+  avatarSize?: 'small' | 'medium'
   className?: string
   createdAtInline?: boolean
 }
