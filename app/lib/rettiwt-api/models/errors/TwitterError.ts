@@ -19,11 +19,12 @@ export class TwitterError extends Error implements ITwitterError {
    */
   public constructor(error: AxiosError<IRawErrorData | IRawErrorDetails>) {
     super(error.message)
-    this.details = (
-      (error.response?.data as IRawErrorData).errors
-        ? (error.response?.data as IRawErrorData).errors.map(item => new TwitterErrorDetails(item))
-        : [new TwitterErrorDetails(error.response?.data as IRawErrorDetails)]
-    ).map(item => item.toJSON())
+    this.details = []
+    // this.details = (
+    //   (error.response?.data as IRawErrorData)?.errors
+    //     ? (error.response?.data as IRawErrorData).errors.map(item => new TwitterErrorDetails(item))
+    //     : [new TwitterErrorDetails(error.response?.data as IRawErrorDetails)]
+    // ).map(item => item.toJSON())
     this.message = error.message
     this.name = 'TWITTER_ERROR'
     this.status = error.status ?? 500

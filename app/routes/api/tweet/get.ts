@@ -3,7 +3,6 @@ import type { TweetData } from '~/types'
 import { data } from 'react-router'
 import z from 'zod'
 import { autoTranslateTweet } from '~/lib/AITranslation'
-import { TwitterError } from '~/lib/rettiwt-api'
 import { getTweets } from '~/lib/service/getTweet'
 import { getLocalTweet, insertToTweetDB } from '~/lib/service/getTweet.server'
 import { extractTweetId } from '~/lib/utils'
@@ -49,13 +48,13 @@ export async function action({ request }: Route.ActionArgs) {
     tweets = await getTweets(tweetId, getLocalTweet)
   }
   catch (error: any) {
-    if (error instanceof TwitterError) {
-      return {
-        ...error,
-        details: error.details.map(m => m.message).join('\n'),
-      }
-    }
-    return []
+    console.log(`get tweet ${tweetId}`, error)
+    return data({
+      success: false,
+      error: 'Tweet not found',
+      status: 404,
+      message: error.message,
+    })
   }
 
   await Promise.all(

@@ -147,12 +147,12 @@ export function useTranslationEditorLogic(originalTweet: EnrichedTweet) {
 
         toast.success('AI 翻译完成')
       }
-      else {
-        toast.error(data.message || 'AI 翻译失败')
-      }
     }
     catch (error: any) {
-      toast.error(error.message)
+      console.error(error)
+      toast.error(error.message || 'AI 翻译失败', {
+        description: error.cause || '未知错误',
+      })
     }
     finally {
       setIsAITranslating(false)
