@@ -307,9 +307,24 @@ export const useTranslationStore = create<TranslationStore>()(
     {
       name: 'translation-store',
       partialize: state => ({
-        settings: state.settings,
-        translationMode: state.translationMode,
+        settings: {
+          ...state.settings,
+          translationMode: state.translationMode,
+        },
       }),
+      migrate: (state: any, version) => {
+        console.log(state)
+        if (version < 5) {
+          return {
+            ...state,
+            settings: {
+              ...state.settings,
+              translationMode: state.translationMode,
+            },
+          }
+        }
+        return state
+      },
       version: 5,
       onRehydrateStorage: (state) => {
         return () => state?.setHasHydrated(true)

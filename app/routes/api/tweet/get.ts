@@ -58,9 +58,6 @@ export async function action({ request }: Route.ActionArgs) {
     return []
   }
 
-  // 并发处理所有推文的翻译（适用于 Thread/Conversation）
-  // 使用 Promise.allSettled 或 Promise.all 都可以，这里直接用 Promise.all 等待完成
-  // map 允许并行启动所有请求
   await Promise.all(
     tweets.map(async (tweet) => {
       const isZhTweet = tweet.lang === 'zh'
@@ -95,7 +92,9 @@ export async function action({ request }: Route.ActionArgs) {
             : [],
         ])
         tweet.autoTranslationEntities = mainTweet
-        tweet.quotedTweet && (tweet.quotedTweet.autoTranslationEntities = quotedTweet)
+        if (tweet.quotedTweet) {
+          tweet.quotedTweet.autoTranslationEntities = quotedTweet
+        }
 
         await insertToTweetDB([tweet])
       }
