@@ -67,9 +67,9 @@ export function ToggleTransButton({ className, tweetId, ...props }: ToggleTransB
     <DropdownMenu>
       <DropdownMenuTrigger render={(
         <Button
+          variant="outline"
           {...props}
-          variant="secondary"
-          className={cn('text-sm font-medium transition-all duration-200', className)}
+          className={cn(className)}
         />
       )}
       >

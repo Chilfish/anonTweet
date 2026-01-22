@@ -309,9 +309,6 @@ export const useTranslationStore = create<TranslationStore>()(
       partialize: state => ({
         settings: state.settings,
         translationMode: state.translationMode,
-        translations: state.translations,
-        translationVisibility: state.translationVisibility,
-        tweetTranslationModes: state.tweetTranslationModes,
       }),
       version: 5,
       onRehydrateStorage: (state) => {

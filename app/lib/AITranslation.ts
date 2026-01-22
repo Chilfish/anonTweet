@@ -227,5 +227,5 @@ export async function autoTranslateTweet({
   if (!translatedTextString) {
     return []
   }
-  return restoreEntities(translatedTextString, entityMap)
+  return restoreEntities(translatedTextString, entityMap, tweet.entities)
 }

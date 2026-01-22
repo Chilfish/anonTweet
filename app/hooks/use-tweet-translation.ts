@@ -57,10 +57,6 @@ export function useTweetTranslation(tweet: EnrichedTweet, type: 'body' | 'alt' =
   if (manualTranslation) {
     // 处理人工翻译记录：如果是正常数组，则与原文合并
     entities = mergeEntities(tweet.entities || [], manualTranslation)
-    // 恢复特殊的句首补充 (index -1)
-    const prepend = manualTranslation.find(e => e.index === -1)
-    if (prepend)
-      entities.unshift(prepend)
   }
   // 检查 AI 翻译
   else if (enableAITranslation && tweet.autoTranslationEntities?.length) {
