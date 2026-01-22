@@ -1,27 +1,31 @@
+// hooks/use-element-size.ts
 import type { RefObject } from 'react'
-import { useLayoutEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
-export function useElementSize<T extends HTMLElement = HTMLDivElement>(
-  elementRef: RefObject<T | null>,
-) {
+export function useElementSize(ref: RefObject<HTMLElement | null>) {
   const [size, setSize] = useState({ width: 0, height: 0 })
 
-  useLayoutEffect(() => {
-    const element = elementRef.current
-    if (!element)
+  useEffect(() => {
+    if (!ref?.current)
       return
 
-    const resizeObserver = new ResizeObserver((entries) => {
-      if (!entries || entries.length === 0)
-        return
-      const { width, height } = entries[0]?.contentRect || { width: 0, height: 0 }
-      setSize({ width, height })
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setSize({
+          width: entry.contentRect.width,
+          height: entry.contentRect.height,
+        })
+      }
     })
 
-    resizeObserver.observe(element)
+    observer.observe(ref.current)
 
-    return () => resizeObserver.disconnect()
-  }, [elementRef]) // 依赖 ref 对象本身
+    // 初始测量
+    const { offsetWidth, offsetHeight } = ref.current
+    setSize({ width: offsetWidth, height: offsetHeight })
+
+    return () => observer.disconnect()
+  }, [ref])
 
   return size
 }

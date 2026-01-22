@@ -1,0 +1,224 @@
+import type { StoreApi, UseBoundStore } from 'zustand'
+import type { EnrichedTweet } from '~/types'
+import { useMemo } from 'react'
+import { useShallow } from 'zustand/react/shallow'
+import { useAppConfigStore } from './appConfig'
+import { useTranslationStore } from './translation'
+import { useTranslationDictionaryStore } from './TranslationDictionary'
+import { useTranslationUIStore } from './translationUI'
+
+const DEFAULT_VISIBILITY = { body: true, alt: true }
+
+type WithSelectors<S> = S extends { getState: () => infer T }
+  ? S & { use: { [K in keyof T]: () => T[K] } }
+  : never
+
+function createSelectors<S extends UseBoundStore<StoreApi<object>>>(_store: S) {
+  const store = _store as WithSelectors<typeof _store>
+  store.use = {}
+  for (const k of Object.keys(store.getState())) {
+    ;(store.use as any)[k] = () => store(s => s[k as keyof typeof s])
+  }
+
+  return store
+}
+
+export function useAIConfig() {
+  return useAppConfigStore(
+    useShallow(state => ({
+      geminiApiKey: state.geminiApiKey,
+      geminiModel: state.geminiModel,
+      enableAITranslation: state.enableAITranslation,
+      geminiThinkingLevel: state.geminiThinkingLevel,
+      translationGlossary: state.translationGlossary,
+    })),
+  )
+}
+
+/**
+ * 专门用于获取操作函数。
+ * 原理：我们只订阅 actions 部分，由于 Zustand 的 actions 函数引用是稳定的，
+ * 所以这个 Hook 永远不会导致组件因数据变化而重渲染。
+ */
+export function useTranslationActions() {
+  return useTranslationStore(
+    useShallow(state => ({
+      updateSettings: state.updateSettings,
+      resetSettings: state.resetSettings,
+      selectTemplate: state.selectTemplate,
+      updateTemplate: state.updateTemplate,
+      addTemplate: state.addTemplate,
+      deleteTemplate: state.deleteTemplate,
+      addCustomTemplate: state.addCustomTemplate,
+      updateCustomTemplate: state.updateCustomTemplate,
+      deleteCustomTemplate: state.deleteCustomTemplate,
+      setAllTweets: state.setAllTweets,
+      appendTweets: state.appendTweets,
+      setCommentIds: state.setCommentIds,
+      setTranslation: state.setTranslation,
+      // 注意：getTranslation 是 getter，不应在渲染期间直接作为数据源依赖，
+      // 而是应该在事件回调中使用，或者使用下方的 useTweetTranslation
+      getTranslation: state.getTranslation,
+      deleteTranslation: state.deleteTranslation,
+      resetTranslation: state.resetTranslation,
+      setTranslationVisibility: state.setTranslationVisibility,
+      setTweetTranslationMode: state.setTweetTranslationMode,
+      setTranslationMode: state.setTranslationMode,
+      hasTextContent: state.hasTextContent,
+    })),
+  )
+}
+
+// UI Store 的 Actions
+export function useTranslationUIActions() {
+  return useTranslationUIStore(
+    useShallow(state => ({
+      setShowTranslationButton: state.setShowTranslationButton,
+      setEditingTweetId: state.setEditingTweetId,
+      setTweetElRef: state.setTweetElRef,
+      setScreenshoting: state.setScreenshoting,
+      toggleSelectionMode: state.toggleSelectionMode,
+      toggleTweetSelection: state.toggleTweetSelection,
+      selectAllTweets: state.selectAllTweets,
+      setIsCapturingSelected: state.setIsCapturingSelected,
+      resetUI: state.resetUI,
+    })),
+  )
+}
+
+/**
+ * 获取单个推文的翻译数据
+ * 只有当这个特定推文的翻译发生变化时，组件才会重渲染
+ */
+export function useTweetTranslation(tweetId: string) {
+  return useTranslationStore(state => state.translations[tweetId])
+}
+
+/**
+ * 获取单个推文的可见性设置
+ * 只有当可见性变化时重渲染
+ */
+export function useTweetVisibility(tweetId: string) {
+  return useTranslationStore(state =>
+    state.translationVisibility[tweetId] || DEFAULT_VISIBILITY,
+  )
+}
+
+/**
+ * 获取特定推文的翻译模式
+ */
+export function useTweetMode(tweetId: string) {
+  return useTranslationStore(state =>
+    state.tweetTranslationModes[tweetId] || state.translationMode,
+  )
+}
+
+/**
+ * 获取全局设置 (Settings)
+ * 使用 useShallow 防止每次 settings 对象引用变化导致重渲染
+ */
+export function useTranslationSettings() {
+  return useTranslationStore(useShallow(state => state.settings))
+}
+
+export function useUIState() {
+  return useTranslationUIStore(
+    useShallow(state => ({
+      showTranslationButton: state.showTranslationButton,
+      isSelectionMode: state.isSelectionMode,
+      screenshoting: state.screenshoting,
+      isCapturingSelected: state.isCapturingSelected,
+      editingTweetId: state.editingTweetId,
+      selectedTweetIds: state.selectedTweetIds,
+      tweetElRef: state.tweetElRef,
+    })),
+  )
+}
+
+export function useShowTranslationButton() {
+  return useTranslationUIStore(state => state.showTranslationButton)
+}
+
+/**
+ * 检查推文是否被选中
+ */
+export function useIsTweetSelected(tweetId: string) {
+  return useTranslationUIStore(state => state.selectedTweetIds.includes(tweetId))
+}
+
+export function useIsSelectionMode() {
+  return useTranslationUIStore(state => state.isSelectionMode)
+}
+
+export function useIsCapturingSelected() {
+  return useTranslationUIStore(state => state.isCapturingSelected)
+}
+
+export function useScreenshoting() {
+  return useTranslationUIStore(state => state.screenshoting)
+}
+
+export function useSelectedCount() {
+  return useTranslationUIStore(state => state.selectedTweetIds.length)
+}
+
+export function useTweets() {
+  return useTranslationStore(useShallow(state => state.tweets))
+}
+
+export function useMainTweet() {
+  return useTranslationStore(useShallow(state => state.mainTweet))
+}
+
+export function useExcludeCommentsTweets(): EnrichedTweet[] {
+  const tweets = useTweets()
+  const commentIds = useCommentIds()
+  return useMemo(() => {
+    const excludedSet = new Set(commentIds)
+
+    const seenIds = new Set<string>()
+    return tweets.filter((tweet) => {
+      const id = tweet.id_str
+      if (excludedSet.has(id)) {
+        return false
+      }
+      if (seenIds.has(id)) {
+        return false
+      }
+      seenIds.add(id)
+      return true
+    })
+  }, [tweets, commentIds])
+}
+
+export function useCommentIds() {
+  return useTranslationStore(state => state.commentIds)
+}
+
+export function useGlobalTranslationMode() {
+  return useTranslationStore(
+    useShallow(state => ({
+      translationMode: state.translationMode,
+      tweetTranslationModes: state.tweetTranslationModes,
+    })),
+  )
+}
+
+export function useTranslations() {
+  return useTranslationStore(useShallow(state => state.translations))
+}
+
+/**
+ * Hydration status hooks to prevent Next.js hydration mismatch
+ */
+export function useTranslationHydrated() {
+  return useTranslationStore(state => state._hasHydrated)
+}
+
+export function useAppConfigHydrated() {
+  return useAppConfigStore(state => state._hasHydrated)
+}
+
+export function useDictionaryHydrated() {
+  return useTranslationDictionaryStore(state => state._hasHydrated)
+}

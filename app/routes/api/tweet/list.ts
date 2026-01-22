@@ -8,5 +8,5 @@ export async function loader({
 }: Route.LoaderArgs): Promise<TweetData> {
   const { id } = params
   const tweets = await fetchListTweets(id)
-  return tweets.map(tweet => enrichTweet(tweet))
+  return tweets.map(tweet => enrichTweet(tweet)).filter(tweet => !!tweet)
 }

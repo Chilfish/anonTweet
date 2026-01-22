@@ -180,7 +180,9 @@ ${maskedText}
         } satisfies GoogleGenerativeAIProviderOptions,
       },
     })
-    return response.text.trim()
+    const text = response.text.trim()
+
+    return text.replace(/^thought[ful].*\n/g, '')
   }
   catch (error) {
     console.error('AI Translation Failed:', error)
@@ -225,5 +227,5 @@ export async function autoTranslateTweet({
   if (!translatedTextString) {
     return []
   }
-  return restoreEntities(translatedTextString, entityMap)
+  return restoreEntities(translatedTextString, entityMap, tweet.entities)
 }

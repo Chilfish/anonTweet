@@ -1,9 +1,10 @@
 import type { IListTweetsResponse } from '~/lib/rettiwt-api/types/raw/list/Tweets'
 import type { ITweetDetailsResponse } from '~/lib/rettiwt-api/types/raw/tweet/Details'
+import type { ITweetRepliesResponse } from '~/lib/rettiwt-api/types/raw/tweet/Replies'
 import type { IUserDetailsResponse } from '~/lib/rettiwt-api/types/raw/user/Details'
 import type { IUserTweetsResponse } from '~/lib/rettiwt-api/types/raw/user/Tweets'
 import type { EnrichedTweet, RawTweet, RawUser } from '~/types'
-import { ResourceType } from '~/lib/rettiwt-api'
+import { ResourceType, TweetRepliesSortType } from '~/lib/rettiwt-api'
 import { Extractors } from '~/lib/rettiwt-api/collections/Extractors'
 import { RettiwtPool } from '~/lib/SmartPool'
 import { enrichTweet } from './parseTweet'
@@ -83,18 +84,47 @@ export async function fetchUserTweet(userId: string): Promise<RawTweet[]> {
   )
 }
 
+export async function fetchReplies(tweetId: string): Promise<RawTweet[]> {
+  return await twitterPool.run(async (fetcher) => {
+    const response = await fetcher.request<ITweetRepliesResponse>(
+      ResourceType.TWEET_REPLIES,
+      {
+        id: tweetId,
+        sortBy: TweetRepliesSortType.LIKES,
+      },
+    )
+    const data = response.data
+      .threaded_conversation_with_injections_v2
+      .instructions
+      .filter(t => t.type === 'TimelineAddEntries')
+
+    const mainTweet = (data.flatMap(d => d.entries?.filter(e => e.content.entryType === 'TimelineTimelineItem') || [])
+      .flatMap(entry => (entry.content.itemContent?.tweet_results.result))
+      .filter(result => !!result)
+      .at(0) || {}) as RawTweet
+
+    const comments = data.flatMap(t => t.entries?.filter(d => d.content.entryType === 'TimelineTimelineModule') || [])
+      .flatMap(entry => (entry.content.items || []).map(d => d.item.itemContent.tweet_results.result))
+      .filter(result => !!result)
+
+    return [...comments as unknown as RawTweet[], mainTweet]
+  })
+}
+
 export async function getEnrichedUserTweet(userId: string): Promise<EnrichedTweet[]> {
   const tweets = await fetchUserTweet(userId)
   // await writeFile('data/user-timeline-tweets.json', JSON.stringify(tweets, null, 2), 'utf8')
   return tweets
     .map((tweet) => {
       const enrichedTweet = enrichTweet(tweet)
-      if (tweet.quoted_status_result?.result) {
+      if (tweet.quoted_status_result?.result && enrichedTweet) {
         const quotedTweet = enrichTweet(tweet.quoted_status_result.result)
-        enrichedTweet.quotedTweet = quotedTweet
+        if (quotedTweet)
+          enrichedTweet.quotedTweet = quotedTweet
       }
       return enrichedTweet
     })
+    .filter(tweet => !!tweet)
     .filter((tweet) => {
       const isAd = tweet.user.id_str !== userId && !tweet.retweetedOrignalId
 

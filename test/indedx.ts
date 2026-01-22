@@ -9,7 +9,7 @@ if (!tweet) {
 
 const data = serializeForAI(tweet.entities)
 
-const entities = restoreEntities(data.maskedText, data.entityMap)
+const entities = restoreEntities(data.maskedText, data.entityMap, tweet.entities)
 
 const text = generateEntityContext(data.entityMap)
 

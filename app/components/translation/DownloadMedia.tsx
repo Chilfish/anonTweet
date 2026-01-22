@@ -7,7 +7,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip
 import { downloadFiles } from '~/lib/downloader'
 
 import { formatDate } from '~/lib/react-tweet'
-import { useTranslationStore } from '~/lib/stores/translation'
+import { useTweets } from '~/lib/stores/hooks'
 import { toast } from '~/lib/utils'
 
 type MediaType = 'photo' | 'video' | 'animated_gif'
@@ -123,7 +123,7 @@ export function extractDownloadItemsFromTweets(tweets: EnrichedTweet[]): Downloa
 }
 
 export function DownloadMedia() {
-  const { tweets } = useTranslationStore()
+  const tweets = useTweets()
   const [isDownloading, setIsDownloading] = useState(false)
 
   const handleDownload = useCallback(async () => {

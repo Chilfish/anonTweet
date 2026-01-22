@@ -1,14 +1,13 @@
 import type { GetTweetSchema } from '~/lib/validations/tweet'
 import type { TweetData } from '~/types'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import useSWR from 'swr'
 import { MyTweet } from '~/components/tweet/Tweet'
 import { TweetHeader } from '~/components/tweet/TweetHeader'
 import { fetcher } from '~/lib/fetcher'
 import { TweetNotFound, TweetSkeleton } from '~/lib/react-tweet'
-import { useAppConfigStore } from '~/lib/stores/appConfig'
-import { useTranslationStore } from '~/lib/stores/translation'
+import { useAIConfig, useMainTweet, useTranslationActions, useTweets } from '~/lib/stores/hooks'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 import { extractTweetId } from '~/lib/utils'
 
@@ -31,11 +30,19 @@ export default function TweetPage() {
   const { id } = useParams()
   const tweetId = id ? extractTweetId(id) : null
   const navigate = useNavigate()
-  const { setAllTweets } = useTranslationStore()
+  const { setAllTweets } = useTranslationActions()
+  const storeTweets = useTweets()
+  const storeMainTweet = useMainTweet()
   const [isStoreReady, setIsStoreReady] = useState(false)
-  const appConfig = useAppConfigStore()
-  const { enableAITranslation, geminiApiKey, geminiModel, translationGlossary } = appConfig
-  const { getFormattedEntries } = useTranslationDictionaryStore()
+
+  const {
+    enableAITranslation,
+    geminiApiKey,
+    geminiModel,
+    translationGlossary,
+  } = useAIConfig()
+
+  const getFormattedEntries = useTranslationDictionaryStore(state => state.getFormattedEntries)
 
   if (!tweetId) {
     return (
@@ -89,6 +96,13 @@ export default function TweetPage() {
   // Check for retweet to show skeleton while redirecting
   const isRetweet = tweets?.[0]?.retweetedOrignalId && tweets[0].retweetedOrignalId !== tweets[0].id_str
 
+  // Prefer store data if it matches current tweet (allows for updates like loading comments)
+  const displayTweets = useMemo(() => {
+    return (storeMainTweet?.id_str === tweetId && storeTweets.length > 0)
+      ? storeTweets
+      : tweets
+  }, [storeMainTweet?.id_str, tweetId, storeTweets, tweets])
+
   if (isLoading || isRetweet || !isStoreReady) {
     return (
       <>
@@ -114,8 +128,9 @@ export default function TweetPage() {
     <>
       <TweetHeader />
       <MyTweet
-        tweets={tweets}
+        tweets={displayTweets || []}
         mainTweetId={tweetId}
+        showComments={true}
       />
     </>
   )

@@ -3,11 +3,12 @@ import { LoaderIcon, SaveIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
-import { useTranslationStore } from '~/lib/stores/translation'
+import { useTranslations, useTweets } from '~/lib/stores/hooks'
 import { flatTweets, toast } from '~/lib/utils'
 
 export default function UpdateTranslation() {
-  const { tweets, translations } = useTranslationStore()
+  const tweets = useTweets()
+  const translations = useTranslations()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   async function submitTweet() {

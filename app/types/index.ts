@@ -1,6 +1,6 @@
 import type { LinkPreviewCard } from './card'
 import type { Entity } from './entities'
-import type { QuotedTweet, Tweet } from './tweet'
+import type { Tweet } from './tweet'
 import type { IUser } from '~/lib/rettiwt-api'
 import type { ITweetDetailsResponse } from '~/lib/rettiwt-api/types/raw/tweet/Details'
 
@@ -24,14 +24,9 @@ export type EnrichedTweet = Omit<Tweet, OmitTypes> & {
   quoted_tweet_id?: string
   quotedTweet?: EnrichedTweet
   card?: LinkPreviewCard
-  // conversation_count: number
   retweetedOrignalId?: string
   isInlineMeida?: boolean
-}
-
-export type EnrichedQuotedTweet = Omit<QuotedTweet, 'entities'> & {
-  url: string
-  entities: Entity[]
+  comments?: EnrichedTweet[]
 }
 
 export type TweetData = EnrichedTweet[]

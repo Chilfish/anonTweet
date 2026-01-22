@@ -77,7 +77,7 @@ function UnifiedTweet({ tweet, variant, enableTranslation }: UnifiedTweetProps) 
         tweet={tweet}
         className={cn({ 'pb-1!': isThread })}
         createdAtInline
-        inQuote={isQuoted}
+        avatarSize={isQuoted ? 'small' : 'medium'}
       />
       <div className={bodyContainerClasses}>
         <TweetTextBody

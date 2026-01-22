@@ -63,7 +63,7 @@ export class AuthService {
 
     // If user id was found
     if (searchResults) {
-      return searchResults[0]
+      return searchResults[0] as string
     }
     // If user id was not found
     else {
