@@ -51,15 +51,9 @@ export function DictionaryViewer() {
               <SettingsRow
                 key={entry.id}
                 className="min-h-12 py-2 px-3 gap-2"
+                label={entry.translated}
+                description={entry.original}
               >
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-sm font-medium truncate" title={entry.translated}>
-                    {entry.translated}
-                  </span>
-                  <span className="text-xs text-muted-foreground truncate" title={entry.original}>
-                    {entry.original}
-                  </span>
-                </div>
                 <Button
                   variant="ghost"
                   size="icon"

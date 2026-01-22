@@ -17,7 +17,7 @@
 .grid2Columns {
   grid-template-columns: repeat(2, 1fr);
 }
-.grid3 > a:first-child {
+.grid3 > :first-child {
   grid-row: span 2;
 }
 .grid2x2 {

@@ -1,17 +1,17 @@
-import type { EnrichedTweet, MediaAnimatedGif, MediaVideo } from '~/types'
+import type { EnrichedTweet, MediaAnimatedGif, MediaVideo as TMediaVideo } from '~/types'
 import clsx from 'clsx'
 import { useState } from 'react'
+import { MediaImage, MediaVideo } from '~/components/ui/media'
 import {
   getMediaUrl,
   getMp4Video,
 } from '../utils'
-import { MediaImg } from './media-img'
 import s from './tweet-media-video.module.css'
 import mediaStyles from './tweet-media.module.css'
 
 interface Props {
   tweet: EnrichedTweet
-  media: MediaAnimatedGif | MediaVideo
+  media: MediaAnimatedGif | TMediaVideo
   showCoverOnly?: boolean
 }
 
@@ -61,7 +61,7 @@ export function TweetMediaVideo({ tweet, media, showCoverOnly }: Props) {
   if (showCoverOnly) {
     return (
       <>
-        <MediaImg
+        <MediaImage
           src={getMediaUrl(media, 'large')}
           alt="Video"
           className={mediaStyles.image}
@@ -74,7 +74,7 @@ export function TweetMediaVideo({ tweet, media, showCoverOnly }: Props) {
 
   return (
     <>
-      <video
+      <MediaVideo
         className={mediaStyles.image}
         poster={getMediaUrl(media, 'small')}
         controls={!playButton}
@@ -105,7 +105,7 @@ export function TweetMediaVideo({ tweet, media, showCoverOnly }: Props) {
         }}
       >
         <source src={mp4Video.url} type={mp4Video.content_type} />
-      </video>
+      </MediaVideo>
 
       {playButton && <PlayControlButton />}
 

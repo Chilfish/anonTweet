@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { SettingsGroup, SettingsRow } from '~/components/settings/SettingsUI'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
-import { Label } from '~/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -91,17 +90,12 @@ export function AITranslationSettings() {
       <div className="space-y-2">
         <h4 className="px-1 text-sm font-medium text-muted-foreground">Gemini API 配置</h4>
         <SettingsGroup>
-          <SettingsRow>
-            <div className="flex flex-col gap-1">
-              <Label htmlFor="enable-ai-translation" className="text-sm font-medium">
-                启用 AI 翻译
-              </Label>
-              <span className="text-xs text-muted-foreground">
-                使用 Google Gemini 模型自动翻译推文
-              </span>
-            </div>
+          <SettingsRow
+            label="启用 AI 翻译"
+            description="使用 Google Gemini 模型自动翻译推文"
+            id="enable-ai-translation"
+          >
             <Switch
-              id="enable-ai-translation"
               checked={enableAITranslation}
               onCheckedChange={setEnableAITranslation}
             />
@@ -109,11 +103,9 @@ export function AITranslationSettings() {
 
           {enableAITranslation && (
             <>
-              <SettingsRow>
-                <div className="flex flex-col gap-1">
-                  <Label htmlFor="gemini-api-key" className="font-medium">
-                    API Key
-                  </Label>
+              <SettingsRow
+                label="API Key"
+                description={(
                   <a
                     href="https://aistudio.google.com/api-keys"
                     target="_blank"
@@ -122,22 +114,23 @@ export function AITranslationSettings() {
                   >
                     获取 API Key
                   </a>
-                </div>
+                )}
+                id="gemini-api-key"
+              >
                 <Input
-                  id="gemini-api-key"
                   type="password"
                   autoComplete="off"
                   value={geminiApiKey}
                   onChange={e => setGeminiApiKey(e.target.value)}
                   placeholder="输入 Gemini API Key"
-                  className="text-right h-8 w-1/2 min-w-40"
+                  className="text-right h-8 sm:min-w-64"
                 />
               </SettingsRow>
 
-              <SettingsRow>
-                <Label htmlFor="gemini-model" className="w-24 shrink-0 font-medium">
-                  模型选择
-                </Label>
+              <SettingsRow
+                label="模型选择"
+                id="gemini-model"
+              >
                 <div className="flex-1 flex justify-end">
                   <Select
                     value={geminiModel}
@@ -176,15 +169,10 @@ export function AITranslationSettings() {
               </SettingsRow>
 
               {models.find(m => m.name === geminiModel)?.thinkingType !== 'none' && (
-                <SettingsRow>
-                  <div className="flex flex-col gap-1">
-                    <Label htmlFor="gemini-thinking-level" className="text-sm font-medium">
-                      思考程度
-                    </Label>
-                    <span className="text-xs text-muted-foreground">
-                      控制模型翻译时的思考深度，影响翻译耗时
-                    </span>
-                  </div>
+                <SettingsRow
+                  label="思考程度"
+                  description="控制模型翻译时的思考深度，影响翻译耗时"
+                >
                   <div className="flex-1 flex justify-end">
                     <Select
                       value={geminiThinkingLevel}
@@ -222,11 +210,10 @@ export function AITranslationSettings() {
                 </SettingsRow>
               )}
 
-              <SettingsRow>
-                <div className="flex flex-col gap-1">
-                  <span className="text-sm font-medium">连通性测试</span>
-                  <span className="text-xs text-muted-foreground">验证 API Key 和网络连接</span>
-                </div>
+              <SettingsRow
+                label="连通性测试"
+                description="验证 API Key 和网络连接"
+              >
                 <Button
                   type="button"
                   variant="outline"
@@ -258,18 +245,14 @@ export function AITranslationSettings() {
         <div className="space-y-2">
           <h4 className="px-1 text-sm font-medium text-muted-foreground">翻译术语表</h4>
           <SettingsGroup>
-            <SettingsRow className="border-b-0">
-              <div className="flex flex-col gap-1 w-full">
-                <Label htmlFor="translation-glossary" className="text-sm font-medium">
-                  术语定义与提示词
-                </Label>
-                <span className="text-xs text-muted-foreground">
-                  在此输入给 AI 的额外提示词或术语对照，有助于提高翻译准确性。
-                </span>
-              </div>
+            <SettingsRow
+              label="术语定义与提示词"
+              description="在此输入给 AI 的额外提示词或术语对照，有助于提高翻译准确性。"
+              id="translation-glossary"
+              className="border-b-0"
+            >
             </SettingsRow>
             <Textarea
-              id="translation-glossary"
               value={translationGlossary}
               onChange={e => setTranslationGlossary(e.target.value)}
               placeholder="例如：ひなぴよ -> Hinapiyo..."

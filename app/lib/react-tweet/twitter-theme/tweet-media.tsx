@@ -1,9 +1,8 @@
-import type { TwitterComponents } from './types'
 import type { EnrichedTweet, MediaDetails } from '~/types'
 import clsx from 'clsx'
 import { Fragment } from 'react'
+import { MediaImage } from '~/components/ui/media'
 import { getMediaUrl } from '../utils'
-import { MediaImg } from './media-img'
 import { TweetMediaVideo } from './tweet-media-video'
 import s from './tweet-media.module.css'
 
@@ -28,14 +27,12 @@ function getSkeletonStyle(media: MediaDetails, itemCount: number) {
 
 interface Props {
   tweet: EnrichedTweet
-  components?: TwitterComponents
   quoted?: boolean
   showCoverOnly?: boolean
 }
 
-export function TweetMedia({ tweet, components, quoted, showCoverOnly }: Props) {
+export function TweetMedia({ tweet, quoted, showCoverOnly }: Props) {
   const length = tweet.mediaDetails?.length ?? 0
-  const Img = components?.MediaImg ?? MediaImg
 
   const isInlineMedia = !!tweet.isInlineMeida
 
@@ -54,24 +51,21 @@ export function TweetMedia({ tweet, components, quoted, showCoverOnly }: Props) 
           <Fragment key={media.media_url_https}>
             {media.type === 'photo'
               ? (
-                  <a
+                  <div
                     key={media.media_url_https}
-                    href={tweet.url}
                     className={clsx(s.mediaContainer, s.mediaLink)}
-                    target="_blank"
-                    rel="noopener noreferrer"
                   >
                     <div
                       className={s.skeleton}
                       style={getSkeletonStyle(media, length)}
                     />
-                    <Img
+                    <MediaImage
                       src={getMediaUrl(media, 'medium')}
                       alt={media.ext_alt_text || 'Image'}
                       className={s.image}
                       draggable
                     />
-                  </a>
+                  </div>
                 )
               : (
                   <div
