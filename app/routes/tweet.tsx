@@ -42,6 +42,7 @@ export default function TweetPage() {
     translationGlossary,
   } = useAIConfig()
 
+  const { setCommentIds } = useTranslationActions()
   const getFormattedEntries = useTranslationDictionaryStore(state => state.getFormattedEntries)
 
   if (!tweetId) {
@@ -89,6 +90,7 @@ export default function TweetPage() {
       }
       else {
         setAllTweets(tweets, tweetId)
+        setCommentIds([])
       }
     }
   }, [tweets, tweetId, navigate, setAllTweets])
