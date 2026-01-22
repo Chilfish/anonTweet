@@ -12,7 +12,7 @@ export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
 
   // 初始化逻辑：以原始 Tweet 的结构为基准，回填已有的翻译
   const initializeEditor = useCallback(() => {
-    const existingTranslation = getTranslation(tweetId)
+    const existingTranslation = getTranslation(tweetId) || originalTweet.entities
     const aiTranslation = originalTweet.autoTranslationEntities
 
     // 1. 决定数据源优先级：人工保存 > AI 自动 > 原文

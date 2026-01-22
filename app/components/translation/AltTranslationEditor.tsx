@@ -62,7 +62,7 @@ export const AltTranslationEditor: React.FC<AltTranslationEditorProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        <DialogPanel className="space-y-4 max-h-[70vh] overflow-y-auto px-1">
+        <DialogPanel className="space-y-4">
           {/* 编辑列表组件 */}
           <AltEntityList
             entities={editor.editingEntities}
@@ -76,11 +76,10 @@ export const AltTranslationEditor: React.FC<AltTranslationEditorProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                className="text-muted-foreground hover:text-foreground pl-0"
               />
             )}
             >
-              <BookA className="size-4 mr-2" />
+              <BookA className="size-4" />
               词汇表
             </PopoverTrigger>
             <PopoverContent className="w-80 p-0" align="start" side="top">
