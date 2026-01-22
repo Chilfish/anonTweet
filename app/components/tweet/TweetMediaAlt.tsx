@@ -4,14 +4,14 @@ import { useTweetTranslation } from '~/hooks/use-tweet-translation'
 import { useTranslationSettings } from '~/lib/stores/hooks'
 
 export function TweetMediaAlt({ tweet }: { tweet: EnrichedTweet }) {
-  const { shouldShow, entities } = useTweetTranslation(tweet, 'alt')
+  const { entities } = useTweetTranslation(tweet, 'alt')
   const settings = useTranslationSettings()
   const altEntitiesSize = entities?.filter(e => e.type === 'media_alt')?.length || 0
 
   if (!tweet.mediaDetails?.length)
     return null
 
-  if (!shouldShow || !altEntitiesSize) {
+  if (!altEntitiesSize) {
     return null
   }
 

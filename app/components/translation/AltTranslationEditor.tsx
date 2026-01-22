@@ -87,14 +87,21 @@ export const AltTranslationEditor: React.FC<AltTranslationEditorProps> = ({
             </PopoverContent>
           </Popover>
 
-          <Button
-            className="ml-auto"
-            onClick={editor.saveTranslations}
-            size="sm"
-          >
-            <Save className="size-4 mr-2" />
-            保存
-          </Button>
+          <div className="flex items-center gap-2 ml-auto">
+            <Button
+              variant="destructive-outline"
+              onClick={editor.hideTranslations}
+            >
+              <Save className="size-4" />
+              删除
+            </Button>
+            <Button
+              onClick={editor.saveTranslations}
+            >
+              <Save className="size-4" />
+              保存
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

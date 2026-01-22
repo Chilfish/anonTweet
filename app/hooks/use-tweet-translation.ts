@@ -67,7 +67,7 @@ export function useTweetTranslation(tweet: EnrichedTweet, type: 'body' | 'alt' =
     entities = tweet.entities
   }
 
-  const shouldShow = !!entities
+  const shouldShow = !!entities?.some(e => e.translation)
 
   return { shouldShow, entities }
 }
