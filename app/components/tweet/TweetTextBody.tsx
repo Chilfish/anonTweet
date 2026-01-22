@@ -1,10 +1,11 @@
 import type { EnrichedTweet } from '~/types'
 import { TranslationDisplay } from '~/components/translation/TranslationDisplay'
 import { TweetBody } from '~/lib/react-tweet'
-import { useTranslationStore } from '~/lib/stores/translation'
+import { useGlobalTranslationMode, useTranslations } from '~/lib/stores/hooks'
 
 export function TweetTextBody({ tweet }: { tweet: EnrichedTweet }) {
-  const { translationMode, tweetTranslationModes, translations } = useTranslationStore()
+  const { translationMode, tweetTranslationModes } = useGlobalTranslationMode()
+  const translations = useTranslations()
 
   const mode = tweetTranslationModes[tweet.id_str] || translationMode
   const hasTranslation = translations[tweet.id_str] !== undefined || !!tweet.autoTranslationEntities?.length
@@ -22,3 +23,5 @@ export function TweetTextBody({ tweet }: { tweet: EnrichedTweet }) {
     </>
   )
 }
+
+// export const TweetTextBody = memo(TweetTextBodyComponent)

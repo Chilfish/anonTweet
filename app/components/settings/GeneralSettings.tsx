@@ -9,6 +9,7 @@ import {
 import { Switch } from '~/components/ui/switch'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 
+import { useTranslationActions, useTranslationSettings } from '~/lib/stores/hooks'
 import { SettingsGroup, SettingsRow } from './SettingsUI'
 import { ThemeSelector } from './ThemeSwitcher'
 
@@ -20,7 +21,12 @@ export function GeneralSettings() {
     setMediaProxyUrl,
     screenshotFormat,
     setScreenshotFormat,
+    isInlineMedia,
+    setIsInlineMedia,
   } = useAppConfigStore()
+
+  const { filterUnrelated } = useTranslationSettings()
+  const { updateSettings } = useTranslationActions()
 
   return (
     <div className="space-y-6 p-1">
@@ -48,6 +54,17 @@ export function GeneralSettings() {
                 <SelectItem value="jpeg">JPEG</SelectItem>
               </SelectContent>
             </Select>
+          </SettingsRow>
+
+          <SettingsRow
+            label="默认过滤无关评论"
+            description="过滤与博主无互动的评论"
+            id="filter-unrelated"
+          >
+            <Switch
+              checked={filterUnrelated}
+              onCheckedChange={value => updateSettings({ filterUnrelated: value })}
+            />
           </SettingsRow>
         </SettingsGroup>
       </div>

@@ -208,6 +208,7 @@ export function serializeForAI(entities: Entity[]): TranslationPayload {
   const entityMap = new Map<string, Entity>()
   let maskedText = ''
   let pCounter = 0
+
   for (const entity of entities) {
     if (entity.type === 'text' || entity.type === 'media_alt') {
       maskedText += entity.text
@@ -219,6 +220,7 @@ export function serializeForAI(entities: Entity[]): TranslationPayload {
       entityMap.set(placeholder, entity)
     }
   }
+
   return { maskedText, entityMap }
 }
 
@@ -228,8 +230,23 @@ export function serializeForAI(entities: Entity[]): TranslationPayload {
 export function restoreEntities(
   translatedText: string,
   entityMap: Map<string, Entity>,
+  originalEntities: Entity[], // 新增参数：原始实体数组
 ): Entity[] {
   const result: Entity[] = []
+  // 创建原始实体的索引映射，便于快速查找
+  const originalEntityByIndex = new Map<number, Entity>()
+  const originalMediaAltByIndex = new Map<number, Entity>()
+
+  // 构建索引映射
+  for (const entity of originalEntities) {
+    if (entity.type === 'text') {
+      originalEntityByIndex.set(entity.index, entity)
+    }
+    else if (entity.type === 'media_alt') {
+      originalMediaAltByIndex.set(entity.index, entity)
+    }
+  }
+
   // 正则捕获占位符，保留分隔符
   const parts = translatedText.split(/(<<__[A-Z]+_\d+__>>)/g)
   let newIndex = 0
@@ -238,6 +255,7 @@ export function restoreEntities(
   for (const part of parts) {
     if (!part)
       continue
+
     if (entityMap.has(part)) {
       // === 命中原有实体 (Hashtag, URL, Mention) ===
       // 直接复用原始对象，保留原始 text (如 #原本的Tag) 和 href
@@ -257,23 +275,31 @@ export function restoreEntities(
     }
     else {
       if (lastSeparator) {
+        // 处理 media_alt 类型
+        const mediaIndex = 20000 + (lastSeparator.mediaIndex ?? 0)
+        const originalMediaAlt = originalMediaAltByIndex.get(mediaIndex)
+
         result.push({
           type: 'media_alt',
-          text: '',
+          text: originalMediaAlt?.text ?? '', // 从原始实体中获取 text
           translation: part,
-          index: 20000 + (lastSeparator.mediaIndex ?? 0),
+          index: mediaIndex,
         })
         lastSeparator = null
       }
       else {
+        // 处理 text 类型
+        const originalText = originalEntityByIndex.get(newIndex)
+
         result.push({
           type: 'text',
-          text: '',
+          text: originalText?.text ?? '', // 从原始实体中获取 text
           index: newIndex++,
           translation: part,
         })
       }
     }
   }
+
   return result
 }

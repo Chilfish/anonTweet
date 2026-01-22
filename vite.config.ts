@@ -1,12 +1,13 @@
 import { execSync } from 'node:child_process'
+import fs from 'node:fs'
+import path from 'node:path'
 import { reactRouter } from '@react-router/dev/vite'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
+import babel from 'vite-plugin-babel'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import { env } from './app/lib/env.server'
 
-// TODO: REMOVE IT
-// process.exit(1)
 // 获取 git 信息
 function getGitInfo() {
   try {
@@ -26,12 +27,30 @@ function getGitInfo() {
   }
 }
 
+if (env.ENABLE_LOCAL_CACHE) {
+  const dir = path.join(process.cwd(), 'cache')
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir)
+  }
+}
+
 const gitInfo = getGitInfo()
+
+const ReactCompilerConfig = { /* ... */ }
 
 export default defineConfig(({ isSsrBuild }) => ({
   plugins: [
     tailwindcss(),
     reactRouter(),
+    babel({
+      filter: /\.[jt]sx?$/,
+      babelConfig: {
+        presets: ['@babel/preset-typescript'], // if you use TypeScript
+        plugins: [
+          ['babel-plugin-react-compiler', ReactCompilerConfig],
+        ],
+      },
+    }),
     tsconfigPaths(),
   ],
   ssr: {

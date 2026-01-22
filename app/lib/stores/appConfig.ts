@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
@@ -20,6 +21,9 @@ export interface AppConfigs {
 }
 
 interface AppConfigState extends AppConfigs {
+  _hasHydrated: boolean
+  setHasHydrated: (state: boolean) => void
+
   setTheme: (theme: Theme) => void
   setScreenshotFormat: (format: ScreenshotFormat) => void
   setShowActions: (showActions: boolean) => void
@@ -37,6 +41,9 @@ interface AppConfigState extends AppConfigs {
 export const useAppConfigStore = create<AppConfigState>()(
   persist(
     set => ({
+      _hasHydrated: false,
+      setHasHydrated: state => set({ _hasHydrated: state }),
+
       theme: 'light',
       screenshotFormat: 'jpeg',
       showActions: false,
@@ -64,6 +71,9 @@ export const useAppConfigStore = create<AppConfigState>()(
     {
       name: 'app-config-store',
       version: 2,
+      onRehydrateStorage: (state) => {
+        return () => state?.setHasHydrated(true)
+      },
     },
   ),
 )
@@ -72,12 +82,13 @@ export function useProxyMedia() {
   const enableMediaProxy = useAppConfigStore(s => s.enableMediaProxy)
   const mediaProxyUrl = useAppConfigStore(s => s.mediaProxyUrl)
 
-  return (url: string, force?: boolean) => {
-    if (url?.startsWith(mediaProxyUrl))
+  return useCallback((url: string, force?: boolean) => {
+    if (!url)
+      return ''
+    if (url.startsWith(mediaProxyUrl))
       return url
-
     if (enableMediaProxy || force)
       return `${mediaProxyUrl}${url}`
     return url
-  }
+  }, [enableMediaProxy, mediaProxyUrl])
 }

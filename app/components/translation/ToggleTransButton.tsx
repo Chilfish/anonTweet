@@ -11,7 +11,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
-import { useTranslationStore } from '~/lib/stores/translation'
+import {
+  useGlobalTranslationMode,
+  useTranslationActions,
+  useTranslationUIActions,
+} from '~/lib/stores/hooks'
 import { cn } from '~/lib/utils'
 
 interface ToggleTransButtonProps extends ComponentProps<typeof Button> {
@@ -19,13 +23,9 @@ interface ToggleTransButtonProps extends ComponentProps<typeof Button> {
 }
 
 export function ToggleTransButton({ className, tweetId, ...props }: ToggleTransButtonProps) {
-  const {
-    translationMode,
-    setTranslationMode,
-    setShowTranslationButton,
-    tweetTranslationModes,
-    setTweetTranslationMode,
-  } = useTranslationStore()
+  const { translationMode, tweetTranslationModes } = useGlobalTranslationMode()
+  const { setTranslationMode, setTweetTranslationMode } = useTranslationActions()
+  const { setShowTranslationButton } = useTranslationUIActions()
 
   const modes = [
     {
@@ -67,13 +67,13 @@ export function ToggleTransButton({ className, tweetId, ...props }: ToggleTransB
     <DropdownMenu>
       <DropdownMenuTrigger render={(
         <Button
-          variant="secondary"
+          variant="outline"
           {...props}
-          className={cn('h-8 px-3 text-sm font-medium transition-all duration-200 gap-2', className)}
+          className={cn(className)}
         />
       )}
       >
-        <currentMode.icon className="h-4 w-4" />
+        <currentMode.icon className="sise-4" />
         <span className="hidden sm:inline">
           {currentMode.label}
         </span>
@@ -88,7 +88,7 @@ export function ToggleTransButton({ className, tweetId, ...props }: ToggleTransB
               effectiveMode === mode.value && 'bg-muted font-bold',
             )}
           >
-            <mode.icon className="h-4 w-4" />
+            <mode.icon className="size-4" />
             <span>{mode.label}</span>
           </DropdownMenuItem>
         ))}

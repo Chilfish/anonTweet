@@ -50,7 +50,7 @@ export const DEFAULT_TEMPLATES: SeparatorTemplate[] = [
     id: 'preset-gemini',
     name: 'Gemini 翻译风格',
     html: `<div style="margin-top: 4px; color: #3285FD;">
-<b style="font-weight: bold; font-size: small;">由 Gemini 3 Flash 翻译自日语</b>
+<b style="font-weight: bold; font-size: small;">由 Gemini 3 Flash 翻译</b>
 <hr style="margin: 3px; border-top-width: 2px;">
 </div>`,
   },

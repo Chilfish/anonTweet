@@ -3,6 +3,9 @@ import { eq } from 'drizzle-orm'
 import { getDbClient, isDbAvailable } from '~/lib/database/db.server'
 import { tweet, tweetEntities } from '~/lib/database/schema'
 import { getEnrichedTweet } from '~/lib/react-tweet/utils/get-tweet'
+import { getLocalCache } from '../localCache'
+
+export const getLocalTweet = (tweetId: string) => getLocalCache({ id: tweetId, type: 'tweet', getter: () => getDBTweet(tweetId) })
 
 export async function insertToTweetDB(tweets: EnrichedTweet[]) {
   if (!isDbAvailable()) {

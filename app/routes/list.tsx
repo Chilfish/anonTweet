@@ -3,7 +3,7 @@ import type { Route } from './+types/tweet'
 import type { TweetData } from '~/types'
 import axios from 'axios'
 
-import { Suspense, useState } from 'react'
+import { memo, Suspense, useMemo, useState } from 'react'
 import { Await, useLoaderData, useNavigate } from 'react-router'
 import { BackButton } from '~/components/translation/BackButton'
 import { MyTweet } from '~/components/tweet/Tweet'
@@ -41,6 +41,16 @@ export async function clientLoader({
   }
 }
 
+const MemoizedTweetItem = memo(({ tweet }: { tweet: any }) => {
+  const wrappedTweets = useMemo(() => [tweet], [tweet])
+  return (
+    <MyTweet
+      tweets={wrappedTweets}
+      mainTweetId={tweet.id_str}
+    />
+  )
+})
+
 function TweetContent() {
   const loaderData = useLoaderData<typeof clientLoader>()
 
@@ -52,11 +62,10 @@ function TweetContent() {
         children={resolvedTweet => (
           <div className="flex flex-col gap-3 items-center justify-center w-[96vw]">
             {resolvedTweet.tweets.length
-              ? resolvedTweet.tweets.map(tweets => (
-                  <MyTweet
-                    tweets={[tweets]}
-                    mainTweetId={tweets.id_str}
-                    key={tweets.id_str}
+              ? (resolvedTweet.tweets as any[]).map(tweet => (
+                  <MemoizedTweetItem
+                    tweet={tweet}
+                    key={tweet.id_str}
                   />
                 ))
               : (

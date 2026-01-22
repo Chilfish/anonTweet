@@ -2,11 +2,8 @@ import type { VariantProps } from 'class-variance-authority'
 import type { LucideIcon } from 'lucide-react'
 import { cva } from 'class-variance-authority'
 import React from 'react'
-
 import { Label } from '~/components/ui/label'
 import { cn } from '~/lib/utils'
-
-// --- Settings Group ---
 
 const settingsGroupVariants = cva(
   'w-full overflow-hidden rounded-xl border bg-card text-card-foreground shadow-xs',
@@ -60,8 +57,6 @@ const SettingsGroup = React.forwardRef<HTMLDivElement, SettingsGroupProps>(
   },
 )
 SettingsGroup.displayName = 'SettingsGroup'
-
-// --- Settings Item ---
 
 const settingsItemVariants = cva(
   'relative flex min-h-14 w-full items-center justify-between gap-4 px-4 py-3 transition-colors outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&:not(:last-child)]:border-b',

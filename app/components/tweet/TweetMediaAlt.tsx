@@ -1,22 +1,19 @@
 import type { EnrichedTweet } from '~/types'
 import { AltTranslationEditor } from '~/components/translation/AltTranslationEditor'
 import { useTweetTranslation } from '~/hooks/use-tweet-translation'
-import { useTranslationStore } from '~/lib/stores/translation'
+import { useTranslationSettings } from '~/lib/stores/hooks'
 
 export function TweetMediaAlt({ tweet }: { tweet: EnrichedTweet }) {
-  const { entities } = useTweetTranslation(tweet, 'alt')
-  const { settings } = useTranslationStore()
+  const { shouldShow, entities } = useTweetTranslation(tweet, 'alt')
+  const settings = useTranslationSettings()
+  const altEntitiesSize = entities?.filter(e => e.type === 'media_alt')?.length || 0
 
   if (!tweet.mediaDetails?.length)
     return null
 
-  // Filter media that has alt text
-  const mediaWithAlt = tweet.mediaDetails.filter(
-    m => m.type === 'photo' && m.ext_alt_text,
-  )
-
-  if (mediaWithAlt.length === 0)
+  if (!shouldShow || !altEntitiesSize) {
     return null
+  }
 
   return (
     <div className="mt-3 overflow-hidden rounded-xl border border-border/20 bg-muted/30">

@@ -1,88 +1,20 @@
-import type { Ref } from 'react'
+import type { Ref, RefObject } from 'react'
 import type { AppConfigs } from '~/lib/stores/appConfig'
-import type { EnrichedTweet, TweetData } from '~/types'
-import { useEffect, useMemo, useRef } from 'react'
-import { TranslationEditor } from '~/components/translation/TranslationEditor'
+import type { TweetData } from '~/types'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useElementSize } from '~/hooks/use-element-size'
+import { TweetContainer } from '~/lib/react-tweet'
+import { organizeTweets } from '~/lib/react-tweet/utils/organizeTweets'
 import {
-  TweetContainer,
-  TweetHeader,
-  TweetMedia,
-} from '~/lib/react-tweet'
-import { useAppConfigStore } from '~/lib/stores/appConfig'
-import { useTranslationStore } from '~/lib/stores/translation'
+  useIsCapturingSelected,
+  useTranslationSettings,
+  useTranslationUIActions,
+} from '~/lib/stores/hooks'
 import { cn } from '~/lib/utils'
-import { TweetLinkCard } from './TweetCard'
-import { TweetMediaAlt } from './TweetMediaAlt'
-import { TweetTextBody } from './TweetTextBody'
-
-type TweetVariant = 'thread' | 'quoted' | 'main' | 'main-in-thread'
-
-interface UnifiedTweetProps {
-  tweet: EnrichedTweet
-  variant: TweetVariant
-  isParentTweet: boolean
-}
-
-function UnifiedTweet({ tweet, variant, isParentTweet }: UnifiedTweetProps) {
-  const { screenshoting } = useTranslationStore()
-  const { isInlineMedia } = useAppConfigStore()
-  const isQuoted = variant === 'quoted'
-  const isThread = variant === 'thread'
-  const isMainInThread = variant === 'main-in-thread'
-
-  const containerClasses = cn({
-    'p-3 border-2 rounded-2xl mt-2!': isQuoted,
-    'relative': isThread,
-    'pb-3!': isParentTweet,
-  })
-
-  const bodyContainerClasses = cn({
-    'pl-12!': isThread || isMainInThread,
-  })
-
-  const quotedTweet = tweet.quotedTweet
-
-  return (
-    <div className={cn(containerClasses, 'relative')}>
-      <TweetHeader
-        tweet={tweet}
-        className={cn({ 'pb-1!': isThread })}
-        createdAtInline
-        inQuote={isQuoted}
-      />
-      <TranslationEditor
-        originalTweet={tweet}
-        className="absolute top-2 right-1"
-      />
-      <div className={bodyContainerClasses}>
-        <TweetTextBody tweet={tweet} />
-
-        {tweet.mediaDetails?.length ? (
-          <TweetMedia
-            tweet={{
-              ...tweet,
-              isInlineMeida: isInlineMedia || tweet.isInlineMeida,
-            }}
-            showCoverOnly={screenshoting}
-          />
-        ) : null}
-
-        <TweetMediaAlt tweet={tweet} />
-
-        {tweet.card && <TweetLinkCard tweet={tweet} />}
-
-        {quotedTweet && (
-          <UnifiedTweet
-            isParentTweet={false}
-            tweet={quotedTweet}
-            variant="quoted"
-          />
-        )}
-      </div>
-    </div>
-  )
-}
+import { CommentBranch } from './CommentBranch'
+import { SelectableTweetWrapper } from './SelectableTweetWrapper'
+import { ThreadLine } from './ThreadLine'
+import { TweetNode } from './TweetNode'
 
 interface MyTweetProps {
   tweets: TweetData
@@ -90,35 +22,67 @@ interface MyTweetProps {
   containerClassName?: string
   settings?: AppConfigs
   ref?: Ref<HTMLDivElement>
+  showComments?: boolean
+  filterUnrelated?: boolean
+  excludeUsers?: string[]
 }
 
-export function MyTweet({ tweets, mainTweetId, containerClassName }: MyTweetProps) {
-  const containerRef = useRef<HTMLDivElement | null>(null)
-  const { setTweetElRef } = useTranslationStore()
+// Tweet.tsx 中的 MainThreadLine 组件
+function MainThreadLine({ mainTweetRef, visible }: {
+  mainTweetRef: RefObject<HTMLDivElement | null>
+  visible: boolean
+}) {
+  const [isClient, setIsClient] = useState(false)
+  const { height } = useElementSize(mainTweetRef)
 
   useEffect(() => {
-    if (containerRef.current) {
-      setTweetElRef(containerRef.current)
-    }
-  }, [setTweetElRef])
+    setIsClient(true)
+  }, [])
 
-  const { mainTweet, parentTweets } = useMemo(() => {
-    const main = tweets.find(tweet => tweet.id_str === mainTweetId)
-    if (!main) {
-      return { mainTweet: null, parentTweets: [] }
-    }
-    const parents = tweets.filter(tweet => tweet.id_str !== mainTweetId)
-    return { mainTweet: main, parentTweets: parents }
-  }, [tweets, mainTweetId])
-
-  const hasThread = parentTweets.length > 0
-  const mainTweetRef = useRef<HTMLDivElement | null>(null)
-
-  const { height: mainTweetHeight } = useElementSize(mainTweetRef)
-
-  if (!mainTweet) {
+  // 只在客户端且高度计算完成后才显示
+  if (!isClient || height === 0) {
     return null
   }
+
+  return (
+    <ThreadLine
+      visible={visible}
+      bottomOffset={height}
+    />
+  )
+}
+
+export function MyTweet({
+  tweets,
+  mainTweetId,
+  containerClassName,
+  showComments,
+  filterUnrelated: propFilterUnrelated,
+  excludeUsers,
+}: MyTweetProps) {
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const { setTweetElRef } = useTranslationUIActions()
+  const isCapturingSelected = useIsCapturingSelected()
+  const { filterUnrelated: storeFilterUnrelated } = useTranslationSettings()
+
+  const filterUnrelated = propFilterUnrelated ?? storeFilterUnrelated
+
+  useEffect(() => {
+    if (containerRef.current)
+      setTweetElRef(containerRef.current)
+  }, [setTweetElRef])
+
+  const { mainTweet, ancestors, commentThreads } = useMemo(() => {
+    return organizeTweets(tweets, mainTweetId, { showComments, filterUnrelated, excludeUsers })
+  }, [tweets, mainTweetId, showComments, filterUnrelated, excludeUsers])
+
+  const mainTweetRef = useRef<HTMLDivElement>(null)
+
+  if (!mainTweet)
+    return null
+
+  const hasThread = ancestors.length > 0
+  const hasComments = !!(showComments && commentThreads.length)
 
   return (
     <TweetContainer
@@ -126,33 +90,59 @@ export function MyTweet({ tweets, mainTweetId, containerClassName }: MyTweetProp
       id={mainTweet.id_str}
       className={cn('tweet-loaded', containerClassName)}
     >
-      {hasThread && (
-        <>
-          {parentTweets.map(parentTweet => (
-            <UnifiedTweet
-              key={parentTweet.id_str}
-              tweet={parentTweet}
-              isParentTweet={true}
-              variant="thread"
+      <div className="relative">
+        {/* 1. 祖先节点 (Context) */}
+        {hasThread && (
+          <>
+            {ancestors.map((parentTweet) => {
+              return (
+                <SelectableTweetWrapper
+                  key={parentTweet.id_str}
+                  tweetId={parentTweet.id_str}
+                >
+                  <TweetNode
+                    tweet={parentTweet}
+                    variant="thread"
+                    hasParent={true}
+                  />
+                </SelectableTweetWrapper>
+              )
+            })}
+
+            {/* 祖先节点到底部的连线 (只在非截图或全部显示时出现) */}
+            <MainThreadLine
+              mainTweetRef={mainTweetRef}
+              visible={!isCapturingSelected}
             />
+          </>
+        )}
+
+        {/* 2. 主推文 (Main Focus) */}
+        <SelectableTweetWrapper
+          tweetId={mainTweet.id_str}
+          className={cn(hasComments && 'pb-4 border-b border-[#cfd9de] dark:border-[#333639]')}
+        >
+          <article className="relative">
+            <TweetNode
+              ref={mainTweetRef}
+              tweet={mainTweet}
+              variant={hasThread ? 'main-in-thread' : 'main'}
+              hasParent={false}
+            />
+          </article>
+        </SelectableTweetWrapper>
+      </div>
+
+      {/* 3. 评论区 (Replies) */}
+      {hasComments && (
+        <section>
+          {commentThreads.map(thread => (
+            <CommentBranch key={thread.id_str} tweet={thread} />
           ))}
-
-          <div
-            style={{
-              height: mainTweetHeight > 0 ? `calc(100% - ${mainTweetHeight}px)` : '100%',
-            }}
-            className="absolute z-0 left-[1.1rem] sm:left-[1.3rem] top-4 bottom-0 w-[2px] bg-[#cfd9de] dark:bg-[#333639]"
-          />
-        </>
+        </section>
       )}
-
-      <article ref={mainTweetRef}>
-        <UnifiedTweet
-          isParentTweet={false}
-          tweet={mainTweet}
-          variant={hasThread ? 'main-in-thread' : 'main'}
-        />
-      </article>
     </TweetContainer>
   )
 }
+
+MyTweet.displayName = 'MyTweet'

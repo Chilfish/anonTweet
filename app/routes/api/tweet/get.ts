@@ -1,11 +1,11 @@
 import type { Route } from './+types/get'
-import type { Entity, TweetData } from '~/types'
+import type { TweetData } from '~/types'
 import { data } from 'react-router'
 import z from 'zod'
 import { autoTranslateTweet } from '~/lib/AITranslation'
 import { TwitterError } from '~/lib/rettiwt-api'
 import { getTweets } from '~/lib/service/getTweet'
-import { getDBTweet, insertToTweetDB } from '~/lib/service/getTweet.server'
+import { getLocalTweet, insertToTweetDB } from '~/lib/service/getTweet.server'
 import { extractTweetId } from '~/lib/utils'
 import { getTweetSchema } from '~/lib/validations/tweet'
 
@@ -46,7 +46,7 @@ export async function action({ request }: Route.ActionArgs) {
 
   let tweets: TweetData = []
   try {
-    tweets = await getTweets(tweetId, getDBTweet)
+    tweets = await getTweets(tweetId, getLocalTweet)
   }
   catch (error: any) {
     if (error instanceof TwitterError) {
@@ -58,9 +58,6 @@ export async function action({ request }: Route.ActionArgs) {
     return []
   }
 
-  // 并发处理所有推文的翻译（适用于 Thread/Conversation）
-  // 使用 Promise.allSettled 或 Promise.all 都可以，这里直接用 Promise.all 等待完成
-  // map 允许并行启动所有请求
   await Promise.all(
     tweets.map(async (tweet) => {
       const isZhTweet = tweet.lang === 'zh'
@@ -75,23 +72,29 @@ export async function action({ request }: Route.ActionArgs) {
 
       try {
         const [mainTweet, quotedTweet] = await Promise.all([
-          autoTranslateTweet({
-            tweet,
-            apiKey,
-            model,
-            thinkingLevel,
-            translationGlossary,
-          }),
-          tweet.quotedTweet ? autoTranslateTweet({
-            tweet: tweet.quotedTweet,
-            apiKey,
-            model,
-            thinkingLevel,
-            translationGlossary,
-          }) : [] as Entity[],
+          !tweet.autoTranslationEntities?.length
+            ? autoTranslateTweet({
+                tweet,
+                apiKey,
+                model,
+                thinkingLevel,
+                translationGlossary,
+              })
+            : [],
+          tweet.quotedTweet && !tweet.quotedTweet.autoTranslationEntities?.length
+            ? autoTranslateTweet({
+                tweet: tweet.quotedTweet,
+                apiKey,
+                model,
+                thinkingLevel,
+                translationGlossary,
+              })
+            : [],
         ])
         tweet.autoTranslationEntities = mainTweet
-        tweet.quotedTweet && (tweet.quotedTweet.autoTranslationEntities = quotedTweet)
+        if (tweet.quotedTweet) {
+          tweet.quotedTweet.autoTranslationEntities = quotedTweet
+        }
 
         await insertToTweetDB([tweet])
       }
