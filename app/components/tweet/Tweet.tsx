@@ -7,7 +7,6 @@ import { TweetContainer } from '~/lib/react-tweet'
 import { organizeTweets } from '~/lib/react-tweet/utils/organizeTweets'
 import {
   useIsCapturingSelected,
-  useTranslationActions,
   useTranslationSettings,
   useTranslationUIActions,
 } from '~/lib/stores/hooks'
@@ -63,7 +62,6 @@ export function MyTweet({
 }: MyTweetProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const { setTweetElRef } = useTranslationUIActions()
-  const { setCommentIds } = useTranslationActions()
   const isCapturingSelected = useIsCapturingSelected()
   const { filterUnrelated: storeFilterUnrelated } = useTranslationSettings()
 
@@ -77,10 +75,6 @@ export function MyTweet({
   const { mainTweet, ancestors, commentThreads } = useMemo(() => {
     return organizeTweets(tweets, mainTweetId, { showComments, filterUnrelated, excludeUsers })
   }, [tweets, mainTweetId, showComments, filterUnrelated, excludeUsers])
-
-  useEffect(() => {
-    setCommentIds(commentThreads.map(thread => thread.id_str))
-  }, [commentThreads.length, setCommentIds])
 
   const mainTweetRef = useRef<HTMLDivElement>(null)
 
