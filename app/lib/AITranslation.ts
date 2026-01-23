@@ -186,7 +186,7 @@ ${maskedText}
   }
   catch (error) {
     console.error('AI Translation Failed:', error)
-    return null
+    throw error
   }
 }
 

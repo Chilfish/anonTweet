@@ -12,7 +12,7 @@ export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
 
   // 初始化逻辑：以原始 Tweet 的结构为基准，回填已有的翻译
   const initializeEditor = useCallback(() => {
-    const existingTranslation = getTranslation(tweetId)
+    const existingTranslation = getTranslation(tweetId) || originalTweet.autoTranslationEntities || originalTweet.entities
     const aiTranslation = originalTweet.autoTranslationEntities
 
     // 1. 决定数据源优先级：人工保存 > AI 自动 > 原文
@@ -48,6 +48,7 @@ export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
 
   // 保存
   const saveTranslations = useCallback(() => {
+    // console.log(editingEntities)
     setTranslation(tweetId, editingEntities)
     setTranslationVisibility(tweetId, { alt: true })
     setIsOpen(false)
@@ -55,9 +56,16 @@ export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
 
   // 隐藏/删除显示
   const hideTranslations = useCallback(() => {
-    setTranslationVisibility(tweetId, { alt: false })
+    editingEntities.forEach((entity) => {
+      if (entity.type === 'media_alt') {
+        entity.translation = ''
+      }
+    })
+
+    setTranslation(tweetId, editingEntities)
+    setTranslationVisibility(tweetId, { alt: true })
     setIsOpen(false)
-  }, [tweetId, setTranslationVisibility])
+  }, [tweetId, editingEntities, setTranslation, setTranslationVisibility])
 
   // 计算是否有可编辑的项
   const hasEditableAlts = editingEntities.some(e => e.type === 'media_alt')

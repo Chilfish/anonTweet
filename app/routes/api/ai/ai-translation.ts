@@ -50,15 +50,6 @@ export async function action({ request }: Route.ActionArgs) {
       translationGlossary,
     })
 
-    if (!translation.length) {
-      return data({
-        success: false,
-        error: 'Failed to translate tweet',
-        status: 500,
-        message: `Failed to translate tweet`,
-      })
-    }
-
     return data({
       success: true,
       data: {
@@ -73,7 +64,7 @@ export async function action({ request }: Route.ActionArgs) {
       success: false,
       error: 'Failed to generate text',
       status: 500,
-      message: `Failed to generate text`,
+      message: `翻译推文失败`,
       cause: error.message,
     })
   }

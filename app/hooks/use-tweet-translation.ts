@@ -37,7 +37,7 @@ export function useTweetTranslation(tweet: EnrichedTweet, type: 'body' | 'alt' =
   }
 
   // 3. 确定显示内容：人工记录 > AI 翻译 > 传入数据兜底
-  let entities: Entity[] | null = null
+  let entities: Entity[] = tweet.entities
 
   // 检查 Store 中的人工翻译记录
   const manualTranslation = translations[tweetId]
@@ -67,12 +67,7 @@ export function useTweetTranslation(tweet: EnrichedTweet, type: 'body' | 'alt' =
     entities = tweet.entities
   }
 
-  // Legacy fallback: 如果被显式设为 null
-  if (manualTranslation === null) {
-    return { shouldShow: false, entities: null }
-  }
-
-  const shouldShow = !!entities
+  const shouldShow = !!entities?.some(e => e.translation)
 
   return { shouldShow, entities }
 }
