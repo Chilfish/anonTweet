@@ -29,8 +29,6 @@ export function TweetMediaVideo({ tweet, media, showCoverOnly }: Props) {
     if (!video)
       return
 
-    video.load()
-
     await video.play()
     video.focus()
     setShowPlayButton(false)

@@ -80,7 +80,6 @@ export interface MediaImageProps extends React.ImgHTMLAttributes<HTMLImageElemen
 
 const MediaImage = forwardRef<HTMLImageElement, MediaImageProps>(
   ({ className, containerClassName, loadingFallback, errorFallback, onLoad, onError, ...props }, ref) => {
-    // 使用 useSyncExternalStore 确保 SSR 一致性
     const [status, setStatus] = useState<MediaStatus>('loading')
     const imgRef = useRef<HTMLImageElement>(null)
 
@@ -94,7 +93,6 @@ const MediaImage = forwardRef<HTMLImageElement, MediaImageProps>(
       onError?.(e)
     }, [onError])
 
-    // 合并 refs（React 19 风格）
     const mergedRef = useCallback((node: HTMLImageElement | null) => {
       imgRef.current = node
       if (typeof ref === 'function') {
@@ -105,7 +103,6 @@ const MediaImage = forwardRef<HTMLImageElement, MediaImageProps>(
       }
     }, [ref])
 
-    // 仅在客户端检查缓存图片（使用 useEffect 而非 useLayoutEffect）
     useEffect(() => {
       if (imgRef.current?.complete && imgRef.current.naturalWidth > 0) {
         setStatus('success')
@@ -117,7 +114,12 @@ const MediaImage = forwardRef<HTMLImageElement, MediaImageProps>(
     const isSuccess = status === 'success'
 
     return (
-      <div className={cn(mediaContainerVariants({ isLoaded: isSuccess }), containerClassName)}>
+      <div className={cn(
+        mediaContainerVariants({ isLoaded: isSuccess }),
+        containerClassName,
+        'w-full h-full',
+      )}
+      >
         <img
           ref={mergedRef}
           onLoad={handleLoad}

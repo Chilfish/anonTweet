@@ -1,7 +1,7 @@
 import type { EnrichedTweet, MediaDetails } from '~/types'
 import clsx from 'clsx'
 import { Fragment } from 'react'
-import { MediaImage } from '~/components/ui/media'
+import { Skeleton } from '~/components/ui/skeleton'
 import { getMediaUrl } from '../utils'
 import { TweetMediaVideo } from './tweet-media-video'
 import s from './tweet-media.module.css'
@@ -55,11 +55,11 @@ export function TweetMedia({ tweet, quoted, showCoverOnly }: Props) {
                     key={media.media_url_https}
                     className={clsx(s.mediaContainer, s.mediaLink)}
                   >
-                    <div
+                    <Skeleton
                       className={s.skeleton}
                       style={getSkeletonStyle(media, length)}
                     />
-                    <MediaImage
+                    <img
                       src={getMediaUrl(media, 'medium')}
                       alt={media.ext_alt_text || 'Image'}
                       className={s.image}
