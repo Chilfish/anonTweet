@@ -1,6 +1,6 @@
 import type { VariantProps } from 'class-variance-authority'
 import { cva } from 'class-variance-authority'
-import * as React from 'react'
+import { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
 import { Skeleton } from '~/components/ui/skeleton'
 import { cn } from '~/lib/utils'
 
@@ -16,9 +16,8 @@ const mediaLoadingVariants = cva(
 
 interface MediaLoadingProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof mediaLoadingVariants> {}
 
-const MediaLoading = React.forwardRef<HTMLDivElement, MediaLoadingProps>(
+const MediaLoading = forwardRef<HTMLDivElement, MediaLoadingProps>(
   ({ className, children, ...props }, ref) => {
-    // 如果有 children，则渲染自定义内容容器，否则渲染 Skeleton
     if (children) {
       return (
         <div ref={ref} className={cn(mediaLoadingVariants({ className }))} {...props}>
@@ -46,7 +45,7 @@ const mediaFallbackVariants = cva(
 
 interface MediaFallbackProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof mediaFallbackVariants> {}
 
-const MediaFallback = React.forwardRef<HTMLDivElement, MediaFallbackProps>(
+const MediaFallback = forwardRef<HTMLDivElement, MediaFallbackProps>(
   ({ className, ...props }, ref) => {
     return (
       <div
@@ -61,7 +60,7 @@ MediaFallback.displayName = 'MediaFallback'
 
 // --- 3. Media Image (Smart Particle) ---
 
-const mediaContainerVariants = cva('overflow-hidden', {
+const mediaContainerVariants = cva('relative overflow-hidden', {
   variants: {
     isLoaded: {
       true: 'bg-transparent',
@@ -74,83 +73,68 @@ const mediaContainerVariants = cva('overflow-hidden', {
 })
 
 export interface MediaImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
-  /**
-   * Custom element to show while loading.
-   * Defaults to <MediaLoading />
-   */
   loadingFallback?: React.ReactNode
-  /**
-   * Custom element to show on error.
-   * Defaults to <MediaFallback />
-   */
   errorFallback?: React.ReactNode
-  /**
-   * Helper to force wrapping div classes
-   */
   containerClassName?: string
 }
 
-const MediaImage = React.forwardRef<HTMLImageElement, MediaImageProps>(
+const MediaImage = forwardRef<HTMLImageElement, MediaImageProps>(
   ({ className, containerClassName, loadingFallback, errorFallback, onLoad, onError, ...props }, ref) => {
-    const [status, setStatus] = React.useState<MediaStatus>('loading')
-    const internalRef = React.useRef<HTMLImageElement>(null)
+    // 使用 useSyncExternalStore 确保 SSR 一致性
+    const [status, setStatus] = useState<MediaStatus>('loading')
+    const imgRef = useRef<HTMLImageElement>(null)
 
-    // Check for cached images immediately to avoid hydration mismatch or flash
-    React.useLayoutEffect(() => {
-      if (internalRef.current?.complete) {
-        setStatus('success')
-      }
-    }, [])
-
-    const handleLoad = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const handleLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement, Event>) => {
       setStatus('success')
       onLoad?.(e)
-    }
+    }, [onLoad])
 
-    const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const handleError = useCallback((e: React.SyntheticEvent<HTMLImageElement, Event>) => {
       setStatus('error')
       onError?.(e)
-    }
+    }, [onError])
 
-    // Merge refs logic
-    const mergedRef = (node: HTMLImageElement) => {
-      internalRef.current = node
+    // 合并 refs（React 19 风格）
+    const mergedRef = useCallback((node: HTMLImageElement | null) => {
+      imgRef.current = node
       if (typeof ref === 'function') {
         ref(node)
       }
       else if (ref) {
         ref.current = node
       }
-    }
+    }, [ref])
 
-    // Render Logic
-    const showLoading = status === 'loading'
-    const showError = status === 'error'
-    const showImage = status === 'success' || status === 'loading' // Image stays in DOM to trigger onLoad
+    // 仅在客户端检查缓存图片（使用 useEffect 而非 useLayoutEffect）
+    useEffect(() => {
+      if (imgRef.current?.complete && imgRef.current.naturalWidth > 0) {
+        setStatus('success')
+      }
+    }, [])
+
+    const isLoading = status === 'loading'
+    const isError = status === 'error'
+    const isSuccess = status === 'success'
 
     return (
-      <>
-        {showImage && (
-          <img
-            ref={mergedRef}
-            onLoad={handleLoad}
-            onError={handleError}
-            data-status={status}
-            loading="lazy"
-            className={cn(
-              mediaContainerVariants({ isLoaded: status === 'success' }),
-              containerClassName,
-              'size-full object-cover transition-opacity duration-300',
-              status === 'loading' ? 'opacity-0' : 'opacity-100',
-              className,
-            )}
-            {...props}
-          />
-        )}
+      <div className={cn(mediaContainerVariants({ isLoaded: isSuccess }), containerClassName)}>
+        <img
+          ref={mergedRef}
+          onLoad={handleLoad}
+          onError={handleError}
+          data-status={status}
+          loading="lazy"
+          className={cn(
+            'size-full object-cover transition-opacity duration-300',
+            isSuccess ? 'opacity-100' : 'opacity-0',
+            className,
+          )}
+          {...props}
+        />
 
-        {showLoading && (loadingFallback || <MediaLoading />)}
-        {showError && (errorFallback || <MediaFallback />)}
-      </>
+        {isLoading && (loadingFallback ?? <MediaLoading />)}
+        {isError && (errorFallback ?? <MediaFallback />)}
+      </div>
     )
   },
 )
@@ -164,9 +148,19 @@ export interface MediaVideoProps extends React.VideoHTMLAttributes<HTMLVideoElem
   containerClassName?: string
 }
 
-const MediaVideo = React.forwardRef<HTMLVideoElement, MediaVideoProps>(
-  ({ className, containerClassName, loadingFallback, errorFallback, onLoadedData, onError, ...props }, ref) => {
-    const [status, setStatus] = React.useState<MediaStatus>('loading')
+const MediaVideo = forwardRef<HTMLVideoElement, MediaVideoProps>(
+  ({
+    className,
+    containerClassName,
+    loadingFallback,
+    errorFallback,
+    onLoadedData,
+    onError,
+    preload = 'metadata',
+    ...props
+  }, ref) => {
+    const [status, setStatus] = useState<MediaStatus>('loading')
+    const videoRef = useRef<HTMLVideoElement>(null)
 
     const handleLoadedData = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
       setStatus('success')
@@ -178,34 +172,53 @@ const MediaVideo = React.forwardRef<HTMLVideoElement, MediaVideoProps>(
       onError?.(e)
     }
 
-    const showLoading = status === 'loading'
-    const showError = status === 'error'
+    const mergedRef = (node: HTMLVideoElement | null) => {
+      videoRef.current = node
+      if (typeof ref === 'function') {
+        ref(node)
+      }
+      else if (ref) {
+        ref.current = node
+      }
+    }
 
-    // Video is tricky; usually we want it mounted to start buffering
-    const showVideo = status !== 'error'
+    // 客户端检查视频是否已加载
+    useEffect(() => {
+      const video = videoRef.current
+      if (video && video.readyState >= 2) { // HAVE_CURRENT_DATA
+        setStatus('success')
+      }
+    }, [])
+
+    const isLoading = status === 'loading' && preload !== 'none'
+    const isError = status === 'error'
+    const isSuccess = status === 'success'
 
     return (
       <div
-        className={cn(mediaContainerVariants({ isLoaded: status === 'success' }), containerClassName)}
+        className={cn(
+          mediaContainerVariants({ isLoaded: isSuccess }),
+          'w-full h-full',
+          containerClassName,
+        )}
         data-status={status}
       >
-        {showVideo && (
-          <video
-            ref={ref}
-            onLoadedData={handleLoadedData}
-            onError={handleError}
-            data-status={status}
-            className={cn(
-              'size-full object-cover transition-opacity duration-300',
-              status === 'loading' ? 'opacity-0' : 'opacity-100',
-              className,
-            )}
-            {...props}
-          />
-        )}
+        <video
+          ref={mergedRef}
+          onLoadedData={handleLoadedData}
+          onError={handleError}
+          data-status={status}
+          preload={preload}
+          className={cn(
+            'size-full object-cover transition-opacity duration-300',
+            isSuccess ? 'opacity-100' : 'opacity-0',
+            className,
+          )}
+          {...props}
+        />
 
-        {showLoading && (loadingFallback || <MediaLoading />)}
-        {showError && (errorFallback || <MediaFallback />)}
+        {isLoading && (loadingFallback ?? <MediaLoading />)}
+        {isError && (errorFallback ?? <MediaFallback />)}
       </div>
     )
   },

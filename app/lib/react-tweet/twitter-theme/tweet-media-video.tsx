@@ -1,6 +1,5 @@
 import type { EnrichedTweet, MediaAnimatedGif, MediaVideo as TMediaVideo } from '~/types'
-import clsx from 'clsx'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { MediaImage, MediaVideo } from '~/components/ui/media'
 import {
   getMediaUrl,
@@ -16,47 +15,26 @@ interface Props {
 }
 
 export function TweetMediaVideo({ tweet, media, showCoverOnly }: Props) {
-  const [playButton, setPlayButton] = useState(true)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [ended, setEnded] = useState(false)
+  'use no memo'
+
+  const [showPlayButton, setShowPlayButton] = useState(true)
+  const videoRef = useRef<HTMLVideoElement>(null)
   const mp4Video = getMp4Video(media)
-  let timeout = 0
 
-  const PlayControlButton = () => (
-    <button
-      type="button"
-      className={s.videoButton}
-      aria-label="View video on X"
-      onClick={(e) => {
-        const video = e.currentTarget.previousSibling as HTMLMediaElement
+  const handlePlayClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
 
-        e.preventDefault()
-        setPlayButton(false)
-        video.load()
-        video
-          .play()
-          .then(() => {
-            setIsPlaying(true)
-            video.focus()
-          })
-          .catch((error) => {
-            console.error('Error playing video:', error)
-            setPlayButton(true)
-            setIsPlaying(false)
-          })
-      }}
-    >
-      <svg
-        viewBox="0 0 24 24"
-        className={s.videoButtonIcon}
-        aria-hidden="true"
-      >
-        <g>
-          <path d="M21 12L4 2v20l17-10z"></path>
-        </g>
-      </svg>
-    </button>
-  )
+    const video = videoRef.current
+    if (!video)
+      return
+
+    video.load()
+
+    await video.play()
+    video.focus()
+    setShowPlayButton(false)
+  }
 
   if (showCoverOnly) {
     return (
@@ -67,7 +45,21 @@ export function TweetMediaVideo({ tweet, media, showCoverOnly }: Props) {
           className={mediaStyles.image}
           draggable
         />
-        <PlayControlButton />
+        <button
+          type="button"
+          className={s.videoButton}
+          aria-label="View video on X"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            className={s.videoButtonIcon}
+            aria-hidden="true"
+          >
+            <g>
+              <path d="M21 12L4 2v20l17-10z"></path>
+            </g>
+          </svg>
+        </button>
       </>
     )
   }
@@ -75,49 +67,34 @@ export function TweetMediaVideo({ tweet, media, showCoverOnly }: Props) {
   return (
     <>
       <MediaVideo
+        ref={videoRef}
         className={mediaStyles.image}
         poster={getMediaUrl(media, 'small')}
-        controls={!playButton}
+        src={mp4Video.url}
+        controls={!showPlayButton}
         playsInline
-        preload="none"
-        tabIndex={playButton ? -1 : 0}
-        onPlay={() => {
-          if (timeout)
-            window.clearTimeout(timeout)
-          if (!isPlaying)
-            setIsPlaying(true)
-          if (ended)
-            setEnded(false)
-        }}
-        onPause={() => {
-          // When the video is seeked (moved to a different timestamp), it will pause for a moment
-          // before resuming. We don't want to show the message in that case so we wait a bit.
-          if (timeout)
-            window.clearTimeout(timeout)
-          timeout = window.setTimeout(() => {
-            if (isPlaying)
-              setIsPlaying(false)
-            timeout = 0
-          }, 100)
-        }}
-        onEnded={() => {
-          setEnded(true)
-        }}
+        tabIndex={showPlayButton ? -1 : 0}
       >
         <source src={mp4Video.url} type={mp4Video.content_type} />
       </MediaVideo>
 
-      {playButton && <PlayControlButton />}
-
-      {ended && (
-        <a
-          href={tweet.url}
-          className={clsx(s.anchor, s.viewReplies)}
-          target="_blank"
-          rel="noopener noreferrer"
+      {showPlayButton && (
+        <button
+          type="button"
+          className={s.videoButton}
+          aria-label="View video on X"
+          onClick={handlePlayClick}
         >
-          View replies
-        </a>
+          <svg
+            viewBox="0 0 24 24"
+            className={s.videoButtonIcon}
+            aria-hidden="true"
+          >
+            <g>
+              <path d="M21 12L4 2v20l17-10z"></path>
+            </g>
+          </svg>
+        </button>
       )}
     </>
   )
