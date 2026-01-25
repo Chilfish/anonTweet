@@ -30,6 +30,8 @@ export class User implements IUser {
   public profileImage: string
   public statusesCount: number
   public userName: string
+  public birthdayString: string | undefined
+  public url: string
 
   /**
    * @param user - The raw user details.
@@ -51,7 +53,16 @@ export class User implements IUser {
     this.location = user.location?.location ?? user.legacy.location ?? undefined
     this.pinnedTweet = user.legacy.pinned_tweet_ids_str[0]
     this.profileBanner = user.legacy.profile_banner_url
-    this.profileImage = user.avatar?.image_url ?? user.legacy.profile_image_url_https ?? ''
+    this.profileImage = (user.avatar?.image_url ?? user.legacy.profile_image_url_https ?? '').replace('_normal', '_400x400')
+    this.url = user.legacy.entities.url.urls[0]?.expanded_url ?? ''
+
+    const birthday = user.legacy_extended_profile.birthdate
+    if (birthday) {
+      this.birthdayString = `${birthday.month}/${birthday.day}`
+    }
+    else {
+      this.birthdayString = undefined
+    }
   }
 
   /** The raw user details. */
@@ -185,6 +196,8 @@ export class User implements IUser {
       profileImage: this.profileImage,
       statusesCount: this.statusesCount,
       userName: this.userName,
+      birthdayString: this.birthdayString,
+      url: this.url,
     }
   }
 }

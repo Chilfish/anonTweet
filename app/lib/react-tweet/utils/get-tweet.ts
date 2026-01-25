@@ -4,6 +4,7 @@ import type { ITweetRepliesResponse } from '~/lib/rettiwt-api/types/raw/tweet/Re
 import type { IUserDetailsResponse } from '~/lib/rettiwt-api/types/raw/user/Details'
 import type { IUserTweetsResponse } from '~/lib/rettiwt-api/types/raw/user/Tweets'
 import type { EnrichedTweet, RawTweet, RawUser } from '~/types'
+import { writeFile } from 'node:fs/promises'
 import { ResourceType, TweetRepliesSortType } from '~/lib/rettiwt-api'
 import { Extractors } from '~/lib/rettiwt-api/collections/Extractors'
 import { RettiwtPool } from '~/lib/SmartPool'
@@ -51,6 +52,8 @@ export async function fetchUserDetails(id: string): Promise<RawUser | null> {
     }
     const response = await fetcher.request<IUserDetailsResponse>(resource, { id })
     const data = Extractors[resource](response)
+
+    await writeFile('cache/user.json', JSON.stringify(data, null, 2), 'utf8')
     return data || null
   })
 }

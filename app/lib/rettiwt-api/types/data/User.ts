@@ -51,4 +51,10 @@ export interface IUser {
 
   /** The username/screenname of the user. */
   userName: string
+
+  /** The birthday of the user. */
+  birthdayString?: string
+
+  /** The link of user displayed */
+  url: string
 }

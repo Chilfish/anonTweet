@@ -1,11 +1,11 @@
 import type { Route } from './+types/get'
 import type { RawUser } from '~/types'
-import { getDBUser } from '~/lib/service/getUser.server'
+import { fetchUserDetails } from '~/lib/react-tweet/utils/get-tweet'
 
 export async function loader({
   params,
 }: Route.LoaderArgs): Promise<RawUser | null> {
   const { username } = params
 
-  return await getDBUser(username)
+  return await fetchUserDetails(username)
 }

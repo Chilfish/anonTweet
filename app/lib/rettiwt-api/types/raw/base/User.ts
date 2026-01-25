@@ -143,7 +143,14 @@ export interface IUserLocation {
   location: string
 }
 
-export interface ILegacyExtendedProfile {}
+export interface ILegacyExtendedProfile {
+  birthdate?: {
+    day?: number
+    month?: number
+    visibility: 'Public'
+    year_visibility: 'Self'
+  }
+}
 
 export interface IVerificationInfo {
   reason: IVerificationReason

@@ -14,6 +14,7 @@ export default [
     route('/list/:id', 'routes/list.tsx'),
     route('/tweets/:id', 'routes/tweet.tsx'),
     route('/bili', 'routes/bili.tsx'),
+    route('/profile/:username', 'routes/profile.tsx'),
   ]),
 
   ...prefix('api', [

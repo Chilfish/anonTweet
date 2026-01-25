@@ -5,13 +5,10 @@ import { tweetUser } from '~/lib/database/schema'
 import { fetchUserDetails } from '~/lib/react-tweet/utils/get-tweet'
 
 export async function getDBUser(username: string): Promise<RawUser | null> {
-  // 1. 检查开关：如果没有 DB URL 或未开启缓存，直接走 API
-  // 此时 db.server.ts 里的 neon() 根本不会被执行
   if (!isDbAvailable()) {
     return await fetchUserDetails(username)
   }
 
-  // 2. 只有进入这里，才会真正初始化 DB 连接
   const db = getDbClient()
 
   try {

@@ -165,24 +165,27 @@ function getReplyInfo(text: string) {
 
 interface TweetTextProps {
   text: string
+  className?: string
 }
 
-export const TweetText: React.FC<TweetTextProps> = ({ text }) => {
+export const TweetText: React.FC<TweetTextProps> = ({ text, className }) => {
   const { name: replyToName, text: content } = getReplyInfo(text)
 
   if (replyToName) {
     return (
       <>
-        <p className="py-2 wrap-anywhere">
+        <p className={cn('py-2 wrap-anywhere', className)}>
           回复
           {' '}
           <PeopleLink name={replyToName} />
           :
         </p>
-        <p className="wrap-anywhere">{parseTweetText(content || '')}</p>
+        <p className={cn('wrap-anywhere', className)}>
+          {parseTweetText(content || '')}
+        </p>
       </>
     )
   }
 
-  return <p className="pt-2 wrap-anywhere">{parseTweetText(text)}</p>
+  return <p className={cn('pt-2 wrap-anywhere', className)}>{parseTweetText(text)}</p>
 }
