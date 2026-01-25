@@ -20,7 +20,7 @@ export function TweetHeader({ tweet, avatarSize, className }: Props) {
   return (
     <div className={cn(s.header, className, avatarSize === 'small' && s.inQuote)}>
       <a
-        href={tweet.url}
+        href={`https://x.com/${user.screen_name}`}
         className={s.avatar}
         target="_blank"
         rel="noopener noreferrer"
@@ -46,7 +46,7 @@ export function TweetHeader({ tweet, avatarSize, className }: Props) {
       <div className={cn(s.author)}>
         <div className={s.authorInline}>
           <a
-            href={tweet.url}
+            href={`https://x.com/${user.screen_name}`}
             className={s.authorLink}
             target="_blank"
             rel="noopener noreferrer"
@@ -58,7 +58,7 @@ export function TweetHeader({ tweet, avatarSize, className }: Props) {
           </a>
           <div className={s.authorMeta}>
             <a
-              href={tweet.url}
+              href={`https://x.com/${user.screen_name}`}
               className={s.username}
               target="_blank"
               rel="noopener noreferrer"

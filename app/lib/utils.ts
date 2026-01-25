@@ -10,6 +10,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export function snowId2millis(id: string) {
+  return (BigInt(id) >> BigInt(22)) + BigInt(1288834974657)
+}
+
+export function pubTime(id: string) {
+  return new Date(Number(snowId2millis(id)))
+}
+
 export function extractTweetId(input: string): string | null {
   // Remove whitespace
   const trimmed = input.trim()
