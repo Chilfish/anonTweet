@@ -1,46 +1,29 @@
 import type { RawUser } from '~/types'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
-import { ArrowLeft, BalloonIcon, CalendarDays, LinkIcon, MapPin } from 'lucide-react'
-import { useNavigate } from 'react-router'
+import { BalloonIcon, CalendarDays, LinkIcon, MapPin } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
-import { Button } from '~/components/ui/button'
 import { TweetText } from '../tweet/TweetText'
 
 interface ProfileHeaderProps {
   user: RawUser
+  children?: React.ReactNode
 }
 
-export function ProfileHeader({ user }: ProfileHeaderProps) {
-  const navigate = useNavigate()
+export function ProfileHeader({ user, children }: ProfileHeaderProps) {
   const formattedDate = user.createdAt
     ? format(new Date(user.createdAt), 'yyyy年M月', { locale: zhCN })
     : ''
 
   return (
-    <div className="flex flex-col w-full border-b border-border bg-background">
-      {/* Sticky Top Bar */}
-      <div className="sticky top-0 z-20 flex items-center gap-8 px-4 h-12 bg-background/80 backdrop-blur-md">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="rounded-full size-8 shrink-0"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="size-5" />
-        </Button>
-        <h1 className="text-xl font-bold leading-tight truncate">
-          {user.fullName}
-        </h1>
-      </div>
-
+    <div className="flex flex-col w-full rounded border-b border-border bg-background">
       {/* Banner */}
       <div className="relative aspect-3/1 w-full bg-muted overflow-hidden">
         {user.profileBanner ? (
           <img
             src={user.profileBanner}
             alt={`${user.fullName} 的封面`}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover rounded-t"
           />
         ) : (
           <div className="w-full h-full bg-slate-200 dark:bg-slate-800" />
@@ -149,6 +132,8 @@ export function ProfileHeader({ user }: ProfileHeaderProps) {
           </div>
         </div>
       </div>
+
+      {children}
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { env } from './env.server'
 
-export type CacheType = 'tweet' | 'user' | 'replies'
+export type CacheType = 'tweet' | 'user' | 'replies' | 'timeline'
 
 /**
  * 缓存数据包装结构，用于存储过期时间

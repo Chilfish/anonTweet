@@ -40,6 +40,41 @@ export function extractTweetId(input: string): string | null {
   return null
 }
 
+export function extractUsernameOrTweetId(input: string): string | number | null {
+  // Remove whitespace
+  const trimmed = input.trim()
+
+  // If it's already just a tweet ID (numeric string)
+  if (/^\d+$/.test(trimmed)) {
+    return Number(trimmed)
+  }
+
+  // If it's a username
+  if (/^\w+$/.test(trimmed)) {
+    return trimmed
+  }
+
+  // Twitter URL patterns
+  const patterns = [
+    // Standard twitter.com URLs
+    /(?:https?:\/\/)?(?:www\.)?twitter\.com\/(\w+)/i,
+    // x.com URLs
+    /(?:https?:\/\/)?(?:www\.)?x\.com\/(\w+)/i,
+    // Mobile URLs
+    /(?:https?:\/\/)?(?:mobile\.)?twitter\.com\/(\w+)/i,
+    /(?:https?:\/\/)?(?:mobile\.)?x\.com\/(\w+)/i,
+  ]
+
+  for (const pattern of patterns) {
+    const match = trimmed.match(pattern)
+    if (match && match[1]) {
+      return match[1]
+    }
+  }
+
+  return null
+}
+
 export function proxyMedia(url: string) {
   return url
   // return `https://proxy.chilfish.top/${url}`

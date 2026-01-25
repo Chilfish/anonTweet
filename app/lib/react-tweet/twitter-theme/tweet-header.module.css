@@ -98,6 +98,7 @@
   color: var(--tweet-font-color-secondary);
   text-decoration: none;
   text-overflow: ellipsis;
+  font-size: smaller;
 }
 .follow {
   color: var(--tweet-color-blue-secondary);

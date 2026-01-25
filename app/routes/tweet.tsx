@@ -60,17 +60,19 @@ export default function TweetPage() {
 
   const { data: tweets, error, isLoading } = useSWR<TweetData>(
     (tweetId && isStoreReady) ? tweetId : null,
-    () => {
+    async () => {
       const dictEntries = getFormattedEntries()
       const combinedGlossary = [dictEntries, translationGlossary].filter(Boolean).join('\n')
 
-      return getTweets({
+      const data = await getTweets({
         tweetId,
         enableAITranslation,
         translationGlossary: combinedGlossary,
         apiKey: geminiApiKey,
         model: geminiModel,
       })
+
+      return [...data, ...(data[0]?.comments || [])]
     },
     {
       revalidateIfStale: false,
