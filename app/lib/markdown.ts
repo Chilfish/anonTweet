@@ -1,5 +1,30 @@
 import type { EnrichedTweet, Entity, MediaDetails, TweetData } from '~/types'
 import { format } from 'date-fns'
+import { formatDate } from './react-tweet'
+
+export function generateText(tweet: EnrichedTweet): string {
+  const tweetText = tweet.entities.map((entity) => {
+    if (entity.type === 'hashtag' || entity.type === 'mention' || entity.type === 'url')
+      return entity.text
+
+    if (entity.type === 'text' || entity.type === 'media_alt') {
+      const translation = entity.translation ?? (tweet.autoTranslationEntities?.find(e => e.index === entity.index)?.translation || '')
+      const altPrefix = entity.type === 'media_alt' ? `\n图${entity.index - 20000 + 1} Alt：` : ''
+      return altPrefix + translation
+    }
+    return null
+  })
+    .filter(Boolean)
+    .join(' ')
+  const createAt = formatDate(tweet.created_at)
+  const author = tweet.user.name
+
+  return `@${author}
+${tweetText}
+
+发布于：${createAt}
+链接：${tweet.url}`
+}
 
 /**
  * Generates a Markdown string from a list of tweets (thread).

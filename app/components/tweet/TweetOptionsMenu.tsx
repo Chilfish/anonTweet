@@ -19,20 +19,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
+import { useTweetOperations } from '~/hooks/use-tweet-operations'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { useTranslationUIActions, useUIState } from '~/lib/stores/hooks'
 
 interface TweetOptionsMenuProps {
-  onDownload: () => void
-  onCopyMarkdown: () => void
   disableActions: boolean
 }
 
-export function TweetOptionsMenu({ onDownload, onCopyMarkdown, disableActions }: TweetOptionsMenuProps) {
+export function TweetOptionsMenu({ disableActions }: TweetOptionsMenuProps) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const { isInlineMedia, setIsInlineMedia } = useAppConfigStore()
   const { showTranslationButton } = useUIState()
   const { setShowTranslationButton } = useTranslationUIActions()
+
+  const {
+    downloadMedia,
+    copyMarkdown,
+    copyTweetText,
+  } = useTweetOperations()
 
   return (
     <>
@@ -52,7 +57,7 @@ export function TweetOptionsMenu({ onDownload, onCopyMarkdown, disableActions }:
 
           <DropdownMenuSeparator />
 
-          <DropdownMenuItem onClick={onDownload} disabled={disableActions} className="menu-item-class">
+          <DropdownMenuItem onClick={downloadMedia} disabled={disableActions} className="menu-item-class">
             <Download className="h-4 w-4 mr-2" />
             <span>下载媒体</span>
           </DropdownMenuItem>
@@ -66,9 +71,14 @@ export function TweetOptionsMenu({ onDownload, onCopyMarkdown, disableActions }:
             </span>
           </DropdownMenuCheckboxItem>
 
-          <DropdownMenuItem onClick={onCopyMarkdown} disabled={disableActions} className="menu-item-class">
+          <DropdownMenuItem onClick={copyMarkdown} disabled={disableActions} className="menu-item-class">
             <FileText className="h-4 w-4 mr-2" />
             <span>复制 Markdown</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem onClick={copyTweetText} disabled={disableActions} className="menu-item-class">
+            <FileText className="h-4 w-4 mr-2" />
+            <span>复制正文文本</span>
           </DropdownMenuItem>
 
           <DropdownMenuCheckboxItem checked={!showTranslationButton} onCheckedChange={c => setShowTranslationButton(!c)} className="menu-item-class">

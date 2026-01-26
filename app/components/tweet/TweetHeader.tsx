@@ -42,8 +42,6 @@ export function TweetHeader() {
         <SaveAsImageButton />
 
         <TweetOptionsMenu
-          onDownload={downloadMedia}
-          onCopyMarkdown={copyMarkdown}
           disableActions={!hasTweets}
         />
       </div>

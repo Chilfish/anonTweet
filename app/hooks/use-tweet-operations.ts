@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { extractDownloadItemsFromTweets } from '~/components/translation/DownloadMedia'
 import { downloadFiles } from '~/lib/downloader'
 import { fetcher } from '~/lib/fetcher'
-import { generateMarkdownFromTweets } from '~/lib/markdown'
+import { generateMarkdownFromTweets, generateText } from '~/lib/markdown'
 import { useMainTweet, useTranslationActions, useTweets } from '~/lib/stores/hooks'
 import { toast } from '~/lib/utils'
 
@@ -74,9 +74,21 @@ export function useTweetOperations() {
     }
   }
 
+  const copyTweetText = async () => {
+    try {
+      const text = generateText(tweets[0]!)
+      await navigator.clipboard.writeText(text)
+      toast.success('已复制正文到剪贴板')
+    }
+    catch (error) {
+      toast.error('复制失败', { description: '请确保浏览器可写剪贴板' })
+    }
+  }
+
   return {
     isLoadingComments,
     loadComments,
+    copyTweetText,
     downloadMedia,
     copyMarkdown,
     hasTweets: tweets.length > 0,
