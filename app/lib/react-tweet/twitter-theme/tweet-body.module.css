@@ -1,11 +1,17 @@
 .root {
   font-size: var(--tweet-body-font-size);
-  font-weight: var(--tweet-body-font-weight);
+  font-weight: 500;
   line-height: var(--tweet-body-line-height);
   margin: var(--tweet-body-margin);
   overflow-wrap: break-word;
   white-space: pre-wrap;
-  font-family:
-    'Inter', 'UnifontEX', 'Noto Sans', 'Noto Sans JP', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-    sans-serif;
+  font-family: 'Inter', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Sans', 'UnifontEX', sans-serif;
+}
+
+.root[lang='ja'] {
+  font-family: 'Inter', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Sans JP', 'UnifontEX', sans-serif;
+}
+
+.root[lang='zh'] {
+  font-family: 'Inter', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Sans SC', 'UnifontEX', sans-serif;
 }

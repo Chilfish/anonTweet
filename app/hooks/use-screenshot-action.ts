@@ -1,3 +1,4 @@
+import type { Options as ScreenshotOptions } from 'modern-screenshot'
 import type { EnrichedTweet } from '~/types'
 import { domToJpeg, domToPng } from 'modern-screenshot'
 import { useCallback, useState } from 'react'
@@ -39,9 +40,25 @@ export function useScreenshotAction({ tweets }: UseScreenshotActionProps) {
       return true
     }
 
-    const options = {
+    const options: ScreenshotOptions = {
       quality: 1,
       filter,
+      font: {
+        preferredFormat: 'woff2',
+        cssText: `
+        p {
+            font-family:
+            'Inter',
+            "Apple Color Emoji",
+            "Segoe UI Emoji",
+            "Noto Color Emoji",
+            "Segoe UI Symbol",
+           'UnifontEX',
+           'Noto Sans JP',
+           sans-serif;
+        }
+        `,
+      },
     }
 
     return screenshotFormat === 'png'
@@ -83,7 +100,7 @@ export function useScreenshotAction({ tweets }: UseScreenshotActionProps) {
     }
 
     // 等待 DOM 更新 (React Render + Layout paint)
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await new Promise(resolve => requestAnimationFrame(resolve))
 
     try {
       // 2. 执行截图 (Action)
