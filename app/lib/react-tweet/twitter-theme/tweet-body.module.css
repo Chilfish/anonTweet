@@ -5,4 +5,7 @@
   margin: var(--tweet-body-margin);
   overflow-wrap: break-word;
   white-space: pre-wrap;
+  font-family:
+    'Inter', 'UnifontEX', 'Noto Sans', 'Noto Sans JP', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    sans-serif;
 }

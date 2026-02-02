@@ -8,4 +8,5 @@
   /* 样式修正：Unifont 通常是等宽或类等宽，建议修正其字重 */
   font-weight: 400;
   font-style: normal;
+  unicode-range: U+1DC0-1DFF, U+1F00-1FFF, U+2000-2BFF, U+3000-303F, U+FF00-FFEF;
 }
