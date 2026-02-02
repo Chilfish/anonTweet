@@ -1,0 +1,11 @@
+@font-face {
+  font-family: 'UnifontEX';
+  src: url('/UnifontExMono.woff2') format('woff2');
+
+  /* 性能优化：交换模式，避免文本长时间不可见 */
+  font-display: swap;
+
+  /* 样式修正：Unifont 通常是等宽或类等宽，建议修正其字重 */
+  font-weight: 400;
+  font-style: normal;
+}
