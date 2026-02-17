@@ -225,6 +225,7 @@ export function mapMediaDetails(tweet: RawTweet): MediaDetails[] | undefined {
         ...baseMedia,
         type: 'video' as const,
         video_info: {
+          duration: media.video_info.duration_millis || 0,
           aspect_ratio: [
             media.video_info.aspect_ratio[0] || 1,
             media.video_info.aspect_ratio[1] || 1,
