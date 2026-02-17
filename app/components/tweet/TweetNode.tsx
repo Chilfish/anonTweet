@@ -32,7 +32,7 @@ function TweetMediaSection({ tweet }: { tweet: EnrichedTweet }) {
   return (
     <TweetMedia
       tweet={tweetWithMediaConfig}
-      showCoverOnly={screenshoting}
+      showCoverOnly={true}
     />
   )
 }
