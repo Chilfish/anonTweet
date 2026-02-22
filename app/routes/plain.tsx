@@ -55,7 +55,8 @@ function TweetContent() {
     <Await
       resolve={loaderData}
       errorElement={<TweetNotFound />}
-      children={resolvedTweet =>
+    >
+      {resolvedTweet =>
         resolvedTweet.tweets.length && resolvedTweet.tweetId
           ? (
               <MyPlainTweet
@@ -67,7 +68,7 @@ function TweetContent() {
           : (
               <TweetNotFound tweetId={resolvedTweet.tweetId} />
             )}
-    />
+    </Await>
   )
 }
 

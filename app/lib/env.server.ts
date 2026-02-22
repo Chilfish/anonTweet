@@ -45,20 +45,3 @@ export const env = (() => {
 
   return validatedData
 })()
-
-// Environment convenience exports
-export const isDevelopment = env.ENVIRONMENT === 'development'
-export const isProduction = env.ENVIRONMENT === 'production'
-
-/**
- * Returns a subset of environment variables that are safe to expose to the client.
- * SECURITY WARNING: Be careful what you expose here - never include API keys,
- * secrets, or sensitive information as these will be visible in the browser.
- */
-export function getPublicEnv() {
-  return {
-    // Add other public variables here that are safe to expose...
-  }
-}
-
-export type PublicEnv = ReturnType<typeof getPublicEnv>

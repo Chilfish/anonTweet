@@ -46,11 +46,6 @@ function TemplateEditor({
   const [html, setHtml] = useState(initialHtml)
 
   useEffect(() => {
-    setName(initialName)
-    setHtml(initialHtml)
-  }, [id, initialName, initialHtml])
-
-  useEffect(() => {
     if (isReadOnly)
       return
 
@@ -204,7 +199,6 @@ export function SeparatorTemplateManager() {
                       onChange={e => setNewTemplate(prev => ({ ...prev, name: e.target.value }))}
                       placeholder="例如：极简线条"
                       className="text-right h-8 border-none shadow-none focus-visible:ring-0"
-                      autoFocus
                     />
                   </SettingsRow>
                   <div className="p-4 border-t space-y-2 bg-muted/10">

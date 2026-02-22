@@ -16,7 +16,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { ImagePlus, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { cn } from '~/lib/utils'
 
@@ -85,15 +85,16 @@ function SortableImage({
 export function ImageUploader({ value, onChange, maxCount = 9 }: ImageUploaderProps) {
   // 内部维护带 ID 的状态，用于 DnD
   const [items, setItems] = useState<ImageItem[]>([])
+  const [prevValue, setPrevValue] = useState(value)
 
   // 当外部 value 变空时（例如表单重置），同步清空内部状态
-  useEffect(() => {
+  if (prevValue !== value) {
+    setPrevValue(value)
     if (value.length === 0 && items.length > 0) {
-      // 清理旧的 URL
       items.forEach(item => URL.revokeObjectURL(item.preview))
       setItems([])
     }
-  }, [value, items])
+  }
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),

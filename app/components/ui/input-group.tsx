@@ -53,6 +53,7 @@ function InputGroupAddon({
       className={cn(inputGroupAddonVariants({ align }), className)}
       data-align={align}
       data-slot="input-group-addon"
+      role="presentation"
       onMouseDown={(e) => {
         const target = e.target as HTMLElement
         const isInteractive = target.closest('button, a')

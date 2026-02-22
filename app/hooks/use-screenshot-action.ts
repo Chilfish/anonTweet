@@ -12,6 +12,7 @@ import {
   useUIState,
 } from '~/lib/stores/hooks'
 import { useTranslationUIStore } from '~/lib/stores/translationUI'
+import { waitForRenderReady } from '~/lib/utils'
 
 interface UseScreenshotActionProps {
   tweets: EnrichedTweet[]
@@ -100,7 +101,7 @@ export function useScreenshotAction({ tweets }: UseScreenshotActionProps) {
     }
 
     // 等待 DOM 更新 (React Render + Layout paint)
-    await new Promise(resolve => requestAnimationFrame(resolve))
+    await waitForRenderReady(tweetElRef)
 
     try {
       // 2. 执行截图 (Action)

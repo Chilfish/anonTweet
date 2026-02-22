@@ -19,6 +19,27 @@ interface ApiResponse {
   error?: string
 }
 
+async function submitBiliPost(formData: FormData): Promise<{ postId: string | null, error: string | null }> {
+  try {
+    const response = await axios.postForm<ApiResponse>('/api/bili-post', formData)
+    if (response.data.error) {
+      return { postId: null, error: response.data.error }
+    }
+    const dynId = response.data.dyn_id_str
+    return { postId: dynId !== undefined ? dynId : 'N/A', error: null }
+  }
+  catch (err: any) {
+    let errorMessage = '发生未知错误'
+    if (err.response && err.response.data && err.response.data.error) {
+      errorMessage = err.response.data.error
+    }
+    else if (err.message) {
+      errorMessage = err.message
+    }
+    return { postId: null, error: errorMessage }
+  }
+}
+
 export interface CookieSettings {
   cookie: string
 }
@@ -70,28 +91,18 @@ export default function PublishDynamicForm() {
       formData.append('images', image)
     })
 
-    try {
-      const response = await axios.postForm<ApiResponse>('/api/bili-post', formData)
-
-      if (response.data.error) {
-        throw new Error(response.data.error)
-      }
-
-      setPostId(response.data.dyn_id_str || 'N/A')
+    const result = await submitBiliPost(formData)
+    if (result.error) {
+      setError(result.error)
+    }
+    else {
+      setPostId(result.postId)
       setSuccess('动态发布成功。')
-
-      // 重置表单
       setTitle('')
       setContent('')
-      setImages([]) // ImageUploader 会监听到这个变化并重置内部预览
+      setImages([])
     }
-    catch (err: any) {
-      const errorMessage = err.response?.data?.error || err.message || '发生未知错误'
-      setError(errorMessage)
-    }
-    finally {
-      setIsLoading(false)
-    }
+    setIsLoading(false)
   }
 
   return (

@@ -1,6 +1,6 @@
 import type { GetTweetSchema } from '~/lib/validations/tweet'
 import type { TweetData } from '~/types'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useSyncExternalStore } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import useSWR from 'swr'
 import { MyTweet } from '~/components/tweet/Tweet'
@@ -33,7 +33,7 @@ export default function TweetPage() {
   const { setAllTweets } = useTranslationActions()
   const storeTweets = useTweets()
   const storeMainTweet = useMainTweet()
-  const [isStoreReady, setIsStoreReady] = useState(false)
+  const isStoreReady = useSyncExternalStore(() => () => {}, () => true, () => false)
 
   const {
     enableAITranslation,
@@ -45,19 +45,6 @@ export default function TweetPage() {
   const { setCommentIds } = useTranslationActions()
   const getFormattedEntries = useTranslationDictionaryStore(state => state.getFormattedEntries)
 
-  if (!tweetId) {
-    return (
-      <>
-        <TweetHeader />
-        <TweetNotFound tweetId={id} />
-      </>
-    )
-  }
-
-  useEffect(() => {
-    setIsStoreReady(true)
-  }, [])
-
   const { data: tweets, error, isLoading } = useSWR<TweetData>(
     (tweetId && isStoreReady) ? tweetId : null,
     () => {
@@ -65,7 +52,7 @@ export default function TweetPage() {
       const combinedGlossary = [dictEntries, translationGlossary].filter(Boolean).join('\n')
 
       return getTweets({
-        tweetId,
+        tweetId: tweetId!,
         enableAITranslation,
         translationGlossary: combinedGlossary,
         apiKey: geminiApiKey,
@@ -104,6 +91,15 @@ export default function TweetPage() {
       ? storeTweets
       : tweets
   }, [storeMainTweet?.id_str, tweetId, storeTweets, tweets])
+
+  if (!tweetId) {
+    return (
+      <>
+        <TweetHeader />
+        <TweetNotFound tweetId={id} />
+      </>
+    )
+  }
 
   if (isLoading || isRetweet || !isStoreReady) {
     return (

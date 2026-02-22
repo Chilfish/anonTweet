@@ -17,12 +17,18 @@ function ProgressBar({ showSpinner = false }: ProgressBarProps) {
   })
   const ref = useRef<HTMLDivElement>(null)
   const [animationComplete, setAnimationComplete] = useState(true)
+  const [prevDelayedPending, setPrevDelayedPending] = useState(delayedPending)
+
+  if (prevDelayedPending !== delayedPending) {
+    setPrevDelayedPending(delayedPending)
+    if (delayedPending) {
+      setAnimationComplete(false)
+    }
+  }
 
   useEffect(() => {
     if (!ref.current)
       return
-    if (delayedPending)
-      setAnimationComplete(false)
 
     const animationPromises = ref.current
       .getAnimations()

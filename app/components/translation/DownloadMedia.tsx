@@ -157,9 +157,7 @@ export function DownloadMedia() {
         description: globalError instanceof Error ? globalError.message : '网络或权限错误',
       })
     }
-    finally {
-      setIsDownloading(false)
-    }
+    setIsDownloading(false)
   }, [tweets])
 
   return (

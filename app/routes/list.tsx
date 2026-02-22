@@ -59,7 +59,8 @@ function TweetContent() {
       <Await
         resolve={loaderData}
         errorElement={<TweetNotFound />}
-        children={resolvedTweet => (
+      >
+        {resolvedTweet => (
           <div className="flex flex-col gap-3 items-center justify-center w-[96vw]">
             {resolvedTweet.tweets.length
               ? (resolvedTweet.tweets as any[]).map(tweet => (
@@ -75,7 +76,7 @@ function TweetContent() {
                 )}
           </div>
         )}
-      />
+      </Await>
     </Suspense>
   )
 }
@@ -102,7 +103,6 @@ function ListIdInputForm() {
           required
           type="text"
           className="max-w-64"
-          autoFocus
           autoComplete="off"
         />
       </Field>

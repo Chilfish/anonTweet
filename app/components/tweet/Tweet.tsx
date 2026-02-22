@@ -1,7 +1,7 @@
 import type { Ref, RefObject } from 'react'
 import type { AppConfigs } from '~/lib/stores/appConfig'
 import type { TweetData } from '~/types'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react'
 import { useElementSize } from '~/hooks/use-element-size'
 import { TweetContainer } from '~/lib/react-tweet'
 import { organizeTweets } from '~/lib/react-tweet/utils/organizeTweets'
@@ -32,12 +32,8 @@ function MainThreadLine({ mainTweetRef, visible }: {
   mainTweetRef: RefObject<HTMLDivElement | null>
   visible: boolean
 }) {
-  const [isClient, setIsClient] = useState(false)
+  const isClient = useSyncExternalStore(() => () => {}, () => true, () => false)
   const { height } = useElementSize(mainTweetRef)
-
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
 
   // 只在客户端且高度计算完成后才显示
   if (!isClient || height === 0) {

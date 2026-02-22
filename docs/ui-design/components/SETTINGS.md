@@ -10,14 +10,16 @@
 
 **When to use this pattern?**
 If the user request involves:
+
 1.  **Keywords:** "Settings", "Preferences", "Profile", "Config", "Menu", "Options".
 2.  **Visual Intent:** "iOS/macOS style list", "Grouped list", "Form rows".
 3.  **Data Structure:** Key-Value pairs, Toggles, or Navigation Links grouped in sections.
 
 **When NOT to use?**
-*   **Data Grids:** Use `DataTable` (for sorting/filtering).
-*   **Marketing Content:** Use `Card` or custom layout.
-*   **Chat/Feed:** Use specialized components.
+
+- **Data Grids:** Use `DataTable` (for sorting/filtering).
+- **Marketing Content:** Use `Card` or custom layout.
+- **Chat/Feed:** Use specialized components.
 
 ---
 
@@ -29,9 +31,10 @@ The structure is strict. You must respect this hierarchy:
 2.  **`SettingsItem`**: The row. Handles layout, icons, labels, and **automatic separators**.
 
 ### ❌ Forbidden Patterns
-*   **NO** manual `<hr />` or `border-b` between items. `SettingsItem` handles this via `:not(:last-child)`.
-*   **NO** nesting `Card` components inside `SettingsGroup`.
-*   **NO** using standard bordered `Input` fields (see Scenario C).
+
+- **NO** manual `<hr />` or `border-b` between items. `SettingsItem` handles this via `:not(:last-child)`.
+- **NO** nesting `Card` components inside `SettingsGroup`.
+- **NO** using standard bordered `Input` fields (see Scenario C).
 
 ---
 
@@ -40,22 +43,26 @@ The structure is strict. You must respect this hierarchy:
 Reference path: `~/components/ui/settings-layout`
 
 ### 3.1 `SettingsGroup`
+
 Wraps a collection of related items.
-*   **Props:**
-    *   `title?` (string): Section header (uppercase, tracking-wider).
-    *   `description?` (string): Helper text below the title.
-    *   `variant?`: "default" (card style) | "ghost" (transparent).
+
+- **Props:**
+  - `title?` (string): Section header (uppercase, tracking-wider).
+  - `description?` (string): Helper text below the title.
+  - `variant?`: "default" (card style) | "ghost" (transparent).
 
 ### 3.2 `SettingsItem`
+
 The atomic row component.
-*   **Props:**
-    *   `label` (ReactNode): Main text (Left).
-    *   `description?` (ReactNode): Subtext below label.
-    *   `icon?` (LucideIcon): Left-aligned icon.
-    *   `destructive?` (boolean): Styles text red (for delete actions).
-    *   `onClick?` (Fn): Makes the row interactive (hover/active states).
-    *   `children` (ReactNode): **Right Content Slot** (Switch, Input, Select, Chevron).
-    *   `id` (String): As HtmlFor in label in from-item
+
+- **Props:**
+  - `label` (ReactNode): Main text (Left).
+  - `description?` (ReactNode): Subtext below label.
+  - `icon?` (LucideIcon): Left-aligned icon.
+  - `destructive?` (boolean): Styles text red (for delete actions).
+  - `onClick?` (Fn): Makes the row interactive (hover/active states).
+  - `children` (ReactNode): **Right Content Slot** (Switch, Input, Select, Chevron).
+  - `id` (String): As HtmlFor in label in from-item
 
 ---
 
@@ -64,16 +71,17 @@ The atomic row component.
 **AI MUST match the user's intent to one of these scenarios.**
 
 ### Scenario A: Boolean Toggle (Switch)
-*Use for: Notifications, Dark Mode, System Features.*
+
+_Use for: Notifications, Dark Mode, System Features._
 
 ```tsx
-import { SettingsGroup, SettingsItem } from "~/components/ui/settings-layout"
-import { Switch } from "~/components/ui/switch"
-import { BellIcon } from "lucide-react"
+import { BellIcon } from 'lucide-react'
+import { SettingsGroup, SettingsItem } from '~/components/ui/settings-layout'
+import { Switch } from '~/components/ui/switch'
 
 <SettingsGroup title="Notifications">
-  <SettingsItem 
-    label="Push Notifications" 
+  <SettingsItem
+    label="Push Notifications"
     description="Receive updates on your mobile device."
     icon={<BellIcon />}
     id="push-notifs" // Automatically wired to Label
@@ -84,11 +92,12 @@ import { BellIcon } from "lucide-react"
 ```
 
 ### Scenario B: Navigation / Drill-down
-*Use for: Sub-menus, Account Security, External Links.*
+
+_Use for: Sub-menus, Account Security, External Links._
 **Note:** Use `ChevronRight` manually in the children slot if it's a link.
 
 ```tsx
-import { ChevronRight, ShieldIcon } from "lucide-react"
+import { ChevronRight, ShieldIcon } from 'lucide-react'
 
 <SettingsGroup title="Account">
   <SettingsItem
@@ -105,34 +114,36 @@ import { ChevronRight, ShieldIcon } from "lucide-react"
 ```
 
 ### Scenario C: Inline Editing (Seamless Input)
-*Use for: Changing Name, Email, API Keys.*
+
+_Use for: Changing Name, Email, API Keys._
 **CRITICAL:** You MUST override Input styles to be borderless and right-aligned.
 
 ```tsx
-import { Input } from "~/components/ui/input"
-import { UserIcon } from "lucide-react"
+import { UserIcon } from 'lucide-react'
+import { Input } from '~/components/ui/input'
 
 <SettingsItem label="Display Name" icon={<UserIcon />}>
-  {/* 
-    KEY STYLING: 
+  {/*
+    KEY STYLING:
     1. text-right: Aligns text to the end
     2. border-none shadow-none focus-visible:ring-0: Removes default Input styling
     3. bg-transparent: Blends with row background
   */}
-  <Input 
-    className="h-8 w-[200px] border-none bg-transparent px-0 text-right shadow-none focus-visible:ring-0" 
-    defaultValue="Alice" 
+  <Input
+    className="h-8 w-[200px] border-none bg-transparent px-0 text-right shadow-none focus-visible:ring-0"
+    defaultValue="Alice"
     placeholder="Enter name"
   />
 </SettingsItem>
 ```
 
 ### Scenario D: Select / Dropdown
-*Use for: Theme, Language, Frequency.*
+
+_Use for: Theme, Language, Frequency._
 **CRITICAL:** Trigger must be styled to look like plain text.
 
 ```tsx
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "~/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select'
 
 <SettingsItem label="Theme">
   <Select defaultValue="system">
@@ -148,15 +159,16 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "~
 ```
 
 ### Scenario E: Destructive Action
-*Use for: Sign Out, Delete Account.*
+
+_Use for: Sign Out, Delete Account._
 
 ```tsx
-import { LogOutIcon } from "lucide-react"
+import { LogOutIcon } from 'lucide-react'
 
 <SettingsGroup>
-  <SettingsItem 
-    label="Sign Out" 
-    icon={<LogOutIcon />} 
+  <SettingsItem
+    label="Sign Out"
+    icon={<LogOutIcon />}
     destructive // Activates red styling
     className="justify-center font-medium" // Optional: Center align
     onClick={handleSignOut}
@@ -169,6 +181,7 @@ import { LogOutIcon } from "lucide-react"
 ## 5. Visual Constraints Checklist
 
 Before generating code, verify:
+
 1.  [ ] Are related items wrapped in **one** `SettingsGroup`?
 2.  [ ] Did I remove all `border-b` or `<Separator />` components? (The Item handles it).
 3.  [ ] If using an Input, is it `border-none` and `text-right`?

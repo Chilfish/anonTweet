@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 import { cn } from '~/lib/utils'
 
 interface ThreadLineProps {
@@ -14,12 +14,7 @@ export function ThreadLine({
   className,
   visible = true,
 }: ThreadLineProps) {
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    // 确保在客户端且布局完成后才渲染
-    setMounted(true)
-  }, [])
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false)
 
   if (!visible || !mounted) {
     return null

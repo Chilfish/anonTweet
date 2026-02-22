@@ -21,7 +21,7 @@ export const AltEntityList: React.FC<AltEntityListProps> = ({ entities, onUpdate
       {altEntities.map((entity) => {
         // 计算图片序号，通常 index 大于 20000 用于媒体
         // 保持原逻辑的视觉提示
-        const imgNumber = entity.index > 20000 ? entity.index - 20000 + 1 : '?'
+        const imgNumber = entity.index > 20000 ? entity.index - 20000 + 1 : '1'
 
         return (
           <div key={entity.index} className="flex flex-col border-b last:border-0 bg-card">
@@ -30,7 +30,7 @@ export const AltEntityList: React.FC<AltEntityListProps> = ({ entities, onUpdate
               <Label className="text-[10px] uppercase font-mono text-muted-foreground flex items-center gap-2">
                 ALT TEXT
                 <span className="text-[10px] text-muted-foreground/70 bg-muted px-1.5 py-0.5 rounded">
-                  IMG
+                  图
                   {' '}
                   {imgNumber}
                 </span>
@@ -38,7 +38,7 @@ export const AltEntityList: React.FC<AltEntityListProps> = ({ entities, onUpdate
             </div>
 
             {/* 原文展示区 */}
-            <div className="p-3 bg-muted/10 border-b border-border/10">
+            <div className="p-3 bg-muted/10 border-b-2">
               <p className="text-xs text-muted-foreground leading-relaxed break-words whitespace-pre-wrap">
                 {entity.text}
               </p>

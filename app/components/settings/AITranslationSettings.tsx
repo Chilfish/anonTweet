@@ -80,13 +80,11 @@ export function AITranslationSettings() {
         type: 'error',
       })
     }
-    finally {
-      setIsTesting(false)
-    }
+    setIsTesting(false)
   }
 
   return (
-    <form className="space-y-6 p-1" onSubmit={e => e.preventDefault()}>
+    <div className="space-y-6 p-1">
       <div className="space-y-2">
         <h4 className="px-1 text-sm font-medium text-muted-foreground">Gemini API 配置</h4>
         <SettingsGroup>
@@ -270,6 +268,6 @@ export function AITranslationSettings() {
           </SettingsGroup>
         </div>
       )}
-    </form>
+    </div>
   )
 }

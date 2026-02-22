@@ -53,6 +53,37 @@ function SelectableTweetWrapperComponent({
     return children
   }
 
+  if (isSelectionMode) {
+    return (
+      <div
+        data-tweet-id={tweetId}
+        data-selected={isSelected}
+        role="button"
+        tabIndex={0}
+        className={cn(
+          'relative transition-all duration-300 ease-in-out',
+          className,
+        )}
+        onClick={handleClick}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ')
+            handleClick(e as any)
+        }}
+      >
+        <div className="absolute top-4 right-4 z-20 flex items-center justify-center">
+          <Checkbox
+            data-ignore-screenshot="true"
+            className="size-4 border-2 border-primary"
+            checked={isSelected}
+            onCheckedChange={handleToggle}
+            onClick={handleCheckboxClick}
+          />
+        </div>
+        {children}
+      </div>
+    )
+  }
+
   return (
     <div
       data-tweet-id={tweetId}
@@ -61,21 +92,7 @@ function SelectableTweetWrapperComponent({
         'relative transition-all duration-300 ease-in-out',
         className,
       )}
-      onClick={handleClick}
     >
-      {isSelectionMode && (
-        <div className="absolute top-4 right-4 z-20 flex items-center justify-center">
-          <Checkbox
-            data-ignore-screenshot="true"
-            className="size-4 border-2 border-primary"
-            checked={isSelected}
-            // onCheckedChange 已经通过外层 div 的 onClick 处理了，这里只需展示状态，
-            // 或者保留 onCheckedChange 以支持精确点击
-            onCheckedChange={handleToggle}
-            onClick={handleCheckboxClick}
-          />
-        </div>
-      )}
       {children}
     </div>
   )

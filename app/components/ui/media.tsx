@@ -1,6 +1,6 @@
 import type { VariantProps } from 'class-variance-authority'
 import { cva } from 'class-variance-authority'
-import { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
+import { forwardRef, useCallback, useRef, useState } from 'react'
 import { Skeleton } from '~/components/ui/skeleton'
 import { cn } from '~/lib/utils'
 
@@ -79,7 +79,7 @@ export interface MediaImageProps extends React.ImgHTMLAttributes<HTMLImageElemen
 }
 
 const MediaImage = forwardRef<HTMLImageElement, MediaImageProps>(
-  ({ className, containerClassName, loadingFallback, errorFallback, onLoad, onError, ...props }, ref) => {
+  ({ className, containerClassName, loadingFallback, errorFallback, onLoad, onError, alt = '', ...props }, ref) => {
     const [status, setStatus] = useState<MediaStatus>('loading')
     const imgRef = useRef<HTMLImageElement>(null)
 
@@ -101,13 +101,10 @@ const MediaImage = forwardRef<HTMLImageElement, MediaImageProps>(
       else if (ref) {
         ref.current = node
       }
-    }, [ref])
-
-    useEffect(() => {
-      if (imgRef.current?.complete && imgRef.current.naturalWidth > 0) {
+      if (node?.complete && node.naturalWidth > 0) {
         setStatus('success')
       }
-    }, [])
+    }, [ref])
 
     const isLoading = status === 'loading'
     const isError = status === 'error'
@@ -126,6 +123,7 @@ const MediaImage = forwardRef<HTMLImageElement, MediaImageProps>(
           onError={handleError}
           data-status={status}
           loading="lazy"
+          alt={alt}
           className={cn(
             'size-full object-cover transition-opacity duration-300',
             isSuccess ? 'opacity-100' : 'opacity-0',
@@ -174,7 +172,7 @@ const MediaVideo = forwardRef<HTMLVideoElement, MediaVideoProps>(
       onError?.(e)
     }
 
-    const mergedRef = (node: HTMLVideoElement | null) => {
+    const mergedRef = useCallback((node: HTMLVideoElement | null) => {
       videoRef.current = node
       if (typeof ref === 'function') {
         ref(node)
@@ -182,15 +180,10 @@ const MediaVideo = forwardRef<HTMLVideoElement, MediaVideoProps>(
       else if (ref) {
         ref.current = node
       }
-    }
-
-    // 客户端检查视频是否已加载
-    useEffect(() => {
-      const video = videoRef.current
-      if (video && video.readyState >= 2) { // HAVE_CURRENT_DATA
+      if (node && node.readyState >= 2) { // HAVE_CURRENT_DATA
         setStatus('success')
       }
-    }, [])
+    }, [ref])
 
     const isLoading = status === 'loading' && preload !== 'none'
     const isError = status === 'error'

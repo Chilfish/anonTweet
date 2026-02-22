@@ -4,7 +4,6 @@ import { useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { useAppConfigStore } from './appConfig'
 import { useTranslationStore } from './translation'
-import { useTranslationDictionaryStore } from './TranslationDictionary'
 import { useTranslationUIStore } from './translationUI'
 
 const DEFAULT_VISIBILITY = { body: true, alt: true }
@@ -206,19 +205,4 @@ export function useGlobalTranslationMode() {
 
 export function useTranslations() {
   return useTranslationStore(useShallow(state => state.translations))
-}
-
-/**
- * Hydration status hooks to prevent Next.js hydration mismatch
- */
-export function useTranslationHydrated() {
-  return useTranslationStore(state => state._hasHydrated)
-}
-
-export function useAppConfigHydrated() {
-  return useAppConfigStore(state => state._hasHydrated)
-}
-
-export function useDictionaryHydrated() {
-  return useTranslationDictionaryStore(state => state._hasHydrated)
 }

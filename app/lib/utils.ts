@@ -40,7 +40,7 @@ export function extractTweetId(input: string): string | null {
   return null
 }
 
-export function proxyMedia(url: string) {
+function proxyMedia(url: string) {
   return url
   // return `https://proxy.chilfish.top/${url}`
 }
@@ -209,4 +209,39 @@ export async function parseExcel(data: ArrayBuffer): Promise<Omit<TranslationDic
     .filter((e): e is Omit<TranslationDicEntry, 'id' | 'createdAt'> =>
       e !== null && Boolean(e.original.trim()) && Boolean(e.translated.trim()),
     )
+}
+
+/**
+ * 确保 DOM 真正稳定并准备好截图
+ * 结合了 React 调度、字体检测、图片解析与双重渲染帧同步
+ */
+export async function waitForRenderReady(container?: HTMLElement) {
+  // 1. 立即退出当前的宏任务/微任务队列，让 React 完成同步渲染
+  await new Promise(resolve => setTimeout(resolve, 0))
+
+  // 2. 等待字体就绪（防止截图时排版塌陷）
+  if (typeof document !== 'undefined' && 'fonts' in document) {
+    await document.fonts.ready
+  }
+
+  // 3. 等待所有图片解码完成 (针对推文中的头像、媒体图)
+  const images = Array.from(container?.querySelectorAll('img') || document.images)
+  const imagePromises = images.map((img) => {
+    if (img.complete)
+      return Promise.resolve()
+    return new Promise((resolve) => {
+      img.onload = resolve
+      img.onerror = resolve // 即使报错也继续，防止阻塞
+    })
+  })
+  await Promise.all(imagePromises)
+
+  // 4. 双重 requestAnimationFrame
+  // 第一帧：浏览器收到重绘指令
+  // 第二帧：浏览器已完成布局计算和复杂的层叠合成
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(resolve)
+    })
+  })
 }

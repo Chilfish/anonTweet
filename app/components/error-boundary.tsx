@@ -53,7 +53,7 @@ export function ErrorDisplay({
   )
 }
 
-export function GeneralErrorBoundary() {
+function GeneralErrorBoundary() {
   const error = useRouteError()
   const isDev = import.meta.env.DEV
   let message = 'Oops! Application Error.'
