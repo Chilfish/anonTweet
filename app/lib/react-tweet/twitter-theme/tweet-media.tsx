@@ -35,7 +35,10 @@ export function TweetMedia({ tweet, quoted, onMediaClick }: Props) {
   const length = tweet.mediaDetails?.length ?? 0
   const isInlineMedia = !!tweet.isInlineMeida
 
-  const onlyHasOnePhoto = length === 1 && tweet.mediaDetails?.[0]?.type === 'photo'
+  // 只有一个图片，且是竖屏
+  const onlyHasOnePhotoPortrait = length === 1
+    && tweet.mediaDetails?.[0]?.type === 'photo'
+    && tweet.mediaDetails?.[0]?.original_info.height > tweet.mediaDetails?.[0]?.original_info.width
 
   // 只有一个视频，且是竖屏
   const isOnlyOneVideoPortrait = length === 1
@@ -47,7 +50,7 @@ export function TweetMedia({ tweet, quoted, onMediaClick }: Props) {
       className={cn(
         'mt-3 overflow-hidden relative',
         !quoted && 'border border-[rgb(207,217,222)] dark:border-[rgb(66,83,100)] rounded-xl',
-        onlyHasOnePhoto && 'max-w-[85%]',
+        onlyHasOnePhotoPortrait && 'max-w-[85%]',
         isOnlyOneVideoPortrait && 'sm:max-w-[72%]',
       )}
     >
