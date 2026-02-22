@@ -238,7 +238,7 @@
 
 @layer components {
   .tweet-container {
-    @apply w-full min-w-[450px] sm:max-w-[600px] overflow-hidden;
+    @apply w-full sm:min-w-[450px] sm:max-w-[600px] overflow-hidden;
     @apply text-[rgb(15,20,25)] dark:text-[rgb(247,249,249)];
     @apply font-sans font-normal border rounded-xl box-border;
     @apply border-[rgb(207,217,222)] dark:border-[rgb(66,83,100)];
