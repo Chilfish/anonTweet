@@ -31,16 +31,24 @@ interface Props {
   onMediaClick?: (index: number) => void
 }
 
-export function TweetMedia({ tweet, quoted, showCoverOnly, onMediaClick }: Props) {
+export function TweetMedia({ tweet, quoted, onMediaClick }: Props) {
   const length = tweet.mediaDetails?.length ?? 0
   const isInlineMedia = !!tweet.isInlineMeida
+
+  const onlyHasOnePhoto = length === 1 && tweet.mediaDetails?.[0]?.type === 'photo'
+
+  // 只有一个视频，且是竖屏
+  const isOnlyOneVideoPortrait = length === 1
+    && tweet.mediaDetails?.[0]?.type === 'video'
+    && tweet.mediaDetails?.[0]?.video_info?.aspect_ratio[0] < tweet.mediaDetails?.[0]?.video_info?.aspect_ratio[1]
 
   return (
     <div
       className={cn(
         'mt-3 overflow-hidden relative',
         !quoted && 'border border-[rgb(207,217,222)] dark:border-[rgb(66,83,100)] rounded-xl',
-        length === 1 && 'max-w-[85%]',
+        onlyHasOnePhoto && 'max-w-[85%]',
+        isOnlyOneVideoPortrait && 'sm:max-w-[72%]',
       )}
     >
       <div
