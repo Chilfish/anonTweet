@@ -1,7 +1,5 @@
 import type { ReactNode, Ref } from 'react'
 import { cn } from '~/lib/utils'
-import s from './tweet-container.module.css'
-import './theme.css'
 
 interface TweetContainerProps {
   children: ReactNode
@@ -14,10 +12,10 @@ export function TweetContainer({ className, children, ref, id }: TweetContainerP
   return (
     <div
       id={id}
-      className={cn('react-tweet-theme', s.root, className)}
+      className={cn('tweet-container', className)}
       ref={ref}
     >
-      <article className={s.article}>{children}</article>
+      <article className="relative box-inherit">{children}</article>
     </div>
   )
 }

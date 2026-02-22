@@ -39,7 +39,7 @@ export const AltEntityList: React.FC<AltEntityListProps> = ({ entities, onUpdate
 
             {/* 原文展示区 */}
             <div className="p-3 bg-muted/10 border-b-2">
-              <p className="text-xs text-muted-foreground leading-relaxed break-words whitespace-pre-wrap">
+              <p className="tweet-body text-xs">
                 {entity.text}
               </p>
             </div>

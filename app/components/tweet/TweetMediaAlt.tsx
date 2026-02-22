@@ -16,7 +16,7 @@ export function TweetMediaAlt({ tweet }: { tweet: EnrichedTweet }) {
   }
 
   return (
-    <div className="mt-3 overflow-hidden rounded-xl border border-border/20 bg-muted/30">
+    <div className="mt-3 overflow-hidden rounded-xl border border-border bg-muted/30">
       <div className="flex items-center justify-between border-b border-border/10 px-3 py-1.5">
         <span className="text-xs font-bold text-muted-foreground">
           图片描述
@@ -38,10 +38,10 @@ export function TweetMediaAlt({ tweet }: { tweet: EnrichedTweet }) {
           return (
             <div
               key={media.media_url_https || i}
-              className="flex flex-col gap-1 py-3 px-2 border border-border/50 rounded bg-muted/40"
+              className="flex flex-col gap-1 py-3 px-2 border border-border/50 rounded bg-muted/70"
             >
               <span
-                className="w-fit h-fit items-center justify-center rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium"
+                className="w-fit h-fit items-center justify-center rounded bg-muted/20 border border-border/50 px-1.5 py-0.5 text-[10px] font-medium"
               >
                 图
                 {' '}
@@ -49,7 +49,7 @@ export function TweetMediaAlt({ tweet }: { tweet: EnrichedTweet }) {
               </span>
 
               <div className="flex min-w-0 flex-1 flex-col">
-                <p className="wrap-break-word text-[13px] leading-relaxed">
+                <p className="tweet-body text-[13px]">
                   {media.ext_alt_text}
                 </p>
                 {translation && (
@@ -59,7 +59,7 @@ export function TweetMediaAlt({ tweet }: { tweet: EnrichedTweet }) {
                       dangerouslySetInnerHTML={{ __html: settings.customSeparator }}
                     >
                     </div>
-                    <p className="text-[13px] font-bold wrap-break-word leading-relaxed text-foreground">
+                    <p className="tweet-body text-[13px] font-bold">
                       {translation}
                     </p>
                   </div>

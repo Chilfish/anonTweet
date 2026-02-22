@@ -1,2 +1,2 @@
-export * from './twitter-theme/components'
+export * from './twitter-theme'
 export * from './utils'

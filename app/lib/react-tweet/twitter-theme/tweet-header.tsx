@@ -1,9 +1,7 @@
 import type { EnrichedTweet } from '~/types'
 import { MediaImage } from '~/components/ui/media'
-import { useProxyMedia } from '~/lib/stores/appConfig'
 import { cn } from '~/lib/utils'
-import { TweetInfoCreatedAt } from './components'
-import s from './tweet-header.module.css'
+import { TweetInfoCreatedAt } from '.'
 import { VerifiedBadge } from './verified-badge'
 
 interface Props {
@@ -15,51 +13,52 @@ interface Props {
 
 export function TweetHeader({ tweet, avatarSize, className }: Props) {
   const { user } = tweet
-  const proxyMedia = useProxyMedia()
+  const isSmall = avatarSize === 'small'
 
   return (
-    <div className={cn(s.header, className, avatarSize === 'small' && s.inQuote)}>
+    <div className={cn('tweet-header', className, isSmall && 'tweet-header-in-quote')}>
       <a
-        href={tweet.url}
-        className={s.avatar}
+        href={`https://x.com/${user.screen_name}`}
+        className={cn('inline-block relative')}
+        style={{ height: isSmall ? '36px' : '40px', width: isSmall ? '36px' : '40px' }}
         target="_blank"
         rel="noopener noreferrer"
       >
         <div
           className={cn(
-            s.avatarOverflow,
-            user.profile_image_shape === 'Square' && s.avatarSquare,
+            'absolute inset-0 overflow-hidden',
+            user.profile_image_shape === 'Square' ? 'rounded-sm' : 'rounded-full',
             'z-10',
           )}
         >
           <MediaImage
-            src={proxyMedia(user.profile_image_url_https)}
+            src={(user.profile_image_url_https)}
             alt={user.name}
-            className={s.avatarImg}
+            className="h-full w-full object-cover select-none pointer-events-none"
           />
         </div>
-        <div className={s.avatarOverflow}>
-          <div className={s.avatarShadow}></div>
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="h-full w-full transition-colors duration-200 shadow-[inset_0_0_2px_rgba(0,0,0,0.03)] hover:bg-black/15"></div>
         </div>
       </a>
 
-      <div className={cn(s.author)}>
-        <div className={s.authorInline}>
+      <div className="flex flex-col mx-2 h-fit gap-[0.1rem]">
+        <div className="flex flex-row items-center gap-1">
           <a
-            href={tweet.url}
-            className={s.authorLink}
+            href={`https://x.com/${user.screen_name}`}
+            className="no-underline color-inherit flex items-center hover:underline"
             target="_blank"
             rel="noopener noreferrer"
           >
-            <div className={s.authorLinkText}>
+            <div className="font-bold truncate whitespace-nowrap">
               <span title={user.name}>{user.name}</span>
             </div>
-            <VerifiedBadge user={user} className={s.authorVerified} />
+            <VerifiedBadge user={user} className="inline-flex ml-1" />
           </a>
-          <div className={s.authorMeta}>
+          <div className="overflow-hidden truncate whitespace-nowrap">
             <a
-              href={tweet.url}
-              className={s.username}
+              href={`https://x.com/${user.screen_name}`}
+              className="text-[#536471] dark:text-[#71767b] no-underline truncate text-sm"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -71,7 +70,7 @@ export function TweetHeader({ tweet, avatarSize, className }: Props) {
           </div>
         </div>
 
-        <div className={s.createdAt}>
+        <div className="text-[#536471] dark:text-[#71767b] flex items-center gap-1 text-[0.85rem]">
           <TweetInfoCreatedAt tweet={tweet} />
         </div>
       </div>

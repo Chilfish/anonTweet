@@ -1,6 +1,5 @@
 import type { EnrichedTweet } from '~/types'
 import { cn } from '~/lib/utils'
-import s from './tweet-body.module.css'
 import { TweetLink } from './tweet-link'
 
 interface TweetBodyProps {
@@ -13,7 +12,7 @@ interface TweetBodyProps {
 export function TweetBody({ tweet, isTranslated, lang, className }: TweetBodyProps) {
   return (
     <p
-      className={cn(s.root, className)}
+      className={cn('tweet-body', className)}
       lang={lang ?? tweet.lang}
       dir="auto"
     >

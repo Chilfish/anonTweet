@@ -1,12 +1,12 @@
-import s from './icons.module.css'
+import { cn } from '~/lib/utils'
 
-export function VerifiedBusiness() {
+export function VerifiedBusiness({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 22 22"
-      aria-label="Verified account"
+      aria-label="Verified business account"
       role="img"
-      className={s.verified}
+      className={cn('tweet-icon-verified', className)}
     >
       <g>
         <linearGradient

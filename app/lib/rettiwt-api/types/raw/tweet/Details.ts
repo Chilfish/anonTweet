@@ -64,6 +64,11 @@ interface Result2 {
   avatar: {
     image_url: string
   }
+
+  verification: {
+    verified: boolean
+    verified_type?: 'Business' | 'Government'
+  }
 }
 
 interface AffiliatesHighlightedLabel {}

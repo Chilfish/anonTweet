@@ -23,6 +23,7 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@fontsource-variable/noto-sans": "^5.2.10",
     "@neondatabase/serverless": "^1.0.2",
     "@react-router/node": "^7.12.0",
     "@react-router/serve": "^7.12.0",

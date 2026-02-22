@@ -61,8 +61,8 @@ export function transformUserResponse(sourceData: RawTweet): TweetUser {
     profile_image_shape: RawTweet.profile_image_shape as TweetUser['profile_image_shape'],
     verified: legacy.verified,
     // @ts-expect-error: The verified_type is not always defined
-    verified_type: legacy.verified_type,
-    profile_image_url_https: RawTweet.avatar.image_url,
+    verified_type: legacy.verified_type || RawTweet.verification?.verified_type,
+    profile_image_url_https: RawTweet.avatar.image_url?.replace('_normal', ''),
   }
 
   return transformedUser

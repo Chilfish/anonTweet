@@ -1,6 +1,5 @@
 import type { EnrichedTweet } from '~/types'
 import { formatDate } from '../utils'
-import s from './tweet-info-created-at.module.css'
 
 export function TweetInfoCreatedAt({ tweet }: { tweet: EnrichedTweet }) {
   const createdAt = new Date(tweet.created_at)
@@ -8,7 +7,7 @@ export function TweetInfoCreatedAt({ tweet }: { tweet: EnrichedTweet }) {
 
   return (
     <a
-      className={s.root}
+      className="text-inherit no-underline hover:underline decoration-1"
       href={tweet.url}
       target="_blank"
       rel="noopener noreferrer"

@@ -1,14 +1,20 @@
 import type { ReactNode } from 'react'
-import s from './tweet-link.module.css'
+import { cn } from '~/lib/utils'
 
 interface Props {
   children: ReactNode
   href: string
+  className?: string
 }
 
-export function TweetLink({ href, children }: Props) {
+export function TweetLink({ href, children, className }: Props) {
   return (
-    <a href={href} className={s.root} target="_blank" rel="noopener noreferrer nofollow">
+    <a
+      href={href}
+      className={cn('tweet-link', className)}
+      target="_blank"
+      rel="noopener noreferrer nofollow"
+    >
       {children}
     </a>
   )
