@@ -4,26 +4,19 @@ import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { useTranslationStore } from '~/lib/stores/translation'
 import { resolveTranslationView } from '~/lib/translation/resolveTranslationView'
 
+const DEFAULT_VISIBILITY = { body: true, alt: true } as const
+
 export function useTweetTranslation(tweet: EnrichedTweet, type: 'body' | 'alt' = 'body') {
-  const {
-    translationMode,
-    tweetTranslationModes,
-    translations,
-    translationVisibility,
-  } = useTranslationStore(
-    useShallow(state => ({
-      translationMode: state.translationMode,
-      tweetTranslationModes: state.tweetTranslationModes,
-      translations: state.translations,
-      translationVisibility: state.translationVisibility,
-    })),
-  )
   const enableAITranslation = useAppConfigStore(state => state.enableAITranslation)
   const tweetId = tweet.id_str
 
-  const mode = tweetTranslationModes[tweetId] || translationMode
-  const visibility = translationVisibility[tweetId] || { body: true, alt: true }
-  const manualTranslation = translations[tweetId]
+  const { mode, visibility, manualTranslation } = useTranslationStore(
+    useShallow(state => ({
+      mode: state.tweetTranslationModes[tweetId] || state.translationMode,
+      visibility: state.translationVisibility[tweetId] || DEFAULT_VISIBILITY,
+      manualTranslation: state.translations[tweetId],
+    })),
+  )
 
   const view = resolveTranslationView({
     tweet,

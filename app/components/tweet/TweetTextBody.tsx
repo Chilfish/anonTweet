@@ -2,13 +2,12 @@ import type { EnrichedTweet } from '~/types'
 import { TranslationDisplay } from '~/components/translation/TranslationDisplay'
 import { useTweetTranslation } from '~/hooks/use-tweet-translation'
 import { TweetBody } from '~/lib/react-tweet'
-import { useGlobalTranslationMode } from '~/lib/stores/hooks'
+import { useTweetMode } from '~/lib/stores/hooks'
 
 export function TweetTextBody({ tweet }: { tweet: EnrichedTweet }) {
-  const { translationMode, tweetTranslationModes } = useGlobalTranslationMode()
   const { shouldShow } = useTweetTranslation(tweet, 'body')
 
-  const mode = tweetTranslationModes[tweet.id_str] || translationMode
+  const mode = useTweetMode(tweet.id_str)
   const isShowRawText = mode !== 'translation' || !shouldShow
 
   return (

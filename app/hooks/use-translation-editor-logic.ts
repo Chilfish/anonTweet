@@ -1,5 +1,5 @@
 import type { EnrichedTweet, Entity } from '~/types'
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { fetcher } from '~/lib/fetcher'
 import { useAIConfig, useTranslationActions } from '~/lib/stores/hooks'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
@@ -74,6 +74,7 @@ export function useTranslationEditorLogic(originalTweet: EnrichedTweet) {
   const [editingEntities, setEditingEntities] = useState<Entity[]>([])
   const [enablePrepend, setEnablePrepend] = useState(false)
   const [prependText, setPrependText] = useState('')
+  const entityPosByIndexRef = useRef<Map<number, number>>(new Map())
 
   const { getTranslation, setTranslation, setTranslationVisibility } = useTranslationActions()
   const { enableAITranslation, geminiApiKey, geminiModel, geminiThinkingLevel, translationGlossary } = useAIConfig()
@@ -85,6 +86,10 @@ export function useTranslationEditorLogic(originalTweet: EnrichedTweet) {
     const existing = getTranslation(tweetId) || []
     const { entities, prepend, hasPrepend } = prepareInitialEntities(originalTweet, existing, dictionaryEntries)
 
+    const posMap = new Map<number, number>()
+    entities.forEach((e, i) => posMap.set(e.index, i))
+    entityPosByIndexRef.current = posMap
+
     setEditingEntities(entities)
     setPrependText(prepend)
     setEnablePrepend(hasPrepend)
@@ -93,7 +98,20 @@ export function useTranslationEditorLogic(originalTweet: EnrichedTweet) {
 
   // 更新单个实体的翻译
   const updateEntityTranslation = useCallback((index: number, value: string) => {
-    setEditingEntities(prev => prev.map(e => e.index === index ? { ...e, translation: value } : e))
+    setEditingEntities((prev) => {
+      const pos = entityPosByIndexRef.current.get(index)
+      if (pos === undefined)
+        return prev
+      const current = prev[pos]
+      if (!current)
+        return prev
+      if (current.translation === value)
+        return prev
+
+      const next = prev.slice()
+      next[pos] = { ...current, translation: value }
+      return next
+    })
   }, [])
 
   // 保存逻辑
