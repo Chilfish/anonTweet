@@ -3,12 +3,17 @@ import { format } from 'date-fns'
 import { formatDate } from './react-tweet'
 
 export function generateText(tweet: EnrichedTweet): string {
-  const tweetText = tweet.entities.map((entity) => {
+  const hasManualTranslation = tweet.entities.some(e => !!e.translation)
+  const entitiesForTranslation = hasManualTranslation
+    ? tweet.entities
+    : (tweet.autoTranslationEntities?.length ? tweet.autoTranslationEntities : tweet.entities)
+
+  const tweetText = entitiesForTranslation.map((entity) => {
     if (entity.type === 'hashtag' || entity.type === 'mention' || entity.type === 'url')
       return entity.text
 
     if (entity.type === 'text' || entity.type === 'media_alt') {
-      const translation = entity.translation ?? (tweet.autoTranslationEntities?.find(e => e.index === entity.index)?.translation || '')
+      const translation = entity.translation || ''
       const altPrefix = entity.type === 'media_alt' ? `\n图${entity.index - 20000 + 1} Alt：` : ''
       return altPrefix + translation
     }

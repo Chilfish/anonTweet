@@ -1,4 +1,6 @@
-# 推文翻译与词典管理子系统设计文档 v1.1
+# 推文翻译与词典管理子系统设计文档 v2.0
+
+> 本文档描述 **Anon Tweet** 当前（2026-03）翻译子系统的真实数据流向、关键约束与模块职责，并给出下一步重构边界。
 
 ## 1. 概述 (System Overview)
 
@@ -6,9 +8,16 @@
 
 本模块主要包含三个核心领域：
 
-1.  **AI 自动翻译 (AI Auto-Translation)**：基于 Vercel AI SDK 和 Google Gemini 模型，提供带上下文感知的流式翻译服务。
-2.  **翻译编辑器 (Translation Editor)**：负责对单条推文进行实体级的文本编辑、人工校对及“隐藏/显示”状态管理。
-3.  **词典管理 (Dictionary Manager)**：维护本地术语表，支持 AI 提示词注入及批量导入导出。
+1.  **AI 自动翻译 (AI Auto-Translation)**：基于 Vercel AI SDK 和 Google Gemini 模型进行结构化输出翻译，并在服务端生成可渲染的 “翻译实体流”。
+2.  **翻译编辑器 (Translation Editor)**：用户对实体级翻译进行人工校对、显示/隐藏管理（当前实现以“原始实体结构”为主）。
+3.  **词典管理 (Dictionary Manager)**：维护本地术语表，用于 AI 提示词注入及 UI 辅助补全（如 hashtag 词典）。
+
+### 1.1 术语与约束 (Terminology & Constraints)
+
+- **Entity stream（实体流）**：`Entity[]` 按阅读顺序描述推文内容，包含 `text/hashtag/mention/url/...` 等类型。
+- **Translated stream（翻译实体流）**：AI 翻译后重新构建的一套 `Entity[]`，允许占位符实体（hashtag/url/mention 等）在译文中 **重排** 以适配中文语序。
+- **Overlay translation（覆盖式翻译）**：在不改变实体流结构的前提下，仅把 `translation` 字段回填到原始实体中（人工编辑与部分旧逻辑使用此模式）。
+- **占位符 (Placeholder)**：AI 输入中把不可翻译实体替换为 `<<__TYPE_INDEX__>>`，AI 输出必须原样保留。
 
 ---
 
@@ -21,10 +30,15 @@
 ```typescript
 interface EnrichedTweet {
   // ...标准字段
-  entities: Entity[] // 当前显示的内容（可能是原文，也可能是人工翻译后的）
-  autoTranslationEntities?: Entity[] // 服务端/AI 返回的自动翻译结果备份
+  entities: Entity[] // 原始实体流（保持只读；人工翻译存储在 TranslationStore）
+  autoTranslationEntities?: Entity[] // 服务端 AI 生成的“翻译实体流”（可能与 entities 结构不同）
 }
 ```
+
+**关键点**：
+
+- `autoTranslationEntities` 是“可直接渲染”的实体流，不保证与 `entities` 的长度/索引集合一致。
+- 任何“按 index 合并回原文实体”的逻辑都必须谨慎，否则会出现 tag/正文错位。
 
 ### 2.2 翻译状态 (Translation State)
 
@@ -33,6 +47,8 @@ interface EnrichedTweet {
 - **`undefined`**: 未进行人工编辑（默认状态，优先显示 AI 翻译，无 AI 则显示原文）。
 - **`Entity[]`**: 已存在人工翻译/编辑内容（最高优先级）。
 - **`null`**: 用户显式隐藏翻译（强制显示原文，忽略 AI 翻译）。
+
+对应实现文件：`app/lib/stores/translation.ts`
 
 ### 2.3 翻译设置 (Settings Configuration)
 
@@ -63,7 +79,7 @@ interface TranslationSettings {
 - **核心职责**:
   1.  **多级回退策略 (Fallback Strategy)**: 在渲染时，UI 组件会按照 `Manual Edit -> AI Translation -> Original Text` 的优先级决定显示内容。
   2.  **显式隐藏支持**: `setTranslation(tweetId, null)` 动作允许用户针对特定推文关闭翻译显示，此时系统会忽略 AI 翻译结果。
-  3.  **数据同步**: `setTranslation` 会同步更新 `translations` 查找表和 `tweets` 数组中的实体数据，确保视图一致性。
+  3.  **数据同步**: `setTranslation` 只更新 `translations` 查找表；渲染/导出/同步时通过纯函数 “materialize” 将翻译覆盖到原文实体流，避免污染 `tweet.entities`。
 
 ### 3.2 词典持久化 Store (`useTranslationDictionaryStore`)
 
@@ -74,16 +90,37 @@ interface TranslationSettings {
 
 ## 4. 核心业务逻辑 (Core Business Logic)
 
-### 4.1 AI 自动翻译工作流
+### 4.1 AI 自动翻译工作流（服务端）
 
 为了解决 LLM 翻译过程中破坏推文实体（如 URL、Mention、Hashtag）的问题，系统设计了一套**占位符序列化机制**。
 
-- **逻辑实现**: `app/lib/entityParser.ts` & `app/services/ai.ts`
-- **流程**:
-  1.  **序列化 (Serialization)**: 将推文文本中的实体替换为不可翻译的占位符（如 `{{LINK_0}}`, `{{MENTION_1}}`）。
-  2.  **上下文构建 (Contextualization)**: 将推文作者、发布时间、引用推文内容以及用户词典作为上下文注入 Prompt，以提升翻译准确度。
-  3.  **请求生成**: 调用 Google Gemini API 获取翻译文本。
-  4.  **反序列化 (Deserialization)**: 将翻译结果中的占位符还原为原始的 `Entity` 对象，保留其点击跳转功能。
+**实现文件**：
+
+- AI 翻译入口：`app/lib/AITranslation.ts`
+- 占位符序列化/还原：`app/lib/react-tweet/utils/entitytParser.ts`
+- API 路由：
+  - `POST /api/tweet/get`：`app/routes/api/tweet/get.ts`（拉取推文并可选服务端翻译）
+  - `POST /api/ai-translation`：`app/routes/api/ai/ai-translation.ts`（仅翻译单条推文）
+
+**流程**：
+
+1. **序列化 (serializeForAI)**：把不可翻译实体替换为占位符 `<<__TYPE_INDEX__>>`，得到 `maskedText + entityMap`。
+2. **上下文构建**：构造 system/user prompt（作者信息、引用推文、术语表、实体引用上下文）。
+3. **结构化生成**：调用 `generateText()` 并强制 JSON 输出（Zod schema 校验），返回：
+   - `translation`：译文字符串（必须保留占位符）
+   - `entityText?`：可选，hashtag/symbol 的显示文本覆盖（禁止 mention）
+4. **校验/重试**：占位符缺失/多余会触发一次重试；`entityText` 类型越权会触发重试。
+5. **应用覆盖**：将 `entityText` 写回 `entityMap`（不改变占位符本身，只改变最终渲染显示文本）。
+6. **还原 (restoreEntities)**：将译文字符串解析为“翻译实体流” `Entity[]`，保留链接实体可点击性。
+
+```mermaid
+flowchart LR
+  A["EnrichedTweet.entities (original stream)"] --> B["serializeForAI() => maskedText + entityMap"]
+  B --> C["LLM generateText(output=JSON schema)"]
+  C --> D["validate placeholders & entityText (retry once)"]
+  D --> E["apply entityText => entityMap'"]
+  E --> F["restoreEntities(translation, entityMap') => autoTranslationEntities (translated stream)"]
+```
 
 ### 4.2 实体级人工编辑
 
@@ -111,6 +148,24 @@ interface TranslationSettings {
 - **智能展示**: 自动判断显示逻辑。若存在 `autoTranslationEntities` 且无人工覆盖，则显示带特定分割线样式的 AI 译文。
 - **视觉反馈**: AI 翻译内容会有独特的视觉标记（如 Gemini Logo 或特定的分割线），区分于人工翻译。
 
+**当前真实渲染链路**：
+
+- 原文：`app/components/tweet/TweetTextBody.tsx` → `TweetBody(isTranslated=false)`
+- 译文：`app/components/translation/TranslationDisplay.tsx` → `useTweetTranslation()` → `TweetBody(isTranslated=true)`
+
+```mermaid
+flowchart TD
+  A["TweetTextBody"] --> B["TweetBody (original)"]
+  A --> C["TranslationDisplay"]
+  C --> D["useTweetTranslation() resolve entities"]
+  D --> E["TweetBody (translated)"]
+```
+
+**重要约束**：
+
+- `autoTranslationEntities` 可能是“翻译实体流”，结构与原文不同。
+- 因此 UI 需要在“覆盖式合并渲染”与“直接渲染翻译实体流”之间做选择，否则会出现 hashtag 与正文错位。
+
 ### 5.2 设置面板
 
 - **模型选择**: 提供 Gemini 2.0 Flash, Gemini 1.5 Pro 等预设模型选项。
@@ -127,5 +182,55 @@ interface TranslationSettings {
 ## 7. 安全与隐私
 
 1.  **API Key 安全**: 用户输入的 Gemini API Key 仅存储在本地浏览器 LocalStorage 中，或通过服务器端环境变量注入（用于公共部署）。
-2.  **内容清洗**: 发送给 AI 之前，会对文本进行预处理，去除无关的乱码或过长的不可见字符。
-3.  **中文跳过**: 内置语言检测逻辑，对于已经是中文的推文，自动跳过 AI 翻译请求，节省 Token。
+2.  **结构化输出**: 服务端强制 JSON schema，降低“多余文本/思考 token”污染下游解析的风险（见 `app/lib/AITranslation.ts`）。
+3.  **中文跳过**: 对于 `tweet.lang === 'zh'` 的推文，跳过 AI 翻译请求，节省 Token。
+
+---
+
+## 8. 当前痛点与重构边界 (Problems & Refactor Boundaries)
+
+### 8.1 当前痛点
+
+- **合并逻辑分散**：多个地方各自实现 “manual > ai > original” 与 “按 index 合并” 的策略，假设不一致。
+- **数据形态混用**：同一字段 `Entity[]` 被同时当作 “overlay” 与 “stream” 使用，导致错位与边界不清。
+- **跨层耦合**：AI 输出契约的变化（如 tag 翻译、占位符重排）会直接影响 UI 解析/渲染与缓存同步。
+- **性能抖动（重复翻译）**：在无 DB 或 DB 未命中时，tweet 可能来自 local cache 的“未翻译版本”，若不刷新缓存会导致后续请求反复触发 AI 翻译，产生数秒延迟。
+
+### 8.2 推荐模块职责（SOLID）
+
+- **翻译生成（单一职责）**：`AITranslation` 只负责 “输入 tweet → 输出翻译结果（译文+实体覆盖）”，不直接关心 UI 合并策略。
+- **实体转换（单一职责）**：`entitytParser` 只处理 placeholder 序列化/还原，不包含 UI 或 store 假设。
+- **渲染决策（单一职责）**：由一个纯函数模块统一决定“直接渲染翻译实体流”还是“overlay 合并渲染”。
+- **持久化/同步（单一职责）**：缓存同步只处理“可持久化的翻译数据形态”，不依赖 UI 组件行为。
+
+### 8.3 重构路线（分阶段）
+
+1. **抽离 Translation Resolver（纯函数）**：集中实现 “manual/ai/original” 的选择与合并，替换散落逻辑。
+2. **统一 AI 翻译结果契约**：明确 `autoTranslationEntities` 是 stream 还是 overlay；若两者并存则显式区分字段。
+3. **收敛 editor 与 sync 的输入形态**：避免拿 stream 结果强行按 index 合并回原文结构。
+
+---
+
+## 9. 性能与缓存策略 (Performance & Caching)
+
+### 9.1 DB 缓存
+
+- 推文主体缓存：`tweet.jsonContent`（包含 `autoTranslationEntities`）
+- 人工翻译缓存：`tweet_entities.entities`（`TranslationEntity[]`，按 index 覆盖式回填）
+
+### 9.2 Local Cache（无 DB/读穿透场景）
+
+当推文通过 `getLocalCache()` 命中缓存时，缓存的快照可能不包含后续补充字段（例如服务端刚生成的 `autoTranslationEntities`）。
+为避免下一次请求仍拿到“未翻译快照”而重复触发 AI 翻译，翻译完成后会主动刷新缓存：
+
+- `POST /api/tweet/get`：翻译完成后 `setLocalCache(type='tweet')` 刷新 tweet 快照
+- `POST /api/ai-translation`：翻译成功后同样刷新 tweet 快照
+
+### 9.3 Materialize（导出/同步的“翻译视图”）
+
+由于 store 中的人工翻译不再写回 `tweet.entities`，导出/同步等场景需要显式生成“带翻译字段的 tweet 视图”：
+
+- 纯函数实现：`app/lib/translation/materialize.ts`
+- 使用位置：
+  - Markdown 导出：`useTweetOperations()`
+  - 截图后同步到 DB：`useScreenshotAction()` → `syncTranslationData(tweets, translations)`

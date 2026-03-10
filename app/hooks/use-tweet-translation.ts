@@ -2,6 +2,7 @@ import type { EnrichedTweet, Entity } from '~/types'
 import { useShallow } from 'zustand/react/shallow'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { useTranslationStore } from '~/lib/stores/translation'
+import { mergeEntityTranslationsByIndex, resolveAIEntitiesForDisplay } from '~/lib/translation/resolveEntities'
 
 export function useTweetTranslation(tweet: EnrichedTweet, type: 'body' | 'alt' = 'body') {
   const {
@@ -42,37 +43,13 @@ export function useTweetTranslation(tweet: EnrichedTweet, type: 'body' | 'alt' =
   // 检查 Store 中的人工翻译记录
   const manualTranslation = translations[tweetId]
 
-  // 辅助函数：将译文合并到原始实体中，确保原文 (text) 始终存在
-  const mergeEntities = (base: Entity[], translated: Entity[]) => {
-    return base.map((original) => {
-      const found = translated.find(e => e.index === original.index)
-      if (!found)
-        return original
-      // 译文优先取 .translation，如果没有（某些 AI 结果）则取 .text
-      const translation = found.translation || (found.text !== original.text ? found.text : undefined)
-      return { ...original, translation }
-    })
-  }
-
-  const shouldRenderAIEntitiesDirectly = (base: Entity[], translated: Entity[]) => {
-    if (translated.length !== base.length)
-      return true
-    const baseIndexSet = new Set(base.map(e => e.index))
-    return translated.some(e => !baseIndexSet.has(e.index))
-  }
-
   if (manualTranslation) {
     // 处理人工翻译记录：如果是正常数组，则与原文合并
-    entities = mergeEntities(tweet.entities || [], manualTranslation)
+    entities = mergeEntityTranslationsByIndex(tweet.entities || [], manualTranslation)
   }
   // 检查 AI 翻译
   else if (enableAITranslation && tweet.autoTranslationEntities?.length) {
-    const base = tweet.entities || []
-    const ai = tweet.autoTranslationEntities
-    // AI 翻译通常返回“重建后的实体流”（会插入/重排文本片段），按 index 合并会导致错位
-    entities = shouldRenderAIEntitiesDirectly(base, ai)
-      ? ai
-      : mergeEntities(base, ai)
+    entities = resolveAIEntitiesForDisplay(tweet.entities || [], tweet.autoTranslationEntities)
   }
   // 兜底：如果传入的 tweet.entities 本身就包含翻译内容
   else if (tweet.entities?.some(e => e.translation)) {

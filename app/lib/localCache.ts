@@ -240,3 +240,21 @@ export async function getLocalCache<T>({ id, getter, type, ttl = 3600 * 1000 }: 
   pendingRequests.set(key, promise)
   return promise
 }
+
+/**
+ * 主动写入缓存（用于在“获取后又补充了翻译/解析字段”的场景下刷新缓存快照）。
+ */
+export async function setLocalCache<T>({ id, type, value, ttl = 3600 * 1000 }: {
+  id: string
+  type: CacheType
+  value: T
+  ttl?: number
+}): Promise<void> {
+  if (!env.ENABLE_LOCAL_CACHE) {
+    return
+  }
+
+  const key = `${type}-${id}`
+  const adapter = await getAdapter()
+  await adapter.set(key, value, ttl)
+}

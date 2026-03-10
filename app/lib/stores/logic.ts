@@ -40,6 +40,37 @@ export function extractTranslationsFromEntities(tweets: EnrichedTweet | Enriched
   return extracted
 }
 
+function stripEntityTranslation(entity: Entity): Entity {
+  if (entity.translation == null)
+    return entity
+  const copy: Entity = { ...entity }
+  delete (copy as any).translation
+  return copy
+}
+
+/**
+ * Strip `.translation` from tweet entities so `tweet.entities` can be treated as a stable "original stream".
+ *
+ * Translations are persisted separately in `TranslationStore.translations` and re-applied at render/export time.
+ */
+export function stripTranslationsFromTweets(tweets: EnrichedTweet[]): EnrichedTweet[] {
+  return tweets.map((tweet) => {
+    const cleaned: EnrichedTweet = {
+      ...tweet,
+      entities: (tweet.entities || []).map(stripEntityTranslation),
+    }
+
+    if (tweet.quotedTweet) {
+      cleaned.quotedTweet = {
+        ...tweet.quotedTweet,
+        entities: (tweet.quotedTweet.entities || []).map(stripEntityTranslation),
+      }
+    }
+
+    return cleaned
+  })
+}
+
 /** 递归查找所有后代 Tweet ID (纯函数) */
 export function findDescendantIds(allTweets: EnrichedTweet[], parentId: string): string[] {
   const children = allTweets.filter(t => t.in_reply_to_status_id_str === parentId)

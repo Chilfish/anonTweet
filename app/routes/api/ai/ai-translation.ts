@@ -2,6 +2,7 @@ import type { Route } from './+types/ai-translation'
 import type { AITranslationSchema } from '~/lib/validations/tweet'
 import { data } from 'react-router'
 import { autoTranslateTweet } from '~/lib/AITranslation'
+import { setLocalCache } from '~/lib/localCache'
 
 /**
  *  POST /api/ai-translation
@@ -49,6 +50,19 @@ export async function action({ request }: Route.ActionArgs) {
       thinkingLevel,
       translationGlossary,
     })
+
+    // 刷新本地缓存快照，避免后续请求重复翻译
+    try {
+      await setLocalCache({
+        id: tweet.id_str,
+        type: 'tweet',
+        value: {
+          ...tweet,
+          autoTranslationEntities: translation,
+        },
+      })
+    }
+    catch {}
 
     return data({
       success: true,

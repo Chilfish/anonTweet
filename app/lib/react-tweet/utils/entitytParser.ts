@@ -233,16 +233,16 @@ export function restoreEntities(
   originalEntities: Entity[], // 新增参数：原始实体数组
 ): Entity[] {
   const result: Entity[] = []
-  // 创建原始实体的索引映射，便于快速查找
-  const originalEntityByIndex = new Map<number, Entity>()
+  // 原文 text 实体按顺序排列，用于为翻译实体流回填原文（仅展示/同步用途）
+  const originalTextEntities = originalEntities
+    .filter(e => e.type === 'text')
+    .sort((a, b) => a.index - b.index)
+  let originalTextCursor = 0
+
   const originalMediaAltByIndex = new Map<number, Entity>()
 
-  // 构建索引映射
   for (const entity of originalEntities) {
-    if (entity.type === 'text') {
-      originalEntityByIndex.set(entity.index, entity)
-    }
-    else if (entity.type === 'media_alt') {
+    if (entity.type === 'media_alt') {
       originalMediaAltByIndex.set(entity.index, entity)
     }
   }
@@ -289,7 +289,7 @@ export function restoreEntities(
       }
       else {
         // 处理 text 类型
-        const originalText = originalEntityByIndex.get(newIndex)
+        const originalText = originalTextEntities[originalTextCursor++]
 
         result.push({
           type: 'text',

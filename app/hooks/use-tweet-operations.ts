@@ -4,13 +4,15 @@ import { extractDownloadItemsFromTweets } from '~/components/translation/Downloa
 import { downloadFiles } from '~/lib/downloader'
 import { fetcher } from '~/lib/fetcher'
 import { generateMarkdownFromTweets, generateText } from '~/lib/markdown'
-import { useMainTweet, useTranslationActions, useTweets } from '~/lib/stores/hooks'
+import { useMainTweet, useTranslationActions, useTranslations, useTweets } from '~/lib/stores/hooks'
+import { materializeTweetsWithManualTranslations } from '~/lib/translation/materialize'
 import { toast } from '~/lib/utils'
 
 export function useTweetOperations() {
   const [isLoadingComments, setIsLoadingComments] = useState(false)
   const tweets = useTweets()
   const mainTweet = useMainTweet()
+  const translations = useTranslations()
   const { appendTweets, setCommentIds } = useTranslationActions()
 
   const loadComments = async () => {
@@ -65,7 +67,8 @@ export function useTweetOperations() {
 
   const copyMarkdown = async () => {
     try {
-      const markdown = generateMarkdownFromTweets(tweets)
+      const viewTweets = materializeTweetsWithManualTranslations(tweets, translations)
+      const markdown = generateMarkdownFromTweets(viewTweets)
       await navigator.clipboard.writeText(markdown)
       toast.success('已复制 Markdown 到剪贴板')
     }
@@ -76,7 +79,8 @@ export function useTweetOperations() {
 
   const copyTweetText = async () => {
     try {
-      const text = generateText(tweets[0]!)
+      const viewTweets = materializeTweetsWithManualTranslations(tweets, translations)
+      const text = generateText(viewTweets[0]!)
       await navigator.clipboard.writeText(text)
       toast.success('已复制正文到剪贴板')
     }

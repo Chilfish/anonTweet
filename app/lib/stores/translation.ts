@@ -4,7 +4,7 @@ import type { EnrichedTweet, Entity, TweetData } from '~/types'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { DEFAULT_TEMPLATES } from '~/lib/constants'
-import { checkTextContent, extractTranslationsFromEntities } from './logic'
+import { checkTextContent, extractTranslationsFromEntities, stripTranslationsFromTweets } from './logic'
 
 export type TranslationMode = 'bilingual' | 'original' | 'translation'
 
@@ -200,9 +200,10 @@ const createDataSlice: StateCreator<
 
   setAllTweets: (data, mainTweetId) => {
     const extracted = extractTranslationsFromEntities(data)
+    const cleaned = stripTranslationsFromTweets(data)
     set(state => ({
-      tweets: data,
-      mainTweet: data.find(t => t.id_str === mainTweetId) || null,
+      tweets: cleaned,
+      mainTweet: cleaned.find(t => t.id_str === mainTweetId) || null,
       translations: { ...state.translations, ...extracted },
     }))
   },
@@ -216,8 +217,9 @@ const createDataSlice: StateCreator<
       return
 
     const extracted = extractTranslationsFromEntities(newTweets)
+    const cleaned = stripTranslationsFromTweets(newTweets)
     set(state => ({
-      tweets: [...state.tweets, ...newTweets],
+      tweets: [...state.tweets, ...cleaned],
       translations: { ...state.translations, ...extracted },
     }))
   },
@@ -227,17 +229,10 @@ const createDataSlice: StateCreator<
       if (content === null) {
         return { translations: { ...state.translations, [tweetId]: null } }
       }
-      const updateTweetEntities = (t: EnrichedTweet): EnrichedTweet =>
-        t.id_str === tweetId ? { ...t, entities: content } : t
 
       return {
-        translations: { ...state.translations, [tweetId]: content },
-        tweets: state.tweets.map((tweet) => {
-          if (tweet.quotedTweet)
-            tweet.quotedTweet = updateTweetEntities(tweet.quotedTweet)
-          return updateTweetEntities(tweet)
-        }),
-        mainTweet: state.mainTweet ? updateTweetEntities(state.mainTweet) : null,
+        // Store manual translations separately; keep `tweet.entities` as a stable original stream.
+        translations: { ...state.translations, [tweetId]: structuredClone(content) },
       }
     }),
 

@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react'
 import { fetcher } from '~/lib/fetcher'
 import { useAIConfig, useTranslationActions } from '~/lib/stores/hooks'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
+import { shouldRenderTranslatedEntitiesDirectly } from '~/lib/translation/resolveEntities'
 import { decodeHtmlEntities, toast } from '~/lib/utils'
 
 // 纯函数：初始化实体数据（核心业务逻辑）
@@ -23,11 +24,16 @@ function prepareInitialEntities(
     })
   }
   else if (tweetWithAuto.autoTranslationEntities?.length) {
-    baseEntities = baseEntities.map((original) => {
-      const found = tweetWithAuto.autoTranslationEntities?.find(e => e.index === original.index)
-      const translation = found?.translation || found?.text
-      return found ? { ...original, translation } : original
-    })
+    const ai = tweetWithAuto.autoTranslationEntities
+    const isStream = shouldRenderTranslatedEntitiesDirectly(originalTweet.entities || [], ai)
+    // Editor 当前以“原始实体结构”为基准回填；若 AI 是翻译实体流（stream），避免按 index 强行合并导致错位
+    if (!isStream) {
+      baseEntities = baseEntities.map((original) => {
+        const found = ai.find(e => e.index === original.index)
+        const translation = found?.translation || found?.text
+        return found ? { ...original, translation } : original
+      })
+    }
   }
 
   // 2. 字典增强
@@ -140,10 +146,18 @@ export function useTranslationEditorLogic(originalTweet: EnrichedTweet) {
       if (data.success && data.data?.autoTranslationEntities) {
         const aiTranslations = data.data.autoTranslationEntities as Entity[]
 
-        setEditingEntities(prev => prev.map((entity) => {
-          const aiEntity = aiTranslations.find(e => e.index === entity.index)
-          return aiEntity ? { ...entity, translation: aiEntity.translation || aiEntity.text } : entity
-        }))
+        const isStream = shouldRenderTranslatedEntitiesDirectly(originalTweet.entities || [], aiTranslations)
+        if (isStream) {
+          toast.info('AI 翻译已生成', {
+            description: '该结果为“翻译实体流”，当前编辑器仅支持按原文实体结构回填；可在正文翻译区直接查看。',
+          })
+        }
+        else {
+          setEditingEntities(prev => prev.map((entity) => {
+            const aiEntity = aiTranslations.find(e => e.index === entity.index)
+            return aiEntity ? { ...entity, translation: aiEntity.translation || aiEntity.text } : entity
+          }))
+        }
 
         toast.success('AI 翻译完成')
       }

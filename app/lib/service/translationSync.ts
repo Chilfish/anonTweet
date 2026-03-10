@@ -1,35 +1,35 @@
-import type { EnrichedTweet, TweetData } from '~/types'
+import type { EnrichedTweet, Entity, TweetData } from '~/types'
 import axios from 'axios'
 import { toastManager } from '~/components/ui/toast'
+import { materializeTweetsWithManualTranslations } from '~/lib/translation/materialize'
+import { resolveAIEntitiesForDisplay } from '~/lib/translation/resolveEntities'
 import { flatTweets } from '~/lib/utils'
 
 function combineEntities(tweet: EnrichedTweet) {
-  let baseEntities = tweet.entities
-
   if (tweet.autoTranslationEntities && tweet.autoTranslationEntities.length > 0) {
-    // 情况 B: 命中服务端 AI 翻译
-    // AI 结果可能缺失 text (原文)，或者 text 存放的是译文。我们只取其译文部分。
-    baseEntities = baseEntities.map((original) => {
-      const found = tweet.autoTranslationEntities?.find(e => e.index === original.index)
-      const translation = found?.translation || found?.text
-      return found ? { ...original, translation } : original
-    })
+    // 注意：AI 结果可能是“翻译实体流”（结构与原文不同）。
+    // 为避免按 index 合并导致错位，这里复用统一的 resolver。
+    tweet.entities = resolveAIEntitiesForDisplay(tweet.entities, tweet.autoTranslationEntities)
   }
-  tweet.entities = baseEntities
-
   return tweet
 }
 
-export async function syncTranslationData(tweets: TweetData) {
-  const flatedTweet = flatTweets(tweets)
+export async function syncTranslationData(
+  tweets: TweetData,
+  translations?: Record<string, Entity[] | null>,
+) {
+  const materialized = materializeTweetsWithManualTranslations(tweets, translations)
+  const flatedTweet = flatTweets(materialized)
 
   // 提取有翻译内容的实体
   const data = flatedTweet
     .map(combineEntities)
     .map((tweet) => {
-      const entities = [...tweet.entities, ...(tweet.autoTranslationEntities || [])]
+      const entities = tweet.entities
         .filter(entity => ['hashtag', 'text', 'media_alt'].includes(entity.type))
-        .filter(entity => !!entity.translation?.trim() && !!entity.text?.trim())
+        .filter(entity => !!entity.translation?.trim())
+        // 避免把空原文写进 DB（AI stream 偶尔会产生额外片段，无法可靠回填原文）
+        .filter(entity => entity.type !== 'text' || !!entity.text?.trim())
 
       if (entities.length === 0)
         return null

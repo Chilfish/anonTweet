@@ -3,6 +3,7 @@ import type { TweetData } from '~/types'
 import { data } from 'react-router'
 import z from 'zod'
 import { autoTranslateTweet } from '~/lib/AITranslation'
+import { setLocalCache } from '~/lib/localCache'
 import { getTweets } from '~/lib/service/getTweet'
 import { getLocalTweet, insertToTweetDB } from '~/lib/service/getTweet.server'
 import { extractTweetId } from '~/lib/utils'
@@ -96,6 +97,13 @@ export async function action({ request }: Route.ActionArgs) {
         }
 
         await insertToTweetDB([tweet])
+
+        // 无 DB / DB 未命中时，tweet 可能来自 local cache 的“未翻译版本”；
+        // 这里主动刷新缓存，避免后续请求重复翻译导致变慢。
+        await setLocalCache({ id: tweet.id_str, type: 'tweet', value: tweet })
+        if (tweet.quotedTweet) {
+          await setLocalCache({ id: tweet.quotedTweet.id_str, type: 'tweet', value: tweet.quotedTweet })
+        }
       }
       catch (e) {
         console.error(`Failed to translate tweet ${tweet.id_str}`, e)

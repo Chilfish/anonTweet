@@ -8,6 +8,7 @@ import { useAppConfigStore } from '~/lib/stores/appConfig'
 import {
   useGlobalTranslationMode,
   useMainTweet,
+  useTranslations,
   useTranslationUIActions,
   useUIState,
 } from '~/lib/stores/hooks'
@@ -23,6 +24,7 @@ export function useScreenshotAction({ tweets }: UseScreenshotActionProps) {
 
   const { tweetElRef, selectedTweetIds } = useUIState()
   const mainTweet = useMainTweet()
+  const translations = useTranslations()
   const { translationMode } = useGlobalTranslationMode()
   const {
     setScreenshoting,
@@ -124,7 +126,7 @@ export function useScreenshotAction({ tweets }: UseScreenshotActionProps) {
         toastManager.add({ title: '截图保存成功', type: 'success' })
 
         // 副作用：同步数据
-        await syncTranslationData(tweets)
+        await syncTranslationData(tweets, translations)
       }
       else {
         throw new Error('生成的图片数据为空')
