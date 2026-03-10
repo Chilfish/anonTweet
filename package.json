@@ -9,6 +9,8 @@
     "dev": "react-router dev",
     "start": "node ./server/express.js",
     "typecheck": "react-router typegen && tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "eslint . --fix",
     "postinstall": "lefthook install",
     "db:migrate": "drizzle-kit migrate",

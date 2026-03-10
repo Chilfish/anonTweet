@@ -7,14 +7,17 @@ import 'dotenv/config'
 const serverEnvSchema = z.object({
   ENVIRONMENT: z.enum(['development', 'production']).default('development'),
 
-  TWEET_KEYS: z.string().min(1),
+  // Optional: without keys it may still work, but will face stricter upstream rate limits.
+  TWEET_KEYS: z.string().optional().default(''),
 
   DB_URL: z.url().optional(),
-  ENABLE_DB_CACHE: z.stringbool().default(true),
+  ENABLE_DB_CACHE: z.stringbool().default(false),
   ENABLE_LOCAL_CACHE: z.stringbool().default(false),
   VERCEL: z.stringbool().default(false),
 
-  HOSTNAME: z.url().default('https://anon-tweet.chilfish.top'),
+  // Optional: required only for server-side callbacks that need an absolute URL (e.g. screenshot/plain route).
+  // In development, we'll default to http://localhost:<PORT> when absent.
+  HOSTNAME: z.url().optional(),
 
   GEMINI_API_KEY: z.string().min(1).optional(),
   GEMINI_MODEL: z.string().min(1).optional().default('models/gemini-3-flash-preview'),
@@ -35,11 +38,22 @@ export const env = (() => {
     throw new Error('Invalid environment variables')
   }
 
-  const validatedData = parsed.data
+  const validatedData = parsed.data as z.infer<typeof serverEnvSchema> & { HOSTNAME?: string }
+
+  if (!validatedData.HOSTNAME && validatedData.ENVIRONMENT === 'development') {
+    const port = Number.parseInt(process.env.PORT || '9080')
+    validatedData.HOSTNAME = `http://localhost:${Number.isFinite(port) ? port : 9080}`
+  }
+
+  if (!validatedData.TWEET_KEYS && validatedData.ENVIRONMENT === 'production') {
+    console.warn('⚠️  TWEET_KEYS is empty. Upstream fetching may be rate-limited in production.')
+  }
+
   Object.freeze(validatedData) // Ensure immutability
 
   // Only log in development for better production security
-  if (validatedData.ENVIRONMENT === 'development') {
+  const isTestRuntime = process.env.NODE_ENV === 'test' || !!process.env.VITEST
+  if (validatedData.ENVIRONMENT === 'development' && !isTestRuntime) {
     console.log(`✅ Environment: ${validatedData.ENVIRONMENT}`)
   }
 

@@ -28,7 +28,11 @@ export async function loader({
   const translation = new URL(request.url).searchParams.get('translation') === 'true'
   const enableTranslation = translation && env.ENABLE_AI_TRANSLATION
 
-  const { data: tweets } = await axios.post<TweetData>(`${env.HOSTNAME}/api/tweet/get/${tweetId}`, {
+  const origin = new URL(request.url).origin
+  const baseUrl = env.HOSTNAME || origin
+  const apiUrl = new URL(`/api/tweet/get/${tweetId}`, baseUrl).toString()
+
+  const { data: tweets } = await axios.post<TweetData>(apiUrl, {
     tweetId,
     translationGlossary: '',
     apiKey: env.GEMINI_API_KEY || '',

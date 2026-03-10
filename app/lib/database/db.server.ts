@@ -24,5 +24,3 @@ export function getDbClient(): DrizzleDB {
 export function isDbAvailable(): boolean {
   return !!env.DB_URL && env.ENABLE_DB_CACHE
 }
-
-console.log('isDbAvailable', isDbAvailable())

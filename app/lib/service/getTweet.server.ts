@@ -1,4 +1,4 @@
-import type { EnrichedTweet } from '~/types'
+import type { EnrichedTweet, TranslationEntity } from '~/types'
 import { eq } from 'drizzle-orm'
 import { getDbClient, isDbAvailable } from '~/lib/database/db.server'
 import { tweet, tweetEntities } from '~/lib/database/schema'
@@ -6,6 +6,20 @@ import { getEnrichedTweet } from '~/lib/react-tweet/utils/get-tweet'
 import { getLocalCache } from '../localCache'
 
 export const getLocalTweet = (tweetId: string) => getLocalCache({ id: tweetId, type: 'tweet', getter: () => getDBTweet(tweetId) })
+
+export function mergeTranslationEntities(enrichedTweet: EnrichedTweet, entities: TranslationEntity[]) {
+  entities.forEach((entity) => {
+    const idx = enrichedTweet.entities.findIndex(e => e.index === entity.index)
+    if (idx > -1) {
+      enrichedTweet.entities[idx]!.translation = entity.translation
+    }
+
+    const isAlts = entity.type === 'media_alt'
+    if (isAlts) {
+      enrichedTweet.entities.push(entity)
+    }
+  })
+}
 
 export async function insertToTweetDB(tweets: EnrichedTweet[]) {
   if (!isDbAvailable()) {
@@ -69,17 +83,7 @@ export async function getDBTweet(tweetId: string): Promise<EnrichedTweet | null>
     }).then(r => r[0])
 
     if (translationEntities) {
-      translationEntities.entities.forEach((entity) => {
-        const idx = enrichedTweet.entities.findIndex(e => e.index === entity.index)
-        if (idx > -1) {
-          enrichedTweet.entities[idx]!.translation = entity.translation
-        }
-
-        const isAlts = entity.type === 'media_alt'
-        if (isAlts) {
-          enrichedTweet.entities.push(entity)
-        }
-      })
+      mergeTranslationEntities(enrichedTweet, translationEntities.entities)
     }
 
     return enrichedTweet
