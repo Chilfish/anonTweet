@@ -15,19 +15,14 @@ export const models: ModelConfig[] = [
     supportedLevels: ['minimal', 'low', 'medium', 'high'],
   },
   {
-    name: 'models/gemini-3-pro-preview',
-    text: 'Gemini 3 Pro Preview',
+    name: 'models/gemini-3.1-pro-preview',
+    text: 'Gemini 3.1 Pro Preview',
     thinkingType: 'level',
     supportedLevels: ['low', 'high'],
   },
   {
-    name: 'models/gemini-2.5-flash-lite',
-    text: 'Gemini 2.5 Flash Lite',
-    thinkingType: 'budget',
-  },
-  {
-    name: 'models/gemini-2.5-flash',
-    text: 'Gemini 2.5 Flash',
+    name: 'models/gemini-3.1-flash-lite-preview',
+    text: 'Gemini 3.1 Flash Lite',
     thinkingType: 'budget',
   },
 ]

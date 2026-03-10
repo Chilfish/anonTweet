@@ -54,13 +54,25 @@ export function useTweetTranslation(tweet: EnrichedTweet, type: 'body' | 'alt' =
     })
   }
 
+  const shouldRenderAIEntitiesDirectly = (base: Entity[], translated: Entity[]) => {
+    if (translated.length !== base.length)
+      return true
+    const baseIndexSet = new Set(base.map(e => e.index))
+    return translated.some(e => !baseIndexSet.has(e.index))
+  }
+
   if (manualTranslation) {
     // 处理人工翻译记录：如果是正常数组，则与原文合并
     entities = mergeEntities(tweet.entities || [], manualTranslation)
   }
   // 检查 AI 翻译
   else if (enableAITranslation && tweet.autoTranslationEntities?.length) {
-    entities = mergeEntities(tweet.entities || [], tweet.autoTranslationEntities)
+    const base = tweet.entities || []
+    const ai = tweet.autoTranslationEntities
+    // AI 翻译通常返回“重建后的实体流”（会插入/重排文本片段），按 index 合并会导致错位
+    entities = shouldRenderAIEntitiesDirectly(base, ai)
+      ? ai
+      : mergeEntities(base, ai)
   }
   // 兜底：如果传入的 tweet.entities 本身就包含翻译内容
   else if (tweet.entities?.some(e => e.translation)) {
