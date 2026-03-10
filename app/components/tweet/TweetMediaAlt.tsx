@@ -38,20 +38,18 @@ export function TweetMediaAlt({ tweet }: { tweet: EnrichedTweet }) {
           return (
             <div
               key={media.media_url_https || i}
-              className="flex flex-col gap-1 py-3 px-2 border border-border/50 rounded bg-muted/70"
+              className="flex flex-col py-2.5 px-2 border border-border/50 rounded bg-muted/70"
             >
-              <span
-                className="w-fit h-fit items-center justify-center rounded bg-muted/20 border border-border/50 px-1.5 py-0.5 text-[10px] font-medium"
-              >
-                图
-                {' '}
-                {i + 1}
-              </span>
-
+              <div className="tweet-body text-[13px] leading-relaxed break-words">
+                <span
+                  className="mr-1.5 inline-flex min-w-fit h-4 items-center justify-center rounded bg-card/30 border border-border/50 px-1.5 text-[10px] font-bold text-muted-foreground align-middle"
+                >
+                  图
+                  {i + 1}
+                </span>
+                {media.ext_alt_text}
+              </div>
               <div className="flex min-w-0 flex-1 flex-col">
-                <p className="tweet-body text-[13px]">
-                  {media.ext_alt_text}
-                </p>
                 {translation && (
                   <div>
                     <div
