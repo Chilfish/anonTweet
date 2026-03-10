@@ -9,8 +9,13 @@ import type { Entity } from '~/types'
  *   we treat `.text` as the translation only when it differs from the original `.text`.
  */
 export function mergeEntityTranslationsByIndex(base: Entity[], translated: Entity[]) {
+  const byIndex = new Map<number, Entity>()
+  translated.forEach((e) => {
+    byIndex.set(e.index, e)
+  })
+
   return base.map((original) => {
-    const found = translated.find(e => e.index === original.index)
+    const found = byIndex.get(original.index)
     if (!found)
       return original
     const translation = found.translation || (found.text !== original.text ? found.text : undefined)

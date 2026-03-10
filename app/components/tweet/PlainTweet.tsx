@@ -8,20 +8,33 @@ import {
   TweetHeader,
   TweetMedia,
 } from '~/lib/react-tweet'
+import { resolveTranslationView } from '~/lib/translation/resolveTranslationView'
 import { cn } from '~/lib/utils'
 import { TweetLinkCard } from './TweetCard'
 import { TweetMediaAlt } from './TweetMediaAlt'
 
 function TweetTextBody({ tweet, enableTranslation }: { tweet: EnrichedTweet, enableTranslation: boolean }) {
-  const translation = enableTranslation ? tweet.autoTranslationEntities : null
-
-  if (!translation) {
+  if (!enableTranslation) {
     return (<TweetBody tweet={tweet} isTranslated={false} />)
   }
 
+  const view = resolveTranslationView({
+    tweet,
+    manualTranslation: undefined,
+    enableAITranslation: true,
+    mode: 'bilingual',
+    visibility: { body: true, alt: true },
+    part: 'body',
+  })
+
   const geminiModel = typeof __GEMINI_MODEL__ === 'undefined' ? 'models/gemini-3-flash-preview' : __GEMINI_MODEL__
-  const separatorTemplate = `<div style="margin-top: 4px; color: #3285FD;">
+  const separatorTemplate = view.source === 'ai'
+    ? `<div style="margin-top: 4px; color: #3285FD;">
 <b style="font-weight: bold; font-size: small;">由 ${models.find(m => m.name === geminiModel)?.text || 'Gemini'} 翻译</b>
+<hr style="margin: 3px; border-top-width: 2px;">
+</div>`
+    : `<div style="margin-top: 4px; color: #3285FD;">
+<b style="font-weight: bold; font-size: small;">翻译</b>
 <hr style="margin: 3px; border-top-width: 2px;">
 </div>`
 
@@ -29,20 +42,24 @@ function TweetTextBody({ tweet, enableTranslation }: { tweet: EnrichedTweet, ena
     <>
       <TweetBody tweet={tweet} isTranslated={false} />
 
-      <div
-        className="translation-separator"
-        dangerouslySetInnerHTML={{ __html: separatorTemplate }}
-      >
-      </div>
-      <TweetBody
-        lang="zh"
-        className="font-bold! mt-2!"
-        tweet={{
-          ...tweet,
-          entities: translation || tweet.entities,
-        }}
-        isTranslated
-      />
+      {view.shouldShow && (
+        <>
+          <div
+            className="translation-separator"
+            dangerouslySetInnerHTML={{ __html: separatorTemplate }}
+          >
+          </div>
+          <TweetBody
+            lang="zh"
+            className="font-bold! mt-2!"
+            tweet={{
+              ...tweet,
+              entities: view.entities,
+            }}
+            isTranslated
+          />
+        </>
+      )}
     </>
   )
 }
