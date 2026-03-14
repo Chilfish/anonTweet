@@ -1,30 +1,50 @@
 import type { TweetData } from '~/types'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { extractDownloadItemsFromTweets } from '~/components/translation/DownloadMedia'
 import { downloadFiles } from '~/lib/downloader'
 import { fetcher } from '~/lib/fetcher'
 import { generateMarkdownFromTweets, generateText } from '~/lib/markdown'
-import { useMainTweet, useTranslationActions, useTranslations, useTweets } from '~/lib/stores/hooks'
+import { useCommentIds, useMainTweet, useTranslationActions, useTranslations, useTweets } from '~/lib/stores/hooks'
 import { materializeTweetsWithManualTranslations } from '~/lib/translation/materialize'
 import { toast } from '~/lib/utils'
 
+interface RepliesResponse {
+  tweets: TweetData
+  nextCursor: string | null
+}
+
 export function useTweetOperations() {
   const [isLoadingComments, setIsLoadingComments] = useState(false)
+  const [repliesCursor, setRepliesCursor] = useState<string | null>(null)
   const tweets = useTweets()
   const mainTweet = useMainTweet()
+  const commentIds = useCommentIds()
   const translations = useTranslations()
   const { appendTweets, setCommentIds } = useTranslationActions()
 
-  const loadComments = async () => {
+  useEffect(() => {
+    setRepliesCursor(null)
+  }, [mainTweet?.id_str])
+
+  const loadComments = async (): Promise<void> => {
     if (!mainTweet)
       return
+
+    if (commentIds.length > 0) {
+      toast.info('评论已加载', repliesCursor ? { description: '可在评论区底部继续加载更多' } : undefined)
+      return
+    }
+
     setIsLoadingComments(true)
     try {
-      const { data } = await fetcher.get<TweetData>(`/api/tweet/replies/${mainTweet.id_str}`)
-      if (data && data.length > 0) {
-        appendTweets(data)
-        setCommentIds(data.map(tweet => tweet.id_str))
-        toast.success(`已获取 ${data.length} 条评论`, {
+      const { data } = await fetcher.get<RepliesResponse>(`/api/tweet/replies/${mainTweet.id_str}`)
+      const tweets = data?.tweets || []
+      setRepliesCursor(data?.nextCursor || null)
+
+      if (tweets.length > 0) {
+        appendTweets(tweets)
+        setCommentIds(tweets.map(tweet => tweet.id_str))
+        toast.success(`已获取 ${tweets.length} 条评论`, {
           description: '默认仅筛选出与博主有互动的回复',
         })
       }
@@ -37,6 +57,40 @@ export function useTweetOperations() {
     catch (error) {
       console.error('Failed to load comments:', error)
       toast.error('加载评论失败', { description: `${error}` })
+    }
+    finally {
+      setIsLoadingComments(false)
+    }
+  }
+
+  const loadMoreComments = async (): Promise<void> => {
+    if (!mainTweet || !repliesCursor)
+      return
+
+    setIsLoadingComments(true)
+    try {
+      const url = `/api/tweet/replies/${mainTweet.id_str}?cursor=${encodeURIComponent(repliesCursor)}`
+      const { data } = await fetcher.get<RepliesResponse>(url)
+
+      const tweets = data?.tweets || []
+      const next = data?.nextCursor || null
+      setRepliesCursor(next && next !== repliesCursor ? next : null)
+
+      if (tweets.length > 0) {
+        appendTweets(tweets)
+
+        const merged = new Set([...commentIds, ...tweets.map(tweet => tweet.id_str)])
+        setCommentIds([...merged])
+
+        toast.success(`已加载更多 ${tweets.length} 条评论`)
+      }
+      else {
+        toast.info('暂无更多评论')
+      }
+    }
+    catch (error) {
+      console.error('Failed to load more comments:', error)
+      toast.error('加载更多评论失败', { description: `${error}` })
     }
     finally {
       setIsLoadingComments(false)
@@ -92,6 +146,8 @@ export function useTweetOperations() {
   return {
     isLoadingComments,
     loadComments,
+    loadMoreComments,
+    hasMoreComments: !!repliesCursor,
     copyTweetText,
     downloadMedia,
     copyMarkdown,

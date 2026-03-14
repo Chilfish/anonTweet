@@ -6,6 +6,7 @@ import type { IUserTweetsResponse } from '~/lib/rettiwt-api/types/raw/user/Tweet
 import type { EnrichedTweet, RawTweet, RawUser } from '~/types'
 import { ResourceType, TweetRepliesSortType } from '~/lib/rettiwt-api'
 import { Extractors } from '~/lib/rettiwt-api/collections/Extractors'
+import { findByFilter } from '~/lib/rettiwt-api/helper/JsonUtils'
 import { RettiwtPool } from '~/lib/SmartPool'
 import { enrichTweet } from './parseTweet'
 // import { writeFile } from 'node:fs/promises'
@@ -84,30 +85,51 @@ export async function fetchUserTweet(userId: string): Promise<RawTweet[]> {
   )
 }
 
-export async function fetchReplies(tweetId: string): Promise<RawTweet[]> {
-  return await twitterPool.run(async (fetcher) => {
+export interface FetchRepliesResult {
+  tweets: RawTweet[]
+  nextCursor: string | null
+}
+
+function getBottomCursor(data: NonNullable<unknown>): string | null {
+  const cursors = findByFilter<{ value?: string }>(data, 'cursorType', 'Bottom')
+  const value = cursors.at(-1)?.value
+  return value ? String(value) : null
+}
+
+export async function fetchReplies(tweetId: string, cursor?: string): Promise<FetchRepliesResult> {
+  return twitterPool.run(async (fetcher) => {
     const response = await fetcher.request<ITweetRepliesResponse>(
       ResourceType.TWEET_REPLIES,
       {
         id: tweetId,
         sortBy: TweetRepliesSortType.LIKES,
+        cursor,
       },
     )
-    const data = response.data
+
+    const instructions = response.data
       .threaded_conversation_with_injections_v2
       .instructions
       .filter(t => t.type === 'TimelineAddEntries')
 
-    const mainTweet = (data.flatMap(d => d.entries?.filter(e => e.content.entryType === 'TimelineTimelineItem') || [])
+    const mainTweet = instructions.flatMap(d => d.entries?.filter(e => e.content.entryType === 'TimelineTimelineItem') || [])
       .flatMap(entry => (entry.content.itemContent?.tweet_results.result))
       .filter(result => !!result)
-      .at(0) || {}) as RawTweet
+      .at(0) as RawTweet | undefined
 
-    const comments = data.flatMap(t => t.entries?.filter(d => d.content.entryType === 'TimelineTimelineModule') || [])
+    const comments = instructions
+      .flatMap(t => t.entries?.filter(d => d.content.entryType === 'TimelineTimelineModule') || [])
       .flatMap(entry => (entry.content.items || []).map(d => d.item.itemContent.tweet_results.result))
       .filter(result => !!result)
 
-    return [...comments as unknown as RawTweet[], mainTweet]
+    return {
+      // 部分分页批次不一定包含 mainTweet，避免返回空对象导致 enrich 过程崩溃
+      tweets: [
+        ...comments as unknown as RawTweet[],
+        ...(mainTweet ? [mainTweet] : []),
+      ],
+      nextCursor: getBottomCursor(response.data),
+    }
   })
 }
 

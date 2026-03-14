@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router'
 import useSWR from 'swr'
 import { MyTweet } from '~/components/tweet/Tweet'
 import { TweetHeader } from '~/components/tweet/TweetHeader'
+import { useTweetOperations } from '~/hooks/use-tweet-operations'
 import { fetcher } from '~/lib/fetcher'
 import { TweetNotFound, TweetSkeleton } from '~/lib/react-tweet'
 import { useAIConfig, useMainTweet, useTranslationActions, useTweets } from '~/lib/stores/hooks'
@@ -34,6 +35,8 @@ export default function TweetPage() {
   const storeTweets = useTweets()
   const storeMainTweet = useMainTweet()
   const isStoreReady = useSyncExternalStore(() => () => {}, () => true, () => false)
+
+  const tweetOperations = useTweetOperations()
 
   const {
     enableAITranslation,
@@ -95,7 +98,12 @@ export default function TweetPage() {
   if (!tweetId) {
     return (
       <>
-        <TweetHeader />
+        <TweetHeader
+          isLoadingComments={tweetOperations.isLoadingComments}
+          loadComments={tweetOperations.loadComments}
+          hasTweets={tweetOperations.hasTweets}
+          hasMainTweet={tweetOperations.hasMainTweet}
+        />
         <TweetNotFound tweetId={id} />
       </>
     )
@@ -104,7 +112,12 @@ export default function TweetPage() {
   if (isLoading || isRetweet || !isStoreReady) {
     return (
       <>
-        <TweetHeader />
+        <TweetHeader
+          isLoadingComments={tweetOperations.isLoadingComments}
+          loadComments={tweetOperations.loadComments}
+          hasTweets={tweetOperations.hasTweets}
+          hasMainTweet={tweetOperations.hasMainTweet}
+        />
         <div className="w-full max-w-2xl">
           <TweetSkeleton />
         </div>
@@ -116,7 +129,12 @@ export default function TweetPage() {
     console.error(error)
     return (
       <>
-        <TweetHeader />
+        <TweetHeader
+          isLoadingComments={tweetOperations.isLoadingComments}
+          loadComments={tweetOperations.loadComments}
+          hasTweets={tweetOperations.hasTweets}
+          hasMainTweet={tweetOperations.hasMainTweet}
+        />
         <TweetNotFound tweetId={tweetId} error={error} />
       </>
     )
@@ -124,11 +142,19 @@ export default function TweetPage() {
 
   return (
     <>
-      <TweetHeader />
+      <TweetHeader
+        isLoadingComments={tweetOperations.isLoadingComments}
+        loadComments={tweetOperations.loadComments}
+        hasTweets={tweetOperations.hasTweets}
+        hasMainTweet={tweetOperations.hasMainTweet}
+      />
       <MyTweet
         tweets={displayTweets || []}
         mainTweetId={tweetId}
         showComments={true}
+        hasMoreComments={tweetOperations.hasMoreComments}
+        isLoadingMoreComments={tweetOperations.isLoadingComments}
+        loadMoreComments={tweetOperations.loadMoreComments}
       />
     </>
   )

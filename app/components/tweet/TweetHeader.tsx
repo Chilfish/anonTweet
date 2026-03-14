@@ -3,21 +3,22 @@ import { BackButton } from '~/components/translation/BackButton'
 import { SaveAsImageButton } from '~/components/translation/SaveAsImageButton'
 import { ToggleTransButton } from '~/components/translation/ToggleTransButton'
 import { Button } from '~/components/ui/button'
-import { useTweetOperations } from '~/hooks/use-tweet-operations'
 import { FilterUnrelatedToggle } from './FilterUnrelatedToggle'
 import { TweetOptionsMenu } from './TweetOptionsMenu'
 
-export function TweetHeader() {
-  // 1. 挂载业务逻辑 Hook
-  const {
-    isLoadingComments,
-    loadComments,
-    downloadMedia,
-    copyMarkdown,
-    hasTweets,
-    hasMainTweet,
-  } = useTweetOperations()
+interface TweetHeaderProps {
+  isLoadingComments: boolean
+  loadComments: () => Promise<void>
+  hasTweets: boolean
+  hasMainTweet: boolean
+}
 
+export function TweetHeader({
+  isLoadingComments,
+  loadComments,
+  hasTweets,
+  hasMainTweet,
+}: TweetHeaderProps) {
   return (
     <div className="mb-4 flex w-full items-center justify-between gap-2 px-1 py-2 sm:mb-6 sm:px-0">
       {/* 左侧：导航 */}

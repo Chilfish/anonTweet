@@ -20,6 +20,8 @@ export function enrichTweet(sourceData: RawTweet, retweetedOrignalId?: string): 
 
   const tweet = ('tweet' in sourceData ? sourceData.tweet : sourceData) as RawTweet
   const userBase = transformUserResponse(tweet)
+  if (!userBase)
+    return null
   const userScreenName = userBase.screen_name
   const user = userBase
 
@@ -49,20 +51,23 @@ export function enrichTweet(sourceData: RawTweet, retweetedOrignalId?: string): 
   }
 }
 
-export function transformUserResponse(sourceData: RawTweet): TweetUser {
-  const RawTweet = sourceData?.core?.user_results?.result
-  const legacy = RawTweet.legacy
+export function transformUserResponse(sourceData: RawTweet): TweetUser | null {
+  const rawUser = sourceData?.core?.user_results?.result as any
+  const legacy = rawUser?.legacy
+  const core = rawUser?.core
+
+  if (!rawUser || !legacy || !core)
+    return null
 
   const transformedUser = {
-    id_str: RawTweet.rest_id,
-    name: RawTweet.core.name,
-    screen_name: RawTweet.core.screen_name,
-    is_blue_verified: RawTweet.is_blue_verified,
-    profile_image_shape: RawTweet.profile_image_shape as TweetUser['profile_image_shape'],
+    id_str: rawUser.rest_id,
+    name: core.name,
+    screen_name: core.screen_name,
+    is_blue_verified: rawUser.is_blue_verified,
+    profile_image_shape: rawUser.profile_image_shape as TweetUser['profile_image_shape'],
     verified: legacy.verified,
-    // @ts-expect-error: The verified_type is not always defined
-    verified_type: legacy.verified_type || RawTweet.verification?.verified_type,
-    profile_image_url_https: RawTweet.avatar.image_url?.replace('_normal', ''),
+    verified_type: legacy.verified_type || rawUser.verification?.verified_type,
+    profile_image_url_https: rawUser.avatar?.image_url?.replace('_normal', ''),
   }
 
   return transformedUser

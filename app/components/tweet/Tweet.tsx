@@ -1,12 +1,15 @@
 import type { Ref, RefObject } from 'react'
 import type { AppConfigs } from '~/lib/stores/appConfig'
 import type { TweetData } from '~/types'
+import { ChevronDown, Loader2 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react'
+import { Button } from '~/components/ui/button'
 import { useElementSize } from '~/hooks/use-element-size'
 import { TweetContainer } from '~/lib/react-tweet'
 import { organizeTweets } from '~/lib/react-tweet/utils/organizeTweets'
 import {
   useIsCapturingSelected,
+  useScreenshoting,
   useTranslationSettings,
   useTranslationUIActions,
 } from '~/lib/stores/hooks'
@@ -25,6 +28,9 @@ interface MyTweetProps {
   showComments?: boolean
   filterUnrelated?: boolean
   excludeUsers?: string[]
+  hasMoreComments?: boolean
+  isLoadingMoreComments?: boolean
+  loadMoreComments?: () => Promise<void>
 }
 
 // Tweet.tsx 中的 MainThreadLine 组件
@@ -55,9 +61,13 @@ export function MyTweet({
   showComments,
   filterUnrelated: propFilterUnrelated,
   excludeUsers,
+  hasMoreComments,
+  isLoadingMoreComments,
+  loadMoreComments,
 }: MyTweetProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const { setTweetElRef } = useTranslationUIActions()
+  const isScreenshoting = useScreenshoting()
   const isCapturingSelected = useIsCapturingSelected()
   const { filterUnrelated: storeFilterUnrelated } = useTranslationSettings()
 
@@ -135,6 +145,22 @@ export function MyTweet({
           {commentThreads.map(thread => (
             <CommentBranch key={thread.id_str} tweet={thread} />
           ))}
+
+          {!!(hasMoreComments && loadMoreComments && !isScreenshoting) && (
+            <div className="flex justify-center py-3">
+              <Button
+                variant="secondary"
+                className="w-full max-w-sm"
+                onClick={loadMoreComments}
+                disabled={!!isLoadingMoreComments}
+              >
+                {isLoadingMoreComments
+                  ? <Loader2 className="size-4 animate-spin" />
+                  : <ChevronDown className="size-4" />}
+                加载更多
+              </Button>
+            </div>
+          )}
         </section>
       )}
     </TweetContainer>
