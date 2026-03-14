@@ -1,5 +1,5 @@
 import type { EnrichedTweet } from '~/types'
-import { MediaImage } from '~/components/ui/media'
+import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import { cn } from '~/lib/utils'
 import { TweetInfoCreatedAt } from '.'
 import { VerifiedBadge } from './verified-badge'
@@ -16,58 +16,51 @@ export function TweetHeader({ tweet, avatarSize, className }: Props) {
   const isSmall = avatarSize === 'small'
 
   return (
-    <div className={cn('tweet-header', className, isSmall && 'tweet-header-in-quote')}>
+    <div className={cn('tweet-header flex flex-row items-start', className, isSmall && 'tweet-header-in-quote')}>
       <a
         href={`https://x.com/${user.screen_name}`}
-        className={cn('inline-block relative')}
-        style={{ height: isSmall ? '36px' : '40px', width: isSmall ? '36px' : '40px' }}
+        className={cn('inline-block relative shrink-0')}
+        style={{
+          height: isSmall ? '34px' : '40px',
+          width: isSmall ? '34px' : '40px',
+        }}
         target="_blank"
         rel="noopener noreferrer"
       >
-        <div
-          className={cn(
-            'absolute inset-0 overflow-hidden',
-            user.profile_image_shape === 'Square' ? 'rounded-sm' : 'rounded-full',
-            'z-10',
-          )}
+        <Avatar
+          className="w-full h-full"
         >
-          <MediaImage
-            src={(user.profile_image_url_https)}
+          <AvatarImage
+            src={user.profile_image_url_https}
             alt={user.name}
-            className="h-full w-full object-cover select-none pointer-events-none"
           />
-        </div>
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="h-full w-full transition-colors duration-200 shadow-[inset_0_0_2px_rgba(0,0,0,0.03)] hover:bg-black/15"></div>
-        </div>
+          <AvatarFallback>{user.name[0]}</AvatarFallback>
+        </Avatar>
       </a>
 
-      <div className="flex flex-col mx-2 h-fit gap-[0.1rem]">
-        <div className="flex flex-row items-center gap-1">
+      <div className="flex flex-col flex-1 min-w-0 mx-2 h-fit gap-[0.1rem]">
+        <div className="flex flex-row items-center gap-1 min-w-0">
           <a
             href={`https://x.com/${user.screen_name}`}
-            className="no-underline color-inherit flex items-center hover:underline"
+            className="no-underline color-inherit flex items-center hover:underline min-w-0 shrink"
             target="_blank"
             rel="noopener noreferrer"
           >
-            <div className="font-bold truncate whitespace-nowrap">
-              <span title={user.name}>{user.name}</span>
-            </div>
-            <VerifiedBadge user={user} className="inline-flex ml-1" />
+            <span className="font-bold truncate" title={user.name}>
+              {user.name}
+            </span>
+            <VerifiedBadge user={user} className="shrink-0 ml-1" />
           </a>
-          <div className="overflow-hidden truncate whitespace-nowrap">
-            <a
-              href={`https://x.com/${user.screen_name}`}
-              className="text-[#536471] dark:text-[#71767b] no-underline truncate text-sm"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <span title={`@${user.screen_name}`}>
-                @
-                {user.screen_name}
-              </span>
-            </a>
-          </div>
+          <a
+            href={`https://x.com/${user.screen_name}`}
+            className="text-[#536471] dark:text-[#71767b] no-underline truncate text-sm shrink min-w-[3rem]"
+            target="_blank"
+            rel="noopener noreferrer"
+            title={`@${user.screen_name}`}
+          >
+            @
+            {user.screen_name}
+          </a>
         </div>
 
         <div className="text-[#536471] dark:text-[#71767b] flex items-center gap-1 text-[0.85rem]">

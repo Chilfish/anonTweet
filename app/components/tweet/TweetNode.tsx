@@ -3,7 +3,6 @@ import { forwardRef, useMemo } from 'react'
 import { TranslationEditor } from '~/components/translation/TranslationEditor'
 import { TweetHeader, TweetMedia } from '~/lib/react-tweet'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
-import { useScreenshoting } from '~/lib/stores/hooks'
 import { cn } from '~/lib/utils'
 import { TweetLinkCard } from './TweetCard'
 import { TweetMediaAlt } from './TweetMediaAlt'
@@ -18,7 +17,6 @@ interface TweetNodeProps {
 }
 
 function TweetMediaSection({ tweet }: { tweet: EnrichedTweet }) {
-  const screenshoting = useScreenshoting()
   const isInlineMedia = useAppConfigStore(state => state.isInlineMedia)
 
   const tweetWithMediaConfig = useMemo(() => ({
@@ -44,7 +42,7 @@ export const TweetNode = forwardRef<HTMLDivElement, TweetNodeProps>(({
 }, ref) => {
   const isQuoted = variant === 'quoted'
   const isThreadContext = variant === 'thread' || variant === 'main-in-thread'
-  const avatarSize = isThreadContext ? 'small' : 'medium'
+  const avatarSize = isQuoted ? 'small' : 'medium'
 
   // 样式映射表，替代混乱的 cn
   const styles = useMemo(() => ({
