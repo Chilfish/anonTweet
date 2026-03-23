@@ -40,9 +40,11 @@ function getBestVideoVariant(media: MediaDetails): string | null {
   if (mp4Variants.length === 0)
     return null
 
-  return mp4Variants.reduce((prev, curr) =>
+  const url = mp4Variants.reduce((prev, curr) =>
     curr.bitrate > prev.bitrate ? curr : prev,
   ).url
+
+  return `https://proxy.chilfish.top/${url}`
 }
 
 /**
