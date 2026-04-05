@@ -15,5 +15,6 @@ export default antfu({
     'unicorn/prefer-number-properties': 'warn',
     'ts/no-use-before-define': 'warn',
     'no-case-declarations': 'off',
+    'e18e/prefer-static-regex': 'warn',
   },
 })

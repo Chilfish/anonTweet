@@ -5,7 +5,6 @@ import { reactRouter } from '@react-router/dev/vite'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
 import babel from 'vite-plugin-babel'
-import tsconfigPaths from 'vite-tsconfig-paths'
 import { env } from './app/lib/env.server'
 
 // 获取 git 信息
@@ -51,10 +50,9 @@ export default defineConfig(({ isSsrBuild }) => ({
         ],
       },
     }),
-    tsconfigPaths(),
   ],
-  ssr: {
-    noExternal: ['react-tweet'],
+  resolve: {
+    tsconfigPaths: true,
   },
   server: {
     port: 9080,
