@@ -19,7 +19,7 @@ export function TweetHeader({ tweet, avatarSize, className }: Props) {
     <div className={cn('tweet-header flex flex-row items-start', className, isSmall && 'tweet-header-in-quote')}>
       <a
         href={`https://x.com/${user.screen_name}`}
-        className={cn('inline-block relative shrink-0')}
+        className={cn('inline-block relative shrink-0 z-10')}
         style={{
           height: isSmall ? '34px' : '40px',
           width: isSmall ? '34px' : '40px',
