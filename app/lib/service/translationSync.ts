@@ -6,9 +6,14 @@ import { resolveAIEntitiesForDisplay } from '~/lib/translation/resolveEntities'
 import { flatTweets } from '~/lib/utils'
 
 function combineEntities(tweet: EnrichedTweet) {
+  // 1. 如果已经有新规范的 aiTranslation，通常已经合并在 entities 里了，直接返回
+  if (tweet.entities?.some(e => !!e.aiTranslation)) {
+    return tweet
+  }
+
+  // 2. 兼容旧规范：如果有 autoTranslationEntities，则合并
   if (tweet.autoTranslationEntities && tweet.autoTranslationEntities.length > 0) {
     // 注意：AI 结果可能是“翻译实体流”（结构与原文不同）。
-    // 为避免按 index 合并导致错位，这里复用统一的 resolver。
     tweet.entities = resolveAIEntitiesForDisplay(tweet.entities, tweet.autoTranslationEntities)
   }
   return tweet
@@ -27,8 +32,9 @@ export async function syncTranslationData(
     .map((tweet) => {
       const entities = tweet.entities
         .filter(entity => ['hashtag', 'text', 'media_alt'].includes(entity.type))
-        .filter(entity => !!entity.translation?.trim())
-        // 避免把空原文写进 DB（AI stream 偶尔会产生额外片段，无法可靠回填原文）
+        // 支持 translation (手动) 或 aiTranslation (AI)
+        .filter(entity => !!entity.translation?.trim() || !!entity.aiTranslation?.trim())
+        // 避免把空原文写进 DB
         .filter(entity => entity.type !== 'text' || !!entity.text?.trim())
 
       if (entities.length === 0)

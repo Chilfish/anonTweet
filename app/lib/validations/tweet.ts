@@ -26,6 +26,7 @@ export const getTweetSchema = z.object({
   model: z.string().optional(),
   thinkingLevel: z.enum(['minimal', 'low', 'medium', 'high']).optional(),
   translationGlossary: z.string().optional(),
+  force: z.boolean().default(false),
 })
 
 export type GetTweetSchema = z.infer<typeof getTweetSchema>

@@ -17,7 +17,7 @@ export function TweetBody({ tweet, isTranslated, lang, className }: TweetBodyPro
       dir="auto"
     >
       {tweet.entities.map((item) => {
-        const text = isTranslated ? (item.translation || item.text) : item.text
+        const text = isTranslated ? (item.translation || item.aiTranslation || item.text) : item.text
         if (!isTranslated && item.index < 0)
           return null
 

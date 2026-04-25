@@ -62,7 +62,8 @@ export async function action({ request }: Route.ActionArgs) {
   await Promise.all(
     tweets.map(async (tweet) => {
       const isZhTweet = tweet.lang === 'zh'
-      if (tweet.autoTranslationEntities?.length || !enableAITranslation || isZhTweet) {
+      const hasTranslation = tweet.entities?.some(e => !!e.aiTranslation) || !!tweet.autoTranslationEntities?.length
+      if (hasTranslation || !enableAITranslation || isZhTweet) {
         return
       }
 
@@ -75,18 +76,16 @@ export async function action({ request }: Route.ActionArgs) {
       const provider = modelConfig?.provider || 'google'
 
       try {
-        const [mainTweet, quotedTweet] = await Promise.all([
-          !tweet.autoTranslationEntities?.length
-            ? autoTranslateTweet({
-                tweet,
-                apiKey,
-                model,
-                provider,
-                thinkingLevel,
-                translationGlossary,
-              })
-            : [],
-          tweet.quotedTweet && !tweet.quotedTweet.autoTranslationEntities?.length
+        const [mainEntities, quotedEntities] = await Promise.all([
+          autoTranslateTweet({
+            tweet,
+            apiKey,
+            model,
+            provider,
+            thinkingLevel,
+            translationGlossary,
+          }),
+          tweet.quotedTweet
             ? autoTranslateTweet({
                 tweet: tweet.quotedTweet,
                 apiKey,
@@ -95,11 +94,15 @@ export async function action({ request }: Route.ActionArgs) {
                 thinkingLevel,
                 translationGlossary,
               })
-            : [],
+            : Promise.resolve(null),
         ])
-        tweet.autoTranslationEntities = mainTweet
-        if (tweet.quotedTweet) {
-          tweet.quotedTweet.autoTranslationEntities = quotedTweet
+
+        tweet.entities = mainEntities
+        tweet.autoTranslationEntities = undefined // 清理旧字段
+
+        if (tweet.quotedTweet && quotedEntities) {
+          tweet.quotedTweet.entities = quotedEntities
+          tweet.quotedTweet.autoTranslationEntities = undefined // 清理旧字段
         }
 
         await insertToTweetDB([tweet])
@@ -113,7 +116,6 @@ export async function action({ request }: Route.ActionArgs) {
       }
       catch (e) {
         console.error(`Failed to translate tweet ${tweet.id_str}`, e)
-        tweet.autoTranslationEntities = []
       }
     }),
   )

@@ -2,13 +2,13 @@ import type { Entity } from '~/types'
 
 /**
  * Merge `translated` into `base` by matching `index`.
- *
- * - Keeps original entity structure (overlay-style).
- * - Writes translated text into `.translation`.
- * - For some AI results, the translated text might be stored in `.text`; in that case
- *   we treat `.text` as the translation only when it differs from the original `.text`.
+ * Writes result into the specified field.
  */
-export function mergeEntityTranslationsByIndex(base: Entity[], translated: Entity[]) {
+export function mergeTranslationsToField(
+  base: Entity[],
+  translated: Entity[],
+  field: 'translation' | 'aiTranslation',
+) {
   const byIndex = new Map<number, Entity>()
   translated.forEach((e) => {
     byIndex.set(e.index, e)
@@ -18,9 +18,17 @@ export function mergeEntityTranslationsByIndex(base: Entity[], translated: Entit
     const found = byIndex.get(original.index)
     if (!found)
       return original
-    const translation = found.translation || (found.text !== original.text ? found.text : undefined)
-    return translation ? { ...original, translation } : original
+    // 优先取目标字段，如果没有则尝试从 text 差异中获取
+    const translation = found[field] || (found.text !== original.text ? (found.aiTranslation || found.translation || found.text) : undefined)
+    return translation ? { ...original, [field]: translation } : original
   })
+}
+
+/**
+ * Legacy wrapper for manual translations
+ */
+export function mergeEntityTranslationsByIndex(base: Entity[], translated: Entity[]) {
+  return mergeTranslationsToField(base, translated, 'translation')
 }
 
 /**
@@ -42,7 +50,8 @@ export function shouldRenderTranslatedEntitiesDirectly(base: Entity[], translate
  * - If it is an index-aligned overlay, merge into the base entities.
  */
 export function resolveAIEntitiesForDisplay(base: Entity[], ai: Entity[]) {
-  return shouldRenderTranslatedEntitiesDirectly(base, ai)
-    ? ai
-    : mergeEntityTranslationsByIndex(base, ai)
+  if (shouldRenderTranslatedEntitiesDirectly(base, ai)) {
+    return ai
+  }
+  return mergeTranslationsToField(base, ai, 'aiTranslation')
 }

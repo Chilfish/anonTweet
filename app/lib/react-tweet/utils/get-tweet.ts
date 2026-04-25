@@ -24,7 +24,7 @@ export async function fetchTweet(id: string): Promise<RawTweet> {
       { id },
     )
 
-    return response.data.data.tweetResult.result
+    return response.data.tweetResult.result
   })
 }
 

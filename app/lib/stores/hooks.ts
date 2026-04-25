@@ -56,6 +56,7 @@ export function useTranslationActions() {
       deleteCustomTemplate: state.deleteCustomTemplate,
       setAllTweets: state.setAllTweets,
       appendTweets: state.appendTweets,
+      updateTweet: state.updateTweet,
       setCommentIds: state.setCommentIds,
       setTranslation: state.setTranslation,
       // 注意：getTranslation 是 getter，不应在渲染期间直接作为数据源依赖，

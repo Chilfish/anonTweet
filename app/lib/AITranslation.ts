@@ -9,6 +9,7 @@ import { generateText, Output, zodSchema } from 'ai'
 import { z } from 'zod'
 import { models } from '~/lib/constants'
 import {
+  applyAITranslations,
   restoreEntities,
   serializeForAI,
 } from '~/lib/react-tweet'
@@ -415,8 +416,9 @@ export async function autoTranslateTweet({
     thinkingLevel,
   })
   if (!translatedText) {
-    return []
+    return tweet.entities
   }
   const entityMapForRestore = applyEntityTextOverrides(entityMap, entityText)
-  return restoreEntities(translatedText, entityMapForRestore, tweet.entities)
+  const aiEntities = restoreEntities(translatedText, entityMapForRestore, tweet.entities)
+  return applyAITranslations(tweet.entities, aiEntities)
 }

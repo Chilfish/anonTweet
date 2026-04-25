@@ -130,6 +130,7 @@ interface DataSlice {
   // Data Actions
   setAllTweets: (data: TweetData, mainTweetId: string) => void
   appendTweets: (data: TweetData) => void
+  updateTweet: (tweetId: string, updates: Partial<EnrichedTweet>) => void
   setCommentIds: (ids: string[]) => void
   setTranslation: (tweetId: string, content: Entity[] | null) => void
   getTranslation: (tweetId: string) => Entity[] | null | undefined
@@ -187,6 +188,23 @@ const createDataSlice: StateCreator<
       tweets: [...state.tweets, ...cleaned],
       translations: { ...state.translations, ...extracted },
     }))
+  },
+
+  updateTweet: (tweetId, updates) => {
+    set((state) => {
+      const updateList = (list: EnrichedTweet[]) =>
+        list.map(t => (t.id_str === tweetId ? { ...t, ...updates } : t))
+
+      const newTweets = updateList(state.tweets)
+      const newMainTweet = state.mainTweet?.id_str === tweetId
+        ? { ...state.mainTweet, ...updates }
+        : state.mainTweet
+
+      return {
+        tweets: newTweets,
+        mainTweet: newMainTweet,
+      }
+    })
   },
 
   setTranslation: (tweetId, content) =>

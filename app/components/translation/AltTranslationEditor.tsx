@@ -1,5 +1,5 @@
 import type { EnrichedTweet } from '~/types'
-import { BookA, Languages, LanguagesIcon, Save } from 'lucide-react'
+import { BookA, Languages, LanguagesIcon, Loader2, Save, Sparkles } from 'lucide-react'
 import React, { useMemo } from 'react'
 import { DictionaryViewer } from '~/components/translation/DictionaryViewer'
 import { Button } from '~/components/ui/button'
@@ -76,6 +76,7 @@ export const AltTranslationEditor: React.FC<AltTranslationEditorProps> = ({
               <Button
                 variant="outline"
                 size="sm"
+                className="text-muted-foreground hover:text-foreground"
               />
             )}
             >
@@ -87,15 +88,34 @@ export const AltTranslationEditor: React.FC<AltTranslationEditorProps> = ({
             </PopoverContent>
           </Popover>
 
+          {editor.enableAITranslation && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={editor.requestAITranslation}
+              disabled={editor.isAITranslating}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              {editor.isAITranslating
+                ? <Loader2 className="size-3.5 animate-spin" />
+                : <Sparkles className="size-3.5" />}
+              <span className="hidden sm:inline-block">
+                AI 翻译
+              </span>
+            </Button>
+          )}
+
           <div className="flex items-center gap-2 ml-auto">
             <Button
               variant="destructive-outline"
+              size="sm"
               onClick={editor.hideTranslations}
             >
               <Save className="size-4" />
               删除
             </Button>
             <Button
+              size="sm"
               onClick={editor.saveTranslations}
             >
               <Save className="size-4" />

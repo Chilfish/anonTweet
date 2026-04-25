@@ -1,4 +1,5 @@
 import type { EnrichedTweet, Entity } from '~/types'
+import { applyAITranslations } from '../react-tweet'
 import { flatTweets } from '../utils'
 
 /** 检查文本有效性 (纯函数) */
@@ -44,31 +45,51 @@ function stripEntityTranslation(entity: Entity): Entity {
   if (entity.translation == null)
     return entity
   const copy: Entity = { ...entity }
+  // 只剥离人工翻译字段，AI 翻译字段可以保留在推文主体中作为“预制翻译”
   delete (copy as any).translation
   return copy
 }
 
 /**
- * Strip `.translation` from tweet entities so `tweet.entities` can be treated as a stable "original stream".
- *
- * Translations are persisted separately in `TranslationStore.translations` and re-applied at render/export time.
+ * 处理推文数据，进行兼容性合并并剥离人工翻译字段。
  */
-export function stripTranslationsFromTweets(tweets: EnrichedTweet[]): EnrichedTweet[] {
+export function processTweetsForStore(tweets: EnrichedTweet[]): EnrichedTweet[] {
   return tweets.map((tweet) => {
+    let entities = tweet.entities || []
+
+    // 兼容性处理：如果存在旧的 autoTranslationEntities 且 entities 还没合并过 AI 翻译
+    if (tweet.autoTranslationEntities?.length && !entities.some(e => !!e.aiTranslation)) {
+      entities = applyAITranslations(entities, tweet.autoTranslationEntities)
+    }
+
     const cleaned: EnrichedTweet = {
       ...tweet,
-      entities: (tweet.entities || []).map(stripEntityTranslation),
+      entities: entities.map(stripEntityTranslation),
+      // 处理完后可以删除旧字段（可选，为了彻底重构）
+      autoTranslationEntities: undefined,
     }
 
     if (tweet.quotedTweet) {
+      let qEntities = tweet.quotedTweet.entities || []
+      if (tweet.quotedTweet.autoTranslationEntities?.length && !qEntities.some(e => !!e.aiTranslation)) {
+        qEntities = applyAITranslations(qEntities, tweet.quotedTweet.autoTranslationEntities)
+      }
       cleaned.quotedTweet = {
         ...tweet.quotedTweet,
-        entities: (tweet.quotedTweet.entities || []).map(stripEntityTranslation),
+        entities: qEntities.map(stripEntityTranslation),
+        autoTranslationEntities: undefined,
       }
     }
 
     return cleaned
   })
+}
+
+/**
+ * Legacy alias
+ */
+export function stripTranslationsFromTweets(tweets: EnrichedTweet[]): EnrichedTweet[] {
+  return processTweetsForStore(tweets)
 }
 
 /** 递归查找所有后代 Tweet ID (纯函数) */

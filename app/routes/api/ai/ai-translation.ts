@@ -18,6 +18,7 @@ export async function action({ request }: Route.ActionArgs) {
     model,
     thinkingLevel,
     translationGlossary,
+    force,
   } = jsonData
 
   try {
@@ -31,8 +32,22 @@ export async function action({ request }: Route.ActionArgs) {
     }
 
     const isZhTweet = tweet.lang === 'zh'
-    if (tweet.autoTranslationEntities?.length || !enableAITranslation || isZhTweet) {
-      return
+    // 新规范：检查 entities 里的 aiTranslation
+    const hasNewTranslation = tweet.entities?.some(e => !!e.aiTranslation)
+    // 旧规范兼容
+    const hasOldTranslation = !!tweet.autoTranslationEntities?.length
+    const hasTranslation = hasNewTranslation || hasOldTranslation
+
+    // 如果不是强制翻译，且已经有翻译结果、或未开启AI翻译、或是中文推文，则跳过
+    if (!force && (hasTranslation || !enableAITranslation || isZhTweet)) {
+      return data({
+        success: true,
+        message: 'No translation needed or already translated',
+        data: {
+          tweetId: tweet.id_str,
+          entities: tweet.entities || [],
+        },
+      })
     }
 
     if (!apiKey || !model) {
@@ -47,7 +62,8 @@ export async function action({ request }: Route.ActionArgs) {
     const modelConfig = models.find(m => m.name === model)
     const provider = modelConfig?.provider || 'google'
 
-    const translation = await autoTranslateTweet({
+    // autoTranslateTweet 现在返回合并后的 entities 数组
+    const mergedEntities = await autoTranslateTweet({
       tweet,
       apiKey,
       model,
@@ -63,7 +79,8 @@ export async function action({ request }: Route.ActionArgs) {
         type: 'tweet',
         value: {
           ...tweet,
-          autoTranslationEntities: translation,
+          entities: mergedEntities,
+          autoTranslationEntities: undefined, // 清理旧字段
         },
       })
     }
@@ -73,7 +90,7 @@ export async function action({ request }: Route.ActionArgs) {
       success: true,
       data: {
         tweetId: tweet.id_str,
-        autoTranslationEntities: translation,
+        entities: mergedEntities,
       },
     })
   }

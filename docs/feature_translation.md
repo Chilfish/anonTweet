@@ -103,6 +103,7 @@ interface TranslationSettings {
 - API 路由：
   - `POST /api/tweet/get`：`app/routes/api/tweet/get.ts`（拉取推文并可选服务端翻译）
   - `POST /api/ai-translation`：`app/routes/api/ai/ai-translation.ts`（仅翻译单条推文）
+    - **强制重翻译**：支持 `force: true` 参数。当为 `true` 时，即便推文已有翻译结果（`autoTranslationEntities`）或为中文，也会强制调用 AI 进行重新翻译，允许用户切换模型或调整翻译质量。
 
 **流程**：
 
@@ -113,7 +114,8 @@ interface TranslationSettings {
    - `entityText?`：可选，hashtag/symbol 的显示文本覆盖（禁止 mention）
 4. **校验/重试**：占位符缺失/多余会触发一次重试；`entityText` 类型越权会触发重试。
 5. **应用覆盖**：将 `entityText` 写回 `entityMap`（不改变占位符本身，只改变最终渲染显示文本）。
-6. **还原 (restoreEntities)**：将译文字符串解析为“翻译实体流” `Entity[]`，保留链接实体可点击性。
+6. **还原 (restoreEntities)**：将译文字符串解析为“翻译实体流” `Entity[]`。
+   - **索引保持**：还原时会尽力保留原始实体的 `index` 字段。这确保了即便 AI 调整了语序，编辑器仍能通过索引将译文准确回填到对应的输入框中。
 
 ```mermaid
 flowchart LR
@@ -121,15 +123,19 @@ flowchart LR
   B --> C["LLM generateText(output=JSON schema)"]
   C --> D["validate placeholders & entityText (retry once)"]
   D --> E["apply entityText => entityMap'"]
-  E --> F["restoreEntities(translation, entityMap') => autoTranslationEntities (translated stream)"]
+  E --> F["restoreEntities(translation, entityMap', originalEntities) => autoTranslationEntities (translated stream)"]
 ```
 
 ### 4.2 实体级人工编辑
 
 允许用户在 AI 翻译的基础上进行二次修改。
 
-- **逻辑实现**: `TranslationEditor.tsx`
+- **逻辑实现**: `TranslationEditor.tsx` / `use-translation-editor-logic.ts`
 - **特性**:
+  - **回填策略 (Back-fill)**：
+    - 优先通过 `index` 匹配 AI 翻译结果并填入编辑器。
+    - **尽力回填 (Best-effort)**：即便 AI 翻译结果被判定为“翻译流”（结构与原文不一致），编辑器也会取消拦截，尽力完成回填并提示用户检查对齐情况。
+  - **手动触发重翻译**：编辑器内的 AI 翻译按钮默认带上 `force: true`，确保用户点击时总是能看到最新的翻译结果。
   - **重置 (Reset)**: 恢复到初始状态（清除人工编辑，回退到 AI 翻译或原文）。
   - **隐藏 (Hide)**: 强制显示原文，屏蔽 AI 翻译。
   - **句首补充**: 支持插入额外的上下文说明（Prepend Entity）。

@@ -21,21 +21,17 @@ export interface TranslationView {
 }
 
 function hasBodyOverlayTranslation(entities: Entity[]) {
-  return entities.some(e => e.type !== 'media_alt' && !!e.translation)
+  return entities.some(e => e.type !== 'media_alt' && (!!e.translation || !!e.aiTranslation))
 }
 
 function hasAltOverlayTranslation(entities: Entity[]) {
-  return entities.some(e => e.type === 'media_alt' && !!e.translation)
+  return entities.some(e => e.type === 'media_alt' && (!!e.translation || !!e.aiTranslation))
 }
 
 function shouldShowForPart(part: TranslationViewPart, entities: Entity[], source: TranslationViewSource, isAIStream: boolean) {
   if (part === 'alt')
     return hasAltOverlayTranslation(entities)
 
-  // Body:
-  // - Overlay-style translations: show only when `.translation` exists on non-alt entities.
-  // - AI translated stream (rendered directly): treat as showable even if `.translation` is empty,
-  //   because the translated content may live in `.text`.
   if (source === 'ai' && isAIStream)
     return entities.length > 0
 
@@ -51,9 +47,10 @@ function shouldShowForPart(part: TranslationViewPart, entities: Entity[], source
  *    - `null`: explicitly hidden => force original
  *    - `Entity[]`: overlay-style => highest priority
  *    - `undefined`: no manual override
- * 3) AI translation (optional)
- * 4) Legacy embedded translations on `tweet.entities`
- * 5) Original
+ * 3) New AI translation (embedded in entities[].aiTranslation)
+ * 4) Legacy AI translation (autoTranslationEntities)
+ * 5) Legacy embedded translations on `tweet.entities` (.translation)
+ * 6) Original
  */
 export function resolveTranslationView(args: {
   tweet: EnrichedTweet
@@ -100,7 +97,16 @@ export function resolveTranslationView(args: {
     }
   }
 
-  // 4) AI translation
+  // 4) New AI translation (directly in entities[].aiTranslation)
+  if (enableAITranslation && base.some(e => !!e.aiTranslation)) {
+    return {
+      shouldShow: shouldShowForPart(part, base, 'ai', false),
+      entities: base,
+      source: 'ai',
+    }
+  }
+
+  // 5) Legacy AI translation (separate array)
   const ai = tweet.autoTranslationEntities || []
   if (enableAITranslation && ai.length > 0) {
     const isAIStream = shouldRenderTranslatedEntitiesDirectly(base, ai)
@@ -112,7 +118,7 @@ export function resolveTranslationView(args: {
     }
   }
 
-  // 5) Legacy embedded translations on base entities (e.g., DB overlay merged upstream).
+  // 6) Legacy embedded translations on base entities (e.g., .translation)
   if (base.some(e => !!e.translation)) {
     return {
       shouldShow: shouldShowForPart(part, base, 'manual', false),
@@ -121,6 +127,6 @@ export function resolveTranslationView(args: {
     }
   }
 
-  // 6) Original
+  // 7) Original
   return { shouldShow: false, entities: base, source: 'original' }
 }

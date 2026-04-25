@@ -52,6 +52,7 @@ export type EntityWithType
 export interface EntityBase {
   text: string
   translation?: string
+  aiTranslation?: string
   index: number
 }
 

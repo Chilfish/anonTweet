@@ -270,7 +270,8 @@ export function restoreEntities(
 
       result.push({
         ...original,
-        index: newIndex++, // 更新排序索引
+        // 保持原始索引，以便在编辑器中通过 index 匹配回填
+        index: original.index,
       })
     }
     else {
@@ -282,7 +283,7 @@ export function restoreEntities(
         result.push({
           type: 'media_alt',
           text: originalMediaAlt?.text ?? '', // 从原始实体中获取 text
-          translation: part,
+          aiTranslation: part,
           index: mediaIndex,
         })
         lastSeparator = null
@@ -294,12 +295,33 @@ export function restoreEntities(
         result.push({
           type: 'text',
           text: originalText?.text ?? '', // 从原始实体中获取 text
-          index: newIndex++,
-          translation: part,
+          index: originalText?.index ?? (30000 + newIndex++),
+          aiTranslation: part,
         })
       }
     }
   }
 
   return result
+}
+
+/**
+ * 将 AI 翻译结果合并回原始实体数组中
+ */
+export function applyAITranslations(base: Entity[], ai: Entity[]): Entity[] {
+  const aiMap = new Map(ai.map(e => [e.index, e]))
+
+  return base.map((original) => {
+    const found = aiMap.get(original.index)
+    if (!found)
+      return original
+
+    // 只有当 AI 结果中有翻译内容，且与原文不同时，才更新 aiTranslation
+    const aiVal = found.aiTranslation || (found.text !== original.text ? found.text : undefined)
+
+    if (aiVal) {
+      return { ...original, aiTranslation: aiVal }
+    }
+    return original
+  })
 }

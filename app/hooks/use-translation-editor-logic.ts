@@ -14,26 +14,32 @@ function prepareInitialEntities(
 ): { entities: Entity[], prepend: string, hasPrepend: boolean } {
   // 深拷贝防止引用污染
   let baseEntities: Entity[] = JSON.parse(JSON.stringify(originalTweet.entities || []))
-  const tweetWithAuto = originalTweet
 
-  // 1. 策略合并：优先使用本地保存的翻译，其次是服务端 AI 翻译
+  // 1. 策略合并：
+  // 优先级 A: 本地保存的手动翻译 (TranslationStore)
   if (existingTranslation && existingTranslation.length > 0) {
     baseEntities = baseEntities.map((original) => {
       const found = existingTranslation.find(e => e.index === original.index)
       return found ? { ...original, translation: found.translation } : original
     })
   }
-  else if (tweetWithAuto.autoTranslationEntities?.length) {
-    const ai = tweetWithAuto.autoTranslationEntities
-    const isStream = shouldRenderTranslatedEntitiesDirectly(originalTweet.entities || [], ai)
-    // Editor 当前以“原始实体结构”为基准回填；若 AI 是翻译实体流（stream），避免按 index 强行合并导致错位
-    if (!isStream) {
-      baseEntities = baseEntities.map((original) => {
-        const found = ai.find(e => e.index === original.index)
-        const translation = found?.translation || found?.text
-        return found ? { ...original, translation } : original
-      })
-    }
+  // 优先级 B: 推文自带的 AI 翻译字段 (aiTranslation)
+  else if (baseEntities.some(e => !!e.aiTranslation)) {
+    baseEntities = baseEntities.map((entity) => {
+      if (entity.aiTranslation) {
+        return { ...entity, translation: entity.aiTranslation }
+      }
+      return entity
+    })
+  }
+  // 优先级 C: 兼容旧数据的独立数组 (autoTranslationEntities)
+  else if (originalTweet.autoTranslationEntities?.length) {
+    const ai = originalTweet.autoTranslationEntities
+    baseEntities = baseEntities.map((original) => {
+      const found = ai.find(e => e.index === original.index)
+      const translation = found?.aiTranslation || found?.translation || found?.text
+      return found ? { ...original, translation } : original
+    })
   }
 
   // 2. 字典增强
@@ -76,7 +82,7 @@ export function useTranslationEditorLogic(originalTweet: EnrichedTweet) {
   const [prependText, setPrependText] = useState('')
   const entityPosByIndexRef = useRef<Map<number, number>>(new Map())
 
-  const { getTranslation, setTranslation, setTranslationVisibility } = useTranslationActions()
+  const { getTranslation, setTranslation, setTranslationVisibility, updateTweet } = useTranslationActions()
   const {
     aiProvider,
     geminiApiKey,
@@ -149,7 +155,10 @@ export function useTranslationEditorLogic(originalTweet: EnrichedTweet) {
     setTranslation(tweetId, finalTranslations)
     setTranslationVisibility(tweetId, { body: true })
     setIsOpen(false)
-    // console.log(finalTranslations)
+    console.log('[Editor] Saved Translation Data:', {
+      tweetId,
+      entities: finalTranslations,
+    })
   }, [editingEntities, enablePrepend, prependText, setTranslation, setTranslationVisibility, tweetId])
 
   // AI 翻译逻辑
@@ -173,25 +182,34 @@ export function useTranslationEditorLogic(originalTweet: EnrichedTweet) {
         model,
         thinkingLevel,
         translationGlossary: combinedGlossary,
+        force: true,
       })
 
-      if (data.success && data.data?.autoTranslationEntities) {
-        const aiTranslations = data.data.autoTranslationEntities as Entity[]
+      if (data.success && data.data?.entities) {
+        const aiEntities = data.data.entities as Entity[]
 
-        const isStream = shouldRenderTranslatedEntitiesDirectly(originalTweet.entities || [], aiTranslations)
+        // 更新全局 Store 中的推文实体，确保外面实时显示
+        updateTweet(tweetId, {
+          entities: aiEntities,
+          autoTranslationEntities: undefined,
+        })
+
+        // 回填到编辑器中：优先使用新生成的 aiTranslation
+        setEditingEntities(prev => prev.map((entity) => {
+          const found = aiEntities.find(e => e.index === entity.index)
+          const translation = found?.aiTranslation || (found && found.text !== entity.text ? found.text : undefined)
+          return found ? { ...entity, translation: translation || entity.translation } : entity
+        }))
+
+        const isStream = shouldRenderTranslatedEntitiesDirectly(originalTweet.entities || [], aiEntities)
         if (isStream) {
-          toast.info('AI 翻译已生成', {
-            description: '该结果为“翻译实体流”，当前编辑器仅支持按原文实体结构回填；可在正文翻译区直接查看。',
+          toast.success('AI 翻译完成', {
+            description: '已尽量按原文结构回填。由于翻译包含结构性调整，请手动检查是否对齐。',
           })
         }
         else {
-          setEditingEntities(prev => prev.map((entity) => {
-            const aiEntity = aiTranslations.find(e => e.index === entity.index)
-            return aiEntity ? { ...entity, translation: aiEntity.translation || aiEntity.text } : entity
-          }))
+          toast.success('AI 翻译完成')
         }
-
-        toast.success('AI 翻译完成')
       }
     }
     catch (error: any) {

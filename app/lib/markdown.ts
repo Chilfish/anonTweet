@@ -3,18 +3,22 @@ import { format } from 'date-fns'
 import { formatDate } from './react-tweet'
 
 export function generateText(tweet: EnrichedTweet): string {
-  const hasManualTranslation = tweet.entities.some(e => !!e.translation)
-  const entitiesForTranslation = hasManualTranslation
-    ? tweet.entities
-    : (tweet.autoTranslationEntities?.length ? tweet.autoTranslationEntities : tweet.entities)
+  const entities = tweet.entities || []
+  const hasTranslation = entities.some(e => !!e.translation || !!e.aiTranslation)
+
+  // 兼容逻辑：如果没有新规范翻译，看看有没有旧规范翻译
+  const entitiesForTranslation = hasTranslation
+    ? entities
+    : (tweet.autoTranslationEntities?.length ? tweet.autoTranslationEntities : entities)
 
   const tweetText = entitiesForTranslation.map((entity) => {
     if (entity.type === 'hashtag' || entity.type === 'mention' || entity.type === 'url')
       return entity.text
 
     if (entity.type === 'text' || entity.type === 'media_alt') {
-      const translation = entity.translation || ''
-      const altPrefix = entity.type === 'media_alt' ? `\n图${entity.index - 20000 + 1} Alt：` : ''
+      const translation = entity.translation || entity.aiTranslation || ''
+      const altPrefix = entity.type === 'media_alt' ? `
+图${entity.index - 20000 + 1} Alt：` : ''
       return altPrefix + translation
     }
     return null
@@ -41,7 +45,9 @@ export function generateMarkdownFromTweets(tweets: TweetData): string {
 
   return tweets
     .map(tweet => generateTweetMarkdown(tweet))
-    .join('---\n\n')
+    .join(`---
+
+`)
 }
 
 /**
@@ -64,20 +70,36 @@ function generateTweetMarkdown(tweet: EnrichedTweet): string {
   if (originalText) {
     parts.push(applyIndent(originalText, indent))
   }
-  const hasTranslation = tweet.entities.some(e => !!e.translation)
-  const translatedText = generateTextFromEntities(tweet.entities, true)
 
-  if (hasTranslation && translatedText && translatedText !== originalText) {
-    parts.push(indent)
-    parts.push(`${indent}**Translation:**\n`)
-    parts.push(applyIndent(translatedText, indent))
-  }
-  else if (tweet.autoTranslationEntities && tweet.autoTranslationEntities.length > 0 && !hasTranslation) {
-    // Fallback to auto translation if no manual translation in main entities
-    const autoText = generateTextFromEntities(tweet.autoTranslationEntities, true)
-    if (autoText) {
+  const hasManualTranslation = tweet.entities.some(e => !!e.translation)
+  const hasAITranslation = tweet.entities.some(e => !!e.aiTranslation)
+  const hasOldAITranslation = !!tweet.autoTranslationEntities?.length
+
+  if (hasManualTranslation) {
+    const translatedText = generateTextFromEntities(tweet.entities, true)
+    if (translatedText && translatedText !== originalText) {
       parts.push(indent)
-      parts.push(`${indent}**AI Translation:**\n`)
+      parts.push(`${indent}**Translation:**
+`)
+      parts.push(applyIndent(translatedText, indent))
+    }
+  }
+  else if (hasAITranslation) {
+    const aiText = generateTextFromEntities(tweet.entities, true)
+    if (aiText && aiText !== originalText) {
+      parts.push(indent)
+      parts.push(`${indent}**AI Translation:**
+`)
+      parts.push(applyIndent(aiText, indent))
+    }
+  }
+  else if (hasOldAITranslation) {
+    // Fallback to old auto translation if no new translation fields
+    const autoText = generateTextFromEntities(tweet.autoTranslationEntities!, true)
+    if (autoText && autoText !== originalText) {
+      parts.push(indent)
+      parts.push(`${indent}**AI Translation:**
+`)
       parts.push(applyIndent(autoText, indent))
     }
   }
@@ -85,11 +107,13 @@ function generateTweetMarkdown(tweet: EnrichedTweet): string {
   if (tweet.mediaDetails && tweet.mediaDetails.length > 0) {
     parts.push(indent)
     const altTranslationEntities = [
-      (tweet.autoTranslationEntities || []).filter(e => e.type === 'media_alt'),
       (tweet.entities.filter(e => e.type === 'media_alt') || []),
+      (tweet.autoTranslationEntities || []).filter(e => e.type === 'media_alt'),
     ]
       .flat()
-      .filter(e => e.translation)
+      // 这里的排序优先级：手动 translation > 新 AI aiTranslation > 旧 AI translation
+      .filter(e => e.translation || e.aiTranslation)
+
     const mediaMarkdown = generateMediaMarkdown(tweet.mediaDetails, altTranslationEntities)
     parts.push(applyIndent(mediaMarkdown, indent))
   }
@@ -122,8 +146,10 @@ function generateTextFromEntities(entities: Entity[], useTranslation: boolean): 
     return ''
 
   return entities.map((item) => {
-    // Determine content
-    const content = (useTranslation && item.translation) ? item.translation : item.text
+    // Determine content: manual translation > AI translation > original text
+    const content = useTranslation
+      ? (item.translation || item.aiTranslation || item.text)
+      : item.text
 
     // Skip technical/hidden entities
     if (item.index < 0)
@@ -153,10 +179,18 @@ function generateTextFromEntities(entities: Entity[], useTranslation: boolean): 
 function generateMediaMarkdown(media: MediaDetails[], altTranslationEntities: Entity[]): string {
   return media.map((item, idx) => {
     if (item.type === 'photo') {
-      const alt = item.ext_alt_text ? `\n\nAlt(${idx + 1} of ${media.length}): ${item.ext_alt_text}` : ''
-      const autoAlt = altTranslationEntities[idx]?.translation
+      const alt = item.ext_alt_text ? `
 
-      return `![Image(${idx + 1} of ${media.length})](${item.media_url_https})${alt}${autoAlt ? `\n\n**Alt Translation:** ${autoAlt}` : ''}`
+Alt(${idx + 1} of ${media.length}): ${item.ext_alt_text}` : ''
+      // 获取该图片的翻译：优先取 manual translation，其次取 aiTranslation
+      const altEntity = altTranslationEntities.find(e =>
+        (e as any).mediaIndex === idx || e.index === 20000 + idx,
+      )
+      const autoAlt = altEntity?.translation || altEntity?.aiTranslation
+
+      return `![Image(${idx + 1} of ${media.length})](${item.media_url_https})${alt}${autoAlt ? `
+
+**Alt Translation:** ${autoAlt}` : ''}`
     }
     else if (item.type === 'video' || item.type === 'animated_gif') {
       const bestVariant = item.video_info?.variants
@@ -164,7 +198,8 @@ function generateMediaMarkdown(media: MediaDetails[], altTranslationEntities: En
         .sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0))[0]
 
       const videoUrl = bestVariant?.url || item.media_url_https
-      return `![Video Thumbnail](${item.media_url_https})\n[Watch Video](${videoUrl})`
+      return `![Video Thumbnail](${item.media_url_https})
+[Watch Video](${videoUrl})`
     }
     return ''
   }).join('\n\n')

@@ -65,10 +65,10 @@ export class FetcherService {
    */
   private _checkAuthorization(resource: ResourceType): void {
   // Logging
-    LogService.log(LogActions.AUTHORIZATION, { authenticated: this.config.userId != undefined })
+    LogService.log(LogActions.AUTHORIZATION, { authenticated: this.config.userId !== undefined })
 
     // Checking authorization status
-    if (!AllowGuestAuthenticationGroup.includes(resource) && this.config.userId == undefined) {
+    if (!AllowGuestAuthenticationGroup.includes(resource) && this.config.userId === undefined) {
       throw new Error(ApiErrors.RESOURCE_NOT_ALLOWED)
     }
   }
@@ -273,7 +273,7 @@ export class FetcherService {
    * });
    * ```
    */
-  public async request<T = unknown>(resource: ResourceType, args: IFetchArgs | IPostArgs): Promise<AxiosResponse<T>> {
+  public async request<T = unknown>(resource: ResourceType, args: IFetchArgs | IPostArgs): Promise<AxiosResponse<T>['data']> {
   /** The current retry number. */
     let retry = 0
 
@@ -344,7 +344,7 @@ export class FetcherService {
         }
 
         // Returning the response
-        return response
+        return response.data
       }
       catch (err) {
         // If it's an error 404, retry
