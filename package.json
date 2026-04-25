@@ -39,7 +39,7 @@
     "cookiejar": "^2.1.4",
     "date-fns": "^4.1.0",
     "dotenv": "^17.4.2",
-    "drizzle-orm": "~0.45.1",
+    "drizzle-orm": "~0.45.2",
     "happy-dom": "20.1.0",
     "https-proxy-agent": "^9.0.0",
     "isbot": "^5.1.39",
@@ -90,7 +90,7 @@
     "morgan": "^1.10.1",
     "storybook": "^10.3.5",
     "typescript": "^6.0.3",
-    "vite": "^7.3.1",
+    "vite": "^8.0.10",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.5"
   }
