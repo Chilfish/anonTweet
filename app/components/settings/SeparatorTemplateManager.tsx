@@ -1,5 +1,6 @@
 import { Check, Plus, RotateCcw, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
@@ -119,7 +120,15 @@ export function SeparatorTemplateManager() {
     addCustomTemplate,
     updateCustomTemplate,
     deleteCustomTemplate,
-  } = useTranslationStore()
+  } = useTranslationStore(
+    useShallow(state => ({
+      settings: state.settings,
+      selectTemplate: state.selectTemplate,
+      addCustomTemplate: state.addCustomTemplate,
+      updateCustomTemplate: state.updateCustomTemplate,
+      deleteCustomTemplate: state.deleteCustomTemplate,
+    })),
+  )
 
   const [isCreating, setIsCreating] = useState(false)
 

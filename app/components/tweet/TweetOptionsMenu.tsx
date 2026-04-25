@@ -9,6 +9,7 @@ import {
   Settings,
 } from 'lucide-react'
 import { useState } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import { SettingsPanel } from '~/components/settings/SettingsPanel'
 import { Button } from '~/components/ui/button'
 import {
@@ -29,7 +30,12 @@ interface TweetOptionsMenuProps {
 
 export function TweetOptionsMenu({ disableActions }: TweetOptionsMenuProps) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const { isInlineMedia, setIsInlineMedia } = useAppConfigStore()
+  const { isInlineMedia, setIsInlineMedia } = useAppConfigStore(
+    useShallow(state => ({
+      isInlineMedia: state.isInlineMedia,
+      setIsInlineMedia: state.setIsInlineMedia,
+    })),
+  )
   const { showTranslationButton } = useUIState()
   const { setShowTranslationButton } = useTranslationUIActions()
 

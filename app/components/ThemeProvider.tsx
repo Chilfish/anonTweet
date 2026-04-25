@@ -6,7 +6,7 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const { theme } = useAppConfigStore()
+  const theme = useAppConfigStore(state => state.theme)
 
   useEffect(() => {
     const root = window.document.documentElement

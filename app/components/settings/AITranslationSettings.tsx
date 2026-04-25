@@ -1,6 +1,7 @@
 import type { ThinkingLevel } from '~/lib/stores/appConfig'
 import { Loader2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import { SettingsGroup, SettingsRow } from '~/components/settings/SettingsUI'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
@@ -39,9 +40,30 @@ export function AITranslationSettings() {
     setDeepseekModel,
     setDeepseekThinkingLevel,
     setTranslationGlossary,
-  } = useAppConfigStore()
+  } = useAppConfigStore(
+    useShallow(state => ({
+      enableAITranslation: state.enableAITranslation,
+      aiProvider: state.aiProvider,
+      geminiApiKey: state.geminiApiKey,
+      geminiModel: state.geminiModel,
+      geminiThinkingLevel: state.geminiThinkingLevel,
+      deepseekApiKey: state.deepseekApiKey,
+      deepseekModel: state.deepseekModel,
+      deepseekThinkingLevel: state.deepseekThinkingLevel,
+      translationGlossary: state.translationGlossary,
+      setEnableAITranslation: state.setEnableAITranslation,
+      setAIProvider: state.setAIProvider,
+      setGeminiApiKey: state.setGeminiApiKey,
+      setGeminiModel: state.setGeminiModel,
+      setGeminiThinkingLevel: state.setGeminiThinkingLevel,
+      setDeepseekApiKey: state.setDeepseekApiKey,
+      setDeepseekModel: state.setDeepseekModel,
+      setDeepseekThinkingLevel: state.setDeepseekThinkingLevel,
+      setTranslationGlossary: state.setTranslationGlossary,
+    })),
+  )
 
-  const { entries } = useTranslationDictionaryStore()
+  const entries = useTranslationDictionaryStore(state => state.entries)
   const [isTesting, setIsTesting] = useState(false)
 
   const currentProviderConfig = {

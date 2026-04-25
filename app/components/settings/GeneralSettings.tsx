@@ -1,3 +1,4 @@
+import { useShallow } from 'zustand/react/shallow'
 import { Input } from '~/components/ui/input'
 import {
   Select,
@@ -21,9 +22,16 @@ export function GeneralSettings() {
     setMediaProxyUrl,
     screenshotFormat,
     setScreenshotFormat,
-    isInlineMedia,
-    setIsInlineMedia,
-  } = useAppConfigStore()
+  } = useAppConfigStore(
+    useShallow(state => ({
+      enableMediaProxy: state.enableMediaProxy,
+      mediaProxyUrl: state.mediaProxyUrl,
+      setEnableMediaProxy: state.setEnableMediaProxy,
+      setMediaProxyUrl: state.setMediaProxyUrl,
+      screenshotFormat: state.screenshotFormat,
+      setScreenshotFormat: state.setScreenshotFormat,
+    })),
+  )
 
   const { filterUnrelated } = useTranslationSettings()
   const { updateSettings } = useTranslationActions()

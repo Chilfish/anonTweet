@@ -1,6 +1,7 @@
 import type { TranslationDicEntry } from '~/lib/stores/TranslationDictionary'
 import { FileDown, FileUp, Pencil, Plus, SearchIcon, Trash2, X } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import { Button } from '~/components/ui/button'
 import {
   Dialog,
@@ -40,7 +41,13 @@ async function parseImportedExcel(result: ArrayBuffer): Promise<ImportOutcome> {
 }
 
 function DictionaryAddSection() {
-  const { entries, addEntry, importEntries } = useTranslationDictionaryStore()
+  const { entries, addEntry, importEntries } = useTranslationDictionaryStore(
+    useShallow(state => ({
+      entries: state.entries,
+      addEntry: state.addEntry,
+      importEntries: state.importEntries,
+    })),
+  )
   const [showAddForm, setShowAddForm] = useState(false)
   const [newOriginal, setNewOriginal] = useState('')
   const [newTranslated, setNewTranslated] = useState('')
@@ -184,7 +191,12 @@ function DictionaryAddSection() {
 }
 
 function DictionaryListSection({ onEdit }: { onEdit: (entry: TranslationDicEntry) => void }) {
-  const { entries, removeEntry } = useTranslationDictionaryStore()
+  const { entries, removeEntry } = useTranslationDictionaryStore(
+    useShallow(state => ({
+      entries: state.entries,
+      removeEntry: state.removeEntry,
+    })),
+  )
   const [searchTerm, setSearchTerm] = useState('')
 
   const filteredEntries = useMemo(() => {
@@ -259,7 +271,7 @@ function DictionaryEditDialog({
   isOpen: boolean
   onClose: () => void
 }) {
-  const { updateEntry } = useTranslationDictionaryStore()
+  const updateEntry = useTranslationDictionaryStore(state => state.updateEntry)
   const [editOriginal, setEditOriginal] = useState(entry?.original ?? '')
   const [editTranslated, setEditTranslated] = useState(entry?.translated ?? '')
 

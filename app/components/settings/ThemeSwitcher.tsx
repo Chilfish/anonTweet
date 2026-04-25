@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
 import type { Theme } from '~/lib/stores/appConfig'
 import { Monitor, Moon, Sun } from 'lucide-react'
+import { useShallow } from 'zustand/react/shallow'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
@@ -16,7 +17,12 @@ const THEME_OPTIONS: {
 ]
 
 export function ThemeSelector() {
-  const { theme, setTheme } = useAppConfigStore()
+  const { theme, setTheme } = useAppConfigStore(
+    useShallow(state => ({
+      theme: state.theme,
+      setTheme: state.setTheme,
+    })),
+  )
 
   return (
     <div className="flex gap-2">
