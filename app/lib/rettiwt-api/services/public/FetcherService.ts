@@ -1,4 +1,4 @@
-import type { AxiosError } from 'axios'
+import type { AxiosError, AxiosResponse } from 'axios'
 import type { ResourceType } from '../../enums/Resource'
 import type { RettiwtConfig } from '../../models/RettiwtConfig'
 import type { IFetchArgs } from '../../types/args/FetchArgs'
@@ -8,7 +8,7 @@ import type { IErrorHandler } from '../../types/ErrorHandler'
 import type { IErrorData } from '../../types/raw/base/Error'
 import axios, { isAxiosError } from 'axios'
 import { Cookie } from 'cookiejar'
-import { Window } from 'happy-dom'
+import { parseHTML } from 'linkedom'
 import { ClientTransaction } from 'x-client-transaction-id'
 import { AllowGuestAuthenticationGroup, FetchResourcesGroup, PostResourcesGroup } from '../../collections/Groups'
 import { Requests } from '../../collections/Requests'
@@ -64,11 +64,11 @@ export class FetcherService {
    * @throws An error if not authorized to access the requested resource.
    */
   private _checkAuthorization(resource: ResourceType): void {
-    // Logging
-    LogService.log(LogActions.AUTHORIZATION, { authenticated: this.config.userId !== undefined })
+  // Logging
+    LogService.log(LogActions.AUTHORIZATION, { authenticated: this.config.userId != undefined })
 
     // Checking authorization status
-    if (!AllowGuestAuthenticationGroup.includes(resource) && this.config.userId === undefined) {
+    if (!AllowGuestAuthenticationGroup.includes(resource) && this.config.userId == undefined) {
       throw new Error(ApiErrors.RESOURCE_NOT_ALLOWED)
     }
   }
@@ -106,7 +106,7 @@ export class FetcherService {
    * @returns The header containing the transaction ID.
    */
   private async _getTransactionHeader(method: string, url: string): Promise<ITransactionHeader> {
-    // Get the X homepage HTML document (using utility function)
+  // Get the X homepage HTML document (using utility function)
     const document = await this._handleXMigration()
 
     // Create and initialize ClientTransaction instance
@@ -119,54 +119,56 @@ export class FetcherService {
     const tid = await transaction.generateTransactionId(method.toUpperCase(), path)
 
     return {
-
       'x-client-transaction-id': tid,
-
     }
   }
 
   private async _handleXMigration(): Promise<Document> {
-    const parseHtml = (html: string) => {
-      const window = new Window({
-        url: 'https://x.com',
-        settings: {
-          disableJavaScriptFileLoading: true,
-          disableJavaScriptEvaluation: true,
-          disableCSSFileLoading: true,
-        },
-      })
-      window.document.write(html)
-      return window.document
-    }
+  // Fetch X.com homepage
     const homePageResponse = await axios.get<string>('https://x.com', {
       headers: this.config.headers,
       httpAgent: this.config.httpsAgent,
       httpsAgent: this.config.httpsAgent,
     })
-    let document = parseHtml(homePageResponse.data)
+
+    // Parse HTML using linkedom
+    let document = parseHTML(homePageResponse.data).document
+
     // Check for migration redirection links
-    const migrationRedirectionRegex = /(https?:\/\/(?:www\.)?(twitter|x)\.com(\/x)?\/migrate([/?])?tok=[\w%\-]+)+/i
+    const migrationRedirectionRegex = new RegExp(
+      '(https?://(?:www\\.)?(twitter|x)\\.com(/x)?/migrate([/?])?tok=[\\w%\\-]+)+',
+      'i',
+    )
+
     const metaRefresh = document.querySelector('meta[http-equiv=\'refresh\']')
     const metaContent = metaRefresh ? metaRefresh.getAttribute('content') || '' : ''
+
     const migrationRedirectionUrl
       = migrationRedirectionRegex.exec(metaContent) || migrationRedirectionRegex.exec(homePageResponse.data)
+
     if (migrationRedirectionUrl) {
+      // Follow redirection URL
       const redirectResponse = await axios.get<string>(migrationRedirectionUrl[0], {
         httpAgent: this.config.httpsAgent,
         httpsAgent: this.config.httpsAgent,
       })
-      document = parseHtml(redirectResponse.data)
+
+      document = parseHTML(redirectResponse.data).document
     }
+
+    // Handle migration form if present
     const migrationForm
       = document.querySelector('form[name=\'f\']')
         || document.querySelector('form[action=\'https://x.com/x/migrate\']')
+
     if (migrationForm) {
       const url = migrationForm.getAttribute('action') || 'https://x.com/x/migrate'
       const method = migrationForm.getAttribute('method') || 'POST'
+
       // Collect form input fields
       const requestPayload = new FormData()
-      const inputFields = migrationForm.querySelectorAll('input')
 
+      const inputFields = migrationForm.querySelectorAll('input')
       for (const element of Array.from(inputFields)) {
         const name = element.getAttribute('name')
         const value = element.getAttribute('value')
@@ -174,6 +176,7 @@ export class FetcherService {
           requestPayload.append(name, value)
         }
       }
+
       // Submit form using POST request
       const formResponse = await axios.request<string>({
         method,
@@ -186,9 +189,12 @@ export class FetcherService {
         httpAgent: this.config.httpsAgent,
         httpsAgent: this.config.httpsAgent,
       })
-      document = parseHtml(formResponse.data)
+
+      document = parseHTML(formResponse.data).document
     }
-    return document as unknown as Document
+
+    // Return final DOM document
+    return document
   }
 
   /**
@@ -218,7 +224,7 @@ export class FetcherService {
    * Introduces a delay using the configured delay/delay function.
    */
   private async _wait(): Promise<void> {
-    // If no delay is set, skip
+  // If no delay is set, skip
     if (this._delay === undefined) {
       return
     }
@@ -227,10 +233,10 @@ export class FetcherService {
     let delay = 0
 
     // Getting the delay
-    if (this._delay && typeof this._delay === 'number') {
+    if (this._delay && typeof this._delay == 'number') {
       delay = this._delay
     }
-    else if (this._delay && typeof this._delay === 'function') {
+    else if (this._delay && typeof this._delay == 'function') {
       delay = await this._delay()
     }
 
@@ -242,11 +248,11 @@ export class FetcherService {
    * Makes an HTTP request according to the given parameters.
    *
    * @param resource - The requested resource.
-   * @param config - The request configuration.
+   * @param args - The args to be used for the request.
    *
    * @typeParam T - The type of the returned response data.
    *
-   * @returns The raw data response received.
+   * @returns The raw Axios response.
    *
    * @example
    *
@@ -267,8 +273,8 @@ export class FetcherService {
    * });
    * ```
    */
-  public async request<T = unknown>(resource: ResourceType, args: IFetchArgs | IPostArgs): Promise<T> {
-    /** The current retry number. */
+  public async request<T = unknown>(resource: ResourceType, args: IFetchArgs | IPostArgs): Promise<AxiosResponse<T>> {
+  /** The current retry number. */
     let retry = 0
 
     /** The error, if any. */
@@ -313,7 +319,8 @@ export class FetcherService {
         await this._wait()
 
         // Getting the response body
-        const responseData = (await axios<T>(config)).data
+        const response = await axios<T>(config)
+        const responseData = response.data
 
         // Check for Twitter API errors in response body
         // Type guard to check if response contains errors
@@ -336,8 +343,8 @@ export class FetcherService {
           throw new TwitterError(axiosError)
         }
 
-        // Returning the reponse body
-        return responseData
+        // Returning the response
+        return response
       }
       catch (err) {
         // If it's an error 404, retry

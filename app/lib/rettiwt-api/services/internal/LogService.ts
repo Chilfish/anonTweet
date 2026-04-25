@@ -7,7 +7,7 @@ import type { LogActions } from '../../enums/Logging'
  */
 export class LogService {
   /** Whether logging is enabled or not. */
-  public static enabled = false
+  public static enabled = true
 
   /**
    * Logs the given data.

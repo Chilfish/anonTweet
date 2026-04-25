@@ -21,13 +21,6 @@ export class ErrorService implements IErrorHandler {
   }
 
   /**
-   * Handle unknown error.
-   */
-  private _handleUnknownError(): void {
-    throw new Error('Unknown error')
-  }
-
-  /**
    * The method called when an error response is received from Twitter API.
    *
    * @param error - The error caught while making HTTP request to Twitter API.
@@ -37,7 +30,7 @@ export class ErrorService implements IErrorHandler {
       this._handleAxiosError(error as AxiosError<IRawErrorData | IRawErrorDetails>)
     }
     else {
-      this._handleUnknownError()
+      throw error
     }
   }
 }

@@ -11,6 +11,13 @@ import {
   serializeForAI,
 } from '~/lib/react-tweet'
 
+import { createDeepSeek, type DeepSeekLanguageModelOptions } from '@ai-sdk/deepseek';
+import { env } from './env.server'
+
+const deepseek = createDeepSeek({
+  apiKey: env.DEEPSEEK_API_KEY ?? '',
+})
+
 /**
  * 将思考程度映射为 Gemini 2.5 的 thinkingBudget (token 数)
  */
@@ -265,6 +272,8 @@ ${maskedText}
     { role: 'user', content: userContent },
   ]
 
+  // console.log(baseMessages)
+
   const thinkingConfig = getThinkingConfig(modelName, thinkingLevel)
   const expectedNewlineCount = countNewlines(maskedText)
   const output = Output.object({
@@ -291,9 +300,9 @@ ${maskedText}
         output,
         temperature: 0.5,
         providerOptions: {
-          google: {
-            thinkingConfig,
-          } satisfies GoogleGenerativeAIProviderOptions,
+          // google: {
+          //   thinkingConfig,
+          // } satisfies GoogleGenerativeAIProviderOptions,
         },
       })
 
@@ -350,7 +359,7 @@ interface TranslationOptions {
 
 export async function autoTranslateTweet({
   tweet,
-  model,
+  // model,
   translationGlossary,
   apiKey,
   thinkingLevel,
@@ -365,13 +374,14 @@ export async function autoTranslateTweet({
     apiKey,
   })
 
+  const model = 'deepseek-chat'
   const { translatedText, entityText } = await translateText({
     tweet,
     maskedText,
     entityContext,
     placeholders: Array.from(entityMap.keys()),
     entityMap,
-    model: gemini(model),
+    model: deepseek(model),
     modelName: model,
     translationGlossary,
     thinkingLevel,

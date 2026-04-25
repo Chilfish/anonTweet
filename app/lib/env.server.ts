@@ -19,6 +19,7 @@ const serverEnvSchema = z.object({
   // In development, we'll default to http://localhost:<PORT> when absent.
   HOSTNAME: z.url().optional(),
 
+  DEEPSEEK_API_KEY: z.string().min(1).optional(),
   GEMINI_API_KEY: z.string().min(1).optional(),
   GEMINI_MODEL: z.string().min(1).optional().default('models/gemini-3-flash-preview'),
   ENABLE_AI_TRANSLATION: z.stringbool().default(false),
