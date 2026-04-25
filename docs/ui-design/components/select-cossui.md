@@ -52,11 +52,11 @@ npm install @base-ui/react
 import {
   Select,
   SelectItem,
-  SelectPopup,
   SelectLabel,
+  SelectPopup,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from '@/components/ui/select'
 ```
 
 ```tsx
@@ -92,9 +92,9 @@ Root component. Alias for `Select.Root` from Base UI.
 
 Trigger button that opens the select dropdown. Styled wrapper for `Select.Trigger` from Base UI.
 
-| Prop   | Type                        | Default     | Description                                      |
-| ------ | --------------------------- | ----------- | ------------------------------------------------ |
-| `size` | `"sm" \| "default" \| "lg"` | `"default"` | Controls the size of the trigger                 |
+| Prop   | Type                        | Default     | Description                      |
+| ------ | --------------------------- | ----------- | -------------------------------- |
+| `size` | `"sm" \| "default" \| "lg"` | `"default"` | Controls the size of the trigger |
 
 ### SelectValue
 
@@ -104,11 +104,11 @@ Displays the selected value. Styled wrapper for `Select.Value` from Base UI.
 
 Popup container for select options. Also exported as `SelectContent`.
 
-| Prop                   | Type                    | Default | Description                                                                                         |
-| ---------------------- | ----------------------- | ------- | --------------------------------------------------------------------------------------------------- |
-| `alignItemWithTrigger` | `boolean`               | `true`  | Aligns the selected item with the trigger                                                           |
-| `sideOffset`           | `number`                | `4`     | Distance from the trigger in pixels                                                                   |
-| `portalProps`          | `Select.Portal.Props`   | -       | Props forwarded to the internal portal (`keepMounted`, `container`, etc.); see Base UI Select portal API |
+| Prop                   | Type                  | Default | Description                                                                                              |
+| ---------------------- | --------------------- | ------- | -------------------------------------------------------------------------------------------------------- |
+| `alignItemWithTrigger` | `boolean`             | `true`  | Aligns the selected item with the trigger                                                                |
+| `sideOffset`           | `number`              | `4`     | Distance from the trigger in pixels                                                                      |
+| `portalProps`          | `Select.Portal.Props` | -       | Props forwarded to the internal portal (`keepMounted`, `container`, etc.); see Base UI Select portal API |
 
 ### SelectItem
 
@@ -134,12 +134,12 @@ Visual separator between items. Styled wrapper for `Select.Separator` from Base 
 
 A standalone button styled like a `SelectTrigger`. Use it as a `render` prop on other trigger components (e.g., `ComboboxTrigger`, `MenuTrigger`) to give them select-like appearance.
 
-| Prop   | Type                        | Default     | Description                                      |
-| ------ | --------------------------- | ----------- | ------------------------------------------------ |
-| `size` | `"sm" \| "default" \| "lg"` | `"default"` | Controls the size of the button                 |
+| Prop   | Type                        | Default     | Description                     |
+| ------ | --------------------------- | ----------- | ------------------------------- |
+| `size` | `"sm" \| "default" \| "lg"` | `"default"` | Controls the size of the button |
 
 ```tsx
-import { SelectButton } from "@/components/ui/select"
+import { SelectButton } from '@/components/ui/select'
 ```
 
 ```tsx
@@ -164,8 +164,8 @@ const items = [
 
 const [selected, setSelected] = useState(items[0])
 
-<Select 
-  value={selected} 
+<Select
+  value={selected}
   onValueChange={(val) => setSelected(val)}
 >
   <SelectTrigger>

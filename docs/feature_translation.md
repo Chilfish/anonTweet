@@ -65,9 +65,11 @@ interface TranslationSettings {
   // 显示风格
   customSeparator: string
   selectedTemplateId: string
-  separatorTemplates: SeparatorTemplate[]
+  customTemplates: SeparatorTemplate[]
 }
 ```
+
+**Note**: `separatorTemplates` (presets) are fixed in the code and provided at the store root, while `customTemplates` are persisted in settings.
 
 ---
 

@@ -17,7 +17,6 @@ interface SettingsState {
   customSeparator: string
   selectedTemplateId: string
   filterUnrelated: boolean
-  separatorTemplates: SeparatorTemplate[]
   customTemplates: SeparatorTemplate[]
 }
 
@@ -26,18 +25,15 @@ const DEFAULT_SETTINGS: SettingsState = {
   customSeparator: DEFAULT_TEMPLATES[0]!.html,
   selectedTemplateId: DEFAULT_TEMPLATES[0]!.id,
   filterUnrelated: false,
-  separatorTemplates: DEFAULT_TEMPLATES,
   customTemplates: [],
 }
 
 interface SettingsSlice {
   settings: SettingsState
+  separatorTemplates: SeparatorTemplate[]
   updateSettings: (settings: Partial<SettingsState>) => void
   resetSettings: () => void
   selectTemplate: (templateId: string) => void
-  updateTemplate: (templateId: string, updates: Partial<SeparatorTemplate>) => void
-  addTemplate: (template: Omit<SeparatorTemplate, 'id'>) => void
-  deleteTemplate: (templateId: string) => void
   addCustomTemplate: (template: Omit<SeparatorTemplate, 'id'>) => string
   updateCustomTemplate: (templateId: string, updates: Partial<SeparatorTemplate>) => void
   deleteCustomTemplate: (templateId: string) => void
@@ -50,6 +46,7 @@ const createSettingsSlice: StateCreator<
   SettingsSlice
 > = set => ({
   settings: DEFAULT_SETTINGS,
+  separatorTemplates: DEFAULT_TEMPLATES,
 
   updateSettings: newSettings =>
     set(state => ({ settings: { ...state.settings, ...newSettings } })),
@@ -58,7 +55,8 @@ const createSettingsSlice: StateCreator<
 
   selectTemplate: templateId =>
     set((state) => {
-      const { separatorTemplates, customTemplates } = state.settings
+      const { separatorTemplates, settings } = state
+      const { customTemplates } = settings
       const template
         = separatorTemplates.find(t => t.id === templateId)
           || customTemplates.find(t => t.id === templateId)
@@ -74,39 +72,6 @@ const createSettingsSlice: StateCreator<
         },
       }
     }),
-
-  updateTemplate: (templateId, updates) =>
-    set(state => ({
-      settings: {
-        ...state.settings,
-        separatorTemplates: state.settings.separatorTemplates.map(t =>
-          t.id === templateId ? { ...t, ...updates } : t,
-        ),
-      },
-    })),
-
-  addTemplate: template =>
-    set(state => ({
-      settings: {
-        ...state.settings,
-        separatorTemplates: [
-          ...state.settings.separatorTemplates,
-          { ...template, id: `custom-${Date.now()}` },
-        ],
-      },
-    })),
-
-  deleteTemplate: templateId =>
-    set(state => ({
-      settings: {
-        ...state.settings,
-        separatorTemplates: state.settings.separatorTemplates.filter(t => t.id !== templateId),
-        selectedTemplateId:
-          state.settings.selectedTemplateId === templateId
-            ? 'preset-google'
-            : state.settings.selectedTemplateId,
-      },
-    })),
 
   addCustomTemplate: (template) => {
     const newId = `custom-${Date.now()}`
@@ -135,7 +100,7 @@ const createSettingsSlice: StateCreator<
       let { selectedTemplateId, customSeparator } = state.settings
 
       if (selectedTemplateId === templateId) {
-        const fallback = state.settings.separatorTemplates[0] || newCustomTemplates[0]
+        const fallback = state.separatorTemplates[0] || newCustomTemplates[0]
         selectedTemplateId = fallback?.id || 'preset-google'
         customSeparator = fallback?.html || ''
       }
@@ -302,25 +267,34 @@ export const useTranslationStore = create<TranslationStore>()(
     {
       name: 'translation-store',
       partialize: state => ({
-        settings: {
-          ...state.settings,
-          translationMode: state.translationMode,
-        },
+        settings: state.settings,
+        translationMode: state.translationMode,
       }),
       migrate: (state: any, version) => {
-        console.log(state)
-        if (version < 5) {
+        if (version < 6) {
+          const newSettings = { ...state.settings }
+          let translationMode = state.translationMode
+
+          // Move translationMode out of settings if it was stored there
+          if (newSettings.translationMode) {
+            translationMode = newSettings.translationMode
+            delete newSettings.translationMode
+          }
+
+          // Ensure separatorTemplates is not persisted
+          if (newSettings.separatorTemplates) {
+            delete newSettings.separatorTemplates
+          }
+
           return {
             ...state,
-            settings: {
-              ...state.settings,
-              translationMode: state.translationMode,
-            },
+            settings: newSettings,
+            translationMode: translationMode || 'bilingual',
           }
         }
         return state
       },
-      version: 5,
+      version: 6,
       onRehydrateStorage: (state) => {
         return () => state?.setHasHydrated(true)
       },

@@ -116,6 +116,7 @@ function TemplateEditor({
 export function SeparatorTemplateManager() {
   const {
     settings,
+    separatorTemplates,
     selectTemplate,
     addCustomTemplate,
     updateCustomTemplate,
@@ -123,6 +124,7 @@ export function SeparatorTemplateManager() {
   } = useTranslationStore(
     useShallow(state => ({
       settings: state.settings,
+      separatorTemplates: state.separatorTemplates,
       selectTemplate: state.selectTemplate,
       addCustomTemplate: state.addCustomTemplate,
       updateCustomTemplate: state.updateCustomTemplate,
@@ -135,7 +137,7 @@ export function SeparatorTemplateManager() {
   const [newTemplate, setNewTemplate] = useState({ name: '', html: '<hr class="my-4" />' })
 
   const allTemplates = useMemo(() =>
-    [...settings.separatorTemplates, ...settings.customTemplates], [settings.separatorTemplates, settings.customTemplates])
+    [...separatorTemplates, ...settings.customTemplates], [separatorTemplates, settings.customTemplates])
 
   const selectedTemplate = useMemo(() =>
     allTemplates.find(t => t.id === settings.selectedTemplateId) || allTemplates[0], [allTemplates, settings.selectedTemplateId])

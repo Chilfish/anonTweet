@@ -61,7 +61,7 @@ export const useAppConfigStore = create<AppConfigState>()(
       enableAITranslation: false,
       aiProvider: 'google',
       geminiApiKey: '',
-      geminiModel: 'models/gemini-2.0-flash-exp',
+      geminiModel: 'models/gemini-3-flash-preview',
       geminiThinkingLevel: 'minimal',
       deepseekApiKey: '',
       deepseekModel: 'deepseek-v4-flash',
