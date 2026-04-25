@@ -3,6 +3,7 @@ import type { TweetData } from '~/types'
 import { data } from 'react-router'
 import z from 'zod'
 import { autoTranslateTweet } from '~/lib/AITranslation'
+import { models } from '~/lib/constants'
 import { setLocalCache } from '~/lib/localCache'
 import { getTweets } from '~/lib/service/getTweet'
 import { getLocalTweet, insertToTweetDB } from '~/lib/service/getTweet.server'
@@ -70,6 +71,9 @@ export async function action({ request }: Route.ActionArgs) {
         return
       }
 
+      const modelConfig = models.find(m => m.name === model)
+      const provider = modelConfig?.provider || 'google'
+
       try {
         const [mainTweet, quotedTweet] = await Promise.all([
           !tweet.autoTranslationEntities?.length
@@ -77,6 +81,7 @@ export async function action({ request }: Route.ActionArgs) {
                 tweet,
                 apiKey,
                 model,
+                provider,
                 thinkingLevel,
                 translationGlossary,
               })
@@ -86,6 +91,7 @@ export async function action({ request }: Route.ActionArgs) {
                 tweet: tweet.quotedTweet,
                 apiKey,
                 model,
+                provider,
                 thinkingLevel,
                 translationGlossary,
               })

@@ -25,10 +25,13 @@ function createSelectors<S extends UseBoundStore<StoreApi<object>>>(_store: S) {
 export function useAIConfig() {
   return useAppConfigStore(
     useShallow(state => ({
+      aiProvider: state.aiProvider,
       geminiApiKey: state.geminiApiKey,
       geminiModel: state.geminiModel,
-      enableAITranslation: state.enableAITranslation,
       geminiThinkingLevel: state.geminiThinkingLevel,
+      deepseekApiKey: state.deepseekApiKey,
+      deepseekModel: state.deepseekModel,
+      enableAITranslation: state.enableAITranslation,
       translationGlossary: state.translationGlossary,
     })),
   )

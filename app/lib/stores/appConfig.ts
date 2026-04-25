@@ -4,7 +4,8 @@ import { persist } from 'zustand/middleware'
 
 export type Theme = 'light' | 'dark' | 'system'
 export type ScreenshotFormat = 'png' | 'jpeg'
-export type ThinkingLevel = 'minimal' | 'low' | 'medium' | 'high'
+export type ThinkingLevel = 'minimal' | 'low' | 'medium' | 'high' | 'max'
+export type AIProvider = 'google' | 'deepseek'
 
 export interface AppConfigs {
   theme: Theme
@@ -13,9 +14,13 @@ export interface AppConfigs {
   enableMediaProxy: boolean
   mediaProxyUrl: string
   enableAITranslation: boolean
+  aiProvider: AIProvider
   geminiApiKey: string
   geminiModel: string
   geminiThinkingLevel: ThinkingLevel
+  deepseekApiKey: string
+  deepseekModel: string
+  deepseekThinkingLevel: ThinkingLevel
   translationGlossary: string
   isInlineMedia: boolean
 }
@@ -31,9 +36,13 @@ interface AppConfigState extends AppConfigs {
   setEnableMediaProxy: (enableMediaProxy: boolean) => void
   setMediaProxyUrl: (mediaProxyUrl: string) => void
   setEnableAITranslation: (enable: boolean) => void
+  setAIProvider: (provider: AIProvider) => void
   setGeminiApiKey: (apiKey: string) => void
   setGeminiModel: (model: string) => void
   setGeminiThinkingLevel: (level: ThinkingLevel) => void
+  setDeepseekApiKey: (apiKey: string) => void
+  setDeepseekModel: (model: string) => void
+  setDeepseekThinkingLevel: (level: ThinkingLevel) => void
   setTranslationGlossary: (glossary: string) => void
   setIsInlineMedia: (isInlineMedia: boolean) => void
 }
@@ -50,27 +59,35 @@ export const useAppConfigStore = create<AppConfigState>()(
       enableMediaProxy: false,
       mediaProxyUrl: 'https://proxy.chilfish.top/',
       enableAITranslation: false,
+      aiProvider: 'google',
       geminiApiKey: '',
-      geminiModel: 'models/gemini-3-flash-preview',
+      geminiModel: 'models/gemini-2.0-flash-exp',
       geminiThinkingLevel: 'minimal',
+      deepseekApiKey: '',
+      deepseekModel: 'deepseek-v4-flash',
+      deepseekThinkingLevel: 'high',
       translationGlossary: '',
       isInlineMedia: false,
 
       setEnableMediaProxy: enableMediaProxy => set({ enableMediaProxy }),
       setMediaProxyUrl: mediaProxyUrl => set({ mediaProxyUrl }),
       setEnableAITranslation: enableAITranslation => set({ enableAITranslation }),
+      setAIProvider: aiProvider => set({ aiProvider }),
       setTheme: theme => set({ theme }),
       setScreenshotFormat: screenshotFormat => set({ screenshotFormat }),
       setShowActions: showActions => set({ showActions }),
       setGeminiApiKey: geminiApiKey => set({ geminiApiKey }),
       setGeminiModel: geminiModel => set({ geminiModel }),
       setGeminiThinkingLevel: geminiThinkingLevel => set({ geminiThinkingLevel }),
+      setDeepseekApiKey: deepseekApiKey => set({ deepseekApiKey }),
+      setDeepseekModel: deepseekModel => set({ deepseekModel }),
+      setDeepseekThinkingLevel: deepseekThinkingLevel => set({ deepseekThinkingLevel }),
       setTranslationGlossary: translationGlossary => set({ translationGlossary }),
       setIsInlineMedia: isInlineMedia => set({ isInlineMedia }),
     }),
     {
       name: 'app-config-store',
-      version: 2,
+      version: 4,
       onRehydrateStorage: (state) => {
         return () => state?.setHasHydrated(true)
       },

@@ -2,6 +2,7 @@ import type { Route } from './+types/ai-translation'
 import type { AITranslationSchema } from '~/lib/validations/tweet'
 import { data } from 'react-router'
 import { autoTranslateTweet } from '~/lib/AITranslation'
+import { models } from '~/lib/constants'
 import { setLocalCache } from '~/lib/localCache'
 
 /**
@@ -43,10 +44,14 @@ export async function action({ request }: Route.ActionArgs) {
       })
     }
 
+    const modelConfig = models.find(m => m.name === model)
+    const provider = modelConfig?.provider || 'google'
+
     const translation = await autoTranslateTweet({
       tweet,
       apiKey,
       model,
+      provider,
       thinkingLevel,
       translationGlossary,
     })

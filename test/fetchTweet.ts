@@ -1,4 +1,4 @@
-import { getTweets } from "../app/lib/service/getTweet";
+import { getTweets } from '../app/lib/service/getTweet'
 
 const tweet = await getTweets('2047850803839537342')
 

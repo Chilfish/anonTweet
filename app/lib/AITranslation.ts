@@ -1,7 +1,9 @@
+import type { DeepSeekLanguageModelOptions } from '@ai-sdk/deepseek'
 import type { GoogleGenerativeAIProviderOptions } from '@ai-sdk/google'
 import type { LanguageModel, ModelMessage } from 'ai'
 import type { ThinkingLevel } from '~/lib/stores/appConfig'
 import type { EnrichedTweet, Entity } from '~/types'
+import { createDeepSeek } from '@ai-sdk/deepseek'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { generateText, Output, zodSchema } from 'ai'
 import { z } from 'zod'
@@ -11,15 +13,8 @@ import {
   serializeForAI,
 } from '~/lib/react-tweet'
 
-// import { createDeepSeek, type DeepSeekLanguageModelOptions } from '@ai-sdk/deepseek';
-// import { env } from './env.server'
-
-// const deepseek = createDeepSeek({
-//   apiKey: env.DEEPSEEK_API_KEY ?? '',
-// })
-
 /**
- * 将思考程度映射为 Gemini 2.5 的 thinkingBudget (token 数)
+ * 将思考程度映射为 Gemini 2.0 的 thinkingBudget (token 数)
  */
 export function mapLevelToBudget(level: ThinkingLevel): number {
   switch (level) {
@@ -27,6 +22,7 @@ export function mapLevelToBudget(level: ThinkingLevel): number {
     case 'low': return 1024
     case 'medium': return 4096
     case 'high': return 16384
+    case 'max': return 32768
     default: return 0
   }
 }
@@ -38,11 +34,24 @@ export function getThinkingConfig(modelName: string, level: ThinkingLevel = 'min
   const modelConfig = models.find(m => m.name === modelName)
   const thinkingConfig: any = { includeThoughts: false }
 
-  if (modelConfig?.thinkingType === 'level') {
-    thinkingConfig.thinkingLevel = level
+  if (!modelConfig)
+    return thinkingConfig
+
+  if (modelConfig.provider === 'google') {
+    if (modelConfig.thinkingType === 'level') {
+      thinkingConfig.thinkingLevel = level
+    }
+    else if (modelConfig.thinkingType === 'budget') {
+      thinkingConfig.thinkingBudget = mapLevelToBudget(level)
+    }
   }
-  else if (modelConfig?.thinkingType === 'budget') {
-    thinkingConfig.thinkingBudget = mapLevelToBudget(level)
+  else if (modelConfig.provider === 'deepseek') {
+    // DeepSeek 映射逻辑
+    if (level === 'minimal')
+      return 'disabled'
+    if (level === 'max')
+      return 'max'
+    return 'high'
   }
 
   return thinkingConfig
@@ -272,7 +281,9 @@ ${maskedText}
     { role: 'user', content: userContent },
   ]
 
-  // console.log(baseMessages)
+  const modelConfig = models.find(m => m.name === modelName)
+  const isDeepSeek = modelConfig?.provider === 'deepseek'
+  const isGoogle = modelConfig?.provider === 'google'
 
   const thinkingConfig = getThinkingConfig(modelName, thinkingLevel)
   const expectedNewlineCount = countNewlines(maskedText)
@@ -300,9 +311,17 @@ ${maskedText}
         output,
         temperature: 0.5,
         providerOptions: {
-          google: {
-            thinkingConfig,
-          } satisfies GoogleGenerativeAIProviderOptions,
+          ...(isGoogle ? {
+            google: {
+              thinkingConfig,
+            } satisfies GoogleGenerativeAIProviderOptions,
+          } : {}),
+          ...(isDeepSeek && modelConfig?.thinkingType === 'level' ? {
+            deepseek: {
+              thinking: { type: thinkingConfig === 'disabled' ? 'disabled' : 'enabled' },
+              ...(thinkingConfig !== 'disabled' && typeof thinkingConfig === 'string' ? { reasoningEffort: thinkingConfig } : {}),
+            } satisfies DeepSeekLanguageModelOptions,
+          } : {}),
         },
       })
 
@@ -352,6 +371,7 @@ ${maskedText}
 interface TranslationOptions {
   model: string
   apiKey: string
+  provider: 'google' | 'deepseek'
   translationGlossary?: string
   tweet: EnrichedTweet
   thinkingLevel?: ThinkingLevel
@@ -360,6 +380,7 @@ interface TranslationOptions {
 export async function autoTranslateTweet({
   tweet,
   model,
+  provider,
   translationGlossary,
   apiKey,
   thinkingLevel,
@@ -370,18 +391,25 @@ export async function autoTranslateTweet({
   }
   const entityContext = generateEntityContext(entityMap)
 
-  const gemini = createGoogleGenerativeAI({
-    apiKey,
-  })
+  let aiProvider: any
+  if (provider === 'google') {
+    aiProvider = createGoogleGenerativeAI({
+      apiKey,
+    })
+  }
+  else {
+    aiProvider = createDeepSeek({
+      apiKey,
+    })
+  }
 
-  // const model = 'deepseek-chat'
   const { translatedText, entityText } = await translateText({
     tweet,
     maskedText,
     entityContext,
     placeholders: Array.from(entityMap.keys()),
     entityMap,
-    model: gemini(model),
+    model: aiProvider(model),
     modelName: model,
     translationGlossary,
     thinkingLevel,

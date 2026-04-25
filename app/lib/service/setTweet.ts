@@ -3,7 +3,7 @@ import { and, eq } from 'drizzle-orm'
 import { getDbClient } from '~/lib/database/db.server'
 import { tweetEntities } from '~/lib/database/schema'
 
-export async function updateEntities({ entities, tweetId}: {
+export async function updateEntities({ entities, tweetId }: {
   tweetId: string
   entities: TranslationEntity[]
 }) {

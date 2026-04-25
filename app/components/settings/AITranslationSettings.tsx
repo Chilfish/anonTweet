@@ -1,5 +1,6 @@
+import type { ThinkingLevel } from '~/lib/stores/appConfig'
 import { Loader2 } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { SettingsGroup, SettingsRow } from '~/components/settings/SettingsUI'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
@@ -21,26 +22,40 @@ import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionar
 export function AITranslationSettings() {
   const {
     enableAITranslation,
+    aiProvider,
     geminiApiKey,
     geminiModel,
     geminiThinkingLevel,
+    deepseekApiKey,
+    deepseekModel,
+    deepseekThinkingLevel,
     translationGlossary,
     setEnableAITranslation,
+    setAIProvider,
     setGeminiApiKey,
     setGeminiModel,
     setGeminiThinkingLevel,
+    setDeepseekApiKey,
+    setDeepseekModel,
+    setDeepseekThinkingLevel,
     setTranslationGlossary,
   } = useAppConfigStore()
 
   const { entries } = useTranslationDictionaryStore()
-
   const [isTesting, setIsTesting] = useState(false)
 
+  const currentProviderConfig = {
+    apiKey: aiProvider === 'google' ? geminiApiKey : deepseekApiKey,
+    model: aiProvider === 'google' ? geminiModel : deepseekModel,
+    thinkingLevel: aiProvider === 'google' ? geminiThinkingLevel : deepseekThinkingLevel,
+    providerName: aiProvider === 'google' ? 'Gemini' : 'DeepSeek',
+  }
+
   const handleTestConnection = async () => {
-    if (!geminiApiKey) {
+    if (!currentProviderConfig.apiKey) {
       toastManager.add({
         title: 'API Key 为空',
-        description: '请先输入 Gemini API Key',
+        description: `请先输入 ${currentProviderConfig.providerName} API Key`,
         type: 'error',
       })
       return
@@ -49,9 +64,9 @@ export function AITranslationSettings() {
     setIsTesting(true)
     try {
       const { data } = await fetcher.post('/api/ai-test', {
-        apiKey: geminiApiKey,
-        model: geminiModel,
-        thinkingLevel: geminiThinkingLevel,
+        apiKey: currentProviderConfig.apiKey,
+        model: currentProviderConfig.model,
+        thinkingLevel: currentProviderConfig.thinkingLevel,
         tweetId: '1',
         enableAITranslation: true,
         translationGlossary: '1',
@@ -60,15 +75,14 @@ export function AITranslationSettings() {
       if (data.success) {
         toastManager.add({
           title: '连接成功',
-          description: 'API Key 有效，模型连接正常',
+          description: `${currentProviderConfig.providerName} API 连接正常`,
           type: 'success',
         })
       }
       else {
-        console.error('Failed to connect to Gemini API:', data)
         toastManager.add({
           title: '连接失败',
-          description: `无法连接到 Gemini API.\n原因：${data.cause}`,
+          description: `无法连接到 ${currentProviderConfig.providerName} API.\n原因：${data.cause}`,
           type: 'error',
         })
       }
@@ -76,21 +90,63 @@ export function AITranslationSettings() {
     catch {
       toastManager.add({
         title: '连接失败',
-        description: '无法连接到 Gemini API',
+        description: `请求 ${currentProviderConfig.providerName} API 失败，请检查网络`,
         type: 'error',
       })
     }
     setIsTesting(false)
   }
 
+  const providerModels = models.filter(m => m.provider === aiProvider)
+  const currentModelConfig = models.find(m => m.name === currentProviderConfig.model)
+
+  const thinkingLevelOptions = useMemo(() => {
+    const supported = currentModelConfig?.supportedLevels || ['minimal', 'low', 'medium', 'high']
+    return supported.map((level) => {
+      let label = ''
+      switch (level) {
+        case 'minimal':
+          label = aiProvider === 'deepseek' ? '不开启 (None)' : '最低 (Minimal)'
+          break
+        case 'low':
+          label = '较低 (Low)'
+          break
+        case 'medium':
+          label = '中等 (Medium)'
+          break
+        case 'high':
+          label = aiProvider === 'deepseek' ? '标准 (High)' : '高 (High)'
+          break
+        case 'max':
+          label = aiProvider === 'deepseek' ? '深度 (Max)' : '最高 (Max)'
+          break
+      }
+      return { label, value: level }
+    })
+  }, [currentModelConfig, aiProvider])
+
+  const currentThinkingLevelOption = thinkingLevelOptions.find(
+    opt => opt.value === (aiProvider === 'google' ? geminiThinkingLevel : deepseekThinkingLevel),
+  )
+
+  const providerOptions = [
+    { label: 'Google Gemini', value: 'google' },
+    { label: 'DeepSeek', value: 'deepseek' },
+  ]
+  const currentProviderOption = providerOptions.find(opt => opt.value === aiProvider)
+
+  const modelOptions = providerModels.map(m => ({ label: m.text, value: m.name }))
+  const currentModelOption = modelOptions.find(opt => opt.value === currentProviderConfig.model)
+
   return (
     <div className="space-y-6 p-1">
+      {/* Main Engine Selection */}
       <div className="space-y-2">
-        <h4 className="px-1 text-sm font-medium text-muted-foreground">Gemini API 配置</h4>
+        <h4 className="px-1 text-sm font-medium text-muted-foreground">AI 翻译引擎</h4>
         <SettingsGroup>
           <SettingsRow
             label="启用 AI 翻译"
-            description="使用 Google Gemini 模型自动翻译推文"
+            description="自动识别语境并提供高质量的本地化翻译"
             id="enable-ai-translation"
           >
             <Switch
@@ -100,171 +156,205 @@ export function AITranslationSettings() {
           </SettingsRow>
 
           {enableAITranslation && (
-            <>
-              <SettingsRow
-                label="API Key"
-                description={(
-                  <a
-                    href="https://aistudio.google.com/api-keys"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-xs text-muted-foreground underline hover:text-primary"
-                  >
-                    获取 API Key
-                  </a>
-                )}
-                id="gemini-api-key"
-              >
-                <Input
-                  type="password"
-                  autoComplete="off"
-                  value={geminiApiKey}
-                  onChange={e => setGeminiApiKey(e.target.value)}
-                  placeholder="输入 Gemini API Key"
-                  className="text-right h-8 sm:min-w-64"
-                />
-              </SettingsRow>
+            <SettingsRow
+              label="服务提供商"
+              description="选择翻译任务的驱动引擎"
+              id="ai-provider"
+            >
+              <div className="flex-1 flex justify-end">
+                <Select
+                  value={currentProviderOption}
+                  onValueChange={opt => opt && setAIProvider(opt.value as any)}
+                >
+                  <SelectTrigger className="w-fit h-8 border-none transition-colors">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {providerOptions.map(opt => (
+                      <SelectItem key={opt.value} value={opt}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </SettingsRow>
+          )}
+        </SettingsGroup>
+      </div>
 
-              <SettingsRow
-                label="模型选择"
-                id="gemini-model"
-              >
-                <div className="flex-1 flex justify-end">
-                  <Select
-                    value={geminiModel}
-                    onValueChange={(val) => {
-                      if (!val)
-                        return
+      {enableAITranslation && (
+        <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-400">
+          <h4 className="px-1 text-sm font-medium text-muted-foreground capitalize">
+            {aiProvider}
+            {' '}
+            详情配置
+          </h4>
+          <SettingsGroup>
+            {/* API Key Input */}
+            <SettingsRow
+              label="API Key"
+              description={(
+                <a
+                  href={aiProvider === 'google' ? 'https://aistudio.google.com/api-keys' : 'https://platform.deepseek.com/api_keys'}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs text-muted-foreground underline hover:text-primary transition-colors inline-flex items-center"
+                >
+                  获取
+                  {' '}
+                  {currentProviderConfig.providerName}
+                  {' '}
+                  凭据
+                </a>
+              )}
+              id="ai-api-key"
+            >
+              <Input
+                type="password"
+                autoComplete="off"
+                value={aiProvider === 'google' ? geminiApiKey : deepseekApiKey}
+                onChange={e => aiProvider === 'google' ? setGeminiApiKey(e.target.value) : setDeepseekApiKey(e.target.value)}
+                placeholder="输入密钥"
+                className="text-right h-8 sm:min-w-64 bg-secondary/30 border-none focus-visible:ring-1 focus-visible:ring-primary/20"
+              />
+            </SettingsRow>
+
+            {/* Model Selection */}
+            <SettingsRow
+              label="模型"
+              id="ai-model"
+            >
+              <div className="flex-1 flex justify-end">
+                <Select
+                  value={currentModelOption}
+                  onValueChange={(opt) => {
+                    if (!opt)
+                      return
+                    const val = opt.value
+                    if (aiProvider === 'google') {
                       setGeminiModel(val)
-                      // 切换模型时，如果当前思考程度不被支持，重置为第一个可用选项或 minimal
                       const nextModel = models.find(m => m.name === val)
                       if (nextModel?.thinkingType === 'level' && nextModel.supportedLevels) {
                         if (!nextModel.supportedLevels.includes(geminiThinkingLevel)) {
                           setGeminiThinkingLevel(nextModel.supportedLevels[0]!)
                         }
                       }
-                      else if (nextModel?.thinkingType === 'budget') {
-                        // Gemini 2.5 统一映射，不需要重置，除非需要
+                    }
+                    else {
+                      setDeepseekModel(val)
+                      const nextModel = models.find(m => m.name === val)
+                      if (nextModel?.thinkingType === 'level' && nextModel.supportedLevels) {
+                        if (!nextModel.supportedLevels.includes(deepseekThinkingLevel)) {
+                          setDeepseekThinkingLevel(nextModel.supportedLevels[0]!)
+                        }
                       }
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-fit h-8 border-none transition-colors">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {modelOptions.map(opt => (
+                      <SelectItem key={opt.value} value={opt}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </SettingsRow>
+
+            {/* Thinking Level */}
+            {currentModelConfig?.thinkingType !== 'none' && (
+              <SettingsRow
+                label="思考强度"
+                description={aiProvider === 'deepseek' ? 'DeepSeek 思考模式下的推理强度' : '控制翻译时的思考预算或深度'}
+              >
+                <div className="flex-1 flex justify-end">
+                  <Select
+                    value={currentThinkingLevelOption}
+                    onValueChange={(opt) => {
+                      if (!opt)
+                        return
+                      const val = opt.value as ThinkingLevel
+                      if (aiProvider === 'google')
+                        setGeminiThinkingLevel(val)
+                      else setDeepseekThinkingLevel(val)
                     }}
                   >
-                    <SelectTrigger className="w-fit">
-                      <SelectValue>
-                        {models.find(model => model.name === geminiModel)?.text || '选择模型'}
-                      </SelectValue>
+                    <SelectTrigger className="w-fit h-8 border-none transition-colors">
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {
-                        models.map(model => (
-                          <SelectItem key={model.name} value={model.name}>
-                            {model.text}
-                          </SelectItem>
-                        ))
-                      }
+                      {thinkingLevelOptions.map(opt => (
+                        <SelectItem key={opt.value} value={opt}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
               </SettingsRow>
+            )}
 
-              {models.find(m => m.name === geminiModel)?.thinkingType !== 'none' && (
-                <SettingsRow
-                  label="思考程度"
-                  description="控制模型翻译时的思考深度，影响翻译耗时"
-                >
-                  <div className="flex-1 flex justify-end">
-                    <Select
-                      value={geminiThinkingLevel}
-                      onValueChange={val => val && setGeminiThinkingLevel(val as any)}
-                    >
-                      <SelectTrigger className="w-fit h-8">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(() => {
-                          const currentModel = models.find(m => m.name === geminiModel)
-                          if (currentModel?.thinkingType === 'level' && currentModel.supportedLevels) {
-                            return (
-                              <>
-                                {currentModel.supportedLevels.includes('minimal') && <SelectItem value="minimal">最低 (Minimal)</SelectItem>}
-                                {currentModel.supportedLevels.includes('low') && <SelectItem value="low">较低 (Low)</SelectItem>}
-                                {currentModel.supportedLevels.includes('medium') && <SelectItem value="medium">中等 (Medium)</SelectItem>}
-                                {currentModel.supportedLevels.includes('high') && <SelectItem value="high">最高 (High)</SelectItem>}
-                              </>
-                            )
-                          }
-                          // 默认显示所有（针对 budget 类型或 fallback）
-                          return (
-                            <>
-                              <SelectItem value="minimal">最低 (Minimal)</SelectItem>
-                              <SelectItem value="low">较低 (Low)</SelectItem>
-                              <SelectItem value="medium">中等 (Medium)</SelectItem>
-                              <SelectItem value="high">最高 (High)</SelectItem>
-                            </>
-                          )
-                        })()}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </SettingsRow>
-              )}
-
-              <SettingsRow
-                label="连通性测试"
-                description="验证 API Key 和网络连接"
+            <SettingsRow
+              label="测试连接"
+              description="验证 API 配置的有效性"
+            >
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleTestConnection}
+                disabled={isTesting}
+                className="h-8 transition-all active:scale-95 border-none"
               >
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleTestConnection}
-                  disabled={isTesting}
-                >
-                  {isTesting ? (
-                    <>
-                      <Loader2 className="mr-2 size-3 animate-spin" />
-                      测试中
-                    </>
-                  ) : (
-                    '测试连接'
-                  )}
-                </Button>
-              </SettingsRow>
-            </>
-          )}
-        </SettingsGroup>
-        {enableAITranslation && (
-          <p className="px-4 text-[10px] text-muted-foreground/60 leading-tight">
-            您的 API Key 仅存储在浏览器本地，经由服务器直接用于与 Google Gemini API 通信，不会经过/发送/存储给第三方。
+                {isTesting ? (
+                  <>
+                    <Loader2 className="mr-2 size-3 animate-spin" />
+                    验证中
+                  </>
+                ) : (
+                  '立即测试'
+                )}
+              </Button>
+            </SettingsRow>
+          </SettingsGroup>
+          <p className="px-4 text-[10px] text-muted-foreground/50 leading-tight">
+            隐私提示：API Key 仅本地加密存储，仅在发起翻译请求时经由应用服务器安全透传。
           </p>
-        )}
-      </div>
+        </div>
+      )}
 
       {enableAITranslation && (
         <div className="space-y-2">
-          <h4 className="px-1 text-sm font-medium text-muted-foreground">翻译术语表</h4>
+          <h4 className="px-1 text-sm font-medium text-muted-foreground">翻译辅助</h4>
           <SettingsGroup>
             <SettingsRow
-              label="术语定义与提示词"
-              description="在此输入给 AI 的额外提示词或术语对照，有助于提高翻译准确性。"
+              label="提示词与术语表"
+              description="引导 AI 遵循特定的翻译风格或术语对应关系"
               id="translation-glossary"
               className="border-b-0"
-            >
-            </SettingsRow>
-            <Textarea
-              value={translationGlossary}
-              onChange={e => setTranslationGlossary(e.target.value)}
-              placeholder="例如：ひなぴよ -> Hinapiyo..."
-              className="min-h-30 leading-relaxed"
             />
-            {entries.length > 0 && (
-              <p className="px-4 text-[10px] text-muted-foreground/60 leading-tight py-1">
-                已自动包含翻译词汇表中的
-                {' '}
-                {entries.length}
-                {' '}
-                条词条。
-              </p>
-            )}
+            <div>
+              <Textarea
+                value={translationGlossary}
+                onChange={e => setTranslationGlossary(e.target.value)}
+                placeholder="例如：\nひなぴよ -> Hinapiyo"
+                className="min-h-32 leading-relaxed bg-secondary/20 border-none focus-visible:ring-1 focus-visible:ring-primary/20 resize-none rounded-lg text-sm"
+              />
+              {entries.length > 0 && (
+                <p className="mt-2 text-[10px] text-muted-foreground/40 font-medium">
+                  • 已联动词典中的
+                  {' '}
+                  {entries.length}
+                  {' '}
+                  个本地词条
+                </p>
+              )}
+            </div>
           </SettingsGroup>
         </div>
       )}

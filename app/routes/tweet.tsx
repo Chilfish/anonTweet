@@ -40,8 +40,13 @@ export default function TweetPage() {
 
   const {
     enableAITranslation,
+    aiProvider,
     geminiApiKey,
     geminiModel,
+    geminiThinkingLevel,
+    deepseekApiKey,
+    deepseekModel,
+    deepseekThinkingLevel,
     translationGlossary,
   } = useAIConfig()
 
@@ -54,12 +59,17 @@ export default function TweetPage() {
       const dictEntries = getFormattedEntries()
       const combinedGlossary = [dictEntries, translationGlossary].filter(Boolean).join('\n')
 
+      const apiKey = aiProvider === 'google' ? geminiApiKey : deepseekApiKey
+      const model = aiProvider === 'google' ? geminiModel : deepseekModel
+      const thinkingLevel = aiProvider === 'google' ? geminiThinkingLevel : deepseekThinkingLevel
+
       return getTweets({
         tweetId: tweetId!,
         enableAITranslation,
         translationGlossary: combinedGlossary,
-        apiKey: geminiApiKey,
-        model: geminiModel,
+        apiKey,
+        model,
+        thinkingLevel,
       })
     },
     {

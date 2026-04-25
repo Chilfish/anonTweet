@@ -77,7 +77,17 @@ export function useTranslationEditorLogic(originalTweet: EnrichedTweet) {
   const entityPosByIndexRef = useRef<Map<number, number>>(new Map())
 
   const { getTranslation, setTranslation, setTranslationVisibility } = useTranslationActions()
-  const { enableAITranslation, geminiApiKey, geminiModel, geminiThinkingLevel, translationGlossary } = useAIConfig()
+  const {
+    aiProvider,
+    geminiApiKey,
+    geminiModel,
+    geminiThinkingLevel,
+    deepseekApiKey,
+    deepseekModel,
+    deepseekThinkingLevel,
+    enableAITranslation,
+    translationGlossary,
+  } = useAIConfig()
   const dictEntries = useTranslationDictionaryStore(state => state.getFormattedEntries)
   const dictionaryEntries = useTranslationDictionaryStore(state => state.entries)
 
@@ -144,8 +154,12 @@ export function useTranslationEditorLogic(originalTweet: EnrichedTweet) {
 
   // AI 翻译逻辑
   const requestAITranslation = useCallback(async () => {
-    if (!geminiApiKey || !geminiModel) {
-      toast.error('请配置 AI Key')
+    const apiKey = aiProvider === 'google' ? geminiApiKey : deepseekApiKey
+    const model = aiProvider === 'google' ? geminiModel : deepseekModel
+    const thinkingLevel = aiProvider === 'google' ? geminiThinkingLevel : deepseekThinkingLevel
+
+    if (!apiKey || !model) {
+      toast.error(`请配置 ${aiProvider === 'google' ? 'Gemini' : 'DeepSeek'} API Key`)
       return
     }
 
@@ -155,9 +169,9 @@ export function useTranslationEditorLogic(originalTweet: EnrichedTweet) {
       const { data } = await fetcher.post('/api/ai-translation', {
         tweet: originalTweet,
         enableAITranslation: true,
-        apiKey: geminiApiKey,
-        model: geminiModel,
-        thinkingLevel: geminiThinkingLevel,
+        apiKey,
+        model,
+        thinkingLevel,
         translationGlossary: combinedGlossary,
       })
 
@@ -189,7 +203,18 @@ export function useTranslationEditorLogic(originalTweet: EnrichedTweet) {
     finally {
       setIsAITranslating(false)
     }
-  }, [geminiApiKey, geminiModel, geminiThinkingLevel, translationGlossary, dictEntries, originalTweet])
+  }, [
+    aiProvider,
+    geminiApiKey,
+    geminiModel,
+    geminiThinkingLevel,
+    deepseekApiKey,
+    deepseekModel,
+    deepseekThinkingLevel,
+    translationGlossary,
+    dictEntries,
+    originalTweet,
+  ])
 
   return {
     isOpen,
