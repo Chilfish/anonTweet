@@ -1,14 +1,10 @@
-import type { DeepSeekLanguageModelOptions } from '@ai-sdk/deepseek'
-import type { GoogleGenerativeAIProviderOptions } from '@ai-sdk/google'
 import type { ModelMessage } from 'ai'
 import type { Route } from './+types/ai-test'
-import { createDeepSeek } from '@ai-sdk/deepseek'
-import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { generateText } from 'ai'
 import { data } from 'react-router'
 import z from 'zod'
-import { getThinkingConfig } from '~/lib/AITranslation'
 import { models } from '~/lib/constants'
+import { getProviderStrategy, getThinkingConfig } from '~/lib/providers'
 import { getTweetSchema } from '~/lib/validations/tweet'
 
 export async function action({ request }: Route.ActionArgs) {
@@ -44,17 +40,8 @@ export async function action({ request }: Route.ActionArgs) {
   const provider = modelConfig?.provider || 'google'
 
   try {
-    let aiProvider: any
-    if (provider === 'google') {
-      aiProvider = createGoogleGenerativeAI({
-        apiKey,
-      })
-    }
-    else {
-      aiProvider = createDeepSeek({
-        apiKey,
-      })
-    }
+    const strategy = getProviderStrategy(provider)
+    const aiProvider = strategy.createSDKProvider(apiKey)
 
     const messages: ModelMessage[] = [
       { role: 'user', content: 'hello' },
@@ -66,18 +53,9 @@ export async function action({ request }: Route.ActionArgs) {
       model: aiProvider(model),
       messages,
       temperature: 1,
-      providerOptions: {
-        ...(provider === 'google' ? {
-          google: {
-            thinkingConfig,
-          } satisfies GoogleGenerativeAIProviderOptions,
-        } : {}),
-        ...(provider === 'deepseek' && model === 'deepseek-reasoner' ? {
-          deepseek: {
-            thinking: { type: 'enabled' },
-          } satisfies DeepSeekLanguageModelOptions,
-        } : {}),
-      },
+      providerOptions: modelConfig
+        ? strategy.buildProviderOptions(thinkingConfig, modelConfig)
+        : {},
     })
 
     const text = response.text.trim()

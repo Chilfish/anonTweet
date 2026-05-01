@@ -2,6 +2,8 @@ import compression from 'compression'
 import express from 'express'
 import morgan from 'morgan'
 
+globalThis.AI_SDK_LOG_WARNINGS = false
+
 const BUILD_PATH = '../build/server/index.js'
 const PORT = Number.parseInt(process.env.PORT || '9080')
 
