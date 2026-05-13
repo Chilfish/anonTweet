@@ -1,8 +1,11 @@
+import type React from 'react'
 import { CheckboxGroup as CheckboxGroupPrimitive } from '@base-ui/react/checkbox-group'
-
 import { cn } from '~/lib/utils'
 
-function CheckboxGroup({ className, ...props }: CheckboxGroupPrimitive.Props) {
+export function CheckboxGroup({
+  className,
+  ...props
+}: CheckboxGroupPrimitive.Props): React.ReactElement {
   return (
     <CheckboxGroupPrimitive
       className={cn('flex flex-col items-start gap-3', className)}
@@ -11,4 +14,4 @@ function CheckboxGroup({ className, ...props }: CheckboxGroupPrimitive.Props) {
   )
 }
 
-export { CheckboxGroup }
+export { CheckboxGroupPrimitive }

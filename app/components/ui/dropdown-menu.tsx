@@ -144,11 +144,8 @@ function DropdownMenuCheckboxItem({
   className,
   children,
   checked,
-  showIcon = false,
   ...props
-}: MenuPrimitive.CheckboxItem.Props & {
-  showIcon?: boolean
-}) {
+}: MenuPrimitive.CheckboxItem.Props) {
   return (
     <MenuPrimitive.CheckboxItem
       data-slot="dropdown-menu-checkbox-item"
@@ -159,16 +156,14 @@ function DropdownMenuCheckboxItem({
       checked={checked}
       {...props}
     >
-      {showIcon && (
-        <span
-          className="pointer-events-none absolute right-2 flex items-center justify-center pointer-events-none"
-          data-slot="dropdown-menu-checkbox-item-indicator"
-        >
-          <MenuPrimitive.CheckboxItemIndicator>
-            <CheckIcon />
-          </MenuPrimitive.CheckboxItemIndicator>
-        </span>
-      )}
+      <span
+        className="pointer-events-none absolute right-2 flex items-center justify-center pointer-events-none"
+        data-slot="dropdown-menu-checkbox-item-indicator"
+      >
+        <MenuPrimitive.CheckboxItemIndicator>
+          <CheckIcon />
+        </MenuPrimitive.CheckboxItemIndicator>
+      </span>
       {children}
     </MenuPrimitive.CheckboxItem>
   )
