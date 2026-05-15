@@ -233,11 +233,11 @@ export class AuthService {
    * // Logging in an getting a new guest key
    * rettiwt.auth.guest()
    * .then(guestKey => {
-   * 	// Use the guest key
-   * 	...
+   *   // Use the guest key
+   *   ...
    * })
    * .catch(err => {
-   * 	console.log(err);
+   *   console.log(err);
    * });
    * ```
    */

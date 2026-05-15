@@ -200,10 +200,10 @@ const rettiwt = new Rettiwt();
 // Fetching the details of the user whose username is <username>
 rettiwt.user.details('<username>')
 .then(details => {
-	...
+  ...
 })
 .catch(error => {
-	...
+  ...
 });
 ```
 
@@ -217,18 +217,18 @@ const rettiwt = new Rettiwt({ apiKey: API_KEY });
 
 /**
  * Fetching the list of tweets that:
- * 	- are made by a user with username <username>,
- * 	- contain the words <word1> and <word2>
+ *   - are made by a user with username <username>,
+ *   - contain the words <word1> and <word2>
  */
 rettiwt.tweet.search({
-	fromUsers: ['<username>'],
-	includeWords: ['<word1>', '<word2>']
+  fromUsers: ['<username>'],
+  includeWords: ['<word1>', '<word2>']
 })
 .then(data => {
-	...
+  ...
 })
 .catch(err => {
-	...
+  ...
 });
 ```
 
@@ -246,22 +246,22 @@ const rettiwt = new Rettiwt({ apiKey: API_KEY });
 
 /**
  * Fetching the list of tweets that:
- * 	- are made by a user with username <username>,
- * 	- contain the words <word1> and <word2>
+ *   - are made by a user with username <username>,
+ *   - contain the words <word1> and <word2>
  *
  * 'data' is the response object received in the previous example.
  *
  * 'count' is a number less or equal to 20 (the quantity of tweets to return)
  */
 rettiwt.tweet.search({
-	fromUsers: ['<username>'],
-	includeWords: ['<word1>', '<word2>']
+  fromUsers: ['<username>'],
+  includeWords: ['<word1>', '<word2>']
 }, count, data.next.value)
 .then(data => {
-	...
+  ...
 })
 .catch(err => {
-	...
+  ...
 });
 ```
 
@@ -279,10 +279,10 @@ const rettiwt = new Rettiwt();
 rettiwt.auth.login('<email>', '<username>', '<password>')
 .then(apiKey => {
     // Use the API_KEY
-	...
+  ...
 })
 .catch(err => {
-	console.log(err);
+  console.log(err);
 });
 ```
 
@@ -330,7 +330,7 @@ const rettiwt = new Rettiwt();
 // Fetching the details of the user whose username is <username>
 rettiwt.user.details('<username>')
 .then(details => {
-	console.log(details);
+  console.log(details);
     // {
     //     "createdAt": "2021-07-24T14:25:32.000Z",
     //     "description": "Coder, Gamer and Tech Enthusiast",
@@ -404,7 +404,7 @@ rettiwt.user.details('<username>')
 
 })
 .catch(error => {
-	...
+  ...
 });
 ```
 
