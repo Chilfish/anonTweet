@@ -8,6 +8,13 @@ import { env } from '~/lib/env.server'
 import { TweetNotFound } from '~/lib/react-tweet'
 import { extractTweetId } from '~/lib/utils'
 
+export function meta() {
+  return [
+    { title: '推文截图 | Anon Tweet' },
+    { name: 'robots', content: 'noindex, follow' },
+  ]
+}
+
 export async function loader({
   params,
   request,

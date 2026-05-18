@@ -13,6 +13,13 @@ import { Form } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
 import { TweetNotFound, TweetSkeleton } from '~/lib/react-tweet'
 
+export function meta() {
+  return [
+    { title: 'Twitter 列表查看 | Anon Tweet' },
+    { name: 'description', content: '查看 Twitter/X 列表内容，支持按列表 ID 浏览推文。' },
+  ]
+}
+
 export function HydrateFallback() {
   return (
     <div className="w-full max-w-2xl">

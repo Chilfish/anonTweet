@@ -47,6 +47,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta charSet="utf-8" />
         <link rel="icon" type="image/jpeg" href="/icon.webp" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Anon Tweet — 匿名推文浏览器</title>
+        <meta name="description" content="Anon Tweet — 第三方 Twitter/X 推文浏览器，支持 AI 翻译、推文卡片导出、匿名浏览。无需登录即可查看推文内容与评论区。" />
+        <meta name="robots" content="index, follow" />
+        <meta name="googlebot" content="index, follow" />
+        <meta property="og:site_name" content="Anon Tweet" />
+        <meta property="og:locale" content="zh_CN" />
+        <meta name="twitter:card" content="summary_large_image" />
         <Meta />
         <Links />
         {import.meta.env.DEV && (

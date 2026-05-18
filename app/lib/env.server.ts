@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import 'dotenv/config'
+import dotenv from 'dotenv'
+dotenv.config({ override: true })
 
 /**
  * Server environment schema definition with validation rules
