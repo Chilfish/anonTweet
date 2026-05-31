@@ -1,4 +1,4 @@
-import { BadgeCheck, Ellipsis } from 'lucide-react'
+import { BadgeCheck } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import { cn } from '~/lib/utils'
 import InsLogo from './InsLogo'
@@ -48,20 +48,12 @@ export function IGCardHeader({
       <div className="flex items-center gap-1 min-w-0 flex-1">
         <span className="text-sm font-semibold truncate">{displayName}</span>
         {verified && (
-          <BadgeCheck className="size-4 text-[#3896F4] fill-[#3896F4] shrink-0" />
+          <BadgeCheck className="size-4 text-white fill-[#3896F4] shrink-0" />
         )}
       </div>
 
-      {/* 右侧：InsLogo + 菜单 */}
-      <div className="flex items-center gap-1.5 shrink-0">
-        <InsLogo className="h-8 w-auto text-foreground/80" />
-        <button
-          className="size-7 flex items-center justify-center rounded-full hover:bg-muted/60 transition-colors -mr-1"
-          aria-label="更多选项"
-        >
-          <Ellipsis className="size-4 text-foreground/50" />
-        </button>
-      </div>
+      {/* 右侧：InsLogo */}
+      <InsLogo className="h-8 w-auto text-foreground/80" />
     </div>
   )
 }

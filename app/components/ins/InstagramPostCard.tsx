@@ -38,7 +38,7 @@ export const InstagramPostCard = forwardRef<HTMLElement, InstagramPostCardProps>
       <article
         ref={ref}
         className={cn(
-          'w-full max-w-[468px] mx-auto',
+          'w-full max-w-150 mx-auto',
           'bg-card',
           'rounded-sm',
           'border border-border/20',

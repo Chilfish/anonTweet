@@ -131,15 +131,57 @@ export const NineGrid: Story = {
   ),
 }
 
+/** 4 张 — 2×2，对称无悬空 */
+export const FourImages: Story = {
+  render: () => (
+    <InstagramPostCard post={makePost({ media: samplePhotos.slice(0, 4) })} />
+  ),
+}
+
+/** 5 张 — [3, 2] 分布，彻底消除 3+1+1 悬空 */
+export const FiveImages: Story = {
+  render: () => (
+    <InstagramPostCard post={makePost({ media: samplePhotos.slice(0, 5) })} />
+  ),
+}
+
+/** 7 张 — [3, 2, 2] 分布，杜绝末行单图 */
+export const SevenImages: Story = {
+  render: () => (
+    <InstagramPostCard post={makePost({ media: samplePhotos.slice(0, 7) })} />
+  ),
+}
+
+/** 12 张 — 2 行预览 + 实体相片堆叠（真实图片层叠，无文字） */
 export const OverflowFolded: Story = {
   render: () => (
     <InstagramPostCard
       post={makePost({
         media: samplePhotos,
-        description: '12 张合集。前 9 张可见，第 9 位毛玻璃 +3。',
+        description: '12 张合集。默认 2 行（6 张）预览，末张为 3 层真实图片错位堆叠。Hover 扇开。',
       })}
     />
   ),
+}
+
+/** 20 张模拟 — 2 行预览 + 堆叠 +14 badge，适合长截图场景 */
+export const TwentyImagesCompact: Story = {
+  render: () => {
+    const twentyPhotos: IGPost['media'] = Array.from({ length: 20 }, (_, i) => ({
+      ...samplePhotos[i % samplePhotos.length]!,
+      num: i + 1,
+      media_id: String(i + 1),
+      display_url: `https://picsum.photos/seed/ig${i + 1}/640/640`,
+    }))
+    return (
+      <InstagramPostCard
+        post={makePost({
+          media: twentyPhotos,
+          description: '20 张合集。紧凑预览 + 实体相片堆叠 + 角落 +14 badge。点击可展开全部。',
+        })}
+      />
+    )
+  },
 }
 
 export const NoCaption: Story = {
@@ -171,6 +213,47 @@ export const HeaderOnly: Story = {
 
 export const MediaGridOnly: Story = {
   render: () => (<div className="w-[468px]"><IGMediaGrid media={samplePhotos.slice(0, 6)} /></div>),
+}
+
+/** 2×2 完美对称 */
+export const MediaGrid2x2: Story = {
+  render: () => (<div className="w-[468px]"><IGMediaGrid media={samplePhotos.slice(0, 4)} /></div>),
+}
+
+/** 3+2 分布，消除悬空 */
+export const MediaGrid3x2: Story = {
+  render: () => (<div className="w-[468px]"><IGMediaGrid media={samplePhotos.slice(0, 5)} /></div>),
+}
+
+/** 3+2+2 分布 */
+export const MediaGrid3x2x2: Story = {
+  render: () => (<div className="w-[468px]"><IGMediaGrid media={samplePhotos.slice(0, 7)} /></div>),
+}
+
+/** 实体相册堆叠 — 2 行预览 +8 */
+export const MediaGridStacked: Story = {
+  render: () => (
+    <div className="w-[468px]">
+      <IGMediaGrid media={samplePhotos} showInfoLabel />
+    </div>
+  ),
+}
+
+/** 20 张紧凑索引 — 适合长截图 */
+export const MediaGrid20Compact: Story = {
+  render: () => {
+    const twenty: IGPost['media'] = Array.from({ length: 20 }, (_, i) => ({
+      ...samplePhotos[i % samplePhotos.length]!,
+      num: i + 1,
+      media_id: String(i + 1),
+      display_url: `https://picsum.photos/seed/ig${i + 1}/640/640`,
+    }))
+    return (
+      <div className="w-[468px]">
+        <IGMediaGrid media={twenty} showInfoLabel />
+      </div>
+    )
+  },
 }
 
 export const ActionBarOnly: Story = {
