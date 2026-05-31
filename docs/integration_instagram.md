@@ -113,6 +113,7 @@
   - 更新 `PlainIGPost` 复用新子组件
   - 纯 shadcn/ui 体系，0 处自研 UI 原语
 - **15:25** 🍎 精修第二轮：InsLogo + 圆点指示器 + 图标对齐 + 红心 + 时间格式
+- **15:45** 🚀 PR 已创建 → https://github.com/Chilfish/anonTweet/pull/12
   - 九宫格 `grid-cols-3 gap-[1px]`（不再轮播）
   - `IGCardHeader` — 蓝勾认证 + 三点菜单（lucide-react）
   - `IGActionBar` — Heart/Comment/Share/Bookmark（outline 图标）

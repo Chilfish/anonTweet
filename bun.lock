@@ -8,7 +8,7 @@
         "@ai-sdk/deepseek": "^2.0.35",
         "@ai-sdk/google": "^3.0.80",
         "@base-ui/react": "^1.5.0",
-        "@chilfish/gallery-dl-instagram": "^0.2.2",
+        "@chilfish/gallery-dl-instagram": "^0.2.3",
         "@dnd-kit/core": "^6.3.1",
         "@dnd-kit/sortable": "^10.0.0",
         "@dnd-kit/utilities": "^3.2.2",
@@ -163,7 +163,7 @@
 
     "@bcoe/v8-coverage": ["@bcoe/v8-coverage@1.0.2", "", {}, "sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA=="],
 
-    "@chilfish/gallery-dl-instagram": ["@chilfish/gallery-dl-instagram@0.2.2", "", { "bin": { "dl-ins": "dist/dl-ins.mjs" } }, "sha512-IHxlnRUX8HO7sTraKNOKOZY4ktph16VHEbZYQzdfS2rSzNnOUuV1aBNTZTJo94piMx97C15+aU9s/X2ogtExJA=="],
+    "@chilfish/gallery-dl-instagram": ["@chilfish/gallery-dl-instagram@0.2.3", "", { "bin": { "dl-ins": "dist/dl-ins.mjs" } }, "sha512-wKcb0g5Z0SKaRTvdJXM6ITwEhMCYQpQJ7AGD3VlNLZeqW1n89i9fiDZC0M9BIAWl20jm03jNtoDjBvnNMgzBYw=="],
 
     "@chromatic-com/storybook": ["@chromatic-com/storybook@5.2.1", "", { "dependencies": { "@neoconfetti/react": "^1.0.0", "chromatic": "16.10.0", "jsonfile": "^6.1.0", "strip-ansi": "^7.1.0" }, "peerDependencies": { "storybook": "^0.0.0-0 || ^10.1.0 || ^10.1.0-0 || ^10.2.0-0 || ^10.3.0-0 || ^10.4.0-0 || ^10.5.0-0 || ^10.6.0-0" } }, "sha512-z6I7NJk/0VngA64y5TNYaB4Hc2X8+90n4op6lBt9PvWk5TmIlFLDqdX33rlrwbNRkkYijVgA/wO04rVYXi5Mlg=="],
 

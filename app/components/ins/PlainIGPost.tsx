@@ -4,6 +4,7 @@ import { IGActionBar } from './IGActionBar'
 import { IGCaption } from './IGCaption'
 import { IGCardHeader } from './IGCardHeader'
 import { IGMediaGrid } from './IGMediaGrid'
+import { IGMusicInfo } from './IGMusicInfo'
 
 function formatTime(iso: string): string {
   const d = new Date(iso)
@@ -36,6 +37,8 @@ export function PlainIGPost({ post, className }: PlainIGPostProps) {
       </div>
 
       {post.media?.length > 0 && <IGMediaGrid media={post.media} />}
+
+      {post.media?.length > 0 && <IGMusicInfo media={post.media} />}
 
       <IGActionBar className="pt-1.5 pb-1" />
 

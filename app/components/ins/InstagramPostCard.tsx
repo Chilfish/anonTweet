@@ -4,6 +4,7 @@ import { IGActionBar } from './IGActionBar'
 import { IGCaption } from './IGCaption'
 import { IGCardHeader } from './IGCardHeader'
 import { IGMediaGrid } from './IGMediaGrid'
+import { IGMusicInfo } from './IGMusicInfo'
 
 interface InstagramPostCardProps {
   post: IGPost
@@ -58,6 +59,9 @@ export function InstagramPostCard({ post, className }: InstagramPostCardProps) {
 
       {/* Media */}
       {post.media?.length > 0 && <IGMediaGrid media={post.media} />}
+
+      {/* 音乐信息 — 媒体与 action 之间 */}
+      {post.media?.length > 0 && <IGMusicInfo media={post.media} />}
 
       {/* Action Bar */}
       <IGActionBar className="pt-1.5 pb-1" />

@@ -3,6 +3,7 @@ import type { IGPost } from '~/types'
 import { IGActionBar } from '~/components/ins/IGActionBar'
 import { IGCardHeader } from '~/components/ins/IGCardHeader'
 import { IGMediaGrid } from '~/components/ins/IGMediaGrid'
+import { IGMusicInfo } from '~/components/ins/IGMusicInfo'
 import { InstagramPostCard } from '~/components/ins/InstagramPostCard'
 
 // ─── Mock Data ──────────────────────────────────────────────────────
@@ -22,6 +23,25 @@ const samplePhotos: IGPost['media'] = [
   { num: 12, media_id: '12', display_url: 'https://picsum.photos/seed/ig12/640/640', width: 640, height: 640, type: 'photo' },
 ]
 
+/** 带音乐数据的媒体项（模拟 Reel） */
+const musicMedia: IGPost['media'] = [{
+  num: 1,
+  media_id: 'reel1',
+  shortcode: 'DReel01',
+  display_url: 'https://picsum.photos/seed/reel/640/640',
+  video_url: null,
+  width: 640,
+  height: 640,
+  type: 'video' as const,
+  tagged_users: [],
+  audio_title: 'Blue Bird',
+  audio_subtitle: 'NARUTO OP 3 Cover',
+  audio_artist: 'Ikimono Gakari',
+  audio_duration: 45,
+  audio_has_lyrics: true,
+  audio_is_explicit: false,
+}]
+
 function makePost(overrides: Partial<IGPost>): IGPost {
   return {
     id: 'CxAbCdEfGh',
@@ -29,8 +49,8 @@ function makePost(overrides: Partial<IGPost>): IGPost {
     url: 'https://www.instagram.com/p/CxAbCdEfGh/',
     username: 'chilfish',
     fullname: 'Chil Fish',
-    description: 'A peaceful evening walk along the shore 🌊 The sunset painted the sky in shades of orange and pink.',
-    tags: ['sunset', 'peaceful', 'eveningvibes'],
+    description: 'A peaceful evening walk along the shore 🌊',
+    tags: ['sunset', 'peaceful'],
     likes: 47969,
     type: 'post',
     media: [],
@@ -46,9 +66,7 @@ function makePost(overrides: Partial<IGPost>): IGPost {
 const meta = {
   title: 'Instagram/PostCard',
   component: InstagramPostCard,
-  parameters: {
-    layout: 'centered',
-  },
+  parameters: { layout: 'centered' },
   tags: ['autodocs'],
 } satisfies Meta<typeof InstagramPostCard>
 
@@ -62,8 +80,21 @@ export const SingleImageWithTranslation: Story = {
     <InstagramPostCard
       post={makePost({
         media: [samplePhotos[0]!],
-        captionTranslation: '傍晚沿着海岸散步 🌊 夕阳把天空染成了橙粉色的画卷。',
+        captionTranslation: '傍晚沿着海岸散步 🌊',
         verified: true,
+      })}
+    />
+  ),
+}
+
+export const ReelWithMusic: Story = {
+  render: () => (
+    <InstagramPostCard
+      post={makePost({
+        media: musicMedia,
+        type: 'reel',
+        description: '新しい自分に出会う旅 🕊️ #BlueBird #NARUTO',
+        tags: ['BlueBird', 'NARUTO', 'ikimonogakari'],
       })}
     />
   ),
@@ -143,4 +174,12 @@ export const MediaGridOnly: Story = {
 
 export const ActionBarOnly: Story = {
   render: () => (<div className="w-[400px] bg-card rounded-sm p-4"><IGActionBar /></div>),
+}
+
+export const MusicInfoOnly: Story = {
+  render: () => (
+    <div className="w-[400px] bg-card rounded-sm">
+      <IGMusicInfo media={musicMedia} />
+    </div>
+  ),
 }
