@@ -1,20 +1,10 @@
 import type { IGPost } from '~/types'
-import { cn } from '~/lib/utils'
+import { cn, formatIGTime } from '~/lib/utils'
 import { IGActionBar } from './IGActionBar'
 import { IGCaption } from './IGCaption'
 import { IGCardHeader } from './IGCardHeader'
 import { IGMediaGrid } from './IGMediaGrid'
 import { IGMusicInfo } from './IGMusicInfo'
-
-function formatTime(iso: string): string {
-  const d = new Date(iso)
-  const y = d.getFullYear()
-  const mo = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  const h = String(d.getHours()).padStart(2, '0')
-  const mi = String(d.getMinutes()).padStart(2, '0')
-  return `${y}-${mo}-${day} ${h}:${mi}`
-}
 
 interface PlainIGPostProps {
   post: IGPost
@@ -44,7 +34,7 @@ export function PlainIGPost({ post, className }: PlainIGPostProps) {
 
       {post.created_at && (
         <p className="px-4 text-xs text-muted-foreground/50 tabular-nums pb-1">
-          {formatTime(post.created_at)}
+          {formatIGTime(post.created_at, 'plain')}
         </p>
       )}
 

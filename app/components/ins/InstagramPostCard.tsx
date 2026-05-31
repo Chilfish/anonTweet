@@ -1,6 +1,6 @@
 import type { IGPost } from '~/types'
 import { forwardRef } from 'react'
-import { cn } from '~/lib/utils'
+import { cn, formatIGTime } from '~/lib/utils'
 import { IGActionBar } from './IGActionBar'
 import { IGCaption } from './IGCaption'
 import { IGCardHeader } from './IGCardHeader'
@@ -14,19 +14,6 @@ interface InstagramPostCardProps {
   translationMode?: 'original' | 'bilingual' | 'translation'
   /** 翻译完成回调（IGTranslateDialog 保存后触发） */
   onTranslated?: (captionTranslation: string) => void
-}
-
-/**
- * 绝对时间格式化
- */
-function formatTime(iso: string): string {
-  const d = new Date(iso)
-  const y = d.getFullYear()
-  const mo = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  const h = String(d.getHours()).padStart(2, '0')
-  const mi = String(d.getMinutes()).padStart(2, '0')
-  return `${y}年${mo}月${day}日 ${h}:${mi}`
 }
 
 /**
@@ -81,7 +68,7 @@ export const InstagramPostCard = forwardRef<HTMLElement, InstagramPostCardProps>
         {/* 时间戳 — action 和 caption 之间 */}
         {post.created_at && (
           <p className="px-4 text-xs font-medium tabular-nums pb-1">
-            {formatTime(post.created_at)}
+            {formatIGTime(post.created_at, 'card')}
           </p>
         )}
 

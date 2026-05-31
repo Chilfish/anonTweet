@@ -90,6 +90,23 @@ export function formatDate(
   return format(dateObj, formatString)
 }
 
+/**
+ * Instagram 卡片专用时间格式化（中日风格）。
+ * @param iso   ISO 时间字符串
+ * @param format 'card' = "2026年05月31日 19:30"，'plain' = "2026-05-31 19:30"
+ */
+export function formatIGTime(iso: string, format: 'card' | 'plain' = 'card'): string {
+  const d = new Date(iso)
+  const y = d.getFullYear()
+  const mo = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  const h = String(d.getHours()).padStart(2, '0')
+  const mi = String(d.getMinutes()).padStart(2, '0')
+  if (format === 'plain')
+    return `${y}-${mo}-${day} ${h}:${mi}`
+  return `${y}年${mo}月${day}日 ${h}:${mi}`
+}
+
 export function flatTweets(tweets: EnrichedTweet[]): EnrichedTweet[] {
   const copiedTweets = structuredClone(tweets)
   return copiedTweets.flatMap((tweet) => {
