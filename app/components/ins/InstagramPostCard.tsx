@@ -26,7 +26,7 @@ function formatTime(iso: string): string {
   const day = String(d.getDate()).padStart(2, '0')
   const h = String(d.getHours()).padStart(2, '0')
   const mi = String(d.getMinutes()).padStart(2, '0')
-  return `${y}-${mo}-${day} ${h}:${mi}`
+  return `${y}年${mo}月${day}日 ${h}:${mi}`
 }
 
 /**
@@ -80,7 +80,7 @@ export const InstagramPostCard = forwardRef<HTMLElement, InstagramPostCardProps>
 
         {/* 时间戳 — action 和 caption 之间 */}
         {post.created_at && (
-          <p className="px-4 text-xs text-muted-foreground/50 tabular-nums pb-1">
+          <p className="px-4 text-xs font-medium tabular-nums pb-1">
             {formatTime(post.created_at)}
           </p>
         )}
@@ -91,7 +91,6 @@ export const InstagramPostCard = forwardRef<HTMLElement, InstagramPostCardProps>
             username={post.username}
             text={post.description}
             translatedText={captionTranslated}
-            tags={post.tags}
             className="px-4 pt-0 pb-0"
             post={post}
             onTranslated={onTranslated}

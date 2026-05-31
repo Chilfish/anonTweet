@@ -1,5 +1,4 @@
 import type { ComponentProps } from 'react'
-import { Image } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 
 interface IGScreenshotButtonProps extends ComponentProps<typeof Button> {
@@ -19,13 +18,11 @@ export function IGScreenshotButton({
 }: IGScreenshotButtonProps) {
   return (
     <Button
-      variant="outline"
       disabled={isCapturing}
       onClick={onScreenshot}
       {...props}
     >
-      <Image className="size-4" />
-      <span className="hidden sm:inline">
+      <span>
         {isCapturing ? '截图中...' : '截图'}
       </span>
     </Button>

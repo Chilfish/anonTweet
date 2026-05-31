@@ -33,6 +33,7 @@ export default [
 
     ...prefix('ig', [
       route('get/:id', 'routes/api/ig/get.ts'),
+      route('translate/:id', 'routes/api/ig/translate.ts'),
     ]),
 
     ...prefix('user', [
