@@ -10,6 +10,9 @@ const serverEnvSchema = z.object({
   // Optional: without keys it may still work, but will face stricter upstream rate limits.
   TWEET_KEYS: z.string().optional().default(''),
 
+  // Instagram — cookies for gallery-dl-instagram SDK
+  INS_COOKIES: z.string().optional(),
+
   DB_URL: z.url().optional(),
   ENABLE_DB_CACHE: z.stringbool().default(false),
   ENABLE_LOCAL_CACHE: z.stringbool().default(false),

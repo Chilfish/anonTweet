@@ -12,7 +12,7 @@
 | Phase | 内容 | 状态 |
 |-------|------|------|
 | Phase 1 | 类型定义 + URL 识别 + 路由框架 | ✅ 完成 |
-| Phase 2 | API 层（SDK 集成 + BFF 路由） | 🔄 进行中 |
+| Phase 2 | API 层（SDK 集成 + BFF 路由） | ✅ 完成 |
 | Phase 3 | UI 组件（多图轮播 + 主贴卡片 + /ins 页面） | ⬜ 待开始 |
 | Phase 4 | 翻译 + 截图 + 下载 接入 | ⬜ 待开始 |
 | Phase 5 | 纯文本路由 + 截图导出 | ⬜ 待开始 |
@@ -28,12 +28,11 @@
 
 ## Phase 2 任务清单
 
-- [ ] `app/routes/api/ig/get.ts` — POST API 路由
-- [ ] `normalizeIGPost()` — SDK 消息 → IGPost 标准化
-- [ ] `.env` 新增 `INS_COOKIES`
-- [ ] `app/lib/env.server.ts` 暴露环境变量
-- [ ] 依赖安装：`@chilfish/gallery-dl-instagram`
-- [ ] 类型检查 + lint 通过
+- [x] `app/routes/api/ig/get.ts` — POST/GET API 路由 + normalizeIGPost()
+- [x] `app/lib/env.server.ts` — 新增 `INS_COOKIES` 环境变量
+- [x] `app/lib/localCache.ts` — CacheType 新增 `ig-post`
+- [x] 依赖安装：`@chilfish/gallery-dl-instagram@0.2.2`
+- [ ] `.env` 手动添加 `INS_COOKIES`（用户操作）
 
 ## Phase 3 任务清单
 
@@ -91,4 +90,8 @@
   - 新增 `app/components/ins/IGMediaCarousel.tsx` (scroll-snap 轮播)
   - 新增 `app/components/ins/IGPostCard.tsx` (头像 + 媒体 + caption)
   - 更新 `app/types/index.ts` 导出 IG 类型
-- **14:28** 进入 Phase 2：API 层集成
+- **14:28** Phase 2 完成 ✅
+  - 安装 `@chilfish/gallery-dl-instagram@0.2.2`
+  - 新增 `app/routes/api/ig/get.ts` (POST/GET + normalizeIGPost)
+  - `env.server.ts` 新增 `INS_COOKIES`
+  - `localCache.ts` 新增 `ig-post` 缓存类型
