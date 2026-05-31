@@ -1,62 +1,66 @@
-import type { IGPost } from '~/types'
+import { BadgeCheck, Ellipsis } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import { cn } from '~/lib/utils'
 
 interface IGCardHeaderProps {
-  post: IGPost
+  username: string
+  fullname?: string
+  avatarUrl?: string
+  verified?: boolean
+  timestamp?: string
+  locationName?: string
   className?: string
 }
 
 /**
- * Instagram 卡片头部 — 头像 + 用户名 + 显示名 + 发布时间。
+ * Instagram 卡片头部。
  *
- * 复用 {@link Avatar}、遵循 Native-First 排版层级：
- * 用户名 font-semibold → 显示名 font-normal text-muted → 时间 right-aligned。
+ * Apple HIG: w-8 h-8 rounded-full 头像 + 用户名 bold + 蓝勾认证 + 右侧三点菜单。
+ * 纯展示，不依赖完整 IGPost（可复用）。
  */
-export function IGCardHeader({ post, className }: IGCardHeaderProps) {
-  const timeText = post.created_at
-    ? new Date(post.created_at).toLocaleDateString('zh-CN', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    : null
-
+export function IGCardHeader({
+  username,
+  fullname,
+  avatarUrl,
+  verified,
+  timestamp,
+  locationName,
+  className,
+}: IGCardHeaderProps) {
   return (
-    <div className={cn('flex items-start gap-3', className)}>
-      {/* 头像 — 复用 Base UI Avatar */}
-      <Avatar className="size-10 shrink-0">
-        {post.avatar_url
-          ? <AvatarImage src={post.avatar_url} alt={post.username} />
-          : <AvatarFallback>{post.username[0]?.toUpperCase() ?? '?'}</AvatarFallback>}
+    <div className={cn('flex items-center gap-2', className)}>
+      {/* 头像 */}
+      <Avatar className="size-8 shrink-0">
+        {avatarUrl
+          ? <AvatarImage src={avatarUrl} alt={username} />
+          : <AvatarFallback>{username[0]?.toUpperCase() ?? '?'}</AvatarFallback>}
       </Avatar>
 
-      {/* 元信息 */}
+      {/* 用户名区域 */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5">
-          <span className="font-semibold text-sm truncate">
-            {post.username}
-          </span>
-          {post.fullname && post.fullname !== post.username && (
-            <span className="text-xs text-muted-foreground truncate">
-              {post.fullname}
-            </span>
+        <div className="flex items-center gap-1">
+          <span className="text-sm font-semibold truncate">{username}</span>
+          {verified && (
+            <BadgeCheck className="size-4 text-[#3896F4] fill-[#3896F4] shrink-0" />
           )}
         </div>
-
-        {post.location_name && (
-          <p className="text-xs text-muted-foreground/70 mt-0.5">
-            {post.location_name}
+        {fullname && fullname !== username && (
+          <p className="text-xs text-muted-foreground truncate">{fullname}</p>
+        )}
+        {(locationName || timestamp) && (
+          <p className="text-xs text-muted-foreground/60 mt-0.5">
+            {[locationName, timestamp].filter(Boolean).join(' · ')}
           </p>
         )}
       </div>
 
-      {/* 发布时间 */}
-      {timeText && (
-        <span className="text-xs text-muted-foreground/60 shrink-0 mt-0.5">
-          {timeText}
-        </span>
-      )}
+      {/* 右侧三点菜单 */}
+      <button
+        className="size-8 flex items-center justify-center rounded-full hover:bg-muted/60 transition-colors shrink-0"
+        aria-label="更多选项"
+      >
+        <Ellipsis className="size-5 text-foreground/70" />
+      </button>
     </div>
   )
 }

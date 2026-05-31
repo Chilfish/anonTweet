@@ -54,6 +54,10 @@ export interface IGPost {
   location_name?: string
   /** 合作者列表 */
   coauthors?: { username: string, fullname: string }[]
+  /** AI / 手动翻译后的 caption 文本 */
+  captionTranslation?: string
+  /** 是否认证用户 */
+  verified?: boolean
 }
 
 /** API 返回的帖子数组 */
