@@ -38,6 +38,7 @@ export async function loader({
     apiKey: env.GEMINI_API_KEY || '',
     model: env.GEMINI_MODEL || '',
     enableAITranslation: enableTranslation,
+    force: false,
   } satisfies GetTweetSchema)
 
   const isRetweet = tweets[0] && tweets[0].retweetedOrignalId && tweets[0].retweetedOrignalId !== tweets[0].id_str

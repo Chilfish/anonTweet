@@ -70,6 +70,7 @@ export default function TweetPage() {
         apiKey,
         model,
         thinkingLevel,
+        force: false,
       })
     },
     {

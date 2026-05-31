@@ -63,9 +63,8 @@ class MemoryCacheAdapter implements ICacheAdapter {
     this.cache.delete(key)
     this.cache.set(key, wrapper)
 
-    // 注意：这里做一次深拷贝，防止外部修改缓存内的对象引用
-    // 对于高性能场景，可以不做 parse/stringify，但需确保数据不可变
-    return JSON.parse(JSON.stringify(wrapper.data))
+    // 深拷贝防止外部修改缓存内的对象引用
+    return structuredClone(wrapper.data)
   }
 
   async set<T>(key: string, value: T, ttl?: number): Promise<void> {
@@ -79,8 +78,8 @@ class MemoryCacheAdapter implements ICacheAdapter {
 
     const expiresAt = ttl ? Date.now() + ttl : null
 
-    // 存储前序列化再反序列化，确保存入的是快照
-    const safeData = JSON.parse(JSON.stringify(value))
+    // 存储前深拷贝，确保存入的是快照
+    const safeData = structuredClone(value)
 
     this.cache.set(key, { data: safeData, expiresAt })
   }
