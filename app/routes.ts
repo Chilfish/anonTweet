@@ -13,6 +13,7 @@ export default [
     index('routes/home.tsx'),
     route('/list/:id', 'routes/list.tsx'),
     route('/tweets/:id', 'routes/tweet.tsx'),
+    route('/ins/:id', 'routes/ins.tsx'),
     route('/bili', 'routes/bili.tsx'),
   ]),
 
@@ -26,6 +27,10 @@ export default [
       route('set', 'routes/api/tweet/set.ts'),
       route('list/:id', 'routes/api/tweet/list.ts'),
       route('/replies/:id', 'routes/api/tweet/replies.ts'),
+    ]),
+
+    ...prefix('ig', [
+      route('get/:id', 'routes/api/ig/get.ts'),
     ]),
 
     ...prefix('user', [

@@ -3,8 +3,6 @@
     "target": "ES2022",
     "jsx": "react-jsx",
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
-
-    "baseUrl": ".",
     "rootDirs": [".", "./.react-router/types"],
     "module": "ESNext",
     "moduleResolution": "Bundler",

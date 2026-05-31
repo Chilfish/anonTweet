@@ -95,3 +95,20 @@
 - **14:30** Phase 3 完成 ✅
   - `app/routes/ins.tsx` 接入 SWR → API → IGPostCard 完整数据流
   - Skeleton / NotFound / 正常三态渲染
+- **14:31** Phase 4 完成 ✅
+  - `app/lib/translateIGCaption.ts` — caption AI 翻译（无实体占位符简化版）
+  - `app/hooks/use-ig-screenshot-action.ts` — modern-screenshot 截图
+  - `app/lib/igDownloader.ts` — 媒体下载提取器
+- **14:32** Phase 5 完成 ✅
+  - `app/routes/plain-ig.tsx` — SSR 纯文本路由
+  - `app/components/ins/PlainIGPost.tsx` — 纯净截图组件
+- **14:32** 🎉 全部 5 个 Phase 完成
+- **15:00** 🔄 设计大改：复用 UI 组件库 + 透卡相框风格 + Apple 折叠宫格
+  - 19 files, +1097/-18
+  - 0 lint errors, 所有 commit 通过 pre-commit hook
+- **15:02** 设计重构完成 ✅
+  - 删除 `IGPostCard` / `IGMediaCarousel`（自造轮子）
+  - 新增 `IGCardHeader`（复用 Avatar）、`IGMediaGrid`（复用 MediaImage/MediaVideo）、`IGCaption`
+  - 新增 `IGPhotoCard`（复用 Card）— 透卡相框整体
+  - 更新 `PlainIGPost` 复用新子组件
+  - 纯 shadcn/ui 体系，0 处自研 UI 原语

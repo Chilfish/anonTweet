@@ -2,7 +2,7 @@ import type { IGPostData } from '~/types'
 import { AlertCircle } from 'lucide-react'
 import { useParams } from 'react-router'
 import useSWR from 'swr'
-import { IGPostCard } from '~/components/ins/IGPostCard'
+import { IGPhotoCard } from '~/components/ins/IGPhotoCard'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Skeleton } from '~/components/ui/skeleton'
@@ -89,5 +89,5 @@ export default function IGPostPage() {
 
   const post = posts[0]!
 
-  return <IGPostCard post={post} className="mt-4" />
+  return <IGPhotoCard post={post} className="mt-4" />
 }
