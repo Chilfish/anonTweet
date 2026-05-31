@@ -20,7 +20,6 @@ interface IGMediaGridProps {
  */
 export function IGMediaGrid({ media, maxVisible = 9, className }: IGMediaGridProps) {
   const [expanded, setExpanded] = useState(false)
-  const [currentIdx, setCurrentIdx] = useState(0)
 
   const shouldFold = media.length > maxVisible && !expanded
   const visibleMedia = shouldFold ? media.slice(0, maxVisible) : media
@@ -95,23 +94,6 @@ export function IGMediaGrid({ media, maxVisible = 9, className }: IGMediaGridPro
           )
         })}
       </div>
-
-      {/* Instagram 圆点指示器 — 多图时显示 */}
-      {media.length > 1 && !shouldFold && (
-        <div className="flex items-center justify-center gap-1 py-2">
-          {media.map((_, i) => (
-            <span
-              key={i}
-              className={cn(
-                'size-1.5 rounded-full transition-all duration-200',
-                i === currentIdx
-                  ? 'bg-[#3896F4] scale-110'
-                  : 'bg-muted-foreground/25',
-              )}
-            />
-          ))}
-        </div>
-      )}
     </div>
   )
 }
