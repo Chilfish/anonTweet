@@ -87,9 +87,6 @@ export async function action({ request, params }: Route.ActionArgs) {
 
     const translated = await translateIGCaption({
       post,
-      apiKey,
-      model,
-      provider,
       modelInstance,
       thinkingLevel,
       translationGlossary,

@@ -76,9 +76,6 @@ async function handleIGTranslation(args: Extract<AITranslationSchema, { type: 'i
 
     const translated = await translateIGCaption({
       post: igPost,
-      apiKey,
-      model,
-      provider,
       modelInstance,
       thinkingLevel,
       translationGlossary,
