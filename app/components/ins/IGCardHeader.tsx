@@ -12,6 +12,17 @@ interface IGCardHeaderProps {
 }
 
 /**
+ * 将 Instagram CDN 图片 URL 转为同源代理 URL。
+ * 解决 `ERR_BLOCKED_BY_RESPONSE.NotSameOrigin` CORS 拦截。
+ */
+function proxyImage(url: string): string {
+  if (url.includes('cdninstagram.com') || url.includes('fbcdn.net')) {
+    return `/api/proxy/image?url=${encodeURIComponent(url)}`
+  }
+  return url
+}
+
+/**
  * Instagram 卡片头部 — 单行紧凑。
  *
  * [头像] [用户名 ✓] — flex-1 长昵称 truncate — [InsLogo] [···]
@@ -27,9 +38,10 @@ export function IGCardHeader({
 
   return (
     <div className={cn('flex items-center gap-2', className)}>
+      {/* 头像 — 走代理绕过 IG CDN 的 CORP 拦截 */}
       <Avatar className="size-8 shrink-0">
         {avatarUrl
-          ? <AvatarImage src={avatarUrl} alt={username} />
+          ? <AvatarImage src={proxyImage(avatarUrl)} alt={username} />
           : <AvatarFallback>{username[0]?.toUpperCase() ?? '?'}</AvatarFallback>}
       </Avatar>
 
@@ -40,7 +52,7 @@ export function IGCardHeader({
         )}
       </div>
 
-      {/* 右侧：InsLogo（黑色字） + 菜单 */}
+      {/* 右侧：InsLogo + 菜单 */}
       <div className="flex items-center gap-1.5 shrink-0">
         <InsLogo className="h-8 w-auto text-foreground/80" />
         <button
