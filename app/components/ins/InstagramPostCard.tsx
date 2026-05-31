@@ -1,4 +1,5 @@
 import type { IGPost } from '~/types'
+import { forwardRef } from 'react'
 import { cn } from '~/lib/utils'
 import { IGActionBar } from './IGActionBar'
 import { IGCaption } from './IGCaption'
@@ -9,6 +10,8 @@ import { IGMusicInfo } from './IGMusicInfo'
 interface InstagramPostCardProps {
   post: IGPost
   className?: string
+  /** 翻译模式：仅译文时只显示 translatedText，原文时隐藏 translatedText */
+  translationMode?: 'original' | 'bilingual' | 'translation'
 }
 
 /**
@@ -35,54 +38,62 @@ function formatTime(iso: string): string {
  * IGCaption      (username bold + 原文 + 译文)
  * ```
  */
-export function InstagramPostCard({ post, className }: InstagramPostCardProps) {
-  return (
-    <article
-      className={cn(
-        'w-full max-w-[468px] mx-auto',
-        'bg-card',
-        'rounded-sm',
-        'border border-border/20',
-        'pb-3',
-        className,
-      )}
-    >
-      {/* Header */}
-      <div className="px-4 pt-3 pb-2">
-        <IGCardHeader
-          username={post.username}
-          fullname={post.fullname}
-          avatarUrl={post.avatar_url}
-          verified={post.verified}
-        />
-      </div>
+export const InstagramPostCard = forwardRef<HTMLElement, InstagramPostCardProps>(
+  ({ post, className, translationMode = 'bilingual' }, ref) => {
+    // 根据翻译模式决定传给 IGCaption 的 translatedText
+    const captionTranslated = translationMode === 'original'
+      ? undefined
+      : post.captionTranslation
 
-      {/* Media */}
-      {post.media?.length > 0 && <IGMediaGrid media={post.media} />}
+    return (
+      <article
+        ref={ref}
+        className={cn(
+          'w-full max-w-[468px] mx-auto',
+          'bg-card',
+          'rounded-sm',
+          'border border-border/20',
+          'pb-3',
+          className,
+        )}
+      >
+        {/* Header */}
+        <div className="px-4 pt-3 pb-2">
+          <IGCardHeader
+            username={post.username}
+            fullname={post.fullname}
+            avatarUrl={post.avatar_url}
+            verified={post.verified}
+          />
+        </div>
 
-      {/* 音乐信息 — 媒体与 action 之间 */}
-      {post.audio && <IGMusicInfo audio={post.audio} />}
+        {/* Media */}
+        {post.media?.length > 0 && <IGMediaGrid media={post.media} />}
 
-      {/* Action Bar */}
-      <IGActionBar className="pt-1.5 pb-1" />
+        {/* 音乐信息 — 媒体与 action 之间 */}
+        {post.audio && <IGMusicInfo audio={post.audio} />}
 
-      {/* 时间戳 — action 和 caption 之间 */}
-      {post.created_at && (
-        <p className="px-4 text-xs text-muted-foreground/50 tabular-nums pb-1">
-          {formatTime(post.created_at)}
-        </p>
-      )}
+        {/* Action Bar */}
+        <IGActionBar className="pt-1.5 pb-1" />
 
-      {/* Caption */}
-      {post.description && (
-        <IGCaption
-          username={post.username}
-          text={post.description}
-          translatedText={post.captionTranslation}
-          tags={post.tags}
-          className="px-4 pt-0 pb-0"
-        />
-      )}
-    </article>
-  )
-}
+        {/* 时间戳 — action 和 caption 之间 */}
+        {post.created_at && (
+          <p className="px-4 text-xs text-muted-foreground/50 tabular-nums pb-1">
+            {formatTime(post.created_at)}
+          </p>
+        )}
+
+        {/* Caption */}
+        {post.description && (
+          <IGCaption
+            username={post.username}
+            text={post.description}
+            translatedText={captionTranslated}
+            tags={post.tags}
+            className="px-4 pt-0 pb-0"
+          />
+        )}
+      </article>
+    )
+  },
+)

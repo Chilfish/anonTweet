@@ -1,11 +1,16 @@
+import type { IGTranslationMode } from '~/components/ins/IGTranslateToggle'
 import type { IGPostData } from '~/types'
 import { AlertCircle } from 'lucide-react'
+import { useState } from 'react'
 import { useParams } from 'react-router'
 import useSWR from 'swr'
+import { IGHeader } from '~/components/ins/IGHeader'
 import { InstagramPostCard } from '~/components/ins/InstagramPostCard'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Skeleton } from '~/components/ui/skeleton'
+import { useIGOperations } from '~/hooks/use-ig-operations'
+import { useIGScreenshotAction } from '~/hooks/use-ig-screenshot-action'
 import { fetcher } from '~/lib/fetcher'
 import { extractIGId } from '~/lib/utils'
 
@@ -64,6 +69,9 @@ export default function IGPostPage() {
   const { id } = useParams()
   const igId = id ? (extractIGId(id) ?? id) : null
 
+  // 翻译模式：local state，不依赖全局 Twitter 翻译 store
+  const [translationMode, setTranslationMode] = useState<IGTranslationMode>('bilingual')
+
   const { data: posts, error, isLoading } = useSWR<IGPostData>(
     igId,
     () => getIGPost(igId!),
@@ -74,20 +82,67 @@ export default function IGPostPage() {
     },
   )
 
+  const post = posts?.[0] ?? null
+
+  // IG 操作 hook
+  const { downloadMedia, copyText, copyMarkdown } = useIGOperations(post)
+
+  // 截图 hook
+  const { containerRef, handleScreenshot, isCapturing } = useIGScreenshotAction({ post })
+
+  // 共享的 header props
+  const headerProps = {
+    post,
+    translationMode,
+    onTranslationModeChange: setTranslationMode,
+    isCapturing,
+    onScreenshot: handleScreenshot,
+    onDownload: downloadMedia,
+    onCopyText: copyText,
+    onCopyMarkdown: copyMarkdown,
+  }
+
+  // 无有效 ID
   if (!igId) {
-    return <IGNotFound id={id} />
+    return (
+      <>
+        <IGHeader {...headerProps} />
+        <IGNotFound id={id} />
+      </>
+    )
   }
 
+  // 加载中
   if (isLoading) {
-    return <IGPostSkeleton />
+    return (
+      <>
+        <IGHeader {...headerProps} />
+        <IGPostSkeleton />
+      </>
+    )
   }
 
+  // 错误 / 无数据
   if (error || !posts || posts.length === 0) {
     console.error(error)
-    return <IGNotFound id={igId} />
+    return (
+      <>
+        <IGHeader {...headerProps} />
+        <IGNotFound id={igId} />
+      </>
+    )
   }
 
-  const post = posts[0]!
-
-  return <InstagramPostCard post={post} className="mt-4" />
+  // 正常渲染
+  return (
+    <>
+      <IGHeader {...headerProps} />
+      <InstagramPostCard
+        ref={containerRef}
+        post={post!}
+        translationMode={translationMode}
+        className="mt-4"
+      />
+    </>
+  )
 }
