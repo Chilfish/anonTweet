@@ -76,18 +76,65 @@ The `docs/` directory contains the foundational technical context and constraint
 - **Components**: Prefer functional components with TypeScript. Use `lucide-react` for icons.
 - **Screenshots**: Components used for screenshots (in `app/routes/plain.tsx`) must be isolated and use `waitForRenderReady`.
 
-## 6. Testing & Validation
+## 6. Postmortem（尸检报告）
+
+> 🩻 **每次 Release 前必须跑的检查流程。** 这个词是用来让 AI 和人类都警觉的——不是「哦一篇文档」，而是「这是一个需要严肃对待的死亡分析」。
+
+### 报告库
+
+所有报告存放在 `./postmortem/` 目录，索引见 `./postmortem/index.md`。
+
+当前 8 份报告覆盖了项目从 107 个 fix commit 中提取的根因：
+
+| # | 主题 | 严重级 | 状态 |
+|---|------|--------|------|
+| 001 | Twitter 推文解析（parseTweet.ts 无测试、无分层） | SEV-2 | Active |
+| 002 | 翻译系统（UI/字典/AI/模板全部耦合） | SEV-2 | Active |
+| 003 | UI 样式/布局（20 次 CSS fix，无 design token） | SEV-3 | Active |
+| 004 | 构建配置（客户端/服务端边界不清） | SEV-2 | Mitigated |
+| 005 | 媒体管线（代理/视频/截图四套重复逻辑） | SEV-2 | Active |
+| 006 | 状态管理（zustand 整 store 订阅 + 无类型迁移） | SEV-2 | Mitigated |
+| 007 | Instagram 集成（新功能无验收清单） | SEV-3 | Active |
+| 008 | 字体/渲染（web font 与截图竞争加载） | SEV-2 | Mitigated |
+
+### Phase 1: Onboarding（初次接入）
+
+从历史 fix commit 生成报告库，已完成。
+
+### Phase 2: Pre-Release 检查（每次 Release 前）
+
+**步骤**：
+1. 获取本次改动的 commit 列表和文件列表
+2. 读取 `./postmortem/*.md` 中的 Changed Files 和 Root Cause
+3. 逐份交叉比对：文件重叠？模式复现？预防措施落实了没？
+
+**输出**：✅ PASS / ⚠️ WARN / ❌ FAIL。FAIL 必须在 Release 前修。
+
+### Phase 3: Post-Release 更新（每次 Release 后）
+
+收集本次 Release 的 fix commit，判断是补充已有报告（Recurrence 字段）还是新增报告。
+
+### 跨集群经验教训
+
+1. **零自动化测试** — 解析器/store 迁移/视觉回归全无测试，每个 bug 手动发现
+2. **高危文件**: `parseTweet.ts` (10 fix), `Tweet.tsx` (13 fix), `TranslationEditor.tsx` (10 fix)
+3. **「修两次」反模式**: 至少 3 对 commit 第一次没修干净
+4. **状态困在 React 边界**: 媒体代理 + 翻译逻辑绑定 hook，非 React 工具函数不可用
+
+---
+
+## 7. Testing & Validation
 
 - **Commands**: `bun test` or `bun test:watch`.
 - **Framework**: Vitest.
 - **Automation**: **Always** run `bun run typecheck` and `bun run lint` after modifying code. If tests exist for the modified module (check `test/` directory), run them.
 
-## 7. PR & Commit Guidelines
+## 8. PR & Commit Guidelines
 
 - **Commit Messages**: Prefer concise, semantic commit messages (e.g., `feat:`, `fix:`, `refactor:`).
 - **Verification**: Ensure all changes are verified with `typecheck` and `lint` before completing a task.
 
-## 8. Security
+## 9. Security
 
 - **API Keys**: Never hardcode API keys or secrets. Use `.env` and `app/lib/env.server.ts`.
 - **Twitter Keys**: Treat `TWEET_KEYS` as highly sensitive credentials.
