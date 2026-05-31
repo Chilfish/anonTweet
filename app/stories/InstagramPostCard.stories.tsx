@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { IGPost } from '~/types'
 import { IGActionBar } from '~/components/ins/IGActionBar'
-import { IGCaption } from '~/components/ins/IGCaption'
 import { IGCardHeader } from '~/components/ins/IGCardHeader'
 import { IGMediaGrid } from '~/components/ins/IGMediaGrid'
 import { InstagramPostCard } from '~/components/ins/InstagramPostCard'
@@ -36,7 +35,7 @@ function makePost(overrides: Partial<IGPost>): IGPost {
     type: 'post',
     media: [],
     avatar_url: 'https://picsum.photos/seed/avatar/200/200',
-    created_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString(), // 2h ago
+    created_at: '2026-05-31T15:32:00Z',
     verified: false,
     ...overrides,
   }
@@ -70,35 +69,33 @@ export const SingleImageWithTranslation: Story = {
   ),
 }
 
-export const TwoImageGrid: Story = {
+export const LongNickname: Story = {
   render: () => (
     <InstagramPostCard
-      post={makePost({ media: [samplePhotos[0]!, samplePhotos[1]!] })}
+      post={makePost({
+        media: [samplePhotos[0]!],
+        username: 'very_long_nickname_that_should_truncate',
+        fullname: 'A Very Long Display Name That Will Truncate Nicely',
+      })}
     />
+  ),
+}
+
+export const TwoImageGrid: Story = {
+  render: () => (
+    <InstagramPostCard post={makePost({ media: [samplePhotos[0]!, samplePhotos[1]!] })} />
   ),
 }
 
 export const ThreeImageGrid: Story = {
   render: () => (
-    <InstagramPostCard
-      post={makePost({ media: [samplePhotos[0]!, samplePhotos[1]!, samplePhotos[2]!] })}
-    />
-  ),
-}
-
-export const FourImageGrid: Story = {
-  render: () => (
-    <InstagramPostCard
-      post={makePost({ media: [samplePhotos[0]!, samplePhotos[1]!, samplePhotos[2]!, samplePhotos[3]!] })}
-    />
+    <InstagramPostCard post={makePost({ media: [samplePhotos[0]!, samplePhotos[1]!, samplePhotos[2]!] })} />
   ),
 }
 
 export const NineGrid: Story = {
   render: () => (
-    <InstagramPostCard
-      post={makePost({ media: samplePhotos.slice(0, 9) })}
-    />
+    <InstagramPostCard post={makePost({ media: samplePhotos.slice(0, 9) })} />
   ),
 }
 
@@ -107,7 +104,7 @@ export const OverflowFolded: Story = {
     <InstagramPostCard
       post={makePost({
         media: samplePhotos,
-        description: '12 张合集。前 9 张可见，第 9 位毛玻璃 +3。点击展开全部。',
+        description: '12 张合集。前 9 张可见，第 9 位毛玻璃 +3。',
       })}
     />
   ),
@@ -115,17 +112,13 @@ export const OverflowFolded: Story = {
 
 export const NoCaption: Story = {
   render: () => (
-    <InstagramPostCard
-      post={makePost({ media: [samplePhotos[0]!], description: '', tags: undefined })}
-    />
+    <InstagramPostCard post={makePost({ media: [samplePhotos[0]!], description: '', tags: undefined })} />
   ),
 }
 
-export const NoAvatarFallback: Story = {
+export const NoAvatar: Story = {
   render: () => (
-    <InstagramPostCard
-      post={makePost({ media: [samplePhotos[0]!], avatar_url: undefined })}
-    />
+    <InstagramPostCard post={makePost({ media: [samplePhotos[0]!], avatar_url: undefined })} />
   ),
 }
 
@@ -139,33 +132,15 @@ export const HeaderOnly: Story = {
         fullname="Chil Fish"
         avatarUrl="https://picsum.photos/seed/avatar/200/200"
         verified
-        createdAt={new Date(Date.now() - 2 * 3600 * 1000).toISOString()}
       />
     </div>
   ),
 }
 
 export const MediaGridOnly: Story = {
-  render: () => (
-    <div className="w-[468px]"><IGMediaGrid media={samplePhotos.slice(0, 6)} /></div>
-  ),
+  render: () => (<div className="w-[468px]"><IGMediaGrid media={samplePhotos.slice(0, 6)} /></div>),
 }
 
 export const ActionBarOnly: Story = {
-  render: () => (
-    <div className="w-[400px] bg-card rounded-sm p-4"><IGActionBar /></div>
-  ),
-}
-
-export const CaptionWithTranslation: Story = {
-  render: () => (
-    <div className="w-[400px] bg-card rounded-sm p-4">
-      <IGCaption
-        username="chilfish"
-        text="The quick brown fox jumps over the lazy dog. Always fully visible, no line-clamp."
-        translatedText="敏捷的棕色狐狸跳过了懒惰的狗。始终完整显示，不使用截断。"
-        tags={['example']}
-      />
-    </div>
-  ),
+  render: () => (<div className="w-[400px] bg-card rounded-sm p-4"><IGActionBar /></div>),
 }
