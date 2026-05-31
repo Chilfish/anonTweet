@@ -4,7 +4,9 @@ import type { IGAudio, IGMedia, IGPost, IGPostData } from '~/types'
 import { createSDK } from '@chilfish/gallery-dl-instagram/node'
 import { data } from 'react-router'
 import { env } from '~/lib/env.server'
-import { setLocalCache } from '~/lib/localCache'
+import { getProviderStrategy } from '~/lib/providers'
+import { getCachedIGPost } from '~/lib/service/getIGPost.server'
+import { translateIGCaption } from '~/lib/translateIGCaption'
 import { extractIGId } from '~/lib/utils'
 
 /**
@@ -81,6 +83,21 @@ function normalizeIGPost(messages: Message[]): IGPost | null {
   }
 }
 
+/**
+ * 通过 SDK 拉取 IG 帖子原始数据并标准化。
+ * 不做缓存写入（由 getCachedIGPost 管理）。
+ */
+async function fetchIGPostFromSDK(postUrl: string): Promise<IGPost | null> {
+  const ig = await createSDK({ cookies: env.INS_COOKIES })
+
+  const messages: Message[] = []
+  for await (const msg of ig.extract(postUrl)) {
+    messages.push(msg)
+  }
+
+  return normalizeIGPost(messages)
+}
+
 export async function action({ request, params }: Route.ActionArgs) {
   const id = params.id
 
@@ -105,11 +122,12 @@ export async function action({ request, params }: Route.ActionArgs) {
   }
 
   const {
-    enableAITranslation: _enableAI = false,
-    apiKey: _apiKey,
-    model: _model,
-    thinkingLevel: _thinkingLevel,
-    translationGlossary: _glossary,
+    enableAITranslation = false,
+    apiKey,
+    model,
+    provider = 'google',
+    thinkingLevel,
+    translationGlossary,
   } = body
 
   // 如果是 stories 格式（username/id），需要特殊处理
@@ -126,16 +144,9 @@ export async function action({ request, params }: Route.ActionArgs) {
   }
 
   try {
-    // 1. 创建 SDK 实例并提取
-    const ig = await createSDK({ cookies: env.INS_COOKIES })
+    // 1. 三层缓存获取帖子（localCache → DB → SDK）
+    const post = await getCachedIGPost(igId, () => fetchIGPostFromSDK(postUrl))
 
-    const messages: Message[] = []
-    for await (const msg of ig.extract(postUrl)) {
-      messages.push(msg)
-    }
-
-    // 2. 标准化为 IGPost
-    const post = normalizeIGPost(messages)
     if (!post) {
       return data(
         { success: false, error: 'Failed to parse Instagram post data' },
@@ -143,22 +154,34 @@ export async function action({ request, params }: Route.ActionArgs) {
       )
     }
 
-    const posts: IGPostData = [post]
+    // 2. AI 翻译（如果启用且未翻译过）
+    if (enableAITranslation && post.description && apiKey && model) {
+      try {
+        const strategy = getProviderStrategy(provider)
+        const sdkProvider = strategy.createSDKProvider(apiKey)
+        const modelInstance = sdkProvider.languageModel(model)
 
-    // 3. AI 翻译（TODO Phase 4: 接入翻译管线）
-    // if (enableAITranslation && post.description && apiKey && model) {
-    //   const translated = await translateIGCaption(post, { apiKey, model, thinkingLevel, translationGlossary })
-    // }
+        const translated = await translateIGCaption({
+          post,
+          apiKey,
+          model,
+          provider,
+          modelInstance,
+          thinkingLevel,
+          translationGlossary,
+        })
 
-    // 4. 缓存写入
-    try {
-      await setLocalCache({ id: post.id, type: 'ig-post', value: post })
+        if (translated) {
+          post.captionTranslation = translated
+        }
+      }
+      catch (transError) {
+        console.error('[IG] Translation failed:', transError)
+        // 翻译失败不影响帖子返回
+      }
     }
-    catch (cacheError) {
-      console.warn('[IG] Failed to cache post:', cacheError)
-    }
 
-    return posts
+    return [post] satisfies IGPostData
   }
   catch (error: any) {
     console.error(`[IG] Failed to extract post ${igId}:`, error)
@@ -189,13 +212,7 @@ export async function loader({ params }: Route.LoaderArgs) {
     : `https://www.instagram.com/p/${igId}/`
 
   try {
-    const ig = await createSDK({ cookies: env.INS_COOKIES })
-    const messages: Message[] = []
-    for await (const msg of ig.extract(postUrl)) {
-      messages.push(msg)
-    }
-
-    const post = normalizeIGPost(messages)
+    const post = await getCachedIGPost(igId, () => fetchIGPostFromSDK(postUrl))
     return post ? [post] : []
   }
   catch (error) {
