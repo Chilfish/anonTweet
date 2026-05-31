@@ -13,3 +13,4 @@ storybook-static
 
 .vercel/
 cache/
+.alma-snapshots

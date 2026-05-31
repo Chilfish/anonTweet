@@ -25,7 +25,6 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
 }) => {
   const showTranslationButton = useShowTranslationButton()
   const { hasTextContent } = useTranslationActions()
-  const editor = useTranslationEditorLogic(originalTweet)
 
   const isVisible = useMemo(() => {
     return hasTextContent(originalTweet.text) && showTranslationButton
@@ -33,6 +32,17 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
 
   if (!isVisible)
     return null
+
+  return <TranslationEditorInner originalTweet={originalTweet} className={className} />
+}
+
+TranslationEditor.displayName = 'TranslationEditor'
+
+function TranslationEditorInner({
+  originalTweet,
+  className,
+}: TranslationEditorProps) {
+  const editor = useTranslationEditorLogic(originalTweet)
 
   return (
     <Dialog
@@ -149,4 +159,4 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
   )
 }
 
-TranslationEditor.displayName = 'TranslationEditor'
+TranslationEditorInner.displayName = 'TranslationEditorInner'

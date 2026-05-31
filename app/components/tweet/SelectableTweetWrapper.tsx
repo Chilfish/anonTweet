@@ -61,7 +61,7 @@ function SelectableTweetWrapperComponent({
         role="button"
         tabIndex={0}
         className={cn(
-          'relative transition-all duration-300 ease-in-out',
+          'relative transition-opacity duration-200 ease-in-out',
           className,
         )}
         onClick={handleClick}
@@ -89,7 +89,7 @@ function SelectableTweetWrapperComponent({
       data-tweet-id={tweetId}
       data-selected={isSelected}
       className={cn(
-        'relative transition-all duration-300 ease-in-out',
+        'relative transition-opacity duration-200 ease-in-out',
         className,
       )}
     >

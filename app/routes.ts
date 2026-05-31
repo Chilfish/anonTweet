@@ -9,14 +9,17 @@ import {
 
 export default [
   route('plain-tweet/:id', 'routes/plain.tsx'),
+  route('plain-ins/:id', 'routes/plain-ig.tsx'),
   layout('routes/layout.tsx', [
     index('routes/home.tsx'),
     route('/list/:id', 'routes/list.tsx'),
     route('/tweets/:id', 'routes/tweet.tsx'),
+    route('/ins/:id', 'routes/ins.tsx'),
     route('/bili', 'routes/bili.tsx'),
   ]),
 
   ...prefix('api', [
+    route('proxy/image', 'routes/api/proxy/image.ts'),
     route('bili-post', 'routes/api/bili-post.tsx'),
     route('ai-test', 'routes/api/ai/ai-test.ts'),
     route('ai-translation', 'routes/api/ai/ai-translation.ts'),
@@ -26,6 +29,10 @@ export default [
       route('set', 'routes/api/tweet/set.ts'),
       route('list/:id', 'routes/api/tweet/list.ts'),
       route('/replies/:id', 'routes/api/tweet/replies.ts'),
+    ]),
+
+    ...prefix('ig', [
+      route('get/:id', 'routes/api/ig/get.ts'),
     ]),
 
     ...prefix('user', [
