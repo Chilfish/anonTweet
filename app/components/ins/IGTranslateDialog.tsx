@@ -11,6 +11,7 @@ import { fetcher } from '~/lib/fetcher'
 import { useAIConfig } from '~/lib/stores/hooks'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 import { toast } from '~/lib/utils'
+import { RichText } from '../RichText'
 
 interface IGTranslateDialogProps {
   post: IGPost
@@ -81,12 +82,27 @@ export function IGTranslateDialog({ post, onTranslated }: IGTranslateDialogProps
     }
   }
 
-  const handleSave = () => {
-    if (editedText.trim()) {
-      onTranslated(editedText.trim())
-      toast.success('翻译已保存')
-      setOpen(false)
+  const handleSave = async () => {
+    const text = editedText.trim()
+    if (!text)
+      return
+
+    // 写回 DB + localCache
+    try {
+      await fetcher.post(`/api/ig/translate/${post.id}`, {
+        manualTranslation: text,
+      })
     }
+    catch (err) {
+      console.error('[IG] Failed to save translation to DB:', err)
+      // 不阻塞：DB 写失败不影响 UI 更新
+    }
+
+    onTranslated(text)
+    toast.success('翻译已保存', {
+      description: '已同步到数据库',
+    })
+    setOpen(false)
   }
 
   // 打开时初始化编辑文本
@@ -104,7 +120,7 @@ export function IGTranslateDialog({ post, onTranslated }: IGTranslateDialogProps
           <Button
             variant="ghost"
             size="icon"
-            className="inline-flex align-middle -my-1 ml-1 h-6 w-6 text-muted-foreground hover:text-foreground"
+            className="inline-flex align-middle -my-1 ml-1 size-6 text-muted-foreground hover:text-foreground"
             aria-label="翻译 caption"
           />
         )}
@@ -127,9 +143,10 @@ export function IGTranslateDialog({ post, onTranslated }: IGTranslateDialogProps
               <Label className="px-1 text-xs font-medium text-muted-foreground">
                 原文
               </Label>
-              <div className="p-3 rounded-lg bg-muted/30 border border-dashed text-sm whitespace-pre-wrap break-words">
-                {post.description}
-              </div>
+              <RichText
+                text={post.description}
+                className="p-3 rounded-lg bg-muted/30 border border-dashed text-sm whitespace-pre-wrap wrap-break-words"
+              />
             </div>
 
             {/* 译文编辑 */}

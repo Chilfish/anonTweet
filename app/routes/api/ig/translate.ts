@@ -46,8 +46,17 @@ export async function action({ request, params }: Route.ActionArgs) {
     provider = 'google',
     thinkingLevel,
     translationGlossary,
+    // 手动翻译：直接写入，跳过 AI
+    manualTranslation,
   } = body
 
+  // ─── 手动翻译分支 ─────────────────────────
+  if (manualTranslation) {
+    await updateIGPostTranslation(igId, manualTranslation)
+    return { captionTranslation: manualTranslation }
+  }
+
+  // ─── AI 翻译分支 ─────────────────────────
   if (!apiKey || !model) {
     return data(
       { success: false, error: 'Missing apiKey or model' },
