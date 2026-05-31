@@ -2,7 +2,7 @@ import type { IGPost } from '~/types'
 import { eq } from 'drizzle-orm'
 import { getDbClient, isDbAvailable } from '~/lib/database/db.server'
 import { igPost } from '~/lib/database/schema'
-import { getLocalCache } from '~/lib/localCache'
+import { getLocalCache, setLocalCache } from '~/lib/localCache'
 
 /**
  * 从 DB 缓存读取 IG 帖子。
@@ -93,4 +93,52 @@ export async function getCachedIGPost(
       return post
     },
   })
+}
+
+/**
+ * 更新 IG 帖子的翻译结果到 DB + localCache。
+ *
+ * 用于翻译按钮触发后持久化 captionTranslation。
+ */
+export async function updateIGPostTranslation(
+  shortcode: string,
+  captionTranslation: string,
+): Promise<void> {
+  // 1. 更新 DB
+  if (isDbAvailable()) {
+    const db = getDbClient()
+    try {
+      const cached = await db.query.igPost.findFirst({
+        where: eq(igPost.postShortcode, shortcode),
+      })
+      if (cached) {
+        const updated = { ...cached.jsonContent, captionTranslation }
+        await db.update(igPost)
+          .set({ jsonContent: updated })
+          .where(eq(igPost.postShortcode, shortcode))
+      }
+    }
+    catch (error) {
+      console.error('[IG] Failed to update translation in DB:', error)
+    }
+  }
+
+  // 2. 更新 localCache
+  try {
+    const cached = await getLocalCache<IGPost | null>({
+      id: shortcode,
+      type: 'ig-post',
+      getter: async () => null,
+    })
+    if (cached) {
+      await setLocalCache({
+        id: shortcode,
+        type: 'ig-post',
+        value: { ...cached, captionTranslation },
+      })
+    }
+  }
+  catch {
+    // localCache update is best-effort
+  }
 }

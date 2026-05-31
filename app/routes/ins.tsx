@@ -12,7 +12,8 @@ import { Skeleton } from '~/components/ui/skeleton'
 import { useIGOperations } from '~/hooks/use-ig-operations'
 import { useIGScreenshotAction } from '~/hooks/use-ig-screenshot-action'
 import { fetcher } from '~/lib/fetcher'
-import { extractIGId } from '~/lib/utils'
+import { useAIConfig } from '~/lib/stores/hooks'
+import { extractIGId, toast } from '~/lib/utils'
 
 export function meta() {
   return [
@@ -60,8 +61,29 @@ function IGNotFound({ id }: { id?: string }) {
   )
 }
 
-async function getIGPost(id: string): Promise<IGPostData> {
-  const { data } = await fetcher.post<IGPostData>(`/api/ig/get/${id}`, {})
+async function getIGPost(
+  id: string,
+  aiConfig?: {
+    enableAITranslation: boolean
+    aiProvider: string
+    apiKey: string
+    model: string
+    thinkingLevel?: string
+    translationGlossary?: string
+  },
+): Promise<IGPostData> {
+  const body = aiConfig?.enableAITranslation && aiConfig.apiKey && aiConfig.model
+    ? {
+        enableAITranslation: true,
+        apiKey: aiConfig.apiKey,
+        model: aiConfig.model,
+        provider: aiConfig.aiProvider,
+        thinkingLevel: aiConfig.thinkingLevel,
+        translationGlossary: aiConfig.translationGlossary,
+      }
+    : {}
+
+  const { data } = await fetcher.post<IGPostData>(`/api/ig/get/${id}`, body)
   return data
 }
 
@@ -72,9 +94,34 @@ export default function IGPostPage() {
   // 翻译模式：local state，不依赖全局 Twitter 翻译 store
   const [translationMode, setTranslationMode] = useState<IGTranslationMode>('bilingual')
 
-  const { data: posts, error, isLoading } = useSWR<IGPostData>(
+  // 翻译触发状态
+  const [isTranslating, setIsTranslating] = useState(false)
+
+  // AI 配置（使用 selector hook 防止不必要重渲染）
+  const aiConfigFromStore = useAIConfig()
+
+  const apiKey = aiConfigFromStore.aiProvider === 'google'
+    ? aiConfigFromStore.geminiApiKey
+    : aiConfigFromStore.deepseekApiKey
+  const model = aiConfigFromStore.aiProvider === 'google'
+    ? aiConfigFromStore.geminiModel
+    : aiConfigFromStore.deepseekModel
+  const thinkingLevel = aiConfigFromStore.aiProvider === 'google'
+    ? aiConfigFromStore.geminiThinkingLevel
+    : aiConfigFromStore.deepseekThinkingLevel
+
+  const aiConfig = {
+    enableAITranslation: aiConfigFromStore.enableAITranslation,
+    aiProvider: aiConfigFromStore.aiProvider,
+    apiKey,
+    model,
+    thinkingLevel,
+    translationGlossary: aiConfigFromStore.translationGlossary,
+  }
+
+  const { data: posts, error, isLoading, mutate } = useSWR<IGPostData>(
     igId,
-    () => getIGPost(igId!),
+    () => getIGPost(igId!, aiConfig),
     {
       revalidateIfStale: false,
       revalidateOnFocus: false,
@@ -89,6 +136,62 @@ export default function IGPostPage() {
 
   // 截图 hook
   const { containerRef, handleScreenshot, isCapturing } = useIGScreenshotAction({ post })
+
+  // 翻译 caption 回调
+  const handleTranslateCaption = async () => {
+    if (!igId || !post?.description)
+      return
+
+    if (!apiKey || !model) {
+      toast.error('翻译失败：未配置 API Key', {
+        description: '请在设置中配置 Gemini 或 DeepSeek API Key',
+      })
+      return
+    }
+
+    setIsTranslating(true)
+    try {
+      const result = await fetcher.post<{ captionTranslation: string }>(
+        `/api/ig/translate/${igId}`,
+        {
+          apiKey,
+          model,
+          provider: aiConfigFromStore.aiProvider,
+          thinkingLevel,
+          translationGlossary: aiConfigFromStore.translationGlossary,
+        },
+      )
+
+      if (result.data?.captionTranslation) {
+        // 更新本地 SWR 缓存 — 把翻译文本注入帖子
+        mutate(
+          (currentData) => {
+            if (!currentData)
+              return currentData
+            const updated = currentData.map(p =>
+              p.id === igId
+                ? { ...p, captionTranslation: result.data.captionTranslation }
+                : p,
+            )
+            return updated
+          },
+          { revalidate: false },
+        )
+
+        toast.success('翻译完成')
+      }
+      else {
+        toast.error('翻译失败', { description: '返回结果为空' })
+      }
+    }
+    catch (err) {
+      console.error('[IG] Translate error:', err)
+      toast.error('翻译请求失败')
+    }
+    finally {
+      setIsTranslating(false)
+    }
+  }
 
   // 共享的 header props
   const headerProps = {
@@ -141,6 +244,8 @@ export default function IGPostPage() {
         ref={containerRef}
         post={post!}
         translationMode={translationMode}
+        isTranslatingCaption={isTranslating}
+        onTranslateCaption={handleTranslateCaption}
         className="mt-4"
       />
     </>
