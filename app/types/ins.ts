@@ -6,6 +6,8 @@ export interface IGMedia {
   num: number
   /** Instagram 媒体 ID */
   media_id: string
+  /** 媒体级短码（用于深层链接） */
+  shortcode?: string
   /** 图片/视频缩略图 CDN URL */
   display_url: string
   /** 视频 CDN URL（图片则为 undefined） */
@@ -18,8 +20,19 @@ export interface IGMedia {
   width_original?: number
   /** 原图高度 */
   height_original?: number
-  /** 媒体类型便捷字段 */
+  /** 媒体类型 */
   type: 'photo' | 'video'
+  /** 被 @ 的用户列表 */
+  tagged_users?: { id: string, username: string, full_name: string }[]
+  /** Reel / 帖子独立音频 */
+  audio_url?: string
+  audio_title?: string
+  audio_subtitle?: string
+  audio_artist?: string
+  audio_duration?: number
+  audio_cover_artwork_uri?: string
+  audio_has_lyrics?: boolean
+  audio_is_explicit?: boolean
 }
 
 /**
@@ -54,10 +67,10 @@ export interface IGPost {
   location_name?: string
   /** 合作者列表 */
   coauthors?: { username: string, fullname: string }[]
-  /** AI / 手动翻译后的 caption 文本 */
-  captionTranslation?: string
   /** 是否认证用户 */
   verified?: boolean
+  /** AI / 手动翻译后的 caption 文本 */
+  captionTranslation?: string
 }
 
 /** API 返回的帖子数组 */

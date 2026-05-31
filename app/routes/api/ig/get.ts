@@ -17,7 +17,12 @@ function normalizeIGPost(messages: Message[]): IGPost | null {
   if (!dir)
     return null
 
-  const meta = dir.metadata as ParsedPost
+  const meta = dir.metadata as ParsedPost & {
+    post_date?: string
+    user?: { profile_pic_url?: string, is_verified?: boolean }
+    location_slug?: string
+    coauthors?: { username: string, full_name?: string }[]
+  }
   const urlMsgs = messages.filter(m => m.type === 'url') as UrlMsg[]
 
   const media: IGMedia[] = urlMsgs.map((msg, i) => {
@@ -25,6 +30,7 @@ function normalizeIGPost(messages: Message[]): IGPost | null {
     return {
       num: m.num ?? i,
       media_id: m.media_id,
+      shortcode: m.shortcode,
       display_url: m.display_url,
       video_url: m.video_url,
       width: m.width,
@@ -32,6 +38,15 @@ function normalizeIGPost(messages: Message[]): IGPost | null {
       width_original: m.width_original,
       height_original: m.height_original,
       type: (m.video_url ? 'video' : 'photo') as IGMedia['type'],
+      tagged_users: m.tagged_users,
+      audio_url: m.audio_url,
+      audio_title: m.audio_title,
+      audio_subtitle: m.audio_subtitle,
+      audio_artist: m.audio_artist,
+      audio_duration: m.audio_duration,
+      audio_cover_artwork_uri: m.audio_cover_artwork_uri,
+      audio_has_lyrics: m.audio_has_lyrics,
+      audio_is_explicit: m.audio_is_explicit,
     }
   })
 
@@ -46,9 +61,14 @@ function normalizeIGPost(messages: Message[]): IGPost | null {
     likes: meta.likes,
     type: meta.type,
     media,
-    // IG SDK 不直接提供头像和时间，后续可扩展
-    created_at: undefined,
-    avatar_url: undefined,
+    created_at: meta.post_date,
+    avatar_url: meta.user?.profile_pic_url,
+    verified: meta.user?.is_verified,
+    location_name: meta.location_slug,
+    coauthors: meta.coauthors?.map(c => ({
+      username: c.username,
+      fullname: c.full_name ?? c.username,
+    })),
   }
 }
 
