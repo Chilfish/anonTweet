@@ -13,7 +13,7 @@ interface IGActionBarProps {
  */
 export function IGActionBar({ className }: IGActionBarProps) {
   return (
-    <div className={cn('flex items-center justify-between px-4 py-2', className)}>
+    <div className={cn('flex items-center justify-between px-4 my-2', className)}>
       <div className="flex items-center gap-4">
         <button aria-label="点赞" className="p-1 -m-1">
           <Heart className="size-6 text-[#FF3040] fill-[#FF3040]" />
@@ -22,7 +22,7 @@ export function IGActionBar({ className }: IGActionBarProps) {
           <MessageCircle className="size-6" />
         </button>
         <button aria-label="分享" className="p-1 -m-1">
-          <Send className="size-[1.15rem]" />
+          <Send className="size-6" />
         </button>
       </div>
 

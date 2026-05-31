@@ -42,7 +42,7 @@ export function IGCardHeader({
 
       {/* 右侧：InsLogo（黑色字） + 菜单 */}
       <div className="flex items-center gap-1.5 shrink-0">
-        <InsLogo className="h-3.5 w-auto text-foreground/80" />
+        <InsLogo className="h-8 w-auto text-foreground/80" />
         <button
           className="size-7 flex items-center justify-center rounded-full hover:bg-muted/60 transition-colors -mr-1"
           aria-label="更多选项"
