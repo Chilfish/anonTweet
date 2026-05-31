@@ -1,4 +1,18 @@
 /**
+ * Instagram 帖子附带的音频/音乐信息
+ */
+export interface IGAudio {
+  title?: string
+  subtitle?: string
+  artist?: string
+  duration?: number
+  cover_artwork_uri?: string
+  cover_artwork_thumbnail_uri?: string
+  has_lyrics?: boolean
+  is_explicit?: boolean
+}
+
+/**
  * Instagram 媒体项 — 对应 SDK ParsedMedia
  */
 export interface IGMedia {
@@ -24,15 +38,6 @@ export interface IGMedia {
   type: 'photo' | 'video'
   /** 被 @ 的用户列表 */
   tagged_users?: { id: string, username: string, full_name: string }[]
-  /** Reel / 帖子独立音频 */
-  audio_url?: string
-  audio_title?: string
-  audio_subtitle?: string
-  audio_artist?: string
-  audio_duration?: number
-  audio_cover_artwork_uri?: string
-  audio_has_lyrics?: boolean
-  audio_is_explicit?: boolean
 }
 
 /**
@@ -69,6 +74,8 @@ export interface IGPost {
   coauthors?: { username: string, fullname: string }[]
   /** 是否认证用户 */
   verified?: boolean
+  /** 帖子附带的音频/音乐（Reel 等） */
+  audio?: IGAudio
   /** AI / 手动翻译后的 caption 文本 */
   captionTranslation?: string
 }

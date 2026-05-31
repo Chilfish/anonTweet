@@ -34,12 +34,6 @@ const musicMedia: IGPost['media'] = [{
   height: 640,
   type: 'video' as const,
   tagged_users: [],
-  audio_title: 'Blue Bird',
-  audio_subtitle: 'NARUTO OP 3 Cover',
-  audio_artist: 'Ikimono Gakari',
-  audio_duration: 45,
-  audio_has_lyrics: true,
-  audio_is_explicit: false,
 }]
 
 function makePost(overrides: Partial<IGPost>): IGPost {
@@ -95,6 +89,14 @@ export const ReelWithMusic: Story = {
         type: 'reel',
         description: '新しい自分に出会う旅 🕊️ #BlueBird #NARUTO',
         tags: ['BlueBird', 'NARUTO', 'ikimonogakari'],
+        audio: {
+          title: 'Blue Bird',
+          subtitle: 'NARUTO OP 3 Cover',
+          artist: 'Ikimono Gakari',
+          duration: 45,
+          has_lyrics: true,
+          is_explicit: false,
+        },
       })}
     />
   ),
@@ -179,7 +181,15 @@ export const ActionBarOnly: Story = {
 export const MusicInfoOnly: Story = {
   render: () => (
     <div className="w-[400px] bg-card rounded-sm">
-      <IGMusicInfo media={musicMedia} />
+      <IGMusicInfo audio={{
+        title: 'Blue Bird',
+        subtitle: 'NARUTO OP 3 Cover',
+        artist: 'Ikimono Gakari',
+        duration: 45,
+        has_lyrics: true,
+        is_explicit: false,
+      }}
+      />
     </div>
   ),
 }

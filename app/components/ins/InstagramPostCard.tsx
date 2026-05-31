@@ -61,7 +61,7 @@ export function InstagramPostCard({ post, className }: InstagramPostCardProps) {
       {post.media?.length > 0 && <IGMediaGrid media={post.media} />}
 
       {/* 音乐信息 — 媒体与 action 之间 */}
-      {post.media?.length > 0 && <IGMusicInfo media={post.media} />}
+      {post.audio && <IGMusicInfo audio={post.audio} />}
 
       {/* Action Bar */}
       <IGActionBar className="pt-1.5 pb-1" />

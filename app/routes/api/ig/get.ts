@@ -1,6 +1,6 @@
 import type { DirectoryMsg, Message, ParsedMedia, ParsedPost, UrlMsg } from '@chilfish/gallery-dl-instagram'
 import type { Route } from './+types/get'
-import type { IGMedia, IGPost, IGPostData } from '~/types'
+import type { IGAudio, IGMedia, IGPost, IGPostData } from '~/types'
 import { createSDK } from '@chilfish/gallery-dl-instagram/node'
 import { data } from 'react-router'
 import { env } from '~/lib/env.server'
@@ -25,6 +25,22 @@ function normalizeIGPost(messages: Message[]): IGPost | null {
   }
   const urlMsgs = messages.filter(m => m.type === 'url') as UrlMsg[]
 
+  // 从第一条有音频数据的媒体中提取全剧音频信息
+  const audioItem = urlMsgs.find(m => (m.metadata as ParsedMedia).audio_title)
+  const audioParsed = audioItem?.metadata as ParsedMedia | undefined
+  const audio: IGAudio | undefined = audioParsed
+    ? {
+        title: audioParsed.audio_title,
+        subtitle: audioParsed.audio_subtitle,
+        artist: audioParsed.audio_artist,
+        duration: audioParsed.audio_duration,
+        cover_artwork_uri: audioParsed.audio_cover_artwork_uri,
+        cover_artwork_thumbnail_uri: audioParsed.audio_cover_artwork_thumbnail_uri,
+        has_lyrics: audioParsed.audio_has_lyrics,
+        is_explicit: audioParsed.audio_is_explicit,
+      }
+    : undefined
+
   const media: IGMedia[] = urlMsgs.map((msg, i) => {
     const m = msg.metadata as ParsedMedia
     return {
@@ -39,14 +55,6 @@ function normalizeIGPost(messages: Message[]): IGPost | null {
       height_original: m.height_original,
       type: (m.video_url ? 'video' : 'photo') as IGMedia['type'],
       tagged_users: m.tagged_users,
-      audio_url: m.audio_url,
-      audio_title: m.audio_title,
-      audio_subtitle: m.audio_subtitle,
-      audio_artist: m.audio_artist,
-      audio_duration: m.audio_duration,
-      audio_cover_artwork_uri: m.audio_cover_artwork_uri,
-      audio_has_lyrics: m.audio_has_lyrics,
-      audio_is_explicit: m.audio_is_explicit,
     }
   })
 
@@ -63,6 +71,7 @@ function normalizeIGPost(messages: Message[]): IGPost | null {
     media,
     created_at: meta.post_date,
     avatar_url: meta.user?.profile_pic_url,
+    audio,
     verified: meta.user?.is_verified,
     location_name: meta.location_slug,
     coauthors: meta.coauthors?.map(c => ({

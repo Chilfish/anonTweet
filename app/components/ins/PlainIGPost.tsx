@@ -38,7 +38,7 @@ export function PlainIGPost({ post, className }: PlainIGPostProps) {
 
       {post.media?.length > 0 && <IGMediaGrid media={post.media} />}
 
-      {post.media?.length > 0 && <IGMusicInfo media={post.media} />}
+      {post.audio && <IGMusicInfo audio={post.audio} />}
 
       <IGActionBar className="pt-1.5 pb-1" />
 
