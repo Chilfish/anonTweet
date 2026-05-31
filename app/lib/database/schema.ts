@@ -1,4 +1,4 @@
-import type { EnrichedTweet, RawUser, TranslationEntity } from '~/types'
+import type { EnrichedTweet, IGPost, RawUser, TranslationEntity } from '~/types'
 import {
   index,
   json,
@@ -41,8 +41,29 @@ export const tweetUser = pgTable(
   },
 )
 
+/**
+ * Instagram 帖子缓存表。
+ *
+ * 以 postShortcode 为唯一键，存储完整的 IGPost JSON。
+ * username 索引用于按作者查询。
+ */
+export const igPost = pgTable(
+  'ig_post',
+  {
+    id: serial('id').primaryKey(),
+    postShortcode: text('postShortcode').notNull().unique(),
+    username: text('username').notNull(),
+    jsonContent: json('jsonContent').$type<IGPost>().notNull(),
+    createdAt: timestamp('createdAt').notNull().defaultNow(),
+  },
+  table => [index('ig_post_username_idx').on(table.username)],
+)
+
 export type SelectTweet = typeof tweet.$inferSelect
 export type InsertTweet = typeof tweet.$inferInsert
 
 export type SelectEntities = typeof tweetEntities.$inferSelect
 export type InsertEntities = typeof tweetEntities.$inferInsert
+
+export type SelectIGPost = typeof igPost.$inferSelect
+export type InsertIGPost = typeof igPost.$inferInsert

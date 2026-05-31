@@ -1,4 +1,4 @@
-import type { EnrichedTweet, TranslationEntity } from '~/types'
+import type { EnrichedTweet, IGPost, TranslationEntity } from '~/types'
 import { z } from 'zod'
 
 export const tweetSchema = z.discriminatedUnion('intent', [
@@ -31,6 +31,17 @@ export const getTweetSchema = z.object({
 
 export type GetTweetSchema = z.infer<typeof getTweetSchema>
 
-export type AITranslationSchema = Omit<GetTweetSchema, 'tweetId'> & {
+export type AITranslationSchema = (Omit<GetTweetSchema, 'tweetId'> & {
   tweet: EnrichedTweet
+  type?: 'twitter'
+}) | {
+  /** IG caption AI 翻译 */
+  type: 'ins'
+  igPost: IGPost
+  enableAITranslation: boolean
+  apiKey: string
+  model: string
+  thinkingLevel?: string
+  translationGlossary?: string
+  force?: boolean
 }

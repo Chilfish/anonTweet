@@ -31,6 +31,7 @@ export function useAIConfig() {
       geminiThinkingLevel: state.geminiThinkingLevel,
       deepseekApiKey: state.deepseekApiKey,
       deepseekModel: state.deepseekModel,
+      deepseekThinkingLevel: state.deepseekThinkingLevel,
       enableAITranslation: state.enableAITranslation,
       translationGlossary: state.translationGlossary,
     })),
