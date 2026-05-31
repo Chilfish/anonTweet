@@ -15,7 +15,7 @@
 | Phase 2 | API 层（SDK 集成 + BFF 路由） | ✅ 完成 |
 | Phase 3 | UI 组件（多图轮播 + 主贴卡片 + /ins 页面） | ✅ 完成 |
 | Phase 4 | 翻译 + 截图 + 下载 接入 | ✅ 完成 |
-| Phase 5 | 纯文本路由 + 截图导出 | ⬜ 待开始 |
+| Phase 5 | 纯文本路由 + 截图导出 | ✅ 完成 |
 
 ## Phase 1 任务清单
 
@@ -49,9 +49,8 @@
 
 ## Phase 5 任务清单
 
-- [ ] `app/routes/plain-ig.tsx` — 纯文本路由
-- [ ] `app/components/ins/PlainIGPost.tsx` — 纯文本组件
-- [ ] 类型检查 + lint 通过
+- [x] `app/routes/plain-ig.tsx` — SSR loader + Await 渲染（无 Layout chrome）
+- [x] `app/components/ins/PlainIGPost.tsx` — 纯文本 IGPost 组件（头像 + 媒体 + caption）
 
 ## 变更文件总览
 
