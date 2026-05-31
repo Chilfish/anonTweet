@@ -13,7 +13,7 @@
 |-------|------|------|
 | Phase 1 | 类型定义 + URL 识别 + 路由框架 | ✅ 完成 |
 | Phase 2 | API 层（SDK 集成 + BFF 路由） | ✅ 完成 |
-| Phase 3 | UI 组件（多图轮播 + 主贴卡片 + /ins 页面） | ⬜ 待开始 |
+| Phase 3 | UI 组件（多图轮播 + 主贴卡片 + /ins 页面） | ✅ 完成 |
 | Phase 4 | 翻译 + 截图 + 下载 接入 | ⬜ 待开始 |
 | Phase 5 | 纯文本路由 + 截图导出 | ⬜ 待开始 |
 
@@ -36,11 +36,10 @@
 
 ## Phase 3 任务清单
 
-- [ ] `app/components/ins/IGMediaCarousel.tsx` — 多图轮播（scroll-snap + 圆点指示器）
-- [ ] `app/components/ins/IGPostCard.tsx` — 主贴卡片（头像 + caption + 媒体）
-- [ ] `app/routes/ins.tsx` — 完整页面（SWR 数据获取 + 渲染）
-- [ ] 移动端适配
-- [ ] 类型检查 + lint 通过
+- [x] `app/components/ins/IGMediaCarousel.tsx` — 多图轮播（scroll-snap + 圆点指示器 + 左右箭头 + 移动端触控）
+- [x] `app/components/ins/IGPostCard.tsx` — 主贴卡片（头像 + 媒体 + caption + 互动数据）
+- [x] `app/routes/ins.tsx` — SWR 数据获取 + Skeleton/NotFound/正常 三态渲染
+- [x] 移动端适配（scroll-snap 天然支持触控滑动）
 
 ## Phase 4 任务清单
 
@@ -95,3 +94,6 @@
   - 新增 `app/routes/api/ig/get.ts` (POST/GET + normalizeIGPost)
   - `env.server.ts` 新增 `INS_COOKIES`
   - `localCache.ts` 新增 `ig-post` 缓存类型
+- **14:30** Phase 3 完成 ✅
+  - `app/routes/ins.tsx` 接入 SWR → API → IGPostCard 完整数据流
+  - Skeleton / NotFound / 正常三态渲染

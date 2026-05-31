@@ -76,11 +76,11 @@ export async function action({ request, params }: Route.ActionArgs) {
   }
 
   const {
-    enableAITranslation = false,
-    apiKey,
-    model,
-    thinkingLevel,
-    translationGlossary,
+    enableAITranslation: _enableAI = false,
+    apiKey: _apiKey,
+    model: _model,
+    thinkingLevel: _thinkingLevel,
+    translationGlossary: _glossary,
   } = body
 
   // 如果是 stories 格式（username/id），需要特殊处理

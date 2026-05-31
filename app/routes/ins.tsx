@@ -1,9 +1,12 @@
 import type { IGPostData } from '~/types'
 import { AlertCircle } from 'lucide-react'
 import { useParams } from 'react-router'
+import useSWR from 'swr'
+import { IGPostCard } from '~/components/ins/IGPostCard'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Skeleton } from '~/components/ui/skeleton'
+import { fetcher } from '~/lib/fetcher'
 import { extractIGId } from '~/lib/utils'
 
 export function meta() {
@@ -52,34 +55,39 @@ function IGNotFound({ id }: { id?: string }) {
   )
 }
 
+async function getIGPost(id: string): Promise<IGPostData> {
+  const { data } = await fetcher.post<IGPostData>(`/api/ig/get/${id}`, {})
+  return data
+}
+
 export default function IGPostPage() {
   const { id } = useParams()
-  const igId = id ? extractIGId(id) ?? id : null
+  const igId = id ? (extractIGId(id) ?? id) : null
+
+  const { data: posts, error, isLoading } = useSWR<IGPostData>(
+    igId,
+    () => getIGPost(igId!),
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
+  )
 
   if (!igId) {
     return <IGNotFound id={id} />
   }
 
-  // TODO Phase 2: replace with SWR fetch to /api/ig/get/:id
-  const isLoading = false
-  const error: Error | null = null
-  const post: IGPostData | null = null
-
   if (isLoading) {
     return <IGPostSkeleton />
   }
 
-  if (error || !post) {
+  if (error || !posts || posts.length === 0) {
+    console.error(error)
     return <IGNotFound id={igId} />
   }
 
-  // TODO Phase 3: render IGPostCard + IGMediaCarousel
-  return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardContent className="py-8 text-center text-muted-foreground">
-        <p>Instagram 帖子查看器 — 接入中</p>
-        <p className="text-sm mt-1">{igId}</p>
-      </CardContent>
-    </Card>
-  )
+  const post = posts[0]!
+
+  return <IGPostCard post={post} className="mt-4" />
 }
