@@ -14,7 +14,7 @@
 | Phase 1 | 类型定义 + URL 识别 + 路由框架 | ✅ 完成 |
 | Phase 2 | API 层（SDK 集成 + BFF 路由） | ✅ 完成 |
 | Phase 3 | UI 组件（多图轮播 + 主贴卡片 + /ins 页面） | ✅ 完成 |
-| Phase 4 | 翻译 + 截图 + 下载 接入 | ⬜ 待开始 |
+| Phase 4 | 翻译 + 截图 + 下载 接入 | ✅ 完成 |
 | Phase 5 | 纯文本路由 + 截图导出 | ⬜ 待开始 |
 
 ## Phase 1 任务清单
@@ -43,10 +43,9 @@
 
 ## Phase 4 任务清单
 
-- [ ] `app/lib/translateIGCaption.ts` — IG caption AI 翻译
-- [ ] `app/hooks/use-ig-screenshot-action.ts` — 截图 hook
-- [ ] IG 媒体下载（复用 downloader.ts）
-- [ ] 类型检查 + lint 通过
+- [x] `app/lib/translateIGCaption.ts` — IG caption AI 翻译（简化版，无实体占位符）
+- [x] `app/hooks/use-ig-screenshot-action.ts` — modern-screenshot 截图 hook
+- [x] `app/lib/igDownloader.ts` — extractIGDownloadItems 媒体下载提取器（复用 downloader.ts）
 
 ## Phase 5 任务清单
 
