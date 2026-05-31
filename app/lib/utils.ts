@@ -49,12 +49,12 @@ export function extractIGId(input: string): string | null {
   const trimmed = input.trim()
 
   const patterns = [
-    // post: instagram.com/p/{shortcode}/
-    /(?:https?:\/\/)?(?:www\.)?instagram\.com\/p\/([\w-]+)/i,
-    // reel: instagram.com/reel/{shortcode}/
-    /(?:https?:\/\/)?(?:www\.)?instagram\.com\/reel\/([\w-]+)/i,
+    // post: instagram.com/p/{shortcode}/ or instagram.com/{user}/p/{shortcode}/
+    /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:[\w.-]+\/)?p\/([\w-]+)/i,
+    // reel: instagram.com/reel/{shortcode}/ or instagram.com/{user}/reel/{shortcode}/
+    /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:[\w.-]+\/)?reel\/([\w-]+)/i,
     // story: instagram.com/stories/{username}/{story_id}/
-    /(?:https?:\/\/)?(?:www\.)?instagram\.com\/stories\/([^/]+)\/(\d+)/i,
+    /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:[\w.-]+\/)?stories\/([^/]+)\/(\d+)/i,
   ]
 
   for (const pattern of patterns) {

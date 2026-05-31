@@ -110,14 +110,23 @@ export function TweetInputForm() {
             <FormatListItem>
               <code className="bg-muted px-1.5 py-0.5 rounded-sm">
                 instagram.com/p/
-                {'{shortcode}'}
+                {'{id}'}
                 /
               </code>
             </FormatListItem>
             <FormatListItem>
               <code className="bg-muted px-1.5 py-0.5 rounded-sm">
                 instagram.com/reel/
-                {'{shortcode}'}
+                {'{id}'}
+                /
+              </code>
+            </FormatListItem>
+            <FormatListItem>
+              <code className="bg-muted px-1.5 py-0.5 rounded-sm">
+                instagram.com/
+                {'{username}'}
+                /p/
+                {'{id}'}
                 /
               </code>
             </FormatListItem>
