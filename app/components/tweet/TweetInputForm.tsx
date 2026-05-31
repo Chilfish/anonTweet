@@ -7,7 +7,7 @@ import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
-import { extractTweetId } from '~/lib/utils'
+import { detectInputType, extractIGId, extractTweetId } from '~/lib/utils'
 
 function FormatListItem({ children }: { children: React.ReactNode }) {
   return (
@@ -29,16 +29,31 @@ export function TweetInputForm() {
 
     const trimmedInput = input.trim()
     if (!trimmedInput) {
-      setError('请输入 Tweet 的 URL 或 ID。')
+      setError('请输入 Tweet 或 Instagram 的 URL。')
       return
     }
 
-    const tweetId = extractTweetId(trimmedInput)
-    if (!tweetId) {
-      setError('无法识别有效的 Tweet URL 或 ID，请检查格式。')
-      return
+    const type = detectInputType(trimmedInput)
+
+    if (type === 'twitter') {
+      const tweetId = extractTweetId(trimmedInput)
+      if (!tweetId) {
+        setError('无法识别有效的 Tweet URL 或 ID，请检查格式。')
+        return
+      }
+      navigate(`/tweets/${tweetId}`)
     }
-    navigate(`/tweets/${tweetId}`)
+    else if (type === 'instagram') {
+      const igId = extractIGId(trimmedInput)
+      if (!igId) {
+        setError('无法识别有效的 Instagram URL，请检查格式。')
+        return
+      }
+      navigate(`/ins/${igId}`)
+    }
+    else {
+      setError('无法识别有效的 Tweet 或 Instagram URL，请检查格式。')
+    }
   }
 
   return (
@@ -49,14 +64,14 @@ export function TweetInputForm() {
           Anon Tweet
         </CardTitle>
         <CardDescription>
-          输入链接或 ID，立即加载推文内容
+          输入链接或 ID，加载推文 / Instagram 内容
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative">
             <Label htmlFor="tweet-input" className="sr-only">
-              Tweet URL 或 ID
+              Tweet / Instagram URL 或 ID
             </Label>
             <Input
               id="tweet-input"
@@ -77,7 +92,7 @@ export function TweetInputForm() {
           )}
 
           <Button type="submit" className="w-full">
-            查看推文
+            查看
           </Button>
         </form>
 
@@ -85,15 +100,26 @@ export function TweetInputForm() {
           <p className="font-medium text-foreground/80">支持格式:</p>
           <ul className="space-y-1.5">
             <FormatListItem>
-              <code className="bg-muted px-1.5 py-0.5 rounded-sm">twitter.com/.../status/123...</code>
-            </FormatListItem>
-            <FormatListItem>
               <code className="bg-muted px-1.5 py-0.5 rounded-sm">x.com/.../status/123...</code>
             </FormatListItem>
             <FormatListItem>
               <code className="bg-muted px-1.5 py-0.5 rounded-sm">1234567890...</code>
               {' '}
-              (纯数字 ID)
+              (推文纯数字 ID)
+            </FormatListItem>
+            <FormatListItem>
+              <code className="bg-muted px-1.5 py-0.5 rounded-sm">
+                instagram.com/p/
+                {'{shortcode}'}
+                /
+              </code>
+            </FormatListItem>
+            <FormatListItem>
+              <code className="bg-muted px-1.5 py-0.5 rounded-sm">
+                instagram.com/reel/
+                {'{shortcode}'}
+                /
+              </code>
             </FormatListItem>
           </ul>
         </div>

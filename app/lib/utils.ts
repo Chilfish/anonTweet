@@ -40,6 +40,48 @@ export function extractTweetId(input: string): string | null {
   return null
 }
 
+/**
+ * 从 Instagram URL 提取 shortcode 或 story 标识符。
+ *
+ * @returns shortcode（post/reel），"username/story_id"（story），或 null
+ */
+export function extractIGId(input: string): string | null {
+  const trimmed = input.trim()
+
+  const patterns = [
+    // post: instagram.com/p/{shortcode}/
+    /(?:https?:\/\/)?(?:www\.)?instagram\.com\/p\/([\w-]+)/i,
+    // reel: instagram.com/reel/{shortcode}/
+    /(?:https?:\/\/)?(?:www\.)?instagram\.com\/reel\/([\w-]+)/i,
+    // story: instagram.com/stories/{username}/{story_id}/
+    /(?:https?:\/\/)?(?:www\.)?instagram\.com\/stories\/([^/]+)\/(\d+)/i,
+  ]
+
+  for (const pattern of patterns) {
+    const match = trimmed.match(pattern)
+    if (match) {
+      if (match[2])
+        return `${match[1]}/${match[2]}` // stories: username/id
+      return match[1]! // post/reel: shortcode
+    }
+  }
+
+  return null
+}
+
+/**
+ * 检测输入 URL 的类型
+ * @returns 'twitter' | 'instagram' | null
+ */
+export function detectInputType(input: string): 'twitter' | 'instagram' | null {
+  const trimmed = input.trim()
+  if (extractTweetId(trimmed))
+    return 'twitter'
+  if (extractIGId(trimmed))
+    return 'instagram'
+  return null
+}
+
 function proxyMedia(url: string) {
   return url
   // return `https://proxy.chilfish.top/${url}`
