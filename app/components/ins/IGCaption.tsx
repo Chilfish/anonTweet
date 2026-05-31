@@ -1,6 +1,6 @@
-import { Languages, Loader2 } from 'lucide-react'
-import { Button } from '~/components/ui/button'
+import type { IGPost } from '~/types'
 import { cn } from '~/lib/utils'
+import { IGTranslateDialog } from './IGTranslateDialog'
 
 interface IGCaptionProps {
   username: string
@@ -8,10 +8,10 @@ interface IGCaptionProps {
   translatedText?: string
   tags?: string[]
   className?: string
-  /** 是否正在翻译中 */
-  isTranslating?: boolean
-  /** 点击翻译按钮的回调 */
-  onTranslate?: () => void
+  /** IGPost 完整数据，供翻译弹窗使用 */
+  post?: IGPost
+  /** 翻译完成回调 */
+  onTranslated?: (captionTranslation: string) => void
 }
 
 /**
@@ -19,7 +19,7 @@ interface IGCaptionProps {
  *
  * - 始终展开，不截断
  * - 原文 `text-foreground`，译文 `text-muted-foreground`
- * - 翻译按钮：inline Languages 图标，点击触发 onTranslate
+ * - `Languages` 图标按钮 → 打开 IGTranslateDialog 弹窗
  */
 export function IGCaption({
   username,
@@ -27,33 +27,25 @@ export function IGCaption({
   translatedText,
   tags,
   className,
-  isTranslating,
-  onTranslate,
+  post,
+  onTranslated,
 }: IGCaptionProps) {
   if (!text)
     return null
 
   return (
     <div className={cn('text-sm leading-relaxed px-4 pb-3', className)}>
-      {/* 原文 + 翻译按钮 */}
+      {/* 原文 + 翻译入口按钮 */}
       <p className="whitespace-pre-wrap break-words text-foreground">
         <span className="font-semibold mr-1.5">{username}</span>
         {text}
 
-        {/* 翻译按钮 — 有回调且未在翻译中时显示 */}
-        {onTranslate && !translatedText && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="inline-flex align-middle -my-1 ml-1 h-6 w-6 text-muted-foreground hover:text-foreground"
-            onClick={onTranslate}
-            disabled={isTranslating}
-            aria-label="翻译 caption"
-          >
-            {isTranslating
-              ? <Loader2 className="size-3.5 animate-spin" />
-              : <Languages className="size-3.5" />}
-          </Button>
+        {/* 翻译按钮 — 打开弹窗 */}
+        {post && onTranslated && (
+          <IGTranslateDialog
+            post={post}
+            onTranslated={onTranslated}
+          />
         )}
       </p>
 
@@ -62,20 +54,12 @@ export function IGCaption({
         <p className="whitespace-pre-wrap break-words text-muted-foreground mt-1.5">
           {translatedText}
 
-          {/* 已有译文时也可以重试翻译 */}
-          {onTranslate && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="inline-flex align-middle -my-1 ml-1 h-6 w-6 text-muted-foreground/50 hover:text-foreground"
-              onClick={onTranslate}
-              disabled={isTranslating}
-              aria-label="重新翻译"
-            >
-              {isTranslating
-                ? <Loader2 className="size-3 animate-spin" />
-                : <Languages className="size-3" />}
-            </Button>
+          {/* 已有译文时也显示翻译入口（重新翻译） */}
+          {post && onTranslated && (
+            <IGTranslateDialog
+              post={{ ...post, captionTranslation: translatedText }}
+              onTranslated={onTranslated}
+            />
           )}
         </p>
       )}

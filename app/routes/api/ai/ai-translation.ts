@@ -4,13 +4,117 @@ import { data } from 'react-router'
 import { autoTranslateTweet } from '~/lib/AITranslation'
 import { models } from '~/lib/constants'
 import { setLocalCache } from '~/lib/localCache'
+import { getProviderStrategy } from '~/lib/providers'
+import { updateIGPostTranslation } from '~/lib/service/getIGPost.server'
+import { translateIGCaption } from '~/lib/translateIGCaption'
 
 /**
- *  POST /api/ai-translation
+ * POST /api/ai-translation
+ *
+ * 统一 AI 翻译端点，通过 `type` 区分：
+ * - `twitter` (默认): 翻译推文实体
+ * - `ins`: 翻译 Instagram caption
  */
 export async function action({ request }: Route.ActionArgs) {
   const jsonData: AITranslationSchema = await request.json()
 
+  // ─── IG 分支 ────────────────────────────────────
+  if (jsonData.type === 'ins') {
+    return handleIGTranslation(jsonData)
+  }
+
+  // ─── Twitter 分支（原逻辑） ────────────────────
+  return handleTweetTranslation(jsonData)
+}
+
+/**
+ * Instagram caption AI 翻译
+ */
+async function handleIGTranslation(args: Extract<AITranslationSchema, { type: 'ins' }>) {
+  const {
+    igPost,
+    enableAITranslation: _enableAI,
+    apiKey,
+    model,
+    thinkingLevel,
+    translationGlossary,
+    force,
+  } = args
+
+  if (!igPost || !igPost.description) {
+    return data({
+      success: false,
+      error: 'Post not found or has no caption',
+      status: 404,
+    })
+  }
+
+  // 已有翻译且非强制
+  if (!force && igPost.captionTranslation) {
+    return data({
+      success: true,
+      message: 'Already translated',
+      data: { captionTranslation: igPost.captionTranslation },
+    })
+  }
+
+  if (!apiKey || !model) {
+    return data({
+      success: false,
+      error: 'Missing apiKey or model',
+      status: 400,
+    })
+  }
+
+  try {
+    const modelConfig = models.find(m => m.name === model)
+    const provider = modelConfig?.provider || 'google'
+
+    const strategy = getProviderStrategy(provider)
+    const sdkProvider = strategy.createSDKProvider(apiKey)
+    const modelInstance = sdkProvider.languageModel(model)
+
+    const translated = await translateIGCaption({
+      post: igPost,
+      apiKey,
+      model,
+      provider,
+      modelInstance,
+      thinkingLevel,
+      translationGlossary,
+    })
+
+    if (!translated) {
+      return data({
+        success: false,
+        error: 'Translation returned empty',
+        status: 500,
+      })
+    }
+
+    // 写回 DB + localCache
+    await updateIGPostTranslation(igPost.id, translated)
+
+    return data({
+      success: true,
+      data: { captionTranslation: translated },
+    })
+  }
+  catch (error: any) {
+    console.error('[AI-Trans IG] Failed:', error)
+    return data({
+      success: false,
+      error: 'Translation failed',
+      status: 500,
+      message: error.message,
+    })
+  }
+}
+
+/**
+ * Twitter 推文实体翻译（原逻辑不变）
+ */
+async function handleTweetTranslation(args: Extract<AITranslationSchema, { tweet: any }>) {
   const {
     tweet,
     enableAITranslation,
@@ -19,7 +123,7 @@ export async function action({ request }: Route.ActionArgs) {
     thinkingLevel,
     translationGlossary,
     force,
-  } = jsonData
+  } = args
 
   try {
     if (!tweet) {
@@ -27,18 +131,15 @@ export async function action({ request }: Route.ActionArgs) {
         success: false,
         error: 'Tweet not found',
         status: 404,
-        message: `Tweet not found`,
+        message: 'Tweet not found',
       })
     }
 
     const isZhTweet = tweet.lang === 'zh'
-    // 新规范：检查 entities 里的 aiTranslation
-    const hasNewTranslation = tweet.entities?.some(e => !!e.aiTranslation)
-    // 旧规范兼容
+    const hasNewTranslation = tweet.entities?.some((e: any) => !!e.aiTranslation)
     const hasOldTranslation = !!tweet.autoTranslationEntities?.length
     const hasTranslation = hasNewTranslation || hasOldTranslation
 
-    // 如果不是强制翻译，且已经有翻译结果、或未开启AI翻译、或是中文推文，则跳过
     if (!force && (hasTranslation || !enableAITranslation || isZhTweet)) {
       return data({
         success: true,
@@ -55,14 +156,13 @@ export async function action({ request }: Route.ActionArgs) {
         success: false,
         error: 'Invalid request',
         status: 400,
-        message: `Invalid request data: API key or model is missing`,
+        message: 'Invalid request data: API key or model is missing',
       })
     }
 
     const modelConfig = models.find(m => m.name === model)
     const provider = modelConfig?.provider || 'google'
 
-    // autoTranslateTweet 现在返回合并后的 entities 数组
     const mergedEntities = await autoTranslateTweet({
       tweet,
       apiKey,
@@ -72,7 +172,6 @@ export async function action({ request }: Route.ActionArgs) {
       translationGlossary,
     })
 
-    // 刷新本地缓存快照，避免后续请求重复翻译
     try {
       await setLocalCache({
         id: tweet.id_str,
@@ -80,7 +179,7 @@ export async function action({ request }: Route.ActionArgs) {
         value: {
           ...tweet,
           entities: mergedEntities,
-          autoTranslationEntities: undefined, // 清理旧字段
+          autoTranslationEntities: undefined,
         },
       })
     }
@@ -100,7 +199,7 @@ export async function action({ request }: Route.ActionArgs) {
       success: false,
       error: 'Failed to generate text',
       status: 500,
-      message: `翻译推文失败`,
+      message: '翻译推文失败',
       cause: error.message,
     })
   }

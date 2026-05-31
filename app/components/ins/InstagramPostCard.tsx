@@ -12,10 +12,8 @@ interface InstagramPostCardProps {
   className?: string
   /** 翻译模式：仅译文时只显示 translatedText，原文时隐藏 translatedText */
   translationMode?: 'original' | 'bilingual' | 'translation'
-  /** 是否正在翻译中 */
-  isTranslatingCaption?: boolean
-  /** 翻译按钮回调 */
-  onTranslateCaption?: () => void
+  /** 翻译完成回调（IGTranslateDialog 保存后触发） */
+  onTranslated?: (captionTranslation: string) => void
 }
 
 /**
@@ -43,7 +41,7 @@ function formatTime(iso: string): string {
  * ```
  */
 export const InstagramPostCard = forwardRef<HTMLElement, InstagramPostCardProps>(
-  ({ post, className, translationMode = 'bilingual', isTranslatingCaption, onTranslateCaption }, ref) => {
+  ({ post, className, translationMode = 'bilingual', onTranslated }, ref) => {
     // 根据翻译模式决定传给 IGCaption 的 translatedText
     const captionTranslated = translationMode === 'original'
       ? undefined
@@ -95,8 +93,8 @@ export const InstagramPostCard = forwardRef<HTMLElement, InstagramPostCardProps>
             translatedText={captionTranslated}
             tags={post.tags}
             className="px-4 pt-0 pb-0"
-            isTranslating={isTranslatingCaption}
-            onTranslate={onTranslateCaption}
+            post={post}
+            onTranslated={onTranslated}
           />
         )}
       </article>
