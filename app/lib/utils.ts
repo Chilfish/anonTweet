@@ -82,11 +82,6 @@ export function detectInputType(input: string): 'twitter' | 'instagram' | null {
   return null
 }
 
-function proxyMedia(url: string) {
-  return url
-  // return `https://proxy.chilfish.top/${url}`
-}
-
 export function formatDate(
   date: Date | string,
   formatString = 'yyyy-MM-dd',

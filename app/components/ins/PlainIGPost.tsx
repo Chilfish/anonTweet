@@ -53,7 +53,6 @@ export function PlainIGPost({ post, className }: PlainIGPostProps) {
           username={post.username}
           text={post.description}
           translatedText={post.captionTranslation}
-          tags={post.tags}
           className="px-4 pt-0 pb-0"
         />
       )}

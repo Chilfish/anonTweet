@@ -31,12 +31,13 @@ export class RettiwtPool {
       // 2. 执行业务逻辑
       return await task(fetcher)
     }
-    catch (error: any) {
+    catch (error: unknown) {
       // 3. 错误过滤：判断是否值得重试
       if (this.hasApiKeys && this.shouldRetry(error)) {
         // 防止无限递归：如果重试次数超过 Key 的总数，说明所有 Key 都挂了，直接抛出
+        const message = error instanceof Error ? error.message : String(error)
         if (attempt >= this.keys.length) {
-          throw new Error(`[RettiwtPool] All keys exhausted via Rate Limiting. Last Error: ${error.message}`)
+          throw new Error(`[RettiwtPool] All keys exhausted. Last error: ${message}`)
         }
 
         if (currentKey) {
@@ -81,11 +82,16 @@ export class RettiwtPool {
   }
 
   /**
-   * 策略判断：定义什么错误需要换 Key
-   * 这里你需要根据实际库抛出的 Error 结构进行调整
+   * 策略判断：定义什么错误需要轮换 Key
+   *
+   * 429 (Rate Limit) — 该 key 配额耗尽，换下一个。
+   * 401 (Unauthorized) — cookie/token 过期失效，也应换 key 重试。
+   * 403 (Forbidden) — 同样可能是 cookie 失效导致。
    */
-  private shouldRetry(error: any): boolean {
-    const status = error?.response?.status || error?.status || error?.statusCode
-    return status === 429
+  private shouldRetry(error: unknown): boolean {
+    const status = (error as any)?.response?.status
+      || (error as any)?.status
+      || (error as any)?.statusCode
+    return status === 429 || status === 401 || status === 403
   }
 }
