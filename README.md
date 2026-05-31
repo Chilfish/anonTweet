@@ -1,6 +1,6 @@
 # Anon Tweet
 
-**Anon Tweet** 是一个基于 **React Router v7** 构建的现代化全栈应用程序，旨在提供极致的推文匿名浏览体验。本项目集成了 **Google Gemini AI** 实现的翻译功能，支持推文的卡片导出。
+**Anon Tweet** 是一个基于 **React Router v7** 构建的现代化全栈应用程序，旨在提供极致的推文与 Instagram 帖子匿名浏览体验。本项目集成了 **Google Gemini / DeepSeek AI** 双提供商翻译功能，支持推文卡片与 IG 帖子导出（截图 + Markdown）。
 
 ## 🛠 Tech Stack
 
@@ -9,16 +9,23 @@
 - **Core Framework**: [React Router v7](https://reactrouter.com/) (Fullstack, SSR/CSR)
 - **Language & Runtime**: TypeScript, [Bun](https://bun.sh/)
 - **AI & Automation**:
-  - [Google Gemini API](https://ai.google.dev/) (Translation Engine)
+  - [Google Gemini API](https://ai.google.dev/) + [DeepSeek API](https://platform.deepseek.com/) (双提供商翻译引擎)
   - [Vercel AI SDK](https://sdk.vercel.ai/docs) (Stream & State Management)
+- **Data Sources**:
+  - Twitter/X Private API (via bundled `rettiwt-api`)
+  - Instagram (via `@chilfish/gallery-dl-instagram` SDK)
 - **UI System**:
   - [Tailwind CSS v4](https://tailwindcss.com/) (Styling)
-  - [coss/ui](https://coss.com/ui/docs) (Component Primitives)
+  - [shadcn/ui](https://ui.shadcn.com/) (Component Primitives)
   - [Lucide React](https://lucide.dev/) (Icons)
 - **Data & State**:
-  - [Drizzle ORM](https://orm.drizzle.team/) + PostgreSQL (Optional, for caching)
+  - [Drizzle ORM](https://orm.drizzle.team/) + PostgreSQL / Neon Serverless (Optional, for caching)
   - [SWR](https://swr.vercel.app/) (Data Fetching)
-  - Zustand (Client-side global state)
+  - [Zustand](https://zustand-demo.pmnd.rs/) (Client-side global state)
+- **Export & Media**:
+  - [modern-screenshot](https://www.npmjs.com/package/modern-screenshot) (Screenshot export)
+  - [xlsx](https://www.npmjs.com/package/xlsx) (Dictionary import/export)
+  - [html-to-image](https://www.npmjs.com/package/html-to-image) (Alternative screenshot backend)
 
 ## 🚀 Getting Started
 
@@ -41,23 +48,33 @@ bun install
 
 在项目根目录创建 `.env` 文件，并参照以下配置设置关键变量。
 
-> **注意**: AI 翻译功能依赖于 Google Gemini API，截图功能依赖于正确的 HOSTNAME 配置。
+> **注意**: AI 翻译功能依赖于 Google Gemini 或 DeepSeek API，截图功能依赖于正确的 HOSTNAME 配置。
 
 ```env
 ENVIRONMENT="development" # development | production
 HOSTNAME="http://localhost:9080" # ⚠️ 截图服务回调地址，生产环境请填写实际域名
 
-# ⚠️ 必需。用于服务端逆向获取推文数据流。
+# ⚠️ 必需。用于服务端获取推文数据流。
 # 若不配置，将受到严格的 Rate Limit 限制。
-# 支持配置多个 Key（用英文逗号分隔）以实现轮询负载均衡。
+# 支持配置多个 Key（用英文逗号分隔）以实现轮询 + 故障转移。
 TWEET_KEYS="your_twitter_auth_token_1,your_twitter_auth_token_2"
+
+# 🆕 Instagram 解析 — 必需。从浏览器 DevTools 复制 cookies JSON
+INS_COOKIES='{"sessionid":"...","csrftoken":"..."}'
 
 # 启用 AI 翻译功能
 ENABLE_AI_TRANSLATION="true"
 # Google Gemini API Key
 GEMINI_API_KEY="AIzaSy..."
-# 模型选择 (支持 gemini-2.0-flash-exp, gemini-1.5-pro 等)
-GEMINI_MODEL="models/gemini-2.0-flash-exp"
+# 模型选择（默认 gemini-3-flash-preview）
+GEMINI_MODEL="models/gemini-3-flash-preview"
+
+# DeepSeek（可选，双提供商切换）
+# DEEPSEEK_API_KEY="sk-..."
+# DEEPSEEK_MODEL="deepseek-v4-flash"
+
+# 启用本地文件缓存（Node/Bun 环境）
+ENABLE_LOCAL_CACHE="true"
 
 # 如果不配置 DB_URL，系统将直接调用 API 而不使用持久化缓存。
 # DB_URL="postgres://..."
@@ -114,11 +131,31 @@ bun run dev
 2.  配置 `GEMINI_API_KEY` 以启用线上的翻译服务。
 3.  确保 `HOSTNAME` 设置为生产环境域名，否则推文截图功能将无法正确回调渲染。
 
-## 🚧 Development Status
+## 🚧 Features
 
-### External Libraries Refactoring
+| 功能              | Twitter                                     | Instagram                   |
+| ----------------- | ------------------------------------------- | --------------------------- |
+| 匿名浏览          | ✅ 推文 + 评论 + 引用                       | ✅ Post / Reel / Story      |
+| AI 翻译           | ✅ Google Gemini + DeepSeek，实体占位符保护 | ✅ 纯文本翻译，中日检测     |
+| 手动翻译编辑器    | ✅ 实体级编辑（三态：手动/AI/原文）         | ✅ `IGTranslateDialog` 弹窗 |
+| 双语对照          | ✅ 三模式（双语/原文/仅译文）               | ✅ 同上                     |
+| 截图导出          | ✅ PNG/JPEG                                 | ✅ 同上                     |
+| Markdown/文本复制 | ✅                                          | ✅                          |
+| 媒体下载          | ✅                                          | ✅ 图片 + 视频直链          |
+| DB 缓存           | ✅ `tweet` + `tweet_entities` 表            | ✅ `ig_post` 表             |
+| 纯文本路由        | ✅ `/plain/:id`                             | ✅ `/plain-ins/:id`         |
+
+### External Libraries
 
 项目包含部分定制的第三方库核心，位于 `app/lib/` 目录下：
 
-- **`react-tweet`**: 经深度修改以适配 Tailwind v4，并增加了对 AI 翻译实体（Auto Translation Entities）的渲染支持。
-- **`rettiwt-api`**: 针对最新的 Twitter GraphQL 接口进行了逆向工程适配，增强了数据获取的稳定性。
+- **`react-tweet`**: 经深度修改以适配 Tailwind v4，增加了 AI 翻译实体渲染支持。
+- **`rettiwt-api`**: 针对 Twitter GraphQL 接口逆向适配，支持多 Key 轮询（429/401/403 自动故障转移）。
+
+### Storybook
+
+```bash
+bun run storybook    # 启动在 http://localhost:6006
+```
+
+14 个 IG 组件用例 + Twitter 推文渲染用例。

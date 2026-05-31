@@ -1,8 +1,10 @@
-# Anon Tweet 架构设计文档 v2.2
+# Anon Tweet 架构设计文档 v3.0
+
+> 最后更新：2026-05-31 (新增 Instagram 完整集成 + 代码质量修复)
 
 ## 1. 架构总览 (System Architecture)
 
-本项目采用 **React Router v7** 构建全栈应用，遵循 **BFF (Backend for Frontend)** 设计模式。系统明确划分为表现层（Presentation Layer）、API 聚合层（BFF Layer）与领域服务层（Domain Service Layer）。
+本项目采用 **React Router v7** 构建全栈应用，遵循 **BFF (Backend for Frontend)** 设计模式。系统明确划分为表现层（Presentation Layer）、API 聚合层（BFF Layer）与领域服务层（Domain Service Layer）。**支持 Twitter/X 推文 + Instagram 帖子双平台。**
 
 - **运行时 (Runtime)**: Bun (高性能 JavaScript 运行时)
 - **全栈框架 (Framework)**: React Router v7 (SSR + CSR Hybrid)
@@ -38,14 +40,35 @@ API 层作为 BFF，主要负责将异构数据源（Database, Twitter Private A
   - **逻辑**: 处理推文数据的持久化与更新。
   - **机制**: 接收 `entities` 数据包，使用 `ON CONFLICT DO UPDATE` 策略写入 `tweet` 及 `tweet_entities` 表。支持批量插入（Batch Insert），确保翻译后的推文内容及时同步到数据库。
 
-### 2.2 AI Domain
+### 2.2 Instagram Domain (`/api/ig/*`)
+
+Instagram 帖子数据获取、翻译与缓存管理。于 2026-05 完成 5 阶段集成（参见 `docs/integration_instagram.md`）。
+
+- **`POST /api/ig/get/:id`**
+  - **Handler**: `app/routes/api/ig/get.ts`
+  - **逻辑**: 三层缓存策略获取 IG 帖子。
+    1. `localCache` (Memory/FS) → 命中直接返回
+    2. DB (`ig_post` 表) → 命中则回填 localCache
+    3. SDK (`@chilfish/gallery-dl-instagram`) → `createSDK(cookies).extract(url)` → normalize → 写回 DB + localCache
+  - **normalizeIGPost()**: 将 SDK 输出的 `ParsedPost` 转换为 `IGPost` 类型（统一字段名、提取 media/audio/tags）。
+  - **返回**: `IGPost` + 缓存元数据。
+
+- **`POST /api/ig/translate/:id`**
+  - **Handler**: `app/routes/api/ig/translate.ts`
+  - **逻辑**: 将用户编辑或 AI 生成的 caption 翻译写入 `ig_post.caption_translation` 字段。同步刷新 localCache。
+
+- **缓存类型**: `CacheType` 新增 `'ig-post'`，`getLocalCache` / `setLocalCache` 直接复用。
+
+### 2.3 AI Domain (Twitter + Instagram)
 
 - **`POST /api/ai-translation`**
   - **Handler**: `app/routes/api/ai/ai-translation.ts`
-  - **逻辑**: 单条推文 AI 翻译代理接口。
-  - **多提供商支持**: 根据请求中的 `provider` 参数（`google` / `deepseek`），动态选择 `@ai-sdk/google` 或 `@ai-sdk/deepseek` 进行翻译。
-  - **强制重翻译**: 支持 `force: true` 参数，即便推文已有翻译结果也会重新调用 AI。
-  - **返回**: 合并后的 `entities`（包含 `aiTranslation` 字段），清理 `autoTranslationEntities` 旧字段。
+  - **逻辑**: 统一 AI 翻译代理接口，支持两种请求类型：
+    - `type: 'twitter'`（默认）— 推文实体级翻译，带占位符保护
+    - `type: 'ins'` — Instagram caption 纯文本翻译（无实体占位符）
+  - **多提供商支持**: 根据 `provider` 参数（`google` / `deepseek`）动态选择 SDK。
+  - **强制重翻译**: 支持 `force: true` 参数。
+  - **返回**: Twitter → 合并后的 `entities`（含 `aiTranslation`）；IG → `{ captionTranslation: string }`。
 
 - **`POST /api/ai-test`**
   - **Handler**: `app/routes/api/ai/ai-test.ts`
@@ -78,15 +101,19 @@ API 层作为 BFF，主要负责将异构数据源（Database, Twitter Private A
 
 系统采用 **Write-Through Cache** 变体策略，并引入 AI 增强。
 
-1. **Level 1: 内存 LRU 缓存** — `MemoryCacheAdapter`，最大 1000 条，请求合并去重。
-2. **Level 2: 文件系统缓存** — `NodeFsCacheAdapter`，原子写入，TTL 支持。
+1. **Level 1: 内存 LRU 缓存** — `MemoryCacheAdapter`，最大 1000 条，请求合并去重。使用 `structuredClone()` 代替 `JSON.parse(JSON.stringify())` 进行深拷贝（更优性能，支持更多类型）。
+2. **Level 2: 文件系统缓存** — `NodeFsCacheAdapter`，原子写入（tmp → rename），TTL 支持。
 3. **Level 3: Database (Cache)**
-   - 存储结构化 JSON 数据 (`EnrichedTweet`)。
-   - `tweet_entities` 表存储翻译内容（新版使用 `entities[].aiTranslation` 字段代替旧的 `autoTranslationEntities`）。
+   - `tweet` 表: 存储 `EnrichedTweet` JSON。
+   - `tweet_entities` 表: 存储翻译内容（实体级，支持 `aiTranslation` 字段）。
+   - `tweet_user` 表: 用户元数据缓存。
+   - **🆕 `ig_post` 表**: Instagram 帖子 JSON 缓存（`id`, `json_content`, `caption_translation`, `created_at`）。
 4. **Level 4: Upstream API (Source of Truth)**
-   - 基于 `rettiwt-api` 的逆向工程接口，通过 `RettiwtPool` 进行多 Key 调度，仅在 Cache Miss 时调用。
+   - Twitter: 基于 `rettiwt-api` 的逆向工程接口，通过 `RettiwtPool` 进行多 Key 调度。
+   - Instagram: 基于 `@chilfish/gallery-dl-instagram` SDK。
 5. **Level 5: AI Engine (Transformation)**
-   - 生成翻译数据，通过实体占位符 (Entity Placeholders) 保护推文中的链接、标签和提及。
+   - Twitter: 实体占位符 (Entity Placeholders) 保护 URL/mention/hashtag。
+   - Instagram: 纯文本翻译，`isChinese()` 检测跳过中文。
    - 支持 Google Gemini 和 DeepSeek 双提供商。
 
 ### 3.2 运行时数据合并 (Runtime Injection)
@@ -101,13 +128,14 @@ API 层作为 BFF，主要负责将异构数据源（Database, Twitter Private A
 
 为了应对 Twitter 严格的 Rate Limit 限制，系统实现了基于 `RettiwtPool` 的多 Key 调度机制：
 
-1. **多 Key 管理**: 支持配置多个 `TWEET_KEYS`，维护一个 Fetcher 实例池。
+1. **多 Key 管理**: 支持配置多个 `TWEET_KEYS`，维护一个 Fetcher 实例池（懒初始化，按需缓存）。
 2. **自动轮询 (Round-Robin)**: 每次请求自动切换使用的 Key，实现负载均衡。
 3. **故障转移与重试**:
-   - 捕获 `429 Too Many Requests` 错误。
-   - 触发指数退避策略。
-   - 自动轮询至下一个可用 Key 并重试请求。
-   - 若所有 Key 均耗尽额度，则向上层抛出异常。
+   - 捕获 `429 Too Many Requests`（配额耗尽）→ 轮换 Key
+   - 捕获 `401 Unauthorized`（cookie 过期）→ 轮换 Key
+   - 捕获 `403 Forbidden`（cookie 失效）→ 轮换 Key
+   - 自动重试，若所有 Key 均耗尽则向上层抛出聚合异常。
+4. **类型安全**: catch 子句使用 `unknown` 而非 `any`，通过 `instanceof Error` 收窄类型。
 
 ---
 

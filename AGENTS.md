@@ -4,7 +4,9 @@ This file provides the technical context, build instructions, and coding standar
 
 ## 1. Project Overview
 
-**Anon Tweet** is a full-stack application built with **React Router v7** and **Bun**. It specializes in anonymous tweet browsing, AI-powered translation (Google Gemini / DeepSeek), and tweet card exporting.
+**Anon Tweet** is a full-stack application built with **React Router v7** and **Bun**. It specializes in anonymous tweet & Instagram post browsing, AI-powered translation (Google Gemini / DeepSeek), and card exporting (screenshot + markdown).
+
+**Dual-platform support** (since 2026-05): Twitter/X tweets + Instagram posts (posts/reels/stories).
 
 ## 2. Setup & Development
 
@@ -20,18 +22,23 @@ This file provides the technical context, build instructions, and coding standar
 
 Key variables required in `.env`:
 
-- `TWEET_KEYS`: Comma-separated Twitter auth tokens.
+- `TWEET_KEYS`: Comma-separated Twitter auth tokens (Base64-encoded cookies).
+- `INS_COOKIES`: Instagram cookies JSON string (for `@chilfish/gallery-dl-instagram` SDK). Required for IG post fetching.
 - `GEMINI_API_KEY`: API Key for Google Gemini.
 - `DEEPSEEK_API_KEY`: API Key for DeepSeek (optional, for dual-provider translation).
 - `HOSTNAME`: Callback address for screenshot services.
+- `DB_URL`: PostgreSQL connection string. Required when `ENABLE_DB_CACHE=true`.
 - `ENABLE_DB_CACHE`: Set to `true` if PostgreSQL is configured.
+- `ENABLE_LOCAL_CACHE`: Set to `true` for filesystem-based local cache (Node/Bun only).
 
 ## 3. Documentation Index (Mandatory Reference)
 
 The `docs/` directory contains the foundational technical context and constraints. **Always** refer to these documents before implementation.
 
-- **[Project Architecture](docs/project_architecture.md)**: System design (BFF, React Router v7, Bun), data flow, and `RettiwtPool` scheduling.
-- **[Translation Subsystem](docs/feature_translation.md)**: Core design of the translation engine, placeholder mechanisms, and entity stream logic.
+- **[Project Architecture](docs/project_architecture.md)**: System design (BFF, React Router v7, Bun), data flow, `RettiwtPool` scheduling, and Instagram integration.
+- **[Translation Subsystem](docs/feature_translation.md)**: Core design of the translation engine, placeholder mechanisms, entity stream logic. Covers both Twitter (entity-based) and Instagram (plain-text) translation.
+- **[Instagram Integration](docs/integration_instagram.md)**: Implementation tracking for the 5-phase Instagram support rollout.
+- **[IG Actions & DB](docs/ig-actions-integration.md)**: Operation bar, DB caching, and AI translation pipeline for Instagram.
 - **[Zustand Best Practices](docs/SKILL/zustand-state-management.md)**: Strict rules for state management and re-render prevention.
 - **[DeepSeek Provider](docs/deepseek-ai-sdk.md)**: Configuration and usage of the DeepSeek AI provider.
 - **[Deployment & Ops](docs/deployment.md)**: Production environments, Vercel optimization, and infrastructure checklists.
@@ -42,11 +49,27 @@ The `docs/` directory contains the foundational technical context and constraint
 
 - **Framework**: React Router v7 (SSR + CSR Hybrid).
 - **Runtime**: Bun.
-- **BFF Pattern**: API routes (`app/routes/api/*`) aggregate data from Twitter, DB, and AI (Google Gemini / DeepSeek).
+- **BFF Pattern**: API routes (`app/routes/api/*`) aggregate data from Twitter, Instagram, DB, and AI (Google Gemini / DeepSeek).
 - **Client State**: **Zustand** (persist v6) for global UI/Configuration state.
 - **Server State**: **SWR** for data fetching and caching.
-- **Persistence**: PostgreSQL + Drizzle ORM (Optional caching layer).
+- **Persistence**: PostgreSQL + Drizzle ORM (Optional caching layer) — tables: `tweet`, `tweet_entities`, `tweet_user`, `ig_post`.
 - **AI Providers**: Google Gemini (`@ai-sdk/google`) and DeepSeek (`@ai-sdk/deepseek`), configurable via `aiProvider` setting.
+- **Caching**: Three-tier — Memory (LRU, max 1000, `structuredClone`), Node FS (atomic write), PostgreSQL. Request coalescing via `pendingRequests` Map.
+
+### Key Directories
+
+| Directory               | Purpose                                                                                |
+| ----------------------- | -------------------------------------------------------------------------------------- |
+| `app/lib/`              | Shared utilities, cache, AI translation, providers, validations                        |
+| `app/lib/rettiwt-api/`  | Twitter/X API client (70+ files, reverse-engineered)                                   |
+| `app/lib/react-tweet/`  | Tweet rendering components + entity parser                                             |
+| `app/lib/stores/`       | Zustand stores (appConfig, translation, translationUI, TranslationDictionary)          |
+| `app/lib/service/`      | Server-side data access layer (DB + cache + API)                                       |
+| `app/lib/translation/`  | Translation resolution pipeline (materialize, resolveEntities, resolveTranslationView) |
+| `app/components/ins/`   | Instagram components (13 files, barrel-exported via `index.ts`)                        |
+| `app/components/tweet/` | Twitter tweet rendering components                                                     |
+| `app/components/ui/`    | shadcn/ui component primitives                                                         |
+| `app/routes/api/`       | BFF API routes (tweet, ig, ai, user, proxy)                                            |
 
 ## 5. Coding Standards & Conventions
 
@@ -60,7 +83,7 @@ The `docs/` directory contains the foundational technical context and constraint
 - **Persistence**: Stores with `persist` middleware must use the `_hasHydrated` pattern to prevent SSR mismatches.
 
 - **Translation Entity System**:
-  - **New Architecture (v2.1)**: AI translations are stored in `entities[].aiTranslation` field. The old `autoTranslationEntities` is deprecated but compatibility is maintained.
+  - **New Architecture (v2.1)**: AI translations are stored in `entities[].aiTranslation` field.
   - **Fallback Logic**: Managed by `app/lib/translation/resolveTranslationView.ts` (6-level decision chain).
   - **Entity Protection**: Use the **Placeholder Mechanism** (`<<__TYPE_INDEX__>>`) when sending text to LLMs to prevent corruption of URLs, mentions, and hashtags.
   - **Dual Provider Support**: Both Google Gemini and DeepSeek are supported. Provider selection is managed via `aiProvider` in `useAppConfigStore`.
@@ -69,12 +92,25 @@ The `docs/` directory contains the foundational technical context and constraint
     - `undefined`: Default (use AI/Original).
     - `Entity[]`: User edited.
     - `null`: Explicitly hidden (force original).
+  - **Instagram Translation**: IG captions are plain text (no entity placeholders). Uses `translateIGCaption.ts` — a simpler pipeline with `isChinese()` guard, AI translation, and DB write-back.
 
 ### UI & Components
 
 - **Styling**: Tailwind CSS v4. Use the `cn()` utility for conditional classes.
 - **Components**: Prefer functional components with TypeScript. Use `lucide-react` for icons.
-- **Screenshots**: Components used for screenshots (in `app/routes/plain.tsx`) must be isolated and use `waitForRenderReady`.
+- **Screenshots**: Components used for screenshots must be isolated and use `waitForRenderReady`.
+  - Twitter: `app/routes/plain.tsx` + `MyPlainTweet`
+  - Instagram: `app/routes/plain-ig.tsx` + `PlainIGPost`
+- **Barrel Exports**: Component directories with 3+ files must have `index.ts`. See `app/components/ins/index.ts` as reference.
+- **IG Time Formatting**: Use `formatIGTime(iso, 'card'|'plain')` from `~/lib/utils` — not inline `formatTime()`.
+
+### SmartPool & API Keys
+
+- **RettiwtPool** (`app/lib/SmartPool.ts`): Multi-key rotation pool for Twitter API.
+  - Automatically rotates on 429 (Rate Limit), 401 (Unauthorized), 403 (Forbidden).
+  - Maintains a `FetcherService` instance cache per key.
+  - Exhausts all keys → throws aggregated error.
+- **Error types**: Use `unknown` in catch clauses, not `any`. Narrow with `instanceof Error`.
 
 ## 6. Postmortem（尸检报告）
 
@@ -138,6 +174,7 @@ The `docs/` directory contains the foundational technical context and constraint
 
 - **API Keys**: Never hardcode API keys or secrets. Use `.env` and `app/lib/env.server.ts`.
 - **Twitter Keys**: Treat `TWEET_KEYS` as highly sensitive credentials.
+- **Instagram Cookies**: `INS_COOKIES` has full account access. Same security level as passwords.
 
 ---
 

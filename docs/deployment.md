@@ -37,9 +37,11 @@
 
 | 验证维度     | 测试端点                           | 预期行为                                           |
 | :----------- | :--------------------------------- | :------------------------------------------------- |
-| **基础渲染** | `/tweets/:tweetId`                 | 静态推文卡片与服务端注水 (Hydration) 正常          |
-| **无头视图** | `/plain/:tweetId`                  | 渲染最小推文静态片段                               |
-| **语义翻译** | `/plain/:tweetId?translation=true` | 返回经过 AI 语义对齐后的 `autoTranslationEntities` |
+| **Twitter 渲染** | `/tweets/:tweetId`                 | 静态推文卡片与服务端注水 (Hydration) 正常          |
+| **Twitter 截图** | `/plain/:tweetId`                  | 渲染最小推文静态片段                               |
+| **AI 翻译**  | `/plain/:tweetId?translation=true` | 返回经过 AI 语义对齐后的翻译实体                   |
+| **IG 渲染**  | `/ins/:shortcode`                  | Instagram 透卡相框 + 九宫格媒体                    |
+| **IG 截图**  | `/plain-ins/:shortcode`            | 纯净版 IG 帖子静态片段                             |
 | **负载均衡** | 日志观察                           | 多 `TWEET_KEYS` 环境下，上游响应分布均匀           |
 
 ---
