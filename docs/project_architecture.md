@@ -174,10 +174,10 @@ v2.1 对翻译实体存储进行了重大重构：
 
 ### 5.1 提供商模型
 
-| 提供商 | SDK | 模型 | 思考模式 |
-|--------|-----|------|----------|
-| Google Gemini | `@ai-sdk/google` | `gemini-3-flash-preview` 等 | `thinkingLevel` + `thinkingBudget` |
-| DeepSeek | `@ai-sdk/deepseek` | `deepseek-v4-flash`, `deepseek v4 pro` | `reasoning_effort` (disabled/high/max) |
+| 提供商        | SDK                | 模型                                   | 思考模式                               |
+| ------------- | ------------------ | -------------------------------------- | -------------------------------------- |
+| Google Gemini | `@ai-sdk/google`   | `gemini-3-flash-preview` 等            | `thinkingLevel` + `thinkingBudget`     |
+| DeepSeek      | `@ai-sdk/deepseek` | `deepseek-v4-flash`, `deepseek v4 pro` | `reasoning_effort` (disabled/high/max) |
 
 ### 5.2 思考强度映射
 

@@ -30,13 +30,14 @@
 // app/types/entities.ts
 interface EntityBase {
   text: string
-  translation?: string      // 手动翻译（用户编辑）
-  aiTranslation?: string    // AI 翻译（v2.1 新增，替代 autoTranslationEntities）
+  translation?: string // 手动翻译（用户编辑）
+  aiTranslation?: string // AI 翻译（v2.1 新增，替代 autoTranslationEntities）
   index: number
 }
 ```
 
 **关键变更 (v2.1)**：
+
 - **`aiTranslation` 字段**：AI 翻译结果现在直接嵌入到每个实体的 `aiTranslation` 字段中，与手动翻译 `translation` 共存。
 - **`autoTranslationEntities`** 标记为遗留字段（Legacy），已有逻辑完成迁移兼容，新代码不应再使用。
 - 实体数组保持只读；翻译内容通过 `TranslationStore` 和 `aiTranslation` 字段管理。
@@ -65,17 +66,17 @@ type EntityType = 'text' | 'hashtag' | 'mention' | 'url' | 'media_alt' | 'symbol
 ```typescript
 // app/lib/stores/appConfig.ts
 interface AIConfig {
-  aiProvider: 'google' | 'deepseek'           // v2.1 新增：AI 提供商选择
-  enableAITranslation: boolean                 // 是否开启 AI 自动翻译
+  aiProvider: 'google' | 'deepseek' // v2.1 新增：AI 提供商选择
+  enableAITranslation: boolean // 是否开启 AI 自动翻译
 
   // Gemini 配置
   geminiApiKey: string
-  geminiModel: string                          // e.g., "models/gemini-3-flash-preview"
-  geminiThinkingLevel: ThinkingLevel           // minimal | low | medium | high | max
+  geminiModel: string // e.g., "models/gemini-3-flash-preview"
+  geminiThinkingLevel: ThinkingLevel // minimal | low | medium | high | max
 
   // DeepSeek 配置 (v2.1 新增)
   deepseekApiKey: string
-  deepseekModel: string                        // e.g., "deepseek-v4-flash"
+  deepseekModel: string // e.g., "deepseek-v4-flash"
   deepseekThinkingLevel: ThinkingLevel
 
   // 翻译显示风格
@@ -94,12 +95,13 @@ interface TranslationSettings {
   enabled: boolean
   customSeparator: string
   selectedTemplateId: string
-  filterUnrelated: boolean         // v2.1 新增
+  filterUnrelated: boolean // v2.1 新增
   customTemplates: SeparatorTemplate[]
 }
 ```
 
 **预设分隔符模板** (`DEFAULT_TEMPLATES` 在 `app/lib/constants.ts`):
+
 - "谷歌翻译风格" — 品牌色 `#4285F4`
 - "Gemini 翻译风格" — 品牌色 `#4285F4`
 - "DeepSeek 翻译风格" — 品牌色 `#4D6BFE` (v2.1 新增)
@@ -225,15 +227,15 @@ v2.1 新增的核心模块，统一决定推文渲染时应展示什么翻译内
 
 **决策优先级**（`app/lib/translation/resolveTranslationView.ts`）：
 
-| 优先级 | 条件 | 行为 |
-|--------|------|------|
-| 1. Mode Gate | `translationMode === 'original'` | 直接返回原文 |
-| 2. Visibility Gate | `visibility[body/alt]` 检查 | 若不可见则跳过翻译 |
-| 3. Manual Override | `translations[tweetId]` 为 `Entity[]` | 使用手动翻译（最高优先） |
-| 4. New AI Translation | `entities[].aiTranslation` 存在 | 使用新版 AI 翻译字段 |
-| 5. Legacy AI Translation | `tweet.autoTranslationEntities` 存在 | 兼容旧的独立数组 |
-| 6. Legacy Embedded | `entities[].translation` 存在 | 兼容旧的手动翻译 |
-| 7. Original Fallback | 以上均不满足 | 返回原文 |
+| 优先级                   | 条件                                  | 行为                     |
+| ------------------------ | ------------------------------------- | ------------------------ |
+| 1. Mode Gate             | `translationMode === 'original'`      | 直接返回原文             |
+| 2. Visibility Gate       | `visibility[body/alt]` 检查           | 若不可见则跳过翻译       |
+| 3. Manual Override       | `translations[tweetId]` 为 `Entity[]` | 使用手动翻译（最高优先） |
+| 4. New AI Translation    | `entities[].aiTranslation` 存在       | 使用新版 AI 翻译字段     |
+| 5. Legacy AI Translation | `tweet.autoTranslationEntities` 存在  | 兼容旧的独立数组         |
+| 6. Legacy Embedded       | `entities[].translation` 存在         | 兼容旧的手动翻译         |
+| 7. Original Fallback     | 以上均不满足                          | 返回原文                 |
 
 ### 5.2 `resolveEntities.ts` — AI 翻译合并工具
 
@@ -283,6 +285,7 @@ v2.1 新增的纯函数模块，提供通用的翻译实体合并能力：
 ### 6.3 推文选项菜单
 
 新增单条推文级别的翻译控制（`app/components/tweet/TweetOptionsMenu.tsx`）：
+
 - 翻译按钮显隐切换
 - 媒体排列方式切换（宫格/竖向）
 
@@ -320,6 +323,7 @@ v2.1 新增的纯函数模块，提供通用的翻译实体合并能力：
 ### 9.3 Markdown 导出 — 三源翻译支持
 
 `app/lib/markdown.ts` 支持三重翻译源输出：
+
 1. `item.translation` — 手动翻译（`**Translation:**`）
 2. `item.aiTranslation` — 新版 AI 翻译（`**AI Translation:**`）
 3. `tweet.autoTranslationEntities` — 旧版兼容（`**AI Translation:**`）
@@ -332,13 +336,13 @@ v2.1 新增的纯函数模块，提供通用的翻译实体合并能力：
 
 ### 10.1 已解决的痛点 (v2.1)
 
-| 痛点 (v2.0) | 解决方案 (v2.1) |
-|-------------|----------------|
-| 合并逻辑分散、假设不一致 | `resolveTranslationView.ts` 统一 6 级决策链 |
-| 数据形态混用 (overlay vs stream) | `resolveEntities.ts` 统一合并策略 |
-| 仅支持 Google Gemini | 完整双提供商架构（Google + DeepSeek） |
-| `autoTranslationEntities` 与 entities 分离存储 | 迁移至 `entities[].aiTranslation` 字段 |
-| 预设模板污染 localStorage | 预设不再持久化，仅自定义模板存储 |
+| 痛点 (v2.0)                                    | 解决方案 (v2.1)                             |
+| ---------------------------------------------- | ------------------------------------------- |
+| 合并逻辑分散、假设不一致                       | `resolveTranslationView.ts` 统一 6 级决策链 |
+| 数据形态混用 (overlay vs stream)               | `resolveEntities.ts` 统一合并策略           |
+| 仅支持 Google Gemini                           | 完整双提供商架构（Google + DeepSeek）       |
+| `autoTranslationEntities` 与 entities 分离存储 | 迁移至 `entities[].aiTranslation` 字段      |
+| 预设模板污染 localStorage                      | 预设不再持久化，仅自定义模板存储            |
 
 ### 10.2 当前痛点
 
