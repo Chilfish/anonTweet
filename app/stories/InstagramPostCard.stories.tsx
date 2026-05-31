@@ -59,10 +59,9 @@ function makePost(overrides: Partial<IGPost>): IGPost {
 
 const meta = {
   title: 'Instagram/PostCard',
-  component: InstagramPostCard,
   parameters: { layout: 'centered' },
   tags: ['autodocs'],
-} satisfies Meta<typeof InstagramPostCard>
+} satisfies Meta
 
 export default meta
 type Story = StoryObj<typeof meta>
