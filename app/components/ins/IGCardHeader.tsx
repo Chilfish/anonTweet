@@ -7,26 +7,49 @@ interface IGCardHeaderProps {
   fullname?: string
   avatarUrl?: string
   verified?: boolean
-  timestamp?: string
-  locationName?: string
+  createdAt?: string
   className?: string
 }
 
 /**
- * Instagram 卡片头部。
+ * Instagram 卡片头部 — 精简版。
  *
- * Apple HIG: w-8 h-8 rounded-full 头像 + 用户名 bold + 蓝勾认证 + 右侧三点菜单。
- * 纯展示，不依赖完整 IGPost（可复用）。
+ * 一行基线对齐：头像 + 用户名(蓝勾) + 右侧时间 + 三点菜单。
+ * 时间使用 Instagram 风格相对时间（"1h"/"2d"/"May 30"）。
  */
+function relativeTime(iso: string): string {
+  const now = Date.now()
+  const then = new Date(iso).getTime()
+  const diff = now - then
+  const sec = Math.floor(diff / 1000)
+  const min = Math.floor(sec / 60)
+  const hr = Math.floor(min / 60)
+  const day = Math.floor(hr / 24)
+  const week = Math.floor(day / 7)
+
+  if (sec < 60)
+    return 'Just now'
+  if (min < 60)
+    return `${min}m`
+  if (hr < 24)
+    return `${hr}h`
+  if (day < 7)
+    return `${day}d`
+  if (week < 5)
+    return `${week}w`
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
 export function IGCardHeader({
   username,
   fullname,
   avatarUrl,
   verified,
-  timestamp,
-  locationName,
+  createdAt,
   className,
 }: IGCardHeaderProps) {
+  const displayName = fullname && fullname !== username ? fullname : username
+
   return (
     <div className={cn('flex items-center gap-2', className)}>
       {/* 头像 */}
@@ -36,31 +59,28 @@ export function IGCardHeader({
           : <AvatarFallback>{username[0]?.toUpperCase() ?? '?'}</AvatarFallback>}
       </Avatar>
 
-      {/* 用户名区域 */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1">
-          <span className="text-sm font-semibold truncate">{username}</span>
-          {verified && (
-            <BadgeCheck className="size-4 text-[#3896F4] fill-[#3896F4] shrink-0" />
-          )}
-        </div>
-        {fullname && fullname !== username && (
-          <p className="text-xs text-muted-foreground truncate">{fullname}</p>
-        )}
-        {(locationName || timestamp) && (
-          <p className="text-xs text-muted-foreground/60 mt-0.5">
-            {[locationName, timestamp].filter(Boolean).join(' · ')}
-          </p>
+      {/* 用户名 + 蓝勾 */}
+      <div className="flex items-center gap-1 min-w-0">
+        <span className="text-sm font-semibold truncate">{displayName}</span>
+        {verified && (
+          <BadgeCheck className="size-4 text-[#3896F4] fill-[#3896F4] shrink-0" />
         )}
       </div>
 
-      {/* 右侧三点菜单 */}
-      <button
-        className="size-8 flex items-center justify-center rounded-full hover:bg-muted/60 transition-colors shrink-0"
-        aria-label="更多选项"
-      >
-        <Ellipsis className="size-5 text-foreground/70" />
-      </button>
+      {/* 右侧：时间 + 菜单 — 与左侧基线对齐 */}
+      <div className="flex items-center gap-1.5 ml-auto shrink-0">
+        {createdAt && (
+          <span className="text-xs text-muted-foreground/60">
+            {relativeTime(createdAt)}
+          </span>
+        )}
+        <button
+          className="size-7 flex items-center justify-center rounded-full hover:bg-muted/60 transition-colors"
+          aria-label="更多选项"
+        >
+          <Ellipsis className="size-4 text-foreground/60" />
+        </button>
+      </div>
     </div>
   )
 }

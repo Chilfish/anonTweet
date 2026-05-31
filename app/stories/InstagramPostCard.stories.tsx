@@ -36,7 +36,7 @@ function makePost(overrides: Partial<IGPost>): IGPost {
     type: 'post',
     media: [],
     avatar_url: 'https://picsum.photos/seed/avatar/200/200',
-    created_at: '2026-05-30T18:30:00Z',
+    created_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString(), // 2h ago
     verified: false,
     ...overrides,
   }
@@ -49,10 +49,6 @@ const meta = {
   component: InstagramPostCard,
   parameters: {
     layout: 'centered',
-    backgrounds: {
-      default: 'app',
-      values: [{ name: 'app', value: 'var(--background)' }],
-    },
   },
   tags: ['autodocs'],
 } satisfies Meta<typeof InstagramPostCard>
@@ -62,7 +58,6 @@ type Story = StoryObj<typeof meta>
 
 // ─── Full Card Stories ───────────────────────────────────────────────
 
-/** 单图 + 翻译 */
 export const SingleImageWithTranslation: Story = {
   render: () => (
     <InstagramPostCard
@@ -75,141 +70,101 @@ export const SingleImageWithTranslation: Story = {
   ),
 }
 
-/** 双图宫格 */
 export const TwoImageGrid: Story = {
   render: () => (
     <InstagramPostCard
-      post={makePost({
-        media: [samplePhotos[0]!, samplePhotos[1]!],
-      })}
+      post={makePost({ media: [samplePhotos[0]!, samplePhotos[1]!] })}
     />
   ),
 }
 
-/** 三图宫格 */
 export const ThreeImageGrid: Story = {
   render: () => (
     <InstagramPostCard
-      post={makePost({
-        media: [samplePhotos[0]!, samplePhotos[1]!, samplePhotos[2]!],
-      })}
+      post={makePost({ media: [samplePhotos[0]!, samplePhotos[1]!, samplePhotos[2]!] })}
     />
   ),
 }
 
-/** 四图宫格 */
 export const FourImageGrid: Story = {
   render: () => (
     <InstagramPostCard
-      post={makePost({
-        media: [samplePhotos[0]!, samplePhotos[1]!, samplePhotos[2]!, samplePhotos[3]!],
-      })}
+      post={makePost({ media: [samplePhotos[0]!, samplePhotos[1]!, samplePhotos[2]!, samplePhotos[3]!] })}
     />
   ),
 }
 
-/** 九宫格（完整 9 张） */
 export const NineGrid: Story = {
   render: () => (
     <InstagramPostCard
-      post={makePost({
-        media: samplePhotos.slice(0, 9),
-      })}
+      post={makePost({ media: samplePhotos.slice(0, 9) })}
     />
   ),
 }
 
-/** 超过 9 张 — 毛玻璃折叠 +N */
 export const OverflowFolded: Story = {
   render: () => (
     <InstagramPostCard
       post={makePost({
         media: samplePhotos,
-        description: '12 张照片的合集！前 9 张可见，第 9 位显示毛玻璃 +3 折叠层。点击可展开。',
+        description: '12 张合集。前 9 张可见，第 9 位毛玻璃 +3。点击展开全部。',
       })}
     />
   ),
 }
 
-/** 无 caption */
 export const NoCaption: Story = {
   render: () => (
     <InstagramPostCard
-      post={makePost({
-        media: [samplePhotos[0]!],
-        description: '',
-        tags: undefined,
-      })}
+      post={makePost({ media: [samplePhotos[0]!], description: '', tags: undefined })}
     />
   ),
 }
 
-/** 无头像（占位回退） */
 export const NoAvatarFallback: Story = {
   render: () => (
     <InstagramPostCard
-      post={makePost({
-        media: [samplePhotos[0]!],
-        avatar_url: undefined,
-      })}
+      post={makePost({ media: [samplePhotos[0]!], avatar_url: undefined })}
     />
   ),
 }
 
 // ─── Sub-Component Stories ───────────────────────────────────────────
 
-/** IGCardHeader 独立测试 */
 export const HeaderOnly: Story = {
   render: () => (
-    <div className="w-[400px] bg-card rounded-2xl p-4">
+    <div className="w-[400px] bg-card rounded-sm p-4">
       <IGCardHeader
         username="chilfish"
         fullname="Chil Fish"
         avatarUrl="https://picsum.photos/seed/avatar/200/200"
         verified
-        timestamp="2026年5月30日"
-        locationName="Tokyo, Japan"
+        createdAt={new Date(Date.now() - 2 * 3600 * 1000).toISOString()}
       />
     </div>
   ),
 }
 
-/** IGMediaGrid 九宫格独立测试 */
 export const MediaGridOnly: Story = {
   render: () => (
-    <div className="w-[468px]">
-      <IGMediaGrid media={samplePhotos.slice(0, 9)} />
-    </div>
+    <div className="w-[468px]"><IGMediaGrid media={samplePhotos.slice(0, 6)} /></div>
   ),
 }
 
-/** IGMediaGrid 折叠独立测试 */
-export const MediaGridFolded: Story = {
-  render: () => (
-    <div className="w-[468px]">
-      <IGMediaGrid media={samplePhotos} maxVisible={6} />
-    </div>
-  ),
-}
-
-/** IGActionBar 独立测试 */
 export const ActionBarOnly: Story = {
   render: () => (
-    <div className="w-[400px] bg-card rounded-2xl">
-      <IGActionBar />
-    </div>
+    <div className="w-[400px] bg-card rounded-sm p-4"><IGActionBar /></div>
   ),
 }
 
-/** IGCaption 带翻译独立测试 */
 export const CaptionWithTranslation: Story = {
   render: () => (
-    <div className="w-[400px] bg-card rounded-2xl p-4">
+    <div className="w-[400px] bg-card rounded-sm p-4">
       <IGCaption
         username="chilfish"
-        text="The quick brown fox jumps over the lazy dog. This is a longer caption that should always be fully visible without line-clamp truncation."
-        translatedText="敏捷的棕色狐狸跳过了懒惰的狗。这是一段更长的文案，应该始终完整显示，不使用任何截断。"
-        tags={['example', 'translation']}
+        text="The quick brown fox jumps over the lazy dog. Always fully visible, no line-clamp."
+        translatedText="敏捷的棕色狐狸跳过了懒惰的狗。始终完整显示，不使用截断。"
+        tags={['example']}
       />
     </div>
   ),

@@ -8,28 +8,26 @@ interface IGActionBarProps {
 /**
  * Instagram 互动栏。
  *
- * Apple HIG：四个 outline 图标，flex between 布局。
- * 遵循 "Blurred Interaction" 原则 — 不暴露真实点赞数、评论者。
+ * 四个图标统一 size-6（24px），flex items-center 基线对齐。
+ * Like 默认红心填充。
  */
 export function IGActionBar({ className }: IGActionBarProps) {
   return (
     <div className={cn('flex items-center justify-between px-4 py-2', className)}>
-      {/* 左侧：Like + Comment + Share */}
       <div className="flex items-center gap-4">
-        <button className="size-8 flex items-center justify-center rounded-full hover:bg-muted/60 transition-colors" aria-label="点赞">
-          <Heart className="size-6" />
+        <button aria-label="点赞" className="p-1 -m-1">
+          <Heart className="size-6 text-[#FF3040] fill-[#FF3040]" />
         </button>
-        <button className="size-8 flex items-center justify-center rounded-full hover:bg-muted/60 transition-colors" aria-label="评论">
-          <MessageCircle className="size-6" />
+        <button aria-label="评论" className="p-1 -m-1">
+          <MessageCircle className="size-6 text-foreground" />
         </button>
-        <button className="size-8 flex items-center justify-center rounded-full hover:bg-muted/60 transition-colors" aria-label="分享">
-          <Send className="size-5" />
+        <button aria-label="分享" className="p-1 -m-1">
+          <Send className="size-[1.15rem] text-foreground" />
         </button>
       </div>
 
-      {/* 右侧：Bookmark */}
-      <button className="size-8 flex items-center justify-center rounded-full hover:bg-muted/60 transition-colors" aria-label="收藏">
-        <Bookmark className="size-6" />
+      <button aria-label="收藏" className="p-1 -m-1">
+        <Bookmark className="size-6 text-foreground" />
       </button>
     </div>
   )

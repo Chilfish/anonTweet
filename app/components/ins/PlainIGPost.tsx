@@ -1,10 +1,10 @@
 import type { IGPost } from '~/types'
-import { Separator } from '~/components/ui/separator'
 import { cn } from '~/lib/utils'
 import { IGActionBar } from './IGActionBar'
 import { IGCaption } from './IGCaption'
 import { IGCardHeader } from './IGCardHeader'
 import { IGMediaGrid } from './IGMediaGrid'
+import InsLogo from './InsLogo'
 
 interface PlainIGPostProps {
   post: IGPost
@@ -12,22 +12,16 @@ interface PlainIGPostProps {
 }
 
 /**
- * 纯净版 IG 帖子 — 无外层 chrome，截图专用。
- *
- * 与 {@link InstagramPostCard} 共享相同的子组件，
- * 仅去掉 Card 包装和模糊互动层，专用于 SSR 截图导出。
+ * 纯净版 — 截图导出专用，与 InstagramPostCard 结构一致。
  */
 export function PlainIGPost({ post, className }: PlainIGPostProps) {
-  const timestamp = post.created_at
-    ? new Date(post.created_at).toLocaleDateString('zh-CN', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    : undefined
-
   return (
     <div className={cn('w-full max-w-[468px] bg-background font-sans antialiased', className)}>
+      {/* Logo */}
+      <div className="flex items-center justify-center px-4 py-2.5 border-b border-border/15">
+        <InsLogo className="h-7 w-auto" />
+      </div>
+
       {/* Header */}
       <div className="px-4 pt-3 pb-2">
         <IGCardHeader
@@ -35,8 +29,7 @@ export function PlainIGPost({ post, className }: PlainIGPostProps) {
           fullname={post.fullname}
           avatarUrl={post.avatar_url}
           verified={post.verified}
-          timestamp={timestamp}
-          locationName={post.location_name}
+          createdAt={post.created_at}
         />
       </div>
 
@@ -44,24 +37,18 @@ export function PlainIGPost({ post, className }: PlainIGPostProps) {
       {post.media?.length > 0 && <IGMediaGrid media={post.media} />}
 
       {/* Actions */}
-      <IGActionBar />
+      <IGActionBar className="pt-1.5 pb-1" />
 
-      {/* Caption — 截图时可能不需要互动假数据 */}
+      {/* Caption */}
       {post.description && (
-        <>
-          <IGCaption
-            username={post.username}
-            text={post.description}
-            translatedText={post.captionTranslation}
-            tags={post.tags}
-          />
-          <div className="px-4 pb-3">
-            <p className="text-xs text-muted-foreground/60">Liked by others</p>
-          </div>
-        </>
+        <IGCaption
+          username={post.username}
+          text={post.description}
+          translatedText={post.captionTranslation}
+          tags={post.tags}
+          className="px-4 pt-0 pb-0"
+        />
       )}
-
-      {!post.description && <Separator className="mx-4" />}
     </div>
   )
 }

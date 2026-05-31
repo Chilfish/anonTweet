@@ -112,3 +112,11 @@
   - 新增 `IGPhotoCard`（复用 Card）— 透卡相框整体
   - 更新 `PlainIGPost` 复用新子组件
   - 纯 shadcn/ui 体系，0 处自研 UI 原语
+- **15:25** 🍎 精修第二轮：InsLogo + 圆点指示器 + 图标对齐 + 红心 + 时间格式
+  - 九宫格 `grid-cols-3 gap-[1px]`（不再轮播）
+  - `IGCardHeader` — 蓝勾认证 + 三点菜单（lucide-react）
+  - `IGActionBar` — Heart/Comment/Share/Bookmark（outline 图标）
+  - `IGCaption` — 始终展开 + `translatedText` 独立 prop（原文 black / 译文 gray）
+  - `InstagramPostCard` — 主导出组件，透视卡相框 + 模糊互动层
+  - Storybook: 14 个 story（单图到 12 图折叠、各子组件独立测试）
+  - 全部 24 files, +1470/-18, 7 commits
