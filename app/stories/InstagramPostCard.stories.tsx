@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { IGPost } from '~/types'
+import { IGPostSkeleton } from '~/components/ins'
 import { IGActionBar } from '~/components/ins/IGActionBar'
 import { IGCardHeader } from '~/components/ins/IGCardHeader'
 import { IGMediaGrid } from '~/components/ins/IGMediaGrid'
@@ -78,6 +79,10 @@ export const SingleImageWithTranslation: Story = {
       })}
     />
   ),
+}
+
+export const SkeletonCard: Story = {
+  render: () => <IGPostSkeleton />,
 }
 
 export const ReelWithMusic: Story = {
@@ -212,28 +217,28 @@ export const HeaderOnly: Story = {
 }
 
 export const MediaGridOnly: Story = {
-  render: () => (<div className="w-[468px]"><IGMediaGrid media={samplePhotos.slice(0, 6)} /></div>),
+  render: () => (<div className="w-150"><IGMediaGrid media={samplePhotos.slice(0, 6)} /></div>),
 }
 
 /** 2×2 完美对称 */
 export const MediaGrid2x2: Story = {
-  render: () => (<div className="w-[468px]"><IGMediaGrid media={samplePhotos.slice(0, 4)} /></div>),
+  render: () => (<div className="w-150"><IGMediaGrid media={samplePhotos.slice(0, 4)} /></div>),
 }
 
 /** 3+2 分布，消除悬空 */
 export const MediaGrid3x2: Story = {
-  render: () => (<div className="w-[468px]"><IGMediaGrid media={samplePhotos.slice(0, 5)} /></div>),
+  render: () => (<div className="w-150"><IGMediaGrid media={samplePhotos.slice(0, 5)} /></div>),
 }
 
 /** 3+2+2 分布 */
 export const MediaGrid3x2x2: Story = {
-  render: () => (<div className="w-[468px]"><IGMediaGrid media={samplePhotos.slice(0, 7)} /></div>),
+  render: () => (<div className="w-150"><IGMediaGrid media={samplePhotos.slice(0, 7)} /></div>),
 }
 
 /** 实体相册堆叠 — 2 行预览 +8 */
 export const MediaGridStacked: Story = {
   render: () => (
-    <div className="w-[468px]">
+    <div className="w-150">
       <IGMediaGrid media={samplePhotos} showInfoLabel />
     </div>
   ),
@@ -249,7 +254,7 @@ export const MediaGrid20Compact: Story = {
       display_url: `https://picsum.photos/seed/ig${i + 1}/640/640`,
     }))
     return (
-      <div className="w-[468px]">
+      <div className="w-150">
         <IGMediaGrid media={twenty} showInfoLabel />
       </div>
     )

@@ -5,10 +5,10 @@ import { useState } from 'react'
 import { useParams } from 'react-router'
 import useSWR from 'swr'
 import { IGHeader } from '~/components/ins/IGHeader'
+import { IGPostSkeleton } from '~/components/ins/IGPostSkeleton'
 import { InstagramPostCard } from '~/components/ins/InstagramPostCard'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
-import { Skeleton } from '~/components/ui/skeleton'
 import { useIGOperations } from '~/hooks/use-ig-operations'
 import { useIGScreenshotAction } from '~/hooks/use-ig-screenshot-action'
 import { fetcher } from '~/lib/fetcher'
@@ -20,25 +20,6 @@ export function meta() {
     { title: 'Anon Tweet — Instagram' },
     { name: 'description', content: 'Instagram 帖子查看器' },
   ]
-}
-
-function IGPostSkeleton() {
-  return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader className="flex flex-row items-center gap-3 pb-2">
-        <Skeleton className="w-10 h-10 rounded-full" />
-        <div className="space-y-1.5">
-          <Skeleton className="w-32 h-4" />
-          <Skeleton className="w-20 h-3" />
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <Skeleton className="w-full aspect-square rounded-xl" />
-        <Skeleton className="w-3/4 h-4" />
-        <Skeleton className="w-1/2 h-4" />
-      </CardContent>
-    </Card>
-  )
 }
 
 function IGNotFound({ id }: { id?: string }) {
