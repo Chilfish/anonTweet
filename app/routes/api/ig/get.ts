@@ -19,17 +19,17 @@ function normalizeIGPost(messages: Message[]): IGPost | null {
   if (!dir)
     return null
 
-  const meta = dir.metadata as ParsedPost & {
+  const meta = dir.metadata as unknown as ParsedPost & {
     post_date?: string
     user?: { profile_pic_url?: string, is_verified?: boolean }
     location_slug?: string
     coauthors?: { username: string, full_name?: string }[]
   }
-  const urlMsgs = messages.filter(m => m.type === 'url') as UrlMsg[]
+  const urlMsgs = messages.filter(m => m.type === 'url') as unknown as UrlMsg[]
 
   // 从第一条有音频数据的媒体中提取全剧音频信息
-  const audioItem = urlMsgs.find(m => (m.metadata as ParsedMedia).audio_title)
-  const audioParsed = audioItem?.metadata as ParsedMedia | undefined
+  const audioItem = urlMsgs.find(m => (m.metadata as unknown as ParsedMedia).audio_title)
+  const audioParsed = audioItem?.metadata as unknown as ParsedMedia | undefined
   const audio: IGAudio | undefined = audioParsed
     ? {
         title: audioParsed.audio_title,
@@ -44,7 +44,7 @@ function normalizeIGPost(messages: Message[]): IGPost | null {
     : undefined
 
   const media: IGMedia[] = urlMsgs.map((msg, i) => {
-    const m = msg.metadata as ParsedMedia
+    const m = msg.metadata as unknown as ParsedMedia
     return {
       num: m.num ?? i,
       media_id: m.media_id,

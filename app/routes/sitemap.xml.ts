@@ -1,4 +1,4 @@
-import type { Route } from './+types/sitemap[.]xml'
+import type { Route } from './+types/sitemap.xml'
 
 export async function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url)

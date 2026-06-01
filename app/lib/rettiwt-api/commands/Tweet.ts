@@ -42,14 +42,14 @@ function createTweetCommand(rettiwt: Rettiwt): Command {
         // Getting the different IDs
         const ids: string[] = id.split(',')
 
-        // If single ID given
+        // If single ID given
         if (ids.length <= 1) {
-          const details = await rettiwt.tweet.details(ids[0])
+          const details = await rettiwt.tweet.details(ids[0]!)
           output(details)
-        }
-        // If multiple IDs give
+        }
+        // If multiple IDs give
         else {
-          const details = await rettiwt.tweet.details(ids)
+          const details = await rettiwt.tweet.details(ids)
           output(details)
         }
       }

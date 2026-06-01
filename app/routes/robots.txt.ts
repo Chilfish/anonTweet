@@ -1,4 +1,4 @@
-import type { Route } from './+types/robots[.]txt'
+import type { Route } from './+types/robots.txt'
 
 export async function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url)
@@ -9,6 +9,7 @@ User-agent: *
 Allow: /
 Allow: /tweets/
 Allow: /list/
+Allow: /ins/
 
 Sitemap: ${baseUrl}/sitemap.xml
 

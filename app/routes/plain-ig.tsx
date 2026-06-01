@@ -1,6 +1,6 @@
 import type { DirectoryMsg, Message, ParsedMedia, ParsedPost, UrlMsg } from '@chilfish/gallery-dl-instagram'
 import type { Route } from './+types/ins'
-import type { IGPostData } from '~/types'
+import type { IGMedia, IGPostData } from '~/types'
 import { createSDK } from '@chilfish/gallery-dl-instagram/node'
 import { Await, useLoaderData } from 'react-router'
 import { PlainIGPost } from '~/components/ins/PlainIGPost'
@@ -33,8 +33,8 @@ export async function loader({ params }: Route.LoaderArgs): Promise<{
     if (!dir)
       return { post: null, igId }
 
-    const meta = dir.metadata as ParsedPost
-    const urlMsgs = messages.filter(m => m.type === 'url') as UrlMsg[]
+    const meta = dir.metadata as unknown as ParsedPost
+    const urlMsgs = messages.filter(m => m.type === 'url') as unknown as UrlMsg[]
 
     const post: IGPostData = [{
       id: meta.post_shortcode,
@@ -47,7 +47,7 @@ export async function loader({ params }: Route.LoaderArgs): Promise<{
       likes: meta.likes,
       type: meta.type,
       media: urlMsgs.map((msg, i) => {
-        const m = msg.metadata as ParsedMedia
+        const m = msg.metadata as unknown as ParsedMedia
         return {
           num: m.num ?? i,
           media_id: m.media_id,
@@ -57,7 +57,7 @@ export async function loader({ params }: Route.LoaderArgs): Promise<{
           height: m.height,
           width_original: m.width_original,
           height_original: m.height_original,
-          type: (m.video_url ? 'video' : 'photo') as const,
+          type: (m.video_url ? 'video' : 'photo') as IGMedia['type'],
         }
       }),
     }]

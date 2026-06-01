@@ -127,7 +127,7 @@ function createUserCommand(rettiwt: Rettiwt): Command {
 
         // If single ID given
         if (ids.length <= 1) {
-          const details = await rettiwt.user.details(ids[0])
+          const details = await rettiwt.user.details(ids[0]!)
           output(details)
         }
         // If multiple IDs given

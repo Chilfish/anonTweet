@@ -28,8 +28,8 @@ export function useTweetTranslation(tweet: EnrichedTweet, type: 'body' | 'alt' =
   })
 
   if (!view.shouldShow) {
-    return { shouldShow: false, entities: null as Entity[] | null, source: view.source as const }
+    return { shouldShow: false, entities: null as Entity[] | null, source: view.source }
   }
 
-  return { shouldShow: true, entities: view.entities, source: view.source as const }
+  return { shouldShow: true, entities: view.entities, source: view.source }
 }

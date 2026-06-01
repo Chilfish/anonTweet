@@ -3,7 +3,7 @@ import type { ProviderStrategy } from './types'
 import type { ThinkingLevel } from '~/lib/stores/appConfig'
 import { createDeepSeek } from '@ai-sdk/deepseek'
 
-function resolveReasoningEffort(level: ThinkingLevel): string {
+function resolveReasoningEffort(level: ThinkingLevel): 'disabled' | 'max' | 'low' | 'medium' | 'high' | 'xhigh' {
   if (level === 'minimal')
     return 'disabled'
   if (level === 'max')
@@ -32,7 +32,7 @@ export const deepseekStrategy: ProviderStrategy = {
           type: thinkingConfig === 'disabled' ? 'disabled' : 'enabled',
         },
         ...(thinkingConfig !== 'disabled' && typeof thinkingConfig === 'string'
-          ? { reasoningEffort: thinkingConfig }
+          ? { reasoningEffort: thinkingConfig as 'low' | 'medium' | 'high' | 'xhigh' }
           : {}),
       },
     } satisfies Record<string, DeepSeekLanguageModelOptions>

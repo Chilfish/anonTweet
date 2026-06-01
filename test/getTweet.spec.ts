@@ -3,14 +3,15 @@ import { describe, expect, it, vi } from 'vitest'
 import { getTweets } from '~/lib/service/getTweet'
 
 function makeTweet(partial: Partial<EnrichedTweet> & Pick<EnrichedTweet, 'id_str'>): EnrichedTweet {
+  const { id_str, ...rest } = partial
   return {
-    id_str: partial.id_str,
-    text: partial.text ?? '',
-    lang: partial.lang ?? 'en',
-    created_at: partial.created_at ?? '',
-    user: (partial.user ?? { screen_name: 'u', id_str: 'u', name: 'u', profile_image_url_https: '' }) as any,
-    entities: (partial.entities ?? []) as any,
-    ...partial,
+    id_str,
+    text: rest.text ?? '',
+    lang: rest.lang ?? 'en',
+    created_at: rest.created_at ?? '',
+    user: (rest.user ?? { screen_name: 'u', id_str: 'u', name: 'u', profile_image_url_https: '' }) as any,
+    entities: (rest.entities ?? []) as any,
+    ...rest,
   } as EnrichedTweet
 }
 

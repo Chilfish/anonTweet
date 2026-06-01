@@ -15,7 +15,7 @@ export function TweetMediaAlt({ tweet }: { tweet: EnrichedTweet }) {
     return null
 
   // 检查是否有 Alt 文本
-  const hasAltText = tweet.mediaDetails.some(m => !!m.ext_alt_text)
+  const hasAltText = tweet.mediaDetails.some(m => m.type === 'photo' && !!m.ext_alt_text)
   if (!hasAltText)
     return null
 

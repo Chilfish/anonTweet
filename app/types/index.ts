@@ -7,7 +7,7 @@ import type { ITweetDetailsResponse } from '~/lib/rettiwt-api/types/raw/tweet/De
 export type * from './card'
 export type * from './entities'
 // Instagram 类型
-export type { IGMedia, IGPost, IGPostData } from './ins'
+export type { IGAudio, IGMedia, IGPost, IGPostData } from './ins'
 export type * from './media'
 export type * from './photo'
 export type * from './user'
