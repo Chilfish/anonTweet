@@ -114,7 +114,11 @@ export function IGTranslateDialog({ post, onTranslated }: IGTranslateDialogProps
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={handleOpen}
+      dismissible={false}
+    >
       <DialogTrigger
         render={(
           <Button
@@ -152,7 +156,7 @@ export function IGTranslateDialog({ post, onTranslated }: IGTranslateDialogProps
             {/* 译文编辑 */}
             <div className="space-y-2">
               <Label className="px-1 text-xs font-medium text-muted-foreground">
-                AI 翻译结果
+                翻译结果
               </Label>
               <Textarea
                 value={editedText}
@@ -176,7 +180,7 @@ export function IGTranslateDialog({ post, onTranslated }: IGTranslateDialogProps
                 )}
               >
                 <BookA className="size-4" />
-                <span className="hidden sm:inline">词汇表</span>
+                <span>词汇表</span>
               </PopoverTrigger>
               <PopoverContent className="w-80 p-0" align="start" side="top">
                 <DictionaryViewer />
@@ -193,7 +197,7 @@ export function IGTranslateDialog({ post, onTranslated }: IGTranslateDialogProps
               {isTranslating
                 ? <Loader2 className="size-3.5 animate-spin" />
                 : <Sparkles className="size-3.5" />}
-              <span className="hidden sm:inline">AI 翻译</span>
+              <span>AI 翻译</span>
             </Button>
 
             <Button className="ml-auto" onClick={handleSave}>

@@ -41,7 +41,7 @@ export function IGCaption({
   return (
     <div className={cn('text-sm leading-relaxed px-4 pb-3', className)}>
       {/* 原文 + 翻译入口按钮（唯一） */}
-      <p className="whitespace-pre-wrap wrap-break-words text-foreground">
+      <div className="whitespace-pre-wrap wrap-break-words text-foreground">
         <div>
           <span className="font-semibold mr-1.5">
             @
@@ -62,7 +62,7 @@ export function IGCaption({
         <RichText
           text={text}
         />
-      </p>
+      </div>
 
       {/* 翻译分隔符 */}
       {translatedText && customSeparator && (

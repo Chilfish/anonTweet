@@ -231,7 +231,7 @@ function PhotoStack({
       <span
         className={cn(
           'absolute bottom-1.5 right-1.5 z-40',
-          'bg-black/70 backdrop-blur-sm',
+          'bg-black/80',
           'text-white text-[10px] font-semibold tabular-nums',
           'px-1.5 py-0.5 rounded-full shadow-sm',
           'pointer-events-none',

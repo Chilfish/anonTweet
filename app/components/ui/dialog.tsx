@@ -10,7 +10,21 @@ import { cn } from '~/lib/utils'
 export const DialogCreateHandle: typeof DialogPrimitive.createHandle
   = DialogPrimitive.createHandle
 
-export const Dialog: typeof DialogPrimitive.Root = DialogPrimitive.Root
+function Dialog({
+  dismissible = true,
+  ...props
+}: DialogPrimitive.Root.Props & {
+  dismissible?: boolean
+}): React.ReactElement {
+  return (
+    <DialogPrimitive.Root
+      disablePointerDismissal={!dismissible}
+      {...props}
+    />
+  )
+}
+
+export { Dialog }
 
 export const DialogPortal: typeof DialogPrimitive.Portal
   = DialogPrimitive.Portal
