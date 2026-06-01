@@ -48,15 +48,11 @@ function distributeRows(count: number, maxCols: number): number[] {
   }
 
   if (remaining === 1) {
-    if (rows.length >= 2) {
-      rows.pop()!
-      rows.pop()!
-      rows.push(maxCols - 1, maxCols - 1)
-    }
-    else {
-      rows.pop()!
-      rows.push(maxCols - 1, maxCols - 1)
-    }
+    // 只有 1 张孤儿：把最后一行 maxCols 拆掉，
+    // 跟这 1 张一起重新分成两行 (maxCols+1 → 2 rows)
+    rows.pop()!
+    const total = maxCols + 1
+    rows.push(Math.ceil(total / 2), Math.floor(total / 2))
   }
   else if (remaining > 0) {
     rows.push(remaining)
