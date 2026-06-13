@@ -1,3 +1,4 @@
+import type { IGTranslationMode } from './IGTranslateToggle'
 import type { IGPost } from '~/types'
 import { useTranslationSettings } from '~/lib/stores/hooks'
 import { cn } from '~/lib/utils'
@@ -13,6 +14,8 @@ interface IGCaptionProps {
   post?: IGPost
   /** 翻译完成回调 */
   onTranslated?: (captionTranslation: string) => void
+  /** 翻译模式：仅译文时隐藏原文，但保留分隔符+译文 */
+  translationMode?: IGTranslationMode
 }
 
 /**
@@ -30,6 +33,7 @@ export function IGCaption({
   className,
   post,
   onTranslated,
+  translationMode,
 }: IGCaptionProps) {
   const { customSeparator } = useTranslationSettings()
 
@@ -37,6 +41,7 @@ export function IGCaption({
     return null
 
   const showTranslateButton = !!post && !!onTranslated
+  const showOriginal = translationMode !== 'translation'
 
   return (
     <div className={cn('text-sm leading-relaxed px-4 pb-3', className)}>
@@ -59,9 +64,11 @@ export function IGCaption({
           )}
         </div>
 
-        <RichText
-          text={text}
-        />
+        {showOriginal && (
+          <RichText
+            text={text}
+          />
+        )}
       </div>
 
       {/* 翻译分隔符 */}

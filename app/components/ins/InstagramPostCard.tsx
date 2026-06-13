@@ -30,9 +30,9 @@ interface InstagramPostCardProps {
 export const InstagramPostCard = forwardRef<HTMLElement, InstagramPostCardProps>(
   ({ post, className, translationMode = 'bilingual', onTranslated }, ref) => {
     // 根据翻译模式决定传给 IGCaption 的 translatedText
-    const captionTranslated = translationMode === 'original'
-      ? undefined
-      : post.captionTranslation
+    const captionTranslated = translationMode !== 'original'
+      ? post.captionTranslation
+      : undefined
 
     return (
       <article
@@ -78,6 +78,7 @@ export const InstagramPostCard = forwardRef<HTMLElement, InstagramPostCardProps>
             username={post.username}
             text={post.description}
             translatedText={captionTranslated}
+            translationMode={translationMode}
             className="px-4 pt-0 pb-0"
             post={post}
             onTranslated={onTranslated}
