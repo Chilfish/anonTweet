@@ -122,16 +122,16 @@ The `docs/` directory contains the foundational technical context and constraint
 
 当前 8 份报告覆盖了项目从 107 个 fix commit 中提取的根因：
 
-| # | 主题 | 严重级 | 状态 |
-|---|------|--------|------|
-| 001 | Twitter 推文解析（parseTweet.ts 无测试、无分层） | SEV-2 | Active |
-| 002 | 翻译系统（UI/字典/AI/模板全部耦合） | SEV-2 | Active |
-| 003 | UI 样式/布局（20 次 CSS fix，无 design token） | SEV-3 | Active |
-| 004 | 构建配置（客户端/服务端边界不清） | SEV-2 | Mitigated |
-| 005 | 媒体管线（代理/视频/截图四套重复逻辑） | SEV-2 | Active |
-| 006 | 状态管理（zustand 整 store 订阅 + 无类型迁移） | SEV-2 | Mitigated |
-| 007 | Instagram 集成（新功能无验收清单） | SEV-3 | Active |
-| 008 | 字体/渲染（web font 与截图竞争加载） | SEV-2 | Mitigated |
+| #   | 主题                                             | 严重级 | 状态      |
+| --- | ------------------------------------------------ | ------ | --------- |
+| 001 | Twitter 推文解析（parseTweet.ts 无测试、无分层） | SEV-2  | Active    |
+| 002 | 翻译系统（UI/字典/AI/模板全部耦合）              | SEV-2  | Active    |
+| 003 | UI 样式/布局（20 次 CSS fix，无 design token）   | SEV-3  | Active    |
+| 004 | 构建配置（客户端/服务端边界不清）                | SEV-2  | Mitigated |
+| 005 | 媒体管线（代理/视频/截图四套重复逻辑）           | SEV-2  | Active    |
+| 006 | 状态管理（zustand 整 store 订阅 + 无类型迁移）   | SEV-2  | Mitigated |
+| 007 | Instagram 集成（新功能无验收清单）               | SEV-3  | Active    |
+| 008 | 字体/渲染（web font 与截图竞争加载）             | SEV-2  | Mitigated |
 
 ### Phase 1: Onboarding（初次接入）
 
@@ -140,6 +140,7 @@ The `docs/` directory contains the foundational technical context and constraint
 ### Phase 2: Pre-Release 检查（每次 Release 前）
 
 **步骤**：
+
 1. 获取本次改动的 commit 列表和文件列表
 2. 读取 `./postmortem/*.md` 中的 Changed Files 和 Root Cause
 3. 逐份交叉比对：文件重叠？模式复现？预防措施落实了没？

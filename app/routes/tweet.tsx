@@ -1,6 +1,6 @@
+import type { Route } from './+types/tweet'
 import type { GetTweetSchema } from '~/lib/validations/tweet'
 import type { EnrichedTweet, TweetData } from '~/types'
-import type { Route } from './+types/tweet'
 import { useEffect, useMemo, useSyncExternalStore } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import useSWR from 'swr'
@@ -26,7 +26,8 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     const tweets = await getTweets(tweetId)
     const mainTweet = tweets[0] || null
     return { tweet: mainTweet, tweetId, baseUrl }
-  } catch {
+  }
+  catch {
     return { tweet: null, tweetId, baseUrl }
   }
 }
@@ -46,9 +47,9 @@ export function meta({ data }: Route.MetaArgs) {
   const authorName = tweet.user?.name || 'Twitter User'
   const authorHandle = tweet.user?.screen_name ? `@${tweet.user.screen_name}` : ''
   const tweetText = decodeHtmlEntities(tweet.text || '').replace(/\n/g, ' ').trim()
-  const description = tweetText.length > 160 ? tweetText.slice(0, 157) + '...' : tweetText
+  const description = tweetText.length > 160 ? `${tweetText.slice(0, 157)}...` : tweetText
   const title = `${authorName} ${authorHandle} on X: "${description}" | Anon Tweet`
-  const tweetUrl = `https://x.com/${tweet.user?.screen_name || 'i'}/status/${tweet.id_str}`
+
   const canonicalUrl = `${baseUrl}/tweets/${tweet.id_str}`
 
   // Get first media image for og:image
@@ -87,18 +88,18 @@ function TweetStructuredData({ tweet }: { tweet: EnrichedTweet }) {
     '@context': 'https://schema.org',
     '@type': 'SocialMediaPosting',
     '@id': tweetUrl,
-    url: tweetUrl,
-    headline: decodeHtmlEntities(tweet.text || '').slice(0, 110),
-    text: decodeHtmlEntities(tweet.text || ''),
-    datePublished: tweet.created_at,
-    author: {
+    'url': tweetUrl,
+    'headline': decodeHtmlEntities(tweet.text || '').slice(0, 110),
+    'text': decodeHtmlEntities(tweet.text || ''),
+    'datePublished': tweet.created_at,
+    'author': {
       '@type': 'Person',
-      name: tweet.user?.name || '',
-      url: `https://x.com/${tweet.user?.screen_name || ''}`,
+      'name': tweet.user?.name || '',
+      'url': `https://x.com/${tweet.user?.screen_name || ''}`,
     },
-    sharedContent: tweet.mediaDetails?.[0]?.media_url_https ? {
+    'sharedContent': tweet.mediaDetails?.[0]?.media_url_https ? {
       '@type': 'ImageObject',
-      contentUrl: tweet.mediaDetails[0].media_url_https,
+      'contentUrl': tweet.mediaDetails[0].media_url_https,
     } : undefined,
   }
 
@@ -193,8 +194,10 @@ export default function TweetPage({ loaderData }: Route.ComponentProps) {
     if (storeMainTweet?.id_str === tweetId && storeTweets.length > 0) {
       return storeTweets
     }
-    if (tweets) return tweets
-    if (loaderData.tweet) return [loaderData.tweet]
+    if (tweets)
+      return tweets
+    if (loaderData.tweet)
+      return [loaderData.tweet]
     return undefined
   }, [storeMainTweet?.id_str, tweetId, storeTweets, tweets, loaderData.tweet])
 

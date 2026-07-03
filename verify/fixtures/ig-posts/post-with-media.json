@@ -1,0 +1,55 @@
+{
+  "_meta": {
+    "source": "ig-post-DWlr-eBgVfR.json",
+    "exportedAt": "2026-07-03T16:18:20.434Z",
+    "label": "IG post (type: post, with media, with audio)",
+    "schema": "IGPost"
+  },
+  "data": {
+    "id": "DWlr-eBgVfR",
+    "post_id": "3865689264012482513",
+    "url": "https://www.instagram.com/p/DWlr-eBgVfR/",
+    "username": "meeeei.gt",
+    "fullname": "猫月めい💚🐾",
+    "description": ".\n⁡\n【 艦これ 佐世保鎮守府Live! 2026 】\n⁡\n2026.03.28 - 03.29\n\n#1MYB ギター MEIでした🎸\n2日間3公演、ありがとうございました！\n⁡\n⁡\n#艦これ #艦隊これくしょん #C2機関",
+    "tags": [
+      "#1MYB",
+      "#C2"
+    ],
+    "likes": 887,
+    "type": "post",
+    "media": [
+      {
+        "num": 1,
+        "media_id": "3865688175011780292",
+        "shortcode": "DWlrun0AVbE",
+        "display_url": "https://scontent-hkg1-1.cdninstagram.com/v/t51.82787-15/657726476_18041493899760300_3931808666100615664_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=105&ig_cache_key=Mzg2NTY4ODE3NTAxMTc4MDI5Mg%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMTQ0MC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=0uh2_wUFQ_4Q7kNvwHoEZ88&_nc_oc=Adq3HIbknoNRVvBgq5aAG3l9u-S04fduD9iTAesMG1QnHKi5vME87Z2BDfHRrLJRDwg&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-hkg1-1.cdninstagram.com&_nc_gid=1o1-N0hiBXushGSqFurXbA&_nc_ss=7a22e&oh=00_Af8sDhm1VNnljtP0YjuknlJV402lFKf2ctRuxxtFHiEzng&oe=6A333E5E",
+        "video_url": null,
+        "width": 1440,
+        "height": 1920,
+        "width_original": 1440,
+        "height_original": 1920,
+        "type": "photo",
+        "tagged_users": []
+      },
+      {
+        "num": 2,
+        "media_id": "3865688174995009222",
+        "shortcode": "DWlrunzAW7G",
+        "display_url": "https://scontent-hkg1-1.cdninstagram.com/v/t51.82787-15/658761594_18041493896760300_1913594466278991842_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=101&ig_cache_key=Mzg2NTY4ODE3NDk5NTAwOTIyMg%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMTQ0MC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=iWxvr1FciaUQ7kNvwGzJ86W&_nc_oc=AdpCUSYsFV2DHIEIuxmCGsy54Z0WEsOc_UKZ7MxX39PXoGR4k3pf-TLVXDRsMA-pNGQ&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-hkg1-1.cdninstagram.com&_nc_gid=1o1-N0hiBXushGSqFurXbA&_nc_ss=7a22e&oh=00_Af-GeHdNmoW09EPliI-D645V_rAJIbRp5RQ4QemHEjYSdg&oe=6A334A55",
+        "video_url": null,
+        "width": 1440,
+        "height": 1916,
+        "width_original": 1440,
+        "height_original": 1916,
+        "type": "photo",
+        "tagged_users": []
+      }
+    ],
+    "created_at": "2026-04-01T12:21:32.000Z",
+    "avatar_url": "https://scontent-hkg4-1.cdninstagram.com/v/t51.82787-19/575641239_18025076153760300_4913260272607099903_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-hkg4-1.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2gFvijzCkO40gMjrCnaGV5yB56xlKffJLFPUFfTRRl38Gi0Od_IBxvvZKbCvgKm2aGQ&_nc_ohc=a6LsVFj9GZUQ7kNvwGgtm9l&_nc_gid=1o1-N0hiBXushGSqFurXbA&edm=ALQROFkBAAAA&ccb=7-5&oh=00_Af9YEREHQMfg6cyYOY1o17KgVbMbPaUJAyL1iDC-sgJ51A&oe=6A332ACD&_nc_sid=fc8dfb",
+    "verified": false,
+    "coauthors": [],
+    "captionTranslation": ".\n【 舰colle 佐世保镇守府Live! 2026 】\n\n2026.03.28 - 03.29\n\n#1MYB 吉他手 MEI🎸\n两天三场演出，非常感谢！\n\n#舰colle #舰队Collection #C2機関"
+  }
+}

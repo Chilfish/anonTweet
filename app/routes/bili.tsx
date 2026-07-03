@@ -3,14 +3,6 @@ import axios from 'axios'
 import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
-
-export function meta() {
-  return [
-    { title: '发布 Bilibili 动态 | Anon Tweet' },
-    { name: 'description', content: '通过 Anon Tweet 快速发布 Bilibili 动态，支持图片上传与排序。' },
-    { name: 'robots', content: 'noindex, follow' },
-  ]
-}
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { ImageUploader } from '~/components/SortableImage'
@@ -20,6 +12,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Textarea } from '~/components/ui/textarea'
+
+export function meta() {
+  return [
+    { title: '发布 Bilibili 动态 | Anon Tweet' },
+    { name: 'description', content: '通过 Anon Tweet 快速发布 Bilibili 动态，支持图片上传与排序。' },
+    { name: 'robots', content: 'noindex, follow' },
+  ]
+}
 
 interface ApiResponse {
   message?: string
