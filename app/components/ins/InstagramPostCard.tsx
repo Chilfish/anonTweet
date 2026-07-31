@@ -63,7 +63,7 @@ export const InstagramPostCard = forwardRef<HTMLElement, InstagramPostCardProps>
         {post.audio && <IGMusicInfo audio={post.audio} />}
 
         {/* Action Bar */}
-        <IGActionBar className="pt-1.5 pb-1" />
+        <IGActionBar className="pt-1.5 pb-1" postUrl={post.url} />
 
         {/* 时间戳 — action 和 caption 之间 */}
         {post.created_at && (

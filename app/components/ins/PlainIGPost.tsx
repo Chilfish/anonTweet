@@ -30,7 +30,7 @@ export function PlainIGPost({ post, className }: PlainIGPostProps) {
 
       {post.audio && <IGMusicInfo audio={post.audio} />}
 
-      <IGActionBar className="pt-1.5 pb-1" />
+      <IGActionBar className="pt-1.5 pb-1" postUrl={post.url} />
 
       {post.created_at && (
         <p className="px-4 text-xs text-muted-foreground/50 tabular-nums pb-1">
