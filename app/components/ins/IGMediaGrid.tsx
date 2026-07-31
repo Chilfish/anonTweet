@@ -287,14 +287,23 @@ export function IGMediaGrid({
   showInfoLabel = false,
   className,
 }: IGMediaGridProps) {
+  // ── Filter invalid media ──
+  const validMedia = useMemo(
+    () => media.filter(m =>
+      !(m.video_url === null && m.width === 0 && m.height === 0
+        && m.width_original === 0 && m.height_original === 0),
+    ),
+    [media],
+  )
+
   const [expanded, setExpanded] = useState(false)
 
   // ── Layout ──
   const layout = useMemo(() => {
-    if (!media.length)
+    if (!validMedia.length)
       return { rows: [] as number[], hiddenCount: 0, allRows: [] as number[] }
 
-    const allRows = distributeRows(media.length, maxCols)
+    const allRows = distributeRows(validMedia.length, maxCols)
 
     if (allRows.length <= maxRows) {
       return { rows: allRows, hiddenCount: 0, allRows }
@@ -305,10 +314,10 @@ export function IGMediaGrid({
 
     return {
       rows: compactRows,
-      hiddenCount: media.length - shown,
+      hiddenCount: validMedia.length - shown,
       allRows,
     }
-  }, [media.length, maxRows, maxCols])
+  }, [validMedia.length, maxRows, maxCols])
 
   const displayRows = expanded ? layout.allRows : layout.rows
   const shouldShowStack = layout.hiddenCount > 0 && !expanded
@@ -316,14 +325,14 @@ export function IGMediaGrid({
   const handleExpand = useCallback(() => setExpanded(true), [])
   const handleCollapse = useCallback(() => setExpanded(false), [])
 
-  if (!media.length)
+  if (!validMedia.length)
     return null
 
   // Single image: full-width, natural ratio
-  if (media.length === 1 && media[0]) {
+  if (validMedia.length === 1 && validMedia[0]) {
     return (
       <div className={className}>
-        <SingleMedia media={media[0]} />
+        <SingleMedia media={validMedia[0]} />
       </div>
     )
   }
@@ -335,7 +344,7 @@ export function IGMediaGrid({
     <>
       <div className="flex flex-col gap-[1px] bg-muted/20">
         {displayRows.map((cols, rowIdx) => {
-          const rowImages = media.slice(cursor, cursor + cols)
+          const rowImages = validMedia.slice(cursor, cursor + cols)
           const isLastRow = rowIdx === displayRows.length - 1
           cursor += cols
 
@@ -347,7 +356,7 @@ export function IGMediaGrid({
 
                 if (isStackTarget) {
                   // The next hidden images become the pile layers
-                  const behindImages = media.slice(cursor, cursor + MAX_STACK_LAYERS)
+                  const behindImages = validMedia.slice(cursor, cursor + MAX_STACK_LAYERS)
 
                   return (
                     <div key={m.media_id || i} className="flex-1 relative z-10 overflow-visible">
@@ -403,7 +412,7 @@ export function IGMediaGrid({
         <p className="pt-1.5 text-[11px] text-muted-foreground/40 text-center tabular-nums select-none">
           此帖共
           {' '}
-          {media.length}
+          {validMedia.length}
           {' '}
           张图片
         </p>
