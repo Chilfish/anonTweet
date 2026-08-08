@@ -9,5 +9,5 @@ pre-push:
   jobs:
     - run: bun run typecheck
     - run: bunx eslint .
-    - run: bun test
+    - run: bun run test
     - run: bun run verify/index.ts --exit-on-fail

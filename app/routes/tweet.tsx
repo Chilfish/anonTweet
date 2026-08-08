@@ -32,10 +32,10 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   }
 }
 
-export function meta({ data }: Route.MetaArgs) {
-  const tweet = data?.tweet
+export function meta({ loaderData }: Route.MetaArgs) {
+  const tweet = loaderData?.tweet
   const siteName = 'Anon Tweet'
-  const baseUrl = data?.baseUrl || 'https://anontweet.chilfish.top'
+  const baseUrl = loaderData?.baseUrl || 'https://anontweet.chilfish.top'
 
   if (!tweet) {
     return [

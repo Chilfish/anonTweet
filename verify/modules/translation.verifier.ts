@@ -9,12 +9,11 @@
  */
 
 import type { StepResult, Verifier, VerifyContext } from '../framework/types.js'
+import type { TranslationPayload } from '~/lib/react-tweet/utils/entitytParser.js'
 import type { Entity } from '~/types'
 import fs from 'node:fs'
 import path from 'node:path'
-
-// We dynamically import the entityParser to test it
-// These are the functions from ~/lib/react-tweet/utils/entitytParser
+import { restoreEntities, serializeForAI } from '~/lib/react-tweet/utils/entitytParser.js'
 
 interface TranslationTestCase {
   id: string
@@ -58,52 +57,23 @@ export class TranslationVerifier implements Verifier {
       'translations/entity-roundtrip.json',
     )
 
-    // Dynamic import entityParser functions
-    let serializeForAI: (...args: unknown[]) => unknown
-    let restoreEntities: (...args: unknown[]) => unknown
-    try {
-      const mod = await import('~/lib/react-tweet/utils/entitytParser.js')
-      serializeForAI = mod.serializeForAI
-      restoreEntities = mod.restoreEntities
-    }
-    catch {
-      results.push({
-        id: 'AC-TRANS-001',
-        name: 'Serialization: protect entities',
-        verdict: 'SKIP',
-        durationMs: 0,
-        detail: 'Cannot import entitytParser module',
-      })
-      // Skip all dependent ACs
-      for (const id of ['AC-TRANS-002', 'AC-TRANS-003', 'AC-TRANS-004']) {
-        results.push({
-          id,
-          name: `${id}: entity protection`,
-          verdict: 'SKIP',
-          durationMs: 0,
-          detail: 'Dependency skipped',
-        })
-      }
-      return results
-    }
-
     // ── AC-TRANS-001: Serialization ──────────────────────
-    results.push(this.verifySerialization(fixture, serializeForAI))
+    results.push(this.verifySerialization(fixture))
 
     // ── AC-TRANS-002: Restore ────────────────────────────
-    results.push(this.verifyRestore(fixture, serializeForAI, restoreEntities))
+    results.push(this.verifyRestore(fixture))
 
     // ── AC-TRANS-003: Text-only ──────────────────────────
-    results.push(this.verifyTextOnly(fixture, serializeForAI, restoreEntities))
+    results.push(this.verifyTextOnly(fixture))
 
     // ── AC-TRANS-004: Only URLs ──────────────────────────
-    results.push(this.verifyOnlyUrls(fixture, serializeForAI, restoreEntities))
+    results.push(this.verifyOnlyUrls(fixture))
 
     // ── AC-TRANS-005: resolveTranslationView ─────────────
     results.push(await this.verifyResolutionView())
 
     // ── AC-TRANS-006: materialize is pure ────────────────
-    results.push(await this.verifyMaterializePure(ctx))
+    results.push(await this.verifyMaterializePure())
 
     // ── AC-TRANS-007: Dual provider ──────────────────────
     results.push(await this.verifyDualProvider())
@@ -118,14 +88,11 @@ export class TranslationVerifier implements Verifier {
     return tc
   }
 
-  private verifySerialization(
-    fixture: { testCases: TranslationTestCase[] },
-    serializeForAI: (...args: unknown[]) => unknown,
-  ): StepResult {
+  private verifySerialization(fixture: { testCases: TranslationTestCase[] }): StepResult {
     const t0 = performance.now()
     try {
       const tc = this.findCase(fixture, 'basic-mixed-entities')
-      const { maskedText, entityMap } = serializeForAI(tc.originalEntities)
+      const { maskedText, entityMap }: TranslationPayload = serializeForAI(tc.originalEntities)
 
       const checks: string[] = []
       let passed = true
@@ -171,21 +138,17 @@ export class TranslationVerifier implements Verifier {
     }
   }
 
-  private verifyRestore(
-    fixture: { testCases: TranslationTestCase[] },
-    serializeForAI: (...args: unknown[]) => unknown,
-    restoreEntities: (...args: unknown[]) => unknown,
-  ): StepResult {
+  private verifyRestore(fixture: { testCases: TranslationTestCase[] }): StepResult {
     const t0 = performance.now()
     try {
       const tc = this.findCase(fixture, 'basic-mixed-entities')
-      const { entityMap } = serializeForAI(tc.originalEntities)
-      const restored = restoreEntities(tc.aiTranslatedText, entityMap, tc.originalEntities)
+      const { entityMap }: TranslationPayload = serializeForAI(tc.originalEntities)
+      const restored: Entity[] = restoreEntities(tc.aiTranslatedText, entityMap, tc.originalEntities)
 
       // Check special entities unchanged — they use aiTranslation (v2.1), not translation
-      const mention = restored.find((e: Entity) => e.type === 'mention')
-      const hashtag = restored.find((e: Entity) => e.type === 'hashtag')
-      const url = restored.find((e: Entity) => e.type === 'url')
+      const mention = restored.find(e => e.type === 'mention')
+      const hashtag = restored.find(e => e.type === 'hashtag')
+      const url = restored.find(e => e.type === 'url')
 
       const checks: string[] = []
       let passed = true
@@ -195,7 +158,7 @@ export class TranslationVerifier implements Verifier {
         checks.push('mention missing')
         passed = false
       }
-      else if ((mention as any).aiTranslation) {
+      else if (mention.aiTranslation) {
         checks.push('mention was modified')
         passed = false
       }
@@ -203,7 +166,7 @@ export class TranslationVerifier implements Verifier {
         checks.push('hashtag missing')
         passed = false
       }
-      else if ((hashtag as any).aiTranslation) {
+      else if (hashtag.aiTranslation) {
         checks.push('hashtag was modified')
         passed = false
       }
@@ -211,14 +174,14 @@ export class TranslationVerifier implements Verifier {
         checks.push('url missing')
         passed = false
       }
-      else if ((url as any).aiTranslation) {
+      else if (url.aiTranslation) {
         checks.push('url was modified')
         passed = false
       }
 
       // Text entities should receive aiTranslation
-      const textEntities = restored.filter((e: Entity) => e.type === 'text')
-      const hasTextTranslation = textEntities.some(e => !!(e as any).aiTranslation)
+      const textEntities = restored.filter((e: Entity): e is Entity & { type: 'text' } => e.type === 'text')
+      const hasTextTranslation = textEntities.some(e => !!e.aiTranslation)
       if (!hasTextTranslation) {
         checks.push('no text entity has aiTranslation')
         passed = false
@@ -229,7 +192,7 @@ export class TranslationVerifier implements Verifier {
         name: 'Restore: entity integrity',
         verdict: passed ? 'PASS' : 'FAIL',
         durationMs: Math.round(performance.now() - t0),
-        detail: passed ? 'special entities intact, text translated' : undefinedndefined,
+        detail: passed ? 'special entities intact, text translated' : undefined,
         error: passed ? undefined : checks.join('; '),
       }
     }
@@ -244,16 +207,12 @@ export class TranslationVerifier implements Verifier {
     }
   }
 
-  private verifyTextOnly(
-    fixture: { testCases: TranslationTestCase[] },
-    serializeForAI: (...args: unknown[]) => unknown,
-    restoreEntities: (...args: unknown[]) => unknown,
-  ): StepResult {
+  private verifyTextOnly(fixture: { testCases: TranslationTestCase[] }): StepResult {
     const t0 = performance.now()
     try {
       const tc = this.findCase(fixture, 'text-only')
-      const { maskedText, entityMap } = serializeForAI(tc.originalEntities)
-      const restored = restoreEntities(tc.aiTranslatedText, entityMap, tc.originalEntities)
+      const { maskedText, entityMap }: TranslationPayload = serializeForAI(tc.originalEntities)
+      const restored: Entity[] = restoreEntities(tc.aiTranslatedText, entityMap, tc.originalEntities)
 
       const textEntity = restored[0] as Entity
       const translationOk = textEntity.aiTranslation === tc.aiTranslatedText
@@ -286,16 +245,12 @@ export class TranslationVerifier implements Verifier {
     }
   }
 
-  private verifyOnlyUrls(
-    fixture: { testCases: TranslationTestCase[] },
-    serializeForAI: (...args: unknown[]) => unknown,
-    restoreEntities: (...args: unknown[]) => unknown,
-  ): StepResult {
+  private verifyOnlyUrls(fixture: { testCases: TranslationTestCase[] }): StepResult {
     const t0 = performance.now()
     try {
       const tc = this.findCase(fixture, 'only-urls')
-      const { maskedText, entityMap } = serializeForAI(tc.originalEntities)
-      const restored = restoreEntities(tc.aiTranslatedText, entityMap, tc.originalEntities)
+      const { maskedText, entityMap }: TranslationPayload = serializeForAI(tc.originalEntities)
+      const restored: Entity[] = restoreEntities(tc.aiTranslatedText, entityMap, tc.originalEntities)
 
       const urlEntity = restored[0] as Entity
       const urlUnchanged = urlEntity.type === 'url' && !urlEntity.translation
@@ -360,11 +315,14 @@ export class TranslationVerifier implements Verifier {
     }
   }
 
-  private async verifyMaterializePure(_ctx: VerifyContext): Promise<StepResult> {
+  private async verifyMaterializePure(): Promise<StepResult> {
     const t0 = performance.now()
     try {
       const mod = await import('~/lib/translation/materialize.js')
-      if (typeof mod.materializeTweetWithManualTranslations || mod.materializeTweetsWithManualTranslations === 'function') {
+      const hasMaterialize
+        = typeof mod.materializeTweetWithManualTranslations === 'function'
+          || typeof mod.materializeTweetsWithManualTranslations === 'function'
+      if (hasMaterialize) {
         return {
           id: 'AC-TRANS-006',
           name: 'materializeTweetWithManualTranslations exists',

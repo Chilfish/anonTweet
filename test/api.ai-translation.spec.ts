@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('~/lib/AITranslation', () => ({
   autoTranslateTweet: vi.fn(async () => ([
-    { type: 'text', text: 'x', index: 0, translation: 'y' },
+    { type: 'text', text: 'x', index: 0, aiTranslation: 'y' },
   ])),
 }))
 
@@ -66,6 +66,6 @@ describe('/api/ai/ai-translation', () => {
       success: true,
       data: { tweetId: '1' },
     })
-    expect(payload.data.autoTranslationEntities?.length).toBe(1)
+    expect(payload.data.entities?.length).toBe(1)
   })
 })

@@ -139,7 +139,7 @@ export class IGVerifier implements Verifier {
     const t0 = performance.now()
     try {
       const mod = await import('~/lib/utils.js')
-      const extractIGId = (mod as any).extractIGId as ((...args) => unknown) | undefined
+      const extractIGId = (mod as any).extractIGId as ((...args: unknown[]) => unknown) | undefined
       if (!extractIGId) {
         return {
           id: 'AC-IG-003',
@@ -181,7 +181,7 @@ export class IGVerifier implements Verifier {
     const t0 = performance.now()
     try {
       const mod = await import('~/lib/utils.js')
-      const extractIGId = (mod as any).extractIGId as ((...args) => unknown) | undefined
+      const extractIGId = (mod as any).extractIGId as ((...args: unknown[]) => unknown) | undefined
       if (!extractIGId) {
         return {
           id: 'AC-IG-004',
@@ -223,7 +223,7 @@ export class IGVerifier implements Verifier {
     const t0 = performance.now()
     try {
       const mod = await import('~/lib/utils.js')
-      const fn = (mod as any).formatIGTime as ((...args) => unknown) | undefined
+      const fn = (mod as any).formatIGTime as ((...args: unknown[]) => unknown) | undefined
       if (!fn) {
         return {
           id: 'AC-IG-005',

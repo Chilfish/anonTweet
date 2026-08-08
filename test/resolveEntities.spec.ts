@@ -57,13 +57,13 @@ describe('resolveEntities', () => {
     ]
     const overlay: Entity[] = [
       { type: 'hashtag', text: '#A', index: 0 } as any,
-      { type: 'text', text: 'x', index: 1, translation: 'y' },
+      { type: 'text', text: 'x', index: 1, aiTranslation: 'y' },
     ]
 
     expect(shouldRenderTranslatedEntitiesDirectly(base, overlay)).toBe(false)
     expect(resolveAIEntitiesForDisplay(base, overlay)).toEqual([
       base[0]!,
-      { ...base[1]!, translation: 'y' },
+      { ...base[1]!, aiTranslation: 'y' },
     ])
   })
 })

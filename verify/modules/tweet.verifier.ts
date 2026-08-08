@@ -37,6 +37,10 @@ function hasDuplicateEntities(entities: Entity[]): boolean {
   return false
 }
 
+// First/last char must be visible (\S) per AC-TWEET-004
+const startsWithVisibleRe = /^\S/
+const endsWithVisibleRe = /\S$/
+
 // ─── Verifier ──────────────────────────────────────────────
 
 export class TweetVerifier implements Verifier {

@@ -10,7 +10,7 @@
       "~/*": ["./app/*"]
     },
     "resolveJsonModule": true,
-    "types": ["vite/client"],
+    "types": ["vite/client", "bun"],
 
     "allowJs": true,
     "strict": true,

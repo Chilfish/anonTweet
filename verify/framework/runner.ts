@@ -74,8 +74,9 @@ export class VerifyRunner {
     }
 
     // Filter by AC
-    if (this.options.ac) {
-      candidates = candidates.filter(v => v.acIds.includes(this.options.ac))
+    const acFilter = this.options.ac
+    if (acFilter) {
+      candidates = candidates.filter(v => v.acIds.includes(acFilter))
     }
 
     if (candidates.length === 0) {

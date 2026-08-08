@@ -89,7 +89,7 @@ ${text}`
       system: systemPrompt,
       messages,
       temperature: 0.5,
-      experimental_output: Output.text(),
+      output: Output.text(),
     })
 
     let translated = result.text?.trim() ?? ''
@@ -107,7 +107,7 @@ ${text}`
           },
         ],
         temperature: 0.6,
-        experimental_output: Output.text(),
+        output: Output.text(),
       })
       translated = result.text?.trim() ?? ''
     }

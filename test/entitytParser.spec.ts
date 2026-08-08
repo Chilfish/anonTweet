@@ -32,10 +32,10 @@ describe('entitytParser', () => {
     const restored = restoreEntities(translatedText, entityMap, originalEntities)
 
     expect(restored).toEqual([
-      { type: 'text', text: 'Hello ', index: 0, translation: '你好 ' },
+      { type: 'text', text: 'Hello ', index: 0, aiTranslation: '你好 ' },
       { ...originalEntities[1]!, index: 1 },
-      { type: 'text', text: ' see ', index: 2, translation: ' 看 ' },
-      { type: 'media_alt', text: 'A CAT', translation: ' 一只猫', index: 20000 },
+      { type: 'text', text: ' see ', index: 2, aiTranslation: ' 看 ' },
+      { type: 'media_alt', text: 'A CAT', aiTranslation: ' 一只猫', index: 20000 },
     ])
   })
 })
