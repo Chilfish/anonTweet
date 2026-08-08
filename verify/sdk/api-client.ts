@@ -195,6 +195,20 @@ export class AnonTweetClient {
     },
   }
 
+  // ── Screenshot plain routes ─────────────────────────────
+
+  readonly plain = {
+    /** GET /plain-tweet/:id — Tweet screenshot page (HTML) */
+    tweet: async (id: string): Promise<string> => {
+      return this.get<string>(`/plain-tweet/${encodeURIComponent(id)}`)
+    },
+
+    /** GET /plain-ins/:id — IG screenshot page (HTML) */
+    ig: async (id: string): Promise<string> => {
+      return this.get<string>(`/plain-ins/${encodeURIComponent(id)}`)
+    },
+  }
+
   // ── Health check ───────────────────────────────────────
 
   /** Check if the server is reachable. Returns true if the app responds. */
