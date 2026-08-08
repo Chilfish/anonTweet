@@ -50,12 +50,14 @@ verify/
 ├── modules/                    ← S3：按子系统的 Verifier
 │   ├── tweet.verifier.ts       ← AC-TWEET-001 ~ 008
 │   ├── translation.verifier.ts ← AC-TRANS-001 ~ 007
-│   └── ig.verifier.ts          ← AC-IG-001 ~ 006
+│   ├── ig.verifier.ts          ← AC-IG-001 ~ 006
+│   └── ci.verifier.ts          ← AC-CI-001 ~ 004
 └── acceptance-criteria/        ← S4：验收标准文档
     ├── AC-tweet.md             ← 8 条 tweet AC
     ├── AC-translation.md       ← 7 条 translation AC
     ├── AC-ig.md                ← 6 条 IG AC
-    └── AC-screenshot.md        ← 4 条 screenshot AC
+    ├── AC-screenshot.md        ← 4 条 screenshot AC
+    └── AC-ci.md                ← 4 条 CI/CD AC
 ```
 
 ---
@@ -66,5 +68,4 @@ verify/
 - [ ] Media Proxy Verifier（Postmortem #005）
 - [ ] IG integration tests（需要 INS_COOKIES）
 - [ ] `--server` 自动启动/停止服务器
-- [ ] `.github/workflows/verify.yml` CI 集成
 - [ ] Postmortem 预发布自动化检查脚本
