@@ -35,7 +35,7 @@ Anon Tweet — 匿名浏览 Twitter/X 推文与 Instagram 帖子的全栈应用�
 | L2 Test Fixtures       | ✅ 7 fixtures                                             |
 | L3 SDK / API Client    | ✅ AnonTweetClient + TestServer                           |
 | L4 CLI Verify Tool     | ✅ 17 PASS / 0 FAIL / 3 SKIP                              |
-| L5 CI/CD Pipeline      | 🟡 待实施（Phase 2 S5）                                   |
+| L5 CI/CD Pipeline      | ✅ 已实施（Phase 2 S5，AC-CI-001~004）                    |
 
 > 详见 `docs/verification-gap-analysis.md`、`verify/README.md`。
 
@@ -45,14 +45,20 @@ Phase 2 行动（源自 `docs/next-steps.md`）：
 
 | 任务                            | 优先级 | 工期   | 依赖 | 状态      |
 | ------------------------------- | ------ | ------ | ---- | --------- |
-| S5 CI/CD Pipeline（verify.yml） | P2     | 1 天   | 无   | 🔄 进行中 |
-| S6 Screenshot Verifier          | P2     | 1 天   | 无   | ⏳ 待办   |
+| S5 CI/CD Pipeline（verify.yml） | P2     | 1 天   | 无   | ✅ 已完成 |
+| S6 Screenshot Verifier          | P2     | 1 天   | 无   | ✅ 已完成 |
 | S8 服务器自动管理（`--server`） | P3     | 0.5 天 | 无   | ⏳ 待办   |
 | S7 Media Proxy Verifier         | P3     | 1 天   | S8   | ⏳ 待办   |
 | S9 IG 集成测试扩展              | P3     | 2 天   | S8   | ⏳ 待办   |
 | S10 Postmortem 自动化检查       | P4     | 1.5 天 | 无   | ⏳ 待办   |
 
 ## 最近更新
+
+### 2026-08-09 — Phase 2 S5 + S6 完成
+
+- **S5 CI/CD Pipeline 完成**：`.github/workflows/verify.yml`（push + pull_request 触发）+ `CIVerifier` 覆盖 AC-CI-001~004，verify 全绿（21 PASS / 0 FAIL / 3 SKIP）
+- 修正 `AC-screenshot.md` 端点路径对齐 `app/routes.ts`：`/plain` → `/plain-tweet/:id`、`/plain-ig` → `/plain-ins/:id`（历史改名遗留，AC 文档沿用了旧路径）
+- **S6 Screenshot Verifier 完成**：按 AC-SHOT-001~004 实现 `screenshot.verifier.ts` + `AnonTweetClient.plain` 方法，verify 全绿（23 PASS / 0 FAIL / 5 SKIP；AC-SHOT-001/002 集成测试待 S8 服务器自动管理）
 
 ### 2026-08-09 — 验证套件修复收尾 + Phase 2 启动
 
