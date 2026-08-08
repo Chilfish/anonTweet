@@ -17,6 +17,7 @@ import { parseArgs } from 'node:util'
 import { VerifyRunner } from './framework/runner.js'
 import { CIVerifier } from './modules/ci.verifier.js'
 import { IGVerifier } from './modules/ig.verifier.js'
+import { ScreenshotVerifier } from './modules/screenshot.verifier.js'
 import { TranslationVerifier } from './modules/translation.verifier.js'
 import { TweetVerifier } from './modules/tweet.verifier.js'
 
@@ -59,7 +60,7 @@ if (values.help) {
     translation   Translation pipeline (entity protection, resolution)
     ig            Instagram integration
     ci            CI/CD pipeline (GitHub Actions workflow)
-    screenshot    Screenshot export (not yet implemented)
+    screenshot    Screenshot export (AC-SHOT-001~004)
   `)
   process.exit(0)
 }
@@ -88,7 +89,7 @@ runner.register(new TweetVerifier())
 runner.register(new TranslationVerifier())
 runner.register(new IGVerifier())
 runner.register(new CIVerifier())
-// ScreenshotVerifier — not yet implemented
+runner.register(new ScreenshotVerifier())
 
 // If --server flag, start the test server and inject client
 // This is a simplified version; full server lifecycle in future iteration
