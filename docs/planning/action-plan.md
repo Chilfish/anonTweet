@@ -45,7 +45,7 @@ Phase 2 行动（源自 `docs/next-steps.md`）：
 
 | 任务                            | 优先级 | 工期   | 依赖 | 状态    |
 | ------------------------------- | ------ | ------ | ---- | ------- |
-| S5 CI/CD Pipeline（verify.yml） | P2     | 1 天   | 无   | ⏳ 待办 |
+| S5 CI/CD Pipeline（verify.yml） | P2     | 1 天   | 无   | 🔄 进行中 |
 | S6 Screenshot Verifier          | P2     | 1 天   | 无   | ⏳ 待办 |
 | S8 服务器自动管理（`--server`） | P3     | 0.5 天 | 无   | ⏳ 待办 |
 | S7 Media Proxy Verifier         | P3     | 1 天   | S8   | ⏳ 待办 |
@@ -53,6 +53,12 @@ Phase 2 行动（源自 `docs/next-steps.md`）：
 | S10 Postmortem 自动化检查       | P4     | 1.5 天 | 无   | ⏳ 待办 |
 
 ## 最近更新
+
+### 2026-08-09 — 验证套件修复收尾 + Phase 2 启动
+
+- **预存失败已修复**：test 7 fail → 44/44 全绿（`bun run test` 修正 Bun 原生 runner 陷阱）；verify ~20 TS errors → 17 PASS / 0 FAIL / 3 SKIP；lint error 清零（ESLint 豁免 `rettiwt-api` 第三方库）
+- AI SDK v7 迁移（`experimental_output` → `output`）+ 实体字段 `translation` → `aiTranslation`
+- pre-push gate 现可正常放行；启动 **S5 CI/CD Pipeline**
 
 ### 2026-08-09 — 工程规范对标 Float
 

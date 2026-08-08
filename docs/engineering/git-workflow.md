@@ -197,7 +197,6 @@ gh pr merge 1 --merge --delete-branch
 `lefthook.yml` 由 `bun install` 时自动安装（postinstall script）。
 
 - `pre-commit`：ESLint autofix（staged files）
-- `pre-push`：真实 gate — `typecheck + lint + test + verify`
-  - ⚠️ 当前 verify/ 有 ~20 个 TS 错误、test/ 有 7 个失败（预先存在），会拦截 push；修复为独立任务
+- `pre-push`：真实 gate — `typecheck + lint + test + verify`（当前 test 44/44、verify 17 PASS，可正常放行）
 
 手动运行：`bun run lefthook run pre-push`

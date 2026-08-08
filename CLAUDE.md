@@ -126,7 +126,7 @@ gh pr merge <N> --merge --delete-branch   # Create a Merge Commit
 `lefthook.yml` 管理 git hooks：
 
 - `pre-commit`：ESLint autofix（staged files）
-- `pre-push`：真实 gate — `typecheck + lint + test + verify`（⚠️ 当前 verify/test 有预先存在的失败会拦截 push，修复为独立任务，见 `docs/planning/action-plan.md`）
+- `pre-push`：真实 gate — `typecheck + lint + test + verify`（当前 test 44/44、verify 17 PASS，可正常放行）
 
 ## Project Skills
 
