@@ -12,6 +12,9 @@ import path from 'node:path'
 
 const WORKFLOW_REL = path.join('.github', 'workflows', 'verify.yml')
 
+// Matches an "on:" block containing a push trigger
+const pushTriggerRe = /\bon:\s*push/
+
 /** Absolute path to the workflow file, derived from the fixture dir. */
 function workflowPath(ctx: VerifyContext): string {
   // fixtureDir = <root>/verify/fixtures  →  root = ../..
@@ -79,7 +82,7 @@ export class CIVerifier implements Verifier {
       const content = this.readWorkflow(ctx)
       const checks: Array<[string, boolean]> = [
         ['workflow exists', !!content],
-        ['triggered on push', !!content && /\bon:\s*push/.test(content)],
+        ['triggered on push', !!content && pushTriggerRe.test(content)],
         ['runs typecheck', !!content && content.includes('bun run typecheck')],
       ]
       const passed = checks.every(([, ok]) => ok)
