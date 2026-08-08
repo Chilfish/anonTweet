@@ -16,7 +16,7 @@
 | `bun run typecheck`                   | 全量类型检查                                                                                                                            | TSC 类型验证                             |
 | `bun run lint`                        | 全量 ESLint                                                                                                                             | `@antfu/eslint-config` + autofix         |
 | Storybook (`app/stories/` 4 个 story) | IG Post Card、Settings、Tweet Components                                                                                                | 无交互测试，仅视觉 story                 |
-| `postmortem/` (8 份报告)              | 历史根因记录                                                                                                                            | 手动流程，无自动化预发布检查             |
+| `docs/postmortem/` (8 份报告)         | 历史根因记录                                                                                                                            | 手动流程，无自动化预发布检查             |
 | `scripts/debug-entity-parser.ts`      | 零散调试脚本                                                                                                                            | 无结构化输出，无 CI 集成                 |
 
 ### 1.2 统计口径
@@ -112,7 +112,7 @@ Postmortem #001 已明确提出需要 snapshot test：
 
 ### 2.8 Postmortem 自动化预发布检查（🟡 缺失）
 
-AGENTS.md 定义了 Phase 2 预发布检查流程，但完全是手动流程。无脚本自动化交叉比对。
+CLAUDE.md 定义了 Phase 2 预发布检查流程，但完全是手动流程。无脚本自动化交叉比对。
 
 ### 2.9 视觉回归测试（🟡 缺失）
 

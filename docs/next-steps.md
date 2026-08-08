@@ -139,12 +139,12 @@ $ bun run verify/index.ts --server --exit-on-fail
 
 ### S10 — Postmortem 预发布检查自动化（优先级 P4，~1 天）
 
-当前 `AGENTS.md` 定义了 Phase 2 预发布检查流程，但需手动执行。用脚本自动化：
+当前 [CLAUDE.md](../CLAUDE.md) 定义了 Phase 2 预发布检查流程，但需手动执行。用脚本自动化：
 
 ```
 scripts/postmortem-check.ts
 ├── 获取本次改动的 commit 列表
-├── 读取 postmortem/*.md
+├── 读取 docs/postmortem/*.md
 ├── 逐份交叉比对 Changed Files + Root Cause
 └── 输出 PASS / WARN / FAIL
 
