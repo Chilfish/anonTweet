@@ -43,14 +43,14 @@ Anon Tweet — 匿名浏览 Twitter/X 推文与 Instagram 帖子的全栈应用�
 
 Phase 2 行动（源自 `docs/next-steps.md`）：
 
-| 任务                            | 优先级 | 工期   | 依赖 | 状态    |
-| ------------------------------- | ------ | ------ | ---- | ------- |
+| 任务                            | 优先级 | 工期   | 依赖 | 状态      |
+| ------------------------------- | ------ | ------ | ---- | --------- |
 | S5 CI/CD Pipeline（verify.yml） | P2     | 1 天   | 无   | 🔄 进行中 |
-| S6 Screenshot Verifier          | P2     | 1 天   | 无   | ⏳ 待办 |
-| S8 服务器自动管理（`--server`） | P3     | 0.5 天 | 无   | ⏳ 待办 |
-| S7 Media Proxy Verifier         | P3     | 1 天   | S8   | ⏳ 待办 |
-| S9 IG 集成测试扩展              | P3     | 2 天   | S8   | ⏳ 待办 |
-| S10 Postmortem 自动化检查       | P4     | 1.5 天 | 无   | ⏳ 待办 |
+| S6 Screenshot Verifier          | P2     | 1 天   | 无   | ⏳ 待办   |
+| S8 服务器自动管理（`--server`） | P3     | 0.5 天 | 无   | ⏳ 待办   |
+| S7 Media Proxy Verifier         | P3     | 1 天   | S8   | ⏳ 待办   |
+| S9 IG 集成测试扩展              | P3     | 2 天   | S8   | ⏳ 待办   |
+| S10 Postmortem 自动化检查       | P4     | 1.5 天 | 无   | ⏳ 待办   |
 
 ## 最近更新
 
