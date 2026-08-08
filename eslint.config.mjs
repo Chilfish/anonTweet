@@ -5,6 +5,10 @@ import antfu from '@antfu/eslint-config'
 export default antfu({
   formatters: true,
   markdown: false,
+  // rettiwt-api 是内置第三方逆向库（非本项目代码），豁免 lint 以避免语义变更
+  ignores: [
+    '**/app/lib/rettiwt-api/**',
+  ],
   rules: {
     'unused-imports/no-unused-vars': 'warn',
     'no-console': 'off',
