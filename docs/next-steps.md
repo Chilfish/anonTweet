@@ -83,20 +83,41 @@ bun run verify/index.ts --module screenshot
 
 ---
 
-### S7 — Media Proxy Verifier（优先级 P3，~1 天）
+### S7 — Media Proxy Verifier（优先级 P3，~1 天）✅ 已完成（2026-08-09）
 
 基于 Postmortem #005（媒体管线重复），验证 `/api/proxy/image` 端点和 URL 转换逻辑。
 
+> **确定性实现说明**：AC-MEDIA-001/002 不用真实 CDN URL（上游状态漂移、离线不可用），
+> 改为启动本地像素图服务器（`Bun.serve` 随机端口），构造同时满足白名单与本地可达的 URL 由代理真实转发。
+> 后缀白名单（AC-001）与 IG 域名白名单（AC-002）两条路径均被覆盖，完全离线确定。
+
 #### 验收标准（AC-MEDIA-001 ~ AC-MEDIA-006）
 
-| AC ID        | 描述                 | Pass 条件                               |
-| ------------ | -------------------- | --------------------------------------- |
-| AC-MEDIA-001 | Tweet 图片代理可达   | `GET /api/proxy/image?url=...` 返回 200 |
-| AC-MEDIA-002 | IG 图片代理可达      | `GET /api/proxy/image?url=...` 返回 200 |
-| AC-MEDIA-003 | 无效 URL 返回错误    | 400 或 5xx                              |
-| AC-MEDIA-004 | URL 转换无重复协议   | 不出现 `https://https://`               |
-| AC-MEDIA-005 | 截图组件使用统一代理 | 代码扫描确认无硬编码 CDN URL            |
-| AC-MEDIA-006 | Video URL 正确处理   | 视频类型媒体有 `video_url` 字段         |
+| AC ID        | 描述               | Pass 条件                                                                      |
+| ------------ | ------------------ | ------------------------------------------------------------------------------ |
+| AC-MEDIA-001 | Tweet 图片代理可达 | `GET /api/proxy/image?url=<*.png 本地>` 返回 200 + image/\*                    |
+| AC-MEDIA-002 | IG 图片代理可达    | `GET /api/proxy/image?url=<含 cdninstagram.com>` 返回 200 + image/\*           |
+| AC-MEDIA-003 | 无效 URL 返回错误  | 缺 `url` → 400；白名单外 → 403                                                 |
+| AC-MEDIA-004 | URL 转换无重复协议 | `useProxyMedia` 含 `startsWith(mediaProxyUrl)` 幂等守卫；无 `https://https://` |
+| AC-MEDIA-005 | Tweet 组件统一代理 | `useProxyMedia` 导出 + `TweetCard`/`utils` 调用 `proxyMedia`，无硬编码 twimg   |
+| AC-MEDIA-006 | Video URL 正确处理 | `IGMedia` 类型含 `video_url`；`IGMediaGrid` video 分支使用 `video_url`         |
+
+#### 验收结果（本地实测）
+
+```
+$ bun run verify/index.ts --server --module media
+  MEDIA
+    ✓ Tweet image proxy reachable    · GET /api/proxy/image?url=*.png → 200 image/png
+    ✓ IG image proxy reachable       · GET /api/proxy/image?url=…cdninstagram.com… → 200 image/png
+    ✓ Invalid URL returns error      · missing url → 400 · non-allowlist → 403
+    ✓ No double-proxy URL            · useProxyMedia idempotent guard ✓
+    ✓ Tweet media uses unified proxy · useProxyMedia entry ✓
+    ✓ Video media URL handled        · IGMediaGrid video branch reads media.video_url
+
+  PASS: 6  FAIL: 0  SKIP: 0
+```
+
+全量：**32 PASS / 0 FAIL / 2 SKIP**；`--module media` 离线 3 PASS / 3 SKIP；typecheck / lint / test 44/44 全绿。
 
 ---
 
@@ -183,17 +204,17 @@ RESULT: PASS (1 WARN / 0 FAIL)
 | P2     | S5 CI/CD Pipeline         | 1 天   | 无               | ✅   |
 | P2     | S6 Screenshot Verifier    | 1 天   | 无               | ✅   |
 | P3     | S8 服务器自动管理         | 0.5 天 | 无               | ✅   |
-| P3     | S7 Media Proxy Verifier   | 1 天   | S8（需要服务器） | ⏳   |
+| P3     | S7 Media Proxy Verifier   | 1 天   | S8（需要服务器） | ✅   |
 | P3     | S9 IG 集成测试扩展        | 2 天   | S8（需要服务器） | ⏳   |
 | P4     | S10 Postmortem 预发布检查 | 1.5 天 | 无               | ⏳   |
 
-**剩余执行顺序：S7 → S9 → S10**
+**剩余执行顺序：S9 → S10**
 
 ---
 
 ## 目标状态
 
-> 当前实测（2026-08-09，S5/S6/S8 完成后）：**26 PASS / 0 FAIL / 2 SKIP**。MEDIA（S7）与 POSTMORTEM（S10）模块尚未实现，下表为整个 Phase 2 完成后的目标态。
+> 当前实测（2026-08-09，S5/S6/S7/S8 完成后）：**32 PASS / 0 FAIL / 2 SKIP**。POSTMORTEM（S10）模块尚未实现，下表为整个 Phase 2 完成后的目标态。
 
 完成后，`bun verify --server` 应该是：
 

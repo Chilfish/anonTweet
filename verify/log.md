@@ -162,3 +162,43 @@ PASS: 26  FAIL: 0  SKIP: 2  WARN: 0
 $ bun run verify/index.ts --server --server-port 9080
 [TestServer] Reusing existing server at http://localhost:9080   (不 spawn、结束后保留)
 ```
+
+---
+
+## 2026-08-09 — Phase 2 S7：Media Proxy Verifier
+
+### 背景
+
+Postmortem #005（媒体管线重复）：代理/视频/截图各路径 URL 转换逻辑分散，需统一验证 `/api/proxy/image` 端点行为 + URL 转换逻辑。
+
+### 实现
+
+- `verify/acceptance-criteria/AC-media.md` — 新增 AC-MEDIA-001~006 验收标准
+- `verify/modules/media.verifier.ts` — `MediaVerifier`（id: media-proxy，module: media）
+  - **AC-MEDIA-001/002（集成）**：本地像素图服务器（`Bun.serve` 随机端口，1×1 PNG）作为上游，分别用 `*.png` 后缀 URL（Tweet 后缀白名单路径）与含 `cdninstagram.com` 的 URL（IG 域名白名单路径）请求 `/api/proxy/image`，断言 200 + `image/png` —— **不依赖真实 CDN，离线确定**
+  - **AC-MEDIA-003（集成）**：缺 `url` → 400、白名单外（`evil.txt`）→ 403
+  - **AC-MEDIA-004（静态）**：`useProxyMedia` 幂等守卫 `startsWith(mediaProxyUrl)` + 全库无 `https://https://`
+  - **AC-MEDIA-005（静态）**：`useProxyMedia` 导出 + `TweetCard`/`utils` 调用 `proxyMedia` + tweet 媒体组件无硬编码 twimg
+  - **AC-MEDIA-006（静态）**：`IGMedia` 类型含 `video_url` + `IGMediaGrid` video 分支读取 `media.video_url`
+- `verify/sdk/api-client.ts` — `proxy.image(url)` 方法 + 底层 `rawGet`（非 2xx 不 throw，暴露 status/contentType）
+- `verify/index.ts` — 注册 `MediaVerifier` + help/模块列表更新
+
+### 踩坑
+
+- **lint `regexp/no-unused-capturing-group` + `e18e/prefer-static-regex`**：`walkTsFiles` 内联 `/\.(ts|tsx)$/` 捕获组未用且每次调用重新编译 → 提为模块常量 `TS_FILE_RE = /\.(?:ts|tsx)$/`（非捕获组）
+- **proxy 白名单 `IMAGE_EXT_RE` 要求 URL 以图片后缀结尾**：真实 pbs.twimg.com 媒体 URL 常以 `?format=jpg&name=…` 结尾（不匹配）且不含 IG 域名 → 会被 403 拒绝。这是 Tweet 真实媒体走该端点的潜在缺口（当前 Tweet 走 `mediaProxyUrl` 前缀方案，不依赖此端点）；AC-MEDIA-001 用本地 `*.png` 验证后缀路径本身无误，边界已记录在 AC 文档
+
+### 验收
+
+```
+$ bun run verify/index.ts --server --module media
+  MEDIA  PASS: 6  FAIL: 0  SKIP: 0
+
+$ bun run verify/index.ts --server
+PASS: 32  FAIL: 0  SKIP: 2  WARN: 0     (26 → 32，新增 media 6/6)
+
+$ bun run verify/index.ts --module media   (离线)
+PASS: 3  FAIL: 0  SKIP: 3                 (001-003 集成 AC 需 server)
+
+typecheck ✓ · lint 0 errors · test 44/44 ✓
+```

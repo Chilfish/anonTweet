@@ -56,12 +56,14 @@ verify/
 │   ├── translation.verifier.ts ← AC-TRANS-001 ~ 007
 │   ├── ig.verifier.ts          ← AC-IG-001 ~ 006
 │   ├── screenshot.verifier.ts  ← AC-SHOT-001 ~ 004
+│   ├── media.verifier.ts       ← AC-MEDIA-001 ~ 006
 │   └── ci.verifier.ts          ← AC-CI-001 ~ 004
 └── acceptance-criteria/        ← S4：验收标准文档
     ├── AC-tweet.md             ← 8 条 tweet AC
     ├── AC-translation.md       ← 7 条 translation AC
     ├── AC-ig.md                ← 6 条 IG AC
     ├── AC-screenshot.md        ← 4 条 screenshot AC
+    ├── AC-media.md             ← 6 条 media AC
     └── AC-ci.md                ← 4 条 CI/CD AC
 ```
 
@@ -70,7 +72,7 @@ verify/
 ## 待实施
 
 - [x] Screenshot Verifier（AC-SHOT-001 ~ 004）✅ 已完成（S6）
-- [ ] Media Proxy Verifier（Postmortem #005）— S7
+- [x] Media Proxy Verifier（Postmortem #005）✅ 已完成（S7，AC-MEDIA-001~006）
 - [ ] IG integration tests（需要 INS_COOKIES）— S9
 - [x] `--server` 自动启动/停止服务器 ✅ 已完成（S8）
 - [ ] Postmortem 预发布自动化检查脚本 — S10

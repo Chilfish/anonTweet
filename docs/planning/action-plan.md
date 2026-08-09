@@ -48,11 +48,19 @@ Phase 2 行动（源自 `docs/next-steps.md`）：
 | S5 CI/CD Pipeline（verify.yml） | P2     | 1 天   | 无   | ✅ 已完成 |
 | S6 Screenshot Verifier          | P2     | 1 天   | 无   | ✅ 已完成 |
 | S8 服务器自动管理（`--server`） | P3     | 0.5 天 | 无   | ✅ 已完成 |
-| S7 Media Proxy Verifier         | P3     | 1 天   | S8   | ⏳ 待办   |
+| S7 Media Proxy Verifier         | P3     | 1 天   | S8   | ✅ 已完成 |
 | S9 IG 集成测试扩展              | P3     | 2 天   | S8   | ⏳ 待办   |
 | S10 Postmortem 自动化检查       | P4     | 1.5 天 | 无   | ⏳ 待办   |
 
 ## 最近更新
+
+### 2026-08-09 — Phase 2 S7 完成：Media Proxy Verifier
+
+- **S7 Media Proxy Verifier 完成**：新建 `verify/modules/media.verifier.ts` + `verify/acceptance-criteria/AC-media.md`，基于 Postmortem #005（媒体管线重复）覆盖 AC-MEDIA-001~006
+- **确定性实现**：AC-MEDIA-001/002 不用真实 CDN URL（上游漂移/离线不可用），改由本地像素图服务器（`Bun.serve` 随机端口，1×1 PNG）构造白名单内 URL 由代理真实转发 —— 后缀白名单（Tweet，`*.png`）与 IG 域名白名单（含 `cdninstagram.com`）两条路径均离线确定
+- **SDK**：`AnonTweetClient.proxy.image(url)` + 底层 `rawGet`（非 2xx 不 throw，暴露 status/contentType），供 AC-MEDIA-003 断言 400/403
+- **验收**：verify 全量 --server → **32 PASS / 0 FAIL / 2 SKIP**（media 6/6 全绿，集成 3 条替代离线 SKIP）；`--module media` 离线 3 PASS / 3 SKIP；typecheck / lint（0 error）/ test 44/44 全绿
+- 调研记录：`useProxyMedia` 幂等守卫存在（双代理已防）；Tweet 组件统一走 `proxyMedia`；IG 组件直接 `display_url` 是合理例外（IG CDN 开放 CORS）；proxy 白名单 `IMAGE_EXT_RE` 要求后缀结尾，真实 twimg URL 带 query 会 403（Tweet 走 `mediaProxyUrl` 前缀方案不依赖该端点，边界已记录）
 
 ### 2026-08-09 — Phase 2 S8 完成
 
