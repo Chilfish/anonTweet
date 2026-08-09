@@ -18,6 +18,7 @@ import { VerifyRunner } from './framework/runner.js'
 import { CIVerifier } from './modules/ci.verifier.js'
 import { IGVerifier } from './modules/ig.verifier.js'
 import { MediaVerifier } from './modules/media.verifier.js'
+import { PostmortemVerifier } from './modules/postmortem.verifier.js'
 import { ScreenshotVerifier } from './modules/screenshot.verifier.js'
 import { TranslationVerifier } from './modules/translation.verifier.js'
 import { TweetVerifier } from './modules/tweet.verifier.js'
@@ -49,7 +50,7 @@ if (values.help) {
     bun run verify/index.ts [options]
 
   Options:
-    --module, -m <name>   Only run verifiers for a module (tweet/translation/ig/screenshot/media)
+    --module, -m <name>   Only run verifiers for a module (tweet/translation/ig/screenshot/media/postmortem)
     --ac <id>             Only run a specific AC (e.g. AC-TWEET-001)
     --server              Start the test server before verifying
     --server-port <port>  Server port (default: 9081)
@@ -65,6 +66,7 @@ if (values.help) {
     ci            CI/CD pipeline (GitHub Actions workflow)
     screenshot    Screenshot export (AC-SHOT-001~004)
     media         Media proxy (AC-MEDIA-001~006)
+    postmortem    Postmortem check (AC-PM-001~007)
   `)
   process.exit(0)
 }
@@ -95,6 +97,7 @@ runner.register(new IGVerifier())
 runner.register(new CIVerifier())
 runner.register(new ScreenshotVerifier())
 runner.register(new MediaVerifier())
+runner.register(new PostmortemVerifier())
 
 // ─── Server lifecycle (--server) ────────────────────────────
 // S8: auto-start a test server, inject the client, stop in all paths.

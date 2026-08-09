@@ -9,6 +9,7 @@ on:
       - 'app/components/**'
       - 'verify/**'
       - 'test/**'
+      - 'scripts/**'
       - .github/workflows/verify.yml
   pull_request:
     branches: [main]
@@ -18,6 +19,7 @@ on:
       - 'app/components/**'
       - 'verify/**'
       - 'test/**'
+      - 'scripts/**'
       - .github/workflows/verify.yml
 
 jobs:
