@@ -54,7 +54,7 @@ verify/
 ├── modules/                    ← S3：按子系统的 Verifier
 │   ├── tweet.verifier.ts       ← AC-TWEET-001 ~ 008
 │   ├── translation.verifier.ts ← AC-TRANS-001 ~ 007
-│   ├── ig.verifier.ts          ← AC-IG-001 ~ 006
+│   ├── ig.verifier.ts          ← AC-IG-001 ~ 009
 │   ├── screenshot.verifier.ts  ← AC-SHOT-001 ~ 004
 │   ├── media.verifier.ts       ← AC-MEDIA-001 ~ 006
 │   └── ci.verifier.ts          ← AC-CI-001 ~ 004
@@ -73,6 +73,6 @@ verify/
 
 - [x] Screenshot Verifier（AC-SHOT-001 ~ 004）✅ 已完成（S6）
 - [x] Media Proxy Verifier（Postmortem #005）✅ 已完成（S7，AC-MEDIA-001~006）
-- [ ] IG integration tests（需要 INS_COOKIES）— S9
+- [x] IG integration tests（需要 INS_COOKIES）✅ 已完成（S9，AC-IG-001~009）
 - [x] `--server` 自动启动/停止服务器 ✅ 已完成（S8）
 - [ ] Postmortem 预发布自动化检查脚本 — S10

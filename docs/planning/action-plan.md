@@ -49,10 +49,20 @@ Phase 2 行动（源自 `docs/next-steps.md`）：
 | S6 Screenshot Verifier          | P2     | 1 天   | 无   | ✅ 已完成 |
 | S8 服务器自动管理（`--server`） | P3     | 0.5 天 | 无   | ✅ 已完成 |
 | S7 Media Proxy Verifier         | P3     | 1 天   | S8   | ✅ 已完成 |
-| S9 IG 集成测试扩展              | P3     | 2 天   | S8   | ⏳ 待办   |
+| S9 IG 集成测试扩展              | P3     | 2 天   | S8   | ✅ 已完成 |
 | S10 Postmortem 自动化检查       | P4     | 1.5 天 | 无   | ⏳ 待办   |
 
 ## 最近更新
+
+### 2026-08-09 — Phase 2 S9 完成：IG 集成测试扩展
+
+- **S9 IG 集成测试扩展完成**：ig.verifier 从 5 条扩到 **9 条**（AC-IG-006~009），AC-ig.md 更新 v1.1
+  - AC-IG-006（Caption 翻译不破坏原文，离线 fixture + `translateIGCaption` 纯函数扫描）
+  - AC-IG-007/008（Posts/Stories 端点集成，需 `INS_COOKIES`，无则 SKIP）
+  - AC-IG-009（无 cookies → 500，隔离环境确定性 PASS）
+- **修正 api-client bug**：`ig.get`/`ig.getById` 路径 `/api/ig/${id}` → `/api/ig/get/${id}`（对齐真实路由，原会 404）；新增 `ig.postRaw`（暴露 status/body）
+- **端点校准**：IG 帖子/故事统一 `POST /api/ig/get/:id`（action handler 内置 stories 分支，无独立 stories 路由），AC 文档 v1.1 对齐
+- **验收**：verify 全量 --server → **34 PASS / 0 FAIL / 4 SKIP**（IG 9/9：6 PASS + 009 集成 PASS + 007/008 SKIP）；离线 6 PASS / 3 SKIP；typecheck / lint（0 error）/ test 44/44 全绿
 
 ### 2026-08-09 — Phase 2 S7 完成：Media Proxy Verifier
 

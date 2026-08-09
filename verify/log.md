@@ -202,3 +202,47 @@ PASS: 3  FAIL: 0  SKIP: 3                 (001-003 集成 AC 需 server)
 
 typecheck ✓ · lint 0 errors · test 44/44 ✓
 ```
+
+---
+
+## 2026-08-09 — Phase 2 S9：IG 集成测试扩展
+
+### 背景
+
+IG verifier 原 5 条 AC 全离线，需补 `INS_COOKIES` 集成测试。
+
+### 实现
+
+- `verify/acceptance-criteria/AC-ig.md` — v1.1：端点校准（IG 帖子/故事统一 `POST /api/ig/get/:id`，无独立 stories 路由）+ 新增 AC-IG-007/008/009
+- `verify/sdk/api-client.ts` — **修正 IG 路径 bug** `ig.get`/`ig.getById` `/api/ig/${id}` → `/api/ig/get/${id}`（原 404）；新增 `ig.postRaw`（底层 `rawPost` 暴露 status/bodyText）
+- `verify/modules/ig.verifier.ts` — 5 条 → 9 条：
+  - **AC-IG-006**（离线）：Caption 翻译不破坏原文 —— fixture 断言 `description`/`captionTranslation` 非空且不同 + 静态扫描 `translateIGCaption` 纯函数不改 `post.description`
+  - **AC-IG-007**（集成）：`POST /api/ig/get/:id` 真实 shortcode → 200 + IGPost（id/username/media）
+  - **AC-IG-008**（集成）：`POST /api/ig/get/:username/:story_id` → type 'story'（另需 `IG_STORY_FIXTURE` env）
+  - **AC-IG-009**（集成）：无 `INS_COOKIES` → 500 —— 隔离环境确定性 PASS（`POST /api/ig/get/__no_cookies_verify__` → 500 + body 含 `INS_COOKIES`）
+
+### 踩坑
+
+- **AC ID 冲突**：现有 AC-IG-006「Caption 翻译不破坏原文」与 next-steps 草案的 AC-IG-009（翻译 caption 不丢失）语义重叠 → 保留现有 006 语义并补齐实现，新集成 AC 顺延 007/008/009
+- **api-client IG 路径历史 bug**：`ig.get`/`ig.getById` 写死 `/api/ig/${id}`，与真实路由 `get/:id` 不符 —— S9 前从未被集成测试触发（IG verifier 全离线），修正后才可能被真实调用
+- **AC-IG-008 需要真实 story id**：无固定 fixture（IG story 有 24h 时效）→ 约定 `IG_STORY_FIXTURE=username/story_id` env，用户有真实 cookies 时提供即可激活；否则 SKIP
+
+### 验收
+
+```
+$ bun run verify/index.ts --server --module ig
+  IG
+    ✓ Post structure complete / Media array valid / Stories URL / Post URL / formatIGTime
+    ✓ Caption translation preserves original          (AC-IG-006 激活)
+    ✓ Missing INS_COOKIES returns 500                 (AC-IG-009 激活，隔离确定)
+    ○ Posts/Stories endpoint → SKIP                   (AC-IG-007/008 需 INS_COOKIES)
+  PASS: 6  FAIL: 0  SKIP: 3
+
+$ bun run verify/index.ts --server
+PASS: 34  FAIL: 0  SKIP: 4  WARN: 0     (32 → 34，IG 9/9：6 PASS + 009 PASS)
+
+$ bun run verify/index.ts --module ig   (离线)
+PASS: 6  FAIL: 0  SKIP: 3
+
+typecheck ✓ · lint 0 errors · test 44/44 ✓
+```

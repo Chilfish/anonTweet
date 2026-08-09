@@ -153,14 +153,29 @@ $ bun run verify/index.ts --server
 
 ---
 
-### S9 — IG 集成测试扩展（优先级 P3，~2 天）
+### S9 — IG 集成测试扩展（优先级 P3，~2 天）✅ 已完成（2026-08-09）
 
-当前 IG Verifier 的 5 条 AC 均为离线检测。需要添加需要 `INS_COOKIES` 的集成测试：
+当前 IG Verifier 的 5 条 AC 均为离线检测。扩展为 9 条，添加需要 `INS_COOKIES` 的集成测试（**端点已校准**——IG 帖子/故事统一走 `POST /api/ig/get/:id`，action handler 内置 stories 分支，无独立 stories 路由）：
 
-- AC-IG-006：Posts 端点 POST /api/ig/:id 返回正确
-- AC-IG-007：Stories 端点 POST /api/stories/:id 返回正确
-- AC-IG-008：未配置 cookies 时返回 500 错误
-- AC-IG-009：翻译后的 caption 不丢失
+- AC-IG-006（合并 next-steps 的「翻译 caption 不丢失」）：Caption 翻译不破坏原文 —— fixture 验证 `description` 不变、`captionTranslation` 非空
+- AC-IG-007：Posts 端点 `POST /api/ig/get/:id` 集成（需 INS_COOKIES）
+- AC-IG-008：Stories 端点 `POST /api/ig/get/:username/:story_id` 集成（需 INS_COOKIES + `IG_STORY_FIXTURE`）
+- AC-IG-009：未配置 cookies 时返回 500（隔离环境确定性 PASS）
+
+#### 验收结果（本地实测）
+
+```
+$ bun run verify/index.ts --server --module ig
+  IG
+    ✓ Post structure complete            ✓ Caption translation preserves original
+    ✓ Media array valid                  ✓ Stories URL parsing / Post URL parsing / formatIGTime
+    ✓ Missing INS_COOKIES returns 500    · POST /api/ig/get/__no_cookies_verify__ → 500 INS_COOKIES
+    ○ Posts/Stories endpoint  → SKIP     · INS_COOKIES not configured
+
+  PASS: 6  FAIL: 0  SKIP: 3
+```
+
+全量：**34 PASS / 0 FAIL / 4 SKIP**；`--module ig` 离线 6 PASS / 3 SKIP；typecheck / lint / test 44/44 全绿。
 
 ---
 
@@ -205,16 +220,16 @@ RESULT: PASS (1 WARN / 0 FAIL)
 | P2     | S6 Screenshot Verifier    | 1 天   | 无               | ✅   |
 | P3     | S8 服务器自动管理         | 0.5 天 | 无               | ✅   |
 | P3     | S7 Media Proxy Verifier   | 1 天   | S8（需要服务器） | ✅   |
-| P3     | S9 IG 集成测试扩展        | 2 天   | S8（需要服务器） | ⏳   |
+| P3     | S9 IG 集成测试扩展        | 2 天   | S8（需要服务器） | ✅   |
 | P4     | S10 Postmortem 预发布检查 | 1.5 天 | 无               | ⏳   |
 
-**剩余执行顺序：S9 → S10**
+**剩余执行顺序：S10**
 
 ---
 
 ## 目标状态
 
-> 当前实测（2026-08-09，S5/S6/S7/S8 完成后）：**32 PASS / 0 FAIL / 2 SKIP**。POSTMORTEM（S10）模块尚未实现，下表为整个 Phase 2 完成后的目标态。
+> 当前实测（2026-08-09，S5/S6/S7/S8/S9 完成后）：**34 PASS / 0 FAIL / 4 SKIP**。POSTMORTEM（S10）模块尚未实现，下表为整个 Phase 2 完成后的目标态。
 
 完成后，`bun verify --server` 应该是：
 
