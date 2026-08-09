@@ -9,9 +9,9 @@
 ## Five 层的当前状态
 
 ```
-L5: CI/CD Pipeline           ← 🟡 待实施 (Phase 2)
-L4: CLI Verify Tool (bun verify) ← ✅ 17 PASS / 0 FAIL / 3 SKIP
-L3: SDK / API Client          ← ✅ AnonTweetClient + TestServer
+L5: CI/CD Pipeline           ← ✅ 已实施 (S5，AC-CI-001~004)
+L4: CLI Verify Tool (bun verify) ← ✅ 26 PASS / 0 FAIL / 2 SKIP（--server 模式）
+L3: SDK / API Client          ← ✅ AnonTweetClient + TestServer（S8 端口复用/隔离）
 L2: Test Fixtures              ← ✅ 7 fixtures (3 tweet, 1 IG, 1 translation)
 L1: Acceptance Criteria        ← ✅ 25 AC (4 份文档)
 ```
@@ -100,29 +100,35 @@ bun run verify/index.ts --module screenshot
 
 ---
 
-### S8 — 服务器自动管理（优先级 P3，~0.5 天）
+### S8 — 服务器自动管理 ✅ 已完成（2026-08-09）
 
-使 `bun verify --server` 自动启动/停止测试服务器：
+`bun run verify/index.ts --server` 自动启动/停止测试服务器（此前为占位实现）：
 
-- `TestServer.start()` 内部调用 `bun run dev`
-- 通过 idle 检测自动停止
+- `TestServer.start()` spawn `bun run dev`（`PORT` env 生效，修复 `vite.config.ts` 硬编码 9080）
+- 端口复用：目标端口已有 HTTP 服务 → `Reusing`，不重复 spawn，结束时保留
+- Windows 进程树清理：`taskkill /T /F`（裸 SIGTERM 会残留 dev server 挂住 CLI）
+- `isolateExternal` 隔离外部 API key（`DOTENV_CONFIG_PATH` + 空串/delete），保证确定性
 - 支持自定义 PORT（默认 9081）
 
-#### 验收标准
+#### 验收结果（本地实测）
 
 ```
-$ bun run verify/index.ts --server --exit-on-fail
+$ bun run verify/index.ts --server
 [TestServer] Starting on port 9081...
-[TestServer] Ready at http://localhost:9081 (5.2s)
+[TestServer] Ready at http://localhost:9081 (12783ms)
+[TestServer] Stopping... / Stopped
 
   TWEET
-    ✓ Normal tweet parsing          ✓
-    ✓ API endpoint returns tweet    ✓  (新增：AC-TWEET-005 通过)
-    ✓ Invalid tweet returns empty   ✓  (新增：AC-TWEET-006 通过)
-    ✓ GET/POST consistency          ✓  (新增：AC-TWEET-008 通过)
+    ✓ Invalid tweet returns empty   ✓  (AC-TWEET-006 激活 PASS)
+    ○ AC-TWEET-005/008 需真实 TWEET_KEYS → SKIP
+  SCREENSHOT
+    ✓ Plain tweet endpoint returns HTML  ✓  (AC-SHOT-001 激活)
+    ✓ Plain IG endpoint returns HTML     ✓  (AC-SHOT-002 激活)
 
-  PASS: 20  FAIL: 0
+  PASS: 26  FAIL: 0  SKIP: 2
 ```
+
+真实 `TWEET_KEYS`/`INS_COOKIES` 时 AC-TWEET-005/008 与 AC-SHOT-002 内容断言会进一步激活（见 S9）。
 
 ---
 
@@ -172,22 +178,24 @@ RESULT: PASS (1 WARN / 0 FAIL)
 
 ## 实施顺序建议
 
-| 优先序 | 任务                      | 工期   | 依赖             |
-| ------ | ------------------------- | ------ | ---------------- |
-| P2     | S5 CI/CD Pipeline         | 1 天   | 无               |
-| P2     | S6 Screenshot Verifier    | 1 天   | 无               |
-| P3     | S8 服务器自动管理         | 0.5 天 | 无               |
-| P3     | S7 Media Proxy Verifier   | 1 天   | S8（需要服务器） |
-| P3     | S9 IG 集成测试扩展        | 2 天   | S8（需要服务器） |
-| P4     | S10 Postmortem 预发布检查 | 1.5 天 | 无               |
+| 优先序 | 任务                      | 工期   | 依赖             | 状态 |
+| ------ | ------------------------- | ------ | ---------------- | ---- |
+| P2     | S5 CI/CD Pipeline         | 1 天   | 无               | ✅   |
+| P2     | S6 Screenshot Verifier    | 1 天   | 无               | ✅   |
+| P3     | S8 服务器自动管理         | 0.5 天 | 无               | ✅   |
+| P3     | S7 Media Proxy Verifier   | 1 天   | S8（需要服务器） | ⏳   |
+| P3     | S9 IG 集成测试扩展        | 2 天   | S8（需要服务器） | ⏳   |
+| P4     | S10 Postmortem 预发布检查 | 1.5 天 | 无               | ⏳   |
 
-**推荐执行顺序：S5 → S6 → S8 → S7 → S9 → S10**
+**剩余执行顺序：S7 → S9 → S10**
 
 ---
 
 ## 目标状态
 
-完成后，`bun verify` 应该是：
+> 当前实测（2026-08-09，S5/S6/S8 完成后）：**26 PASS / 0 FAIL / 2 SKIP**。MEDIA（S7）与 POSTMORTEM（S10）模块尚未实现，下表为整个 Phase 2 完成后的目标态。
+
+完成后，`bun verify --server` 应该是：
 
 ```bash
 $ bun verify --server --exit-on-fail

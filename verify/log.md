@@ -130,3 +130,35 @@ P0 阶段完成：
   - S9: IG 集成测试扩展
   - S10: Postmortem 预发布检查
 ```
+
+---
+
+## 2026-08-09 — Phase 2 S8：服务器自动管理（`--server`）
+
+### 实现
+
+- `verify/index.ts` `--server` 从占位改为真正接线：`TestServer.start()` → `AnonTweetClient` 注入 ctx → `try/finally` 保证停止
+- `verify/framework/runner.ts`：`run(client?)` 支持外部注入 client
+- 修复 `vite.config.ts` `server.port` 硬编码 9080 → 支持 `PORT` env 覆盖（TestServer spawn 传 `PORT=9081`）
+- `TestServer` 增强（`verify/sdk/test-server.ts`）：
+  - **端口复用**：`start()` 先 probe，目标端口已有 HTTP 服务 → `Reusing` 不重复 spawn；`stop()` 仅终止自启进程（`managed`）
+  - **Windows 进程树清理** `taskkill /PID /T /F`；`process.on('exit')` 兜底清理孤儿进程
+  - **`isolateExternal`**：隔离外部 API key，保证验证确定性
+
+### 踩坑
+
+- **Windows `child.kill('SIGTERM')` 不杀进程树**：dev server（vite worker 等）残留持有 stdio pipe → CLI 挂住不退出 → 改用 `spawnSync('taskkill', ['/PID', pid, '/T', '/F'])`
+- **`env.server.ts` dotenv `override: true` + zod `.min(1)`**：隔离时把 `GEMINI_API_KEY`/`DEEPSEEK_API_KEY` 置空串会触发 schema 校验失败（dev server 直接崩）→ 正确隔离 = `DOTENV_CONFIG_PATH` 指向缺失文件 + `INS_COOKIES`/`TWEET_KEYS` 空串 + GEMINI/DEEPSEEK 用 `delete`
+- **AC-SHOT-002 确定性**：本地 `.env` 有 `INS_COOKIES` 时 dev server 走真实 IG 请求（网络不通 → 降级渲染），内容断言失败 → 隔离后走 bogus id 确定性路径
+
+### 验收
+
+```
+$ bun run verify/index.ts --server
+[TestServer] Ready at http://localhost:9081 (12783ms)
+PASS: 26  FAIL: 0  SKIP: 2  WARN: 0
+[TestServer] Stopping... → Stopped   (9081 端口释放)
+
+$ bun run verify/index.ts --server --server-port 9080
+[TestServer] Reusing existing server at http://localhost:9080   (不 spawn、结束后保留)
+```

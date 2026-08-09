@@ -4,6 +4,7 @@
  * Executes verifiers and formats results for CLI output.
  */
 
+import type { AnonTweetClient } from '../sdk/api-client.js'
 import type {
   CliOptions,
   StepResult,
@@ -19,9 +20,9 @@ const PROJECT_ROOT = path.resolve(__dirname, '..', '..')
 
 // ─── Helpers ──────────────────────────────────────────────
 
-function buildContext(options: CliOptions): VerifyContext {
+function buildContext(options: CliOptions, client?: AnonTweetClient): VerifyContext {
   return {
-    client: undefined, // populated later if server is available
+    client,
     fixtureDir: path.join(PROJECT_ROOT, 'verify', 'fixtures'),
     verbose: options.verbose ?? false,
     env: {
@@ -63,9 +64,9 @@ export class VerifyRunner {
     this.verifiers.push(...verifiers)
   }
 
-  /** Run all registered verifiers (or filtered subset) */
-  async run(): Promise<SuiteResult[]> {
-    const ctx = buildContext(this.options)
+  /** Run all registered verifiers (or filtered subset). */
+  async run(client?: AnonTweetClient): Promise<SuiteResult[]> {
+    const ctx = buildContext(this.options, client)
     let candidates = this.verifiers
 
     // Filter by module

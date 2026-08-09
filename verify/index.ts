@@ -12,7 +12,7 @@
  *   bun run verify/index.ts --server           # With live server
  */
 
-import type { CliOptions } from './framework/types.js'
+import type { CliOptions, SuiteResult } from './framework/types.js'
 import { parseArgs } from 'node:util'
 import { VerifyRunner } from './framework/runner.js'
 import { CIVerifier } from './modules/ci.verifier.js'
@@ -20,6 +20,8 @@ import { IGVerifier } from './modules/ig.verifier.js'
 import { ScreenshotVerifier } from './modules/screenshot.verifier.js'
 import { TranslationVerifier } from './modules/translation.verifier.js'
 import { TweetVerifier } from './modules/tweet.verifier.js'
+import { AnonTweetClient } from './sdk/api-client.js'
+import { EXTERNAL_KEYS, TestServer } from './sdk/test-server.js'
 
 // ─── Parse CLI args ─────────────────────────────────────────
 
@@ -91,18 +93,40 @@ runner.register(new IGVerifier())
 runner.register(new CIVerifier())
 runner.register(new ScreenshotVerifier())
 
-// If --server flag, start the test server and inject client
-// This is a simplified version; full server lifecycle in future iteration
+// ─── Server lifecycle (--server) ────────────────────────────
+// S8: auto-start a test server, inject the client, stop in all paths.
+
+let server: TestServer | null = null
+let client: AnonTweetClient | undefined
+
 if (values.server) {
   const port = Number.parseInt(values['server-port'] as string || '9081', 10)
-  console.log(`  [Setup] Test server not auto-started. Use --server-port to connect.`)
-  console.log(`  [Setup] Manually start: bun run dev (PORT=${port})`)
+  server = new TestServer({ port })
+  await server.start()
+  client = new AnonTweetClient({ baseUrl: server.url })
+
+  // Keep the verifier env in sync with the isolated test server: without real
+  // keys the integration ACs take the deterministic path (bogus id → NotFound).
+  if (server.isolatesExternal) {
+    for (const key of EXTERNAL_KEYS)
+      delete process.env[key]
+  }
+
+  console.log(`  [Setup] Test server ready at ${server.url}`)
   console.log('')
 }
 
 // ─── Run ───────────────────────────────────────────────────
 
-const suites = await runner.run()
+let suites: SuiteResult[]
+try {
+  suites = await runner.run(client)
+}
+finally {
+  if (server) {
+    await server.stop().catch(() => {})
+  }
+}
 
 // ─── Exit code ─────────────────────────────────────────────
 

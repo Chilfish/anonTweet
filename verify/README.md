@@ -25,6 +25,10 @@ bun run verify/index.ts --verbose
 
 # CI 模式（失败时 exit 1）
 bun run verify/index.ts --exit-on-fail
+
+# 自动启动测试服务器（默认 9081），运行集成 AC，结束后自动停止
+bun run verify/index.ts --server
+bun run verify/index.ts --server --server-port 9080  # 自定义端口；已有服务器则复用
 ```
 
 ---
@@ -51,6 +55,7 @@ verify/
 │   ├── tweet.verifier.ts       ← AC-TWEET-001 ~ 008
 │   ├── translation.verifier.ts ← AC-TRANS-001 ~ 007
 │   ├── ig.verifier.ts          ← AC-IG-001 ~ 006
+│   ├── screenshot.verifier.ts  ← AC-SHOT-001 ~ 004
 │   └── ci.verifier.ts          ← AC-CI-001 ~ 004
 └── acceptance-criteria/        ← S4：验收标准文档
     ├── AC-tweet.md             ← 8 条 tweet AC
@@ -64,8 +69,8 @@ verify/
 
 ## 待实施
 
-- [ ] Screenshot Verifier（AC-SHOT-001 ~ 004）
-- [ ] Media Proxy Verifier（Postmortem #005）
-- [ ] IG integration tests（需要 INS_COOKIES）
-- [ ] `--server` 自动启动/停止服务器
-- [ ] Postmortem 预发布自动化检查脚本
+- [x] Screenshot Verifier（AC-SHOT-001 ~ 004）✅ 已完成（S6）
+- [ ] Media Proxy Verifier（Postmortem #005）— S7
+- [ ] IG integration tests（需要 INS_COOKIES）— S9
+- [x] `--server` 自动启动/停止服务器 ✅ 已完成（S8）
+- [ ] Postmortem 预发布自动化检查脚本 — S10

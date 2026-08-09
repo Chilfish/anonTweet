@@ -47,12 +47,20 @@ Phase 2 行动（源自 `docs/next-steps.md`）：
 | ------------------------------- | ------ | ------ | ---- | --------- |
 | S5 CI/CD Pipeline（verify.yml） | P2     | 1 天   | 无   | ✅ 已完成 |
 | S6 Screenshot Verifier          | P2     | 1 天   | 无   | ✅ 已完成 |
-| S8 服务器自动管理（`--server`） | P3     | 0.5 天 | 无   | ⏳ 待办   |
+| S8 服务器自动管理（`--server`） | P3     | 0.5 天 | 无   | ✅ 已完成 |
 | S7 Media Proxy Verifier         | P3     | 1 天   | S8   | ⏳ 待办   |
 | S9 IG 集成测试扩展              | P3     | 2 天   | S8   | ⏳ 待办   |
 | S10 Postmortem 自动化检查       | P4     | 1.5 天 | 无   | ⏳ 待办   |
 
 ## 最近更新
+
+### 2026-08-09 — Phase 2 S8 完成
+
+- **S8 服务器自动管理完成**：`bun run verify/index.ts --server` 自动启动 dev server（默认 9081，`--server-port` 自定义）、注入 AnonTweetClient、结束后自动停止
+  - 修复 `vite.config.ts` `server.port` 硬编码 9080 → 支持 `PORT` env 覆盖（`verify/sdk/test-server.ts` spawn 时传 `PORT=9081`）
+  - `TestServer` 增强：**端口复用**（探测已有服务器 → `Reusing` 不重复 spawn，停止时不杀非自启进程）、Windows `taskkill /T /F` 进程树清理（修复 SIGTERM 残留）、`process.on('exit')` 兜底、`isolateExternal` 隔离外部 API key（确定性验证）
+  - **隔离实现**：`DOTENV_CONFIG_PATH` 指向缺失文件阻止 `.env` 加载 + `INS_COOKIES`/`TWEET_KEYS` 置空串 + `GEMINI_API_KEY`/`DEEPSEEK_API_KEY` 用 `delete`（空串会触发 zod `.min(1)` 校验失败）
+  - 验收：verify --server 全绿 **26 PASS / 0 FAIL / 2 SKIP**（AC-SHOT-001/002 + AC-TWEET-006 激活 PASS；AC-TWEET-005/008 需真实 `TWEET_KEYS` 仍 SKIP）
 
 ### 2026-08-09 — Phase 2 S5 + S6 完成
 

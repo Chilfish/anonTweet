@@ -92,8 +92,9 @@ export default defineConfig(({ isSsrBuild }) => ({
     ],
   },
   server: {
-    port: 9080,
-    host: '127.0.0.1',
+    // PORT env overrides the default (TestServer spawns dev on a custom port)
+    port: Number(process.env.PORT) || 9080,
+    host: process.env.HOST ?? '127.0.0.1',
     allowedHosts: true,
   },
   define: {
