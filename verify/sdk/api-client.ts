@@ -114,6 +114,29 @@ export class AnonTweetClient {
     }
   }
 
+  /**
+   * Low-level POST that never throws on non-2xx, exposing the raw status + body text.
+   * Used by verifiers that must assert error codes (500/etc) with response content.
+   */
+  private async rawPost(path: string, body: unknown): Promise<{ status: number, bodyText: string }> {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), this.config.timeoutMs)
+
+    try {
+      const res = await fetch(`${this.config.baseUrl}${path}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      })
+      const bodyText = await res.text()
+      return { status: res.status, bodyText }
+    }
+    finally {
+      clearTimeout(timer)
+    }
+  }
+
   // ── Tweet API ──────────────────────────────────────────
 
   readonly tweet = {
@@ -147,7 +170,7 @@ export class AnonTweetClient {
   // ── Instagram API ──────────────────────────────────────
 
   readonly ig = {
-    /** POST /api/ig/:id — fetch IG post with optional AI translation */
+    /** POST /api/ig/get/:id — fetch IG post with optional AI translation */
     get: async (params: {
       igId: string
       enableAITranslation?: boolean
@@ -155,12 +178,20 @@ export class AnonTweetClient {
       model?: string
       force?: boolean
     }): Promise<IGPost[]> => {
-      return this.post<IGPost[]>(`/api/ig/${params.igId}`, params)
+      return this.post<IGPost[]>(`/api/ig/get/${params.igId}`, params)
     },
 
-    /** GET /api/ig/:id — loader-based fetch (no translation) */
+    /** GET /api/ig/get/:id — loader-based fetch (no translation) */
     getById: async (id: string): Promise<IGPost[]> => {
-      return this.get<IGPost[]>(`/api/ig/${id}`)
+      return this.get<IGPost[]>(`/api/ig/get/${id}`)
+    },
+
+    /**
+     * POST /api/ig/get/:id — raw status + body text for integration assertions
+     * (e.g. 500 when INS_COOKIES is unset, 404 on parse failure).
+     */
+    postRaw: async (id: string, body?: Record<string, unknown>): Promise<{ status: number, bodyText: string }> => {
+      return this.rawPost(`/api/ig/get/${id}`, body ?? {})
     },
   }
 
