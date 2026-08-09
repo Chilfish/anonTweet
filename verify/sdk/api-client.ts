@@ -90,6 +90,30 @@ export class AnonTweetClient {
     }
   }
 
+  /**
+   * Low-level GET that never throws on non-2xx, exposing the raw status.
+   * Used by verifiers that must assert error codes (400/403/etc).
+   */
+  private async rawGet(path: string): Promise<{ status: number, contentType: string | null }> {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), this.config.timeoutMs)
+
+    try {
+      const res = await fetch(`${this.config.baseUrl}${path}`, {
+        signal: controller.signal,
+      })
+      // Drain the body so the connection is reusable, even on error responses.
+      await res.text()
+      return {
+        status: res.status,
+        contentType: res.headers.get('Content-Type'),
+      }
+    }
+    finally {
+      clearTimeout(timer)
+    }
+  }
+
   // ── Tweet API ──────────────────────────────────────────
 
   readonly tweet = {
@@ -206,6 +230,19 @@ export class AnonTweetClient {
     /** GET /plain-ins/:id — IG screenshot page (HTML) */
     ig: async (id: string): Promise<string> => {
       return this.get<string>(`/plain-ins/${encodeURIComponent(id)}`)
+    },
+  }
+
+  // ── Media proxy ─────────────────────────────────────────
+
+  readonly proxy = {
+    /**
+     * GET /api/proxy/image?url=... — proxy a remote image.
+     * Returns the raw status + content-type so verifiers can assert both the
+     * happy path (200 + image/*) and error paths (400/403).
+     */
+    image: async (url: string): Promise<{ status: number, contentType: string | null }> => {
+      return this.rawGet(`/api/proxy/image?url=${encodeURIComponent(url)}`)
     },
   }
 
