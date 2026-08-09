@@ -246,3 +246,39 @@ PASS: 6  FAIL: 0  SKIP: 3
 
 typecheck ✓ · lint 0 errors · test 44/44 ✓
 ```
+
+---
+
+## 2026-08-09 — Phase 2 S10：Postmortem 预发布检查自动化
+
+### 背景
+
+CLAUDE.md 定义 Phase 2 预发布检查流程，但需手动执行。自动化 git 改动文件与 postmortem 报告的交叉比对。
+
+### 实现
+
+- `verify/acceptance-criteria/AC-postmortem.md` — 新增 AC-PM-001~007 验收标准（7 条，全静态/冒烟）
+- `verify/modules/postmortem.verifier.ts` — `PostmortemVerifier`，覆盖 AC-PM-001~007
+- `scripts/postmortem-check.ts` — CLI 入口（git diff × Changed Files 交叉比对 + 高危文件表 + CI shallow 兜底）
+- `verify/index.ts` — 注册 PostmortemVerifier + `--module postmortem` 选项
+- `package.json` — `postmortem-check` script
+- `.github/workflows/verify.yml` — paths 补 `scripts/**`
+
+### 踩坑
+
+- **regexp/no-super-linear-backtracking**：`\s*` 与 `[\s\S]*?`/`.+` 可交换 → 改用行分片 + fence 状态机
+- **裸 `throw`**：TS/Babel catch 不允许（TS1142）→ `throw err instanceof Error ? err : new Error(String(err))`
+- **AC-PM-002 状态正则**：报告用 `- **状态**:`（有列表标记），`^\s*` 锚行首导致全 FAIL → 去锚
+- **CI shallow（depth 1）无 HEAD~1**：fallback 链 `main → HEAD~1` 双崩 → 二级兜底返回空数组
+
+### 验收
+
+```
+$ bun run verify/index.ts --module postmortem
+  POSTMORTEM  PASS: 7  FAIL: 0  SKIP: 0
+
+$ bun run scripts/postmortem-check.ts
+  RESULT: PASS (0 WARN / 0 FAIL)
+
+typecheck ✓ · lint 0 errors · verify POSTMORTEM 7/7
+```

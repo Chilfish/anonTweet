@@ -179,19 +179,22 @@ $ bun run verify/index.ts --server --module ig
 
 ---
 
-### S10 — Postmortem 预发布检查自动化（优先级 P4，~1 天）
+### S10 — Postmortem 预发布检查自动化（优先级 P4，~1 天）✅ 已完成（2026-08-09）
 
 当前 [CLAUDE.md](../CLAUDE.md) 定义了 Phase 2 预发布检查流程，但需手动执行。用脚本自动化：
 
 ```
 scripts/postmortem-check.ts
-├── 获取本次改动的 commit 列表
-├── 读取 docs/postmortem/*.md
-├── 逐份交叉比对 Changed Files + Root Cause
+├── 获取本次改动的文件列表（git diff --name-only base..head）
+├── 读取 docs/postmortem/*.md 的 Changed Files 块
+├── 逐份交叉比对重叠 → WARN；解析失败 → FAIL
+├── 高危文件表（历史 fix 热点）命中 → 额外 WARN
 └── 输出 PASS / WARN / FAIL
 
 用法：bun run scripts/postmortem-check.ts <base-ref> <head-ref>
 ```
+
+接入 verify 的 `POSTMORTEM` 模块（`verify/modules/postmortem.verifier.ts`，AC-PM-001~007）做静态完整性检查：报告目录/状态/Changed Files/索引覆盖/脚本存在与可运行。
 
 #### 验收标准
 
@@ -221,9 +224,9 @@ RESULT: PASS (1 WARN / 0 FAIL)
 | P3     | S8 服务器自动管理         | 0.5 天 | 无               | ✅   |
 | P3     | S7 Media Proxy Verifier   | 1 天   | S8（需要服务器） | ✅   |
 | P3     | S9 IG 集成测试扩展        | 2 天   | S8（需要服务器） | ✅   |
-| P4     | S10 Postmortem 预发布检查 | 1.5 天 | 无               | ⏳   |
+| P4     | S10 Postmortem 预发布检查 | 1.5 天 | 无               | ✅   |
 
-**剩余执行顺序：S10**
+**Phase 2 全部完成** 🎉
 
 ---
 
@@ -238,12 +241,13 @@ $ bun verify --server --exit-on-fail
 
   TWEET         ✓✓✓✓✓✓✓✓  (8/8)
   TRANSLATION   ✓✓✓✓✓✓✓   (7/7)
-  IG            ✓✓✓✓✓     (5/5)
+  IG            ✓✓✓✓✓✓✓✓✓ (9/9)
   SCREENSHOT    ✓✓✓✓       (4/4)
   MEDIA         ✓✓✓✓✓✓     (6/6)
-  POSTMORTEM    ✓✓✓✓✓✓✓✓  (8/8)
+  POSTMORTEM    ✓✓✓✓✓✓✓   (7/7)
+  CI            ✓✓✓✓       (4/4)
 
-  PASS: 38  FAIL: 0
+  PASS: 45  FAIL: 0
   Duration: ~30s
 ```
 

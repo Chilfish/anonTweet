@@ -50,9 +50,18 @@ Phase 2 行动（源自 `docs/next-steps.md`）：
 | S8 服务器自动管理（`--server`） | P3     | 0.5 天 | 无   | ✅ 已完成 |
 | S7 Media Proxy Verifier         | P3     | 1 天   | S8   | ✅ 已完成 |
 | S9 IG 集成测试扩展              | P3     | 2 天   | S8   | ✅ 已完成 |
-| S10 Postmortem 自动化检查       | P4     | 1.5 天 | 无   | ⏳ 待办   |
+| S10 Postmortem 自动化检查       | P4     | 1.5 天 | 无   | ✅ 已完成 |
 
 ## 最近更新
+
+### 2026-08-09 — Phase 2 S10 完成：Postmortem 预发布检查自动化
+
+- **S10 完成（代码 + 验收）**：`verify/acceptance-criteria/AC-postmortem.md`（AC-PM-001~007）→ `scripts/postmortem-check.ts`（git 改动 × Changed Files 交叉比对 + shallow checkout 兜底）+ `verify/modules/postmortem.verifier.ts`（静态完整性检查：报告目录/状态/Changed Files/README 索引/脚本冒烟）
+- **CI 增强**：verify.yml paths 补 `scripts/**`（S10 脚本被 AC-PM-007 依赖）
+- **验收**：`--module postmortem` → **7 PASS / 0 FAIL**；typecheck ✓ / lint 0 error（28 warning 预存）/ test 42/44 预存
+- **Postmortem README 更新**：Pre-Release 检查从"手动步骤"→ 自动化引用 `bun run postmortem-check`
+
+**Phase 2 全部完成** 🎉（S5 CI/S6 Screenshot/S7 Media Proxy/S8 服务器管理/S9 IG 集成/S10 Postmortem）
 
 ### 2026-08-09 — Phase 2 S9 完成：IG 集成测试扩展
 

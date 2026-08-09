@@ -66,7 +66,7 @@ IG 集成 7 次快节奏补丁（缺路由/缺行为/缺 polish）。对策：**
 3. 逐份交叉比对：文件重叠？模式复现？预防措施落实了没？
 
 **输出**：✅ PASS / ⚠️ WARN / ❌ FAIL。FAIL 必须在 Release 前修。
-（自动化脚本 `scripts/postmortem-check.ts` 为 S10 待办，见 `docs/next-steps.md`）
+自动化执行：`bun run postmortem-check <base-ref> <head-ref>`（默认 `main..HEAD`；CI 冒烟由 `AC-PM-007` 覆盖）。
 
 ## 报告全览
 
