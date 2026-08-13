@@ -70,3 +70,22 @@ export function resolveAIConfig(cfg: AIConfigSource): ResolvedAIConfig {
       throw new Error(`Unknown AI provider: ${cfg.aiProvider satisfies never}`)
   }
 }
+
+/** 只允许支持图片输入的 provider（DR-8）：vision 不列 deepseek */
+export const IMAGE_CAPABLE_PROVIDERS: AIProvider[] = ['google', 'openrouter']
+
+/**
+ * 解析视觉 provider 的生效配置——复用 resolveAIConfig，但按 visionProvider 选择
+ * 对应 provider 的 key/model/baseUrl/thinkingLevel（DR-8：识图与翻译可共用同一 Key）。
+ * 纯函数，逻辑下沉 lib（Postmortem #002）。
+ */
+export function resolveVisionConfig(
+  cfg: Omit<AIConfigSource, 'aiProvider'> & { visionProvider: AIProvider },
+): ResolvedAIConfig {
+  if (!IMAGE_CAPABLE_PROVIDERS.includes(cfg.visionProvider)) {
+    throw new Error(
+      `Vision provider ${cfg.visionProvider} does not support image input (only ${IMAGE_CAPABLE_PROVIDERS.join(' / ')})`,
+    )
+  }
+  return resolveAIConfig({ ...cfg, aiProvider: cfg.visionProvider })
+}

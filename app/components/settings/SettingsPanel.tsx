@@ -10,6 +10,7 @@ import {
 } from '~/components/ui/dialog'
 import { Tabs, TabsList, TabsPanel, TabsTab } from '~/components/ui/tabs'
 import { AITranslationSettings } from './AITranslationSettings'
+import { AIVisionSettings } from './AIVisionSettings'
 import { GeneralSettings } from './GeneralSettings'
 import { SeparatorTemplateManager } from './SeparatorTemplateManager'
 import { TranslationDictionaryManager } from './TranslationDictionaryManager'
@@ -22,6 +23,7 @@ export function SettingsBody() {
           <TabsTab value="separator">分隔符样式</TabsTab>
           <TabsTab value="translation">翻译对照表</TabsTab>
           <TabsTab value="ai-translation">AI 翻译</TabsTab>
+          <TabsTab value="ai-vision">AI 图片描述</TabsTab>
           <TabsTab value="general">通用设置</TabsTab>
         </TabsList>
         <TabsPanel value="general">
@@ -35,6 +37,9 @@ export function SettingsBody() {
         </TabsPanel>
         <TabsPanel value="ai-translation">
           <AITranslationSettings />
+        </TabsPanel>
+        <TabsPanel value="ai-vision">
+          <AIVisionSettings />
         </TabsPanel>
       </Tabs>
 

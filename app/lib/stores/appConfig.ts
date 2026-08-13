@@ -28,6 +28,9 @@ export interface AppConfigs {
   openrouterBaseUrl: string
   openrouterThinkingLevel: ThinkingLevel
   translationGlossary: string
+  enableAIVision: boolean
+  /** 视觉 provider：只允许支持图片输入的（google / openrouter），复用翻译侧对应 key */
+  visionProvider: AIProvider
   isInlineMedia: boolean
 }
 
@@ -56,6 +59,8 @@ interface AppConfigState extends AppConfigs {
   setOpenrouterBaseUrl: (baseUrl: string) => void
   setOpenrouterThinkingLevel: (level: ThinkingLevel) => void
   setTranslationGlossary: (glossary: string) => void
+  setEnableAIVision: (enable: boolean) => void
+  setVisionProvider: (provider: AIProvider) => void
   setIsInlineMedia: (isInlineMedia: boolean) => void
 }
 
@@ -85,6 +90,8 @@ export const useAppConfigStore = create<AppConfigState>()(
       openrouterBaseUrl: '',
       openrouterThinkingLevel: 'minimal',
       translationGlossary: '',
+      enableAIVision: false,
+      visionProvider: 'google',
       isInlineMedia: false,
 
       setEnableMediaProxy: enableMediaProxy => set({ enableMediaProxy }),
@@ -107,6 +114,8 @@ export const useAppConfigStore = create<AppConfigState>()(
       setOpenrouterBaseUrl: openrouterBaseUrl => set({ openrouterBaseUrl }),
       setOpenrouterThinkingLevel: openrouterThinkingLevel => set({ openrouterThinkingLevel }),
       setTranslationGlossary: translationGlossary => set({ translationGlossary }),
+      setEnableAIVision: enableAIVision => set({ enableAIVision }),
+      setVisionProvider: visionProvider => set({ visionProvider }),
       setIsInlineMedia: isInlineMedia => set({ isInlineMedia }),
     }),
     {

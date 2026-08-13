@@ -1,7 +1,7 @@
 import type { EnrichedTweet } from '~/types'
 import { useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
-import { resolveAIConfig } from '~/lib/ai-provider-config'
+import { resolveAIConfig, resolveVisionConfig } from '~/lib/ai-provider-config'
 import { useAppConfigStore } from './appConfig'
 import { useTranslationStore } from './translation'
 import { useTranslationUIStore } from './translationUI'
@@ -37,6 +37,37 @@ export function useAIConfig() {
 export function useResolvedAIConfig() {
   const config = useAIConfig()
   return resolveAIConfig(config)
+}
+
+/** AI 视觉配置字段（DR-3：独立字段，不 bump persist version） */
+export function useAIVisionConfig() {
+  return useAppConfigStore(
+    useShallow(state => ({
+      enableAIVision: state.enableAIVision,
+      visionProvider: state.visionProvider,
+      geminiApiKey: state.geminiApiKey,
+      geminiModel: state.geminiModel,
+      geminiBaseUrl: state.geminiBaseUrl,
+      geminiThinkingLevel: state.geminiThinkingLevel,
+      deepseekApiKey: state.deepseekApiKey,
+      deepseekModel: state.deepseekModel,
+      deepseekBaseUrl: state.deepseekBaseUrl,
+      deepseekThinkingLevel: state.deepseekThinkingLevel,
+      openrouterApiKey: state.openrouterApiKey,
+      openrouterModel: state.openrouterModel,
+      openrouterBaseUrl: state.openrouterBaseUrl,
+      openrouterThinkingLevel: state.openrouterThinkingLevel,
+    })),
+  )
+}
+
+/**
+ * 解析视觉 provider 的生效配置（apiKey / model / baseUrl / thinkingLevel）。
+ * 依赖 useAIVisionConfig 的 useShallow：字段不变则引用稳定。
+ */
+export function useResolvedAIVisionConfig() {
+  const config = useAIVisionConfig()
+  return resolveVisionConfig(config)
 }
 
 /**
