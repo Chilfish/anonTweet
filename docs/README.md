@@ -4,22 +4,24 @@
 
 ## 架构与设计
 
-| 文档                                              | 说明                                                                     |
-| ------------------------------------------------- | ------------------------------------------------------------------------ |
-| [Project Architecture](project_architecture.md)   | 系统架构 v3.0 — BFF 模式、React Router v8、数据流、RettiwtPool、三层缓存 |
-| [Translation Subsystem](feature_translation.md)   | 翻译引擎核心设计 — 实体占位符保护、entity stream、双提供商               |
-| [Instagram Integration](integration_instagram.md) | IG 集成 5 阶段实施追踪（Post/Reel/Story）                                |
-| [IG Actions & DB](ig-actions-integration.md)      | IG 操作区、DB 缓存、AI 翻译管线                                          |
-| [DeepSeek Provider](deepseek-ai-sdk.md)           | DeepSeek AI 提供商配置与使用                                             |
-| [UI/UX Design](ui-design/OVERVIEW.md)             | 设计原则与组件规范（native-first、macOS/iOS HIG）                        |
+| 文档                                              | 说明                                                                      |
+| ------------------------------------------------- | ------------------------------------------------------------------------- |
+| [Project Architecture](project_architecture.md)   | 系统架构 v3.0 — BFF 模式、React Router v8、数据流、RettiwtPool、三层缓存  |
+| [Translation Subsystem](feature_translation.md)   | 翻译引擎核心设计 — 实体占位符保护、entity stream、双提供商                |
+| [Instagram Integration](integration_instagram.md) | IG 集成 5 阶段实施追踪（Post/Reel/Story）                                 |
+| [IG Actions & DB](ig-actions-integration.md)      | IG 操作区、DB 缓存、AI 翻译管线                                           |
+| [DeepSeek Provider](deepseek-ai-sdk.md)           | DeepSeek AI 提供商配置与使用                                              |
+| [AI Vision Subsystem](feature_ai_vision.md)       | AI 视觉描述子系统 — 结构化 OCR/看图说话（OpenRouter + MiMo-V2.5，规划中） |
+| [UI/UX Design](ui-design/OVERVIEW.md)             | 设计原则与组件规范（native-first、macOS/iOS HIG）                         |
 
 ## 验证体系
 
-| 文档                                                      | 说明                                                                 |
-| --------------------------------------------------------- | -------------------------------------------------------------------- |
-| [Verification Suite](../verify/README.md)                 | 验证套件 — CLI + Fixture 库 + API 测试 SDK                           |
-| [Verification Gap Analysis](verification-gap-analysis.md) | 验证体系差距分析与下阶段路线图（S5-S10）                             |
-| [Next Steps](next-steps.md)                               | 下阶段行动计划 — CI/CD、Screenshot/Media Verifier、Postmortem 自动化 |
+| 文档                                                       | 说明                                                                 |
+| ---------------------------------------------------------- | -------------------------------------------------------------------- |
+| [Verification Suite](../verify/README.md)                  | 验证套件 — CLI + Fixture 库 + API 测试 SDK                           |
+| [Verification Gap Analysis](verification-gap-analysis.md)  | 验证体系差距分析与下阶段路线图（S5-S10）                             |
+| [Next Steps](next-steps.md)                                | 下阶段行动计划 — CI/CD、Screenshot/Media Verifier、Postmortem 自动化 |
+| [AI Vision AC](../verify/acceptance-criteria/AC-vision.md) | AI 视觉描述验收标准（AC-VISION-001~008，规划中）                     |
 
 ## 规划（planning/）
 
@@ -27,6 +29,7 @@
 | -------------------------------------------- | ----------------------------------------------------------------- |
 | [Action Plan](planning/action-plan.md)       | 整体行动计划与里程碑（进行中）                                    |
 | [Architecture ADR](planning/architecture.md) | 架构决策记录 — RettiwtPool / 双 Provider / Zustand / BFF / verify |
+| [AI Vision Plan](planning/ai-vision-plan.md) | AI 视觉描述子系统行动计划（Phase 0-5 + DR + commit 拆分）         |
 
 ## 工程规范（engineering/）
 

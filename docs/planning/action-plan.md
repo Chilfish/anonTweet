@@ -54,6 +54,14 @@ Phase 2 行动（源自 `docs/next-steps.md`）：
 
 ## 最近更新
 
+### 2026-08-13 — 新特性规划：AI 视觉描述子系统（Phase 0 文档先行）
+
+- 规划文档化：`docs/feature_ai_vision.md`（需求与上下文）、`docs/planning/ai-vision-plan.md`（行动计划 + DR-1~~7 + commit 拆分）、`verify/acceptance-criteria/AC-vision.md`（AC-VISION-001~~008）
+- 目标：为推文配图提供**结构化** AI 视觉描述（看图说话 / 结构化 OCR+翻译 / 自定义提示），默认 `xiaomi/mimo-v2.5` via OpenRouter，与文本翻译解耦、可并行、可进截图
+- 关键决策：复用 `@ai-sdk/openai-compatible`（零新依赖）；`AIVisionInfo` 独立对象不并入 Entity；独立设置 Tab + 独立 `POST /api/ai/vision` 路由
+- 前置依赖：工作区未提交的 baseUrl/自定义模型 threading 先落地
+- 详见 `docs/planning/ai-vision-plan.md`
+
 ### 2026-08-09 — Phase 2 S10 完成：Postmortem 预发布检查自动化
 
 - **S10 完成（代码 + 验收）**：`verify/acceptance-criteria/AC-postmortem.md`（AC-PM-001~007）→ `scripts/postmortem-check.ts`（git 改动 × Changed Files 交叉比对 + shallow checkout 兜底）+ `verify/modules/postmortem.verifier.ts`（静态完整性检查：报告目录/状态/Changed Files/README 索引/脚本冒烟）
