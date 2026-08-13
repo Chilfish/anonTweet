@@ -45,7 +45,7 @@ function buildContextText(tweetText?: string, quotedText?: string): string {
     lines.push(`推文原文：\n${tweetText}`)
   if (quotedText)
     lines.push(`引用推文：\n${quotedText}`)
-  lines.push('以上为推文上下文。若需要翻译，请据此将图片文字翻译为简体中文。')
+  lines.push('以上为推文上下文，供理解图片语境。')
   return lines.join('\n\n')
 }
 

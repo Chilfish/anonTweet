@@ -14,7 +14,7 @@
 - **输入**：构造 describe / ocr 结果
 - **Pass 条件**：
   - 含 `index` / `mode` / `promptId` / `provider` / `model` / `status` / `createdAt`
-  - describe 模式填充 `description`；ocr 模式填充 `originalText` + `translatedText`
+  - describe 模式填充 `description`；ocr 模式填充 `originalText`（纯 OCR，不含 `translatedText`）
   - 不写入 `Entity`，`EnrichedTweet.visionInfo` 为独立可选数组
 
 ---
@@ -30,14 +30,19 @@
 
 ---
 
-## AC-VISION-003：ocr 结构化 schema 校验
+## AC-VISION-003：ocr 纯 OCR schema 校验
 
 - **验证对象**：ocr schema + `parseVisionResult`
-- **输入**：含原文 + 翻译的模型 JSON 输出
+- **输入**：纯 OCR 的模型 JSON 输出（只含原文，不含翻译）
 - **Pass 条件**：
-  - 合法：`{ "texts": [{ "index": 0, "originalText": "こんにちは", "translatedText": "你好" }] }`
-  - 缺 `originalText` 或 `translatedText` → 校验失败
+  - 合法：`{ "texts": [{ "index": 0, "originalText": "こんにちは" }] }`
+  - 缺 `originalText` → 校验失败；多余键（如 `translatedText`）被 strict 拒绝
   - 空数组 → 返回空 `AIVisionInfo[]`（不抛错）
+
+---
+
+> 翻译不再由 ocr 生成步产出：OCR 纯提取 `originalText`，翻译走独立翻译步
+> （`translateOCR.ts`，复用翻译模型 + 推文上下文，见 `POST /api/ai-vision` translate 分支）。
 
 ---
 

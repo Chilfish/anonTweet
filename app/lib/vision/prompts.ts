@@ -16,7 +16,6 @@ const describeItemSchema = z.object({
 const ocrItemSchema = z.object({
   index: z.number(),
   originalText: z.string(),
-  translatedText: z.string(),
 }).strict()
 
 export const describeSchema = z.object({
@@ -46,10 +45,10 @@ export const VISION_PROMPT_PRESETS = {
   },
   ocr: {
     id: 'ocr',
-    name: '结构化 OCR + 翻译',
+    name: 'OCR 识别',
     mode: 'ocr',
     systemPrompt:
-      '你是推文配图的 OCR 助手。每张图片只输出一个对象（一张图一个对象，不得按文字行拆成多个对象）：originalText 为该图片中的全部文字（多行内容保留原顺序与换行），translatedText 为整段文字翻译为简体中文（若提供了推文上下文），否则 translatedText 与 originalText 相同。index 必须使用用户消息中给出的图片索引，不得自编序号。输出严格 JSON。',
+      '你是推文配图的 OCR 助手。每张图片只输出一个对象（一张图一个对象，不得按文字行拆成多个对象）：originalText 为该图片中的全部文字（多行内容保留原顺序与换行）。只提取文字，不翻译、不改写。index 必须使用用户消息中给出的图片索引，不得自编序号。输出严格 JSON。',
     schema: ocrSchema,
   },
 } as const

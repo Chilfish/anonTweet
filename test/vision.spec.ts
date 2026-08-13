@@ -5,6 +5,7 @@ import { buildMediaUrl } from '~/lib/vision/fetchImage'
 import { buildVisionMessages } from '~/lib/vision/messages'
 import { alignVisionIndexes, applyManualOverrides, mergeVisionInfo, parseVisionResult, resolveVisionView } from '~/lib/vision/parse'
 import { getVisionPreset, VISION_PROMPT_PRESETS } from '~/lib/vision/prompts'
+import { parseOcrTranslation } from '~/lib/vision/translateOCR'
 
 const DATA_URI = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD'
 
@@ -27,15 +28,15 @@ describe('vision AC-VISION-001: AIVisionInfo 结构完整', () => {
     expect(info.model).toBe('')
   })
 
-  it('ocr 结果含 originalText + translatedText', () => {
+  it('ocr 结果含 originalText（纯 OCR，不含 translatedText）', () => {
     const info = parseVisionResult(VISION_PROMPT_PRESETS.ocr, {
-      texts: [{ index: 0, originalText: 'こんにちは', translatedText: '你好' }],
+      texts: [{ index: 0, originalText: 'こんにちは' }],
     })[0]!
 
     expect(info.index).toBe(0)
     expect(info.mode).toBe('ocr')
     expect(info.originalText).toBe('こんにちは')
-    expect(info.translatedText).toBe('你好')
+    expect(info.translatedText).toBeUndefined()
     expect(info.description).toBeUndefined()
     expect(info.status).toBe('done')
   })
@@ -98,20 +99,22 @@ describe('vision AC-VISION-002: describe 结构化 schema 校验', () => {
   })
 })
 
-describe('vision AC-VISION-003: ocr 结构化 schema 校验', () => {
-  const valid = { texts: [{ index: 0, originalText: 'こんにちは', translatedText: '你好' }] }
+describe('vision AC-VISION-003: ocr 纯 OCR schema 校验', () => {
+  const valid = { texts: [{ index: 0, originalText: 'こんにちは' }] }
 
   it('合法输入解析为 AIVisionInfo', () => {
     const out = parseVisionResult(VISION_PROMPT_PRESETS.ocr, valid)
     expect(out).toHaveLength(1)
     expect(out[0]!.originalText).toBe('こんにちは')
-    expect(out[0]!.translatedText).toBe('你好')
   })
 
-  it('缺 originalText 或 translatedText → 校验失败', () => {
-    expect(() => parseVisionResult(VISION_PROMPT_PRESETS.ocr, { texts: [{ index: 0, translatedText: '你好' }] }))
+  it('缺 originalText → 校验失败', () => {
+    expect(() => parseVisionResult(VISION_PROMPT_PRESETS.ocr, { texts: [{ index: 0 }] }))
       .toThrow(/schema validation failed/)
-    expect(() => parseVisionResult(VISION_PROMPT_PRESETS.ocr, { texts: [{ index: 0, originalText: 'こんにちは' }] }))
+  })
+
+  it('多余键 translatedText 被 strict 拒绝（翻译走独立翻译步）', () => {
+    expect(() => parseVisionResult(VISION_PROMPT_PRESETS.ocr, { texts: [{ index: 0, originalText: 'x', translatedText: '你好' }] }))
       .toThrow(/schema validation failed/)
   })
 
@@ -121,11 +124,24 @@ describe('vision AC-VISION-003: ocr 结构化 schema 校验', () => {
 
   it('ocr 单图应为一个条目（多行文字合并进 originalText，含换行）', () => {
     const out = parseVisionResult(VISION_PROMPT_PRESETS.ocr, {
-      texts: [{ index: 0, originalText: '第一行\n第二行', translatedText: '第一行\n第二行' }],
+      texts: [{ index: 0, originalText: '第一行\n第二行' }],
     })
     expect(out).toHaveLength(1)
     expect(out[0]!.originalText).toContain('\n')
-    expect(out[0]!.translatedText).toContain('\n')
+  })
+})
+
+describe('vision translate: parseOcrTranslation 解析翻译结果', () => {
+  it('合法输入解析为 { index, translatedText }', () => {
+    const out = parseOcrTranslation({ translations: [{ index: 0, translatedText: '你好' }] })
+    expect(out).toEqual([{ index: 0, translatedText: '你好' }])
+  })
+
+  it('缺 translatedText 或多余键 → 校验失败', () => {
+    expect(() => parseOcrTranslation({ translations: [{ index: 0 }] }))
+      .toThrow(/schema validation failed/)
+    expect(() => parseOcrTranslation({ translations: [{ index: 0, translatedText: 'x', extra: 1 }] }))
+      .toThrow(/schema validation failed/)
   })
 })
 

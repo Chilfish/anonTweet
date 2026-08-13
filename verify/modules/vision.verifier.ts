@@ -84,7 +84,7 @@ export class VisionVerifier implements Verifier {
         descriptions: [{ index: 0, description: '一只猫蹲在窗台上' }],
       })[0]!
       const ocr = parseVisionResult(VISION_PROMPT_PRESETS.ocr, {
-        texts: [{ index: 0, originalText: 'こんにちは', translatedText: '你好' }],
+        texts: [{ index: 0, originalText: 'こんにちは' }],
       })[0]!
 
       const describeOk
@@ -99,11 +99,11 @@ export class VisionVerifier implements Verifier {
       const ocrOk
         = ocr.mode === 'ocr'
           && ocr.originalText === 'こんにちは'
-          && ocr.translatedText === '你好'
+          && ocr.translatedText === undefined
           && ocr.description === undefined
 
       if (describeOk && ocrOk) {
-        return this.pass('AC-VISION-001', 'AIVisionInfo structure', 'describe→description, ocr→originalText+translatedText, 独立于 Entity')
+        return this.pass('AC-VISION-001', 'AIVisionInfo structure', 'describe→description, ocr→originalText(纯OCR), 独立于 Entity')
       }
       return this.fail('AC-VISION-001', 'AIVisionInfo structure', `describeOk:${describeOk} ocrOk:${ocrOk}`)
     }
@@ -139,26 +139,26 @@ export class VisionVerifier implements Verifier {
     }
   }
 
-  // ── AC-VISION-003: ocr 结构化 schema 校验 ─────────────────
+  // ── AC-VISION-003: ocr 纯 OCR schema 校验 ─────────────────
   private verifyOcrSchema(): StepResult {
     try {
       const valid = parseVisionResult(VISION_PROMPT_PRESETS.ocr, {
-        texts: [{ index: 0, originalText: 'こんにちは', translatedText: '你好' }],
+        texts: [{ index: 0, originalText: 'こんにちは' }],
       })
-      const validOk = valid.length === 1 && valid[0]!.originalText === 'こんにちは' && valid[0]!.translatedText === '你好'
+      const validOk = valid.length === 1 && valid[0]!.originalText === 'こんにちは'
 
       const missingOriginal = throws(() =>
-        parseVisionResult(VISION_PROMPT_PRESETS.ocr, { texts: [{ index: 0, translatedText: '你好' }] }))
-      const missingTranslated = throws(() =>
-        parseVisionResult(VISION_PROMPT_PRESETS.ocr, { texts: [{ index: 0, originalText: 'こんにちは' }] }))
+        parseVisionResult(VISION_PROMPT_PRESETS.ocr, { texts: [{ index: 0 }] }))
+      const extraTranslated = throws(() =>
+        parseVisionResult(VISION_PROMPT_PRESETS.ocr, { texts: [{ index: 0, originalText: 'こんにちは', translatedText: '你好' }] }))
 
       const empty = parseVisionResult(VISION_PROMPT_PRESETS.ocr, { texts: [] })
       const emptyOk = Array.isArray(empty) && empty.length === 0
 
-      if (validOk && missingOriginal && missingTranslated && emptyOk) {
-        return this.pass('AC-VISION-003', 'ocr schema', '合法通过；缺字段拒绝；空数组返回 []')
+      if (validOk && missingOriginal && extraTranslated && emptyOk) {
+        return this.pass('AC-VISION-003', 'ocr schema', '合法通过；缺字段/多余键(translatedText)均被 strict 拒绝；空数组返回 []')
       }
-      return this.fail('AC-VISION-003', 'ocr schema', `valid:${validOk} missingOriginal:${missingOriginal} missingTranslated:${missingTranslated} empty:${emptyOk}`)
+      return this.fail('AC-VISION-003', 'ocr schema', `valid:${validOk} missingOriginal:${missingOriginal} extraTranslated:${extraTranslated} empty:${emptyOk}`)
     }
     catch (err) {
       return this.fail('AC-VISION-003', 'ocr schema', err instanceof Error ? err.message : String(err))

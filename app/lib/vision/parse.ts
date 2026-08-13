@@ -22,11 +22,11 @@ export function parseVisionResult(
 
   const data = parsed.data as {
     descriptions?: Array<{ index: number, description: string }>
-    texts?: Array<{ index: number, originalText: string, translatedText: string }>
+    texts?: Array<{ index: number, originalText: string }>
   }
   const createdAt = Date.now()
 
-  // ocr 模式：schema 为 ocrSchema，读 texts
+  // ocr 模式：纯 OCR，只映射 originalText（translatedText 由独立翻译步写入）
   if (preset.mode === 'ocr') {
     return (data.texts ?? []).map(t => ({
       index: t.index,
@@ -35,7 +35,6 @@ export function parseVisionResult(
       provider: '',
       model: '',
       originalText: t.originalText,
-      translatedText: t.translatedText,
       status: 'done' as const,
       createdAt,
     }))
