@@ -1,7 +1,7 @@
 # AI 视觉描述子系统 — 行动计划
 
 > 最后更新：2026-08-13
-> 状态：**Phase 1~3 已完成（P1 e278444 · P2 1bfc2f0 · P3 da66c5c），Phase 4 进行中（4a 设置 Tab 已提交，4b 展示+编辑弹窗 待提交）**
+> 状态：**Phase 1~4 已完成（P1 e278444 · P2 1bfc2f0 · P3 da66c5c · P4a d666ddc · P4b 本 commit），Phase 5 截图+缓存待实施**
 > 上游：`docs/feature_ai_vision.md`（需求与上下文）｜ `verify/acceptance-criteria/AC-vision.md`（验收）
 > 前置依赖：baseUrl / 自定义模型输入（已落库）
 
@@ -74,17 +74,16 @@
 
 > 拆两个 commit：4a 设置 Tab、4b 展示 + 编辑弹窗（原子提交，diff 超 10 文件即拆分）。
 
-- **4a** `app/components/settings/AIVisionSettings.tsx` + `SettingsPanel.tsx` 新 Tab
+- **4a** ✅ `d666ddc` `app/components/settings/AIVisionSettings.tsx` + `SettingsPanel.tsx` 新 Tab
   - Provider 下拉：**复用 provider 策略体系**，只列支持图片输入的模型（google/gemini、openrouter 等；参考 OpenRouter
     [`?input_modalities=image&output_modalities=text`](https://openrouter.ai/models?input_modalities=image&output_modalities=text)）；
     用户已有 Gemini Key 时可「识图+翻译」复用一个 Key（DR-8）
   - `appConfig` vision 字段（`enableAIVision` / `visionProvider`，DR-3 不 bump version）
     - `resolveVisionConfig` 纯函数（只放行 google/openrouter）+ `useAIVisionConfig`（hooks.ts）
-  - commit: `feat(ui): add AI vision settings tab`
-- **4b** `app/components/tweet/AIVisionBlock.tsx`（媒体区展示）
-  - `app/components/translation/AIVisionEditorDialog.tsx` + `app/hooks/use-vision-logic.ts`（逐图查看/预设切换/附上下文/重生成/手动保存）
+- **4b** ✅ `app/components/tweet/AIVisionBlock.tsx`（媒体区展示，`resolveVisionView` 决策链 + 空态入口）
+  - `app/components/translation/AIVisionEditorDialog.tsx` + `app/hooks/use-vision-logic.ts`（弹窗级 mode/附上下文/自定义提示；逐图查看 + 手动覆盖 textarea；AI 生成/重生成 + 保存）
+  - `AIVisionInfo.manualDescription?` 扩展 + `mergeVisionInfo` / `applyManualOverrides` 纯函数（parse.ts，Postmortem #002）
   - `TweetNode.tsx` 挂载（`TweetMediaAlt` 之后）；`plain.tsx` 留待 Phase 5
-  - commit: `feat(ui): vision block display + editor dialog`
 
 ### Phase 5 — 截图 + 缓存/持久化
 

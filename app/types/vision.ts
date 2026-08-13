@@ -20,6 +20,8 @@ export interface AIVisionInfo {
   model: string
   /** describe/custom 模式：看图说话描述 */
   description?: string
+  /** 手动编辑覆盖（Phase 4 UI）：resolveVisionView 中 manual > ai，可为空清除 */
+  manualDescription?: string
   /** ocr 模式：图片原文（结构化 OCR，保持原语言与换行） */
   originalText?: string
   /** ocr 模式：翻译为简体中文 */

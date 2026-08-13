@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { runImageVision } from '~/lib/vision/describeImages'
 import { buildMediaUrl } from '~/lib/vision/fetchImage'
 import { buildVisionMessages } from '~/lib/vision/messages'
-import { parseVisionResult, resolveVisionView } from '~/lib/vision/parse'
+import { applyManualOverrides, mergeVisionInfo, parseVisionResult, resolveVisionView } from '~/lib/vision/parse'
 import { getVisionPreset, VISION_PROMPT_PRESETS } from '~/lib/vision/prompts'
 
 const DATA_URI = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD'
@@ -283,5 +283,68 @@ describe('vision AC-VISION-007: withContext 注入推文上下文', () => {
     const content = noCtx[1]!.content as Array<{ type: string }>
     const fileParts = content.filter(p => p.type === 'file')
     expect(fileParts).toHaveLength(1)
+  })
+})
+
+describe('vision Phase 4: mergeVisionInfo 合并 AI 生成结果', () => {
+  const base = [
+    { index: 0, mode: 'describe' as const, promptId: 'describe', provider: '', model: '', description: '旧描述 0', status: 'done' as const, createdAt: 1 },
+    { index: 1, mode: 'describe' as const, promptId: 'describe', provider: '', model: '', description: '旧描述 1', status: 'done' as const, createdAt: 1 },
+  ]
+
+  it('incoming 命中 index 时替换，保留已有 manualDescription', () => {
+    const withManual = mergeVisionInfo(
+      [{ ...base[0]!, manualDescription: '手动覆盖' }, base[1]!],
+      [{ index: 0, mode: 'describe', promptId: 'describe', provider: 'openrouter', model: 'm', description: '新描述', status: 'done', createdAt: 2 }],
+    )
+    const hit = withManual.find(v => v.index === 0)!
+    expect(hit.description).toBe('新描述')
+    expect(hit.manualDescription).toBe('手动覆盖') // 重生成不冲掉手动覆盖
+    expect(withManual).toHaveLength(2)
+  })
+
+  it('未命中的 index 保留，结果按 index 排序', () => {
+    const merged = mergeVisionInfo(base, [
+      { index: 0, mode: 'describe', promptId: 'describe', provider: '', model: '', description: '新 0', status: 'done', createdAt: 2 },
+    ])
+    expect(merged.map(v => v.index)).toEqual([0, 1])
+    expect(merged[1]!.description).toBe('旧描述 1')
+  })
+})
+
+describe('vision Phase 4: applyManualOverrides 手动覆盖保存', () => {
+  const base = [
+    { index: 0, mode: 'describe' as const, promptId: 'describe', provider: '', model: '', description: 'AI 0', status: 'done' as const, createdAt: 1 },
+    { index: 1, mode: 'describe' as const, promptId: 'describe', provider: '', model: '', description: 'AI 1', status: 'done' as const, createdAt: 1 },
+  ]
+
+  it('manual 非空 → 写 manualDescription（resolveVisionView 手动优先）', () => {
+    const out = applyManualOverrides(base, { 0: '手动改写 0' }, [0, 1])
+    const view = resolveVisionView(out.find(v => v.index === 0), out.find(v => v.index === 0)!.manualDescription)
+    expect(out[0]!.manualDescription).toBe('手动改写 0')
+    expect(view.source).toBe('manual')
+    expect(view.displayText).toBe('手动改写 0')
+    // 未覆盖的图保持 AI 结果
+    expect(out.find(v => v.index === 1)!.manualDescription).toBeUndefined()
+  })
+
+  it('manual 清空 → 移除旧 manualDescription 回到 AI 结果', () => {
+    const withManual = applyManualOverrides(
+      [{ ...base[0]!, manualDescription: '旧的' }, base[1]!],
+      { 0: '   ' }, // 空白视为清除
+      [0, 1],
+    )
+    expect(withManual[0]!.manualDescription).toBeUndefined()
+    const view = resolveVisionView(withManual[0])
+    expect(view.source).toBe('ai')
+    expect(view.displayText).toBe('AI 0')
+  })
+
+  it('无 AI 条目的图 + 手动 → 创建 manual 条目', () => {
+    const out = applyManualOverrides(base, { 2: '纯手动描述' }, [0, 1, 2])
+    const manualEntry = out.find(v => v.index === 2)!
+    expect(manualEntry.description).toBe('纯手动描述')
+    expect(manualEntry.manualDescription).toBe('纯手动描述')
+    expect(out.map(v => v.index)).toEqual([0, 1, 2])
   })
 })

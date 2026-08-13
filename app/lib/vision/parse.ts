@@ -97,3 +97,60 @@ export function resolveVisionView(
   // 3. 两者皆无 → 无视图（隐藏该图描述区）
   return { hasView: false, displayText: '', aiInfo }
 }
+
+/**
+ * 合并 AI 生成结果到已有 visionInfo：incoming 命中 index 时替换，
+ * 但保留已有条目上的 manualDescription（手动覆盖不被 AI 重生成冲掉）。
+ * 纯函数，Phase 4 编辑弹窗复用。
+ */
+export function mergeVisionInfo(
+  existing: AIVisionInfo[],
+  incoming: AIVisionInfo[],
+): AIVisionInfo[] {
+  const map = new Map(existing.map(v => [v.index, v]))
+  for (const item of incoming) {
+    const prev = map.get(item.index)
+    map.set(item.index, { ...item, manualDescription: prev?.manualDescription })
+  }
+  return [...map.values()].sort((a, b) => a.index - b.index)
+}
+
+/**
+ * 应用手动覆盖：按 photoIndexes 重建 visionInfo——manual 非空时写入
+ * manualDescription（无 AI 条目则建手动条目）；manual 清空时移除旧覆盖回到 AI 结果。
+ * 纯函数，Phase 4 编辑弹窗保存时复用。
+ */
+export function applyManualOverrides(
+  visionInfo: AIVisionInfo[],
+  manualTexts: Record<number, string>,
+  photoIndexes: number[],
+): AIVisionInfo[] {
+  const next: AIVisionInfo[] = []
+  for (const index of photoIndexes) {
+    const manual = manualTexts[index]?.trim()
+    const existing = visionInfo.find(v => v.index === index)
+    if (manual) {
+      next.push(existing
+        ? { ...existing, manualDescription: manual }
+        : {
+            index,
+            mode: 'describe',
+            promptId: 'describe',
+            provider: '',
+            model: '',
+            description: manual,
+            manualDescription: manual,
+            status: 'done',
+            createdAt: Date.now(),
+          })
+    }
+    else if (existing) {
+      next.push(
+        existing.manualDescription
+          ? { ...existing, manualDescription: undefined }
+          : existing,
+      )
+    }
+  }
+  return next.sort((a, b) => a.index - b.index)
+}
