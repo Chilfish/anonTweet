@@ -1,7 +1,7 @@
 # AI 视觉描述子系统 — 行动计划
 
 > 最后更新：2026-08-13
-> 状态：**Phase 1~4 已完成（P1 e278444 · P2 1bfc2f0 · P3 da66c5c · P4a d666ddc · P4b 本 commit），Phase 5 截图+缓存待实施**
+> 状态：**Phase 1~4 已完成（P1 e278444 · P2 1bfc2f0 · P3 da66c5c · P4a d666ddc · P4b 1171f46 · 数据正确性修复 本 commit），Phase 5 截图+缓存待实施**
 > 上游：`docs/feature_ai_vision.md`（需求与上下文）｜ `verify/acceptance-criteria/AC-vision.md`（验收）
 > 前置依赖：baseUrl / 自定义模型输入（已落库）
 

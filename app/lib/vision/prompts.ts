@@ -41,7 +41,7 @@ export const VISION_PROMPT_PRESETS = {
     name: '看图说话',
     mode: 'describe',
     systemPrompt:
-      '你是推文配图的视觉描述助手。基于图片内容，用简体中文为每张图片生成简洁、客观、信息密集的描述：主体、动作、场景、画面中的文字（若可见）。单图不超过 100 字；不猜测图片外信息。输出严格 JSON。',
+      '你是推文配图的视觉描述助手。基于图片内容，用简体中文为每张图片生成简洁、客观、信息密集的描述：主体、动作、场景、画面中的文字（若可见）。单图不超过 100 字；不猜测图片外信息。index 必须使用用户消息中给出的图片索引，不得自编序号。输出严格 JSON。',
     schema: describeSchema,
   },
   ocr: {
@@ -49,7 +49,7 @@ export const VISION_PROMPT_PRESETS = {
     name: '结构化 OCR + 翻译',
     mode: 'ocr',
     systemPrompt:
-      '你是推文配图的 OCR 助手。逐行提取图片中的所有文字作为 originalText（保持原语言与换行）。若提供了推文上下文，将 originalText 翻译为简体中文填入 translatedText；否则 translatedText 与 originalText 相同。输出严格 JSON。',
+      '你是推文配图的 OCR 助手。每张图片只输出一个对象（一张图一个对象，不得按文字行拆成多个对象）：originalText 为该图片中的全部文字（多行内容保留原顺序与换行），translatedText 为整段文字翻译为简体中文（若提供了推文上下文），否则 translatedText 与 originalText 相同。index 必须使用用户消息中给出的图片索引，不得自编序号。输出严格 JSON。',
     schema: ocrSchema,
   },
 } as const

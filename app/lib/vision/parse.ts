@@ -154,3 +154,20 @@ export function applyManualOverrides(
   }
   return next.sort((a, b) => a.index - b.index)
 }
+
+/**
+ * 结果索引对齐：模型对「哪张图对应哪个 index」不可靠（曾 describe 单图返回 index 1、
+ * ocr 把行号当 index），结果数量与请求图片一致时按序强制重映射到请求的 mediaDetails
+ * 索引，保证 UI 按图查找（find(v => v.index === i)）命中。数量不一致（如 ocr 仍拆多条）
+ * 时保留模型索引，交由上层按描述内容合并。
+ * 纯函数，服务端编排层 parse 后调用。
+ */
+export function alignVisionIndexes(
+  info: AIVisionInfo[],
+  requestedIndexes: number[],
+): AIVisionInfo[] {
+  if (info.length !== requestedIndexes.length) {
+    return info
+  }
+  return info.map((item, i) => ({ ...item, index: requestedIndexes[i]! }))
+}

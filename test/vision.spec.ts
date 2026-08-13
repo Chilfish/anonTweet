@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { runImageVision } from '~/lib/vision/describeImages'
 import { buildMediaUrl } from '~/lib/vision/fetchImage'
 import { buildVisionMessages } from '~/lib/vision/messages'
-import { applyManualOverrides, mergeVisionInfo, parseVisionResult, resolveVisionView } from '~/lib/vision/parse'
+import { alignVisionIndexes, applyManualOverrides, mergeVisionInfo, parseVisionResult, resolveVisionView } from '~/lib/vision/parse'
 import { getVisionPreset, VISION_PROMPT_PRESETS } from '~/lib/vision/prompts'
 
 const DATA_URI = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD'
@@ -118,6 +118,15 @@ describe('vision AC-VISION-003: ocr 结构化 schema 校验', () => {
   it('空数组 → 返回空 AIVisionInfo[]（不抛错）', () => {
     expect(parseVisionResult(VISION_PROMPT_PRESETS.ocr, { texts: [] })).toEqual([])
   })
+
+  it('ocr 单图应为一个条目（多行文字合并进 originalText，含换行）', () => {
+    const out = parseVisionResult(VISION_PROMPT_PRESETS.ocr, {
+      texts: [{ index: 0, originalText: '第一行\n第二行', translatedText: '第一行\n第二行' }],
+    })
+    expect(out).toHaveLength(1)
+    expect(out[0]!.originalText).toContain('\n')
+    expect(out[0]!.translatedText).toContain('\n')
+  })
 })
 
 describe('vision AC-VISION-004: resolveVisionView 决策链', () => {
@@ -162,6 +171,17 @@ describe('vision AC-VISION-005: mediaIndex → mediaDetails 映射', () => {
     // file part 为 base64 data 形态（供 openai-compatible 转 image_url）
     const part = userContent[0]!.data!
     expect(part.data).toBe('/9j/4AAQSkZJRgABAQAAAQABAAD')
+  })
+
+  it('user 消息含图片 index 映射，模型不再自造 index', () => {
+    const messages = buildVisionMessages({ images, preset })
+    const text = (messages[1]!.content as Array<{ type: string, text?: string }>)
+      .filter(p => p.type === 'text')
+      .map(p => p.text ?? '')
+      .join(' ')
+    expect(text).toContain('0, 2')
+    // 索引映射文本不影响 withContext 上下文注入
+    expect(text).not.toContain('推文原文')
   })
 
   it('结果 index 与 mediaDetails 索引对应，且与 media_alt 20000+i 不冲突', () => {
@@ -346,5 +366,38 @@ describe('vision Phase 4: applyManualOverrides 手动覆盖保存', () => {
     expect(manualEntry.description).toBe('纯手动描述')
     expect(manualEntry.manualDescription).toBe('纯手动描述')
     expect(out.map(v => v.index)).toEqual([0, 1, 2])
+  })
+})
+
+describe('vision fix: alignVisionIndexes 结果索引对齐请求', () => {
+  const info = (index: number) => ({
+    index,
+    mode: 'describe' as const,
+    promptId: 'describe',
+    provider: '',
+    model: '',
+    description: `描述 ${index}`,
+    status: 'done' as const,
+    createdAt: 1,
+  })
+
+  it('结果数与请求一致 → 按序强制对齐请求索引（模型自造 index 不命中）', () => {
+    // 曾出现单图（mediaIndexes [0]）返回 index 1，数量一致时按序重映射
+    const out = alignVisionIndexes([info(1)], [0])
+    expect(out).toHaveLength(1)
+    expect(out[0]!.index).toBe(0)
+    expect(out[0]!.description).toBe('描述 1')
+  })
+
+  it('多图按序对齐到请求索引', () => {
+    const out = alignVisionIndexes([info(0), info(1)], [0, 2])
+    expect(out.map(v => v.index)).toEqual([0, 2])
+    expect(out[1]!.description).toBe('描述 1')
+  })
+
+  it('结果数不一致 → 不强制对齐，保留模型索引', () => {
+    const out = alignVisionIndexes([info(0)], [0, 2])
+    expect(out).toHaveLength(1)
+    expect(out[0]!.index).toBe(0)
   })
 })

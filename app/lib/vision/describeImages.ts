@@ -8,7 +8,7 @@ import { models } from '~/lib/constants'
 import { getProviderStrategy, getThinkingConfig } from '~/lib/providers'
 import { fetchMediaImages } from './fetchImage'
 import { buildVisionMessages } from './messages'
-import { parseVisionResult, VisionParseError } from './parse'
+import { alignVisionIndexes, parseVisionResult, VisionParseError } from './parse'
 import { getVisionPreset } from './prompts'
 
 /**
@@ -16,7 +16,7 @@ import { getVisionPreset } from './prompts'
  *
  * runImageVision：photo 过滤 → 抓图（base64 data URI）→ buildVisionMessages →
  * generateText(Output.object, zodSchema(preset.schema)) → parseVisionResult →
- * 回填 provider/model。
+ * alignVisionIndexes（结果数与请求一致时按序对齐 mediaDetails 索引）→ 回填 provider/model。
  * 无 photo（或全 video/gif）→ 直接返回 []，不发起模型请求（AC-VISION-006）。
  * schema strict 校验失败时带错误提示重试一次（对齐翻译 validate+retry 模式）。
  */
@@ -110,7 +110,10 @@ export async function runImageVision({
           : {},
       })
 
-      const info = parseVisionResult(preset, response.output)
+      const info = alignVisionIndexes(
+        parseVisionResult(preset, response.output),
+        images.map(img => img.index),
+      )
       return info.map(i => ({ ...i, provider, model }))
     }
     catch (err) {
