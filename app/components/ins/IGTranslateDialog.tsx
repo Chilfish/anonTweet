@@ -40,6 +40,9 @@ export function IGTranslateDialog({ post, onTranslated }: IGTranslateDialogProps
   const model = aiConfig.aiProvider === 'google'
     ? aiConfig.geminiModel
     : aiConfig.deepseekModel
+  const baseUrl = aiConfig.aiProvider === 'google'
+    ? aiConfig.geminiBaseUrl
+    : aiConfig.deepseekBaseUrl
   const thinkingLevel = aiConfig.aiProvider === 'google'
     ? aiConfig.geminiThinkingLevel
     : aiConfig.deepseekThinkingLevel
@@ -60,6 +63,8 @@ export function IGTranslateDialog({ post, onTranslated }: IGTranslateDialogProps
         enableAITranslation: true,
         apiKey,
         model,
+        provider: aiConfig.aiProvider,
+        baseUrl,
         thinkingLevel,
         translationGlossary: combinedGlossary,
         force: true,

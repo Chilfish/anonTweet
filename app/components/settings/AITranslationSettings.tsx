@@ -9,16 +9,21 @@ import {
   Select,
   SelectContent,
   SelectItem,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
 import { Switch } from '~/components/ui/switch'
 import { Textarea } from '~/components/ui/textarea'
 import { toastManager } from '~/components/ui/toast'
-import { models } from '~/lib/constants'
+import { DEFAULT_DEEPSEEK_BASE_URL, DEFAULT_GEMINI_BASE_URL, models } from '~/lib/constants'
 import { fetcher } from '~/lib/fetcher'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
+
+/** 模型下拉中的「自定义」哨兵项，用于切换到手写模型名的输入模式 */
+const CUSTOM_MODEL_VALUE = '__custom__'
+const CUSTOM_MODEL_OPTION = { label: '自定义模型…', value: CUSTOM_MODEL_VALUE }
 
 export function AITranslationSettings() {
   const {
@@ -26,18 +31,22 @@ export function AITranslationSettings() {
     aiProvider,
     geminiApiKey,
     geminiModel,
+    geminiBaseUrl,
     geminiThinkingLevel,
     deepseekApiKey,
     deepseekModel,
+    deepseekBaseUrl,
     deepseekThinkingLevel,
     translationGlossary,
     setEnableAITranslation,
     setAIProvider,
     setGeminiApiKey,
     setGeminiModel,
+    setGeminiBaseUrl,
     setGeminiThinkingLevel,
     setDeepseekApiKey,
     setDeepseekModel,
+    setDeepseekBaseUrl,
     setDeepseekThinkingLevel,
     setTranslationGlossary,
   } = useAppConfigStore(
@@ -46,18 +55,22 @@ export function AITranslationSettings() {
       aiProvider: state.aiProvider,
       geminiApiKey: state.geminiApiKey,
       geminiModel: state.geminiModel,
+      geminiBaseUrl: state.geminiBaseUrl,
       geminiThinkingLevel: state.geminiThinkingLevel,
       deepseekApiKey: state.deepseekApiKey,
       deepseekModel: state.deepseekModel,
+      deepseekBaseUrl: state.deepseekBaseUrl,
       deepseekThinkingLevel: state.deepseekThinkingLevel,
       translationGlossary: state.translationGlossary,
       setEnableAITranslation: state.setEnableAITranslation,
       setAIProvider: state.setAIProvider,
       setGeminiApiKey: state.setGeminiApiKey,
       setGeminiModel: state.setGeminiModel,
+      setGeminiBaseUrl: state.setGeminiBaseUrl,
       setGeminiThinkingLevel: state.setGeminiThinkingLevel,
       setDeepseekApiKey: state.setDeepseekApiKey,
       setDeepseekModel: state.setDeepseekModel,
+      setDeepseekBaseUrl: state.setDeepseekBaseUrl,
       setDeepseekThinkingLevel: state.setDeepseekThinkingLevel,
       setTranslationGlossary: state.setTranslationGlossary,
     })),
@@ -69,6 +82,7 @@ export function AITranslationSettings() {
   const currentProviderConfig = {
     apiKey: aiProvider === 'google' ? geminiApiKey : deepseekApiKey,
     model: aiProvider === 'google' ? geminiModel : deepseekModel,
+    baseUrl: aiProvider === 'google' ? geminiBaseUrl : deepseekBaseUrl,
     thinkingLevel: aiProvider === 'google' ? geminiThinkingLevel : deepseekThinkingLevel,
     providerName: aiProvider === 'google' ? 'Gemini' : 'DeepSeek',
   }
@@ -88,6 +102,8 @@ export function AITranslationSettings() {
       const { data } = await fetcher.post('/api/ai-test', {
         apiKey: currentProviderConfig.apiKey,
         model: currentProviderConfig.model,
+        provider: aiProvider,
+        baseUrl: currentProviderConfig.baseUrl,
         thinkingLevel: currentProviderConfig.thinkingLevel,
         tweetId: '1',
         enableAITranslation: true,
@@ -159,6 +175,7 @@ export function AITranslationSettings() {
 
   const modelOptions = providerModels.map(m => ({ label: m.text, value: m.name }))
   const currentModelOption = modelOptions.find(opt => opt.value === currentProviderConfig.model)
+  const isCustomModel = !currentModelOption
 
   return (
     <div className="space-y-6 p-1">
@@ -242,6 +259,22 @@ export function AITranslationSettings() {
               />
             </SettingsRow>
 
+            {/* Base URL Input */}
+            <SettingsRow
+              label="Base URL"
+              description="可选，留空使用官方默认地址"
+              id="ai-base-url"
+            >
+              <Input
+                type="url"
+                autoComplete="off"
+                value={aiProvider === 'google' ? geminiBaseUrl : deepseekBaseUrl}
+                onChange={e => aiProvider === 'google' ? setGeminiBaseUrl(e.target.value) : setDeepseekBaseUrl(e.target.value)}
+                placeholder={aiProvider === 'google' ? DEFAULT_GEMINI_BASE_URL : DEFAULT_DEEPSEEK_BASE_URL}
+                className="text-right h-8 sm:min-w-64 bg-secondary/30 border-none focus-visible:ring-1 focus-visible:ring-primary/20"
+              />
+            </SettingsRow>
+
             {/* Model Selection */}
             <SettingsRow
               label="模型"
@@ -249,10 +282,17 @@ export function AITranslationSettings() {
             >
               <div className="flex-1 flex justify-end">
                 <Select
-                  value={currentModelOption}
+                  value={isCustomModel ? CUSTOM_MODEL_OPTION : currentModelOption}
                   onValueChange={(opt) => {
                     if (!opt)
                       return
+                    if (opt.value === CUSTOM_MODEL_VALUE) {
+                      // 进入自定义模式：清空预设，显示手写模型名输入框
+                      if (aiProvider === 'google')
+                        setGeminiModel('')
+                      else setDeepseekModel('')
+                      return
+                    }
                     const val = opt.value
                     if (aiProvider === 'google') {
                       setGeminiModel(val)
@@ -283,10 +323,31 @@ export function AITranslationSettings() {
                         {opt.label}
                       </SelectItem>
                     ))}
+                    <SelectSeparator />
+                    <SelectItem value={CUSTOM_MODEL_OPTION}>
+                      {CUSTOM_MODEL_OPTION.label}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </SettingsRow>
+
+            {/* Custom Model Name Input */}
+            {isCustomModel && (
+              <SettingsRow
+                label="自定义模型名称"
+                description="输入完整的模型 ID，例如 models/gemini-3-pro-preview"
+                id="ai-custom-model"
+              >
+                <Input
+                  autoComplete="off"
+                  value={currentProviderConfig.model}
+                  onChange={e => aiProvider === 'google' ? setGeminiModel(e.target.value) : setDeepseekModel(e.target.value)}
+                  placeholder="输入模型 ID"
+                  className="text-right h-8 sm:min-w-64 bg-secondary/30 border-none focus-visible:ring-1 focus-visible:ring-primary/20"
+                />
+              </SettingsRow>
+            )}
 
             {/* Thinking Level */}
             {currentModelConfig?.thinkingType !== 'none' && (

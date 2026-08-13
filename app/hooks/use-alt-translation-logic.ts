@@ -16,9 +16,11 @@ export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
     aiProvider,
     geminiApiKey,
     geminiModel,
+    geminiBaseUrl,
     geminiThinkingLevel,
     deepseekApiKey,
     deepseekModel,
+    deepseekBaseUrl,
     deepseekThinkingLevel,
     enableAITranslation,
     translationGlossary,
@@ -73,6 +75,7 @@ export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
   const requestAITranslation = useCallback(async () => {
     const apiKey = aiProvider === 'google' ? geminiApiKey : deepseekApiKey
     const model = aiProvider === 'google' ? geminiModel : deepseekModel
+    const baseUrl = aiProvider === 'google' ? geminiBaseUrl : deepseekBaseUrl
     const thinkingLevel = aiProvider === 'google' ? geminiThinkingLevel : deepseekThinkingLevel
 
     if (!apiKey || !model) {
@@ -88,6 +91,8 @@ export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
         enableAITranslation: true,
         apiKey,
         model,
+        provider: aiProvider,
+        baseUrl,
         thinkingLevel,
         translationGlossary: combinedGlossary,
         force: true,
@@ -125,9 +130,11 @@ export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
     aiProvider,
     geminiApiKey,
     geminiModel,
+    geminiBaseUrl,
     geminiThinkingLevel,
     deepseekApiKey,
     deepseekModel,
+    deepseekBaseUrl,
     deepseekThinkingLevel,
     translationGlossary,
     dictEntries,
