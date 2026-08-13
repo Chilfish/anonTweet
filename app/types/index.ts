@@ -1,6 +1,7 @@
 import type { LinkPreviewCard } from './card'
 import type { Entity } from './entities'
 import type { Tweet } from './tweet'
+import type { AIVisionInfo } from './vision'
 import type { IUser } from '~/lib/rettiwt-api'
 import type { ITweetDetailsResponse } from '~/lib/rettiwt-api/types/raw/tweet/Details'
 
@@ -11,6 +12,7 @@ export type { IGAudio, IGMedia, IGPost, IGPostData } from './ins'
 export type * from './media'
 export type * from './photo'
 export type * from './user'
+export type * from './video'
 
 export type RawTweet = ITweetDetailsResponse['data']['tweetResult']['result']
 
@@ -22,6 +24,7 @@ export type EnrichedTweet = Omit<Tweet, OmitTypes> & {
   url: string
   entities: Entity[]
   autoTranslationEntities?: Entity[]
+  visionInfo?: AIVisionInfo[]
   quoted_tweet_id?: string
   quotedTweet?: EnrichedTweet
   card?: LinkPreviewCard
@@ -32,4 +35,4 @@ export type EnrichedTweet = Omit<Tweet, OmitTypes> & {
 
 export type TweetData = EnrichedTweet[]
 
-export type * from './video'
+export type * from './vision'

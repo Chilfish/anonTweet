@@ -1,0 +1,61 @@
+{
+  "_meta": {
+    "source": "fixture",
+    "exportedAt": "2026-08-13T00:00:00.000Z",
+    "label": "Tweet with 3 photos for AI vision (AC-VISION-005)",
+    "schema": "EnrichedTweet"
+  },
+  "data": {
+    "id_str": "9000000000000000001",
+    "lang": "ja",
+    "url": "https://twitter.com/vision_test/status/9000000000000000001",
+    "created_at": "Sat Mar 14 02:48:15 +0000 2026",
+    "__typename": "Tweet",
+    "text": "スクリーンショットを添付します https://t.co/vision",
+    "user": {
+      "id_str": "1",
+      "name": "Vision Test",
+      "screen_name": "vision_test",
+      "is_blue_verified": false,
+      "profile_image_shape": "Circle",
+      "profile_image_url_https": "https://pbs.twimg.com/profile_images/vision.jpg"
+    },
+    "entities": [
+      {
+        "type": "text",
+        "text": "スクリーンショットを添付します ",
+        "index": 0
+      }
+    ],
+    "mediaDetails": [
+      {
+        "index": 0,
+        "media_url_https": "https://pbs.twimg.com/media/vision0.jpg",
+        "original_info": {
+          "height": 400,
+          "width": 300
+        },
+        "type": "photo"
+      },
+      {
+        "index": 1,
+        "media_url_https": "https://pbs.twimg.com/media/vision1.jpg",
+        "original_info": {
+          "height": 400,
+          "width": 300
+        },
+        "type": "photo"
+      },
+      {
+        "index": 2,
+        "media_url_https": "https://pbs.twimg.com/media/vision2.jpg",
+        "original_info": {
+          "height": 400,
+          "width": 300
+        },
+        "type": "photo"
+      }
+    ],
+    "isInlineMeida": false
+  }
+}
