@@ -24,6 +24,8 @@ export const getTweetSchema = z.object({
   enableAITranslation: z.boolean().default(false),
   apiKey: z.string().optional(),
   model: z.string().optional(),
+  provider: z.enum(['google', 'deepseek']).optional(),
+  baseUrl: z.string().optional(),
   thinkingLevel: z.enum(['minimal', 'low', 'medium', 'high', 'max']).optional(),
   translationGlossary: z.string().optional(),
   force: z.boolean().default(false),
@@ -41,6 +43,8 @@ export type AITranslationSchema = (Omit<GetTweetSchema, 'tweetId'> & {
   enableAITranslation: boolean
   apiKey: string
   model: string
+  provider?: 'google' | 'deepseek'
+  baseUrl?: string
   thinkingLevel?: string
   translationGlossary?: string
   force?: boolean

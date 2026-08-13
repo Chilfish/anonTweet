@@ -1,5 +1,12 @@
 export type ThinkingLevel = 'minimal' | 'low' | 'medium' | 'high' | 'max'
 
+/**
+ * 各 AI 提供商的官方默认 Base URL。
+ * 设置面板中作为占位提示，留空时 SDK 会回退到自身默认值。
+ */
+export const DEFAULT_GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta'
+export const DEFAULT_DEEPSEEK_BASE_URL = 'https://api.deepseek.com'
+
 export interface ModelConfig {
   name: string
   text: string

@@ -17,9 +17,11 @@ export interface AppConfigs {
   aiProvider: AIProvider
   geminiApiKey: string
   geminiModel: string
+  geminiBaseUrl: string
   geminiThinkingLevel: ThinkingLevel
   deepseekApiKey: string
   deepseekModel: string
+  deepseekBaseUrl: string
   deepseekThinkingLevel: ThinkingLevel
   translationGlossary: string
   isInlineMedia: boolean
@@ -39,9 +41,11 @@ interface AppConfigState extends AppConfigs {
   setAIProvider: (provider: AIProvider) => void
   setGeminiApiKey: (apiKey: string) => void
   setGeminiModel: (model: string) => void
+  setGeminiBaseUrl: (baseUrl: string) => void
   setGeminiThinkingLevel: (level: ThinkingLevel) => void
   setDeepseekApiKey: (apiKey: string) => void
   setDeepseekModel: (model: string) => void
+  setDeepseekBaseUrl: (baseUrl: string) => void
   setDeepseekThinkingLevel: (level: ThinkingLevel) => void
   setTranslationGlossary: (glossary: string) => void
   setIsInlineMedia: (isInlineMedia: boolean) => void
@@ -62,9 +66,11 @@ export const useAppConfigStore = create<AppConfigState>()(
       aiProvider: 'google',
       geminiApiKey: '',
       geminiModel: 'models/gemini-3-flash-preview',
+      geminiBaseUrl: '',
       geminiThinkingLevel: 'minimal',
       deepseekApiKey: '',
       deepseekModel: 'deepseek-v4-flash',
+      deepseekBaseUrl: '',
       deepseekThinkingLevel: 'high',
       translationGlossary: '',
       isInlineMedia: false,
@@ -78,9 +84,11 @@ export const useAppConfigStore = create<AppConfigState>()(
       setShowActions: showActions => set({ showActions }),
       setGeminiApiKey: geminiApiKey => set({ geminiApiKey }),
       setGeminiModel: geminiModel => set({ geminiModel }),
+      setGeminiBaseUrl: geminiBaseUrl => set({ geminiBaseUrl }),
       setGeminiThinkingLevel: geminiThinkingLevel => set({ geminiThinkingLevel }),
       setDeepseekApiKey: deepseekApiKey => set({ deepseekApiKey }),
       setDeepseekModel: deepseekModel => set({ deepseekModel }),
+      setDeepseekBaseUrl: deepseekBaseUrl => set({ deepseekBaseUrl }),
       setDeepseekThinkingLevel: deepseekThinkingLevel => set({ deepseekThinkingLevel }),
       setTranslationGlossary: translationGlossary => set({ translationGlossary }),
       setIsInlineMedia: isInlineMedia => set({ isInlineMedia }),

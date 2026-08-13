@@ -5,10 +5,10 @@ export interface ProviderStrategy {
   readonly name: string
 
   /**
-   * Create an AI SDK provider instance from an API key.
+   * Create an AI SDK provider instance from an API key and optional custom base URL.
    * Returns a callable that accepts a model name and returns a LanguageModel.
    */
-  createSDKProvider: (apiKey: string) => any
+  createSDKProvider: (apiKey: string, baseUrl?: string) => any
 
   /**
    * Build thinking configuration for generateText.

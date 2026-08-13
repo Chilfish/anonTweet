@@ -24,6 +24,8 @@ export async function action({ request }: Route.ActionArgs) {
   const {
     apiKey,
     model,
+    provider,
+    baseUrl,
     thinkingLevel,
   } = submission.data
 
@@ -37,11 +39,11 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   const modelConfig = models.find(m => m.name === model)
-  const provider = modelConfig?.provider || 'google'
+  const resolvedProvider = provider || modelConfig?.provider || 'google'
 
   try {
-    const strategy = getProviderStrategy(provider)
-    const aiProvider = strategy.createSDKProvider(apiKey)
+    const strategy = getProviderStrategy(resolvedProvider)
+    const aiProvider = strategy.createSDKProvider(apiKey, baseUrl)
 
     const messages: ModelMessage[] = [
       { role: 'user', content: 'hello' },

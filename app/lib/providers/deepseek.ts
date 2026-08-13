@@ -14,8 +14,11 @@ function resolveReasoningEffort(level: ThinkingLevel): 'disabled' | 'max' | 'low
 export const deepseekStrategy: ProviderStrategy = {
   name: 'deepseek',
 
-  createSDKProvider(apiKey) {
-    return createDeepSeek({ apiKey })
+  createSDKProvider(apiKey, baseUrl) {
+    return createDeepSeek({
+      apiKey,
+      ...(baseUrl?.trim() ? { baseURL: baseUrl.trim() } : {}),
+    })
   },
 
   getThinkingConfig(_modelConfig, level) {

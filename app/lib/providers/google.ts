@@ -17,8 +17,11 @@ function mapLevelToBudget(level: ThinkingLevel): number {
 export const googleStrategy: ProviderStrategy = {
   name: 'google',
 
-  createSDKProvider(apiKey) {
-    return createGoogleGenerativeAI({ apiKey })
+  createSDKProvider(apiKey, baseUrl) {
+    return createGoogleGenerativeAI({
+      apiKey,
+      ...(baseUrl?.trim() ? { baseURL: baseUrl.trim() } : {}),
+    })
   },
 
   getThinkingConfig(modelConfig, level) {

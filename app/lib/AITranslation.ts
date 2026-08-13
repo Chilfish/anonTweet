@@ -315,6 +315,7 @@ interface TranslationOptions {
   model: string
   apiKey: string
   provider: 'google' | 'deepseek'
+  baseUrl?: string
   translationGlossary?: string
   tweet: EnrichedTweet
   thinkingLevel?: ThinkingLevel
@@ -324,6 +325,7 @@ export async function autoTranslateTweet({
   tweet,
   model,
   provider,
+  baseUrl,
   translationGlossary,
   apiKey,
   thinkingLevel,
@@ -335,7 +337,7 @@ export async function autoTranslateTweet({
   const entityContext = generateEntityContext(entityMap)
 
   const strategy = getProviderStrategy(provider)
-  const sdkProvider = strategy.createSDKProvider(apiKey)
+  const sdkProvider = strategy.createSDKProvider(apiKey, baseUrl)
 
   const { translatedText, entityText } = await translateText({
     tweet,

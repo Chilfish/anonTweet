@@ -36,6 +36,8 @@ async function handleIGTranslation(args: Extract<AITranslationSchema, { type: 'i
     enableAITranslation: _enableAI,
     apiKey,
     model,
+    provider,
+    baseUrl,
     thinkingLevel,
     translationGlossary,
     force,
@@ -68,10 +70,10 @@ async function handleIGTranslation(args: Extract<AITranslationSchema, { type: 'i
 
   try {
     const modelConfig = models.find(m => m.name === model)
-    const provider = modelConfig?.provider || 'google'
+    const resolvedProvider = provider || modelConfig?.provider || 'google'
 
-    const strategy = getProviderStrategy(provider)
-    const sdkProvider = strategy.createSDKProvider(apiKey)
+    const strategy = getProviderStrategy(resolvedProvider)
+    const sdkProvider = strategy.createSDKProvider(apiKey, baseUrl)
     const modelInstance = sdkProvider.languageModel(model)
 
     const translated = await translateIGCaption({
@@ -117,6 +119,8 @@ async function handleTweetTranslation(args: Extract<AITranslationSchema, { tweet
     enableAITranslation,
     apiKey,
     model,
+    provider,
+    baseUrl,
     thinkingLevel,
     translationGlossary,
     force,
@@ -158,13 +162,14 @@ async function handleTweetTranslation(args: Extract<AITranslationSchema, { tweet
     }
 
     const modelConfig = models.find(m => m.name === model)
-    const provider = modelConfig?.provider || 'google'
+    const resolvedProvider = provider || modelConfig?.provider || 'google'
 
     const mergedEntities = await autoTranslateTweet({
       tweet,
       apiKey,
       model,
-      provider,
+      provider: resolvedProvider,
+      baseUrl,
       thinkingLevel,
       translationGlossary,
     })
