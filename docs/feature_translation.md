@@ -293,7 +293,7 @@ v2.1 新增的纯函数模块，提供通用的翻译实体合并能力：
 
 ## 7. 技术栈依赖
 
-- **AI Runtime**: `ai` (Vercel AI SDK), `@ai-sdk/google`, `@ai-sdk/deepseek` (v2.1 新增)
+- **AI Runtime**: `ai` (Vercel AI SDK), `@ai-sdk/google`, `@ai-sdk/openai-compatible` (DeepSeek 策略，原 `@ai-sdk/deepseek` 已替换)
 - **State**: `zustand` (with `persist` middleware, v5 core / v6 storage)
 - **Data Fetching**: `swr` (配合 React Router loader)
 

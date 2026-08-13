@@ -4,6 +4,61 @@ The [DeepSeek](https://www.deepseek.com) provider offers access to powerful lang
 
 API keys can be obtained from the [DeepSeek Platform](https://platform.deepseek.com/api_keys).
 
+> **本仓库实现（重要）**
+>
+> 仓库内的 DeepSeek 策略（`app/lib/providers/deepseek.ts`）**不使用** `@ai-sdk/deepseek`，而是
+> 用 **`@ai-sdk/openai-compatible`** 的 `createOpenAICompatible({ name: 'deepseek', baseURL, apiKey })`。
+>
+> 原因：DeepSeek 官方 API 与 OpenCode Zen/Go 端点均为 OpenAI 兼容协议；`@ai-sdk/deepseek` 会发送其
+> 特有的 `thinking: { type }` 字段，部分第三方兼容端点（如 OpenCode）虽透传但语义不确定。openai-compatible
+> 只发标准 `reasoning_effort`，兼容面更广。
+>
+> 「思考关闭」的兜底：OpenAI 兼容协议没有标准的 off 开关，因此策略通过 `transformRequestBody` 在
+> `reasoning_effort` 缺失时补发 DeepSeek 官方的 `thinking: { type: 'disabled' }`，真正做到关闭思考。
+
+## 参数可配置性审计
+
+以下为本仓库当前对 DeepSeek 相关参数的暴露策略（基于 `@ai-sdk/openai-compatible@3.x` 与 AI SDK v7）。
+
+### Provider 级设置（`createOpenAICompatible`）
+
+| 参数                        | 是否暴露给用户 | 当前处理                                                  |
+| --------------------------- | -------------- | --------------------------------------------------------- |
+| `apiKey`                    | ✅ 已暴露      | 设置面板「API Key」                                       |
+| `baseURL`                   | ✅ 已暴露      | 设置面板「Base URL」；留空回退 `https://api.deepseek.com` |
+| `name`                      | ❌ 内部        | 固定 `'deepseek'`，决定 providerOptions 的键              |
+| `headers`                   | ❌ 硬编码      | 默认无（代理 / 自定义认证扩展用，暂无需求）               |
+| `fetch`                     | ❌ 硬编码      | 默认全局 fetch（测试 / 中间件用）                         |
+| `queryParams`               | ❌ 硬编码      | 默认无（附加 query string）                               |
+| `includeUsage`              | ❌ 硬编码      | 默认 false（流式 usage 开销）                             |
+| `supportsStructuredOutputs` | ❌ 硬编码      | 默认 false → 结构化输出退化为 `json_object`               |
+| `transformRequestBody`      | ❌ 内部        | 本仓库用它注入 `thinking: { type: 'disabled' }`           |
+
+### Chat 模型级选项（providerOptions 传入）
+
+| 选项               | 请求体字段          | 是否暴露  | 当前值                                                      |
+| ------------------ | ------------------- | --------- | ----------------------------------------------------------- |
+| `reasoningEffort`  | `reasoning_effort`  | ✅ 已暴露 | 思考强度：minimal→缺省 / high / max（low/medium 映射 high） |
+| `strictJsonSchema` | 仅 json_schema 模式 | ❌ 硬编码 | 默认 true；因 `supportsStructuredOutputs=false` 当前不生效  |
+| `user`             | `user`              | ❌ 未用   | —                                                           |
+| `textVerbosity`    | `verbosity`         | ❌ 未用   | —                                                           |
+
+### AI SDK 标准 callOptions（`generateText` 直传）
+
+| 选项                                   | 请求体字段        | 是否暴露  | 当前硬编码值                             |
+| -------------------------------------- | ----------------- | --------- | ---------------------------------------- |
+| `temperature`                          | `temperature`     | ❌ 硬编码 | 推文 0.5 / IG 0.5（重试 0.6）/ ai-test 1 |
+| `maxTokens`                            | `max_tokens`      | ❌ 未传   | undefined（走模型默认）                  |
+| `topP`                                 | `top_p`           | ❌ 未传   | undefined                                |
+| `frequencyPenalty` / `presencePenalty` | 同名              | ❌ 未传   | undefined                                |
+| `stopSequences`                        | `stop`            | ❌ 未传   | undefined                                |
+| `responseFormat`                       | `response_format` | ✅ 自动   | 由 `Output.object` 生成（`json_object`） |
+| `seed`                                 | `seed`            | ❌ 未传   | undefined                                |
+
+**结论 / 建议**：保持暴露 `model` / `apiKey` / `baseURL` / 思考强度即可，暂不需要新增。
+`temperature` 是唯一值得考虑的用户可配项，但翻译场景固定 0.5 已取得稳定质量，暴露反而增加出错面；
+其余（headers / maxTokens / penalties / seed）属边界场景，保持硬编码。
+
 ## Setup
 
 The DeepSeek provider is available via the `@ai-sdk/deepseek` module. You can install it with:
