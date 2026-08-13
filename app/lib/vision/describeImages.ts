@@ -3,7 +3,7 @@ import type { ModelConfig } from '~/lib/constants'
 import type { ThinkingLevel } from '~/lib/stores/appConfig'
 import type { EnrichedTweet } from '~/types'
 import type { AIVisionInfo, VisionMode } from '~/types/vision'
-import { generateText, Output, zodSchema } from 'ai'
+import { generateText, NoObjectGeneratedError, Output, zodSchema } from 'ai'
 import { models } from '~/lib/constants'
 import { getProviderStrategy, getThinkingConfig } from '~/lib/providers'
 import { fetchMediaImages } from './fetchImage'
@@ -118,10 +118,15 @@ export async function runImageVision({
     }
     catch (err) {
       lastError = err
-      if (attempt < MAX_PARSE_RETRIES && err instanceof VisionParseError) {
+      // 重试条件：schema 校验失败（VisionParseError）或 SDK 结构化输出失败
+      // （NoObjectGeneratedError，模型未按 schema 产出——翻译步真实踩过该形态）
+      const isRetryable
+        = err instanceof VisionParseError
+          || err instanceof NoObjectGeneratedError
+      if (attempt < MAX_PARSE_RETRIES && isRetryable) {
         chatMessages.push({
           role: 'user',
-          content: `上一次输出未通过 schema 校验：${err.message}\n请重新输出严格符合 schema 的 JSON。`,
+          content: `上一次输出未通过 schema 校验：${err instanceof Error ? err.message : String(err)}\n请重新输出严格符合 schema 的 JSON。`,
         })
         continue
       }

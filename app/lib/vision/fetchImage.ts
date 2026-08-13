@@ -19,6 +19,21 @@ export interface FetchedImage {
   dataUri: string
 }
 
+/** 允许服务端 fetch 的媒体 host（精确 hostname 匹配，杜绝 SSRF 内网探测）。 */
+const ALLOWED_MEDIA_HOSTS = new Set(['pbs.twimg.com'])
+
+/**
+ * 校验图片 URL 的 host 在服务端 fetch 白名单内。与 /api/proxy/image 相比更严格：
+ * proxy 靠路径后缀/子串匹配，本函数要求 hostname 精确命中（DR-5 服务端直拉 twimg）。
+ */
+export function assertAllowedMediaHost(url: string): string {
+  const parsed = new URL(url)
+  if (!ALLOWED_MEDIA_HOSTS.has(parsed.hostname)) {
+    throw new Error(`Disallowed media host for server-side fetch: ${parsed.hostname}`)
+  }
+  return url
+}
+
 /** 与 getMediaUrl 相同的 format + name 变换，但服务端安全（无 useProxyMedia hook） */
 export function buildMediaUrl(media: MediaDetails, size: MediaSize = 'small'): string {
   const url = new URL(media.media_url_https)
@@ -35,6 +50,8 @@ export function buildMediaUrl(media: MediaDetails, size: MediaSize = 'small'): s
 const IMAGE_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
 export async function fetchImageDataUri(url: string): Promise<string> {
+  // 服务端 fetch 前必须过 host 白名单（防 SSRF）
+  assertAllowedMediaHost(url)
   const resp = await fetch(url, {
     headers: {
       'User-Agent': IMAGE_UA,

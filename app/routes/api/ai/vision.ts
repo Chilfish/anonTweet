@@ -6,6 +6,7 @@ import { normalizeAIError } from '~/lib/ai-error'
 import { models } from '~/lib/constants'
 import { setLocalCache } from '~/lib/localCache'
 import { getProviderStrategy } from '~/lib/providers'
+import { visionInfoArraySchema } from '~/lib/validations/vision'
 import { runImageVision } from '~/lib/vision/describeImages'
 import { mergeVisionInfo } from '~/lib/vision/parse'
 import { translateVisionOCR } from '~/lib/vision/translateOCR'
@@ -34,6 +35,8 @@ const aiConfigFields = {
 const tweetField = z.object({
   id_str: z.string().min(1),
   text: z.string(),
+  // 客户端可携带 visionInfo（generate 合并用）；存在则必须结构合法（防缓存污染）
+  visionInfo: visionInfoArraySchema.optional(),
 }).passthrough() // EnrichedTweet 复杂，只校验关键字段 + 透传全量
 
 const generateSchema = z.object({
@@ -57,7 +60,8 @@ const translateSchema = z.object({
 
 const saveSchema = z.object({
   action: z.literal('save'),
-  tweet: tweetField,
+  // save 的目的就是持久化 visionInfo，必填且强校验（防未认证缓存污染）
+  tweet: tweetField.extend({ visionInfo: visionInfoArraySchema }),
 }).strict()
 
 export async function action({ request }: Route.ActionArgs) {

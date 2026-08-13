@@ -1,7 +1,8 @@
 import type { EnrichedTweet } from '~/types'
 import { describe, expect, it } from 'vitest'
+import { visionInfoArraySchema } from '~/lib/validations/vision'
 import { runImageVision } from '~/lib/vision/describeImages'
-import { buildMediaUrl } from '~/lib/vision/fetchImage'
+import { assertAllowedMediaHost, buildMediaUrl } from '~/lib/vision/fetchImage'
 import { buildVisionMessages } from '~/lib/vision/messages'
 import { alignVisionIndexes, applyVisionEdits, mergeVisionInfo, parseVisionResult, resolveVisionView } from '~/lib/vision/parse'
 import { getVisionPreset, VISION_PROMPT_PRESETS } from '~/lib/vision/prompts'
@@ -440,5 +441,57 @@ describe('vision fix: alignVisionIndexes 结果索引对齐请求', () => {
     const out = alignVisionIndexes([info(0)], [0, 2])
     expect(out).toHaveLength(1)
     expect(out[0]!.index).toBe(0)
+  })
+})
+
+describe('vision 安全: assertAllowedMediaHost host 白名单（防 SSRF）', () => {
+  it('pbs.twimg.com 合法通过', () => {
+    expect(assertAllowedMediaHost('https://pbs.twimg.com/media/foo.jpg?format=jpg&name=small'))
+      .toBeTruthy()
+  })
+
+  it('内网/本机 host 被拒绝', () => {
+    for (const url of [
+      'https://127.0.0.1:8080/admin',
+      'http://localhost:3000/foo.jpg',
+      'https://169.254.169.254/latest/meta-data/',
+      'http://10.0.0.5/secret.png',
+      'https://evil.example.com/x.jpg',
+    ]) {
+      expect(() => assertAllowedMediaHost(url)).toThrow(/Disallowed media host/)
+    }
+  })
+})
+
+describe('vision 落盘校验: visionInfoArraySchema（防未认证缓存污染）', () => {
+  const validItem = {
+    index: 0,
+    mode: 'ocr',
+    promptId: 'ocr',
+    provider: 'google',
+    model: 'models/gemini-3-flash-preview',
+    originalText: 'こんにちは',
+    translatedText: '你好',
+    status: 'done',
+    createdAt: 1_700_000_000_000,
+  }
+
+  it('合法条目通过', () => {
+    const parsed = visionInfoArraySchema.safeParse([validItem])
+    expect(parsed.success).toBe(true)
+  })
+
+  it('index 越界（>= 20000 与 media_alt 冲突 / 负数）被拒绝', () => {
+    expect(visionInfoArraySchema.safeParse([{ ...validItem, index: 20000 }]).success).toBe(false)
+    expect(visionInfoArraySchema.safeParse([{ ...validItem, index: -1 }]).success).toBe(false)
+  })
+
+  it('重复 index 被拒绝', () => {
+    expect(visionInfoArraySchema.safeParse([validItem, { ...validItem }]).success).toBe(false)
+  })
+
+  it('非法 status / 多余键被拒绝', () => {
+    expect(visionInfoArraySchema.safeParse([{ ...validItem, status: 'pending' }]).success).toBe(false)
+    expect(visionInfoArraySchema.safeParse([{ ...validItem, hacked: true }]).success).toBe(false)
   })
 })
