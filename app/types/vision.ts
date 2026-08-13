@@ -10,7 +10,7 @@ export type VisionMode = 'describe' | 'ocr' | 'custom'
 export interface AIVisionInfo {
   /** 对应 tweet.mediaDetails 数组索引（0-based；与 media_alt 的 20000+i 语义一致，不冲突） */
   index: number
-  /** 模式：describe 看图说话 / ocr 结构化 OCR+翻译 / custom 自定义 */
+  /** 模式：describe 看图说话 / ocr 结构化 OCR / custom 自定义 */
   mode: VisionMode
   /** 使用的提示预设 id：'describe' | 'ocr' | 'custom' */
   promptId: string
@@ -20,11 +20,9 @@ export interface AIVisionInfo {
   model: string
   /** describe/custom 模式：看图说话描述 */
   description?: string
-  /** 手动编辑覆盖（Phase 4 UI）：resolveVisionView 中 manual > ai，可为空清除 */
-  manualDescription?: string
   /** ocr 模式：图片原文（结构化 OCR，保持原语言与换行） */
   originalText?: string
-  /** ocr 模式：翻译为简体中文 */
+  /** ocr 模式：翻译为简体中文（独立翻译步写入，可手动编辑） */
   translatedText?: string
   /** done = 成功；error = 单图失败 */
   status: 'done' | 'error'

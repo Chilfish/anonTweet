@@ -1,19 +1,26 @@
+import type { VisionDraft } from '~/lib/vision/parse'
 import type { EnrichedTweet } from '~/types'
 import type { AIVisionInfo, VisionMode } from '~/types/vision'
 import { useCallback, useState } from 'react'
 import { toastAIError } from '~/lib/ai-error-toast'
 import { fetcher } from '~/lib/fetcher'
-import { useResolvedAIVisionConfig, useTranslationActions } from '~/lib/stores/hooks'
+import {
+  useResolvedAIConfig,
+  useResolvedAIVisionConfig,
+  useTranslationActions,
+} from '~/lib/stores/hooks'
 import { toast } from '~/lib/utils'
-import { applyManualOverrides, mergeVisionInfo } from '~/lib/vision/parse'
+import { applyVisionEdits, mergeVisionInfo } from '~/lib/vision/parse'
 
 /**
  * AI 视觉描述 —— 编辑弹窗逻辑（app/hooks/use-vision-logic.ts）
  *
  * 弹窗级状态：mode（describe/ocr/custom）+ withContext + customPrompt 作用于一次
- * AI 生成请求（对齐 POST /api/ai-vision 的单 mode 多 index 语义）。
- * 逐图状态：visionInfo（AI 结果工作副本）+ manualTexts（手动覆盖，resolveVisionView 中
- * manual > ai，Postmortem #002：合并/覆盖逻辑全部下沉 lib/vision/parse.ts 纯函数）。
+ * AI 生成请求（对齐 POST /api/ai-vision 的生成路径）。
+ * 逐图状态：drafts（原文/译文/描述草稿，直接编辑字段）+ visionInfo（AI 结果工作副本，
+ * 用于模式/错误展示与保存重建）。翻译走独立步（action: 'translate'，复用翻译侧模型配置，
+ * 附推文上下文）——OCR 纯提取、翻译交给翻译模型。
+ * Postmortem #002：合并/保存逻辑全部下沉 lib/vision/parse.ts 纯函数。
  */
 export function useVisionLogic(originalTweet: EnrichedTweet) {
   const tweetId = originalTweet.id_str
@@ -27,10 +34,12 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
   const [customPrompt, setCustomPrompt] = useState('')
   const [withContext, setWithContext] = useState(true)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isTranslating, setIsTranslating] = useState(false)
   const [visionInfo, setVisionInfo] = useState<AIVisionInfo[]>([])
-  const [manualTexts, setManualTexts] = useState<Record<number, string>>({})
+  const [drafts, setDrafts] = useState<Record<number, VisionDraft>>({})
 
-  const aiConfig = useResolvedAIVisionConfig()
+  const visionConfig = useResolvedAIVisionConfig()
+  const translationConfig = useResolvedAIConfig()
   const { updateTweet } = useTranslationActions()
 
   const initializeEditor = useCallback(() => {
@@ -39,16 +48,32 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
     setMode(base[0]?.mode ?? 'describe')
     setCustomPrompt('')
     setWithContext(true)
-    setManualTexts(
-      Object.fromEntries(
-        base.filter(v => v.manualDescription).map(v => [v.index, v.manualDescription!]),
-      ),
-    )
+    setDrafts(Object.fromEntries(base.map(v => [v.index, {
+      originalText: v.originalText,
+      translatedText: v.translatedText,
+      description: v.description,
+    }])))
     setIsOpen(true)
   }, [originalTweet.visionInfo])
 
+  /** 生成/翻译结果合并进 drafts，草稿里用户未动的字段保持原值 */
+  const syncDraftsFromInfo = useCallback((info: AIVisionInfo[]) => {
+    setDrafts((prev) => {
+      const next = { ...prev }
+      for (const v of info) {
+        next[v.index] = {
+          ...next[v.index],
+          originalText: v.originalText,
+          translatedText: v.translatedText,
+          description: v.description,
+        }
+      }
+      return next
+    })
+  }, [])
+
   const generate = useCallback(async () => {
-    const { apiKey, model, provider, baseUrl, thinkingLevel, providerName } = aiConfig
+    const { apiKey, model, provider, baseUrl, thinkingLevel, providerName } = visionConfig
     if (!apiKey || !model) {
       toast.error(`请配置 ${providerName} API Key`)
       return
@@ -75,6 +100,7 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
         const incoming = data.data.visionInfo as AIVisionInfo[]
         const merged = mergeVisionInfo(originalTweet.visionInfo ?? [], incoming)
         setVisionInfo(prev => mergeVisionInfo(prev, incoming))
+        syncDraftsFromInfo(merged)
         updateTweet(tweetId, { visionInfo: merged })
         toast.success('AI 图片描述生成完成')
       }
@@ -89,17 +115,69 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
     finally {
       setIsGenerating(false)
     }
-  }, [aiConfig, photoIndexes, mode, customPrompt, withContext, originalTweet, tweetId, updateTweet])
+  }, [visionConfig, photoIndexes, mode, customPrompt, withContext, originalTweet, tweetId, updateTweet, syncDraftsFromInfo])
 
-  const updateManual = useCallback((index: number, value: string) => {
-    setManualTexts(prev => ({ ...prev, [index]: value }))
+  /** 翻译步：把有 OCR 原文的图交给翻译模型（附推文上下文），结果写 drafts.translatedText */
+  const translateOcr = useCallback(async () => {
+    const { apiKey, model, provider, baseUrl, thinkingLevel, providerName } = translationConfig
+    const items = photoIndexes
+      .map(i => ({ index: i, originalText: drafts[i]?.originalText ?? '' }))
+      .filter(item => item.originalText.trim().length > 0)
+    if (items.length === 0) {
+      toast.error('请先生成 OCR 结果')
+      return
+    }
+    if (!apiKey || !model) {
+      toast.error(`请配置 ${providerName} API Key`)
+      return
+    }
+
+    setIsTranslating(true)
+    try {
+      const { data } = await fetcher.post('/api/ai-vision', {
+        action: 'translate',
+        tweet: { id_str: tweetId, text: originalTweet.text },
+        items,
+        apiKey,
+        model,
+        provider,
+        baseUrl,
+        thinkingLevel,
+      })
+
+      if (data.success && data.data?.translations) {
+        const translations = data.data.translations as Array<{ index: number, translatedText: string }>
+        setDrafts((prev) => {
+          const next = { ...prev }
+          for (const t of translations) {
+            next[t.index] = { ...next[t.index], translatedText: t.translatedText }
+          }
+          return next
+        })
+        toast.success('OCR 翻译完成')
+      }
+    }
+    catch (error: unknown) {
+      console.error(error)
+      toastAIError(error, {
+        providerName,
+        fallbackTitle: 'OCR 翻译失败',
+      })
+    }
+    finally {
+      setIsTranslating(false)
+    }
+  }, [drafts, photoIndexes, translationConfig, originalTweet.text, tweetId])
+
+  const updateDraft = useCallback((index: number, patch: Partial<VisionDraft>) => {
+    setDrafts(prev => ({ ...prev, [index]: { ...prev[index], ...patch } }))
   }, [])
 
   const save = useCallback(() => {
-    const next = applyManualOverrides(visionInfo, manualTexts, photoIndexes)
+    const next = applyVisionEdits(visionInfo, drafts, photoIndexes)
     updateTweet(tweetId, { visionInfo: next })
     setIsOpen(false)
-  }, [tweetId, visionInfo, manualTexts, photoIndexes, updateTweet])
+  }, [tweetId, visionInfo, drafts, photoIndexes, updateTweet])
 
   return {
     isOpen,
@@ -112,12 +190,14 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
     withContext,
     setWithContext,
     isGenerating,
+    isTranslating,
     photoIndexes,
     visionInfo,
-    manualTexts,
-    updateManual,
+    drafts,
+    updateDraft,
     generate,
+    translateOcr,
     save,
-    providerName: aiConfig.providerName,
+    providerName: visionConfig.providerName,
   }
 }

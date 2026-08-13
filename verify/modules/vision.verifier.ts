@@ -172,22 +172,29 @@ export class VisionVerifier implements Verifier {
         descriptions: [{ index: 0, description: 'AI 描述' }],
       })[0]!
 
-      // 场景 1：仅 AI → 显示 AI
-      const aiOnly = resolveVisionView(aiInfo)
-      const aiOk = aiOnly.hasView && aiOnly.displayText === 'AI 描述' && aiOnly.source === 'ai'
+      // 场景 1：describe → 显示描述
+      const describeView = resolveVisionView(aiInfo)
+      const describeOk = describeView.hasView && describeView.displayText === 'AI 描述'
 
-      // 场景 2：AI + 手动 → 手动优先
-      const manual = resolveVisionView(aiInfo, '手动改写')
-      const manualOk = manual.hasView && manual.displayText === '手动改写' && manual.source === 'manual'
+      // 场景 2：ocr 有译文 → 译文优先（直接编辑模型，无手动覆盖层）
+      const ocrInfo = parseVisionResult(VISION_PROMPT_PRESETS.ocr, {
+        texts: [{ index: 0, originalText: 'こんにちは' }],
+      })[0]!
+      const ocrView = resolveVisionView({ ...ocrInfo, translatedText: '你好' })
+      const ocrOk = ocrView.hasView && ocrView.displayText === '你好' && ocrView.originalText === 'こんにちは'
 
-      // 场景 3：两者皆无 → 无视图
+      // 场景 3：translatedOnly 隐藏 ocr 原文，只留译文
+      const onlyView = resolveVisionView({ ...ocrInfo, translatedText: '你好' }, { translatedOnly: true })
+      const onlyOk = onlyView.displayText === '你好' && onlyView.originalText === undefined
+
+      // 场景 4：两者皆无 → 无视图
       const none = resolveVisionView(undefined)
       const noneOk = !none.hasView && none.displayText === ''
 
-      if (aiOk && manualOk && noneOk) {
-        return this.pass('AC-VISION-004', 'resolveVisionView chain', 'manual > ai > none')
+      if (describeOk && ocrOk && onlyOk && noneOk) {
+        return this.pass('AC-VISION-004', 'resolveVisionView chain', 'describe>ocr:translated|original>none')
       }
-      return this.fail('AC-VISION-004', 'resolveVisionView chain', `ai:${aiOk} manual:${manualOk} none:${noneOk}`)
+      return this.fail('AC-VISION-004', 'resolveVisionView chain', `describe:${describeOk} ocr:${ocrOk} only:${onlyOk} none:${noneOk}`)
     }
     catch (err) {
       return this.fail('AC-VISION-004', 'resolveVisionView chain', err instanceof Error ? err.message : String(err))

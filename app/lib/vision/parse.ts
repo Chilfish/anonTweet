@@ -56,50 +56,45 @@ export function parseVisionResult(
 export interface VisionView {
   /** 该图是否存在可展示的视觉内容 */
   hasView: boolean
-  /** 最终展示文本：手动覆盖 > AI 结果 */
+  /** 主展示文本：ocr → translatedText || originalText；describe/custom → description */
   displayText: string
-  /** 来源：manual / ai（无视图时缺省） */
-  source?: 'manual' | 'ai'
-  /** ocr 模式：图片原文（供折叠展示） */
+  /** ocr 模式：图片原文（供折叠展示；translatedOnly 或空时缺省） */
   originalText?: string
   /** 对应的 AI 视觉信息（若存在） */
   aiInfo?: AIVisionInfo
 }
 
+export interface ResolveVisionViewOptions {
+  /** 仅显示译文：隐藏 ocr 原文，只展示翻译 */
+  translatedOnly?: boolean
+}
+
 export function resolveVisionView(
   aiInfo?: AIVisionInfo,
-  manualText?: string,
+  opts?: ResolveVisionViewOptions,
 ): VisionView {
-  // 1. 手动编辑覆盖优先
-  if (manualText && manualText.trim()) {
+  if (!aiInfo || aiInfo.status !== 'done') {
+    return { hasView: false, displayText: '', aiInfo }
+  }
+  if (aiInfo.mode === 'ocr') {
+    const displayText = aiInfo.translatedText || aiInfo.originalText || ''
     return {
-      hasView: true,
-      displayText: manualText,
-      source: 'manual',
-      originalText: aiInfo?.originalText,
+      hasView: !!displayText,
+      displayText,
+      originalText: aiInfo.originalText && !opts?.translatedOnly
+        ? aiInfo.originalText
+        : undefined,
       aiInfo,
     }
   }
-  // 2. AI 结果（describe → description；ocr → translatedText）
-  if (aiInfo?.status === 'done') {
-    const displayText = aiInfo.description || aiInfo.translatedText || ''
-    if (displayText) {
-      return {
-        hasView: true,
-        displayText,
-        source: 'ai',
-        originalText: aiInfo.originalText,
-        aiInfo,
-      }
-    }
-  }
-  // 3. 两者皆无 → 无视图（隐藏该图描述区）
-  return { hasView: false, displayText: '', aiInfo }
+  // describe / custom：看图说话描述即为展示文本
+  const description = aiInfo.description ?? ''
+  return { hasView: !!description, displayText: description, aiInfo }
 }
 
 /**
- * 合并 AI 生成结果到已有 visionInfo：incoming 命中 index 时替换，
- * 但保留已有条目上的 manualDescription（手动覆盖不被 AI 重生成冲掉）。
+ * 合并 AI 生成结果到已有 visionInfo：incoming 命中 index 时整体替换
+ * （直接编辑模型——原文/译文/描述即条目字段，无手动覆盖层）。
  * 纯函数，Phase 4 编辑弹窗复用。
  */
 export function mergeVisionInfo(
@@ -108,47 +103,77 @@ export function mergeVisionInfo(
 ): AIVisionInfo[] {
   const map = new Map(existing.map(v => [v.index, v]))
   for (const item of incoming) {
-    const prev = map.get(item.index)
-    map.set(item.index, { ...item, manualDescription: prev?.manualDescription })
+    map.set(item.index, item)
   }
   return [...map.values()].sort((a, b) => a.index - b.index)
 }
 
+/** 逐图编辑草稿：ocr 模式写原文/译文，describe/custom 写描述 */
+export interface VisionDraft {
+  originalText?: string
+  translatedText?: string
+  description?: string
+}
+
 /**
- * 应用手动覆盖：按 photoIndexes 重建 visionInfo——manual 非空时写入
- * manualDescription（无 AI 条目则建手动条目）；manual 清空时移除旧覆盖回到 AI 结果。
- * 纯函数，Phase 4 编辑弹窗保存时复用。
+ * 应用逐图编辑草稿到 visionInfo：按 photoIndexes 重建——有草稿的图按模式写入字段
+ * （ocr 写 originalText/translatedText，describe/custom 写 description），空草稿保留
+ * 已有条目；无 AI 条目但草稿有内容则建手动条目。纯函数，编辑弹窗保存时复用。
  */
-export function applyManualOverrides(
+export function applyVisionEdits(
   visionInfo: AIVisionInfo[],
-  manualTexts: Record<number, string>,
+  drafts: Record<number, VisionDraft>,
   photoIndexes: number[],
 ): AIVisionInfo[] {
   const next: AIVisionInfo[] = []
   for (const index of photoIndexes) {
-    const manual = manualTexts[index]?.trim()
+    const draft = drafts[index]
     const existing = visionInfo.find(v => v.index === index)
-    if (manual) {
-      next.push(existing
-        ? { ...existing, manualDescription: manual }
+    if (!draft) {
+      if (existing)
+        next.push(existing)
+      continue
+    }
+    const hasContent = !!(draft.originalText?.trim() || draft.translatedText?.trim() || draft.description?.trim())
+    if (!hasContent) {
+      if (existing)
+        next.push(existing)
+      continue
+    }
+    if (existing) {
+      const isOcr = existing.mode === 'ocr'
+      next.push({
+        ...existing,
+        originalText: isOcr ? draft.originalText ?? existing.originalText : existing.originalText,
+        translatedText: isOcr ? draft.translatedText ?? existing.translatedText : existing.translatedText,
+        description: isOcr ? existing.description : draft.description ?? existing.description,
+      })
+    }
+    else {
+      // 纯手动条目：按草稿内容形态推断模式
+      const isOcr = !!(draft.originalText?.trim() || draft.translatedText?.trim())
+      next.push(isOcr
+        ? {
+            index,
+            mode: 'ocr',
+            promptId: 'ocr',
+            provider: '',
+            model: '',
+            originalText: draft.originalText,
+            translatedText: draft.translatedText,
+            status: 'done',
+            createdAt: Date.now(),
+          }
         : {
             index,
             mode: 'describe',
             promptId: 'describe',
             provider: '',
             model: '',
-            description: manual,
-            manualDescription: manual,
+            description: draft.description,
             status: 'done',
             createdAt: Date.now(),
           })
-    }
-    else if (existing) {
-      next.push(
-        existing.manualDescription
-          ? { ...existing, manualDescription: undefined }
-          : existing,
-      )
     }
   }
   return next.sort((a, b) => a.index - b.index)

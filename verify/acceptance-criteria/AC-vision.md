@@ -43,20 +43,24 @@
 
 > 翻译不再由 ocr 生成步产出：OCR 纯提取 `originalText`，翻译走独立翻译步
 > （`translateOCR.ts`，复用翻译模型 + 推文上下文，见 `POST /api/ai-vision` translate 分支）。
+> 翻译步对无结构化输出模型（DeepSeek 等 chat 模型）**宽容解析**：`parseOcrTranslation` 容忍
+> `{ translations: [...] }` / keyed-object `{ "0": "译文" }` / 裸数组 / markdown code fence。
 
 ---
 
 ## AC-VISION-004：resolveVisionView 决策链
 
-- **验证对象**：`app/lib/vision/parse.ts` 的 `resolveVisionView`（纯函数）
+- **验证对象**：`app/lib/vision/parse.ts` 的 `resolveVisionView(aiInfo, { translatedOnly })`（纯函数）
 - **输入**：同一 media `index` 分别设置：
-  1. `AIVisionInfo` 存在（AI 结果）
-  2. `AIVisionInfo` 存在 + 手动编辑覆盖（store）
-  3. 两者皆无
+  1. `AIVisionInfo` describe（AI 描述）
+  2. `AIVisionInfo` ocr（原文 + 译文）
+  3. ocr + `translatedOnly: true`（仅显示译文开关）
+  4. 两者皆无
 - **Pass 条件**：
-  - 场景 1：显示 AI 结果
-  - 场景 2：手动覆盖优先
-  - 场景 3：无视图（隐藏该图描述区）
+  - 场景 1：显示 `description`
+  - 场景 2：显示 `translatedText || originalText`（译文优先，原文可折叠展示）
+  - 场景 3：只显示译文，`originalText` 不暴露
+  - 场景 4：无视图（隐藏该图描述区）
 
 ---
 

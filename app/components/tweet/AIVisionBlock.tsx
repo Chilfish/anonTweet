@@ -1,6 +1,7 @@
 import type { EnrichedTweet } from '~/types'
 import { ImageIcon } from 'lucide-react'
 import { AIVisionEditorDialog } from '~/components/translation/AIVisionEditorDialog'
+import { Switch } from '~/components/ui/switch'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { resolveVisionView } from '~/lib/vision/parse'
 
@@ -8,11 +9,13 @@ import { resolveVisionView } from '~/lib/vision/parse'
  * AI 视觉描述 —— 媒体区展示块（app/components/tweet/AIVisionBlock.tsx）
  *
  * 挂在 TweetNode 的 TweetMediaAlt 之后。enableAIVision 开启且存在 photo 时才渲染：
- * 头部栏「AI 图片描述」+ 编辑弹窗入口，正文逐图渲染 resolveVisionView 结果
- * （manual > ai 决策链；OCR 模式折叠展示原文 + 译文）。
+ * 头部栏「AI 图片描述」+ 「仅译文」开关（visionShowTranslatedOnly，隐藏 OCR 原文）+
+ * 编辑弹窗入口；正文逐图渲染 resolveVisionView 结果（ocr → 译文||原文；describe → 描述）。
  */
 export function AIVisionBlock({ tweet }: { tweet: EnrichedTweet }) {
   const enableAIVision = useAppConfigStore(s => s.enableAIVision)
+  const visionShowTranslatedOnly = useAppConfigStore(s => s.visionShowTranslatedOnly)
+  const setVisionShowTranslatedOnly = useAppConfigStore(s => s.setVisionShowTranslatedOnly)
 
   const photos = (tweet.mediaDetails ?? [])
     .map((m, i) => ({ m, i }))
@@ -30,7 +33,18 @@ export function AIVisionBlock({ tweet }: { tweet: EnrichedTweet }) {
           <ImageIcon className="size-3" />
           AI 图片描述
         </span>
-        <AIVisionEditorDialog originalTweet={tweet} />
+        <span className="flex items-center gap-3">
+          {hasContent && (
+            <label className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60">
+              <Switch
+                checked={visionShowTranslatedOnly}
+                onCheckedChange={setVisionShowTranslatedOnly}
+              />
+              仅译文
+            </label>
+          )}
+          <AIVisionEditorDialog originalTweet={tweet} />
+        </span>
       </div>
 
       {hasContent
@@ -38,7 +52,7 @@ export function AIVisionBlock({ tweet }: { tweet: EnrichedTweet }) {
             <div className="space-y-1">
               {photos.map(({ i }) => {
                 const aiInfo = visionInfo.find(v => v.index === i)
-                const view = resolveVisionView(aiInfo, aiInfo?.manualDescription)
+                const view = resolveVisionView(aiInfo, { translatedOnly: visionShowTranslatedOnly })
                 if (!view.hasView && aiInfo?.status !== 'error')
                   return null
                 return (

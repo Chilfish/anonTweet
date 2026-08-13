@@ -31,6 +31,8 @@ export interface AppConfigs {
   enableAIVision: boolean
   /** 视觉 provider：只允许支持图片输入的（google / openrouter），复用翻译侧对应 key */
   visionProvider: AIProvider
+  /** 仅显示译文：AIVisionBlock 展示开关（隐藏 OCR 原文） */
+  visionShowTranslatedOnly: boolean
   isInlineMedia: boolean
 }
 
@@ -61,6 +63,7 @@ interface AppConfigState extends AppConfigs {
   setTranslationGlossary: (glossary: string) => void
   setEnableAIVision: (enable: boolean) => void
   setVisionProvider: (provider: AIProvider) => void
+  setVisionShowTranslatedOnly: (show: boolean) => void
   setIsInlineMedia: (isInlineMedia: boolean) => void
 }
 
@@ -92,6 +95,7 @@ export const useAppConfigStore = create<AppConfigState>()(
       translationGlossary: '',
       enableAIVision: false,
       visionProvider: 'google',
+      visionShowTranslatedOnly: false,
       isInlineMedia: false,
 
       setEnableMediaProxy: enableMediaProxy => set({ enableMediaProxy }),
@@ -116,6 +120,7 @@ export const useAppConfigStore = create<AppConfigState>()(
       setTranslationGlossary: translationGlossary => set({ translationGlossary }),
       setEnableAIVision: enableAIVision => set({ enableAIVision }),
       setVisionProvider: visionProvider => set({ visionProvider }),
+      setVisionShowTranslatedOnly: visionShowTranslatedOnly => set({ visionShowTranslatedOnly }),
       setIsInlineMedia: isInlineMedia => set({ isInlineMedia }),
     }),
     {

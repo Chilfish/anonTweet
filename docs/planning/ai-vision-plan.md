@@ -81,8 +81,9 @@
   - `appConfig` vision 字段（`enableAIVision` / `visionProvider`，DR-3 不 bump version）
     - `resolveVisionConfig` 纯函数（只放行 google/openrouter）+ `useAIVisionConfig`（hooks.ts）
 - **4b** ✅ `app/components/tweet/AIVisionBlock.tsx`（媒体区展示，`resolveVisionView` 决策链 + 空态入口）
-  - `app/components/translation/AIVisionEditorDialog.tsx` + `app/hooks/use-vision-logic.ts`（弹窗级 mode/附上下文/自定义提示；逐图查看 + 手动覆盖 textarea；AI 生成/重生成 + 保存）
-  - `AIVisionInfo.manualDescription?` 扩展 + `mergeVisionInfo` / `applyManualOverrides` 纯函数（parse.ts，Postmortem #002）
+  - `app/components/translation/AIVisionEditorDialog.tsx` + `app/hooks/use-vision-logic.ts`（弹窗级 mode/附上下文/自定义提示；**逐图直接编辑**原文/译文/描述——AltTranslationEditor 风格；AI 生成 + **AI 翻译**（独立步，翻译模型）+ 保存）
+  - 编辑弹窗改造：**移除 `manualDescription` 覆盖层**，改为直接编辑条目字段——`applyVisionEdits(visionInfo, drafts, photoIndexes)` + `VisionDraft` 纯函数（parse.ts，Postmortem #002）；`resolveVisionView(aiInfo, { translatedOnly })`；appConfig `visionShowTranslatedOnly`「仅显示译文」开关（DR-3 不 bump version）
+  - 翻译步宽容解析：DeepSeek 无结构化输出，`translateOCR.ts` 走文本输出 + 宽容解析（keyed-object / 裸数组 / code fence），修复 `NoObjectGeneratedError`
   - `TweetNode.tsx` 挂载（`TweetMediaAlt` 之后）；`plain.tsx` 留待 Phase 5
 
 ### Phase 5 — 截图 + 缓存/持久化

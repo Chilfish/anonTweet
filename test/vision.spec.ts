@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { runImageVision } from '~/lib/vision/describeImages'
 import { buildMediaUrl } from '~/lib/vision/fetchImage'
 import { buildVisionMessages } from '~/lib/vision/messages'
-import { alignVisionIndexes, applyManualOverrides, mergeVisionInfo, parseVisionResult, resolveVisionView } from '~/lib/vision/parse'
+import { alignVisionIndexes, applyVisionEdits, mergeVisionInfo, parseVisionResult, resolveVisionView } from '~/lib/vision/parse'
 import { getVisionPreset, VISION_PROMPT_PRESETS } from '~/lib/vision/prompts'
 import { parseOcrTranslation } from '~/lib/vision/translateOCR'
 
@@ -131,38 +131,63 @@ describe('vision AC-VISION-003: ocr 纯 OCR schema 校验', () => {
   })
 })
 
-describe('vision translate: parseOcrTranslation 解析翻译结果', () => {
-  it('合法输入解析为 { index, translatedText }', () => {
+describe('vision translate: parseOcrTranslation 宽容解析翻译结果', () => {
+  it('形态 1：{ translations: [{ index, translatedText }] }', () => {
     const out = parseOcrTranslation({ translations: [{ index: 0, translatedText: '你好' }] })
     expect(out).toEqual([{ index: 0, translatedText: '你好' }])
   })
 
-  it('缺 translatedText 或多余键 → 校验失败', () => {
+  it('形态 1 容忍多余键（多余键被剥离，不因严格校验失败）', () => {
+    const out = parseOcrTranslation({ translations: [{ index: 0, translatedText: '你好', extra: 1 }], extra2: 2 })
+    expect(out).toEqual([{ index: 0, translatedText: '你好' }])
+  })
+
+  it('形态 2：keyed-object { "0": "译文" }（DeepSeek 等无结构化输出模型形态）', () => {
+    const out = parseOcrTranslation({ 0: '你好', 2: '再见' })
+    expect(out).toEqual([
+      { index: 0, translatedText: '你好' },
+      { index: 2, translatedText: '再见' },
+    ])
+  })
+
+  it('形态 3：裸数组 [{ index, translatedText }]', () => {
+    const out = parseOcrTranslation([{ index: 0, translatedText: '你好' }])
+    expect(out).toEqual([{ index: 0, translatedText: '你好' }])
+  })
+
+  it('缺 translatedText → 校验失败', () => {
     expect(() => parseOcrTranslation({ translations: [{ index: 0 }] }))
-      .toThrow(/schema validation failed/)
-    expect(() => parseOcrTranslation({ translations: [{ index: 0, translatedText: 'x', extra: 1 }] }))
       .toThrow(/schema validation failed/)
   })
 })
 
 describe('vision AC-VISION-004: resolveVisionView 决策链', () => {
-  const aiInfo = parseVisionResult(VISION_PROMPT_PRESETS.describe, {
+  const describeInfo = parseVisionResult(VISION_PROMPT_PRESETS.describe, {
     descriptions: [{ index: 0, description: 'AI 描述' }],
   })[0]!
+  const ocrInfo = parseVisionResult(VISION_PROMPT_PRESETS.ocr, {
+    texts: [{ index: 0, originalText: 'こんにちは' }],
+  })[0]!
 
-  it('仅 AI 结果 → 显示 AI', () => {
-    const view = resolveVisionView(aiInfo)
+  it('describe → 显示 description', () => {
+    const view = resolveVisionView(describeInfo)
     expect(view.hasView).toBe(true)
     expect(view.displayText).toBe('AI 描述')
-    expect(view.source).toBe('ai')
+    expect(view.aiInfo).toBe(describeInfo)
   })
 
-  it('aI 结果 + 手动覆盖 → 手动优先', () => {
-    const view = resolveVisionView(aiInfo, '手动改写的内容')
+  it('ocr 无译文 → 显示原文；有译文 → 译文优先', () => {
+    expect(resolveVisionView(ocrInfo).displayText).toBe('こんにちは')
+    const view = resolveVisionView({ ...ocrInfo, translatedText: '你好' })
     expect(view.hasView).toBe(true)
-    expect(view.displayText).toBe('手动改写的内容')
-    expect(view.source).toBe('manual')
-    expect(view.aiInfo).toBe(aiInfo)
+    expect(view.displayText).toBe('你好')
+    expect(view.originalText).toBe('こんにちは')
+  })
+
+  it('translatedOnly 隐藏 ocr 原文，只留译文', () => {
+    const view = resolveVisionView({ ...ocrInfo, translatedText: '你好' }, { translatedOnly: true })
+    expect(view.displayText).toBe('你好')
+    expect(view.originalText).toBeUndefined()
   })
 
   it('两者皆无 → 无视图', () => {
@@ -328,15 +353,15 @@ describe('vision Phase 4: mergeVisionInfo 合并 AI 生成结果', () => {
     { index: 1, mode: 'describe' as const, promptId: 'describe', provider: '', model: '', description: '旧描述 1', status: 'done' as const, createdAt: 1 },
   ]
 
-  it('incoming 命中 index 时替换，保留已有 manualDescription', () => {
-    const withManual = mergeVisionInfo(
-      [{ ...base[0]!, manualDescription: '手动覆盖' }, base[1]!],
-      [{ index: 0, mode: 'describe', promptId: 'describe', provider: 'openrouter', model: 'm', description: '新描述', status: 'done', createdAt: 2 }],
+  it('incoming 命中 index 时整体替换（直接编辑模型，无手动覆盖层）', () => {
+    const merged = mergeVisionInfo(
+      [{ ...base[0]!, description: '旧 0' }, base[1]!],
+      [{ index: 0, mode: 'describe', promptId: 'describe', provider: 'openrouter', model: 'm', description: '新 0', status: 'done', createdAt: 2 }],
     )
-    const hit = withManual.find(v => v.index === 0)!
-    expect(hit.description).toBe('新描述')
-    expect(hit.manualDescription).toBe('手动覆盖') // 重生成不冲掉手动覆盖
-    expect(withManual).toHaveLength(2)
+    const hit = merged.find(v => v.index === 0)!
+    expect(hit.description).toBe('新 0')
+    expect(hit.provider).toBe('openrouter')
+    expect(merged).toHaveLength(2)
   })
 
   it('未命中的 index 保留，结果按 index 排序', () => {
@@ -348,40 +373,40 @@ describe('vision Phase 4: mergeVisionInfo 合并 AI 生成结果', () => {
   })
 })
 
-describe('vision Phase 4: applyManualOverrides 手动覆盖保存', () => {
+describe('vision Phase 4: applyVisionEdits 直接编辑草稿保存', () => {
   const base = [
     { index: 0, mode: 'describe' as const, promptId: 'describe', provider: '', model: '', description: 'AI 0', status: 'done' as const, createdAt: 1 },
     { index: 1, mode: 'describe' as const, promptId: 'describe', provider: '', model: '', description: 'AI 1', status: 'done' as const, createdAt: 1 },
   ]
 
-  it('manual 非空 → 写 manualDescription（resolveVisionView 手动优先）', () => {
-    const out = applyManualOverrides(base, { 0: '手动改写 0' }, [0, 1])
-    const view = resolveVisionView(out.find(v => v.index === 0), out.find(v => v.index === 0)!.manualDescription)
-    expect(out[0]!.manualDescription).toBe('手动改写 0')
-    expect(view.source).toBe('manual')
-    expect(view.displayText).toBe('手动改写 0')
-    // 未覆盖的图保持 AI 结果
-    expect(out.find(v => v.index === 1)!.manualDescription).toBeUndefined()
+  it('describe 草稿 → 写 description；无草稿的图保留 AI 结果', () => {
+    const out = applyVisionEdits(base, { 0: { description: '手动改写 0' } }, [0, 1])
+    expect(out.find(v => v.index === 0)!.description).toBe('手动改写 0')
+    expect(out.find(v => v.index === 1)!.description).toBe('AI 1')
   })
 
-  it('manual 清空 → 移除旧 manualDescription 回到 AI 结果', () => {
-    const withManual = applyManualOverrides(
-      [{ ...base[0]!, manualDescription: '旧的' }, base[1]!],
-      { 0: '   ' }, // 空白视为清除
-      [0, 1],
-    )
-    expect(withManual[0]!.manualDescription).toBeUndefined()
-    const view = resolveVisionView(withManual[0])
-    expect(view.source).toBe('ai')
-    expect(view.displayText).toBe('AI 0')
+  it('空草稿 → 保留已有条目', () => {
+    const out = applyVisionEdits(base, { 0: {} }, [0, 1])
+    expect(out).toHaveLength(2)
+    expect(out[0]!.description).toBe('AI 0')
   })
 
-  it('无 AI 条目的图 + 手动 → 创建 manual 条目', () => {
-    const out = applyManualOverrides(base, { 2: '纯手动描述' }, [0, 1, 2])
-    const manualEntry = out.find(v => v.index === 2)!
-    expect(manualEntry.description).toBe('纯手动描述')
-    expect(manualEntry.manualDescription).toBe('纯手动描述')
+  it('无 AI 条目的图 + ocr 草稿 → 创建手动 ocr 条目（原文+译文）', () => {
+    const out = applyVisionEdits(base, { 2: { originalText: '原文', translatedText: '译文' } }, [0, 1, 2])
+    const manual = out.find(v => v.index === 2)!
+    expect(manual.mode).toBe('ocr')
+    expect(manual.originalText).toBe('原文')
+    expect(manual.translatedText).toBe('译文')
     expect(out.map(v => v.index)).toEqual([0, 1, 2])
+  })
+
+  it('ocr 条目清空译文 → translatedText 被清掉，原文保留', () => {
+    const ocrBase = [
+      { index: 0, mode: 'ocr' as const, promptId: 'ocr', provider: '', model: '', originalText: '原文', translatedText: '旧译文', status: 'done' as const, createdAt: 1 },
+    ]
+    const out = applyVisionEdits(ocrBase, { 0: { originalText: '原文', translatedText: '' } }, [0])
+    expect(out[0]!.originalText).toBe('原文')
+    expect(out[0]!.translatedText).toBe('')
   })
 })
 
