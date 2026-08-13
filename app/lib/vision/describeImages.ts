@@ -1,3 +1,4 @@
+import type { ModelMessage } from 'ai'
 import type { ModelConfig } from '~/lib/constants'
 import type { ThinkingLevel } from '~/lib/stores/appConfig'
 import type { EnrichedTweet } from '~/types'
@@ -73,6 +74,17 @@ export async function runImageVision({
     customPrompt,
   })
 
+  // AI SDK v7：system 提示不能放 messages（Gemini 等 provider 报
+  // "System messages are not allowed... Use the instructions option instead"），
+  // 必须拆出走 generateText 顶层 system 选项；chatMessages 只含 user 消息。
+  const systemMessage = messages.find(
+    (m): m is Extract<ModelMessage, { role: 'system' }> => m.role === 'system',
+  )
+  const system = systemMessage?.content
+  const chatMessages = messages.filter(
+    (m): m is Exclude<ModelMessage, { role: 'system' }> => m.role !== 'system',
+  )
+
   const strategy = getProviderStrategy(provider)
   const modelInstance = strategy.createSDKProvider(apiKey, baseUrl)(model)
   const thinkingConfig = getThinkingConfig(model, thinkingLevel)
@@ -89,7 +101,8 @@ export async function runImageVision({
     try {
       const response = await generateText({
         model: modelInstance,
-        messages,
+        system,
+        messages: chatMessages,
         output,
         temperature: VISION_TEMPERATURE,
         providerOptions: modelConfig
@@ -103,7 +116,7 @@ export async function runImageVision({
     catch (err) {
       lastError = err
       if (attempt < MAX_PARSE_RETRIES && err instanceof VisionParseError) {
-        messages.push({
+        chatMessages.push({
           role: 'user',
           content: `上一次输出未通过 schema 校验：${err.message}\n请重新输出严格符合 schema 的 JSON。`,
         })
