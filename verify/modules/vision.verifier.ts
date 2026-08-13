@@ -1,8 +1,10 @@
 /**
  * verify/modules/vision.verifier.ts
  *
- * Covers: AC-VISION-001 ~ AC-VISION-005（Phase 2，纯函数离线确定性）
- *         AC-VISION-006 ~ 007 在 Phase 3 扩展（依赖 runImageVision / buildVisionMessages 上下文注入）
+ * Covers: AC-VISION-001 ~ AC-VISION-007
+ *   AC-VISION-001 ~ 005：Phase 2，纯函数离线确定性
+ *   AC-VISION-006 ~ 007：Phase 3，runImageVision 无 photo 短路 + withContext 注入
+ *   AC-VISION-008：Phase 5（截图路由渲染）
  * Postmortem: 001（解析器零测试）、002（逻辑耦合 React）、005（媒体 URL 重复）
  *
  * 验证对象：
@@ -10,6 +12,7 @@
  * - app/lib/vision/prompts.ts（describe / ocr / custom 预设 + strict schema）
  * - app/lib/vision/parse.ts（parseVisionResult / resolveVisionView 决策链）
  * - app/lib/vision/messages.ts（buildVisionMessages 图片 file part + index 语义）
+ * - app/lib/vision/describeImages.ts（runImageVision 编排，无 photo 短路）
  */
 
 import type { StepResult, Verifier, VerifyContext } from '../framework/types.js'
@@ -18,6 +21,7 @@ import type { EnrichedTweet } from '~/types'
 import type { AIVisionInfo } from '~/types/vision'
 import fs from 'node:fs'
 import path from 'node:path'
+import { runImageVision } from '~/lib/vision/describeImages.js'
 import { buildVisionMessages } from '~/lib/vision/messages.js'
 import { parseVisionResult, resolveVisionView } from '~/lib/vision/parse.js'
 import { VISION_PROMPT_PRESETS } from '~/lib/vision/prompts.js'
@@ -42,6 +46,8 @@ export class VisionVerifier implements Verifier {
     'AC-VISION-003',
     'AC-VISION-004',
     'AC-VISION-005',
+    'AC-VISION-006',
+    'AC-VISION-007',
   ]
 
   canRun(_ctx: VerifyContext): string | null {
@@ -57,6 +63,8 @@ export class VisionVerifier implements Verifier {
     results.push(this.verifyOcrSchema())
     results.push(this.verifyResolveView())
     results.push(this.verifyMediaIndexMapping(tweet))
+    results.push(await this.verifyNoPhoto(tweet))
+    results.push(this.verifyWithContext(tweet))
 
     return results
   }
@@ -220,6 +228,73 @@ export class VisionVerifier implements Verifier {
     }
     catch (err) {
       return this.fail('AC-VISION-005', 'mediaIndex mapping', err instanceof Error ? err.message : String(err))
+    }
+  }
+
+  // ── AC-VISION-006: 无 photo 返回空，不发起模型请求 ────────
+  private async verifyNoPhoto(tweet: EnrichedTweet): Promise<StepResult> {
+    try {
+      const noPhotoTweet: EnrichedTweet = {
+        ...tweet,
+        mediaDetails: (tweet.mediaDetails ?? []).filter(m => m.type !== 'photo'),
+      }
+
+      // 用假 key：若 runImageVision 真的发起模型请求会失败/超时，返回 [] 即证明短路
+      const out = await runImageVision({
+        tweet: noPhotoTweet,
+        mediaIndexes: [0],
+        mode: 'describe',
+        apiKey: 'bogus-key-for-offline-short-circuit',
+        model: 'xiaomi/mimo-v2.5',
+        provider: 'openrouter',
+      })
+
+      const ok = Array.isArray(out) && out.length === 0
+      if (ok) {
+        return this.pass('AC-VISION-006', 'no-photo short-circuit', '全 video/gif → []，未创建 provider / 未发起模型请求')
+      }
+      return this.fail('AC-VISION-006', 'no-photo short-circuit', `expected [] got ${JSON.stringify(out)}`)
+    }
+    catch (err) {
+      return this.fail('AC-VISION-006', 'no-photo short-circuit', err instanceof Error ? err.message : String(err))
+    }
+  }
+
+  // ── AC-VISION-007: withContext 注入推文上下文 ─────────────
+  private verifyWithContext(tweet: EnrichedTweet): StepResult {
+    try {
+      const images: VisionImageInput[] = [{ index: 0, dataUri: DATA_URI }]
+      const preset = VISION_PROMPT_PRESETS.ocr
+
+      const withCtx = buildVisionMessages({
+        images,
+        preset,
+        withContext: true,
+        tweetText: tweet.text,
+        quotedText: tweet.quotedTweet?.text,
+      })
+      const noCtx = buildVisionMessages({ images, preset, withContext: false })
+
+      const textOf = (messages: ReturnType<typeof buildVisionMessages>) =>
+        (messages[1]!.content as Array<{ type: string, text?: string }>)
+          .filter(p => p.type === 'text')
+          .map(p => p.text ?? '')
+          .join(' ')
+
+      const withCtxText = textOf(withCtx)
+      const noCtxText = textOf(noCtx)
+
+      const hasContext = withCtxText.includes(tweet.text)
+      const noContext = !noCtxText.includes(tweet.text)
+      const filePartOk = (withCtx[1]!.content as Array<{ type: string }>).some(p => p.type === 'file')
+
+      if (hasContext && noContext && filePartOk) {
+        return this.pass('AC-VISION-007', 'withContext injection', 'true 注入推文原文；false 不含上下文；file part 始终存在')
+      }
+      return this.fail('AC-VISION-007', 'withContext injection', `hasContext:${hasContext} noContext:${noContext} filePart:${filePartOk}`)
+    }
+    catch (err) {
+      return this.fail('AC-VISION-007', 'withContext injection', err instanceof Error ? err.message : String(err))
     }
   }
 }

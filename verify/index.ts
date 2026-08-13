@@ -68,7 +68,7 @@ if (values.help) {
     screenshot    Screenshot export (AC-SHOT-001~004)
     media         Media proxy (AC-MEDIA-001~006)
     postmortem    Postmortem check (AC-PM-001~007)
-    vision        AI vision (AIVisionInfo / prompts / parse, AC-VISION-001~005)
+    vision        AI vision (AIVisionInfo / prompts / parse / orchestration, AC-VISION-001~007)
   `)
   process.exit(0)
 }

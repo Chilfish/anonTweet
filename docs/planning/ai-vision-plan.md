@@ -1,9 +1,9 @@
 # AI 视觉描述子系统 — 行动计划
 
 > 最后更新：2026-08-13
-> 状态：**文档先行（Phase 0），尚未实现**
+> 状态：**Phase 1~3 已完成（P1 e278444 · P2 1bfc2f0 · P3 本 commit），Phase 4 UI 进行中**
 > 上游：`docs/feature_ai_vision.md`（需求与上下文）｜ `verify/acceptance-criteria/AC-vision.md`（验收）
-> 前置依赖：baseUrl / 自定义模型输入（未提交工作区，先落地再基于它扩展）
+> 前置依赖：baseUrl / 自定义模型输入（已落库）
 
 ---
 
@@ -22,7 +22,7 @@
 | DR-3 | 独立设置 Tab + 独立 store 字段（**不 bump persist version**）                                               | 与翻译配置解耦；加字段浅合并默认值，不触发迁移丢数据（Postmortem #006，baseUrl 同款做法）                                                                                                        |
 | DR-4 | 默认 `baseURL=https://openrouter.ai/api/v1`，模型 `xiaomi/mimo-v2.5`                                        | 官方默认端点；mimo-v2.5 原生 omnimodal、结构化输出支持、价格低                                                                                                                                   |
 | DR-5 | 图片以 **base64 data URI** 传入，服务端 fetch 后转码                                                        | 规避上游数据中心 IP 被 twimg 拦截；OpenRouter 接受 data URI；代价是 token 略增，可用缩略图参数缓解                                                                                               |
-| DR-6 | 独立 API 路由 `POST /api/ai/vision`，不复用 `/api/ai-translation`                                           | 翻译路由有 `force`/`isZh` 守卫；vision 独立请求语义（mediaIndexes/mode/withContext）                                                                                                             |
+| DR-6 | 独立 API 路由 `POST /api/ai-vision`，不复用 `/api/ai-translation`                     | 翻译路由有 `force`/`isZh` 守卫；vision 独立请求语义（mediaIndexes/mode/withContext）；`ai-vision` 命名对齐 `ai-test`/`ai-translation` 扁平路由约定 |
 | DR-7 | Vision thinking 默认关闭（minimal）                                                                         | 感知任务不需要思考链，省延迟省 token；OCR+上下文翻译场景可由用户手动调高                                                                                                                         |
 | DR-8 | Vision 的 provider **不限于 OpenRouter**：复用 provider 策略体系，允许选支持**图片输入**的模型（如 Gemini） | 已有 Gemini Key 的用户可「识图+翻译推文」复用一个 Key；`messages.ts` 的 FilePart 对 google / openai-compatible 均兼容；参考 OpenRouter `?input_modalities=image&output_modalities=text` 过滤模型 |
 
@@ -60,12 +60,14 @@
 - AC-VISION-006/007 依赖服务端编排（`runImageVision`），随 Phase 3 扩展
 - commit: `feat(vision): data model + prompt presets + pure functions`
 
-### Phase 3 — 服务端：图片获取 + 编排 + API
+### Phase 3 — 服务端：图片获取 + 编排 + API（本 commit）
 
-- `app/lib/vision/fetchImage.ts`（复用 `createMediaUrl`；base64；缩略图参数；失败回退 proxy）
-- `app/lib/vision/describeImages.ts`（`buildVisionMessages` + `runImageVision` 编排）
-- `app/routes/api/ai/vision.ts`（新端点；请求 schema；`normalizeAIError`）
-- `verify/modules/vision.verifier.ts` + AC-VISION-007/008（离线/集成）
+- `app/lib/vision/fetchImage.ts`（`buildMediaUrl` 服务端无 proxy 版 + `fetchImageDataUri` + `fetchMediaImages`；默认 small 缩略图，DR-5）
+  - 注：计划原写「复用 `createMediaUrl`」，实际代码中不存在该函数——用与客户端 `getMediaUrl` 相同的 format+name 变换实现服务端孪生，仍满足 Postmortem #005 不写第五套 URL 逻辑
+  - proxy 回退未在本阶段实现（fetch 用浏览器头直接打 twimg），列为二期候选
+- `app/lib/vision/describeImages.ts`（`runImageVision` 编排：photo 过滤 → 抓图 → messages → `Output.object` 结构化生成 → 清洗；schema 校验失败重试一次）
+- `app/routes/api/ai/vision.ts`（`POST /api/ai-vision`；zod 请求校验；`normalizeAIError`）
+- `verify/modules/vision.verifier.ts` 激活 AC-VISION-006/007（无 photo 短路 / withContext 注入）；AC-VISION-008 留待 Phase 5
 - commit: `feat(vision): vision endpoint + server orchestration`
 
 ### Phase 4 — UI：设置 Tab + 展示 + 编辑弹窗

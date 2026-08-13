@@ -1,5 +1,7 @@
 import type { EnrichedTweet } from '~/types'
 import { describe, expect, it } from 'vitest'
+import { runImageVision } from '~/lib/vision/describeImages'
+import { buildMediaUrl } from '~/lib/vision/fetchImage'
 import { buildVisionMessages } from '~/lib/vision/messages'
 import { parseVisionResult, resolveVisionView } from '~/lib/vision/parse'
 import { getVisionPreset, VISION_PROMPT_PRESETS } from '~/lib/vision/prompts'
@@ -185,5 +187,101 @@ describe('vision AC-VISION-005: mediaIndex → mediaDetails 映射', () => {
     expect(out[0]!.mode).toBe('custom')
     expect(out[0]!.promptId).toBe('custom')
     expect(out[0]!.description).toBe('custom desc')
+  })
+})
+
+describe('vision AC-VISION-005 配套: buildMediaUrl 复用 format+name 变换', () => {
+  it('无 proxy，format/name 与 getMediaUrl 一致（Postmortem #005）', () => {
+    const url = buildMediaUrl({
+      type: 'photo',
+      index: 0,
+      media_url_https: 'https://pbs.twimg.com/media/x.jpg',
+      original_info: { height: 100, width: 100 },
+    })
+    expect(url).toContain('format=jpg')
+    expect(url).toContain('name=small')
+    expect(url).not.toContain('proxy')
+  })
+
+  it('默认 small 缩略图（DR-5 token 成本控制），可覆盖为 medium', () => {
+    const small = buildMediaUrl({
+      type: 'photo',
+      index: 0,
+      media_url_https: 'https://pbs.twimg.com/media/x.jpg',
+      original_info: { height: 100, width: 100 },
+    }, 'small')
+    const medium = buildMediaUrl({
+      type: 'photo',
+      index: 0,
+      media_url_https: 'https://pbs.twimg.com/media/x.jpg',
+      original_info: { height: 100, width: 100 },
+    }, 'medium')
+    expect(small).toContain('name=small')
+    expect(medium).toContain('name=medium')
+  })
+})
+
+describe('vision AC-VISION-006: 无 photo 返回空，不发起模型请求', () => {
+  it('runImageVision 对无 photo 推文返回 []，假 key 不触发请求', async () => {
+    const tweet: EnrichedTweet = {
+      __typename: 'Tweet',
+      id_str: '2',
+      lang: 'ja',
+      created_at: 'x',
+      text: 'video only',
+      entities: [],
+      user: {
+        id_str: '1',
+        name: 'n',
+        screen_name: 's',
+        is_blue_verified: false,
+        profile_image_url_https: 'https://x/i.jpg',
+        profile_image_shape: 'Circle',
+        verified: false,
+      },
+      url: 'https://x.com/s/status/2',
+      mediaDetails: [], // 无 photo
+    }
+
+    const out = await runImageVision({
+      tweet,
+      mediaIndexes: [0],
+      mode: 'describe',
+      apiKey: 'bogus-key-for-offline-short-circuit',
+      model: 'xiaomi/mimo-v2.5',
+      provider: 'openrouter',
+    })
+    expect(out).toEqual([])
+  })
+})
+
+describe('vision AC-VISION-007: withContext 注入推文上下文', () => {
+  const images = [{ index: 0, dataUri: DATA_URI }]
+  const textOf = (messages: ReturnType<typeof buildVisionMessages>) =>
+    (messages[1]!.content as Array<{ type: string, text?: string }>)
+      .filter(p => p.type === 'text')
+      .map(p => p.text ?? '')
+      .join(' ')
+
+  it('withContext=true 注入推文原文与引用，false 不含上下文', () => {
+    const withCtx = buildVisionMessages({
+      images,
+      preset: VISION_PROMPT_PRESETS.ocr,
+      withContext: true,
+      tweetText: 'こんにちは世界',
+      quotedText: '引用推文内容',
+    })
+    const noCtx = buildVisionMessages({ images, preset: VISION_PROMPT_PRESETS.ocr, withContext: false })
+
+    expect(textOf(withCtx)).toContain('こんにちは世界')
+    expect(textOf(withCtx)).toContain('引用推文内容')
+    expect(textOf(noCtx)).not.toContain('こんにちは世界')
+  })
+
+  it('图片 file part 始终存在（含 withContext=false）', () => {
+    const noCtx = buildVisionMessages({ images, preset: VISION_PROMPT_PRESETS.describe, withContext: false })
+    const content = noCtx[1]!.content as Array<{ type: string }>
+    const fileParts = content.filter(p => p.type === 'file')
+    expect(fileParts).toHaveLength(1)
   })
 })
