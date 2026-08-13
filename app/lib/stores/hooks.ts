@@ -1,6 +1,7 @@
 import type { EnrichedTweet } from '~/types'
 import { useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
+import { resolveAIConfig } from '~/lib/ai-provider-config'
 import { useAppConfigStore } from './appConfig'
 import { useTranslationStore } from './translation'
 import { useTranslationUIStore } from './translationUI'
@@ -19,10 +20,23 @@ export function useAIConfig() {
       deepseekModel: state.deepseekModel,
       deepseekBaseUrl: state.deepseekBaseUrl,
       deepseekThinkingLevel: state.deepseekThinkingLevel,
+      openrouterApiKey: state.openrouterApiKey,
+      openrouterModel: state.openrouterModel,
+      openrouterBaseUrl: state.openrouterBaseUrl,
+      openrouterThinkingLevel: state.openrouterThinkingLevel,
       enableAITranslation: state.enableAITranslation,
       translationGlossary: state.translationGlossary,
     })),
   )
+}
+
+/**
+ * 解析当前选中 provider 的生效配置（apiKey / model / baseUrl / thinkingLevel）。
+ * 依赖 useAIConfig 的 useShallow：字段不变则引用稳定，不会多渲染。
+ */
+export function useResolvedAIConfig() {
+  const config = useAIConfig()
+  return resolveAIConfig(config)
 }
 
 /**

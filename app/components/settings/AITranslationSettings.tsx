@@ -1,4 +1,4 @@
-import type { ThinkingLevel } from '~/lib/stores/appConfig'
+import type { AIProvider, ThinkingLevel } from '~/lib/stores/appConfig'
 import { Loader2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
@@ -17,7 +17,8 @@ import { Switch } from '~/components/ui/switch'
 import { Textarea } from '~/components/ui/textarea'
 import { toastManager } from '~/components/ui/toast'
 import { toastAIError } from '~/lib/ai-error-toast'
-import { DEFAULT_DEEPSEEK_BASE_URL, DEFAULT_GEMINI_BASE_URL, models } from '~/lib/constants'
+import { resolveAIConfig } from '~/lib/ai-provider-config'
+import { DEFAULT_DEEPSEEK_BASE_URL, DEFAULT_GEMINI_BASE_URL, DEFAULT_OPENROUTER_BASE_URL, models } from '~/lib/constants'
 import { fetcher } from '~/lib/fetcher'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
@@ -38,6 +39,10 @@ export function AITranslationSettings() {
     deepseekModel,
     deepseekBaseUrl,
     deepseekThinkingLevel,
+    openrouterApiKey,
+    openrouterModel,
+    openrouterBaseUrl,
+    openrouterThinkingLevel,
     translationGlossary,
     setEnableAITranslation,
     setAIProvider,
@@ -49,6 +54,10 @@ export function AITranslationSettings() {
     setDeepseekModel,
     setDeepseekBaseUrl,
     setDeepseekThinkingLevel,
+    setOpenrouterApiKey,
+    setOpenrouterModel,
+    setOpenrouterBaseUrl,
+    setOpenrouterThinkingLevel,
     setTranslationGlossary,
   } = useAppConfigStore(
     useShallow(state => ({
@@ -62,6 +71,10 @@ export function AITranslationSettings() {
       deepseekModel: state.deepseekModel,
       deepseekBaseUrl: state.deepseekBaseUrl,
       deepseekThinkingLevel: state.deepseekThinkingLevel,
+      openrouterApiKey: state.openrouterApiKey,
+      openrouterModel: state.openrouterModel,
+      openrouterBaseUrl: state.openrouterBaseUrl,
+      openrouterThinkingLevel: state.openrouterThinkingLevel,
       translationGlossary: state.translationGlossary,
       setEnableAITranslation: state.setEnableAITranslation,
       setAIProvider: state.setAIProvider,
@@ -73,6 +86,10 @@ export function AITranslationSettings() {
       setDeepseekModel: state.setDeepseekModel,
       setDeepseekBaseUrl: state.setDeepseekBaseUrl,
       setDeepseekThinkingLevel: state.setDeepseekThinkingLevel,
+      setOpenrouterApiKey: state.setOpenrouterApiKey,
+      setOpenrouterModel: state.setOpenrouterModel,
+      setOpenrouterBaseUrl: state.setOpenrouterBaseUrl,
+      setOpenrouterThinkingLevel: state.setOpenrouterThinkingLevel,
       setTranslationGlossary: state.setTranslationGlossary,
     })),
   )
@@ -80,13 +97,50 @@ export function AITranslationSettings() {
   const entries = useTranslationDictionaryStore(state => state.entries)
   const [isTesting, setIsTesting] = useState(false)
 
-  const currentProviderConfig = {
-    apiKey: aiProvider === 'google' ? geminiApiKey : deepseekApiKey,
-    model: aiProvider === 'google' ? geminiModel : deepseekModel,
-    baseUrl: aiProvider === 'google' ? geminiBaseUrl : deepseekBaseUrl,
-    thinkingLevel: aiProvider === 'google' ? geminiThinkingLevel : deepseekThinkingLevel,
-    providerName: aiProvider === 'google' ? 'Gemini' : 'DeepSeek',
+  /** 当前生效的 provider 配置（读侧：resolveAIConfig 纯函数，替代 google/deepseek 三元） */
+  const currentProviderConfig = resolveAIConfig({
+    aiProvider,
+    geminiApiKey,
+    geminiModel,
+    geminiBaseUrl,
+    geminiThinkingLevel,
+    deepseekApiKey,
+    deepseekModel,
+    deepseekBaseUrl,
+    deepseekThinkingLevel,
+    openrouterApiKey,
+    openrouterModel,
+    openrouterBaseUrl,
+    openrouterThinkingLevel,
+  })
+
+  /** 写侧：按 provider 索引 setter，保证 UI 组件与 provider 数量解耦 */
+  const settersByProvider: Record<AIProvider, {
+    setApiKey: (v: string) => void
+    setModel: (v: string) => void
+    setBaseUrl: (v: string) => void
+    setThinkingLevel: (v: ThinkingLevel) => void
+  }> = {
+    google: {
+      setApiKey: setGeminiApiKey,
+      setModel: setGeminiModel,
+      setBaseUrl: setGeminiBaseUrl,
+      setThinkingLevel: setGeminiThinkingLevel,
+    },
+    deepseek: {
+      setApiKey: setDeepseekApiKey,
+      setModel: setDeepseekModel,
+      setBaseUrl: setDeepseekBaseUrl,
+      setThinkingLevel: setDeepseekThinkingLevel,
+    },
+    openrouter: {
+      setApiKey: setOpenrouterApiKey,
+      setModel: setOpenrouterModel,
+      setBaseUrl: setOpenrouterBaseUrl,
+      setThinkingLevel: setOpenrouterThinkingLevel,
+    },
   }
+  const setters = settersByProvider[aiProvider]
 
   const handleTestConnection = async () => {
     if (!currentProviderConfig.apiKey) {
@@ -165,18 +219,29 @@ export function AITranslationSettings() {
   }, [currentModelConfig, aiProvider])
 
   const currentThinkingLevelOption = thinkingLevelOptions.find(
-    opt => opt.value === (aiProvider === 'google' ? geminiThinkingLevel : deepseekThinkingLevel),
+    opt => opt.value === currentProviderConfig.thinkingLevel,
   )
 
   const providerOptions = [
     { label: 'Google Gemini', value: 'google' },
     { label: 'DeepSeek', value: 'deepseek' },
+    { label: 'OpenRouter', value: 'openrouter' },
   ]
   const currentProviderOption = providerOptions.find(opt => opt.value === aiProvider)
 
   const modelOptions = providerModels.map(m => ({ label: m.text, value: m.name }))
   const currentModelOption = modelOptions.find(opt => opt.value === currentProviderConfig.model)
   const isCustomModel = !currentModelOption
+
+  const handleSelectModel = (val: string) => {
+    setters.setModel(val)
+    const nextModel = models.find(m => m.name === val)
+    if (nextModel?.thinkingType === 'level' && nextModel.supportedLevels) {
+      if (!nextModel.supportedLevels.includes(currentProviderConfig.thinkingLevel)) {
+        setters.setThinkingLevel(nextModel.supportedLevels[0]!)
+      }
+    }
+  }
 
   return (
     <div className="space-y-6 p-1">
@@ -204,7 +269,7 @@ export function AITranslationSettings() {
               <div className="flex-1 flex justify-end">
                 <Select
                   value={currentProviderOption}
-                  onValueChange={opt => opt && setAIProvider(opt.value as any)}
+                  onValueChange={opt => opt && setAIProvider(opt.value as AIProvider)}
                 >
                   <SelectTrigger className="w-fit h-8 border-none transition-colors">
                     <SelectValue />
@@ -236,7 +301,13 @@ export function AITranslationSettings() {
               label="API Key"
               description={(
                 <a
-                  href={aiProvider === 'google' ? 'https://aistudio.google.com/api-keys' : 'https://platform.deepseek.com/api_keys'}
+                  href={
+                    aiProvider === 'google'
+                      ? 'https://aistudio.google.com/api-keys'
+                      : aiProvider === 'deepseek'
+                        ? 'https://platform.deepseek.com/api_keys'
+                        : 'https://openrouter.ai/settings/keys'
+                  }
                   target="_blank"
                   rel="noreferrer"
                   className="text-xs text-muted-foreground underline hover:text-primary transition-colors inline-flex items-center"
@@ -253,8 +324,8 @@ export function AITranslationSettings() {
               <Input
                 type="password"
                 autoComplete="off"
-                value={aiProvider === 'google' ? geminiApiKey : deepseekApiKey}
-                onChange={e => aiProvider === 'google' ? setGeminiApiKey(e.target.value) : setDeepseekApiKey(e.target.value)}
+                value={currentProviderConfig.apiKey}
+                onChange={e => setters.setApiKey(e.target.value)}
                 placeholder="输入密钥"
                 className="text-right h-8 sm:min-w-64 bg-secondary/30 border-none focus-visible:ring-1 focus-visible:ring-primary/20"
               />
@@ -269,9 +340,15 @@ export function AITranslationSettings() {
               <Input
                 type="url"
                 autoComplete="off"
-                value={aiProvider === 'google' ? geminiBaseUrl : deepseekBaseUrl}
-                onChange={e => aiProvider === 'google' ? setGeminiBaseUrl(e.target.value) : setDeepseekBaseUrl(e.target.value)}
-                placeholder={aiProvider === 'google' ? DEFAULT_GEMINI_BASE_URL : DEFAULT_DEEPSEEK_BASE_URL}
+                value={currentProviderConfig.baseUrl}
+                onChange={e => setters.setBaseUrl(e.target.value)}
+                placeholder={
+                  aiProvider === 'google'
+                    ? DEFAULT_GEMINI_BASE_URL
+                    : aiProvider === 'deepseek'
+                      ? DEFAULT_DEEPSEEK_BASE_URL
+                      : DEFAULT_OPENROUTER_BASE_URL
+                }
                 className="text-right h-8 sm:min-w-64 bg-secondary/30 border-none focus-visible:ring-1 focus-visible:ring-primary/20"
               />
             </SettingsRow>
@@ -289,30 +366,10 @@ export function AITranslationSettings() {
                       return
                     if (opt.value === CUSTOM_MODEL_VALUE) {
                       // 进入自定义模式：清空预设，显示手写模型名输入框
-                      if (aiProvider === 'google')
-                        setGeminiModel('')
-                      else setDeepseekModel('')
+                      setters.setModel('')
                       return
                     }
-                    const val = opt.value
-                    if (aiProvider === 'google') {
-                      setGeminiModel(val)
-                      const nextModel = models.find(m => m.name === val)
-                      if (nextModel?.thinkingType === 'level' && nextModel.supportedLevels) {
-                        if (!nextModel.supportedLevels.includes(geminiThinkingLevel)) {
-                          setGeminiThinkingLevel(nextModel.supportedLevels[0]!)
-                        }
-                      }
-                    }
-                    else {
-                      setDeepseekModel(val)
-                      const nextModel = models.find(m => m.name === val)
-                      if (nextModel?.thinkingType === 'level' && nextModel.supportedLevels) {
-                        if (!nextModel.supportedLevels.includes(deepseekThinkingLevel)) {
-                          setDeepseekThinkingLevel(nextModel.supportedLevels[0]!)
-                        }
-                      }
-                    }
+                    handleSelectModel(opt.value)
                   }}
                 >
                   <SelectTrigger className="w-fit h-8 border-none transition-colors">
@@ -343,7 +400,7 @@ export function AITranslationSettings() {
                 <Input
                   autoComplete="off"
                   value={currentProviderConfig.model}
-                  onChange={e => aiProvider === 'google' ? setGeminiModel(e.target.value) : setDeepseekModel(e.target.value)}
+                  onChange={e => setters.setModel(e.target.value)}
                   placeholder="输入模型 ID"
                   className="text-right h-8 sm:min-w-64 bg-secondary/30 border-none focus-visible:ring-1 focus-visible:ring-primary/20"
                 />
@@ -362,10 +419,7 @@ export function AITranslationSettings() {
                     onValueChange={(opt) => {
                       if (!opt)
                         return
-                      const val = opt.value as ThinkingLevel
-                      if (aiProvider === 'google')
-                        setGeminiThinkingLevel(val)
-                      else setDeepseekThinkingLevel(val)
+                      setters.setThinkingLevel(opt.value as ThinkingLevel)
                     }}
                   >
                     <SelectTrigger className="w-fit h-8 border-none transition-colors">

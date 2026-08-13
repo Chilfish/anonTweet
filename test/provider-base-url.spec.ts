@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { deepseekStrategy, googleStrategy } from '~/lib/providers'
+import { deepseekStrategy, googleStrategy, openrouterStrategy } from '~/lib/providers'
 
 vi.mock('@ai-sdk/google', () => ({
   createGoogleGenerativeAI: vi.fn(
@@ -35,6 +35,19 @@ describe('createSDKProvider baseUrl forwarding', () => {
     const sdk = deepseekStrategy.createSDKProvider('key', 'https://deepseek.example') as any
     expect(sdk.__settings.baseURL).toBe('https://deepseek.example')
     expect(sdk.__settings.name).toBe('deepseek')
+  })
+
+  it('passes baseURL to the OpenRouter SDK when provided', () => {
+    const sdk = openrouterStrategy.createSDKProvider('key', 'https://openrouter.example') as any
+    expect(sdk.__settings.baseURL).toBe('https://openrouter.example')
+    expect(sdk.__settings.name).toBe('openrouter')
+    expect(sdk.__settings.supportsStructuredOutputs).toBe(true)
+  })
+
+  it('defaults to the official OpenRouter base URL when empty', () => {
+    const sdk = openrouterStrategy.createSDKProvider('key', '') as any
+    expect(sdk.__settings.baseURL).toBe('https://openrouter.ai/api/v1')
+    expect(sdk.__settings.supportsStructuredOutputs).toBe(true)
   })
 
   it('defaults to the official DeepSeek base URL when empty', () => {

@@ -8,6 +8,7 @@ import { Label } from '~/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover'
 import { Textarea } from '~/components/ui/textarea'
 import { toastAIError } from '~/lib/ai-error-toast'
+import { resolveAIConfig } from '~/lib/ai-provider-config'
 import { fetcher } from '~/lib/fetcher'
 import { useAIConfig } from '~/lib/stores/hooks'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
@@ -34,23 +35,11 @@ export function IGTranslateDialog({ post, onTranslated }: IGTranslateDialogProps
 
   const aiConfig = useAIConfig()
   const dictEntries = useTranslationDictionaryStore(state => state.getFormattedEntries)
-
-  const apiKey = aiConfig.aiProvider === 'google'
-    ? aiConfig.geminiApiKey
-    : aiConfig.deepseekApiKey
-  const model = aiConfig.aiProvider === 'google'
-    ? aiConfig.geminiModel
-    : aiConfig.deepseekModel
-  const baseUrl = aiConfig.aiProvider === 'google'
-    ? aiConfig.geminiBaseUrl
-    : aiConfig.deepseekBaseUrl
-  const thinkingLevel = aiConfig.aiProvider === 'google'
-    ? aiConfig.geminiThinkingLevel
-    : aiConfig.deepseekThinkingLevel
+  const { apiKey, model, baseUrl, thinkingLevel, providerName } = resolveAIConfig(aiConfig)
 
   const handleAITranslate = async () => {
     if (!apiKey || !model) {
-      toast.error(`请配置 ${aiConfig.aiProvider === 'google' ? 'Gemini' : 'DeepSeek'} API Key`)
+      toast.error(`请配置 ${providerName} API Key`)
       return
     }
 
@@ -82,7 +71,7 @@ export function IGTranslateDialog({ post, onTranslated }: IGTranslateDialogProps
     catch (error: unknown) {
       console.error('[IG TranslateDialog] AI error:', error)
       toastAIError(error, {
-        providerName: aiConfig.aiProvider === 'google' ? 'Gemini' : 'DeepSeek',
+        providerName,
         fallbackTitle: 'AI 翻译请求失败',
       })
     }

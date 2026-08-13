@@ -6,11 +6,14 @@ export type ThinkingLevel = 'minimal' | 'low' | 'medium' | 'high' | 'max'
  */
 export const DEFAULT_GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta'
 export const DEFAULT_DEEPSEEK_BASE_URL = 'https://api.deepseek.com'
+export const DEFAULT_OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
+
+export type AIProviderName = 'google' | 'deepseek' | 'openrouter'
 
 export interface ModelConfig {
   name: string
   text: string
-  provider: 'google' | 'deepseek'
+  provider: AIProviderName
   thinkingType: 'level' | 'budget' | 'none'
   supportedLevels?: ThinkingLevel[]
 }
@@ -49,6 +52,13 @@ export const models: ModelConfig[] = [
     provider: 'deepseek',
     thinkingType: 'level',
     supportedLevels: ['minimal', 'high', 'max'],
+  },
+  {
+    name: 'xiaomi/mimo-v2.5',
+    text: 'MiMo V2.5 (OpenRouter)',
+    provider: 'openrouter',
+    thinkingType: 'level',
+    supportedLevels: ['minimal', 'low', 'medium', 'high'],
   },
 ]
 

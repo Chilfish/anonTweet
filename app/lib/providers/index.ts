@@ -3,10 +3,12 @@ import type { ThinkingLevel } from '~/lib/stores/appConfig'
 import { models } from '~/lib/constants'
 import { deepseekStrategy } from './deepseek'
 import { googleStrategy } from './google'
+import { openrouterStrategy } from './openrouter'
 
 const strategies: Record<string, ProviderStrategy> = {
   google: googleStrategy,
   deepseek: deepseekStrategy,
+  openrouter: openrouterStrategy,
 }
 
 /**
@@ -34,5 +36,5 @@ export function getThinkingConfig(modelName: string, level: ThinkingLevel = 'min
   return strategy.getThinkingConfig(modelConfig, level)
 }
 
-export { deepseekStrategy, googleStrategy }
+export { deepseekStrategy, googleStrategy, openrouterStrategy }
 export type { ProviderStrategy }

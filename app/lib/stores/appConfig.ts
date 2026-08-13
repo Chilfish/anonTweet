@@ -5,7 +5,7 @@ import { persist } from 'zustand/middleware'
 export type Theme = 'light' | 'dark' | 'system'
 export type ScreenshotFormat = 'png' | 'jpeg'
 export type ThinkingLevel = 'minimal' | 'low' | 'medium' | 'high' | 'max'
-export type AIProvider = 'google' | 'deepseek'
+export type AIProvider = 'google' | 'deepseek' | 'openrouter'
 
 export interface AppConfigs {
   theme: Theme
@@ -23,6 +23,10 @@ export interface AppConfigs {
   deepseekModel: string
   deepseekBaseUrl: string
   deepseekThinkingLevel: ThinkingLevel
+  openrouterApiKey: string
+  openrouterModel: string
+  openrouterBaseUrl: string
+  openrouterThinkingLevel: ThinkingLevel
   translationGlossary: string
   isInlineMedia: boolean
 }
@@ -47,6 +51,10 @@ interface AppConfigState extends AppConfigs {
   setDeepseekModel: (model: string) => void
   setDeepseekBaseUrl: (baseUrl: string) => void
   setDeepseekThinkingLevel: (level: ThinkingLevel) => void
+  setOpenrouterApiKey: (apiKey: string) => void
+  setOpenrouterModel: (model: string) => void
+  setOpenrouterBaseUrl: (baseUrl: string) => void
+  setOpenrouterThinkingLevel: (level: ThinkingLevel) => void
   setTranslationGlossary: (glossary: string) => void
   setIsInlineMedia: (isInlineMedia: boolean) => void
 }
@@ -72,6 +80,10 @@ export const useAppConfigStore = create<AppConfigState>()(
       deepseekModel: 'deepseek-v4-flash',
       deepseekBaseUrl: '',
       deepseekThinkingLevel: 'high',
+      openrouterApiKey: '',
+      openrouterModel: 'xiaomi/mimo-v2.5',
+      openrouterBaseUrl: '',
+      openrouterThinkingLevel: 'minimal',
       translationGlossary: '',
       isInlineMedia: false,
 
@@ -90,6 +102,10 @@ export const useAppConfigStore = create<AppConfigState>()(
       setDeepseekModel: deepseekModel => set({ deepseekModel }),
       setDeepseekBaseUrl: deepseekBaseUrl => set({ deepseekBaseUrl }),
       setDeepseekThinkingLevel: deepseekThinkingLevel => set({ deepseekThinkingLevel }),
+      setOpenrouterApiKey: openrouterApiKey => set({ openrouterApiKey }),
+      setOpenrouterModel: openrouterModel => set({ openrouterModel }),
+      setOpenrouterBaseUrl: openrouterBaseUrl => set({ openrouterBaseUrl }),
+      setOpenrouterThinkingLevel: openrouterThinkingLevel => set({ openrouterThinkingLevel }),
       setTranslationGlossary: translationGlossary => set({ translationGlossary }),
       setIsInlineMedia: isInlineMedia => set({ isInlineMedia }),
     }),
