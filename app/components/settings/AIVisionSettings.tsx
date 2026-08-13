@@ -17,6 +17,8 @@ import { useAppConfigStore } from '~/lib/stores/appConfig'
 
 /** 模型下拉中的「自定义」哨兵项，用于切换到手写模型名的输入模式 */
 const CUSTOM_MODEL_VALUE = '__custom__'
+
+/** 「自定义」哨兵对象值（与 AITranslationSettings 一致，Select 用对象作为 value） */
 const CUSTOM_MODEL_OPTION = { label: '自定义模型…', value: CUSTOM_MODEL_VALUE }
 
 /**
@@ -27,6 +29,14 @@ const VISION_PROVIDER_OPTIONS: Array<{ label: string, value: AIProvider }> = [
   { label: 'Google Gemini', value: 'google' },
   { label: 'OpenRouter', value: 'openrouter' },
 ]
+
+const THINKING_LABELS: Record<ThinkingLevel, string> = {
+  minimal: '最低 (Minimal)',
+  low: '较低 (Low)',
+  medium: '中等 (Medium)',
+  high: '高 (High)',
+  max: '最高 (Max)',
+}
 
 export function AIVisionSettings() {
   const {
@@ -117,27 +127,13 @@ export function AIVisionSettings() {
   const providerModels = models.filter(m => m.provider === visionProvider)
   const currentModelConfig = models.find(m => m.name === currentConfig.model)
 
-  const thinkingLevelOptions = (currentModelConfig?.supportedLevels || ['minimal', 'low', 'medium', 'high']).map(
-    (level) => {
-      const labelMap: Record<ThinkingLevel, string> = {
-        minimal: '最低 (Minimal)',
-        low: '较低 (Low)',
-        medium: '中等 (Medium)',
-        high: '高 (High)',
-        max: '最高 (Max)',
-      }
-      return { label: labelMap[level], value: level }
-    },
-  )
-
-  const currentThinkingLevelOption = thinkingLevelOptions.find(
-    opt => opt.value === currentConfig.thinkingLevel,
-  )
-
-  const currentProviderOption = VISION_PROVIDER_OPTIONS.find(opt => opt.value === visionProvider)
+  const thinkingLevelOptions = (currentModelConfig?.supportedLevels || ['minimal', 'low', 'medium', 'high'])
+    .map(level => ({ label: THINKING_LABELS[level], value: level }))
 
   const modelOptions = providerModels.map(m => ({ label: m.text, value: m.name }))
+  const currentProviderOption = VISION_PROVIDER_OPTIONS.find(opt => opt.value === visionProvider)
   const currentModelOption = modelOptions.find(opt => opt.value === currentConfig.model)
+  const currentThinkingLevelOption = thinkingLevelOptions.find(opt => opt.value === currentConfig.thinkingLevel)
   const isCustomModel = !currentModelOption
 
   const handleSelectModel = (val: string) => {
@@ -153,11 +149,11 @@ export function AIVisionSettings() {
   return (
     <div className="space-y-6 p-1">
       <div className="space-y-2">
-        <h4 className="px-1 text-sm font-medium text-muted-foreground">AI 图片描述</h4>
+        <h4 className="px-1 text-sm font-medium text-muted-foreground">图片描述</h4>
         <SettingsGroup>
           <SettingsRow
-            label="启用 AI 图片描述"
-            description="为推文配图生成结构化描述（看图说话 / OCR+翻译 / 自定义提示）"
+            label="启用图片描述"
+            description="为推文配图生成 AI 描述或 OCR 文字"
             id="enable-ai-vision"
           >
             <Switch
@@ -168,8 +164,8 @@ export function AIVisionSettings() {
 
           {enableAIVision && (
             <SettingsRow
-              label="视觉服务提供商"
-              description="只支持图片输入的模型：识图与翻译可共用一个 Key"
+              label="视觉服务"
+              description="支持图片输入的模型，可共用翻译侧的 Key"
               id="vision-provider"
             >
               <div className="flex-1 flex justify-end">
@@ -196,10 +192,10 @@ export function AIVisionSettings() {
 
       {enableAIVision && (
         <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-400">
-          <h4 className="px-1 text-sm font-medium text-muted-foreground capitalize">
-            {visionProvider}
+          <h4 className="px-1 text-sm font-medium text-muted-foreground">
+            {currentConfig.providerName}
             {' '}
-            详情配置
+            配置
           </h4>
           <SettingsGroup>
             <SettingsRow
@@ -307,16 +303,12 @@ export function AIVisionSettings() {
             {currentModelConfig?.thinkingType !== 'none' && (
               <SettingsRow
                 label="思考强度"
-                description="感知任务默认最低，OCR+翻译场景可手动调高"
+                description="感知任务默认最低即可"
               >
                 <div className="flex-1 flex justify-end">
                   <Select
                     value={currentThinkingLevelOption}
-                    onValueChange={(opt) => {
-                      if (!opt)
-                        return
-                      setters.setThinkingLevel(opt.value as ThinkingLevel)
-                    }}
+                    onValueChange={opt => opt && setters.setThinkingLevel(opt.value as ThinkingLevel)}
                   >
                     <SelectTrigger className="w-fit h-8 border-none transition-colors">
                       <SelectValue />
@@ -333,8 +325,8 @@ export function AIVisionSettings() {
               </SettingsRow>
             )}
           </SettingsGroup>
-          <p className="px-4 text-[10px] text-muted-foreground/50 leading-tight">
-            复用翻译侧 API Key：已配置 Gemini / OpenRouter 的用户无需重复填写，识图与翻译共用同一份凭据。
+          <p className="px-4 text-[11px] text-muted-foreground/60 leading-tight">
+            共用翻译侧的 API Key，识图与翻译无需分别配置。
           </p>
         </div>
       )}

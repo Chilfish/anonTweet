@@ -1,4 +1,4 @@
-import type { EnrichedTweet } from '~/types'
+import type { useVisionLogic } from '~/hooks/use-vision-logic'
 import type { VisionMode } from '~/types/vision'
 import { ImageIcon, Languages, Loader2, Save, Sparkles } from 'lucide-react'
 import { Button } from '~/components/ui/button'
@@ -9,207 +9,166 @@ import {
   DialogHeader,
   DialogPanel,
   DialogTitle,
-  DialogTrigger,
 } from '~/components/ui/dialog'
-import { Label } from '~/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/components/ui/select'
 import { Switch } from '~/components/ui/switch'
 import { Textarea } from '~/components/ui/textarea'
-import { useVisionLogic } from '~/hooks/use-vision-logic'
+import { ToggleGroup, ToggleGroupItem } from '~/components/ui/toggle-group'
 
 const MODE_OPTIONS: Array<{ label: string, value: VisionMode }> = [
   { label: '看图说话', value: 'describe' },
   { label: 'OCR 识别', value: 'ocr' },
-  { label: '自定义提示', value: 'custom' },
+  { label: '自定义', value: 'custom' },
 ]
+
+/**
+ * 无底色 textarea（对齐 AltEntityList 既有范式）：textarea 融入卡片本身，
+ * 避免「卡片套输入框」的多层背景叠层。min-h/padding 用 [&_textarea:] 落到内层
+ * 才生效（外层 span 无样式）；文本贴左与「图 N」label 对齐。
+ */
+const EDITOR_TEXTAREA = [
+  'min-h-14 resize-none border-none bg-transparent p-0 text-sm leading-relaxed shadow-none',
+  'focus-visible:ring-0 [&_textarea]:min-h-14 [&_textarea]:p-0',
+].join(' ')
 
 /**
  * AI 视觉描述 —— 编辑弹窗（app/components/translation/AIVisionEditorDialog.tsx）
  *
- * 参考 AltTranslationEditor 设计：逐图卡片编辑——ocr 模式「原文 + 译文」两个 textarea
- * （OCR 结果与翻译均可手动修改/覆盖），describe/custom 模式「描述」textarea。
- * 翻译走独立步（AI 翻译 按钮 → 翻译模型 + 推文上下文），与 OCR 生成解耦。
+ * 模式用分段控件（iOS 风格，裸露在标题下，不装进卡片）；编辑区是单张
+ * `bg-card` 卡片，textarea 无底色融入卡片、hairline 分隔，custom 提示词与
+ * 逐图编辑同卡片。逐图编辑：ocr「原文 + 译文」、describe/custom「描述」，
+ * 均可手动修正。翻译走独立步（AI 翻译 → 翻译模型 + 推文上下文）。
+ * 编辑器状态由 useVisionLogic 提供（AIVisionBlock 持有，空态 CTA 与头栏入口共用）。
  */
-export function AIVisionEditorDialog({ originalTweet }: { originalTweet: EnrichedTweet }) {
-  const editor = useVisionLogic(originalTweet)
-  const currentModeOption = MODE_OPTIONS.find(opt => opt.value === editor.mode)
+export function AIVisionEditorDialog({ editor }: { editor: ReturnType<typeof useVisionLogic> }) {
   const hasOcr = editor.mode === 'ocr' || editor.visionInfo.some(v => v.mode === 'ocr')
 
   return (
     <Dialog open={editor.isOpen} onOpenChange={editor.setIsOpen} dismissible={false}>
-      <DialogTrigger render={(
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={editor.initializeEditor}
-          className="size-5 hover:bg-background/50 p-0"
-          title="生成/编辑 AI 图片描述"
-        />
-      )}
-      >
-        <Sparkles className="size-3 text-muted-foreground/70" />
-        <span className="sr-only">生成/编辑 AI 图片描述</span>
-      </DialogTrigger>
-
       <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ImageIcon className="size-5" />
-            AI 图片描述
+            图片描述
           </DialogTitle>
         </DialogHeader>
 
         <DialogPanel className="space-y-4">
-          {/* 弹窗级生成配置：mode + withContext + customPrompt 作用于一次请求 */}
-          <div className="flex flex-wrap items-center gap-3 px-1">
-            <Select
-              value={currentModeOption}
-              onValueChange={opt => opt && editor.setMode(opt.value)}
-            >
-              <SelectTrigger className="w-fit h-8 border-none transition-colors">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {MODE_OPTIONS.map(opt => (
-                  <SelectItem key={opt.value} value={opt}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* 模式分段控件（裸露，iOS 风格） */}
+          <ToggleGroup
+            variant="outline"
+            size="sm"
+            value={[editor.mode]}
+            onValueChange={value => value.length > 0 && editor.setMode(value[0] as VisionMode)}
+          >
+            {MODE_OPTIONS.map(opt => (
+              <ToggleGroupItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
 
-            <label className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Switch
-                checked={editor.withContext}
-                onCheckedChange={editor.setWithContext}
-              />
-              附推文上下文
-            </label>
-          </div>
-
-          {editor.mode === 'custom' && (
-            <Textarea
-              value={editor.customPrompt}
-              onChange={e => editor.setCustomPrompt(e.target.value)}
-              placeholder="输入自定义描述提示词…"
-              className="min-h-20 bg-secondary/20 border-none focus-visible:ring-1 focus-visible:ring-primary/20 resize-none rounded-lg text-sm"
-            />
-          )}
-
-          {/* 逐图卡片：直接编辑原文/译文/描述（AltTranslationEditor 风格） */}
-          <div className="space-y-1">
-            {editor.photoIndexes.map((i) => {
-              const aiInfo = editor.visionInfo.find(v => v.index === i)
-              const entryMode = aiInfo?.mode ?? editor.mode
-              const isOcr = entryMode === 'ocr'
-              return (
-                <div key={i} className="flex flex-col border-b last:border-0 bg-card">
-                  <div className="flex items-center justify-between px-4 py-2 bg-muted/20 border-b border-border/40">
-                    <Label className="text-[10px] uppercase font-mono text-muted-foreground flex items-center gap-2">
-                      {isOcr ? 'OCR TEXT' : 'DESCRIPTION'}
-                      <span className="text-[10px] text-muted-foreground/70 bg-muted px-1.5 py-0.5 rounded">
-                        图
-                        {' '}
-                        {i + 1}
-                      </span>
-                    </Label>
-                  </div>
-
-                  {aiInfo?.status === 'error' && (
-                    <div className="p-3 bg-destructive/5 border-b-2">
-                      <p className="text-xs text-destructive break-words">{aiInfo.error}</p>
-                    </div>
-                  )}
-
-                  {isOcr
-                    ? (
-                        <>
-                          <div className="p-3 bg-muted/10 border-b-2">
-                            <p className="text-[10px] text-muted-foreground/70 mb-1">原文（OCR）</p>
-                            <Textarea
-                              value={editor.drafts[i]?.originalText ?? ''}
-                              onChange={e => editor.updateDraft(i, { originalText: e.target.value })}
-                              placeholder="OCR 识别文字，可手动修正…"
-                              className="min-h-16 border-none shadow-none rounded-none bg-transparent resize-none text-sm leading-relaxed focus-visible:ring-0"
-                            />
-                          </div>
-                          <div className="p-3">
-                            <p className="text-[10px] text-muted-foreground/70 mb-1">译文</p>
-                            <Textarea
-                              value={editor.drafts[i]?.translatedText ?? ''}
-                              onChange={e => editor.updateDraft(i, { translatedText: e.target.value })}
-                              placeholder={aiInfo ? '手动输入翻译（优先于 AI 结果）…' : '翻译由「AI 翻译」生成，或手动输入…'}
-                              className="min-h-16 border-none shadow-none rounded-none bg-transparent resize-none text-sm leading-relaxed focus-visible:ring-0"
-                            />
-                          </div>
-                        </>
-                      )
-                    : (
-                        <Textarea
-                          value={editor.drafts[i]?.description ?? ''}
-                          onChange={e => editor.updateDraft(i, { description: e.target.value })}
-                          placeholder="图片描述，可手动修改…"
-                          className="min-h-16 border-none shadow-none rounded-none bg-transparent resize-none text-sm leading-relaxed focus-visible:ring-0"
-                        />
-                      )}
+          {/* 编辑区（单张卡片：custom 提示词 + 逐图 + 附上下文开关） */}
+          <div className="overflow-hidden rounded-xl border bg-card">
+            <div className="divide-y divide-border/50">
+              {editor.mode === 'custom' && (
+                <div className="px-4 py-3">
+                  <div className="pb-1 text-xs text-muted-foreground">提示词</div>
+                  <Textarea
+                    value={editor.customPrompt}
+                    onChange={e => editor.setCustomPrompt(e.target.value)}
+                    placeholder="自定义描述提示词…"
+                    className={EDITOR_TEXTAREA}
+                  />
                 </div>
-              )
-            })}
+              )}
+
+              {editor.photoIndexes.map((i) => {
+                const aiInfo = editor.visionInfo.find(v => v.index === i)
+                const entryMode = aiInfo?.mode ?? editor.mode
+                const isOcr = entryMode === 'ocr'
+                return (
+                  <div key={i} className="px-4 py-3">
+                    {aiInfo?.status === 'error' && (
+                      <p className="pb-2 text-xs break-words text-destructive">{aiInfo.error}</p>
+                    )}
+
+                    <div className="pb-1 text-xs text-muted-foreground">
+                      图
+                      {i + 1}
+                    </div>
+
+                    <Textarea
+                      value={isOcr
+                        ? editor.drafts[i]?.originalText ?? ''
+                        : editor.drafts[i]?.description ?? ''}
+                      onChange={e => isOcr
+                        ? editor.updateDraft(i, { originalText: e.target.value })
+                        : editor.updateDraft(i, { description: e.target.value })}
+                      placeholder={isOcr ? 'OCR 识别文字，可手动修正…' : '图片描述，可手动修改…'}
+                      className={EDITOR_TEXTAREA}
+                    />
+
+                    {isOcr && (
+                      <div className="-mx-4 mt-2 border-t border-border/50 px-4 pt-2">
+                        <div className="pb-1 text-xs text-muted-foreground">译文</div>
+                        <Textarea
+                          value={editor.drafts[i]?.translatedText ?? ''}
+                          onChange={e => editor.updateDraft(i, { translatedText: e.target.value })}
+                          placeholder={aiInfo ? '手动输入翻译（优先于 AI 结果）…' : '翻译由「AI 翻译」生成，或手动输入…'}
+                          className={EDITOR_TEXTAREA}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+
+              <label className="flex min-h-11 cursor-pointer items-center justify-between gap-4 px-4">
+                <span className="text-sm text-muted-foreground">附推文上下文</span>
+                <Switch checked={editor.withContext} onCheckedChange={editor.setWithContext} />
+              </label>
+            </div>
           </div>
         </DialogPanel>
 
-        <DialogFooter className="flex-row items-center justify-between gap-2 sm:justify-between">
-          <span className="px-1 text-[10px] text-muted-foreground/50">
-            使用
-            {editor.providerName}
-            {' '}
-            生成 · OCR 识别纯提取文字，翻译走「AI 翻译」交给翻译模型
-          </span>
-          <div className="flex items-center gap-2 ml-auto">
-            {hasOcr && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={editor.translateOcr}
-                disabled={editor.isTranslating}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                {editor.isTranslating
-                  ? <Loader2 className="size-3.5 animate-spin" />
-                  : <Languages className="size-3.5" />}
-                <span className="hidden sm:inline-block">
-                  AI 翻译
-                </span>
-              </Button>
-            )}
+        <DialogFooter className="flex-row items-center justify-end gap-2">
+          {hasOcr && (
             <Button
               variant="outline"
               size="sm"
-              onClick={editor.generate}
-              disabled={editor.isGenerating}
+              onClick={editor.translateOcr}
+              disabled={editor.isTranslating}
               className="text-muted-foreground hover:text-foreground"
             >
-              {editor.isGenerating
+              {editor.isTranslating
                 ? <Loader2 className="size-3.5 animate-spin" />
-                : <Sparkles className="size-3.5" />}
+                : <Languages className="size-3.5" />}
               <span className="hidden sm:inline-block">
-                AI 生成
+                翻译
               </span>
             </Button>
-            <Button
-              size="sm"
-              onClick={editor.save}
-            >
-              <Save className="size-4" />
-              保存
-            </Button>
-          </div>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={editor.generate}
+            disabled={editor.isGenerating}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            {editor.isGenerating
+              ? <Loader2 className="size-3.5 animate-spin" />
+              : <Sparkles className="size-3.5" />}
+            <span className="hidden sm:inline-block">
+              生成
+            </span>
+          </Button>
+          <Button
+            size="sm"
+            onClick={editor.save}
+          >
+            <Save className="size-4" />
+            保存
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
