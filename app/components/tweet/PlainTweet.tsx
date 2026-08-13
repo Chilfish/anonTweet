@@ -10,6 +10,7 @@ import {
 } from '~/lib/react-tweet'
 import { resolveTranslationView } from '~/lib/translation/resolveTranslationView'
 import { cn } from '~/lib/utils'
+import { AIVisionBlock } from './AIVisionBlock'
 import { TweetLinkCard } from './TweetCard'
 import { TweetMediaAlt } from './TweetMediaAlt'
 
@@ -107,6 +108,8 @@ function UnifiedTweet({ tweet, variant, enableTranslation }: UnifiedTweetProps) 
         ) : null}
 
         <TweetMediaAlt tweet={tweet} />
+
+        <AIVisionBlock tweet={tweet} hideChrome />
 
         {tweet.card && <TweetLinkCard tweet={tweet} />}
 

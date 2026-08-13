@@ -1,10 +1,10 @@
 /**
  * verify/modules/vision.verifier.ts
  *
- * Covers: AC-VISION-001 ~ AC-VISION-007
+ * Covers: AC-VISION-001 ~ AC-VISION-008
  *   AC-VISION-001 ~ 005：Phase 2，纯函数离线确定性
  *   AC-VISION-006 ~ 007：Phase 3，runImageVision 无 photo 短路 + withContext 注入
- *   AC-VISION-008：Phase 5（截图路由渲染）
+ *   AC-VISION-008：Phase 5，截图路由渲染 vision 块（source scan，对齐 AC-SHOT-003）
  * Postmortem: 001（解析器零测试）、002（逻辑耦合 React）、005（媒体 URL 重复）
  *
  * 验证对象：
@@ -13,6 +13,7 @@
  * - app/lib/vision/parse.ts（parseVisionResult / resolveVisionView 决策链）
  * - app/lib/vision/messages.ts（buildVisionMessages 图片 file part + index 语义）
  * - app/lib/vision/describeImages.ts（runImageVision 编排，无 photo 短路）
+ * - app/components/tweet/AIVisionBlock.tsx + PlainTweet.tsx（截图路由渲染 + waitForRenderReady）
  */
 
 import type { StepResult, Verifier, VerifyContext } from '../framework/types.js'
@@ -34,6 +35,14 @@ function loadFixture<T = unknown>(fixtureDir: string, name: string): T {
   return (parsed.data ?? parsed.items ?? parsed) as T
 }
 
+/** 从 fixture 目录反推项目根，读取项目源码文件（source scan 用）。 */
+function readProjectFile(ctx: VerifyContext, rel: string): string | null {
+  const filepath = path.resolve(ctx.fixtureDir, '..', '..', rel)
+  if (!fs.existsSync(filepath))
+    return null
+  return fs.readFileSync(filepath, 'utf8')
+}
+
 const DATA_URI = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD'
 
 export class VisionVerifier implements Verifier {
@@ -48,6 +57,7 @@ export class VisionVerifier implements Verifier {
     'AC-VISION-005',
     'AC-VISION-006',
     'AC-VISION-007',
+    'AC-VISION-008',
   ]
 
   canRun(_ctx: VerifyContext): string | null {
@@ -65,6 +75,7 @@ export class VisionVerifier implements Verifier {
     results.push(this.verifyMediaIndexMapping(tweet))
     results.push(await this.verifyNoPhoto(tweet))
     results.push(this.verifyWithContext(tweet))
+    results.push(this.verifyScreenshotRoute(ctx))
 
     return results
   }
@@ -302,6 +313,27 @@ export class VisionVerifier implements Verifier {
     }
     catch (err) {
       return this.fail('AC-VISION-007', 'withContext injection', err instanceof Error ? err.message : String(err))
+    }
+  }
+
+  // ── AC-VISION-008: 截图路由渲染 vision 块 ──────────────
+  private verifyScreenshotRoute(ctx: VerifyContext): StepResult {
+    try {
+      const plainTweetSrc = readProjectFile(ctx, path.join('app', 'components', 'tweet', 'PlainTweet.tsx'))
+      const visionBlockSrc = readProjectFile(ctx, path.join('app', 'components', 'tweet', 'AIVisionBlock.tsx'))
+
+      // 1. 截图路由渲染 vision 块：PlainTweet（plain.tsx → MyPlainTweet 使用）引用 AIVisionBlock
+      const rendersBlock = plainTweetSrc?.includes('AIVisionBlock') ?? false
+      // 2. waitForRenderReady 覆盖：AIVisionBlock 截图上下文调用（对齐 AC-SHOT-003 source scan）
+      const usesRenderReady = visionBlockSrc?.includes('waitForRenderReady') ?? false
+
+      if (rendersBlock && usesRenderReady) {
+        return this.pass('AC-VISION-008', 'screenshot route renders vision block', 'PlainTweet 渲染 AIVisionBlock(hideChrome)；AIVisionBlock 使用 waitForRenderReady')
+      }
+      return this.fail('AC-VISION-008', 'screenshot route renders vision block', `PlainTweet renders AIVisionBlock:${rendersBlock} AIVisionBlock uses waitForRenderReady:${usesRenderReady}`)
+    }
+    catch (err) {
+      return this.fail('AC-VISION-008', 'screenshot route renders vision block', err instanceof Error ? err.message : String(err))
     }
   }
 }

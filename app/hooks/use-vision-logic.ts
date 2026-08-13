@@ -30,7 +30,7 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
     .map(x => x.i)
 
   const [isOpen, setIsOpen] = useState(false)
-  const [mode, setMode] = useState<VisionMode>('describe')
+  const [mode, setMode] = useState<VisionMode>('ocr')
   const [customPrompt, setCustomPrompt] = useState('')
   const [withContext, setWithContext] = useState(true)
   const [isGenerating, setIsGenerating] = useState(false)
@@ -176,8 +176,13 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
   const save = useCallback(() => {
     const next = applyVisionEdits(visionInfo, drafts, photoIndexes)
     updateTweet(tweetId, { visionInfo: next })
+    // Phase 5：持久化 visionInfo 到 tweet localCache（plain-tweet/:id 截图路由重载后仍可渲染）
+    void fetcher.post('/api/ai-vision', {
+      action: 'save',
+      tweet: { ...originalTweet, visionInfo: next },
+    }).catch(() => {})
     setIsOpen(false)
-  }, [tweetId, visionInfo, drafts, photoIndexes, updateTweet])
+  }, [tweetId, visionInfo, drafts, photoIndexes, updateTweet, originalTweet])
 
   return {
     isOpen,

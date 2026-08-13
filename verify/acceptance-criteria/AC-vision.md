@@ -95,25 +95,26 @@
 
 ## AC-VISION-008：截图路由渲染 vision 块
 
-- **验证对象**：`plain.tsx` / `app/components/tweet/AIVisionBlock.tsx`
-- **输入**：带 `visionInfo` 的推文 fixture
+- **验证对象**：`plain.tsx` → `PlainTweet.tsx` + `AIVisionBlock`（source scan，离线确定性）
+- **输入**：项目源码
 - **Pass 条件**：
-  - `GET /plain-tweet/:id`（或等价路由）渲染结果含 vision 描述文本
-  - 组件使用 `waitForRenderReady`（source scan，对齐 AC-SHOT-003）
+  - source scan：`PlainTweet.tsx` 引用 `AIVisionBlock`（截图路由渲染 vision 块，`hideChrome` 隐藏交互 chrome）
+  - source scan：`AIVisionBlock` 使用 `waitForRenderReady`（截图上下文调用，对齐 AC-SHOT-003）
+  - 手动验收：带 `visionInfo` 的推文（visionInfo 已持久化到 localCache）经 `GET /plain-tweet/:id` 截图包含 AI 描述文本
 
 ---
 
 ## 总计：8 条 AC
 
-| AC            | 分类      | 依赖 AI | 依赖 Fixture | 阶段 |
-| ------------- | --------- | ------- | ------------ | ---- |
-| AC-VISION-001 | 类型      | 否      | 否           | P2   |
-| AC-VISION-002 | 纯函数    | 否      | 否           | P2   |
-| AC-VISION-003 | 纯函数    | 否      | 否           | P2   |
-| AC-VISION-004 | 纯函数    | 否      | 否           | P2   |
-| AC-VISION-005 | 纯函数    | 否      | 是           | P2   |
-| AC-VISION-006 | 纯函数    | 否      | 是           | P3   |
-| AC-VISION-007 | 纯函数    | 否      | 是           | P3   |
-| AC-VISION-008 | 集成/截图 | 否      | 是           | P5   |
+| AC            | 分类      | 依赖 AI | 依赖 Fixture | 阶段  |
+| ------------- | --------- | ------- | ------------ | ----- |
+| AC-VISION-001 | 类型      | 否      | 否           | P2    |
+| AC-VISION-002 | 纯函数    | 否      | 否           | P2    |
+| AC-VISION-003 | 纯函数    | 否      | 否           | P2    |
+| AC-VISION-004 | 纯函数    | 否      | 否           | P2    |
+| AC-VISION-005 | 纯函数    | 否      | 是           | P2    |
+| AC-VISION-006 | 纯函数    | 否      | 是           | P3    |
+| AC-VISION-007 | 纯函数    | 否      | 是           | P3    |
+| AC-VISION-008 | 集成/截图 | 否      | 是           | ✅ P5 |
 
 > 注：AC-VISION-001~007 离线确定性；AC-VISION-008 依赖截图路由（Phase 5）。真实 API Key 的端到端（`/api/ai/vision` 真跑 MiMo）不纳入 AC 断言，作为手动验收清单项。

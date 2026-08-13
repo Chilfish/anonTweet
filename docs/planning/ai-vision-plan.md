@@ -86,12 +86,20 @@
   - 翻译步宽容解析：DeepSeek 无结构化输出，`translateOCR.ts` 走文本输出 + 宽容解析（keyed-object / 裸数组 / code fence），修复 `NoObjectGeneratedError`
   - `TweetNode.tsx` 挂载（`TweetMediaAlt` 之后）；`plain.tsx` 留待 Phase 5
 
-### Phase 5 — 截图 + 缓存/持久化
+### Phase 5 — 截图 + 缓存/持久化 ✅
 
-- `plain.tsx` 渲染 `AIVisionBlock` + `waitForRenderReady`
-- `localCache` 写回 `visionInfo`（对齐 `ai-translation`）；二期 DB 持久化（TODO 标注）
-- AC 集成验证：`bun verify --server --module vision`
-- commit: `feat(shot): vision block in screenshot + cache persist`
+- ✅ `PlainTweet.tsx` 渲染 `<AIVisionBlock hideChrome />`（`plain-tweet/:id` 截图路由含 vision 块）
+  - `AIVisionBlock`：`hideChrome` prop + `useScreenshoting()` 截图时隐藏交互 chrome（仅译文开关 /
+    编辑弹窗入口 / 空态提示，对齐 Tweet.tsx / AltTranslationEditor 做法）；截图上下文挂载调用
+    `waitForRenderReady`（AC-SHOT-003 对齐）；chromeHidden 时跳过 enableAIVision 开关门控
+    （SSR 拿不到客户端开关，依赖缓存里的 visionInfo 渲染）
+- ✅ `/api/ai-vision` 缓存写回：generate 合并 `mergeVisionInfo` 后 `setLocalCache`（对齐
+  `ai-translation`）；新增 `action: 'save'` 分支持久化手动编辑后的 visionInfo；`use-vision-logic`
+  save 后 POST persist（best-effort）
+- ✅ AC-VISION-008 激活（source scan：PlainTweet 渲染 AIVisionBlock + AIVisionBlock 用
+  waitForRenderReady）；verify vision 8/8、全量 42 PASS
+- ✅ commit: `feat(shot): vision block in screenshot route + persist visionInfo`
+- 二期 DB 持久化（TODO）：`tweet` 表 / `translationSync.ts` 扩展 JSON 列（本期只写 localCache）
 
 ---
 
