@@ -50,10 +50,9 @@ export function SettingsBody() {
 interface SettingsPanelProps {
   open?: boolean
   onOpenChange?: (open: boolean) => void
-  trigger?: React.ReactNode
 }
 
-export function SettingsPanel({ open, onOpenChange, trigger }: SettingsPanelProps = {}) {
+export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps = {}) {
   const [internalOpen, setInternalOpen] = useState(false)
   const isControlled = open !== undefined
   const isOpen = isControlled ? open : internalOpen

@@ -130,7 +130,7 @@ export function DialogHeader({
 }: useRender.ComponentProps<'div'>): React.ReactElement {
   const defaultProps = {
     'className': cn(
-      'flex flex-col gap-2 p-6 in-[[data-slot=dialog-popup]:has([data-slot=dialog-panel])]:pb-3 max-sm:pb-4',
+      'flex flex-col gap-2 p-5 in-[[data-slot=dialog-popup]:has([data-slot=dialog-panel])]:pb-3 max-sm:pb-4',
       className,
     ),
     'data-slot': 'dialog-header',
@@ -153,7 +153,7 @@ export function DialogFooter({
 }): React.ReactElement {
   const defaultProps = {
     'className': cn(
-      'flex flex-col-reverse gap-2 px-6 sm:flex-row sm:justify-end sm:rounded-b-[calc(var(--radius-2xl)-1px)]',
+      'flex flex-col-reverse gap-2 px-5 sm:flex-row sm:justify-end sm:rounded-b-[calc(var(--radius-2xl)-1px)]',
       variant === 'default' && 'border-t bg-muted/72 py-4',
       variant === 'bare'
       && 'in-[[data-slot=dialog-popup]:has([data-slot=dialog-panel])]:pt-3 pt-4 pb-6',
@@ -208,7 +208,7 @@ export function DialogPanel({
 }): React.ReactElement {
   const defaultProps = {
     'className': cn(
-      'p-6 in-[[data-slot=dialog-popup]:has([data-slot=dialog-header])]:pt-1 in-[[data-slot=dialog-popup]:has([data-slot=dialog-footer]:not(.border-t))]:pb-1',
+      'p-5 in-[[data-slot=dialog-popup]:has([data-slot=dialog-header])]:pt-1 in-[[data-slot=dialog-popup]:has([data-slot=dialog-footer]:not(.border-t))]:pb-1',
       className,
     ),
     'data-slot': 'dialog-panel',
