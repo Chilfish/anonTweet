@@ -23,6 +23,7 @@
   "dependencies": {
     "@ai-sdk/deepseek": "^3.0.13",
     "@ai-sdk/google": "^4.0.24",
+    "@ai-sdk/openai-compatible": "^3.0.30",
     "@base-ui/react": "^1.6.0",
     "@chilfish/gallery-dl-instagram": "^0.2.4",
     "@dnd-kit/core": "^6.3.1",

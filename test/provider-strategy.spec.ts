@@ -104,24 +104,22 @@ describe('deepseekStrategy', () => {
   })
 
   describe('buildProviderOptions', () => {
-    it('returns deepseek options with disabled thinking', () => {
+    it('returns empty options for disabled thinking', () => {
       const config = makeModelConfig({ provider: 'deepseek' })
-      expect(deepseekStrategy.buildProviderOptions('disabled', config)).toEqual({
-        deepseek: { thinking: { type: 'disabled' } },
-      })
+      expect(deepseekStrategy.buildProviderOptions('disabled', config)).toEqual({})
     })
 
-    it('returns deepseek options with enabled thinking + reasoningEffort', () => {
+    it('returns deepseek options with reasoningEffort high', () => {
       const config = makeModelConfig({ provider: 'deepseek' })
       expect(deepseekStrategy.buildProviderOptions('high', config)).toEqual({
-        deepseek: { thinking: { type: 'enabled' }, reasoningEffort: 'high' },
+        deepseek: { reasoningEffort: 'high' },
       })
     })
 
     it('returns deepseek options with max reasoningEffort', () => {
       const config = makeModelConfig({ provider: 'deepseek' })
       expect(deepseekStrategy.buildProviderOptions('max', config)).toEqual({
-        deepseek: { thinking: { type: 'enabled' }, reasoningEffort: 'max' },
+        deepseek: { reasoningEffort: 'max' },
       })
     })
 
