@@ -216,26 +216,6 @@ export default function TweetPage({ loaderData }: Route.ComponentProps) {
   }
 
   if (isLoading || isRetweet || !isStoreReady) {
-    if (loaderData.tweet) {
-      return (
-        <>
-          <TweetStructuredData tweet={loaderData.tweet} />
-          <TweetHeader
-            isLoadingComments={tweetOperations.isLoadingComments}
-            loadComments={tweetOperations.loadComments}
-            hasTweets={tweetOperations.hasTweets}
-            hasMainTweet={tweetOperations.hasMainTweet}
-          />
-          <div className="w-full max-w-2xl">
-            <MyTweet
-              tweets={[loaderData.tweet]}
-              mainTweetId={loaderData.tweetId || tweetId || ''}
-              showComments={false}
-            />
-          </div>
-        </>
-      )
-    }
     return (
       <>
         <TweetHeader
