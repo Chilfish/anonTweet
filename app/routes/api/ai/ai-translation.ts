@@ -1,6 +1,7 @@
 import type { Route } from './+types/ai-translation'
 import type { AITranslationSchema } from '~/lib/validations/tweet'
 import { data } from 'react-router'
+import { normalizeAIError } from '~/lib/ai-error'
 import { autoTranslateTweet } from '~/lib/AITranslation'
 import { models } from '~/lib/constants'
 import { setLocalCache } from '~/lib/localCache'
@@ -99,13 +100,14 @@ async function handleIGTranslation(args: Extract<AITranslationSchema, { type: 'i
       data: { captionTranslation: translated },
     })
   }
-  catch (error: any) {
+  catch (error: unknown) {
     console.error('[AI-Trans IG] Failed:', error)
     return data({
       success: false,
       error: 'Translation failed',
       status: 500,
-      message: error.message,
+      message: error instanceof Error ? error.message : '未知错误',
+      aiError: normalizeAIError(error),
     })
   }
 }
@@ -195,14 +197,15 @@ async function handleTweetTranslation(args: Extract<AITranslationSchema, { tweet
       },
     })
   }
-  catch (error: any) {
-    console.error(`Failed to translate tweet: ${error.message}`)
+  catch (error: unknown) {
+    console.error('Failed to translate tweet:', error)
     return data({
       success: false,
       error: 'Failed to generate text',
       status: 500,
       message: '翻译推文失败',
-      cause: error.message,
+      cause: error instanceof Error ? error.message : '未知错误',
+      aiError: normalizeAIError(error),
     })
   }
 }

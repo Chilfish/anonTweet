@@ -3,6 +3,7 @@ import type { Route } from './+types/ai-test'
 import { generateText } from 'ai'
 import { data } from 'react-router'
 import z from 'zod'
+import { normalizeAIError } from '~/lib/ai-error'
 import { models } from '~/lib/constants'
 import { getProviderStrategy, getThinkingConfig } from '~/lib/providers'
 import { getTweetSchema } from '~/lib/validations/tweet'
@@ -74,14 +75,15 @@ export async function action({ request }: Route.ActionArgs) {
       message: `Text generated successfully`,
     })
   }
-  catch (error: any) {
+  catch (error: unknown) {
     console.error('AI Test Connection Failed:', error)
     return data({
       success: false,
       error: 'Failed to generate text',
       status: 500,
-      message: `Failed to generate text`,
-      cause: error.message,
+      message: 'Failed to generate text',
+      cause: error instanceof Error ? error.message : '未知错误',
+      aiError: normalizeAIError(error),
     })
   }
 }

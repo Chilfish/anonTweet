@@ -16,6 +16,7 @@ import {
 import { Switch } from '~/components/ui/switch'
 import { Textarea } from '~/components/ui/textarea'
 import { toastManager } from '~/components/ui/toast'
+import { toastAIError } from '~/lib/ai-error-toast'
 import { DEFAULT_DEEPSEEK_BASE_URL, DEFAULT_GEMINI_BASE_URL, models } from '~/lib/constants'
 import { fetcher } from '~/lib/fetcher'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
@@ -118,18 +119,18 @@ export function AITranslationSettings() {
         })
       }
       else {
+        // 失败响应带 status，会被 fetcher 拦截器 reject 到下方 catch，这里基本不会走到
         toastManager.add({
           title: '连接失败',
-          description: `无法连接到 ${currentProviderConfig.providerName} API.\n原因：${data.cause}`,
+          description: `无法连接到 ${currentProviderConfig.providerName} API`,
           type: 'error',
         })
       }
     }
-    catch {
-      toastManager.add({
-        title: '连接失败',
-        description: `请求 ${currentProviderConfig.providerName} API 失败，请检查网络`,
-        type: 'error',
+    catch (error: unknown) {
+      toastAIError(error, {
+        providerName: currentProviderConfig.providerName,
+        fallbackTitle: `${currentProviderConfig.providerName} 连接失败`,
       })
     }
     setIsTesting(false)

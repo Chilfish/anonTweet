@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogPanel, DialogT
 import { Label } from '~/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover'
 import { Textarea } from '~/components/ui/textarea'
+import { toastAIError } from '~/lib/ai-error-toast'
 import { fetcher } from '~/lib/fetcher'
 import { useAIConfig } from '~/lib/stores/hooks'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
@@ -78,9 +79,12 @@ export function IGTranslateDialog({ post, onTranslated }: IGTranslateDialogProps
         toast.error('AI 翻译失败', { description: data.error || '返回结果为空' })
       }
     }
-    catch (error: any) {
+    catch (error: unknown) {
       console.error('[IG TranslateDialog] AI error:', error)
-      toast.error('AI 翻译请求失败')
+      toastAIError(error, {
+        providerName: aiConfig.aiProvider === 'google' ? 'Gemini' : 'DeepSeek',
+        fallbackTitle: 'AI 翻译请求失败',
+      })
     }
     finally {
       setIsTranslating(false)

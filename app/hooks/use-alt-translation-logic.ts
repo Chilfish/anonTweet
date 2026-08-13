@@ -1,5 +1,6 @@
 import type { EnrichedTweet, Entity } from '~/types'
 import { useCallback, useState } from 'react'
+import { toastAIError } from '~/lib/ai-error-toast'
 import { fetcher } from '~/lib/fetcher'
 import { useAIConfig, useTranslationActions } from '~/lib/stores/hooks'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
@@ -119,9 +120,12 @@ export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
         toast.success('AI 翻译完成')
       }
     }
-    catch (error: any) {
+    catch (error: unknown) {
       console.error(error)
-      toast.error(error.message || 'AI 翻译失败')
+      toastAIError(error, {
+        providerName: aiProvider === 'google' ? 'Gemini' : 'DeepSeek',
+        fallbackTitle: 'AI 翻译失败',
+      })
     }
     finally {
       setIsAITranslating(false)
