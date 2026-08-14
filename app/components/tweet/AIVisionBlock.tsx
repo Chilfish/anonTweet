@@ -60,13 +60,15 @@ export function AIVisionBlock({
 
   if (photos.length === 0)
     return null
-  // 截图/纯展示：只留内容，无内容则不渲染空块；交互模式跟随 enableAIVision 开关
-  // （SSR 拿不到客户端开关，plain 路由依赖缓存里的 visionInfo 渲染）
+  // 有已缓存结果（hasContent）时始终渲染，不依赖 enableAIVision 开关（数据有值即显示）；
+  // 无结果时仅交互模式 + 开关开启才展示空态 CTA（生成入口）。
+  // 截图/纯展示：只留内容，无内容则不渲染空块（SSR 拿不到客户端开关，
+  // plain 路由依赖缓存里的 visionInfo 渲染）。
   if (chromeHidden) {
     if (!hasContent)
       return null
   }
-  else if (!enableAIVision) {
+  else if (!hasContent && !enableAIVision) {
     return null
   }
 

@@ -21,7 +21,6 @@ describe('resolveTranslationView', () => {
     const view = resolveTranslationView({
       tweet: makeTweet(base, ai),
       manualTranslation: null,
-      enableAITranslation: true,
       mode: 'bilingual',
       visibility: { body: true, alt: true },
       part: 'body',
@@ -40,7 +39,6 @@ describe('resolveTranslationView', () => {
     const view = resolveTranslationView({
       tweet: makeTweet(base, ai),
       manualTranslation: manual,
-      enableAITranslation: true,
       mode: 'bilingual',
       visibility: { body: true, alt: true },
       part: 'body',
@@ -61,7 +59,6 @@ describe('resolveTranslationView', () => {
     const view = resolveTranslationView({
       tweet: makeTweet(base, aiStream),
       manualTranslation: undefined,
-      enableAITranslation: true,
       mode: 'bilingual',
       visibility: { body: true, alt: true },
       part: 'body',
@@ -72,6 +69,21 @@ describe('resolveTranslationView', () => {
     expect(view.entities).toBe(aiStream)
   })
 
+  it('shows cached AI translation even without the global toggle (data-driven)', () => {
+    const base: Entity[] = [{ type: 'text', text: 'hello', index: 0, aiTranslation: '你好' }]
+
+    const view = resolveTranslationView({
+      tweet: makeTweet(base),
+      manualTranslation: undefined,
+      mode: 'bilingual',
+      visibility: { body: true, alt: true },
+      part: 'body',
+    })
+
+    expect(view.source).toBe('ai')
+    expect(view.shouldShow).toBe(true)
+  })
+
   it('respects visibility gates', () => {
     const base: Entity[] = [{ type: 'text', text: 'x', index: 0 }]
     const manual: Entity[] = [{ type: 'text', text: 'x', index: 0, translation: 'm' }]
@@ -79,7 +91,6 @@ describe('resolveTranslationView', () => {
     const view = resolveTranslationView({
       tweet: makeTweet(base),
       manualTranslation: manual,
-      enableAITranslation: true,
       mode: 'bilingual',
       visibility: { body: false, alt: true },
       part: 'body',
@@ -102,7 +113,6 @@ describe('resolveTranslationView', () => {
     const bodyView = resolveTranslationView({
       tweet: makeTweet(base),
       manualTranslation: manualBodyOnly,
-      enableAITranslation: false,
       mode: 'bilingual',
       visibility: { body: true, alt: true },
       part: 'body',
@@ -110,7 +120,6 @@ describe('resolveTranslationView', () => {
     const altView = resolveTranslationView({
       tweet: makeTweet(base),
       manualTranslation: manualBodyOnly,
-      enableAITranslation: false,
       mode: 'bilingual',
       visibility: { body: true, alt: true },
       part: 'alt',
@@ -126,7 +135,6 @@ describe('resolveTranslationView', () => {
     const view = resolveTranslationView({
       tweet: makeTweet(base),
       manualTranslation: undefined,
-      enableAITranslation: false,
       mode: 'bilingual',
       visibility: { body: true, alt: true },
       part: 'body',

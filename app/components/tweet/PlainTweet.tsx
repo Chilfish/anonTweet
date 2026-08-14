@@ -22,7 +22,6 @@ function TweetTextBody({ tweet, enableTranslation }: { tweet: EnrichedTweet, ena
   const view = resolveTranslationView({
     tweet,
     manualTranslation: undefined,
-    enableAITranslation: true,
     mode: 'bilingual',
     visibility: { body: true, alt: true },
     part: 'body',

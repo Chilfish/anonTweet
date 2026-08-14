@@ -51,11 +51,13 @@ function shouldShowForPart(part: TranslationViewPart, entities: Entity[], source
  * 4) Legacy AI translation (autoTranslationEntities)
  * 5) Legacy embedded translations on `tweet.entities` (.translation)
  * 6) Original
+ *
+ * 展示层只认「数据是否有值」，不依赖全局 enableAITranslation 开关——
+ * 开关只控制是否自动生成新翻译，已缓存的 AI 翻译结果始终展示。
  */
 export function resolveTranslationView(args: {
   tweet: EnrichedTweet
   manualTranslation: Entity[] | null | undefined
-  enableAITranslation: boolean
   mode: TranslationMode
   visibility: TranslationVisibility
   part: TranslationViewPart
@@ -63,7 +65,6 @@ export function resolveTranslationView(args: {
   const {
     tweet,
     manualTranslation,
-    enableAITranslation,
     mode,
     visibility,
     part,
@@ -98,7 +99,7 @@ export function resolveTranslationView(args: {
   }
 
   // 4) New AI translation (directly in entities[].aiTranslation)
-  if (enableAITranslation && base.some(e => !!e.aiTranslation)) {
+  if (base.some(e => !!e.aiTranslation)) {
     return {
       shouldShow: shouldShowForPart(part, base, 'ai', false),
       entities: base,
@@ -108,7 +109,7 @@ export function resolveTranslationView(args: {
 
   // 5) Legacy AI translation (separate array)
   const ai = tweet.autoTranslationEntities || []
-  if (enableAITranslation && ai.length > 0) {
+  if (ai.length > 0) {
     const isAIStream = shouldRenderTranslatedEntitiesDirectly(base, ai)
     const entities = resolveAIEntitiesForDisplay(base, ai)
     return {
