@@ -10,7 +10,7 @@ import { useTweetOperations } from '~/hooks/use-tweet-operations'
 import { fetcher } from '~/lib/fetcher'
 import { TweetNotFound, TweetSkeleton } from '~/lib/react-tweet'
 import { getTweets } from '~/lib/service/getTweet'
-import { useAIConfig, useMainTweet, useTranslationActions, useTweets } from '~/lib/stores/hooks'
+import { useAIConfig, useMainTweet, useResolvedAIConfig, useTranslationActions, useTweets } from '~/lib/stores/hooks'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 import { decodeHtmlEntities, extractTweetId } from '~/lib/utils'
 
@@ -129,15 +129,9 @@ export default function TweetPage({ loaderData }: Route.ComponentProps) {
 
   const {
     enableAITranslation,
-    aiProvider,
-    geminiApiKey,
-    geminiModel,
-    geminiThinkingLevel,
-    deepseekApiKey,
-    deepseekModel,
-    deepseekThinkingLevel,
     translationGlossary,
   } = useAIConfig()
+  const aiConfig = useResolvedAIConfig()
 
   const { setCommentIds } = useTranslationActions()
   const getFormattedEntries = useTranslationDictionaryStore(state => state.getFormattedEntries)
@@ -148,9 +142,7 @@ export default function TweetPage({ loaderData }: Route.ComponentProps) {
       const dictEntries = getFormattedEntries()
       const combinedGlossary = [dictEntries, translationGlossary].filter(Boolean).join('\n')
 
-      const apiKey = aiProvider === 'google' ? geminiApiKey : deepseekApiKey
-      const model = aiProvider === 'google' ? geminiModel : deepseekModel
-      const thinkingLevel = aiProvider === 'google' ? geminiThinkingLevel : deepseekThinkingLevel
+      const { apiKey, model, provider, baseUrl, thinkingLevel } = aiConfig
 
       return fetchTweetData({
         tweetId: tweetId!,
@@ -158,6 +150,8 @@ export default function TweetPage({ loaderData }: Route.ComponentProps) {
         translationGlossary: combinedGlossary,
         apiKey,
         model,
+        provider,
+        baseUrl,
         thinkingLevel,
         force: false,
       })

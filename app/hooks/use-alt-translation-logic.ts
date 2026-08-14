@@ -2,7 +2,7 @@ import type { EnrichedTweet, Entity } from '~/types'
 import { useCallback, useState } from 'react'
 import { toastAIError } from '~/lib/ai-error-toast'
 import { fetcher } from '~/lib/fetcher'
-import { useAIConfig, useTranslationActions } from '~/lib/stores/hooks'
+import { useAIConfig, useResolvedAIConfig, useTranslationActions } from '~/lib/stores/hooks'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 import { decodeHtmlEntities, toast } from '~/lib/utils'
 
@@ -14,18 +14,10 @@ export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
 
   const { getTranslation, setTranslation, setTranslationVisibility, updateTweet } = useTranslationActions()
   const {
-    aiProvider,
-    geminiApiKey,
-    geminiModel,
-    geminiBaseUrl,
-    geminiThinkingLevel,
-    deepseekApiKey,
-    deepseekModel,
-    deepseekBaseUrl,
-    deepseekThinkingLevel,
     enableAITranslation,
     translationGlossary,
   } = useAIConfig()
+  const aiConfig = useResolvedAIConfig()
   const dictEntries = useTranslationDictionaryStore(state => state.getFormattedEntries)
 
   // 初始化逻辑：以原始 Tweet 的结构为基准，回填已有的翻译
@@ -74,13 +66,10 @@ export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
 
   // AI 翻译逻辑
   const requestAITranslation = useCallback(async () => {
-    const apiKey = aiProvider === 'google' ? geminiApiKey : deepseekApiKey
-    const model = aiProvider === 'google' ? geminiModel : deepseekModel
-    const baseUrl = aiProvider === 'google' ? geminiBaseUrl : deepseekBaseUrl
-    const thinkingLevel = aiProvider === 'google' ? geminiThinkingLevel : deepseekThinkingLevel
+    const { apiKey, model, baseUrl, thinkingLevel, providerName, provider } = aiConfig
 
     if (!apiKey || !model) {
-      toast.error(`请配置 ${aiProvider === 'google' ? 'Gemini' : 'DeepSeek'} API Key`)
+      toast.error(`请配置 ${providerName} API Key`)
       return
     }
 
@@ -92,7 +81,7 @@ export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
         enableAITranslation: true,
         apiKey,
         model,
-        provider: aiProvider,
+        provider,
         baseUrl,
         thinkingLevel,
         translationGlossary: combinedGlossary,
@@ -123,7 +112,7 @@ export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
     catch (error: unknown) {
       console.error(error)
       toastAIError(error, {
-        providerName: aiProvider === 'google' ? 'Gemini' : 'DeepSeek',
+        providerName,
         fallbackTitle: 'AI 翻译失败',
       })
     }
@@ -131,15 +120,7 @@ export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
       setIsAITranslating(false)
     }
   }, [
-    aiProvider,
-    geminiApiKey,
-    geminiModel,
-    geminiBaseUrl,
-    geminiThinkingLevel,
-    deepseekApiKey,
-    deepseekModel,
-    deepseekBaseUrl,
-    deepseekThinkingLevel,
+    aiConfig,
     translationGlossary,
     dictEntries,
     originalTweet,

@@ -1,6 +1,6 @@
 import type { ModelConfig } from '~/lib/constants'
 import { describe, expect, it } from 'vitest'
-import { deepseekStrategy, getProviderStrategy, getThinkingConfig, googleStrategy } from '~/lib/providers'
+import { deepseekStrategy, getProviderStrategy, getThinkingConfig, googleStrategy, openrouterStrategy } from '~/lib/providers'
 
 function makeModelConfig(overrides: Partial<ModelConfig> = {}): ModelConfig {
   return {
@@ -143,6 +143,54 @@ describe('deepseekStrategy', () => {
   })
 })
 
+describe('openrouterStrategy', () => {
+  describe('getThinkingConfig', () => {
+    it('disables reasoning at minimal level', () => {
+      const config = makeModelConfig({ provider: 'openrouter' })
+      expect(openrouterStrategy.getThinkingConfig(config, 'minimal')).toEqual({ enabled: false })
+    })
+
+    it('maps low/medium/high to matching effort', () => {
+      const config = makeModelConfig({ provider: 'openrouter' })
+      expect(openrouterStrategy.getThinkingConfig(config, 'low')).toEqual({ enabled: true, effort: 'low' })
+      expect(openrouterStrategy.getThinkingConfig(config, 'medium')).toEqual({ enabled: true, effort: 'medium' })
+      expect(openrouterStrategy.getThinkingConfig(config, 'high')).toEqual({ enabled: true, effort: 'high' })
+    })
+
+    it('clamps max → high (OpenRouter 无 max 档)', () => {
+      const config = makeModelConfig({ provider: 'openrouter' })
+      expect(openrouterStrategy.getThinkingConfig(config, 'max')).toEqual({ enabled: true, effort: 'high' })
+    })
+
+    it('disables for thinkingType none', () => {
+      const config = makeModelConfig({ provider: 'openrouter', thinkingType: 'none' })
+      expect(openrouterStrategy.getThinkingConfig(config, 'high')).toEqual({ enabled: false })
+    })
+  })
+
+  describe('buildProviderOptions', () => {
+    it('wraps thinkingConfig under openrouter.reasoning', () => {
+      const config = makeModelConfig({ provider: 'openrouter' })
+      expect(openrouterStrategy.buildProviderOptions({ enabled: true, effort: 'high' }, config)).toEqual({
+        openrouter: { reasoning: { enabled: true, effort: 'high' } },
+      })
+    })
+  })
+
+  describe('createSDKProvider', () => {
+    it('creates a callable provider from an API key', () => {
+      const sdk = openrouterStrategy.createSDKProvider('test-key')
+      expect(typeof sdk).toBe('function')
+    })
+  })
+
+  describe('name', () => {
+    it('is openrouter', () => {
+      expect(openrouterStrategy.name).toBe('openrouter')
+    })
+  })
+})
+
 describe('getProviderStrategy', () => {
   it('returns google strategy for "google"', () => {
     expect(getProviderStrategy('google')).toBe(googleStrategy)
@@ -150,6 +198,10 @@ describe('getProviderStrategy', () => {
 
   it('returns deepseek strategy for "deepseek"', () => {
     expect(getProviderStrategy('deepseek')).toBe(deepseekStrategy)
+  })
+
+  it('returns openrouter strategy for "openrouter"', () => {
+    expect(getProviderStrategy('openrouter')).toBe(openrouterStrategy)
   })
 
   it('throws for unknown provider', () => {
@@ -169,6 +221,11 @@ describe('getThinkingConfig', () => {
   it('delegates to deepseek strategy for deepseek models', () => {
     expect(getThinkingConfig('deepseek-v4-flash', 'max')).toBe('max')
     expect(getThinkingConfig('deepseek-v4-flash', 'minimal')).toBe('disabled')
+  })
+
+  it('delegates to openrouter strategy for openrouter models', () => {
+    expect(getThinkingConfig('xiaomi/mimo-v2.5', 'high')).toEqual({ enabled: true, effort: 'high' })
+    expect(getThinkingConfig('xiaomi/mimo-v2.5', 'minimal')).toEqual({ enabled: false })
   })
 
   it('returns fallback for unknown model', () => {

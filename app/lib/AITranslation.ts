@@ -1,4 +1,5 @@
 import type { LanguageModel, ModelMessage } from 'ai'
+import type { AIProviderName } from '~/lib/constants'
 import type { ThinkingLevel } from '~/lib/stores/appConfig'
 import type { EnrichedTweet, Entity } from '~/types'
 import { generateText, Output, zodSchema } from 'ai'
@@ -314,7 +315,7 @@ ${maskedText}
 interface TranslationOptions {
   model: string
   apiKey: string
-  provider: 'google' | 'deepseek'
+  provider: AIProviderName
   baseUrl?: string
   translationGlossary?: string
   tweet: EnrichedTweet

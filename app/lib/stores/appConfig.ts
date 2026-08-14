@@ -5,7 +5,7 @@ import { persist } from 'zustand/middleware'
 export type Theme = 'light' | 'dark' | 'system'
 export type ScreenshotFormat = 'png' | 'jpeg'
 export type ThinkingLevel = 'minimal' | 'low' | 'medium' | 'high' | 'max'
-export type AIProvider = 'google' | 'deepseek'
+export type AIProvider = 'google' | 'deepseek' | 'openrouter'
 
 export interface AppConfigs {
   theme: Theme
@@ -23,7 +23,16 @@ export interface AppConfigs {
   deepseekModel: string
   deepseekBaseUrl: string
   deepseekThinkingLevel: ThinkingLevel
+  openrouterApiKey: string
+  openrouterModel: string
+  openrouterBaseUrl: string
+  openrouterThinkingLevel: ThinkingLevel
   translationGlossary: string
+  enableAIVision: boolean
+  /** 视觉 provider：只允许支持图片输入的（google / openrouter），复用翻译侧对应 key */
+  visionProvider: AIProvider
+  /** 仅显示译文：AIVisionBlock 展示开关（隐藏 OCR 原文） */
+  visionShowTranslatedOnly: boolean
   isInlineMedia: boolean
 }
 
@@ -47,7 +56,14 @@ interface AppConfigState extends AppConfigs {
   setDeepseekModel: (model: string) => void
   setDeepseekBaseUrl: (baseUrl: string) => void
   setDeepseekThinkingLevel: (level: ThinkingLevel) => void
+  setOpenrouterApiKey: (apiKey: string) => void
+  setOpenrouterModel: (model: string) => void
+  setOpenrouterBaseUrl: (baseUrl: string) => void
+  setOpenrouterThinkingLevel: (level: ThinkingLevel) => void
   setTranslationGlossary: (glossary: string) => void
+  setEnableAIVision: (enable: boolean) => void
+  setVisionProvider: (provider: AIProvider) => void
+  setVisionShowTranslatedOnly: (show: boolean) => void
   setIsInlineMedia: (isInlineMedia: boolean) => void
 }
 
@@ -72,7 +88,14 @@ export const useAppConfigStore = create<AppConfigState>()(
       deepseekModel: 'deepseek-v4-flash',
       deepseekBaseUrl: '',
       deepseekThinkingLevel: 'high',
+      openrouterApiKey: '',
+      openrouterModel: 'xiaomi/mimo-v2.5',
+      openrouterBaseUrl: '',
+      openrouterThinkingLevel: 'minimal',
       translationGlossary: '',
+      enableAIVision: false,
+      visionProvider: 'google',
+      visionShowTranslatedOnly: true,
       isInlineMedia: false,
 
       setEnableMediaProxy: enableMediaProxy => set({ enableMediaProxy }),
@@ -90,12 +113,27 @@ export const useAppConfigStore = create<AppConfigState>()(
       setDeepseekModel: deepseekModel => set({ deepseekModel }),
       setDeepseekBaseUrl: deepseekBaseUrl => set({ deepseekBaseUrl }),
       setDeepseekThinkingLevel: deepseekThinkingLevel => set({ deepseekThinkingLevel }),
+      setOpenrouterApiKey: openrouterApiKey => set({ openrouterApiKey }),
+      setOpenrouterModel: openrouterModel => set({ openrouterModel }),
+      setOpenrouterBaseUrl: openrouterBaseUrl => set({ openrouterBaseUrl }),
+      setOpenrouterThinkingLevel: openrouterThinkingLevel => set({ openrouterThinkingLevel }),
       setTranslationGlossary: translationGlossary => set({ translationGlossary }),
+      setEnableAIVision: enableAIVision => set({ enableAIVision }),
+      setVisionProvider: visionProvider => set({ visionProvider }),
+      setVisionShowTranslatedOnly: visionShowTranslatedOnly => set({ visionShowTranslatedOnly }),
       setIsInlineMedia: isInlineMedia => set({ isInlineMedia }),
     }),
     {
       name: 'app-config-store',
-      version: 4,
+      version: 5,
+      migrate: (persistedState, version) => {
+        const state = persistedState as Partial<AppConfigs>
+        // v4 → v5：AI 图片描述默认仅显示译文（保留其余设置）
+        if (version < 5) {
+          return { ...state, visionShowTranslatedOnly: true }
+        }
+        return state
+      },
       onRehydrateStorage: (state) => {
         return () => state?.setHasHydrated(true)
       },

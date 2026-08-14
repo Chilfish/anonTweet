@@ -1,13 +1,11 @@
 import type { EnrichedTweet, Entity } from '~/types'
 import { useShallow } from 'zustand/react/shallow'
-import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { useTranslationStore } from '~/lib/stores/translation'
 import { resolveTranslationView } from '~/lib/translation/resolveTranslationView'
 
 const DEFAULT_VISIBILITY = { body: true, alt: true } as const
 
 export function useTweetTranslation(tweet: EnrichedTweet, type: 'body' | 'alt' = 'body') {
-  const enableAITranslation = useAppConfigStore(state => state.enableAITranslation)
   const tweetId = tweet.id_str
 
   const { mode, visibility, manualTranslation } = useTranslationStore(
@@ -21,7 +19,6 @@ export function useTweetTranslation(tweet: EnrichedTweet, type: 'body' | 'alt' =
   const view = resolveTranslationView({
     tweet,
     manualTranslation,
-    enableAITranslation,
     mode,
     visibility,
     part: type,

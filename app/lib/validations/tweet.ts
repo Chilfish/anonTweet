@@ -1,3 +1,4 @@
+import type { AIProviderName } from '~/lib/constants'
 import type { EnrichedTweet, IGPost, TranslationEntity } from '~/types'
 import { z } from 'zod'
 
@@ -24,7 +25,7 @@ export const getTweetSchema = z.object({
   enableAITranslation: z.boolean().default(false),
   apiKey: z.string().optional(),
   model: z.string().optional(),
-  provider: z.enum(['google', 'deepseek']).optional(),
+  provider: z.enum(['google', 'deepseek', 'openrouter']).optional(),
   baseUrl: z.string().optional(),
   thinkingLevel: z.enum(['minimal', 'low', 'medium', 'high', 'max']).optional(),
   translationGlossary: z.string().optional(),
@@ -43,7 +44,7 @@ export type AITranslationSchema = (Omit<GetTweetSchema, 'tweetId'> & {
   enableAITranslation: boolean
   apiKey: string
   model: string
-  provider?: 'google' | 'deepseek'
+  provider?: AIProviderName
   baseUrl?: string
   thinkingLevel?: string
   translationGlossary?: string

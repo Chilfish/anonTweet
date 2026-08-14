@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { useIGOperations } from '~/hooks/use-ig-operations'
 import { useIGScreenshotAction } from '~/hooks/use-ig-screenshot-action'
 import { fetcher } from '~/lib/fetcher'
-import { useAIConfig } from '~/lib/stores/hooks'
+import { useAIConfig, useResolvedAIConfig } from '~/lib/stores/hooks'
 import { extractIGId } from '~/lib/utils'
 
 export function meta() {
@@ -77,20 +77,14 @@ export default function IGPostPage() {
 
   // AI 配置（用于自动翻译 — 加载时附带 enableAITranslation）
   const aiConfigFromStore = useAIConfig()
-
-  const apiKey = aiConfigFromStore.aiProvider === 'google'
-    ? aiConfigFromStore.geminiApiKey
-    : aiConfigFromStore.deepseekApiKey
-  const model = aiConfigFromStore.aiProvider === 'google'
-    ? aiConfigFromStore.geminiModel
-    : aiConfigFromStore.deepseekModel
+  const resolved = useResolvedAIConfig()
 
   const aiConfig = {
     enableAITranslation: aiConfigFromStore.enableAITranslation,
-    aiProvider: aiConfigFromStore.aiProvider,
-    apiKey,
-    model,
-    thinkingLevel: undefined as string | undefined,
+    aiProvider: resolved.provider,
+    apiKey: resolved.apiKey,
+    model: resolved.model,
+    thinkingLevel: resolved.thinkingLevel,
     translationGlossary: aiConfigFromStore.translationGlossary,
   }
 

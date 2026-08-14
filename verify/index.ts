@@ -22,6 +22,7 @@ import { PostmortemVerifier } from './modules/postmortem.verifier.js'
 import { ScreenshotVerifier } from './modules/screenshot.verifier.js'
 import { TranslationVerifier } from './modules/translation.verifier.js'
 import { TweetVerifier } from './modules/tweet.verifier.js'
+import { VisionVerifier } from './modules/vision.verifier.js'
 import { AnonTweetClient } from './sdk/api-client.js'
 import { EXTERNAL_KEYS, TestServer } from './sdk/test-server.js'
 
@@ -67,6 +68,7 @@ if (values.help) {
     screenshot    Screenshot export (AC-SHOT-001~004)
     media         Media proxy (AC-MEDIA-001~006)
     postmortem    Postmortem check (AC-PM-001~007)
+    vision        AI vision (AIVisionInfo / prompts / parse / orchestration, AC-VISION-001~007)
   `)
   process.exit(0)
 }
@@ -98,6 +100,7 @@ runner.register(new CIVerifier())
 runner.register(new ScreenshotVerifier())
 runner.register(new MediaVerifier())
 runner.register(new PostmortemVerifier())
+runner.register(new VisionVerifier())
 
 // ─── Server lifecycle (--server) ────────────────────────────
 // S8: auto-start a test server, inject the client, stop in all paths.

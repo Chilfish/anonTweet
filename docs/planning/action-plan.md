@@ -54,6 +54,26 @@ Phase 2 行动（源自 `docs/next-steps.md`）：
 
 ## 最近更新
 
+### 2026-08-14 — 测试基线红灯修复（vitest 冷加载超时）✅ 已完成
+
+- **问题**：`bun run test`（vitest run）全量**偶发 4~5 fail**——失败集每次漂移（`api.ai-translation` / `api.tweet-get` / `env.server` / `getTweet` 轮流出局），全部为 `Test timed out in 5000ms`，且都发生在**动态 import 服务端路由/模块**的冷加载路径
+- **根因诊断（实测）**：vitest 并行全量下 transform+import 冷加载极慢（单文件 import 实测 13.4s；全量 import 合计 131.7s / transform 56.9s），远超默认 5s `testTimeout`；**单文件运行全部通过（env.server 单独 286ms 全绿）** → 非逻辑 bug，是测试隔离层配置问题（对齐 review §7.3 遗留）
+- **修复**：`vitest.config.ts` `test.maxWorkers: 2`（16 核默认 16 worker 并行竞争）+ 全局 `testTimeout`/`hookTimeout` 30s；删除 `api.tweet-get`/`api.vision` 冗余 per-test 15000（全局接管）
+- **验收**：连续 5 次 `bun run test` 全量 115/115 全绿 + typecheck ✅ + lint 0 error ✅ + verify 42 PASS ✅
+- **commit 拆分**：`docs:` 计划（`90f448f`）→ `test:` 修复（`ee5f1eb`）→ `docs:` 验收回填
+- 详见 `docs/development-log/2026-08-14.md`
+
+### 2026-08-13 — AI Vision PR #14 评审修复 + UI 打磨
+
+- 对 `feat/ai-vision`（PR #14，42 文件）做 Apple 产品 × 研发视角评审，产出 `docs/planning/ai-vision-review.md`
+- **合前必修 2 安全点已修**：P0-1 SSRF（`fetchImageDataUri` host 精确白名单 `assertAllowedMediaHost`，绕过 `/api/proxy/image` 白名单的问题）；P0-2 未认证缓存写（`app/lib/validations/vision.ts` 强校验 + save/generate 落盘前校验）
+- **P1-2**：`describeImages.ts` 重试扩展覆盖 SDK 层 `NoObjectGeneratedError`
+- **UI 打磨（Apple HIG）**：`AIVisionBlock`（文字级 toggle / 去编号徽章 / 字阶收敛 / hairline）、`AIVisionEditorDialog`（自然语言 label / 按钮层级 / footer 减负 / Select 值统一字符串）、`AIVisionSettings`（文案精简）
+- **UI 第二轮（结构性）**：模式下拉 → `ToggleGroup` 分段控件；编辑器状态上提 `AIVisionBlock`、空态改可点击 CTA；展示块改 `bg-card` 分组容器；`AIVisionSettings` Select 回对象值模式（对齐 AITranslationSettings）
+- **UI 第三轮（弹窗原语 + tabs 手机端）**：`dialog.tsx` padding `p-6`→`p-5`（6 弹窗受益）；**保留设置页 5 tab**（用户既有习惯），`TabsList` 手机端横向滑动 + 窄屏隐藏绝对定位 Indicator（active 由 tab 自身胶囊承担，宽屏恢复 segment 滑块）；Vision 弹窗重写（分段控件裸露 + 单卡片 + 无底色 textarea）；`SettingsRow` control `shrink-0`；`ToggleGroup` 防溢出
+- 验收：typecheck ✅ · lint 0 error ✅ · test 111 pass（4 fail 1 error 预存基线）· verify vision 8/8 ✅ · vision.spec 45/45 ✅
+- 遗留（见 review §7.3）：测试基线红灯独立任务（Bun runner `vi.resetModules` 兼容）、P1-1 单图容错二期、P1-4 并发限流二期
+
 ### 2026-08-13 — 新特性规划：AI 视觉描述子系统（Phase 0 文档先行）
 
 - 规划文档化：`docs/feature_ai_vision.md`（需求与上下文）、`docs/planning/ai-vision-plan.md`（行动计划 + DR-1~~7 + commit 拆分）、`verify/acceptance-criteria/AC-vision.md`（AC-VISION-001~~008）

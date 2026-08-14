@@ -1,8 +1,8 @@
 # AI 视觉描述验收标准
 
-> 版本：0.1 | 日期：2026-08-13
+> 版本：0.2 | 日期：2026-08-14
 > 对应 Postmortem：#002（翻译系统耦合）/ #005（媒体 URL 重复）/ #007（新功能无验收清单）
-> 关联 Verifier：`verify/modules/vision.verifier.ts`（Phase 3 起）
+> 关联 Verifier：`verify/modules/vision.verifier.ts`（Phase 3 起，v0.2 补 AC-VISION-009）
 > 执行命令：`bun verify --module vision [--ac AC-VISION-NNN]`
 > 上游需求：`docs/feature_ai_vision.md`
 
@@ -14,7 +14,7 @@
 - **输入**：构造 describe / ocr 结果
 - **Pass 条件**：
   - 含 `index` / `mode` / `promptId` / `provider` / `model` / `status` / `createdAt`
-  - describe 模式填充 `description`；ocr 模式填充 `originalText` + `translatedText`
+  - describe 模式填充 `description`；ocr 模式填充 `originalText`（纯 OCR，不含 `translatedText`）
   - 不写入 `Entity`，`EnrichedTweet.visionInfo` 为独立可选数组
 
 ---
@@ -30,28 +30,37 @@
 
 ---
 
-## AC-VISION-003：ocr 结构化 schema 校验
+## AC-VISION-003：ocr 纯 OCR schema 校验
 
 - **验证对象**：ocr schema + `parseVisionResult`
-- **输入**：含原文 + 翻译的模型 JSON 输出
+- **输入**：纯 OCR 的模型 JSON 输出（只含原文，不含翻译）
 - **Pass 条件**：
-  - 合法：`{ "texts": [{ "index": 0, "originalText": "こんにちは", "translatedText": "你好" }] }`
-  - 缺 `originalText` 或 `translatedText` → 校验失败
+  - 合法：`{ "texts": [{ "index": 0, "originalText": "こんにちは" }] }`
+  - 缺 `originalText` → 校验失败；多余键（如 `translatedText`）被 strict 拒绝
   - 空数组 → 返回空 `AIVisionInfo[]`（不抛错）
+
+---
+
+> 翻译不再由 ocr 生成步产出：OCR 纯提取 `originalText`，翻译走独立翻译步
+> （`translateOCR.ts`，复用翻译模型 + 推文上下文，见 `POST /api/ai-vision` translate 分支）。
+> 翻译步对无结构化输出模型（DeepSeek 等 chat 模型）**宽容解析**：`parseOcrTranslation` 容忍
+> `{ translations: [...] }` / keyed-object `{ "0": "译文" }` / 裸数组 / markdown code fence。
 
 ---
 
 ## AC-VISION-004：resolveVisionView 决策链
 
-- **验证对象**：`app/lib/vision/parse.ts` 的 `resolveVisionView`（纯函数）
+- **验证对象**：`app/lib/vision/parse.ts` 的 `resolveVisionView(aiInfo, { translatedOnly })`（纯函数）
 - **输入**：同一 media `index` 分别设置：
-  1. `AIVisionInfo` 存在（AI 结果）
-  2. `AIVisionInfo` 存在 + 手动编辑覆盖（store）
-  3. 两者皆无
+  1. `AIVisionInfo` describe（AI 描述）
+  2. `AIVisionInfo` ocr（原文 + 译文）
+  3. ocr + `translatedOnly: true`（仅显示译文开关）
+  4. 两者皆无
 - **Pass 条件**：
-  - 场景 1：显示 AI 结果
-  - 场景 2：手动覆盖优先
-  - 场景 3：无视图（隐藏该图描述区）
+  - 场景 1：显示 `description`
+  - 场景 2：显示 `translatedText || originalText`（译文优先，原文可折叠展示）
+  - 场景 3：只显示译文，`originalText` 不暴露
+  - 场景 4：无视图（隐藏该图描述区）
 
 ---
 
@@ -86,25 +95,38 @@
 
 ## AC-VISION-008：截图路由渲染 vision 块
 
-- **验证对象**：`plain.tsx` / `app/components/tweet/AIVisionBlock.tsx`
-- **输入**：带 `visionInfo` 的推文 fixture
+- **验证对象**：`plain.tsx` → `PlainTweet.tsx` + `AIVisionBlock`（source scan，离线确定性）
+- **输入**：项目源码
 - **Pass 条件**：
-  - `GET /plain-tweet/:id`（或等价路由）渲染结果含 vision 描述文本
-  - 组件使用 `waitForRenderReady`（source scan，对齐 AC-SHOT-003）
+  - source scan：`PlainTweet.tsx` 引用 `AIVisionBlock`（截图路由渲染 vision 块，`hideChrome` 隐藏交互 chrome）
+  - source scan：`AIVisionBlock` 使用 `waitForRenderReady`（截图上下文调用，对齐 AC-SHOT-003）
+  - 手动验收：带 `visionInfo` 的推文（visionInfo 已持久化到 localCache + DB）经 `GET /plain-tweet/:id` 截图包含 AI 描述文本
 
 ---
 
-## 总计：8 条 AC
+## AC-VISION-009：visionInfo 持久化（save / generate → localCache + DB）
 
-| AC            | 分类      | 依赖 AI | 依赖 Fixture | 阶段 |
-| ------------- | --------- | ------- | ------------ | ---- |
-| AC-VISION-001 | 类型      | 否      | 否           | P2   |
-| AC-VISION-002 | 纯函数    | 否      | 否           | P2   |
-| AC-VISION-003 | 纯函数    | 否      | 否           | P2   |
-| AC-VISION-004 | 纯函数    | 否      | 否           | P2   |
-| AC-VISION-005 | 纯函数    | 否      | 是           | P2   |
-| AC-VISION-006 | 纯函数    | 否      | 是           | P3   |
-| AC-VISION-007 | 纯函数    | 否      | 是           | P3   |
-| AC-VISION-008 | 集成/截图 | 否      | 是           | P5   |
+- **验证对象**：`app/routes/api/ai/vision.ts`（save/generate 分支）+ `app/lib/service/getTweet.server.ts`（`updateTweetVisionInfo`）
+- **输入**：项目源码（source scan，离线确定性）
+- **Pass 条件**：
+  - source scan：`vision.ts` 的 `handleSave` 与 `handleGenerate` 均调用 `updateTweetVisionInfo`（不再只裸写 localCache）
+  - source scan：`getTweet.server.ts` 导出 `updateTweetVisionInfo`，实现同时含 DB 写（`db.update`，字段级合并进 `jsonContent`）与 localCache 写（`setLocalCache`）
+  - 手动验收：开启 `ENABLE_LOCAL_CACHE=true` / `ENABLE_DB_CACHE=true` 后保存 vision 编辑 → 刷新页面 / 重启服务后 visionInfo 仍在（截图路由同样可渲染）
 
-> 注：AC-VISION-001~007 离线确定性；AC-VISION-008 依赖截图路由（Phase 5）。真实 API Key 的端到端（`/api/ai/vision` 真跑 MiMo）不纳入 AC 断言，作为手动验收清单项。
+---
+
+## 总计：9 条 AC
+
+| AC            | 分类      | 依赖 AI | 依赖 Fixture | 阶段  |
+| ------------- | --------- | ------- | ------------ | ----- |
+| AC-VISION-001 | 类型      | 否      | 否           | P2    |
+| AC-VISION-002 | 纯函数    | 否      | 否           | P2    |
+| AC-VISION-003 | 纯函数    | 否      | 否           | P2    |
+| AC-VISION-004 | 纯函数    | 否      | 否           | P2    |
+| AC-VISION-005 | 纯函数    | 否      | 是           | P2    |
+| AC-VISION-006 | 纯函数    | 否      | 是           | P3    |
+| AC-VISION-007 | 纯函数    | 否      | 是           | P3    |
+| AC-VISION-008 | 集成/截图 | 否      | 是           | ✅ P5 |
+| AC-VISION-009 | 持久化    | 否      | 否           | ✅ P5 |
+
+> 注：AC-VISION-001~007 离线确定性；AC-VISION-008/009 source scan 离线确定性。真实 API Key 的端到端（`/api/ai/vision` 真跑 MiMo）不纳入 AC 断言，作为手动验收清单项。

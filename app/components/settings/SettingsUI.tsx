@@ -163,7 +163,7 @@ const SettingsItem = React.forwardRef<HTMLDivElement, SettingsItemProps>(
           </div>
         </div>
         {children && React.isValidElement(children) && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex shrink-0 items-center gap-2 text-sm text-muted-foreground">
             {React.cloneElement(children, { id } as React.Attributes)}
           </div>
         )}
