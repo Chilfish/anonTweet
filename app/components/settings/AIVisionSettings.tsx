@@ -42,6 +42,7 @@ export function AIVisionSettings() {
   const {
     enableAIVision,
     visionProvider,
+    showVisionEntry,
     geminiApiKey,
     geminiModel,
     geminiBaseUrl,
@@ -51,6 +52,7 @@ export function AIVisionSettings() {
     openrouterBaseUrl,
     openrouterThinkingLevel,
     setEnableAIVision,
+    setShowVisionEntry,
     setVisionProvider,
     setGeminiApiKey,
     setGeminiModel,
@@ -64,6 +66,7 @@ export function AIVisionSettings() {
     useShallow(state => ({
       enableAIVision: state.enableAIVision,
       visionProvider: state.visionProvider,
+      showVisionEntry: state.showVisionEntry,
       geminiApiKey: state.geminiApiKey,
       geminiModel: state.geminiModel,
       geminiBaseUrl: state.geminiBaseUrl,
@@ -73,6 +76,7 @@ export function AIVisionSettings() {
       openrouterBaseUrl: state.openrouterBaseUrl,
       openrouterThinkingLevel: state.openrouterThinkingLevel,
       setEnableAIVision: state.setEnableAIVision,
+      setShowVisionEntry: state.setShowVisionEntry,
       setVisionProvider: state.setVisionProvider,
       setGeminiApiKey: state.setGeminiApiKey,
       setGeminiModel: state.setGeminiModel,
@@ -153,12 +157,23 @@ export function AIVisionSettings() {
         <SettingsGroup>
           <SettingsRow
             label="启用图片描述"
-            description="为推文配图生成 AI 描述或 OCR 文字"
+            description="为推文配图生成 AI 描述或 OCR 文字；关闭时已缓存的描述默认隐藏，可在推文上单独展开"
             id="enable-ai-vision"
           >
             <Switch
               checked={enableAIVision}
               onCheckedChange={setEnableAIVision}
+            />
+          </SettingsRow>
+
+          <SettingsRow
+            label="显示添加入口"
+            description="在推文右上角（翻译按钮旁）显示手动添加图片描述的按钮；较少使用，默认关闭"
+            id="show-vision-entry"
+          >
+            <Switch
+              checked={showVisionEntry}
+              onCheckedChange={setShowVisionEntry}
             />
           </SettingsRow>
 

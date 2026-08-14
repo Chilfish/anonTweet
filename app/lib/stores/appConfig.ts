@@ -33,6 +33,8 @@ export interface AppConfigs {
   visionProvider: AIProvider
   /** 仅显示译文：AIVisionBlock 展示开关（隐藏 OCR 原文） */
   visionShowTranslatedOnly: boolean
+  /** 翻译按钮旁「添加图片描述」入口（较少使用，默认关闭） */
+  showVisionEntry: boolean
   isInlineMedia: boolean
 }
 
@@ -64,6 +66,7 @@ interface AppConfigState extends AppConfigs {
   setEnableAIVision: (enable: boolean) => void
   setVisionProvider: (provider: AIProvider) => void
   setVisionShowTranslatedOnly: (show: boolean) => void
+  setShowVisionEntry: (show: boolean) => void
   setIsInlineMedia: (isInlineMedia: boolean) => void
 }
 
@@ -96,6 +99,7 @@ export const useAppConfigStore = create<AppConfigState>()(
       enableAIVision: false,
       visionProvider: 'google',
       visionShowTranslatedOnly: true,
+      showVisionEntry: false,
       isInlineMedia: false,
 
       setEnableMediaProxy: enableMediaProxy => set({ enableMediaProxy }),
@@ -121,6 +125,7 @@ export const useAppConfigStore = create<AppConfigState>()(
       setEnableAIVision: enableAIVision => set({ enableAIVision }),
       setVisionProvider: visionProvider => set({ visionProvider }),
       setVisionShowTranslatedOnly: visionShowTranslatedOnly => set({ visionShowTranslatedOnly }),
+      setShowVisionEntry: showVisionEntry => set({ showVisionEntry }),
       setIsInlineMedia: isInlineMedia => set({ isInlineMedia }),
     }),
     {
