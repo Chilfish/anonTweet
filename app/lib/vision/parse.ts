@@ -195,3 +195,41 @@ export function alignVisionIndexes(
   }
   return info.map((item, i) => ({ ...item, index: requestedIndexes[i]! }))
 }
+
+/**
+ * 图片描述块展示状态（纯函数，Postmortem #002：逻辑下沉 lib，组件只渲染）。
+ *
+ * 可见性模型（对齐 Apple「克制默认 + 渐进披露」）：
+ * - 缓存内容（hasContent）是否展示 = 全局开关（enableAIVision）∨ 逐推文覆盖（override）
+ * - 全局关 + 有缓存内容：交互模式折叠成「图片描述」细条（点按展开 = 逐推文覆盖开），
+ *   截图模式完全隐藏（用户截图时不想要这次的描述结果）
+ * - 无内容：仅全局开 + 交互模式显示空态 CTA（生成入口）
+ */
+export type VisionBlockState = 'content' | 'cta' | 'collapsed' | 'hidden'
+
+export interface ResolveVisionBlockStateOptions {
+  /** 是否存在已缓存/已生成内容（visionInfo 有 done/error） */
+  hasContent: boolean
+  /** 全局「启用图片描述」开关 */
+  enableAIVision: boolean
+  /** 逐推文可见性覆盖：true=强制展示 / false=强制隐藏 / undefined=跟随全局 */
+  override?: boolean
+  /** 截图/纯展示上下文：隐藏一切交互 chrome */
+  chromeHidden: boolean
+}
+
+export function resolveVisionBlockState(
+  opts: ResolveVisionBlockStateOptions,
+): VisionBlockState {
+  const { hasContent, enableAIVision, override, chromeHidden } = opts
+  if (hasContent) {
+    // 逐推文覆盖优先于全局开关
+    const effectiveShow = override ?? enableAIVision
+    if (effectiveShow)
+      return 'content'
+    return chromeHidden ? 'hidden' : 'collapsed'
+  }
+  if (chromeHidden)
+    return 'hidden'
+  return enableAIVision ? 'cta' : 'hidden'
+}

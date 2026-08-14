@@ -97,6 +97,7 @@ export function useTranslationActions() {
       setTranslationVisibility: state.setTranslationVisibility,
       setTweetTranslationMode: state.setTweetTranslationMode,
       setTranslationMode: state.setTranslationMode,
+      setVisionVisibility: state.setVisionVisibility,
       hasTextContent: state.hasTextContent,
     })),
   )
@@ -144,6 +145,15 @@ export function useTweetMode(tweetId: string) {
   return useTranslationStore(state =>
     state.tweetTranslationModes[tweetId] || state.translationMode,
   )
+}
+
+/**
+ * 逐推文图片描述可见性覆盖：undefined = 跟随全局开关（enableAIVision）。
+ * 会话级状态（不进 persist），主页面截图（isScreenshoting）同树渲染可即时生效；
+ * plain-tweet 截图路由默认跟随全局开关。
+ */
+export function useVisionVisibility(tweetId: string) {
+  return useTranslationStore(state => state.visionVisibility[tweetId])
 }
 
 /**

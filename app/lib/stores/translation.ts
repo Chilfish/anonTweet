@@ -126,6 +126,8 @@ interface DataSlice {
   translationVisibility: Record<string, { body: boolean, alt: boolean }>
   tweetTranslationModes: Record<string, TranslationMode>
   translationMode: TranslationMode
+  /** 逐推文图片描述可见性覆盖（会话级，不进 persist）：true=强制展示 / false=强制隐藏 */
+  visionVisibility: Record<string, boolean>
 
   // Data Actions
   setAllTweets: (data: TweetData, mainTweetId: string) => void
@@ -141,6 +143,7 @@ interface DataSlice {
   setTweetTranslationMode: (tweetId: string, mode: TranslationMode) => void
   getTweetTranslationMode: (tweetId: string) => TranslationMode
   setTranslationMode: (mode: TranslationMode) => void
+  setVisionVisibility: (tweetId: string, show: boolean) => void
 
   // Utils
   hasTextContent: (text?: string) => boolean
@@ -160,6 +163,7 @@ const createDataSlice: StateCreator<
   translationVisibility: {},
   tweetTranslationModes: {},
   translationMode: 'bilingual',
+  visionVisibility: {},
 
   // --- Actions ---
   setCommentIds: ids => set({ commentIds: ids }),
@@ -263,6 +267,12 @@ const createDataSlice: StateCreator<
       translationMode: mode,
       tweetTranslationModes: {},
     }),
+
+  /** 逐推文图片描述可见性覆盖（会话级，不进 persist） */
+  setVisionVisibility: (tweetId, show) =>
+    set(state => ({
+      visionVisibility: { ...state.visionVisibility, [tweetId]: show },
+    })),
 
   hasTextContent: checkTextContent,
 })

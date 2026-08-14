@@ -4,7 +4,7 @@ import { visionInfoArraySchema } from '~/lib/validations/vision'
 import { runImageVision } from '~/lib/vision/describeImages'
 import { assertAllowedMediaHost, buildMediaUrl } from '~/lib/vision/fetchImage'
 import { buildVisionMessages } from '~/lib/vision/messages'
-import { alignVisionIndexes, applyVisionEdits, mergeVisionInfo, parseVisionResult, resolveVisionView } from '~/lib/vision/parse'
+import { alignVisionIndexes, applyVisionEdits, mergeVisionInfo, parseVisionResult, resolveVisionBlockState, resolveVisionView } from '~/lib/vision/parse'
 import { getVisionPreset, VISION_PROMPT_PRESETS } from '~/lib/vision/prompts'
 import { parseOcrTranslation } from '~/lib/vision/translateOCR'
 
@@ -441,6 +441,30 @@ describe('vision fix: alignVisionIndexes 结果索引对齐请求', () => {
     const out = alignVisionIndexes([info(0)], [0, 2])
     expect(out).toHaveLength(1)
     expect(out[0]!.index).toBe(0)
+  })
+})
+
+describe('vision AC-VISION-010: resolveVisionBlockState 可见性门控（默认隐藏 + 逐推文覆盖）', () => {
+  it('有内容 + 全局关 + 无覆盖 → 交互折叠 / 截图隐藏（默认不展示缓存描述）', () => {
+    expect(resolveVisionBlockState({ hasContent: true, enableAIVision: false, chromeHidden: false })).toBe('collapsed')
+    expect(resolveVisionBlockState({ hasContent: true, enableAIVision: false, chromeHidden: true })).toBe('hidden')
+  })
+
+  it('有内容 + 全局开 → content（截图同样展示）', () => {
+    expect(resolveVisionBlockState({ hasContent: true, enableAIVision: true, chromeHidden: false })).toBe('content')
+    expect(resolveVisionBlockState({ hasContent: true, enableAIVision: true, chromeHidden: true })).toBe('content')
+  })
+
+  it('逐推文覆盖优先于全局：全局关 + override true → content；全局开 + override false → 折叠/隐藏', () => {
+    expect(resolveVisionBlockState({ hasContent: true, enableAIVision: false, override: true, chromeHidden: false })).toBe('content')
+    expect(resolveVisionBlockState({ hasContent: true, enableAIVision: true, override: false, chromeHidden: false })).toBe('collapsed')
+    expect(resolveVisionBlockState({ hasContent: true, enableAIVision: true, override: false, chromeHidden: true })).toBe('hidden')
+  })
+
+  it('无内容：仅全局开 + 交互 → cta（空态生成入口）；其余 → hidden', () => {
+    expect(resolveVisionBlockState({ hasContent: false, enableAIVision: true, chromeHidden: false })).toBe('cta')
+    expect(resolveVisionBlockState({ hasContent: false, enableAIVision: false, chromeHidden: false })).toBe('hidden')
+    expect(resolveVisionBlockState({ hasContent: false, enableAIVision: true, chromeHidden: true })).toBe('hidden')
   })
 })
 
