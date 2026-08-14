@@ -39,4 +39,29 @@ describe('getTweets', () => {
     expect(t2.quotedTweet?.id_str).toBe('0099')
     expect(tweets.map(t => t.id_str)).toEqual(['0001', '0002'])
   })
+
+  it('returns empty list when getter resolves null (error branch, getTweet.ts:10)', async () => {
+    const getter = vi.fn(async () => null)
+    const tweets = await getTweets('999', getter as any)
+    expect(tweets).toEqual([])
+  })
+
+  it('does not attach quotedTweet when quoted getter returns null', async () => {
+    const t = makeTweet({ id_str: '0001', text: 'root', quoted_tweet_id: '0099' } as any)
+    const getter = vi.fn(async (id: string) => (id === '0001' ? t : null))
+
+    const tweets = await getTweets('0001', getter as any)
+
+    expect(t.quotedTweet).toBeUndefined()
+    expect(tweets.map(x => x.id_str)).toEqual(['0001'])
+  })
+
+  it('returns only root when parent getter returns null', async () => {
+    const t = makeTweet({ id_str: '0001', text: 'root', in_reply_to_status_id_str: '0000' } as any)
+    const getter = vi.fn(async (id: string) => (id === '0001' ? t : null))
+
+    const tweets = await getTweets('0001', getter as any)
+
+    expect(tweets.map(x => x.id_str)).toEqual(['0001'])
+  })
 })

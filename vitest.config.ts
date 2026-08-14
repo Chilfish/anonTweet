@@ -6,7 +6,7 @@ import { defineConfig } from 'vitest/config'
  * Vitest 三层架构（docs/planning/testing-infra-refactor.md Phase A~E）
  *
  * - unit:        L1 纯函数/解析器单测（test/unit/**，node 环境，快）
- * - acceptance:  L3 AC 语义层（test/acceptance/**，fixture 回归 + 仓库级静态检查）— Phase B 启用
+ * - acceptance:  L3 AC 语义层（test/acceptance/**，fixture 回归 + 仓库级静态检查）
  * - integration: L2 BFF API 集成（test/integration/**，globalSetup 起 TestServer）— Phase C 启用
  *
  * 注意：projects 模式下顶层 resolve/plugins 与 test 选项（testTimeout/maxWorkers 等）
@@ -45,6 +45,14 @@ export default defineConfig({
         test: {
           name: 'unit',
           include: ['test/unit/**/*.spec.ts'],
+          ...sharedProjectTest,
+        },
+      },
+      {
+        ...sharedProjectConfig,
+        test: {
+          name: 'acceptance',
+          include: ['test/acceptance/**/*.spec.ts'],
           ...sharedProjectTest,
         },
       },
