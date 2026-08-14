@@ -1,0 +1,74 @@
+{
+  "_meta": {
+    "source": "tweet-2032649981690261684.json",
+    "exportedAt": "2026-07-03T16:18:20.432Z",
+    "label": "Regular tweet (ja, with media)",
+    "schema": "EnrichedTweet"
+  },
+  "data": {
+    "id_str": "2032649981690261684",
+    "lang": "ja",
+    "url": "https://twitter.com/kohinatamika/status/2032649981690261684",
+    "created_at": "Sat Mar 14 02:48:15 +0000 2026",
+    "__typename": "Tweet",
+    "text": "本日お誕生日を迎えました🎂\n\n素敵な皆様に囲まれ生きれている日々、本当に幸せ者です。\n\n出会ってくださる全ての皆様、\n応援してくれる #こひなた民 の皆への感謝を胸に、\nこの一年も飛躍の年にできますよう頑張ってまいります…！\n\nこれからもよろしくお願いいたします✨ https://t.co/pskp3ufQqM",
+    "user": {
+      "id_str": "1359055471106134016",
+      "name": "小日向美香",
+      "screen_name": "kohinatamika",
+      "is_blue_verified": true,
+      "profile_image_shape": "Circle",
+      "profile_image_url_https": "https://pbs.twimg.com/profile_images/1952701283900772352/nGxs0NJL.jpg"
+    },
+    "entities": [
+      {
+        "type": "text",
+        "text": "本日お誕生日を迎えました🎂\n\n素敵な皆様に囲まれ生きれている日々、本当に幸せ者です。\n\n出会ってくださる全ての皆様、\n応援してくれる ",
+        "index": 0
+      },
+      {
+        "text": "#こひなた民",
+        "type": "hashtag",
+        "index": 1,
+        "href": "https://twitter.com/hashtag/こひなた民"
+      },
+      {
+        "type": "text",
+        "text": " の皆への感謝を胸に、\nこの一年も飛躍の年にできますよう頑張ってまいります…！\n\nこれからもよろしくお願いいたします✨ ",
+        "index": 2
+      }
+    ],
+    "mediaDetails": [
+      {
+        "index": 0,
+        "media_url_https": "https://pbs.twimg.com/media/HDVsYlRaMAMfHjp.jpg",
+        "original_info": {
+          "height": 2048,
+          "width": 1536
+        },
+        "type": "photo"
+      }
+    ],
+    "isInlineMeida": false,
+    "autoTranslationEntities": [
+      {
+        "type": "text",
+        "text": "本日お誕生日を迎えました🎂\n\n素敵な皆様に囲まれ生きれている日々、本当に幸せ者です。\n\n出会ってくださる全ての皆様、\n応援してくれる ",
+        "index": 0,
+        "translation": "今天我迎来了生日🎂\n\n每天都能在如此出色的人们陪伴下生活，我真的很幸福。\n\n怀着对所有相遇的人们，以及对一直支持我的 "
+      },
+      {
+        "text": "#こひなた民",
+        "type": "hashtag",
+        "index": 1,
+        "href": "https://twitter.com/hashtag/こひなた民"
+      },
+      {
+        "type": "text",
+        "text": " の皆への感謝を胸に、\nこの一年も飛躍の年にできますよう頑張ってまいります…！\n\nこれからもよろしくお願いいたします✨ ",
+        "index": 2,
+        "translation": " 的大家的感激之情，\n为了让这一年也能成为飞跃的一年，我会继续努力的……！\n\n今后也请多多关照✨"
+      }
+    ]
+  }
+}
