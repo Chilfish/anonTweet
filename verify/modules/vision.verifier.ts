@@ -1,12 +1,14 @@
 /**
  * verify/modules/vision.verifier.ts
  *
- * Covers: AC-VISION-001 ~ AC-VISION-010
+ * Covers: AC-VISION-001 ~ AC-VISION-012
  *   AC-VISION-001 ~ 005：Phase 2，纯函数离线确定性
  *   AC-VISION-006 ~ 007：Phase 3，runImageVision 无 photo 短路 + withContext 注入
  *   AC-VISION-008：Phase 5，截图路由渲染 vision 块（source scan，对齐 AC-SHOT-003）
  *   AC-VISION-009：持久化（localCache + DB，source scan）
  *   AC-VISION-010：展示可见性门控（resolveVisionBlockState 纯函数 + source scan）
+ *   AC-VISION-011：反幻觉内容防线（describe 空描述拒绝 + assertVisionResultCount 数量断言）
+ *   AC-VISION-012：上下文丰富注入（作者/时间/实体参考/官方 alt/术语表）
  * Postmortem: 001（解析器零测试）、002（逻辑耦合 React）、005（媒体 URL 重复）
  *
  * 验证对象：
@@ -29,7 +31,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { runImageVision } from '~/lib/vision/describeImages.js'
 import { buildVisionMessages } from '~/lib/vision/messages.js'
-import { parseVisionResult, resolveVisionBlockState, resolveVisionView } from '~/lib/vision/parse.js'
+import { assertVisionResultCount, parseVisionResult, resolveVisionBlockState, resolveVisionView, VisionContentError } from '~/lib/vision/parse.js'
 import { VISION_PROMPT_PRESETS } from '~/lib/vision/prompts.js'
 
 function loadFixture<T = unknown>(fixtureDir: string, name: string): T {
@@ -65,6 +67,8 @@ export class VisionVerifier implements Verifier {
     'AC-VISION-008',
     'AC-VISION-009',
     'AC-VISION-010',
+    'AC-VISION-011',
+    'AC-VISION-012',
   ]
 
   canRun(_ctx: VerifyContext): string | null {
@@ -85,6 +89,8 @@ export class VisionVerifier implements Verifier {
     results.push(this.verifyScreenshotRoute(ctx))
     results.push(this.verifyPersistence(ctx))
     results.push(this.verifyVisibility(ctx))
+    results.push(this.verifyAntiHallucination())
+    results.push(this.verifyRichContext())
 
     return results
   }
@@ -422,6 +428,98 @@ export class VisionVerifier implements Verifier {
     }
     catch (err) {
       return this.fail('AC-VISION-010', 'visibility gating', err instanceof Error ? err.message : String(err))
+    }
+  }
+
+  // ── AC-VISION-011: 反幻觉内容防线（空描述拒绝 + 结果数量断言） ──
+  private verifyAntiHallucination(): StepResult {
+    try {
+      // 1. describe 空 / 纯空白 description → schema 校验失败（触发上层带反馈重试）
+      const emptyDesc = throws(() =>
+        parseVisionResult(VISION_PROMPT_PRESETS.describe, { descriptions: [{ index: 0, description: '' }] }))
+      const blankDesc = throws(() =>
+        parseVisionResult(VISION_PROMPT_PRESETS.describe, { descriptions: [{ index: 0, description: '   ' }] }))
+
+      // 2. 数量断言：一致不抛；不一致（跳过/合并/空数组）抛 VisionContentError
+      const one = parseVisionResult(VISION_PROMPT_PRESETS.describe, {
+        descriptions: [{ index: 0, description: '图 A' }],
+      })
+      let countOk = true
+      let mismatchThrows = false
+      try {
+        assertVisionResultCount(one, 1)
+      }
+      catch {
+        countOk = false
+      }
+      try {
+        assertVisionResultCount(one, 2)
+      }
+      catch (err) {
+        mismatchThrows = err instanceof VisionContentError
+      }
+
+      if (emptyDesc && blankDesc && countOk && mismatchThrows) {
+        return this.pass('AC-VISION-011', 'anti-hallucination content checks', '空/空白描述被 schema 拒绝；结果数量不符抛 VisionContentError（不再静默错位）')
+      }
+      return this.fail('AC-VISION-011', 'anti-hallucination content checks', `emptyDesc:${emptyDesc} blankDesc:${blankDesc} countOk:${countOk} mismatchThrows:${mismatchThrows}`)
+    }
+    catch (err) {
+      return this.fail('AC-VISION-011', 'anti-hallucination content checks', err instanceof Error ? err.message : String(err))
+    }
+  }
+
+  // ── AC-VISION-012: 上下文丰富注入（作者/时间/实体参考/官方 alt/术语表） ──
+  private verifyRichContext(): StepResult {
+    try {
+      const images: VisionImageInput[] = [{ index: 0, dataUri: DATA_URI }]
+      const textOf = (messages: ReturnType<typeof buildVisionMessages>) =>
+        (messages[1]!.content as Array<{ type: string, text?: string }>)
+          .filter(p => p.type === 'text')
+          .map(p => p.text ?? '')
+          .join(' ')
+
+      // 1. glossary + alt 不依赖 withContext 开关（用户知识库 / 官方 alt 始终注入）
+      const grounded = textOf(buildVisionMessages({
+        images,
+        preset: VISION_PROMPT_PRESETS.describe,
+        withContext: false,
+        glossary: 'ひなぴょ -> Hinapiyo',
+        mediaAltTexts: { 0: '夕阳下的海面' },
+      }))
+      const glossaryInjected = grounded.includes('<Glossary>') && grounded.includes('ひなぴょ -> Hinapiyo')
+      const altInjected = grounded.includes('官方 alt 文本') && grounded.includes('图 0: 夕阳下的海面')
+
+      // 2. withContext=true 注入作者/时间/实体参考
+      const withCtx = textOf(buildVisionMessages({
+        images,
+        preset: VISION_PROMPT_PRESETS.describe,
+        withContext: true,
+        tweetText: '今日の一枚',
+        authorName: 'test_user',
+        createdAt: 'Mon Jan 01 00:00:00 +0000 2024',
+        entityContext: '- <<__HASHTAG_0__>> (hashtag): #Anime\n',
+      }))
+      const ctxInjected = withCtx.includes('@test_user')
+        && withCtx.includes('今日の一枚')
+        && withCtx.includes('<<__HASHTAG_0__>>')
+
+      // 3. withContext=false 不含推文上下文区块
+      const noCtx = textOf(buildVisionMessages({
+        images,
+        preset: VISION_PROMPT_PRESETS.describe,
+        withContext: false,
+        tweetText: '不应出现',
+      }))
+      const ctxSuppressed = !noCtx.includes('推文上下文') && !noCtx.includes('不应出现')
+
+      if (glossaryInjected && altInjected && ctxInjected && ctxSuppressed) {
+        return this.pass('AC-VISION-012', 'rich context injection', 'glossary/官方 alt 常驻注入；withContext=true 含作者/时间/实体参考，false 不含')
+      }
+      return this.fail('AC-VISION-012', 'rich context injection', `glossary:${glossaryInjected} alt:${altInjected} ctx:${ctxInjected} suppressed:${ctxSuppressed}`)
+    }
+    catch (err) {
+      return this.fail('AC-VISION-012', 'rich context injection', err instanceof Error ? err.message : String(err))
     }
   }
 }

@@ -4,7 +4,7 @@ import { visionInfoArraySchema } from '~/lib/validations/vision'
 import { runImageVision } from '~/lib/vision/describeImages'
 import { assertAllowedMediaHost, buildMediaUrl } from '~/lib/vision/fetchImage'
 import { buildVisionMessages } from '~/lib/vision/messages'
-import { alignVisionIndexes, applyVisionEdits, mergeVisionInfo, parseVisionResult, resolveVisionBlockState, resolveVisionView } from '~/lib/vision/parse'
+import { alignVisionIndexes, applyVisionEdits, assertVisionResultCount, mergeVisionInfo, parseVisionResult, resolveVisionBlockState, resolveVisionView, VisionContentError } from '~/lib/vision/parse'
 import { getVisionPreset, VISION_PROMPT_PRESETS } from '~/lib/vision/prompts'
 import { parseOcrTranslation } from '~/lib/vision/translateOCR'
 
@@ -97,6 +97,20 @@ describe('vision AC-VISION-002: describe 结构化 schema 校验', () => {
   it('index 非数字 → 校验失败', () => {
     expect(() => parseVisionResult(VISION_PROMPT_PRESETS.describe, { descriptions: [{ index: '0', description: 'x' }] }))
       .toThrow(/schema validation failed/)
+  })
+
+  it('空字符串 / 纯空白 description → 校验失败（模型不得输出空描述）', () => {
+    expect(() => parseVisionResult(VISION_PROMPT_PRESETS.describe, { descriptions: [{ index: 0, description: '' }] }))
+      .toThrow(/schema validation failed/)
+    expect(() => parseVisionResult(VISION_PROMPT_PRESETS.describe, { descriptions: [{ index: 0, description: '   ' }] }))
+      .toThrow(/schema validation failed/)
+  })
+
+  it('带首尾空白的 description 被 trim 后通过', () => {
+    const out = parseVisionResult(VISION_PROMPT_PRESETS.describe, {
+      descriptions: [{ index: 0, description: '  一只猫  ' }],
+    })
+    expect(out[0]!.description).toBe('一只猫')
   })
 })
 
@@ -517,5 +531,97 @@ describe('vision 落盘校验: visionInfoArraySchema（防未认证缓存污染�
   it('非法 status / 多余键被拒绝', () => {
     expect(visionInfoArraySchema.safeParse([{ ...validItem, status: 'pending' }]).success).toBe(false)
     expect(visionInfoArraySchema.safeParse([{ ...validItem, hacked: true }]).success).toBe(false)
+  })
+})
+
+describe('vision AC-VISION-011: 反幻觉内容防线（空描述拒绝 + 结果数量断言）', () => {
+  it('describe 空数组 → 数量断言抛 VisionContentError（模型未输出任何条目）', () => {
+    const empty = parseVisionResult(VISION_PROMPT_PRESETS.describe, { descriptions: [] })
+    expect(empty).toEqual([])
+    expect(() => assertVisionResultCount(empty, 2)).toThrow(VisionContentError)
+  })
+
+  it('结果数量与请求图片数一致 → 不抛错', () => {
+    const info = parseVisionResult(VISION_PROMPT_PRESETS.describe, {
+      descriptions: [{ index: 0, description: '图 A' }],
+    })
+    expect(() => assertVisionResultCount(info, 1)).not.toThrow()
+  })
+
+  it('结果数量不符（模型跳过/合并图片）→ 抛 VisionContentError，带数量信息', () => {
+    const info = parseVisionResult(VISION_PROMPT_PRESETS.describe, {
+      descriptions: [{ index: 0, description: '图 A' }],
+    })
+    expect(() => assertVisionResultCount(info, 2)).toThrow(VisionContentError)
+    expect(() => assertVisionResultCount(info, 2)).toThrow(/expected 2, got 1/)
+  })
+})
+
+describe('vision AC-VISION-012: 上下文丰富注入（作者/时间/实体参考/官方 alt/术语表）', () => {
+  const images = [{ index: 0, dataUri: DATA_URI }]
+  const textOf = (messages: ReturnType<typeof buildVisionMessages>) =>
+    (messages[1]!.content as Array<{ type: string, text?: string }>)
+      .filter(p => p.type === 'text')
+      .map(p => p.text ?? '')
+      .join(' ')
+
+  it('术语表注入（不依赖 withContext 开关，HIGH 优先级）', () => {
+    const withGlossary = buildVisionMessages({
+      images,
+      preset: VISION_PROMPT_PRESETS.describe,
+      glossary: 'ひなぴよ -> Hinapiyo',
+    })
+    const text = textOf(withGlossary)
+    expect(text).toContain('<Glossary>')
+    expect(text).toContain('HIGH')
+    expect(text).toContain('ひなぴよ -> Hinapiyo')
+  })
+
+  it('官方 alt 文本注入（不依赖 withContext 开关；空白条目被过滤）', () => {
+    const withAlt = buildVisionMessages({
+      images,
+      preset: VISION_PROMPT_PRESETS.describe,
+      mediaAltTexts: { 0: '夕阳下的海面', 1: '   ' },
+    })
+    const text = textOf(withAlt)
+    expect(text).toContain('官方 alt 文本')
+    expect(text).toContain('图 0: 夕阳下的海面')
+    expect(text).not.toContain('图 1')
+  })
+
+  it('withContext=true 注入作者/发布时间/推文原文/引用/实体参考', () => {
+    const messages = buildVisionMessages({
+      images,
+      preset: VISION_PROMPT_PRESETS.describe,
+      withContext: true,
+      tweetText: '今日の一枚',
+      quotedText: '引用内容',
+      authorName: 'test_user',
+      createdAt: 'Mon Jan 01 00:00:00 +0000 2024',
+      entityContext: '- <<__HASHTAG_0__>> (hashtag): #Anime\n',
+    })
+    const text = textOf(messages)
+    expect(text).toContain('@test_user')
+    expect(text).toContain('今日の一枚')
+    expect(text).toContain('引用内容')
+    expect(text).toContain('<<__HASHTAG_0__>>')
+  })
+
+  it('withContext=false 不含推文上下文区块，但仍含 glossary / alt（两者不随开关）', () => {
+    const messages = buildVisionMessages({
+      images,
+      preset: VISION_PROMPT_PRESETS.describe,
+      withContext: false,
+      tweetText: '不应出现',
+      authorName: 'test_user',
+      glossary: '术语内容',
+      mediaAltTexts: { 0: 'alt 内容' },
+    })
+    const text = textOf(messages)
+    expect(text).not.toContain('推文上下文')
+    expect(text).not.toContain('test_user')
+    expect(text).not.toContain('不应出现')
+    expect(text).toContain('术语内容')
+    expect(text).toContain('alt 内容')
   })
 })
