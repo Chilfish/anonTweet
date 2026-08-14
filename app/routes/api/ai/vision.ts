@@ -31,6 +31,8 @@ const aiConfigFields = {
   provider: z.enum(['google', 'deepseek', 'openrouter']).optional(),
   baseUrl: z.string().optional(),
   thinkingLevel: z.enum(['minimal', 'low', 'medium', 'high', 'max']).optional(),
+  // 术语表（词典 + 自定义，HIGH 优先级）：generate 防描述瞎猜图中名称，translate 保证译名
+  translationGlossary: z.string().max(4000).optional(),
 } as const
 
 const tweetField = z
@@ -126,6 +128,7 @@ async function handleGenerate(args: z.infer<typeof generateSchema>) {
     provider,
     baseUrl,
     thinkingLevel,
+    translationGlossary,
   } = args
   try {
     const visionInfo = await runImageVision({
@@ -134,6 +137,7 @@ async function handleGenerate(args: z.infer<typeof generateSchema>) {
       mode,
       customPrompt,
       withContext,
+      translationGlossary,
       apiKey,
       model,
       provider: provider ?? 'google',
@@ -184,8 +188,16 @@ async function handleSave(args: z.infer<typeof saveSchema>) {
 }
 
 async function handleTranslate(args: z.infer<typeof translateSchema>) {
-  const { tweet, items, apiKey, model, provider, baseUrl, thinkingLevel }
-    = args
+  const {
+    tweet,
+    items,
+    apiKey,
+    model,
+    provider,
+    baseUrl,
+    thinkingLevel,
+    translationGlossary,
+  } = args
   try {
     const modelConfig = models.find(m => m.name === model)
     const resolvedProvider = provider || modelConfig?.provider || 'google'
@@ -197,6 +209,7 @@ async function handleTranslate(args: z.infer<typeof translateSchema>) {
       tweetText: tweet.text,
       modelInstance,
       thinkingLevel,
+      translationGlossary,
     })
     return data({ success: true, data: { translations } })
   }

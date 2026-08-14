@@ -4,11 +4,13 @@ import type { AIVisionInfo, VisionMode } from '~/types/vision'
 import { useCallback, useState } from 'react'
 import { toastAIError } from '~/lib/ai-error-toast'
 import { fetcher } from '~/lib/fetcher'
+import { useAppConfigStore } from '~/lib/stores/appConfig'
 import {
   useResolvedAIConfig,
   useResolvedAIVisionConfig,
   useTranslationActions,
 } from '~/lib/stores/hooks'
+import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 import { toast } from '~/lib/utils'
 import { applyVisionEdits, mergeVisionInfo } from '~/lib/vision/parse'
 
@@ -41,6 +43,9 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
   const visionConfig = useResolvedAIVisionConfig()
   const translationConfig = useResolvedAIConfig()
   const { updateTweet } = useTranslationActions()
+  // 术语表（词典 + 自定义，HIGH 优先级）：与翻译侧同一份，防描述/OCR 翻译对知识库外内容瞎猜
+  const dictEntries = useTranslationDictionaryStore(state => state.getFormattedEntries)
+  const translationGlossary = useAppConfigStore(state => state.translationGlossary)
 
   const initializeEditor = useCallback(() => {
     const base = originalTweet.visionInfo ?? []
@@ -91,12 +96,14 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
 
     setIsGenerating(true)
     try {
+      const combinedGlossary = [dictEntries(), translationGlossary].filter(Boolean).join('\n')
       const { data } = await fetcher.post('/api/ai-vision', {
         tweet: originalTweet,
         mediaIndexes: photoIndexes,
         mode,
         customPrompt: mode === 'custom' ? customPrompt : undefined,
         withContext,
+        translationGlossary: combinedGlossary || undefined,
         apiKey,
         model,
         provider,
@@ -136,6 +143,8 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
     tweetId,
     updateTweet,
     syncDraftsFromInfo,
+    dictEntries,
+    translationGlossary,
   ])
 
   /** 翻译步：把有 OCR 原文的图交给翻译模型（附推文上下文），结果写 drafts.translatedText */
@@ -156,10 +165,12 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
 
     setIsTranslating(true)
     try {
+      const combinedGlossary = [dictEntries(), translationGlossary].filter(Boolean).join('\n')
       const { data } = await fetcher.post('/api/ai-vision', {
         action: 'translate',
         tweet: { id_str: tweetId, text: originalTweet.text },
         items,
+        translationGlossary: combinedGlossary || undefined,
         apiKey,
         model,
         provider,
@@ -195,7 +206,7 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
     finally {
       setIsTranslating(false)
     }
-  }, [drafts, photoIndexes, translationConfig, originalTweet.text, tweetId])
+  }, [drafts, photoIndexes, translationConfig, originalTweet.text, tweetId, dictEntries, translationGlossary])
 
   const updateDraft = useCallback(
     (index: number, patch: Partial<VisionDraft>) => {

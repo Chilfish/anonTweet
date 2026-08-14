@@ -131,11 +131,16 @@ const SYSTEM_PROMPT = `你是推文图片 OCR 文字的翻译助手。将每张�
 保持原文换行结构，@mention / #hashtag / URL 原样保留，人名、地名按常见中文译法。若提供了推文上下文，结合语境理解。
 每张图片只输出一个对象。index 必须使用用户消息中给出的图片索引，不得自编序号。
 输出严格 JSON，不要输出任何多余文字或 markdown 代码块标记，格式：
-{"translations": [{"index": 0, "translatedText": "译文"}]}`
+{"translations": [{"index": 0, "translatedText": "译文"}]}
+
+# 反幻觉协议（必须遵守）
+1. 只翻译给出的原文，不得新增、删减或改写内容。
+2. 无法辨认 / 不确定的原文片段保留原样，不要编造译文。
+3. 不要用推文上下文或术语表内容替代图片 OCR 原文。`
 
 /**
  * 批量翻译 OCR 结果：已含中文的条目直接回填原文（不送模型），其余走文本输出翻译。
- * 返回与 items 同序、同 index 的翻译数组。
+ * 返回与 items 同序、同 index 的翻译数组。解析失败带反馈重试一次（对齐翻译 validate+retry）。
  */
 export async function translateVisionOCR(
   args: TranslateVisionOCRArgs,
@@ -157,23 +162,39 @@ export async function translateVisionOCR(
     : ''
   const contextSection = tweetText ? `\n# 推文上下文\n${tweetText}\n` : ''
 
-  const userContent = `# 翻译请求
+  const baseUserContent = `# 翻译请求
 ${glossarySection}
 ${contextSection}
 # OCR 原文（逐图）
 ${toTranslate.map(item => `${item.index}: ${item.originalText}`).join('\n')}`
 
-  const response = await generateText({
-    model: modelInstance,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: userContent }],
-    temperature: 0.5,
-  })
+  let lastError: unknown
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const response = await generateText({
+        model: modelInstance,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: attempt === 0 ? baseUserContent : `${baseUserContent}\n\n上一次输出不符合要求：${lastError instanceof Error ? lastError.message : String(lastError)}\n请重新输出严格 JSON。` }],
+        temperature: 0.5,
+      })
 
-  const parsed = parseOcrTranslation(extractJson(response.text))
-  const byIndex = new Map(parsed.map(t => [t.index, t.translatedText]))
-  return result.map(item => ({
-    index: item.index,
-    translatedText: byIndex.get(item.index) ?? item.translatedText,
-  }))
+      const parsed = parseOcrTranslation(extractJson(response.text))
+      const byIndex = new Map(parsed.map(t => [t.index, t.translatedText]))
+      return result.map(item => ({
+        index: item.index,
+        translatedText: byIndex.get(item.index) ?? item.translatedText,
+      }))
+    }
+    catch (err) {
+      lastError = err
+      if (attempt === 0)
+        continue
+      break
+    }
+  }
+
+  if (lastError instanceof Error) {
+    throw lastError
+  }
+  throw new Error('Vision OCR translation failed')
 }
