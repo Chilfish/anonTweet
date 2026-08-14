@@ -45,13 +45,13 @@ Anon Tweet — 匿名浏览 Twitter/X 推文与 Instagram 帖子的全栈应用�
 verify/ 同一逻辑双实现、弱断言/重复样板蔓延。决策：**保留 AC 语义层理念，执行引擎换成标准 Vitest
 三层架构**。完整审计 + 行动计划见 [testing-infra-refactor.md](testing-infra-refactor.md)。
 
-| 阶段 | 内容 | 优先级 | 工期 | 状态 |
-| ---- | ---- | ------ | ---- | ---- |
-| Phase A | Vitest projects 三层骨架 + 共享 helpers + SDK/fixtures 迁移 | P1 | 0.5 天 | ⬜ 待启动 |
-| Phase B | 单元/验收层去重迁移（translation/tweet/vision/ig）+ **parseTweet 补缺（P0）** | P1 | 1.5 天 | ⬜ |
-| Phase C | 集成层迁移（TestServer globalSetup + tweet/ig/media/screenshot API） | P2 | 1 天 | ⬜ |
-| Phase D | 静态/仓库级检查迁移（postmortem/ci/source scan 断言硬化） | P2 | 0.5 天 | ⬜ |
-| Phase E | 删除 verify/framework + CLI/CI/hooks 收口 + 文档回填 | P2 | 0.5 天 | ⬜ |
+| 阶段    | 内容                                                                          | 优先级 | 工期   | 状态      |
+| ------- | ----------------------------------------------------------------------------- | ------ | ------ | --------- |
+| Phase A | Vitest projects 三层骨架 + 共享 helpers + SDK/fixtures 迁移                   | P1     | 0.5 天 | ⬜ 待启动 |
+| Phase B | 单元/验收层去重迁移（translation/tweet/vision/ig）+ **parseTweet 补缺（P0）** | P1     | 1.5 天 | ⬜        |
+| Phase C | 集成层迁移（TestServer globalSetup + tweet/ig/media/screenshot API）          | P2     | 1 天   | ⬜        |
+| Phase D | 静态/仓库级检查迁移（postmortem/ci/source scan 断言硬化）                     | P2     | 0.5 天 | ⬜        |
+| Phase E | 删除 verify/framework + CLI/CI/hooks 收口 + 文档回填                          | P2     | 0.5 天 | ⬜        |
 
 验收标准：AC-TEST-001~008（见 testing-infra-refactor.md §6）。每阶段新旧 verify 双跑绿灯后才切。
 
@@ -63,7 +63,7 @@ verify/ 同一逻辑双实现、弱断言/重复样板蔓延。决策：**保留
   test/（124 it / 15 文件，**parseTweet 零覆盖 P0**、fetchTweet 真网络脚本混入、test↔verify 双实现）
 - **决策**：Vitest `test.projects` 三层（unit / integration / acceptance）；AC 编号 = test 名；
   去重原则「每个行为恰好一个测试文件」；保留 AnonTweetClient/TestServer/fixtures，删除 framework/
-- **产出**：`docs/planning/testing-infra-refactor.md`（Phase A~E + AC-TEST-001~008）
+- **产出**：`docs/planning/testing-infra-refactor.md`（Phase A~~E + AC-TEST-001~~008）
 - 详见 `docs/development-log/2026-08-14.md`
 
 ### 2026-08-14 — AI 图片描述防幻觉强化 + 上下文丰富注入（对齐翻译侧水准）
