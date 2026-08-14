@@ -1,7 +1,8 @@
 /**
- * verify/sdk/test-server.ts
+ * test/support/test-server.ts
  *
- * Server lifecycle manager for running tests against a live AnonTweet instance.
+ * Server lifecycle manager for running integration tests against a live AnonTweet instance.
+ * （由 verify/sdk/test-server.ts 迁移，Phase A；集成层 globalSetup 使用）
  *
  * Usage:
  *   const server = new TestServer()

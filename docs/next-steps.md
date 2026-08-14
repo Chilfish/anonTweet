@@ -3,6 +3,10 @@
 > 日期：2026-07-04
 > 基于：`docs/verification-gap-analysis.md`（差距分析）
 > 当前进度：P0 已完成（Fixture + SDK + CLI + 25 AC）
+>
+> ⚠️ **本文档为 Phase 2 工作底稿，Phase 2（S5~S10）已全部完成。**
+> 下一阶段为**测试验证基建重构**（自研 verify 引擎 → Vitest 三层架构），
+> 完整审计与行动计划见 [docs/planning/testing-infra-refactor.md](planning/testing-infra-refactor.md)。
 
 ---
 

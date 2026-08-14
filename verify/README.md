@@ -1,80 +1,64 @@
 # Verification Suite
 
-> AI 自验证 CLI 工具 + Fixture 库 + API 测试 SDK
+> AI 自验证体系 — AC 验收标准 + Vitest 三层测试架构
 > 项目：[AnonTweet](..)
-> 版本：0.1.0
+> 版本：0.2.0（2026-08-14 重构：自研引擎 → Vitest 三层）
 
 ---
+
+## 验证理念
+
+「验证先行」：每个功能先有 AC（验收标准），再写测试，最后实现。AC 编号即测试名
+（`it('AC-TWEET-001: ...')`），文档 ↔ 代码 1:1 可追溯，AI 与人都可精确指定某条验收。
+
+执行引擎为 [Vitest](https://vitest.dev) 三层架构（见 [docs/planning/testing-infra-refactor.md](../docs/planning/testing-infra-refactor.md)）：
+
+```
+test/
+├── unit/        # L1 纯函数/解析器单测（parseTweet/entitytParser/vision/providers...）
+├── acceptance/  # L3 AC 语义层：fixture 回归 + 仓库级静态检查（ac-tweet/ac-ig/ac-pm/ac-ci...）
+├── integration/ # L2 BFF API 集成（globalSetup 自动起 TestServer：tweet/ig/media/screenshot）
+├── helpers/     # 共享工具（load-fixture / read-project-file / pixel-server / env / test-context）
+├── fixtures/    # 真实抓取快照（tweets ×3 / ig-posts / translations / vision）
+└── support/     # AnonTweetClient + TestServer（原 verify/sdk 迁移）
+```
 
 ## 快速开始
 
 ```bash
-# 运行所有离线验证（无需服务器、无需 API key）
-bun run verify/index.ts
-
-# 运行特定模块
-bun run verify/index.ts --module tweet
-bun run verify/index.ts --module translation
-bun run verify/index.ts --module ig
-
-# 运行单个 AC
-bun run verify/index.ts --ac AC-TWEET-001
-
-# verbose 模式
-bun run verify/index.ts --verbose
-
-# CI 模式（失败时 exit 1）
-bun run verify/index.ts --exit-on-fail
-
-# 自动启动测试服务器（默认 9081），运行集成 AC，结束后自动停止
-bun run verify/index.ts --server
-bun run verify/index.ts --server --server-port 9080  # 自定义端口；已有服务器则复用
+bun run test                   # unit + acceptance（离线全绿，~10s，无需服务器/key）
+bun run test:integration       # 集成层（自动起 TestServer，外部 key 缺省 SKIP）
+bun run verify/index.ts        # 全三层（= vitest run，含 integration）
+bun run verify/index.ts --ac AC-TWEET-001   # 单个 AC
+bun run verify/index.ts --module tweet      # 子系统（-t 'AC-TWEET' 跨项目过滤）
+bun run verify/index.ts --exit-on-fail      # CI 模式（失败 exit 1）
 ```
 
----
+SKIP 语义：无 `TWEET_KEYS` / `INS_COOKIES` 等外部凭据时，相关集成 AC 自动 `skipIf`，
+裸跑永远绿；有凭据时显式 `VERIFY_ISOLATE=false bun run test:integration` 激活真实集成。
+
+## 验收标准（AC）
+
+| 文档                                                       | 覆盖                           |
+| ---------------------------------------------------------- | ------------------------------ |
+| [AC-tweet.md](acceptance-criteria/AC-tweet.md)             | AC-TWEET-001~008（解析 + API） |
+| [AC-translation.md](acceptance-criteria/AC-translation.md) | AC-TRANS-001~007（占位符管线） |
+| [AC-ig.md](acceptance-criteria/AC-ig.md)                   | AC-IG-001~009（IG 集成）       |
+| [AC-screenshot.md](acceptance-criteria/AC-screenshot.md)   | AC-SHOT-001~004（截图）        |
+| [AC-media.md](acceptance-criteria/AC-media.md)             | AC-MEDIA-001~006（媒体代理）   |
+| [AC-postmortem.md](acceptance-criteria/AC-postmortem.md)   | AC-PM-001~007（预发布检查）    |
+| [AC-ci.md](acceptance-criteria/AC-ci.md)                   | AC-CI-001~004（CI workflow）   |
+| [AC-vision.md](acceptance-criteria/AC-vision.md)           | AC-VISION-001~012（AI 视觉）   |
 
 ## 目录结构
 
 ```
 verify/
-├── index.ts                    ← CLI 入口（bun verify）
+├── index.ts                    ← 薄 CLI（参数映射到 vitest，兼容旧命令）
 ├── README.md                   ← 本文件
-├── log.md                      ← 建设日志
-├── fixtures/                   ← S1：测试数据
-│   ├── tweets/                 ← 3 个 EnrichedTweet JSON 快照
-│   ├── ig-posts/               ← 1 个 IGPost JSON 快照
-│   └── translations/           ← 3 组实体往返测试用例
-├── sdk/                        ← S2：API 测试客户端
-│   ├── api-client.ts           ← AnonTweetClient（程序化调用 API）
-│   ├── test-server.ts          ← TestServer（服务器生命周期管理）
-│   └── types.ts                ← 共享类型
-├── framework/                  ← S3：验证框架
-│   ├── types.ts                ← Verifier 接口 + StepResult + SuiteResult
-│   └── runner.ts               ← VerifyRunner（执行 + 格式化输出）
-├── modules/                    ← S3：按子系统的 Verifier
-│   ├── tweet.verifier.ts       ← AC-TWEET-001 ~ 008
-│   ├── translation.verifier.ts ← AC-TRANS-001 ~ 007
-│   ├── ig.verifier.ts          ← AC-IG-001 ~ 009
-│   ├── screenshot.verifier.ts  ← AC-SHOT-001 ~ 004
-│   ├── media.verifier.ts       ← AC-MEDIA-001 ~ 006
-│   ├── postmortem.verifier.ts  ← AC-PM-001 ~ 007
-│   └── ci.verifier.ts          ← AC-CI-001 ~ 004
-└── acceptance-criteria/        ← S4：验收标准文档
-    ├── AC-tweet.md             ← 8 条 tweet AC
-    ├── AC-translation.md       ← 7 条 translation AC
-    ├── AC-ig.md                ← 9 条 IG AC
-    ├── AC-screenshot.md        ← 4 条 screenshot AC
-    ├── AC-media.md             ← 6 条 media AC
-    ├── AC-postmortem.md        ← 7 条 postmortem AC
-    └── AC-ci.md                ← 4 条 CI/CD AC
+├── log.md                      ← 建设日志（历史）
+└── acceptance-criteria/        ← AC 契约文档（测试实现位于 test/ 三层）
 ```
 
----
-
-## 待实施
-
-- [x] Screenshot Verifier（AC-SHOT-001 ~ 004）✅ 已完成（S6）
-- [x] Media Proxy Verifier（Postmortem #005）✅ 已完成（S7，AC-MEDIA-001~006）
-- [x] IG integration tests（需要 INS_COOKIES）✅ 已完成（S9，AC-IG-001~009）
-- [x] `--server` 自动启动/停止服务器 ✅ 已完成（S8）
-- [x] Postmortem 预发布自动化检查脚本 — S10 ✅ 已完成（AC-PM-001~007，7/7 PASS）
+> 🔄 迁移记录（2026-08-14）：自研 VerifyRunner/Verifier 框架已删除，57 条 AC 全部迁入
+> `test/` 三层；`verify/sdk` → `test/support`、`verify/fixtures` → `test/fixtures`。

@@ -16,12 +16,13 @@
 
 ## 验证体系
 
-| 文档                                                       | 说明                                                                 |
-| ---------------------------------------------------------- | -------------------------------------------------------------------- |
-| [Verification Suite](../verify/README.md)                  | 验证套件 — CLI + Fixture 库 + API 测试 SDK                           |
-| [Verification Gap Analysis](verification-gap-analysis.md)  | 验证体系差距分析与下阶段路线图（S5-S10）                             |
-| [Next Steps](next-steps.md)                                | 下阶段行动计划 — CI/CD、Screenshot/Media Verifier、Postmortem 自动化 |
-| [AI Vision AC](../verify/acceptance-criteria/AC-vision.md) | AI 视觉描述验收标准（AC-VISION-001~008，规划中）                     |
+| 文档                                                         | 说明                                                                   |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| [Testing Infra Refactor](planning/testing-infra-refactor.md) | **测试验证基建重构** — 审计报告 + Vitest 三层架构行动计划（Phase A~E） |
+| [Verification Suite](../verify/README.md)                    | 验证套件 — CLI + Fixture 库 + API 测试 SDK                             |
+| [Verification Gap Analysis](verification-gap-analysis.md)    | 验证体系差距分析与下阶段路线图（S5-S10）                               |
+| [Next Steps](next-steps.md)                                  | 下阶段行动计划 — CI/CD、Screenshot/Media Verifier、Postmortem 自动化   |
+| [AI Vision AC](../verify/acceptance-criteria/AC-vision.md)   | AI 视觉描述验收标准（AC-VISION-001~008，规划中）                       |
 
 ## 规划（planning/）
 

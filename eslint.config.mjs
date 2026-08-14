@@ -21,5 +21,7 @@ export default antfu({
     'ts/no-use-before-define': 'warn',
     'no-case-declarations': 'off',
     'e18e/prefer-static-regex': 'warn',
+    // AC 验收编号命名（AC-TWEET-001 等）是验证体系的可追溯契约，豁免小写标题规则
+    'test/prefer-lowercase-title': ['error', { allowedPrefixes: ['AC-'] }],
   },
 })

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ## [Unreleased]
 
+### 测试验证基建重构（2026-08-14）
+
+- **Changed** verify 引擎：自研 VerifyRunner/Verifier 框架删除，57 条 AC 迁移到标准 **Vitest 三层架构**（`test/unit` 纯函数 / `test/acceptance` AC 语义层 / `test/integration` BFF API），AC 编号 = test 名保持可追溯
+- **Added** `test/integration`：globalSetup 自动起停 TestServer（tweet/ig/media/screenshot API 集成测试），外部凭据缺省 `skipIf`
+- **Added** `parseTweet.ts` 单测 16 用例（postmortem #001 高危文件零覆盖 P0 补缺）
+- **Added** 共享 helpers：`load-fixture`（统一解包）/ `read-project-file` / `pixel-server` / `test-context`
+- **Changed** `verify/index.ts` → 薄 CLI（参数映射 vitest `-t` 过滤）；`bun run test` = unit+acceptance、`bun run test:integration` 独立
+- **Removed** `test/fetchTweet.ts`（真网络脚本混入测试目录）、SDK 死类型（`TweetListResponse` 等）
+- **Changed** 新增 AC-TEST-001~008 验收标准（单命令全分层 / AC 可追溯 / 去重 / 死代码清零 / 离线确定性 / parseTweet 覆盖 / 文档同步 / 样板收敛）
+
 ### 工程规范（对标 Float）
 
 - **CLAUDE.md 真实化**：符号链接 → 普通文件（git mode `120000` → `100644`），写入对标 Float 的完整规范（🔴 强制规范 / Essential Commands / 结构 / Current State）

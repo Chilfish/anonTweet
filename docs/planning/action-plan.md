@@ -39,20 +39,34 @@ Anon Tweet — 匿名浏览 Twitter/X 推文与 Instagram 帖子的全栈应用�
 
 > 详见 `docs/verification-gap-analysis.md`、`verify/README.md`。
 
-## 当前阶段 — verify 套件二期 🔄 进行中
+## 当前阶段 — 测试验证基建重构 ✅ 已完成（2026-08-14）
 
-Phase 2 行动（源自 `docs/next-steps.md`）：
+背景：verify/ 二期（S5-S10）已完成，但双轨制（自研 VerifyRunner + Vitest）重复造轮子、test/ 与
+verify/ 同一逻辑双实现、弱断言/重复样板蔓延。决策：**保留 AC 语义层理念，执行引擎换成标准 Vitest
+三层架构**。完整审计 + 行动计划见 [testing-infra-refactor.md](testing-infra-refactor.md)。
 
-| 任务                            | 优先级 | 工期   | 依赖 | 状态      |
-| ------------------------------- | ------ | ------ | ---- | --------- |
-| S5 CI/CD Pipeline（verify.yml） | P2     | 1 天   | 无   | ✅ 已完成 |
-| S6 Screenshot Verifier          | P2     | 1 天   | 无   | ✅ 已完成 |
-| S8 服务器自动管理（`--server`） | P3     | 0.5 天 | 无   | ✅ 已完成 |
-| S7 Media Proxy Verifier         | P3     | 1 天   | S8   | ✅ 已完成 |
-| S9 IG 集成测试扩展              | P3     | 2 天   | S8   | ✅ 已完成 |
-| S10 Postmortem 自动化检查       | P4     | 1.5 天 | 无   | ✅ 已完成 |
+| 阶段    | 内容                                                                          | 优先级 | 工期   | 状态      |
+| ------- | ----------------------------------------------------------------------------- | ------ | ------ | --------- |
+| Phase A | Vitest projects 三层骨架 + 共享 helpers + SDK/fixtures 迁移                   | P1     | 0.5 天 | ✅ 已完成 |
+| Phase B | 单元/验收层去重迁移（translation/tweet/vision/ig）+ **parseTweet 补缺（P0）** | P1     | 1.5 天 | ✅ 已完成 |
+| Phase C | 集成层迁移（TestServer globalSetup + tweet/ig/media/screenshot API）          | P2     | 1 天   | ✅ 已完成 |
+| Phase D | 静态/仓库级检查迁移（postmortem/ci/source scan 断言硬化）                     | P2     | 0.5 天 | ✅ 已完成 |
+| Phase E | 删除 verify/framework + CLI/CI/hooks 收口 + 文档回填                          | P2     | 0.5 天 | ✅ 已完成 |
+
+**最终验收（2026-08-14）**：\un run verify/index.ts --exit-on-fail\ → **26 files / 187 passed /
+4 skipped，exit 0**（全三层，integration 服务器自动启停）；\un run test\ → 177/177（unit+acceptance
+离线）；AC-TEST-001~008 全部达标（含 parseTweet 16 用例、死代码/样板清零）。
 
 ## 最近更新
+
+### 2026-08-14 — 测试验证基建全量审计 + 重构行动计划（文档先行）
+
+- **审计**：verify/（57 AC / 8 verifier，自研框架重复造轮子、canRun 死接口、30+ 样板）、
+  test/（124 it / 15 文件，**parseTweet 零覆盖 P0**、fetchTweet 真网络脚本混入、test↔verify 双实现）
+- **决策**：Vitest `test.projects` 三层（unit / integration / acceptance）；AC 编号 = test 名；
+  去重原则「每个行为恰好一个测试文件」；保留 AnonTweetClient/TestServer/fixtures，删除 framework/
+- **产出**：`docs/planning/testing-infra-refactor.md`（Phase A~~E + AC-TEST-001~~008）
+- 详见 `docs/development-log/2026-08-14.md`
 
 ### 2026-08-14 — AI 图片描述防幻觉强化 + 上下文丰富注入（对齐翻译侧水准）
 

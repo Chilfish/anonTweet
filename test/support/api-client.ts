@@ -1,9 +1,10 @@
 /**
- * verify/sdk/api-client.ts
+ * test/support/api-client.ts
  *
  * Programmatic HTTP client for AnonTweet's BFF API endpoints.
- * Designed for use by CLI verification tools and CI pipelines.
+ * Designed for use by the integration test layer.
  * No browser required — uses standard `fetch` (Bun/Node 18+).
+ * （由 verify/sdk/api-client.ts 迁移，Phase A）
  */
 
 import type {
