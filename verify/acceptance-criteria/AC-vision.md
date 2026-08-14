@@ -1,8 +1,8 @@
 # AI 视觉描述验收标准
 
-> 版本：0.2 | 日期：2026-08-14
+> 版本：0.3 | 日期：2026-08-14
 > 对应 Postmortem：#002（翻译系统耦合）/ #005（媒体 URL 重复）/ #007（新功能无验收清单）
-> 关联 Verifier：`verify/modules/vision.verifier.ts`（Phase 3 起，v0.2 补 AC-VISION-009）
+> 关联 Verifier：`verify/modules/vision.verifier.ts`（Phase 3 起，v0.2 补 AC-VISION-009，v0.3 补 AC-VISION-011/012）
 > 执行命令：`bun verify --module vision [--ac AC-VISION-NNN]`
 > 上游需求：`docs/feature_ai_vision.md`
 
@@ -115,18 +115,37 @@
 
 ---
 
-## 总计：9 条 AC
+## AC-VISION-010：展示可见性门控（默认隐藏 + 逐推文覆盖 + 截图尊重）
 
-| AC            | 分类      | 依赖 AI | 依赖 Fixture | 阶段  |
-| ------------- | --------- | ------- | ------------ | ----- |
-| AC-VISION-001 | 类型      | 否      | 否           | P2    |
-| AC-VISION-002 | 纯函数    | 否      | 否           | P2    |
-| AC-VISION-003 | 纯函数    | 否      | 否           | P2    |
-| AC-VISION-004 | 纯函数    | 否      | 否           | P2    |
-| AC-VISION-005 | 纯函数    | 否      | 是           | P2    |
-| AC-VISION-006 | 纯函数    | 否      | 是           | P3    |
-| AC-VISION-007 | 纯函数    | 否      | 是           | P3    |
-| AC-VISION-008 | 集成/截图 | 否      | 是           | ✅ P5 |
-| AC-VISION-009 | 持久化    | 否      | 否           | ✅ P5 |
+- **验证对象**：`app/lib/vision/parse.ts` 的 `resolveVisionBlockState`（纯函数）+ `app/components/tweet/AIVisionBlock.tsx` + `app/components/tweet/TweetNode.tsx`（source scan，离线确定性）
+- **输入**：有缓存内容 × 全局开关 × 逐推文覆盖 × 截图上下文的组合
+- **Pass 条件**：
+  - 纯函数（`resolveVisionBlockState({ hasContent, enableAIVision, override, chromeHidden })`）：
+    - 有内容 + 全局关 + 无覆盖 → 交互 `collapsed`（折叠细条）/ 截图 `hidden`
+    - 有内容 + 全局开 → `content`（截图同样展示）
+    - 逐推文覆盖优先于全局：全局关 + override true → `content`；全局开 + override false → 折叠/隐藏
+    - 无内容：仅全局开 + 交互 → `cta`；其余 → `hidden`
+  - source scan：`AIVisionBlock.tsx` 使用 `resolveVisionBlockState`（不再无条件渲染缓存内容），含「隐藏」入口与折叠细条（逐推文覆盖可写）
+  - source scan：`AIVisionBlock.tsx` 的 `AIVisionEditorDialog` 常驻挂载（折叠/隐藏态下翻译按钮旁的入口也能打开弹窗；无 `if (state === 'hidden') return null` 提前返回）
+  - source scan：`appConfig.ts` 含 `showVisionEntry`（默认 false）；`AIVisionSettings.tsx` 提供「显示添加入口」开关
+  - source scan：`TweetNode.tsx` 渲染翻译按钮旁的图片描述入口按钮，受 `showVisionEntry` 门控（有图 + 非展开态 + 非截图时）
+  - 手动验收：全局关时带缓存描述的推文默认不展示描述；点折叠条展开；主页面截图不含折叠条与描述；开启「显示添加入口」后点击按钮弹出编辑弹窗
 
-> 注：AC-VISION-001~007 离线确定性；AC-VISION-008/009 source scan 离线确定性。真实 API Key 的端到端（`/api/ai/vision` 真跑 MiMo）不纳入 AC 断言，作为手动验收清单项。
+---
+
+## 总计：10 条 AC
+
+| AC            | 分类       | 依赖 AI | 依赖 Fixture | 阶段  |
+| ------------- | ---------- | ------- | ------------ | ----- |
+| AC-VISION-001 | 类型       | 否      | 否           | P2    |
+| AC-VISION-002 | 纯函数     | 否      | 否           | P2    |
+| AC-VISION-003 | 纯函数     | 否      | 否           | P2    |
+| AC-VISION-004 | 纯函数     | 否      | 否           | P2    |
+| AC-VISION-005 | 纯函数     | 否      | 是           | P2    |
+| AC-VISION-006 | 纯函数     | 否      | 是           | P3    |
+| AC-VISION-007 | 纯函数     | 否      | 是           | P3    |
+| AC-VISION-008 | 集成/截图  | 否      | 是           | ✅ P5 |
+| AC-VISION-009 | 持久化     | 否      | 否           | ✅ P5 |
+| AC-VISION-010 | 可见性门控 | 否      | 否           | ✅ P5 |
+
+> 注：AC-VISION-001~007 离线确定性；AC-VISION-008/009/010 source scan 离线确定性。真实 API Key 的端到端（`/api/ai/vision` 真跑 MiMo）不纳入 AC 断言，作为手动验收清单项。
