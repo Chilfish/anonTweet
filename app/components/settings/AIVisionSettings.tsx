@@ -156,7 +156,7 @@ export function AIVisionSettings() {
         <h4 className="px-1 text-sm font-medium text-muted-foreground">图片描述</h4>
         <SettingsGroup>
           <SettingsRow
-            label="启用图片描述"
+            label="启用 AI 图片描述"
             description="为推文配图生成 AI 描述或 OCR 文字；关闭时已缓存的描述默认隐藏，可在推文上单独展开"
             id="enable-ai-vision"
           >
