@@ -54,6 +54,15 @@ Phase 2 行动（源自 `docs/next-steps.md`）：
 
 ## 最近更新
 
+### 2026-08-14 — AIVisionBlock 可见性门控（默认不展示 + 逐推文开关 + 手动入口）
+
+- **问题**：上一轮「显示与开关解耦」（`23a829b`）让缓存图片描述无条件渲染——对用户是打扰，且截图时不想带上这次的描述结果
+- **Apple 取舍**：克制默认（缓存内容展示 = 全局开关 ∨ 逐推文覆盖）+ 渐进披露（全局关时折叠成一行细条，截图连细条都不渲染）+ 单一入口（翻译按钮旁图片描述按钮 = 手动添加/编辑，复用同一编辑器弹窗）
+- **实现**：`resolveVisionBlockState` 纯函数（parse.ts）+ translation store `visionVisibility`（会话级，不进 persist）+ AIVisionBlock 折叠条/「隐藏」开关 + TweetNode 手动入口（`useVisionLogic` 上提共用弹窗）
+- **验收**：AC-VISION-010（可见性门控，纯函数 + source scan）；typecheck / lint / test / verify 全绿
+- **commit 拆分**：`docs:` dev-log + action-plan → `docs:` AC-VISION-010 → `feat(vision):` 可见性门控 + 单测
+- 详见 `docs/development-log/2026-08-14.md`
+
 ### 2026-08-14 — 测试基线红灯修复（vitest 冷加载超时）✅ 已完成
 
 - **问题**：`bun run test`（vitest run）全量**偶发 4~5 fail**——失败集每次漂移（`api.ai-translation` / `api.tweet-get` / `env.server` / `getTweet` 轮流出局），全部为 `Test timed out in 5000ms`，且都发生在**动态 import 服务端路由/模块**的冷加载路径
