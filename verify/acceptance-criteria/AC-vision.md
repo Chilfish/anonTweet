@@ -1,8 +1,8 @@
 # AI 视觉描述验收标准
 
-> 版本：0.1 | 日期：2026-08-13
+> 版本：0.2 | 日期：2026-08-14
 > 对应 Postmortem：#002（翻译系统耦合）/ #005（媒体 URL 重复）/ #007（新功能无验收清单）
-> 关联 Verifier：`verify/modules/vision.verifier.ts`（Phase 3 起）
+> 关联 Verifier：`verify/modules/vision.verifier.ts`（Phase 3 起，v0.2 补 AC-VISION-009）
 > 执行命令：`bun verify --module vision [--ac AC-VISION-NNN]`
 > 上游需求：`docs/feature_ai_vision.md`
 
@@ -100,11 +100,22 @@
 - **Pass 条件**：
   - source scan：`PlainTweet.tsx` 引用 `AIVisionBlock`（截图路由渲染 vision 块，`hideChrome` 隐藏交互 chrome）
   - source scan：`AIVisionBlock` 使用 `waitForRenderReady`（截图上下文调用，对齐 AC-SHOT-003）
-  - 手动验收：带 `visionInfo` 的推文（visionInfo 已持久化到 localCache）经 `GET /plain-tweet/:id` 截图包含 AI 描述文本
+  - 手动验收：带 `visionInfo` 的推文（visionInfo 已持久化到 localCache + DB）经 `GET /plain-tweet/:id` 截图包含 AI 描述文本
 
 ---
 
-## 总计：8 条 AC
+## AC-VISION-009：visionInfo 持久化（save / generate → localCache + DB）
+
+- **验证对象**：`app/routes/api/ai/vision.ts`（save/generate 分支）+ `app/lib/service/getTweet.server.ts`（`updateTweetVisionInfo`）
+- **输入**：项目源码（source scan，离线确定性）
+- **Pass 条件**：
+  - source scan：`vision.ts` 的 `handleSave` 与 `handleGenerate` 均调用 `updateTweetVisionInfo`（不再只裸写 localCache）
+  - source scan：`getTweet.server.ts` 导出 `updateTweetVisionInfo`，实现同时含 DB 写（`db.update`，字段级合并进 `jsonContent`）与 localCache 写（`setLocalCache`）
+  - 手动验收：开启 `ENABLE_LOCAL_CACHE=true` / `ENABLE_DB_CACHE=true` 后保存 vision 编辑 → 刷新页面 / 重启服务后 visionInfo 仍在（截图路由同样可渲染）
+
+---
+
+## 总计：9 条 AC
 
 | AC            | 分类      | 依赖 AI | 依赖 Fixture | 阶段  |
 | ------------- | --------- | ------- | ------------ | ----- |
@@ -116,5 +127,6 @@
 | AC-VISION-006 | 纯函数    | 否      | 是           | P3    |
 | AC-VISION-007 | 纯函数    | 否      | 是           | P3    |
 | AC-VISION-008 | 集成/截图 | 否      | 是           | ✅ P5 |
+| AC-VISION-009 | 持久化    | 否      | 否           | ✅ P5 |
 
-> 注：AC-VISION-001~007 离线确定性；AC-VISION-008 依赖截图路由（Phase 5）。真实 API Key 的端到端（`/api/ai/vision` 真跑 MiMo）不纳入 AC 断言，作为手动验收清单项。
+> 注：AC-VISION-001~007 离线确定性；AC-VISION-008/009 source scan 离线确定性。真实 API Key 的端到端（`/api/ai/vision` 真跑 MiMo）不纳入 AC 断言，作为手动验收清单项。

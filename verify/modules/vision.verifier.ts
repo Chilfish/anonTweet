@@ -1,10 +1,11 @@
 /**
  * verify/modules/vision.verifier.ts
  *
- * Covers: AC-VISION-001 ~ AC-VISION-008
+ * Covers: AC-VISION-001 ~ AC-VISION-009
  *   AC-VISION-001 ~ 005：Phase 2，纯函数离线确定性
  *   AC-VISION-006 ~ 007：Phase 3，runImageVision 无 photo 短路 + withContext 注入
  *   AC-VISION-008：Phase 5，截图路由渲染 vision 块（source scan，对齐 AC-SHOT-003）
+ *   AC-VISION-009：持久化（localCache + DB，source scan）
  * Postmortem: 001（解析器零测试）、002（逻辑耦合 React）、005（媒体 URL 重复）
  *
  * 验证对象：
@@ -13,6 +14,8 @@
  * - app/lib/vision/parse.ts（parseVisionResult / resolveVisionView 决策链）
  * - app/lib/vision/messages.ts（buildVisionMessages 图片 file part + index 语义）
  * - app/lib/vision/describeImages.ts（runImageVision 编排，无 photo 短路）
+ * - app/routes/api/ai/vision.ts（save/generate 持久化调用 updateTweetVisionInfo）
+ * - app/lib/service/getTweet.server.ts（updateTweetVisionInfo 双层持久化实现）
  * - app/components/tweet/AIVisionBlock.tsx + PlainTweet.tsx（截图路由渲染 + waitForRenderReady）
  */
 
@@ -58,6 +61,7 @@ export class VisionVerifier implements Verifier {
     'AC-VISION-006',
     'AC-VISION-007',
     'AC-VISION-008',
+    'AC-VISION-009',
   ]
 
   canRun(_ctx: VerifyContext): string | null {
@@ -76,6 +80,7 @@ export class VisionVerifier implements Verifier {
     results.push(await this.verifyNoPhoto(tweet))
     results.push(this.verifyWithContext(tweet))
     results.push(this.verifyScreenshotRoute(ctx))
+    results.push(this.verifyPersistence(ctx))
 
     return results
   }
@@ -334,6 +339,32 @@ export class VisionVerifier implements Verifier {
     }
     catch (err) {
       return this.fail('AC-VISION-008', 'screenshot route renders vision block', err instanceof Error ? err.message : String(err))
+    }
+  }
+
+  // ── AC-VISION-009: save/generate 持久化（localCache + DB） ──
+  private verifyPersistence(ctx: VerifyContext): StepResult {
+    try {
+      const visionRouteSrc = readProjectFile(ctx, path.join('app', 'routes', 'api', 'ai', 'vision.ts'))
+      const getTweetServerSrc = readProjectFile(ctx, path.join('app', 'lib', 'service', 'getTweet.server.ts'))
+
+      // 1. 路由的 save / generate 都走 updateTweetVisionInfo（不再裸 setLocalCache 丢 DB）
+      const routeCallsHelper = visionRouteSrc?.includes('updateTweetVisionInfo') ?? false
+      const saveUsesHelper = visionRouteSrc?.split('async function handleSave')[1]?.includes('updateTweetVisionInfo') ?? false
+      const generateUsesHelper = visionRouteSrc?.split('async function handleGenerate')[1]?.includes('updateTweetVisionInfo') ?? false
+
+      // 2. helper 双层持久化：DB（isDbAvailable / db.update）+ localCache（setLocalCache）
+      const helperExported = getTweetServerSrc?.includes('export async function updateTweetVisionInfo') ?? false
+      const helperWritesDb = getTweetServerSrc?.split('export async function updateTweetVisionInfo')[1]?.includes('db.update') ?? false
+      const helperWritesLocal = getTweetServerSrc?.split('export async function updateTweetVisionInfo')[1]?.includes('setLocalCache') ?? false
+
+      if (routeCallsHelper && saveUsesHelper && generateUsesHelper && helperExported && helperWritesDb && helperWritesLocal) {
+        return this.pass('AC-VISION-009', 'visionInfo persistence', 'save/generate → updateTweetVisionInfo（DB 字段级合并 + localCache）')
+      }
+      return this.fail('AC-VISION-009', 'visionInfo persistence', `routeCalls:${routeCallsHelper} save:${saveUsesHelper} generate:${generateUsesHelper} helperExported:${helperExported} db:${helperWritesDb} local:${helperWritesLocal}`)
+    }
+    catch (err) {
+      return this.fail('AC-VISION-009', 'visionInfo persistence', err instanceof Error ? err.message : String(err))
     }
   }
 }

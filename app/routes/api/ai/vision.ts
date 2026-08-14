@@ -4,8 +4,8 @@ import { data } from 'react-router'
 import { z } from 'zod'
 import { normalizeAIError } from '~/lib/ai-error'
 import { models } from '~/lib/constants'
-import { setLocalCache } from '~/lib/localCache'
 import { getProviderStrategy } from '~/lib/providers'
+import { updateTweetVisionInfo } from '~/lib/service/getTweet.server'
 import { visionInfoArraySchema } from '~/lib/validations/vision'
 import { runImageVision } from '~/lib/vision/describeImages'
 import { mergeVisionInfo } from '~/lib/vision/parse'
@@ -20,8 +20,9 @@ import { translateVisionOCR } from '~/lib/vision/translateOCR'
  * - OCR 翻译：action: 'translate' + items → 翻译模型（附推文上下文）→ translations[]
  * - 保存：action: 'save' + tweet（带最终 visionInfo）→ 写回 tweet localCache
  *
- * 缓存持久化（Phase 5）：visionInfo 随 tweet 写回 localCache（对齐 ai-translation 的
- * setLocalCache），plain-tweet/:id 截图路由重载后仍能渲染。DB 落库留二期 TODO。
+ * 持久化：visionInfo 随 tweet 写回 localCache + DB（updateTweetVisionInfo，
+ * 字段级合并，对齐 ai-translation 的 setLocalCache / updateIGPostTranslation 模式），
+ * 刷新 / 截图路由（plain-tweet/:id）重载后仍能渲染。
  */
 
 const aiConfigFields = {
@@ -32,37 +33,49 @@ const aiConfigFields = {
   thinkingLevel: z.enum(['minimal', 'low', 'medium', 'high', 'max']).optional(),
 } as const
 
-const tweetField = z.object({
-  id_str: z.string().min(1),
-  text: z.string(),
-  // 客户端可携带 visionInfo（generate 合并用）；存在则必须结构合法（防缓存污染）
-  visionInfo: visionInfoArraySchema.optional(),
-}).passthrough() // EnrichedTweet 复杂，只校验关键字段 + 透传全量
+const tweetField = z
+  .object({
+    id_str: z.string().min(1),
+    text: z.string(),
+    // 客户端可携带 visionInfo（generate 合并用）；存在则必须结构合法（防缓存污染）
+    visionInfo: visionInfoArraySchema.optional(),
+  })
+  .loose() // EnrichedTweet 复杂，只校验关键字段 + 透传全量
 
-const generateSchema = z.object({
-  tweet: tweetField,
-  mediaIndexes: z.array(z.number().int().min(0)).min(1),
-  mode: z.enum(['describe', 'ocr', 'custom']),
-  customPrompt: z.string().max(2000).optional(),
-  withContext: z.boolean().optional(),
-  ...aiConfigFields,
-}).strict()
+const generateSchema = z
+  .object({
+    tweet: tweetField,
+    mediaIndexes: z.array(z.number().int().min(0)).min(1),
+    mode: z.enum(['describe', 'ocr', 'custom']),
+    customPrompt: z.string().max(2000).optional(),
+    withContext: z.boolean().optional(),
+    ...aiConfigFields,
+  })
+  .strict()
 
-const translateSchema = z.object({
-  action: z.literal('translate'),
-  tweet: tweetField,
-  items: z.array(z.object({
-    index: z.number().int().min(0),
-    originalText: z.string(),
-  })).min(1),
-  ...aiConfigFields,
-}).strict()
+const translateSchema = z
+  .object({
+    action: z.literal('translate'),
+    tweet: tweetField,
+    items: z
+      .array(
+        z.object({
+          index: z.number().int().min(0),
+          originalText: z.string(),
+        }),
+      )
+      .min(1),
+    ...aiConfigFields,
+  })
+  .strict()
 
-const saveSchema = z.object({
-  action: z.literal('save'),
-  // save 的目的就是持久化 visionInfo，必填且强校验（防未认证缓存污染）
-  tweet: tweetField.extend({ visionInfo: visionInfoArraySchema }),
-}).strict()
+const saveSchema = z
+  .object({
+    action: z.literal('save'),
+    // save 的目的就是持久化 visionInfo，必填且强校验（防未认证缓存污染）
+    tweet: tweetField.extend({ visionInfo: visionInfoArraySchema }),
+  })
+  .strict()
 
 export async function action({ request }: Route.ActionArgs) {
   let body: unknown
@@ -101,10 +114,19 @@ export async function action({ request }: Route.ActionArgs) {
   })
 }
 
-async function handleGenerate(
-  args: z.infer<typeof generateSchema>,
-) {
-  const { tweet, mediaIndexes, mode, customPrompt, withContext, apiKey, model, provider, baseUrl, thinkingLevel } = args
+async function handleGenerate(args: z.infer<typeof generateSchema>) {
+  const {
+    tweet,
+    mediaIndexes,
+    mode,
+    customPrompt,
+    withContext,
+    apiKey,
+    model,
+    provider,
+    baseUrl,
+    thinkingLevel,
+  } = args
   try {
     const visionInfo = await runImageVision({
       tweet: tweet as Parameters<typeof runImageVision>[0]['tweet'],
@@ -119,14 +141,13 @@ async function handleGenerate(
       thinkingLevel,
     })
 
-    // 持久化：合并进 tweet 的 visionInfo 写回 localCache（best-effort，失败不阻断）
-    const merged = mergeVisionInfo((tweet as EnrichedTweet).visionInfo ?? [], visionInfo)
+    // 持久化：合并进 tweet 的 visionInfo 写回 localCache + DB（best-effort，失败不阻断）
+    const merged = mergeVisionInfo(
+      (tweet as EnrichedTweet).visionInfo ?? [],
+      visionInfo,
+    )
     try {
-      await setLocalCache({
-        id: tweet.id_str,
-        type: 'tweet',
-        value: { ...tweet, visionInfo: merged } as EnrichedTweet,
-      })
+      await updateTweetVisionInfo(tweet.id_str, merged, tweet as EnrichedTweet)
     }
     catch {}
 
@@ -144,16 +165,11 @@ async function handleGenerate(
   }
 }
 
-async function handleSave(
-  args: z.infer<typeof saveSchema>,
-) {
+async function handleSave(args: z.infer<typeof saveSchema>) {
   const { tweet } = args
   try {
-    await setLocalCache({
-      id: tweet.id_str,
-      type: 'tweet',
-      value: tweet as EnrichedTweet,
-    })
+    // 持久化到 localCache + DB（字段级合并，防客户端旧快照整体覆盖 DB）
+    await updateTweetVisionInfo(tweet.id_str, tweet.visionInfo, tweet as EnrichedTweet)
     return data({ success: true })
   }
   catch (error: unknown) {
@@ -167,10 +183,9 @@ async function handleSave(
   }
 }
 
-async function handleTranslate(
-  args: z.infer<typeof translateSchema>,
-) {
-  const { tweet, items, apiKey, model, provider, baseUrl, thinkingLevel } = args
+async function handleTranslate(args: z.infer<typeof translateSchema>) {
+  const { tweet, items, apiKey, model, provider, baseUrl, thinkingLevel }
+    = args
   try {
     const modelConfig = models.find(m => m.name === model)
     const resolvedProvider = provider || modelConfig?.provider || 'google'
