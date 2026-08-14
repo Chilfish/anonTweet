@@ -1,22 +1,24 @@
 /**
  * verify/modules/vision.verifier.ts
  *
- * Covers: AC-VISION-001 ~ AC-VISION-009
+ * Covers: AC-VISION-001 ~ AC-VISION-010
  *   AC-VISION-001 ~ 005：Phase 2，纯函数离线确定性
  *   AC-VISION-006 ~ 007：Phase 3，runImageVision 无 photo 短路 + withContext 注入
  *   AC-VISION-008：Phase 5，截图路由渲染 vision 块（source scan，对齐 AC-SHOT-003）
  *   AC-VISION-009：持久化（localCache + DB，source scan）
+ *   AC-VISION-010：展示可见性门控（resolveVisionBlockState 纯函数 + source scan）
  * Postmortem: 001（解析器零测试）、002（逻辑耦合 React）、005（媒体 URL 重复）
  *
  * 验证对象：
  * - app/types/vision.ts（AIVisionInfo 结构）
  * - app/lib/vision/prompts.ts（describe / ocr / custom 预设 + strict schema）
- * - app/lib/vision/parse.ts（parseVisionResult / resolveVisionView 决策链）
+ * - app/lib/vision/parse.ts（parseVisionResult / resolveVisionView 决策链 / resolveVisionBlockState）
  * - app/lib/vision/messages.ts（buildVisionMessages 图片 file part + index 语义）
  * - app/lib/vision/describeImages.ts（runImageVision 编排，无 photo 短路）
  * - app/routes/api/ai/vision.ts（save/generate 持久化调用 updateTweetVisionInfo）
  * - app/lib/service/getTweet.server.ts（updateTweetVisionInfo 双层持久化实现）
  * - app/components/tweet/AIVisionBlock.tsx + PlainTweet.tsx（截图路由渲染 + waitForRenderReady）
+ * - app/components/tweet/TweetNode.tsx（翻译按钮旁图片描述入口）
  */
 
 import type { StepResult, Verifier, VerifyContext } from '../framework/types.js'
@@ -27,7 +29,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { runImageVision } from '~/lib/vision/describeImages.js'
 import { buildVisionMessages } from '~/lib/vision/messages.js'
-import { parseVisionResult, resolveVisionView } from '~/lib/vision/parse.js'
+import { parseVisionResult, resolveVisionBlockState, resolveVisionView } from '~/lib/vision/parse.js'
 import { VISION_PROMPT_PRESETS } from '~/lib/vision/prompts.js'
 
 function loadFixture<T = unknown>(fixtureDir: string, name: string): T {
@@ -62,6 +64,7 @@ export class VisionVerifier implements Verifier {
     'AC-VISION-007',
     'AC-VISION-008',
     'AC-VISION-009',
+    'AC-VISION-010',
   ]
 
   canRun(_ctx: VerifyContext): string | null {
@@ -81,6 +84,7 @@ export class VisionVerifier implements Verifier {
     results.push(this.verifyWithContext(tweet))
     results.push(this.verifyScreenshotRoute(ctx))
     results.push(this.verifyPersistence(ctx))
+    results.push(this.verifyVisibility(ctx))
 
     return results
   }
@@ -365,6 +369,59 @@ export class VisionVerifier implements Verifier {
     }
     catch (err) {
       return this.fail('AC-VISION-009', 'visionInfo persistence', err instanceof Error ? err.message : String(err))
+    }
+  }
+
+  // ── AC-VISION-010: 展示可见性门控（默认隐藏 + 逐推文覆盖 + 截图尊重） ──
+  private verifyVisibility(ctx: VerifyContext): StepResult {
+    try {
+      // 1. 纯函数：有内容 + 全局关 + 无覆盖 → 交互 collapsed / 截图 hidden
+      const defaultHideInteractive = resolveVisionBlockState({ hasContent: true, enableAIVision: false, chromeHidden: false }) === 'collapsed'
+      const defaultHideShot = resolveVisionBlockState({ hasContent: true, enableAIVision: false, chromeHidden: true }) === 'hidden'
+      // 2. 纯函数：有内容 + 全局开 → content（截图同样展示）
+      const globalOn = resolveVisionBlockState({ hasContent: true, enableAIVision: true, chromeHidden: false }) === 'content'
+      const globalOnShot = resolveVisionBlockState({ hasContent: true, enableAIVision: true, chromeHidden: true }) === 'content'
+      // 3. 纯函数：逐推文覆盖优先于全局
+      const overrideShow = resolveVisionBlockState({ hasContent: true, enableAIVision: false, override: true, chromeHidden: false }) === 'content'
+      const overrideHide = resolveVisionBlockState({ hasContent: true, enableAIVision: true, override: false, chromeHidden: false }) === 'collapsed'
+      const overrideHideShot = resolveVisionBlockState({ hasContent: true, enableAIVision: true, override: false, chromeHidden: true }) === 'hidden'
+      // 4. 纯函数：无内容仅全局开 + 交互 → cta
+      const ctaOnly = resolveVisionBlockState({ hasContent: false, enableAIVision: true, chromeHidden: false }) === 'cta'
+      const noContentHidden = resolveVisionBlockState({ hasContent: false, enableAIVision: false, chromeHidden: false }) === 'hidden'
+
+      // 5. source scan：AIVisionBlock 走 resolveVisionBlockState，含「隐藏」入口与折叠条；
+      //    编辑器弹窗常驻挂载（折叠/隐藏态下翻译按钮旁的入口也能打开弹窗，防提前 return 丢掉弹窗）
+      const visionBlockSrc = readProjectFile(ctx, path.join('app', 'components', 'tweet', 'AIVisionBlock.tsx'))
+      const usesStateFn = visionBlockSrc?.includes('resolveVisionBlockState') ?? false
+      const hasHideEntry = visionBlockSrc?.includes('隐藏') ?? false
+      const hasCollapsedBar = visionBlockSrc?.includes('collapsed') ?? false
+      const dialogMounted = (visionBlockSrc?.includes('<AIVisionEditorDialog editor={editor} />') ?? false)
+        && !(visionBlockSrc?.includes('if (state === \'hidden\')') ?? false)
+      // 6. source scan：入口受设置门控——appConfig `showVisionEntry`（默认 false）、
+      //    AIVisionSettings 提供开关、TweetNode 渲染入口（setVisionVisibility + initializeEditor + showVisionEntry）
+      const appConfigSrc = readProjectFile(ctx, path.join('app', 'lib', 'stores', 'appConfig.ts'))
+      const settingsSrc = readProjectFile(ctx, path.join('app', 'components', 'settings', 'AIVisionSettings.tsx'))
+      const tweetNodeSrc = readProjectFile(ctx, path.join('app', 'components', 'tweet', 'TweetNode.tsx'))
+      const configField = (appConfigSrc?.includes('showVisionEntry: boolean') ?? false)
+        && (appConfigSrc?.includes('showVisionEntry: false') ?? false)
+      const settingsRow = (settingsSrc?.includes('showVisionEntry') ?? false)
+        && (settingsSrc?.includes('显示添加入口') ?? false)
+      const hasEntryButton = (tweetNodeSrc?.includes('setVisionVisibility') ?? false)
+        && (tweetNodeSrc?.includes('initializeEditor') ?? false)
+        && (tweetNodeSrc?.includes('showVisionEntry') ?? false)
+
+      const allOk = defaultHideInteractive && defaultHideShot && globalOn && globalOnShot
+        && overrideShow && overrideHide && overrideHideShot && ctaOnly && noContentHidden
+        && usesStateFn && hasHideEntry && hasCollapsedBar && dialogMounted
+        && configField && settingsRow && hasEntryButton
+
+      if (allOk) {
+        return this.pass('AC-VISION-010', 'visibility gating', '缓存内容默认跟随全局开关；逐推文覆盖优先；截图尊重当前状态；弹窗常驻；入口受 showVisionEntry 门控')
+      }
+      return this.fail('AC-VISION-010', 'visibility gating', `defaultHide:${defaultHideInteractive}/${defaultHideShot} globalOn:${globalOn}/${globalOnShot} override:${overrideShow}/${overrideHide}/${overrideHideShot} cta:${ctaOnly}/${noContentHidden} blockSrc:${usesStateFn}/${hasHideEntry}/${hasCollapsedBar}/${dialogMounted} config:${configField} settings:${settingsRow} entry:${hasEntryButton}`)
+    }
+    catch (err) {
+      return this.fail('AC-VISION-010', 'visibility gating', err instanceof Error ? err.message : String(err))
     }
   }
 }
