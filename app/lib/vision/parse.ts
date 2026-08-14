@@ -197,6 +197,26 @@ export function alignVisionIndexes(
 }
 
 /**
+ * 结果数量断言（反幻觉防线，对齐翻译 validate+retry 模式）：
+ * 模型偶发跳过图片 / 把多图并成一条 / 空数组，导致结果数与请求图片数不一致，
+ * 此时 alignVisionIndexes 会原样返回模型索引 → UI 按图查找（find(v => v.index === i)）
+ * 全部 miss。数量不符抛 VisionContentError，上层带反馈重试一次。
+ * 纯函数，服务端编排层 parse 后、align 前调用。
+ */
+export class VisionContentError extends Error {}
+
+export function assertVisionResultCount(
+  info: AIVisionInfo[],
+  expectedCount: number,
+): void {
+  if (info.length !== expectedCount) {
+    throw new VisionContentError(
+      `Vision result count mismatch: expected ${expectedCount}, got ${info.length}`,
+    )
+  }
+}
+
+/**
  * 图片描述块展示状态（纯函数，Postmortem #002：逻辑下沉 lib，组件只渲染）。
  *
  * 可见性模型（对齐 Apple「克制默认 + 渐进披露」）：
