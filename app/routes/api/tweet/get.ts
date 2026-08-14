@@ -29,6 +29,8 @@ export async function action({ request }: Route.ActionArgs) {
     enableAITranslation,
     apiKey,
     model,
+    provider,
+    baseUrl,
     thinkingLevel,
     translationGlossary,
   } = submission.data || {
@@ -73,7 +75,7 @@ export async function action({ request }: Route.ActionArgs) {
       }
 
       const modelConfig = models.find(m => m.name === model)
-      const provider = modelConfig?.provider || 'google'
+      const resolvedProvider = provider || modelConfig?.provider || 'google'
 
       try {
         const [mainEntities, quotedEntities] = await Promise.all([
@@ -81,7 +83,8 @@ export async function action({ request }: Route.ActionArgs) {
             tweet,
             apiKey,
             model,
-            provider,
+            provider: resolvedProvider,
+            baseUrl,
             thinkingLevel,
             translationGlossary,
           }),
@@ -90,7 +93,8 @@ export async function action({ request }: Route.ActionArgs) {
                 tweet: tweet.quotedTweet,
                 apiKey,
                 model,
-                provider,
+                provider: resolvedProvider,
+                baseUrl,
                 thinkingLevel,
                 translationGlossary,
               })

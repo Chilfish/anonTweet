@@ -142,7 +142,7 @@ export default function TweetPage({ loaderData }: Route.ComponentProps) {
       const dictEntries = getFormattedEntries()
       const combinedGlossary = [dictEntries, translationGlossary].filter(Boolean).join('\n')
 
-      const { apiKey, model, thinkingLevel } = aiConfig
+      const { apiKey, model, provider, baseUrl, thinkingLevel } = aiConfig
 
       return fetchTweetData({
         tweetId: tweetId!,
@@ -150,6 +150,8 @@ export default function TweetPage({ loaderData }: Route.ComponentProps) {
         translationGlossary: combinedGlossary,
         apiKey,
         model,
+        provider,
+        baseUrl,
         thinkingLevel,
         force: false,
       })
