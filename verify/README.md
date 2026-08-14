@@ -4,6 +4,10 @@
 > 项目：[AnonTweet](..)
 > 版本：0.1.0
 
+> 🔄 **重构进行中（2026-08-14 起）**：自研验证引擎（VerifyRunner）将被替换为标准 Vitest 三层架构
+> （unit / integration / acceptance），AC 编号保留为 test 名约定，SDK / fixtures / AC 文档保留。
+> 迁移期间新旧并行、双跑绿灯后才切。详见 [docs/planning/testing-infra-refactor.md](../docs/planning/testing-infra-refactor.md)。
+
 ---
 
 ## 快速开始
