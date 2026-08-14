@@ -3,7 +3,8 @@ import { describe, expect, it } from 'vitest'
 import { restoreEntities, serializeForAI } from '~/lib/react-tweet/utils/entitytParser'
 
 describe('entitytParser', () => {
-  it('serializes placeholders and restores translation entities', () => {
+  // AC-TRANS-001/002: serialize → restore 占位符往返（自 verify/translation.verifier 并入）
+  it('AC-TRANS-001/002: serializes placeholders and restores translation entities', () => {
     const originalEntities: Entity[] = [
       { type: 'text', text: 'Hello ', index: 0 },
       {
@@ -37,5 +38,49 @@ describe('entitytParser', () => {
       { type: 'text', text: ' see ', index: 2, aiTranslation: ' 看 ' },
       { type: 'media_alt', text: 'A CAT', aiTranslation: ' 一只猫', index: 20000 },
     ])
+  })
+
+  // AC-TRANS-003: 纯文本不产生占位符，还原后 aiTranslation = 译文（自 verify/translation.verifier 并入）
+  it('AC-TRANS-003: text-only entities pass through without placeholders', () => {
+    const originalEntities: Entity[] = [
+      { type: 'text', text: '今日の天気はいいですね', index: 0 },
+    ]
+
+    const { maskedText, entityMap } = serializeForAI(originalEntities)
+    expect(maskedText).toBe('今日の天気はいいですね')
+    expect(entityMap.size).toBe(0)
+
+    const restored = restoreEntities('今天天气很好', entityMap, originalEntities)
+    expect(restored[0]).toMatchObject({
+      type: 'text',
+      text: '今日の天気はいいですね',
+      aiTranslation: '今天天气很好',
+    })
+  })
+
+  // AC-TRANS-004: URL 实体被占位符保护，还原后原样保留（自 verify/translation.verifier 并入）
+  it('AC-TRANS-004: URL entities are protected and restored unchanged', () => {
+    const originalEntities: Entity[] = [
+      {
+        type: 'url',
+        text: 'https://example.com',
+        href: 'https://example.com',
+        display_url: 'example.com',
+        index: 0,
+      } as Entity,
+    ]
+
+    const { maskedText, entityMap } = serializeForAI(originalEntities)
+    expect(maskedText).toBe('<<__URL_0__>>')
+    expect(entityMap.size).toBe(1)
+
+    const restored = restoreEntities('<<__URL_0__>>', entityMap, originalEntities)
+    expect(restored[0]).toMatchObject({
+      type: 'url',
+      text: 'https://example.com',
+      href: 'https://example.com',
+      index: 0,
+    })
+    expect(restored[0]).not.toHaveProperty('aiTranslation')
   })
 })
