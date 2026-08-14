@@ -54,6 +54,18 @@ Phase 2 行动（源自 `docs/next-steps.md`）：
 
 ## 最近更新
 
+### 2026-08-14 — AI 图片描述防幻觉强化 + 上下文丰富注入（对齐翻译侧水准）
+
+- **问题（用户反馈）**：vision 提示语与流程过于简单脆弱——describe/ocr 一句话 system prompt；
+  `withContext` 只塞裸 `tweet.text`；术语表/本地词典完全没进链路（翻译侧有 glossary HIGH + 作者/时间/实体参考）。模型对无法辨认内容/专有名词/无文字图片会瞎猜；结果数量与图片数不符时静默错位
+- **实现**：反幻觉协议进 system prompt（describe 专有名词协议 + 看不清明说 + ocr 无文字输出空串）；
+  `buildVisionMessages` 上下文丰富注入（作者/时间/实体参考随 `withContext`，官方 alt `media_alt` 与术语表常驻）；
+  `assertVisionResultCount` 数量断言 + 带反馈重试（parse.ts / describeImages.ts）；translateOCR 反幻觉 + 重试；
+  glossary 端到端透传（路由 schema → lib → 客户端 `dictEntries() + translationGlossary` 合并）
+- **验收**：AC-VISION-011（反幻觉内容防线）/ AC-VISION-012（上下文丰富注入）新增；vision 12 条 AC 全 PASS
+- **commit 拆分**：`docs:` dev-log + AC-VISION-011/012 → `feat(vision):` 反幻觉 + 上下文注入 + 数量断言 + glossary 透传 + 单测
+- 详见 `docs/development-log/2026-08-14.md`
+
 ### 2026-08-14 — AIVisionBlock 可见性门控（默认不展示 + 逐推文开关 + 手动入口）
 
 - **问题**：上一轮「显示与开关解耦」（`23a829b`）让缓存图片描述无条件渲染——对用户是打扰，且截图时不想带上这次的描述结果

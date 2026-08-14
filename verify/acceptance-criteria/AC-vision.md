@@ -133,7 +133,33 @@
 
 ---
 
-## 总计：10 条 AC
+## AC-VISION-011：反幻觉内容防线（空描述拒绝 + 结果数量断言）
+
+- **验证对象**：`app/lib/vision/prompts.ts` describe schema（空描述拒绝）+ `app/lib/vision/parse.ts` 的 `assertVisionResultCount`（纯函数）
+- **输入**：
+  - describe 输出空字符串 / 纯空白 `description`
+  - 结果数量与请求图片数一致 / 不一致（模型跳过/合并图片、空数组）
+- **Pass 条件**：
+  - describe 空 / 纯空白 `description` → schema 校验失败（触发上层带反馈重试）
+  - `assertVisionResultCount(info, expected)`：数量一致不抛错；不一致抛 `VisionContentError`（含数量信息）
+  - 对齐翻译 validate+retry 模式：数量不符不再是「静默错位」（旧行为 `alignVisionIndexes` 数量不一致原样返回 → UI 按图查找全 miss）
+
+---
+
+## AC-VISION-012：上下文丰富注入（作者/时间/实体参考/官方 alt/术语表）
+
+- **验证对象**：`app/lib/vision/messages.ts` 的 `buildVisionMessages`（纯函数）
+- **输入**：`withContext` × 作者/发布时间/实体参考 × `mediaAltTexts` × `glossary`
+- **Pass 条件**：
+  - 传 `glossary` → user 消息含 `<Glossary>` 术语表区块（HIGH 优先级）；**不依赖 `withContext` 开关**（用户知识库始终注入，防对知识库外内容瞎猜）
+  - 传 `mediaAltTexts` → 含「官方 alt 文本」区块（`图 N: ...`，按 mediaDetails index）；空白条目被过滤；**不依赖 `withContext` 开关**（原作者对图片的描述 = 最强防幻觉锚点）
+  - `withContext=true` + 作者/发布时间/实体参考 → 推文上下文区块含 `@作者` / 发布时间 / 推文原文 / 引用推文 / 实体参考（hashtag/mention/URL 线索）
+  - `withContext=false` → 不含推文上下文区块，但 glossary / alt 仍注入
+  - 区块首行明确「上下文仅供理解，不得当作图片内容」（防上下文污染描述）
+
+---
+
+## 总计：12 条 AC
 
 | AC            | 分类       | 依赖 AI | 依赖 Fixture | 阶段  |
 | ------------- | ---------- | ------- | ------------ | ----- |
@@ -147,5 +173,7 @@
 | AC-VISION-008 | 集成/截图  | 否      | 是           | ✅ P5 |
 | AC-VISION-009 | 持久化     | 否      | 否           | ✅ P5 |
 | AC-VISION-010 | 可见性门控 | 否      | 否           | ✅ P5 |
+| AC-VISION-011 | 纯函数     | 否      | 否           | ✅ P5 |
+| AC-VISION-012 | 纯函数     | 否      | 否           | ✅ P5 |
 
-> 注：AC-VISION-001~007 离线确定性；AC-VISION-008/009/010 source scan 离线确定性。真实 API Key 的端到端（`/api/ai/vision` 真跑 MiMo）不纳入 AC 断言，作为手动验收清单项。
+> 注：AC-VISION-001~007 离线确定性；AC-VISION-008/009/010 source scan 离线确定性；AC-VISION-011/012 纯函数离线确定性。真实 API Key 的端到端（`/api/ai/vision` 真跑 MiMo）不纳入 AC 断言，作为手动验收清单项。
