@@ -7,7 +7,7 @@ import { defineConfig } from 'vitest/config'
  *
  * - unit:        L1 纯函数/解析器单测（test/unit/**，node 环境，快）
  * - acceptance:  L3 AC 语义层（test/acceptance/**，fixture 回归 + 仓库级静态检查）
- * - integration: L2 BFF API 集成（test/integration/**，globalSetup 起 TestServer）— Phase C 启用
+ * - integration: L2 BFF API 集成（test/integration/**，setupFiles 起 TestServer，串行）
  *
  * 注意：projects 模式下顶层 resolve/plugins 与 test 选项（testTimeout/maxWorkers 等）
  * 均不被项目继承，必须通过共享对象展开到每个项目（见下方 sharedProjectConfig /
@@ -54,6 +54,18 @@ export default defineConfig({
           name: 'acceptance',
           include: ['test/acceptance/**/*.spec.ts'],
           ...sharedProjectTest,
+        },
+      },
+      {
+        ...sharedProjectConfig,
+        test: {
+          name: 'integration',
+          include: ['test/integration/**/*.spec.ts'],
+          globalSetup: ['./test/integration/global-setup.ts'],
+          ...sharedProjectTest,
+          // 单 TestServer 单 worker：串行，避免每 worker 各起一个 dev server
+          maxWorkers: 1,
+          fileParallelism: false,
         },
       },
     ],
