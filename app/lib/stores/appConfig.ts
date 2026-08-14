@@ -95,7 +95,7 @@ export const useAppConfigStore = create<AppConfigState>()(
       translationGlossary: '',
       enableAIVision: false,
       visionProvider: 'google',
-      visionShowTranslatedOnly: false,
+      visionShowTranslatedOnly: true,
       isInlineMedia: false,
 
       setEnableMediaProxy: enableMediaProxy => set({ enableMediaProxy }),
@@ -125,7 +125,15 @@ export const useAppConfigStore = create<AppConfigState>()(
     }),
     {
       name: 'app-config-store',
-      version: 4,
+      version: 5,
+      migrate: (persistedState, version) => {
+        const state = persistedState as Partial<AppConfigs>
+        // v4 → v5：AI 图片描述默认仅显示译文（保留其余设置）
+        if (version < 5) {
+          return { ...state, visionShowTranslatedOnly: true }
+        }
+        return state
+      },
       onRehydrateStorage: (state) => {
         return () => state?.setHasHydrated(true)
       },
