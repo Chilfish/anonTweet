@@ -28,7 +28,7 @@ describe('/api/tweet/get/:id', () => {
     const res = await action({ request: req } as any)
     const payload = (res as any)?.data ?? res
     expect(payload).toMatchObject({ success: false, status: 400 })
-  }, 15000)
+  })
 
   it('returns tweet list on valid payload', async () => {
     const { action } = await import('~/routes/api/tweet/get')
@@ -45,5 +45,5 @@ describe('/api/tweet/get/:id', () => {
     const res = await action({ request: req } as any)
     expect(Array.isArray(res)).toBe(true)
     expect((res as any[])[0]).toMatchObject({ id_str: '1' })
-  }, 15000)
+  })
 })

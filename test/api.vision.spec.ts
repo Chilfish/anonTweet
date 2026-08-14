@@ -15,7 +15,7 @@ describe('/api/ai-vision', () => {
     const res = await action({ request: jsonRequest({ tweet: { id_str: '1', text: 'x' }, mediaIndexes: [0], mode: 'describe' }) } as any)
     const payload = (res as any)?.data ?? res
     expect(payload).toMatchObject({ success: false, status: 400 })
-  }, 15000)
+  })
 
   it('rejects non-JSON body', async () => {
     const { action } = await import('~/routes/api/ai/vision')
@@ -28,7 +28,7 @@ describe('/api/ai-vision', () => {
     const res = await action({ request: req } as any)
     const payload = (res as any)?.data ?? res
     expect(payload).toMatchObject({ success: false, status: 400 })
-  }, 15000)
+  })
 
   it('no-photo tweet → success with empty visionInfo (offline, no model call)', async () => {
     const { action } = await import('~/routes/api/ai/vision')
@@ -44,5 +44,5 @@ describe('/api/ai-vision', () => {
     const payload = (res as any)?.data ?? res
     expect(payload.success).toBe(true)
     expect(payload.data.visionInfo).toEqual([])
-  }, 15000)
+  })
 })
