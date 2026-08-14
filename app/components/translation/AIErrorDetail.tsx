@@ -39,12 +39,16 @@ export function AIErrorDetail({ error }: { error: AITransportError }) {
       )}
 
       {error.providerMessage && (
-        <span className="font-medium text-foreground">{error.providerMessage}</span>
+        <span className="font-medium text-foreground">
+          {error.providerMessage}
+        </span>
       )}
 
       {error.url && (
         <span className="flex items-center gap-1">
-          <span className="shrink-0 text-[10px] text-muted-foreground/70">端点</span>
+          <span className="shrink-0 text-[10px] text-muted-foreground/70">
+            端点
+          </span>
           <code
             className="min-w-0 flex-1 truncate font-mono text-[10px]"
             title={error.url}

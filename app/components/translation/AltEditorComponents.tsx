@@ -9,11 +9,18 @@ interface AltEntityListProps {
   onUpdate: (index: number, value: string) => void
 }
 
-export const AltEntityList: React.FC<AltEntityListProps> = ({ entities, onUpdate }) => {
+export const AltEntityList: React.FC<AltEntityListProps> = ({
+  entities,
+  onUpdate,
+}) => {
   const altEntities = entities.filter(e => e.type === 'media_alt')
 
   if (altEntities.length === 0) {
-    return <div className="p-4 text-sm text-muted-foreground text-center">暂无图片描述可供翻译</div>
+    return (
+      <div className="p-4 text-sm text-muted-foreground text-center">
+        暂无图片描述可供翻译
+      </div>
+    )
   }
 
   return (
@@ -24,7 +31,10 @@ export const AltEntityList: React.FC<AltEntityListProps> = ({ entities, onUpdate
         const imgNumber = entity.index > 20000 ? entity.index - 20000 + 1 : '1'
 
         return (
-          <div key={entity.index} className="flex flex-col border-b last:border-0 bg-card">
+          <div
+            key={entity.index}
+            className="flex flex-col border-b last:border-0 bg-card"
+          >
             {/* 标题头 */}
             <div className="flex items-center justify-between px-4 py-2 bg-muted/20 border-b border-border/40">
               <Label className="text-[10px] uppercase font-mono text-muted-foreground flex items-center gap-2">
@@ -39,9 +49,7 @@ export const AltEntityList: React.FC<AltEntityListProps> = ({ entities, onUpdate
 
             {/* 原文展示区 */}
             <div className="p-3 bg-muted/10 border-b-2">
-              <p className="tweet-body text-xs">
-                {entity.text}
-              </p>
+              <p className="tweet-body text-xs">{entity.text}</p>
             </div>
 
             {/* 编辑区 */}

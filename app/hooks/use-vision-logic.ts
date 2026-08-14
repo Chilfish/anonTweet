@@ -45,14 +45,21 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
   const initializeEditor = useCallback(() => {
     const base = originalTweet.visionInfo ?? []
     setVisionInfo(base)
-    setMode(base[0]?.mode ?? 'describe')
+    setMode(base[0]?.mode ?? 'ocr')
     setCustomPrompt('')
     setWithContext(true)
-    setDrafts(Object.fromEntries(base.map(v => [v.index, {
-      originalText: v.originalText,
-      translatedText: v.translatedText,
-      description: v.description,
-    }])))
+    setDrafts(
+      Object.fromEntries(
+        base.map(v => [
+          v.index,
+          {
+            originalText: v.originalText,
+            translatedText: v.translatedText,
+            description: v.description,
+          },
+        ]),
+      ),
+    )
     setIsOpen(true)
   }, [originalTweet.visionInfo])
 
@@ -73,7 +80,8 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
   }, [])
 
   const generate = useCallback(async () => {
-    const { apiKey, model, provider, baseUrl, thinkingLevel, providerName } = visionConfig
+    const { apiKey, model, provider, baseUrl, thinkingLevel, providerName }
+      = visionConfig
     if (!apiKey || !model) {
       toast.error(`请配置 ${providerName} API Key`)
       return
@@ -98,7 +106,10 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
 
       if (data.success && data.data?.visionInfo) {
         const incoming = data.data.visionInfo as AIVisionInfo[]
-        const merged = mergeVisionInfo(originalTweet.visionInfo ?? [], incoming)
+        const merged = mergeVisionInfo(
+          originalTweet.visionInfo ?? [],
+          incoming,
+        )
         setVisionInfo(prev => mergeVisionInfo(prev, incoming))
         syncDraftsFromInfo(merged)
         updateTweet(tweetId, { visionInfo: merged })
@@ -115,11 +126,22 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
     finally {
       setIsGenerating(false)
     }
-  }, [visionConfig, photoIndexes, mode, customPrompt, withContext, originalTweet, tweetId, updateTweet, syncDraftsFromInfo])
+  }, [
+    visionConfig,
+    photoIndexes,
+    mode,
+    customPrompt,
+    withContext,
+    originalTweet,
+    tweetId,
+    updateTweet,
+    syncDraftsFromInfo,
+  ])
 
   /** 翻译步：把有 OCR 原文的图交给翻译模型（附推文上下文），结果写 drafts.translatedText */
   const translateOcr = useCallback(async () => {
-    const { apiKey, model, provider, baseUrl, thinkingLevel, providerName } = translationConfig
+    const { apiKey, model, provider, baseUrl, thinkingLevel, providerName }
+      = translationConfig
     const items = photoIndexes
       .map(i => ({ index: i, originalText: drafts[i]?.originalText ?? '' }))
       .filter(item => item.originalText.trim().length > 0)
@@ -146,11 +168,17 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
       })
 
       if (data.success && data.data?.translations) {
-        const translations = data.data.translations as Array<{ index: number, translatedText: string }>
+        const translations = data.data.translations as Array<{
+          index: number
+          translatedText: string
+        }>
         setDrafts((prev) => {
           const next = { ...prev }
           for (const t of translations) {
-            next[t.index] = { ...next[t.index], translatedText: t.translatedText }
+            next[t.index] = {
+              ...next[t.index],
+              translatedText: t.translatedText,
+            }
           }
           return next
         })
@@ -169,18 +197,23 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
     }
   }, [drafts, photoIndexes, translationConfig, originalTweet.text, tweetId])
 
-  const updateDraft = useCallback((index: number, patch: Partial<VisionDraft>) => {
-    setDrafts(prev => ({ ...prev, [index]: { ...prev[index], ...patch } }))
-  }, [])
+  const updateDraft = useCallback(
+    (index: number, patch: Partial<VisionDraft>) => {
+      setDrafts(prev => ({ ...prev, [index]: { ...prev[index], ...patch } }))
+    },
+    [],
+  )
 
   const save = useCallback(() => {
     const next = applyVisionEdits(visionInfo, drafts, photoIndexes)
     updateTweet(tweetId, { visionInfo: next })
     // Phase 5：持久化 visionInfo 到 tweet localCache（plain-tweet/:id 截图路由重载后仍可渲染）
-    void fetcher.post('/api/ai-vision', {
-      action: 'save',
-      tweet: { ...originalTweet, visionInfo: next },
-    }).catch(() => {})
+    void fetcher
+      .post('/api/ai-vision', {
+        action: 'save',
+        tweet: { ...originalTweet, visionInfo: next },
+      })
+      .catch(() => {})
     setIsOpen(false)
   }, [tweetId, visionInfo, drafts, photoIndexes, updateTweet, originalTweet])
 
