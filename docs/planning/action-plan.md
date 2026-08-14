@@ -54,13 +54,13 @@ Phase 2 行动（源自 `docs/next-steps.md`）：
 
 ## 最近更新
 
-### 2026-08-14 — 测试基线红灯修复（vitest 冷加载超时）🔄 进行中
+### 2026-08-14 — 测试基线红灯修复（vitest 冷加载超时）✅ 已完成
 
 - **问题**：`bun run test`（vitest run）全量**偶发 4~5 fail**——失败集每次漂移（`api.ai-translation` / `api.tweet-get` / `env.server` / `getTweet` 轮流出局），全部为 `Test timed out in 5000ms`，且都发生在**动态 import 服务端路由/模块**的冷加载路径
 - **根因诊断（实测）**：vitest 并行全量下 transform+import 冷加载极慢（单文件 import 实测 13.4s；全量 import 合计 131.7s / transform 56.9s），远超默认 5s `testTimeout`；**单文件运行全部通过（env.server 单独 286ms 全绿）** → 非逻辑 bug，是测试隔离层配置问题（对齐 review §7.3 遗留）
-- **修复方案**：`vitest.config.ts` 全局 `testTimeout`/`hookTimeout` 提到 30s；不重构测试逻辑（最小侵入）
-- **验收**：连续 2 次 `bun run test` 全绿（证明偶发被消除）+ typecheck / lint / verify 保持通过
-- **commit 拆分**：`docs:`（本条目 + dev-log 计划）→ `test:`（vitest 配置）→ `docs:`（验收结果回填）
+- **修复**：`vitest.config.ts` `test.maxWorkers: 2`（16 核默认 16 worker 并行竞争）+ 全局 `testTimeout`/`hookTimeout` 30s；删除 `api.tweet-get`/`api.vision` 冗余 per-test 15000（全局接管）
+- **验收**：连续 5 次 `bun run test` 全量 115/115 全绿 + typecheck ✅ + lint 0 error ✅ + verify 42 PASS ✅
+- **commit 拆分**：`docs:` 计划（`90f448f`）→ `test:` 修复（`ee5f1eb`）→ `docs:` 验收回填
 - 详见 `docs/development-log/2026-08-14.md`
 
 ### 2026-08-13 — AI Vision PR #14 评审修复 + UI 打磨
