@@ -88,10 +88,13 @@ const { theme, fontScale } = useAppConfigStore(useShallow(s => ({ theme: s.theme
 
 ## 测试规范
 
-- **框架**: Vitest（`bun test` / `bun test:watch`）
-- **命名**: `*.spec.ts`，放 `test/` 目录
+- **框架**: Vitest（`bun run test` = unit + acceptance；`bun run test:integration` = 集成层）
+- **命名**: `*.spec.ts`；`test/unit/`（纯函数）、`test/acceptance/`（AC 语义层）、`test/integration/`（BFF API）
+- **AC 编号 = test 名**：`it('AC-TWEET-001: ...')`，与 `verify/acceptance-criteria/` 文档 1:1 可追溯
 - **纯函数优先**：解析器 / resolver / materialize / placeholder 逻辑必须单测（postmortem #001/#002）
-- **验证套件**：子系统级验证用 `verify/`（fixture + AC + verifier）
+- **集成测试**：BFF API 端点用 `test/support` 的 AnonTweetClient + TestServer（globalSetup 自动启停），外部凭据缺省 `describe.skipIf`
+- **共享工具**：fixture 加载用 `test/helpers/load-fixture.ts`，源码扫描用 `test/helpers/read-project-file.ts`，禁止复制 helper
+- **去重原则**：每个行为恰好一个测试文件；AC 与 spec 冲突时 spec 为准，AC 编号保留在 `it` 名
 
 ## 组件规范
 

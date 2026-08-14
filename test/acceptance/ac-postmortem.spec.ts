@@ -17,7 +17,6 @@ const REPORT_FILE_RE = /^\d{3}-.+\.md$/
 const STATUS_RE = /\*\*状态\*\*:\s*(?:Active|Mitigated)/
 const HOT_FILE_REF_RE = /#\d{3}/g
 const SCRIPT_RESULT_RE = /RESULT: (?:PASS|FAIL)/
-const RESULT_LINE_RE = /^RESULT: .*$/m
 
 function listReports(): string[] {
   const dir = projectPath(POSTMORTEM_DIR_REL)
