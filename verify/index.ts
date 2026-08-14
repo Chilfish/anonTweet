@@ -1,32 +1,21 @@
 #!/usr/bin/env bun
 /**
- * verify/index.ts
+ * verify/index.ts — 验证套件薄 CLI（Phase E 收口）
  *
- * CLI entry point for the verification suite.
+ * 执行引擎已迁移为 Vitest 三层架构（unit / acceptance / integration，见
+ * docs/planning/testing-infra-refactor.md）。本文件只做参数映射，保持既有命令兼容：
  *
- * Usage:
- *   bun run verify/index.ts                    # Run all verifiers
- *   bun run verify/index.ts --module tweet     # Run tweet verifiers only
- *   bun run verify/index.ts --module translation --verbose
- *   bun run verify/index.ts --ac AC-TWEET-001  # Run a single AC
- *   bun run verify/index.ts --server           # With live server
+ *   bun run verify/index.ts                    # 全三层（integration 自动起 TestServer）
+ *   bun run verify/index.ts --ac AC-TWEET-001  # 单 AC（vitest -t 过滤）
+ *   bun run verify/index.ts --module tweet     # 子系统（-t 'AC-TWEET'，跨项目过滤）
+ *   bun run verify/index.ts --exit-on-fail     # CI 模式（vitest 默认失败即 exit 1）
+ *   bun run verify/index.ts --server           # 兼容参数（服务器由 globalSetup 管理，no-op）
+ *
+ * SKIP 语义（无 TWEET_KEYS / INS_COOKIES 等）由各测试的 describe.skipIf 处理。
  */
 
-import type { CliOptions, SuiteResult } from './framework/types.js'
+import { spawnSync } from 'node:child_process'
 import { parseArgs } from 'node:util'
-import { VerifyRunner } from './framework/runner.js'
-import { CIVerifier } from './modules/ci.verifier.js'
-import { IGVerifier } from './modules/ig.verifier.js'
-import { MediaVerifier } from './modules/media.verifier.js'
-import { PostmortemVerifier } from './modules/postmortem.verifier.js'
-import { ScreenshotVerifier } from './modules/screenshot.verifier.js'
-import { TranslationVerifier } from './modules/translation.verifier.js'
-import { TweetVerifier } from './modules/tweet.verifier.js'
-import { VisionVerifier } from './modules/vision.verifier.js'
-import { AnonTweetClient } from './sdk/api-client.js'
-import { EXTERNAL_KEYS, TestServer } from './sdk/test-server.js'
-
-// ─── Parse CLI args ─────────────────────────────────────────
 
 const { values } = parseArgs({
   args: Bun.argv.slice(2),
@@ -35,9 +24,8 @@ const { values } = parseArgs({
     'ac': { type: 'string' },
     'server': { type: 'boolean', default: false },
     'server-port': { type: 'string' },
-    'force': { type: 'boolean', default: false },
-    'verbose': { type: 'boolean', short: 'v', default: false },
     'exit-on-fail': { type: 'boolean', default: false },
+    'verbose': { type: 'boolean', short: 'v', default: false },
     'help': { type: 'boolean', short: 'h', default: false },
   },
   allowPositionals: true,
@@ -45,109 +33,40 @@ const { values } = parseArgs({
 
 if (values.help) {
   console.log(`
-  AnonTweet Verification Suite
+  AnonTweet Verification Suite (Vitest-backed)
 
   Usage:
     bun run verify/index.ts [options]
 
   Options:
-    --module, -m <name>   Only run verifiers for a module (tweet/translation/ig/screenshot/media/postmortem)
     --ac <id>             Only run a specific AC (e.g. AC-TWEET-001)
-    --server              Start the test server before verifying
-    --server-port <port>  Server port (default: 9081)
-    --force               Force run even if prerequisites missing
-    --verbose, -v         Verbose output
-    --exit-on-fail        Exit with code 1 if any test fails
+    --module, -m <name>   Only run a subsystem (tweet/translation/ig/screenshot/media/postmortem/ci/vision)
+    --server              Accept for compatibility — integration server is managed by globalSetup
+    --server-port <port>  Accepted for compatibility
+    --exit-on-fail        Exit with code 1 if any test fails (vitest default)
+    --verbose, -v         Verbose reporter
     --help, -h            Show this help
-
-  Module names:
-    tweet         Tweet parsing & API
-    translation   Translation pipeline (entity protection, resolution)
-    ig            Instagram integration
-    ci            CI/CD pipeline (GitHub Actions workflow)
-    screenshot    Screenshot export (AC-SHOT-001~004)
-    media         Media proxy (AC-MEDIA-001~006)
-    postmortem    Postmortem check (AC-PM-001~007)
-    vision        AI vision (AIVisionInfo / prompts / parse / orchestration, AC-VISION-001~007)
   `)
   process.exit(0)
 }
 
-const options: CliOptions = {
-  module: values.module as string | undefined,
-  ac: values.ac as string | undefined,
-  force: values.force as boolean,
-  verbose: values.verbose as boolean,
-  exitOnFail: values['exit-on-fail'] as boolean,
+const vitestArgs: string[] = ['run']
+
+// AC 过滤：vitest -t 子串匹配 test 名（AC 编号 = test 名契约）
+if (values.ac) {
+  vitestArgs.push('-t', values.ac)
+}
+else if (values.module) {
+  vitestArgs.push('-t', `AC-${values.module.toUpperCase()}`)
 }
 
-// ─── Print header ─────────────────────────────────────────
+if (values.verbose)
+  vitestArgs.push('--reporter=verbose')
 
-console.log('')
-console.log('  AnonTweet Verification Suite')
-console.log(`  ${new Date().toISOString()}`)
-console.log('')
+// --exit-on-fail：vitest run 默认在失败时 exit 1，无需额外处理；参数保留兼容
 
-// ─── Setup ─────────────────────────────────────────────────
+const result = spawnSync('bunx', ['vitest', ...vitestArgs], {
+  stdio: 'inherit',
+})
 
-const runner = new VerifyRunner(options)
-
-// Register all verifiers
-runner.register(new TweetVerifier())
-runner.register(new TranslationVerifier())
-runner.register(new IGVerifier())
-runner.register(new CIVerifier())
-runner.register(new ScreenshotVerifier())
-runner.register(new MediaVerifier())
-runner.register(new PostmortemVerifier())
-runner.register(new VisionVerifier())
-
-// ─── Server lifecycle (--server) ────────────────────────────
-// S8: auto-start a test server, inject the client, stop in all paths.
-
-let server: TestServer | null = null
-let client: AnonTweetClient | undefined
-
-if (values.server) {
-  const port = Number.parseInt(values['server-port'] as string || '9081', 10)
-  server = new TestServer({ port })
-  await server.start()
-  client = new AnonTweetClient({ baseUrl: server.url })
-
-  // Keep the verifier env in sync with the isolated test server: without real
-  // keys the integration ACs take the deterministic path (bogus id → NotFound).
-  if (server.isolatesExternal) {
-    for (const key of EXTERNAL_KEYS)
-      delete process.env[key]
-  }
-
-  console.log(`  [Setup] Test server ready at ${server.url}`)
-  console.log('')
-}
-
-// ─── Run ───────────────────────────────────────────────────
-
-let suites: SuiteResult[]
-try {
-  suites = await runner.run(client)
-}
-finally {
-  if (server) {
-    await server.stop().catch(() => {})
-  }
-}
-
-// ─── Exit code ─────────────────────────────────────────────
-
-if (options.exitOnFail) {
-  const hasFailure = suites.some(s => s.failed > 0)
-  if (hasFailure) {
-    process.exit(1)
-  }
-}
-
-// Provide exit code info
-const totalFailed = suites.reduce((s, suite) => s + suite.failed, 0)
-if (totalFailed > 0) {
-  process.exitCode = 1
-}
+process.exit(result.status ?? 1)

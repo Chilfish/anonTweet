@@ -2,7 +2,7 @@ import dotenv from 'dotenv'
 import { z } from 'zod'
 
 // 测试环境用 DOTENV_CONFIG_PATH 指向不存在的文件，避免加载真实 .env（否则 override 会覆盖测试注入的 env）
-dotenv.config({ override: true, path: process.env.DOTENV_CONFIG_PATH })
+dotenv.config({ override: true, path: process.env.DOTENV_CONFIG_PATH, quiet: true })
 
 /**
  * Server environment schema definition with validation rules

@@ -1,5 +1,5 @@
+import type { TestProjectConfiguration } from 'vitest/config'
 import path from 'node:path'
-import tsconfigPaths from 'vite-tsconfig-paths'
 import { defineConfig } from 'vitest/config'
 
 /**
@@ -13,14 +13,14 @@ import { defineConfig } from 'vitest/config'
  * 均不被项目继承，必须通过共享对象展开到每个项目（见下方 sharedProjectConfig /
  * sharedProjectTest）——实测遗漏 testTimeout 会退回默认 5000ms 导致冷加载超时。
  */
-const sharedProjectConfig = {
+const sharedProjectConfig: TestProjectConfiguration = {
   plugins: [
-    tsconfigPaths(),
   ],
   resolve: {
     alias: {
       '~': path.resolve(__dirname, './app'),
     },
+    tsconfigPaths: true,
   },
 }
 
