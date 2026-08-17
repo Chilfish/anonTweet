@@ -35,8 +35,7 @@
   > ✅ **解耦部分完成（2026-08-17）**：AC-DECOUPLE-001~002 落地且 verify 绿；GET 移除内联 `autoTranslateTweet`（`tweet/get.ts` 源码扫描无 LLM 调用），客户端 `use-auto-translate.ts` 触发 `/api/ai-translation`（不阻塞首屏），plain 截图路由两步走；`app/lib/ai-timeout.ts` 统一超时（默认 120s，`AI_TRANSLATION_TIMEOUT_MS` 可覆盖）。**剩余：AI 端点 stream 化按计划并入阶段三（与「编辑器兼容 stream」L25 合并）**。
 - [ ] [ux] 长链推文/大量媒体渲染与截图性能（原 backlog L19 采纳；关联：review 阶段二；文件：`verify/acceptance-criteria/AC-screenshot.md` 扩、`plain.tsx`、`plain-ig.tsx`；工作量：2-3 人日 / 风险：中）— 与 ADR-008 媒体代理统一（S7 待实施）耦合，一并做
 - [ ] [refactor] 可观测性：翻译耗时/缓存命中率/RettiwtPool 状态结构化日志（原 backlog L26 后半采纳；关联：review 阶段二；文件：`app/lib/translation/`、`app/lib/SmartPool.ts`；工作量：2 人日）— 为阶段三缓存规模化提供指标
-- [ ] [ux] 隐私加固：`baseUrl` 白名单 + 隐私页披露（关联：review P1-3；文件：`app/routes/api/ai/vision.ts`、`ai-translation.ts`、设置页；工作量：1-2 人日）— 仅放行已知提供商域名；设置页声明"Key 经服务器中继"
-  > **实施中（2026-08-17）**：AC-SEC-001 契约（`verify/acceptance-criteria/AC-sec.md`）；`app/lib/ai-base-url.ts` 白名单 helper（无 baseUrl 放行 / 官方域名放行 / 未知域名+IP 拒绝），接入 ai-translation / vision / ai-test 三处边界，设置页加披露文案。
+- [x] [ux] 隐私加固：`baseUrl` 白名单 + 隐私页披露（关联：review P1-3；文件：`app/routes/api/ai/vision.ts`、`ai-translation.ts`、设置页；工作量：1-2 人日）— 仅放行已知提供商域名；设置页声明"Key 经服务器中继" — ✅ 完成（2026-08-17）：`app/lib/ai-base-url.ts` 白名单（无 baseUrl 放行 / 官方域名 hostname 精确匹配 / 未知+IP+后缀伪装拒绝）；ai-translation（twitter+ins）、vision（generate+translate）、ai-test 三处边界校验，拒绝 400；设置页披露 Key 中继 + 白名单说明（AC-SEC-001 落地，verify 绿）
 
 ### 阶段三（7-8 周+）护城河：Vision 闭环、流式编辑器、Story 接入、缓存规模化
 
