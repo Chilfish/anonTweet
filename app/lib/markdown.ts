@@ -151,8 +151,8 @@ function generateTextFromEntities(entities: Entity[], useTranslation: boolean): 
       ? (item.translation || item.aiTranslation || item.text)
       : item.text
 
-    // Skip technical/hidden entities
-    if (item.index < 0)
+    // Skip technical/hidden entities；句首补充（index < 0）只在译文里出现
+    if (item.index < 0 && !useTranslation)
       return ''
     if (item.type === 'media' || item.type === 'media_alt' || item.type === 'separator')
       return '' // Handled separately

@@ -66,4 +66,34 @@ describe('resolveEntities', () => {
       { ...base[1]!, aiTranslation: 'y' },
     ])
   })
+
+  it('keeps the prepend entity (index -1) at the front when merging manual translations', () => {
+    const base: Entity[] = [
+      { type: 'text', text: 'hello', index: 0 },
+      { type: 'text', text: 'world', index: 1 },
+    ]
+    const overlay: Entity[] = [
+      { type: 'text', text: '（补充）', index: -1, translation: '（补充）' },
+      { type: 'text', text: 'hello', index: 0, translation: '你好' },
+      { type: 'text', text: 'world', index: 1, translation: '世界' },
+    ]
+
+    expect(mergeEntityTranslationsByIndex(base, overlay)).toEqual([
+      { type: 'text', text: '（补充）', index: -1, translation: '（补充）' },
+      { ...base[0]!, translation: '你好' },
+      { ...base[1]!, translation: '世界' },
+    ])
+  })
+
+  it('drops extra entities that carry no translation content', () => {
+    const base: Entity[] = [{ type: 'text', text: 'x', index: 0 }]
+    const overlay: Entity[] = [
+      { type: 'text', text: 'x', index: 0, translation: 'y' },
+      { type: 'text', text: 'stray', index: -1 },
+    ]
+
+    expect(mergeEntityTranslationsByIndex(base, overlay)).toEqual([
+      { ...base[0]!, translation: 'y' },
+    ])
+  })
 })

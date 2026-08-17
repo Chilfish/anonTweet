@@ -144,4 +144,49 @@ describe('resolveTranslationView', () => {
     expect(view.shouldShow).toBe(true)
     expect(view.entities).toBe(base)
   })
+
+  it('shows the prepend entity (index -1) at the front for manual translations', () => {
+    const base: Entity[] = [{ type: 'text', text: 'hello', index: 0 }]
+    const manual: Entity[] = [
+      { type: 'text', text: '（补充）', index: -1, translation: '（补充）' },
+      { type: 'text', text: 'hello', index: 0, translation: '你好' },
+    ]
+
+    const view = resolveTranslationView({
+      tweet: makeTweet(base),
+      manualTranslation: manual,
+      mode: 'bilingual',
+      visibility: { body: true, alt: true },
+      part: 'body',
+    })
+
+    expect(view.source).toBe('manual')
+    expect(view.shouldShow).toBe(true)
+    expect(view.entities).toEqual([
+      { type: 'text', text: '（补充）', index: -1, translation: '（补充）' },
+      { ...base[0]!, translation: '你好' },
+    ])
+  })
+
+  it('shows the view when only a prepend exists (no other translations)', () => {
+    const base: Entity[] = [{ type: 'text', text: 'hello', index: 0 }]
+    const manual: Entity[] = [
+      { type: 'text', text: '（补充）', index: -1, translation: '（补充）' },
+    ]
+
+    const view = resolveTranslationView({
+      tweet: makeTweet(base),
+      manualTranslation: manual,
+      mode: 'bilingual',
+      visibility: { body: true, alt: true },
+      part: 'body',
+    })
+
+    expect(view.source).toBe('manual')
+    expect(view.shouldShow).toBe(true)
+    expect(view.entities).toEqual([
+      { type: 'text', text: '（补充）', index: -1, translation: '（补充）' },
+      base[0]!,
+    ])
+  })
 })

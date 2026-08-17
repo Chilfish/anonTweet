@@ -3,6 +3,9 @@ import type { Entity } from '~/types'
 /**
  * Merge `translated` into `base` by matching `index`.
  * Writes result into the specified field.
+ *
+ * `translated` 中 base 不存在的额外实体（如句首补充 `index: -1`）不会被丢弃：
+ * 句首补充（index < 0）插入最前，其余额外实体按 index 排序追加到末尾。
  */
 export function mergeTranslationsToField(
   base: Entity[],
@@ -14,7 +17,7 @@ export function mergeTranslationsToField(
     byIndex.set(e.index, e)
   })
 
-  return base.map((original) => {
+  const merged = base.map((original) => {
     const found = byIndex.get(original.index)
     if (!found)
       return original
@@ -22,6 +25,19 @@ export function mergeTranslationsToField(
     const translation = found[field] || (found.text !== original.text ? (found.aiTranslation || found.translation || found.text) : undefined)
     return translation ? { ...original, [field]: translation } : original
   })
+
+  // 收集 base 中没有对应 index 的额外实体（如句首补充 index: -1），
+  // 只保留带翻译内容的，避免渲染出无意义的裸实体
+  const baseIndexSet = new Set(base.map(e => e.index))
+  const extras = translated
+    .filter(e => !baseIndexSet.has(e.index))
+    .filter(e => !!e.translation || !!e.aiTranslation)
+    .map(e => ({ ...e, [field]: e[field] || e.translation || e.aiTranslation }))
+
+  const prepends = extras.filter(e => e.index < 0).sort((a, b) => a.index - b.index)
+  const tails = extras.filter(e => e.index >= 0).sort((a, b) => a.index - b.index)
+
+  return [...prepends, ...merged, ...tails]
 }
 
 /**
