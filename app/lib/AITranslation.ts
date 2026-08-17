@@ -4,6 +4,7 @@ import type { ThinkingLevel } from '~/lib/stores/appConfig'
 import type { EnrichedTweet, Entity } from '~/types'
 import { generateText, Output, zodSchema } from 'ai'
 import { z } from 'zod'
+import { createAITranslationAbortSignal } from '~/lib/ai-timeout'
 import { models } from '~/lib/constants'
 import { getProviderStrategy, getThinkingConfig } from '~/lib/providers'
 import {
@@ -264,6 +265,8 @@ ${maskedText}
         messages,
         output,
         temperature: 0.5,
+        // AC-DECOUPLE-002：服务端 AI 调用必须带超时，避免 Serverless 无限挂起
+        abortSignal: createAITranslationAbortSignal(),
         providerOptions: strategy && modelConfig
           ? strategy.buildProviderOptions(thinkingConfig, modelConfig)
           : {},

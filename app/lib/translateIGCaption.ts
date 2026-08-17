@@ -1,6 +1,7 @@
 import type { LanguageModel, ModelMessage } from 'ai'
 import type { IGPost } from '~/types'
 import { generateText, Output } from 'ai'
+import { createAITranslationAbortSignal } from '~/lib/ai-timeout'
 
 /**
  * IG Caption 翻译参数（精简版 — 只传真正需要的）
@@ -90,6 +91,8 @@ ${text}`
       messages,
       temperature: 0.5,
       output: Output.text(),
+      // AC-DECOUPLE-002：服务端 AI 调用必须带超时
+      abortSignal: createAITranslationAbortSignal(),
     })
 
     let translated = result.text?.trim() ?? ''
@@ -108,6 +111,8 @@ ${text}`
         ],
         temperature: 0.6,
         output: Output.text(),
+        // AC-DECOUPLE-002：重试同样重新计时
+        abortSignal: createAITranslationAbortSignal(),
       })
       translated = result.text?.trim() ?? ''
     }
