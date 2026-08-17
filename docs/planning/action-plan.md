@@ -80,6 +80,22 @@ verify/ 同一逻辑双实现、弱断言/重复样板蔓延。决策：**保留
 - **commit 拆分**：`docs:` dev-log + AC-VISION-011/012 → `feat(vision):` 反幻觉 + 上下文注入 + 数量断言 + glossary 透传 + 单测
 - 详见 `docs/development-log/2026-08-14.md`
 
+### 2026-08-17 — 修复「句首补充」显示与持久化链路（Postmortem #009）
+
+- **问题（用户反馈）**：翻译编辑器「句首补充」（`index: -1` 实体）保存后不显示、刷新后丢失；
+  用户贴出 `/api/tweet/set` payload——句首补充实体没进同步数据，AI 译文片段（`aiTranslation: "听说在 "`）残留在 text 实体上
+- **根因（四处 index 对齐合并漂移 + 一处 AI 流丢片段 + 持久化触发缺口）**：
+  - 显示/materialize（`mergeTranslationsToField`）、服务端读缓存（`mergeTranslationEntities`）、
+    AI 写回（`applyAITranslations`）都只按 index 对齐 base，`index: -1` 与 `30000+` 流片段被静默丢弃
+  - `restoreEntities` 在占位符被移到句中时产出 base 外 index，`applyAITranslations` 丢后半段
+  - 手动翻译只在截图时同步服务端，保存只写内存 store（persist partialize 不含 translations）
+- **修复**：merge 保留 extra 实体（句首补充插最前）+ `applyAITranslations` 非对齐流直接返回 +
+  保存即同步（`syncTranslationData`）+ `/api/tweet/set` 刷新 localCache + markdown 译文含补充
+- **验收**：`bun run test:unit` 160/160 ✅ · typecheck ✅ · lint 0 error（50 预存 warning）✅
+- **commit 拆分**：`docs:` dev-log + action-plan + postmortem 009 → `fix(translation):` 显示/导出链路 →
+  `fix(translation):` 持久化链路
+- 详见 `docs/development-log/2026-08-17.md`、`docs/postmortem/009-prepend-persistence.md`
+
 ### 2026-08-14 — AIVisionBlock 可见性门控（默认不展示 + 逐推文开关 + 手动入口）
 
 - **问题**：上一轮「显示与开关解耦」（`23a829b`）让缓存图片描述无条件渲染——对用户是打扰，且截图时不想带上这次的描述结果

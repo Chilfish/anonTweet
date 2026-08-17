@@ -8,16 +8,17 @@
 
 ## 索引表
 
-| #                                     | 主题             | 严重级 | 分类         | 状态         | 一句话根因                                            |
-| ------------------------------------- | ---------------- | ------ | ------------ | ------------ | ----------------------------------------------------- |
-| [001](001-twitter-content-parsing.md) | Twitter 推文解析 | SEV-2  | Architecture | 🔴 Active    | `parseTweet.ts` 无测试、无内部分层，每次改动风险全局  |
-| [002](002-translation-system.md)      | 翻译系统         | SEV-2  | Architecture | 🔴 Active    | 翻译逻辑全部耦合在 React 组件内，store 迁移静默丢数据 |
-| [003](003-ui-styling-layout.md)       | UI 样式/布局     | SEV-3  | Bug          | 🟡 Active    | 20 次单行 CSS fix，无 design token，无视觉回归测试    |
-| [004](004-build-configuration.md)     | 构建配置         | SEV-2  | Change       | 🟢 Mitigated | 客户端/服务端边界不清，`lib/` 无 import 约束          |
-| [005](005-media-handling.md)          | 媒体管线         | SEV-2  | Architecture | 🔴 Active    | 代理/视频/截图四套重复 URL 转换逻辑                   |
-| [006](006-state-management.md)        | 状态管理         | SEV-2  | Bug          | 🟢 Mitigated | zustand 整 store 订阅 + 无类型迁移                    |
-| [007](007-instagram-integration.md)   | Instagram 集成   | SEV-3  | Change       | 🔴 Active    | 新功能无验收清单、无测试 fixture                      |
-| [008](008-fonts-and-rendering.md)     | 字体/渲染        | SEV-2  | Bug          | 🟢 Mitigated | Web font 加载与 headless 截图竞争                     |
+| #                                     | 主题             | 严重级 | 分类         | 状态         | 一句话根因                                                 |
+| ------------------------------------- | ---------------- | ------ | ------------ | ------------ | ---------------------------------------------------------- |
+| [001](001-twitter-content-parsing.md) | Twitter 推文解析 | SEV-2  | Architecture | 🔴 Active    | `parseTweet.ts` 无测试、无内部分层，每次改动风险全局       |
+| [002](002-translation-system.md)      | 翻译系统         | SEV-2  | Architecture | 🔴 Active    | 翻译逻辑全部耦合在 React 组件内，store 迁移静默丢数据      |
+| [003](003-ui-styling-layout.md)       | UI 样式/布局     | SEV-3  | Bug          | 🟡 Active    | 20 次单行 CSS fix，无 design token，无视觉回归测试         |
+| [004](004-build-configuration.md)     | 构建配置         | SEV-2  | Change       | 🟢 Mitigated | 客户端/服务端边界不清，`lib/` 无 import 约束               |
+| [005](005-media-handling.md)          | 媒体管线         | SEV-2  | Architecture | 🔴 Active    | 代理/视频/截图四套重复 URL 转换逻辑                        |
+| [006](006-state-management.md)        | 状态管理         | SEV-2  | Bug          | 🟢 Mitigated | zustand 整 store 订阅 + 无类型迁移                         |
+| [007](007-instagram-integration.md)   | Instagram 集成   | SEV-3  | Change       | 🔴 Active    | 新功能无验收清单、无测试 fixture                           |
+| [008](008-fonts-and-rendering.md)     | 字体/渲染        | SEV-2  | Bug          | 🟢 Mitigated | Web font 加载与 headless 截图竞争                          |
+| [009](009-prepend-persistence.md)     | 翻译句首补充     | SEV-2  | Bug          | 🟡 Active    | index 对齐合并四处漂移，base 外实体（-1/30000+）被静默丢弃 |
 
 ## 高危文件（写码前自查）
 
@@ -30,6 +31,8 @@
 | `app/components/translation/TranslationEditor.tsx` | #002, #003       | 10       |
 | `app/lib/stores/`                                  | #002, #006       | 6        |
 | `app/components/tweet/TweetTextBody.tsx`           | #001             | 5        |
+| `app/lib/translation/resolveEntities.ts`           | #002, #009       | 2        |
+| `app/lib/service/getTweet.server.ts`               | #009             | 1        |
 
 ## 高频雷区（写码前自查）
 
@@ -56,6 +59,14 @@ zustand 整 store 订阅导致多余重渲染；手动迁移 API 静默丢数据
 ### 6. 新功能无验收清单（#007）
 
 IG 集成 7 次快节奏补丁（缺路由/缺行为/缺 polish）。对策：**验证先行**——先写 AC（`verify/acceptance-criteria/`）再实现，完成后补 verifier + fixture。
+
+### 7. 按 index 对齐的合并会丢「base 外实体」（#009）
+
+显示 / materialize / 服务端读缓存 / AI 写回四处各有一份按 index 对齐的合并实现，全部只遍历
+base 并按 index 覆盖——句首补充（`index: -1`）与 AI 流片段（`30000+`）这类 base 里不存在的
+实体被静默丢弃。对策：**合并实现必须显式处理 extra entities（哨兵 index 插最前 / 追加末尾），
+收敛为单一纯函数复用，并补「extra 不被丢」的回归测试**。改动前自查 `resolveEntities.ts` /
+`getTweet.server.ts#mergeTranslationEntities` / `entitytParser.ts#applyAITranslations`。
 
 ## Pre-Release 检查（每次 Release 前）
 
