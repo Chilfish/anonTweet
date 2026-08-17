@@ -39,19 +39,19 @@ SKIP 语义：无 `TWEET_KEYS` / `INS_COOKIES` 等外部凭据时，相关集成
 
 ## 验收标准（AC）
 
-| 文档                                                       | 覆盖                                      |
-| ---------------------------------------------------------- | ----------------------------------------- |
-| [AC-tweet.md](acceptance-criteria/AC-tweet.md)             | AC-TWEET-001~008（解析 + API）            |
-| [AC-translation.md](acceptance-criteria/AC-translation.md) | AC-TRANS-001~007（占位符管线）            |
-| [AC-ig.md](acceptance-criteria/AC-ig.md)                   | AC-IG-001~009（IG 集成）                  |
-| [AC-screenshot.md](acceptance-criteria/AC-screenshot.md)   | AC-SHOT-001~004（截图）                   |
-| [AC-media.md](acceptance-criteria/AC-media.md)             | AC-MEDIA-001~006（媒体代理）              |
-| [AC-postmortem.md](acceptance-criteria/AC-postmortem.md)   | AC-PM-001~007（预发布检查）               |
-| [AC-ci.md](acceptance-criteria/AC-ci.md)                   | AC-CI-001~004（CI workflow）              |
-| [AC-vision.md](acceptance-criteria/AC-vision.md)           | AC-VISION-001~012（AI 视觉）              |
-| [AC-resolver.md](acceptance-criteria/AC-resolver.md)       | AC-RESOLVER-001（决策链收敛）             |
-| [AC-decouple.md](acceptance-criteria/AC-decouple.md)       | AC-DECOUPLE-001~002（GET 解耦 + AI 超时） |
-| [AC-sec.md](acceptance-criteria/AC-sec.md)                 | AC-SEC-001（baseUrl 白名单 + 隐私披露）   |
+| 文档                                                       | 覆盖                                           |
+| ---------------------------------------------------------- | ---------------------------------------------- |
+| [AC-tweet.md](acceptance-criteria/AC-tweet.md)             | AC-TWEET-001~008（解析 + API）                 |
+| [AC-translation.md](acceptance-criteria/AC-translation.md) | AC-TRANS-001~007（占位符管线）                 |
+| [AC-ig.md](acceptance-criteria/AC-ig.md)                   | AC-IG-001~009（IG 集成）                       |
+| [AC-screenshot.md](acceptance-criteria/AC-screenshot.md)   | AC-SHOT-001~004 + AC-PERF-001（截图/渲染基线） |
+| [AC-media.md](acceptance-criteria/AC-media.md)             | AC-MEDIA-001~006（媒体代理）                   |
+| [AC-postmortem.md](acceptance-criteria/AC-postmortem.md)   | AC-PM-001~007（预发布检查）                    |
+| [AC-ci.md](acceptance-criteria/AC-ci.md)                   | AC-CI-001~004（CI workflow）                   |
+| [AC-vision.md](acceptance-criteria/AC-vision.md)           | AC-VISION-001~012（AI 视觉）                   |
+| [AC-resolver.md](acceptance-criteria/AC-resolver.md)       | AC-RESOLVER-001（决策链收敛）                  |
+| [AC-decouple.md](acceptance-criteria/AC-decouple.md)       | AC-DECOUPLE-001~002（GET 解耦 + AI 超时）      |
+| [AC-sec.md](acceptance-criteria/AC-sec.md)                 | AC-SEC-001（baseUrl 白名单 + 隐私披露）        |
 
 ## 目录结构
 

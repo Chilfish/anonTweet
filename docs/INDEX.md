@@ -83,15 +83,16 @@ docs/
 
 ## 四、验证体系（verify/）
 
-| 文档                                                        | 说明                                                                        |
-| ----------------------------------------------------------- | --------------------------------------------------------------------------- |
-| [Verification Suite](../verify/README.md)                   | 验证套件 — Vitest 三层架构 + Fixture 库 + API 测试 SDK                      |
-| [Testing Infra Refactor](archive/testing-infra-refactor.md) | 测试验证基建重构 — 审计报告 + 三层架构行动计划（Phase A~E，已完成，已归档） |
-| [AI Vision AC](../verify/acceptance-criteria/AC-vision.md)  | AI 视觉描述验收标准（AC-VISION-001~012）                                    |
-| [Resolver AC](../verify/acceptance-criteria/AC-resolver.md) | 翻译选择链收敛验收标准（AC-RESOLVER-001）                                   |
-| [Decouple AC](../verify/acceptance-criteria/AC-decouple.md) | GET 与 AI 翻译解耦 + 服务端 AI 超时（AC-DECOUPLE-001~002）                  |
-| [Security AC](../verify/acceptance-criteria/AC-sec.md)      | baseUrl 白名单 + 隐私披露（AC-SEC-001）                                     |
-| 存档：差距分析 / 二期计划                                   | `archive/verification-gap-analysis.md`（首轮差距分析，Phase 2 已完成）      |
+| 文档                                                                 | 说明                                                                        |
+| -------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| [Verification Suite](../verify/README.md)                            | 验证套件 — Vitest 三层架构 + Fixture 库 + API 测试 SDK                      |
+| [Testing Infra Refactor](archive/testing-infra-refactor.md)          | 测试验证基建重构 — 审计报告 + 三层架构行动计划（Phase A~E，已完成，已归档） |
+| [AI Vision AC](../verify/acceptance-criteria/AC-vision.md)           | AI 视觉描述验收标准（AC-VISION-001~012）                                    |
+| [Resolver AC](../verify/acceptance-criteria/AC-resolver.md)          | 翻译选择链收敛验收标准（AC-RESOLVER-001）                                   |
+| [Decouple AC](../verify/acceptance-criteria/AC-decouple.md)          | GET 与 AI 翻译解耦 + 服务端 AI 超时（AC-DECOUPLE-001~002）                  |
+| [Security AC](../verify/acceptance-criteria/AC-sec.md)               | baseUrl 白名单 + 隐私披露（AC-SEC-001）                                     |
+| [Screenshot/Perf AC](../verify/acceptance-criteria/AC-screenshot.md) | 截图验收（AC-SHOT-001~004）+ 渲染性能基线（AC-PERF-001）                    |
+| 存档：差距分析 / 二期计划                                            | `archive/verification-gap-analysis.md`（首轮差距分析，Phase 2 已完成）      |
 
 ---
 
