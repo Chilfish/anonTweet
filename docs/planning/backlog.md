@@ -34,6 +34,7 @@
 - [ ] [ux] GET 与 AI 翻译解耦 + AI 端点流式化（原 backlog L26 前半采纳；关联：review P1-2；文件：`app/routes/api/tweet/get.ts`、`app/routes/api/ai/ai-translation.ts`、客户端 hooks；工作量：3-5 人日 / 风险：高，数据流变更涉及编辑器联动）— GET 默认只回缓存/原文；翻译走 `/api/ai-translation` 客户端触发；服务端 AI 调用加 `AbortController.timeout`
   > ✅ **解耦部分完成（2026-08-17）**：AC-DECOUPLE-001~002 落地且 verify 绿；GET 移除内联 `autoTranslateTweet`（`tweet/get.ts` 源码扫描无 LLM 调用），客户端 `use-auto-translate.ts` 触发 `/api/ai-translation`（不阻塞首屏），plain 截图路由两步走；`app/lib/ai-timeout.ts` 统一超时（默认 120s，`AI_TRANSLATION_TIMEOUT_MS` 可覆盖）。**剩余：AI 端点 stream 化按计划并入阶段三（与「编辑器兼容 stream」L25 合并）**。
 - [ ] [ux] 长链推文/大量媒体渲染与截图性能（原 backlog L19 采纳；关联：review 阶段二；文件：`verify/acceptance-criteria/AC-screenshot.md` 扩、`plain.tsx`、`plain-ig.tsx`；工作量：2-3 人日 / 风险：中）— 与 ADR-008 媒体代理统一（S7 待实施）耦合，一并做
+  > **实施中（2026-08-17）**：AC-PERF-001 契约（AC-screenshot.md v1.2）：长链 fixture 离线结构预算（HTML ≤1MB / img 全惰性 / 无脚本注入）+ `renderToString` 中位数回归阈值（基线 25ms 线程 / 2ms 单推 ×5，绝对兜底 500/150ms）；媒体/头像补 `loading="lazy"`。ADR-008 媒体代理统一保持 S7 待实施（独立于本 AC）。
 - [ ] [refactor] 可观测性：翻译耗时/缓存命中率/RettiwtPool 状态结构化日志（原 backlog L26 后半采纳；关联：review 阶段二；文件：`app/lib/translation/`、`app/lib/SmartPool.ts`；工作量：2 人日）— 为阶段三缓存规模化提供指标
 - [x] [ux] 隐私加固：`baseUrl` 白名单 + 隐私页披露（关联：review P1-3；文件：`app/routes/api/ai/vision.ts`、`ai-translation.ts`、设置页；工作量：1-2 人日）— 仅放行已知提供商域名；设置页声明"Key 经服务器中继" — ✅ 完成（2026-08-17）：`app/lib/ai-base-url.ts` 白名单（无 baseUrl 放行 / 官方域名 hostname 精确匹配 / 未知+IP+后缀伪装拒绝）；ai-translation（twitter+ins）、vision（generate+translate）、ai-test 三处边界校验，拒绝 400；设置页披露 Key 中继 + 白名单说明（AC-SEC-001 落地，verify 绿）
 
