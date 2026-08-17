@@ -1,6 +1,7 @@
 import type { Route } from './+types/ai-translation'
 import type { AITranslationSchema } from '~/lib/validations/tweet'
 import { data } from 'react-router'
+import { isAllowedAIBaseUrl } from '~/lib/ai-base-url'
 import { normalizeAIError } from '~/lib/ai-error'
 import { autoTranslateTweet } from '~/lib/AITranslation'
 import { models } from '~/lib/constants'
@@ -66,6 +67,16 @@ async function handleIGTranslation(args: Extract<AITranslationSchema, { type: 'i
       success: false,
       error: 'Missing apiKey or model',
       status: 400,
+    })
+  }
+
+  // AC-SEC-001：baseUrl 白名单校验（SSRF/滥用面）
+  if (!isAllowedAIBaseUrl(baseUrl)) {
+    return data({
+      success: false,
+      error: 'baseUrl not allowed',
+      status: 400,
+      message: 'baseUrl 不在白名单内，仅支持官方提供商域名（AC-SEC-001）',
     })
   }
 
@@ -160,6 +171,16 @@ async function handleTweetTranslation(args: Extract<AITranslationSchema, { type?
         error: 'Invalid request',
         status: 400,
         message: 'Invalid request data: API key or model is missing',
+      })
+    }
+
+    // AC-SEC-001：baseUrl 白名单校验
+    if (!isAllowedAIBaseUrl(baseUrl)) {
+      return data({
+        success: false,
+        error: 'baseUrl not allowed',
+        status: 400,
+        message: 'baseUrl 不在白名单内，仅支持官方提供商域名（AC-SEC-001）',
       })
     }
 

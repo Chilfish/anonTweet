@@ -2,6 +2,7 @@ import type { Route } from './+types/vision'
 import type { EnrichedTweet } from '~/types'
 import { data } from 'react-router'
 import { z } from 'zod'
+import { isAllowedAIBaseUrl } from '~/lib/ai-base-url'
 import { normalizeAIError } from '~/lib/ai-error'
 import { models } from '~/lib/constants'
 import { getProviderStrategy } from '~/lib/providers'
@@ -131,6 +132,15 @@ async function handleGenerate(args: z.infer<typeof generateSchema>) {
     translationGlossary,
   } = args
   try {
+    // AC-SEC-001：baseUrl 白名单校验（SSRF/滥用面）
+    if (!isAllowedAIBaseUrl(baseUrl)) {
+      return data({
+        success: false,
+        error: 'baseUrl not allowed',
+        status: 400,
+        message: 'baseUrl 不在白名单内，仅支持官方提供商域名（AC-SEC-001）',
+      })
+    }
     const visionInfo = await runImageVision({
       tweet: tweet as Parameters<typeof runImageVision>[0]['tweet'],
       mediaIndexes,
@@ -199,6 +209,15 @@ async function handleTranslate(args: z.infer<typeof translateSchema>) {
     translationGlossary,
   } = args
   try {
+    // AC-SEC-001：baseUrl 白名单校验
+    if (!isAllowedAIBaseUrl(baseUrl)) {
+      return data({
+        success: false,
+        error: 'baseUrl not allowed',
+        status: 400,
+        message: 'baseUrl 不在白名单内，仅支持官方提供商域名（AC-SEC-001）',
+      })
+    }
     const modelConfig = models.find(m => m.name === model)
     const resolvedProvider = provider || modelConfig?.provider || 'google'
     const strategy = getProviderStrategy(resolvedProvider)

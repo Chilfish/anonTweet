@@ -3,6 +3,7 @@ import type { Route } from './+types/ai-test'
 import { generateText } from 'ai'
 import { data } from 'react-router'
 import z from 'zod'
+import { isAllowedAIBaseUrl } from '~/lib/ai-base-url'
 import { normalizeAIError } from '~/lib/ai-error'
 import { models } from '~/lib/constants'
 import { getProviderStrategy, getThinkingConfig } from '~/lib/providers'
@@ -36,6 +37,16 @@ export async function action({ request }: Route.ActionArgs) {
       error: 'Missing parameters',
       status: 400,
       message: 'Model and API Key are required',
+    })
+  }
+
+  // AC-SEC-001：baseUrl 白名单校验（SSRF/滥用面）
+  if (!isAllowedAIBaseUrl(baseUrl)) {
+    return data({
+      success: false,
+      error: 'baseUrl not allowed',
+      status: 400,
+      message: 'baseUrl 不在白名单内，仅支持官方提供商域名（AC-SEC-001）',
     })
   }
 
