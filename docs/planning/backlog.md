@@ -35,6 +35,7 @@
   > ✅ **解耦部分完成（2026-08-17）**：AC-DECOUPLE-001~002 落地且 verify 绿；GET 移除内联 `autoTranslateTweet`（`tweet/get.ts` 源码扫描无 LLM 调用），客户端 `use-auto-translate.ts` 触发 `/api/ai-translation`（不阻塞首屏），plain 截图路由两步走；`app/lib/ai-timeout.ts` 统一超时（默认 120s，`AI_TRANSLATION_TIMEOUT_MS` 可覆盖）。**剩余：AI 端点 stream 化按计划并入阶段三（与「编辑器兼容 stream」L25 合并）**。
 - [x] [ux] 长链推文/大量媒体渲染与截图性能（原 backlog L19 采纳；关联：review 阶段二；文件：`verify/acceptance-criteria/AC-screenshot.md` 扩、`plain.tsx`、`plain-ig.tsx`；工作量：2-3 人日 / 风险：中）— 与 ADR-008 媒体代理统一（S7 待实施）耦合，一并做 — ✅ 完成（2026-08-17）：AC-PERF-001 落地（AC-screenshot.md v1.2，verify 绿）；基线实测 15 条线程 SSR 中位 20ms / 单推 1ms，回归阈值 = max(绝对兜底 500/150ms, 基线×5)；媒体/头像补 `loading="lazy"`（长链不并发拉全量图）。ADR-008 媒体代理统一保持 S7 待实施（独立于本 AC）
 - [ ] [refactor] 可观测性：翻译耗时/缓存命中率/RettiwtPool 状态结构化日志（原 backlog L26 后半采纳；关联：review 阶段二；文件：`app/lib/translation/`、`app/lib/SmartPool.ts`；工作量：2 人日）— 为阶段三缓存规模化提供指标
+  > **实施中（2026-08-17）**：AC-OBS-001 契约（`verify/acceptance-criteria/AC-obs.md`）；`app/lib/obs-log.ts` 统一单行 JSON 日志（ai.translate / ai.translate.ig / cache.get / pool.rotate / pool.exhaust），翻译计时 + 缓存命中 + 池状态接入，敏感字段（apiKey/Cookie/baseUrl）一律不入日志。
 - [x] [ux] 隐私加固：`baseUrl` 白名单 + 隐私页披露（关联：review P1-3；文件：`app/routes/api/ai/vision.ts`、`ai-translation.ts`、设置页；工作量：1-2 人日）— 仅放行已知提供商域名；设置页声明"Key 经服务器中继" — ✅ 完成（2026-08-17）：`app/lib/ai-base-url.ts` 白名单（无 baseUrl 放行 / 官方域名 hostname 精确匹配 / 未知+IP+后缀伪装拒绝）；ai-translation（twitter+ins）、vision（generate+translate）、ai-test 三处边界校验，拒绝 400；设置页披露 Key 中继 + 白名单说明（AC-SEC-001 落地，verify 绿）
 
 ### 阶段三（7-8 周+）护城河：Vision 闭环、流式编辑器、Story 接入、缓存规模化

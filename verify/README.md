@@ -52,6 +52,7 @@ SKIP 语义：无 `TWEET_KEYS` / `INS_COOKIES` 等外部凭据时，相关集成
 | [AC-resolver.md](acceptance-criteria/AC-resolver.md)       | AC-RESOLVER-001（决策链收敛）                  |
 | [AC-decouple.md](acceptance-criteria/AC-decouple.md)       | AC-DECOUPLE-001~002（GET 解耦 + AI 超时）      |
 | [AC-sec.md](acceptance-criteria/AC-sec.md)                 | AC-SEC-001（baseUrl 白名单 + 隐私披露）        |
+| [AC-obs.md](acceptance-criteria/AC-obs.md)                 | AC-OBS-001（可观测性结构化日志）               |
 
 ## 目录结构
 
