@@ -71,3 +71,55 @@ export function resolveAIEntitiesForDisplay(base: Entity[], ai: Entity[]) {
   }
   return mergeTranslationsToField(base, ai, 'aiTranslation')
 }
+
+export interface DeriveTranslationSource {
+  /** TranslationStore 手动翻译（含 index: -1 句首补充实体） */
+  manual?: Entity[] | null
+  /** 旧版独立 AI 翻译数组（autoTranslationEntities） */
+  legacyAI?: Entity[] | null
+}
+
+export interface DeriveTranslationOptions {
+  /** 仅对指定类型实体计算，其余原样返回（Alt 编辑器只处理 media_alt） */
+  types?: Entity['type'][]
+}
+
+/**
+ * 单一实现的手动翻译选择链（AC-RESOLVER-001）：
+ *
+ *   manual(按 index 匹配，命中即胜出，即使为空串) > 实体内联 aiTranslation >
+ *   legacy autoTranslationEntities(aiTranslation || translation || text) > 原文
+ *
+ * 两个编辑器 hook（use-translation-editor-logic / use-alt-translation-logic）与显示层
+ * 共享此实现，避免三处选择链漂移（review P2-3 / postmortem #009 同类问题）。
+ * 纯函数：不修改入参；decode / 字典增强属 UI 层职责，不在本函数内处理。
+ */
+export function deriveManualTranslation(
+  base: Entity[],
+  source: DeriveTranslationSource = {},
+  opts: DeriveTranslationOptions = {},
+): Entity[] {
+  const { manual, legacyAI } = source
+  const { types } = opts
+
+  const manualIndex = new Map<number, Entity>()
+  manual?.forEach(e => manualIndex.set(e.index, e))
+  const legacyIndex = new Map<number, Entity>()
+  legacyAI?.forEach(e => legacyIndex.set(e.index, e))
+
+  return base.map((entity) => {
+    if (types && !types.includes(entity.type))
+      return entity
+
+    const manualMatch = manualIndex.get(entity.index)
+    if (manualMatch !== undefined)
+      return { ...entity, translation: manualMatch.translation || '' }
+
+    if (entity.aiTranslation)
+      return { ...entity, translation: entity.aiTranslation }
+
+    const legacyMatch = legacyIndex.get(entity.index)
+    const legacyText = legacyMatch?.translation || legacyMatch?.aiTranslation || legacyMatch?.text
+    return legacyText ? { ...entity, translation: legacyText } : entity
+  })
+}

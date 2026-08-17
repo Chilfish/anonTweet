@@ -5,7 +5,7 @@ import { fetcher } from '~/lib/fetcher'
 import { syncTranslationData } from '~/lib/service/translationSync'
 import { useAIConfig, useResolvedAIConfig, useTranslationActions } from '~/lib/stores/hooks'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
-import { shouldRenderTranslatedEntitiesDirectly } from '~/lib/translation/resolveEntities'
+import { deriveManualTranslation, shouldRenderTranslatedEntitiesDirectly } from '~/lib/translation/resolveEntities'
 import { decodeHtmlEntities, toast } from '~/lib/utils'
 
 // 纯函数：初始化实体数据（核心业务逻辑）
@@ -17,32 +17,12 @@ function prepareInitialEntities(
   // 深拷贝防止引用污染
   let baseEntities: Entity[] = JSON.parse(JSON.stringify(originalTweet.entities || []))
 
-  // 1. 策略合并：
-  // 优先级 A: 本地保存的手动翻译 (TranslationStore)
-  if (existingTranslation && existingTranslation.length > 0) {
-    baseEntities = baseEntities.map((original) => {
-      const found = existingTranslation.find(e => e.index === original.index)
-      return found ? { ...original, translation: found.translation } : original
-    })
-  }
-  // 优先级 B: 推文自带的 AI 翻译字段 (aiTranslation)
-  else if (baseEntities.some(e => !!e.aiTranslation)) {
-    baseEntities = baseEntities.map((entity) => {
-      if (entity.aiTranslation) {
-        return { ...entity, translation: entity.aiTranslation }
-      }
-      return entity
-    })
-  }
-  // 优先级 C: 兼容旧数据的独立数组 (autoTranslationEntities)
-  else if (originalTweet.autoTranslationEntities?.length) {
-    const ai = originalTweet.autoTranslationEntities
-    baseEntities = baseEntities.map((original) => {
-      const found = ai.find(e => e.index === original.index)
-      const translation = found?.aiTranslation || found?.translation || found?.text
-      return found ? { ...original, translation } : original
-    })
-  }
+  // 1. 策略合并：单一选择链实现（AC-RESOLVER-001）
+  // manual(按 index，命中即胜出) > 实体内联 aiTranslation > 旧版 autoTranslationEntities > 原文
+  baseEntities = deriveManualTranslation(baseEntities, {
+    manual: existingTranslation,
+    legacyAI: originalTweet.autoTranslationEntities,
+  })
 
   // 2. 字典增强
   baseEntities = baseEntities.map((entity) => {

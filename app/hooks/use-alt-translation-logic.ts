@@ -5,6 +5,7 @@ import { fetcher } from '~/lib/fetcher'
 import { syncTranslationData } from '~/lib/service/translationSync'
 import { useAIConfig, useResolvedAIConfig, useTranslationActions } from '~/lib/stores/hooks'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
+import { deriveManualTranslation } from '~/lib/translation/resolveEntities'
 import { decodeHtmlEntities, toast } from '~/lib/utils'
 
 export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
@@ -26,39 +27,18 @@ export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
     const manual = getTranslation(tweetId)
     const baseEntities = originalTweet.entities || []
 
-    // 决定数据源优先级：人工保存 > 新版 AI (aiTranslation) > 旧版 AI (autoTranslationEntities) > 原文
-    const mergedEntities = baseEntities.map((entity) => {
-      // 只有 media_alt 需要处理
-      if (entity.type !== 'media_alt')
-        return entity
-
-      let translation = ''
-
-      // 1. 优先取人工翻译
-      if (manual && manual.length > 0) {
-        const match = manual.find(e => e.index === entity.index)
-        if (match)
-          translation = match.translation || ''
-      }
-
-      // 2. 其次取新版 AI 翻译
-      if (!translation && entity.aiTranslation) {
-        translation = entity.aiTranslation
-      }
-
-      // 3. 再次取旧版 AI 翻译兼容
-      if (!translation && originalTweet.autoTranslationEntities?.length) {
-        const match = originalTweet.autoTranslationEntities.find(e => e.index === entity.index)
-        if (match)
-          translation = match.aiTranslation || match.translation || match.text || ''
-      }
-
+    // 单一选择链实现（AC-RESOLVER-001）：manual > inline aiTranslation > autoTranslationEntities > 原文
+    // 仅处理 media_alt 类型（Alt 编辑器职责）
+    const mergedEntities = deriveManualTranslation(
+      baseEntities,
+      { manual, legacyAI: originalTweet.autoTranslationEntities },
+      { types: ['media_alt'] },
+    ).map((entity) => {
       // 解码实体，防止 HTML 字符被再次编码
-      if (translation) {
-        translation = decodeHtmlEntities(translation)
+      if (entity.translation) {
+        return { ...entity, translation: decodeHtmlEntities(entity.translation) }
       }
-
-      return { ...entity, translation }
+      return entity
     })
 
     setEditingEntities(mergedEntities)
