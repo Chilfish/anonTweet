@@ -111,7 +111,11 @@ docs/                    # 技术文档与规范（见 docs/INDEX.md：features/
 
 **Instagram 集成（5 阶段）+ 翻译子系统 + verify 验收框架**：✅ 已完成（2026-05 ~ 2026-07，见 `docs/archive/action-plan.md`）。
 
-**当前阶段 — verify 套件二期 + 测试验证基建重构**：✅ 已完成（Phase 2 S5~S10 与 Vitest 三层架构，见 `docs/archive/action-plan.md`；Phase 2 底稿已归档 `docs/archive/next-steps.md`）。
+**verify 套件二期 + 测试验证基建重构**：✅ 已完成（Phase 2 S5~S10 与 Vitest 三层架构，见 `docs/archive/action-plan.md`）。
+
+**当前阶段 — 三阶段排期·阶段一（止血）**：✅ 已完成（2026-08-17，见 `docs/reviews/review-2026-08-17-apple-critique.md` 与 `docs/planning/backlog.md`）。门禁命令统一（`bun run test` + 集成无服务器 skipIf）、SmartPool 限流/冷却/失败隔离（单测 8 用例）、Resolver 收敛（AC-RESOLVER-001）、catch any 清零、Bili 隐藏入口卫生化（ENABLE_BILI 默认开）。验收：`bun run test` 211/211、`bun test --parallel=2` 0 fail、`verify --exit-on-fail` 218 PASS、lint 0 error。
+
+**下一阶段 — 阶段二（核心体验，3-6 周，按 backlog 排期）**：GET 与 AI 翻译解耦 + 流式化、长链/截图性能基线（AC-PERF-001）、翻译可观测性、baseUrl 白名单（AC-SEC-001）。
 
 ## GitHub CLI Flow
 
