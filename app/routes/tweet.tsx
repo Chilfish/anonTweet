@@ -6,12 +6,12 @@ import { useNavigate, useParams } from 'react-router'
 import useSWR from 'swr'
 import { MyTweet } from '~/components/tweet/Tweet'
 import { TweetHeader } from '~/components/tweet/TweetHeader'
+import { useAutoTranslateTweets } from '~/hooks/use-auto-translate'
 import { useTweetOperations } from '~/hooks/use-tweet-operations'
 import { fetcher } from '~/lib/fetcher'
 import { TweetNotFound, TweetSkeleton } from '~/lib/react-tweet'
 import { getTweets } from '~/lib/service/getTweet'
-import { useAIConfig, useMainTweet, useResolvedAIConfig, useTranslationActions, useTweets } from '~/lib/stores/hooks'
-import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
+import { useMainTweet, useTranslationActions, useTweets } from '~/lib/stores/hooks'
 import { decodeHtmlEntities, extractTweetId } from '~/lib/utils'
 
 export async function loader({ params, request }: Route.LoaderArgs) {
@@ -127,41 +127,20 @@ export default function TweetPage({ loaderData }: Route.ComponentProps) {
 
   const tweetOperations = useTweetOperations()
 
-  const {
-    enableAITranslation,
-    translationGlossary,
-  } = useAIConfig()
-  const aiConfig = useResolvedAIConfig()
-
   const { setCommentIds } = useTranslationActions()
-  const getFormattedEntries = useTranslationDictionaryStore(state => state.getFormattedEntries)
 
+  // GET 已解耦（AC-DECOUPLE-001）：只拉取缓存/原文，AI 翻译由 useAutoTranslateTweets 触发
   const { data: tweets, error, isLoading } = useSWR<TweetData>(
     (tweetId && isStoreReady) ? tweetId : null,
-    () => {
-      const dictEntries = getFormattedEntries()
-      const combinedGlossary = [dictEntries, translationGlossary].filter(Boolean).join('\n')
-
-      const { apiKey, model, provider, baseUrl, thinkingLevel } = aiConfig
-
-      return fetchTweetData({
-        tweetId: tweetId!,
-        enableAITranslation,
-        translationGlossary: combinedGlossary,
-        apiKey,
-        model,
-        provider,
-        baseUrl,
-        thinkingLevel,
-        force: false,
-      })
-    },
+    () => fetchTweetData({ tweetId: tweetId! }),
     {
       revalidateIfStale: false,
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
     },
   )
+
+  useAutoTranslateTweets(tweets)
 
   useEffect(() => {
     if (tweets && tweets.length > 0 && tweetId) {

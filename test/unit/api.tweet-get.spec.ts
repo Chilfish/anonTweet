@@ -11,10 +11,6 @@ vi.mock('~/lib/service/getTweet.server', () => ({
   insertToTweetDB: vi.fn(async () => {}),
 }))
 
-vi.mock('~/lib/AITranslation', () => ({
-  autoTranslateTweet: vi.fn(async () => []),
-}))
-
 describe('/api/tweet/get/:id', () => {
   it('returns 400 on invalid payload', async () => {
     const { action } = await import('~/routes/api/tweet/get')
@@ -45,5 +41,26 @@ describe('/api/tweet/get/:id', () => {
     const res = await action({ request: req } as any)
     expect(Array.isArray(res)).toBe(true)
     expect((res as any[])[0]).toMatchObject({ id_str: '1' })
+  })
+
+  it('returns tweets without inline AI translation even when enableAITranslation is true (AC-DECOUPLE-001)', async () => {
+    const { action } = await import('~/routes/api/tweet/get')
+
+    const req = new Request('http://localhost/api/tweet/get/1', {
+      method: 'POST',
+      body: JSON.stringify({
+        tweetId: '1',
+        enableAITranslation: true,
+        apiKey: 'k',
+        model: 'm',
+      }),
+      headers: { 'content-type': 'application/json' },
+    })
+
+    const res = await action({ request: req } as any)
+    expect(Array.isArray(res)).toBe(true)
+    const tweet = (res as any[])[0]
+    // 解耦后 GET 不注入 aiTranslation（翻译走 /api/ai-translation）
+    expect(tweet.entities).toEqual([])
   })
 })

@@ -1,6 +1,6 @@
 import type { Route } from './+types/tweet'
 import type { GetTweetSchema } from '~/lib/validations/tweet'
-import type { TweetData } from '~/types'
+import type { EnrichedTweet, TweetData } from '~/types'
 import axios from 'axios'
 import { Await, redirect, useLoaderData } from 'react-router'
 import { MyPlainTweet } from '~/components/tweet/PlainTweet'
@@ -13,6 +13,55 @@ export function meta() {
     { title: '推文截图 | Anon Tweet' },
     { name: 'robots', content: 'noindex, follow' },
   ]
+}
+
+/**
+ * 截图 SSR 两步走（阶段二任务 1 / AC-DECOUPLE-001）：
+ * GET `/api/tweet/get` 只回原文/缓存，翻译统一经 `/api/ai-translation`
+ * 用服务端 env key 显式触发（不再依赖 GET 内联 LLM）。
+ */
+async function translateTweetsForScreenshot(tweets: TweetData, baseUrl: string): Promise<void> {
+  if (!env.GEMINI_API_KEY || !env.GEMINI_MODEL)
+    return
+
+  const apiUrl = new URL('/api/ai-translation', baseUrl).toString()
+  const seen = new Set<string>()
+
+  async function translateChain(tweet: EnrichedTweet) {
+    if (seen.has(tweet.id_str))
+      return
+    seen.add(tweet.id_str)
+
+    const isZhTweet = tweet.lang === 'zh'
+    const hasTranslation = tweet.entities?.some(e => !!e.aiTranslation)
+      || !!tweet.autoTranslationEntities?.length
+    if (hasTranslation || isZhTweet)
+      return
+
+    try {
+      const { data } = await axios.post(apiUrl, {
+        tweet,
+        enableAITranslation: true,
+        apiKey: env.GEMINI_API_KEY || '',
+        model: env.GEMINI_MODEL || '',
+        translationGlossary: '',
+        force: false,
+      })
+      if (data?.success && data?.data?.entities) {
+        tweet.entities = data.data.entities
+        tweet.autoTranslationEntities = undefined
+      }
+    }
+    catch (error: unknown) {
+      console.error(`[plain] AI translate tweet ${tweet.id_str} failed:`, error)
+    }
+  }
+
+  for (const tweet of tweets) {
+    await translateChain(tweet)
+    if (tweet.quotedTweet)
+      await translateChain(tweet.quotedTweet)
+  }
 }
 
 export async function loader({
@@ -41,12 +90,11 @@ export async function loader({
 
   const { data: tweets } = await axios.post<TweetData>(apiUrl, {
     tweetId,
-    translationGlossary: '',
-    apiKey: env.GEMINI_API_KEY || '',
-    model: env.GEMINI_MODEL || '',
-    enableAITranslation: enableTranslation,
-    force: false,
   } satisfies GetTweetSchema)
+
+  if (enableTranslation) {
+    await translateTweetsForScreenshot(tweets, baseUrl)
+  }
 
   const isRetweet = tweets[0] && tweets[0].retweetedOrignalId && tweets[0].retweetedOrignalId !== tweets[0].id_str
 

@@ -1,15 +1,20 @@
 import type { Route } from './+types/get'
-import type { TweetData } from '~/types'
 import { data } from 'react-router'
 import z from 'zod'
-import { autoTranslateTweet } from '~/lib/AITranslation'
-import { models } from '~/lib/constants'
-import { setLocalCache } from '~/lib/localCache'
 import { getTweets } from '~/lib/service/getTweet'
-import { getLocalTweet, insertToTweetDB } from '~/lib/service/getTweet.server'
+import { getLocalTweet } from '~/lib/service/getTweet.server'
 import { extractTweetId } from '~/lib/utils'
 import { getTweetSchema } from '~/lib/validations/tweet'
 
+/**
+ * POST /api/tweet/get/:id — 拉取推文（DB 缓存 → 原文）。
+ *
+ * 阶段二任务 1（review P1-2 / AC-DECOUPLE-001）：GET 不再内联 AI 翻译——
+ * 开启 AI 翻译时首屏不再阻塞等待 LLM 完整返回。翻译统一由客户端触发
+ * `/api/ai-translation`（见 app/hooks/use-auto-translate.ts），截图 SSR 走
+ * `app/routes/plain.tsx` 的两步流程。schema 中的 AI 字段为旧客户端兼容保留，
+ * 本路由不读取。
+ */
 export async function action({ request }: Route.ActionArgs) {
   const jsonData = await request.json()
   const submission = getTweetSchema.safeParse(jsonData)
@@ -24,32 +29,14 @@ export async function action({ request }: Route.ActionArgs) {
     })
   }
 
-  const {
-    tweetId: _id,
-    enableAITranslation,
-    apiKey,
-    model,
-    provider,
-    baseUrl,
-    thinkingLevel,
-    translationGlossary,
-  } = submission.data || {
-    tweetId: '',
-    enableAITranslation: false,
-    apiKey: '',
-    model: '',
-    translationGlossary: '',
-  }
-
-  const tweetId = extractTweetId(_id)
+  const tweetId = extractTweetId(submission.data.tweetId)
 
   if (!tweetId) {
     return []
   }
 
-  let tweets: TweetData = []
   try {
-    tweets = await getTweets(tweetId, getLocalTweet)
+    return await getTweets(tweetId, getLocalTweet)
   }
   catch (error: unknown) {
     console.log(`get tweet ${tweetId}`, error)
@@ -60,71 +47,6 @@ export async function action({ request }: Route.ActionArgs) {
       message: error instanceof Error ? error.message : 'Unknown error',
     })
   }
-
-  await Promise.all(
-    tweets.map(async (tweet) => {
-      const isZhTweet = tweet.lang === 'zh'
-      const hasTranslation = tweet.entities?.some(e => !!e.aiTranslation) || !!tweet.autoTranslationEntities?.length
-      if (hasTranslation || !enableAITranslation || isZhTweet) {
-        return
-      }
-
-      if (!apiKey || !model) {
-        console.warn('Invalid request data: API key or model is missing')
-        return
-      }
-
-      const modelConfig = models.find(m => m.name === model)
-      const resolvedProvider = provider || modelConfig?.provider || 'google'
-
-      try {
-        const [mainEntities, quotedEntities] = await Promise.all([
-          autoTranslateTweet({
-            tweet,
-            apiKey,
-            model,
-            provider: resolvedProvider,
-            baseUrl,
-            thinkingLevel,
-            translationGlossary,
-          }),
-          tweet.quotedTweet
-            ? autoTranslateTweet({
-                tweet: tweet.quotedTweet,
-                apiKey,
-                model,
-                provider: resolvedProvider,
-                baseUrl,
-                thinkingLevel,
-                translationGlossary,
-              })
-            : Promise.resolve(null),
-        ])
-
-        tweet.entities = mainEntities
-        tweet.autoTranslationEntities = undefined // 清理旧字段
-
-        if (tweet.quotedTweet && quotedEntities) {
-          tweet.quotedTweet.entities = quotedEntities
-          tweet.quotedTweet.autoTranslationEntities = undefined // 清理旧字段
-        }
-
-        await insertToTweetDB([tweet])
-
-        // 无 DB / DB 未命中时，tweet 可能来自 local cache 的“未翻译版本”；
-        // 这里主动刷新缓存，避免后续请求重复翻译导致变慢。
-        await setLocalCache({ id: tweet.id_str, type: 'tweet', value: tweet })
-        if (tweet.quotedTweet) {
-          await setLocalCache({ id: tweet.quotedTweet.id_str, type: 'tweet', value: tweet.quotedTweet })
-        }
-      }
-      catch (e) {
-        console.error(`Failed to translate tweet ${tweet.id_str}`, e)
-      }
-    }),
-  )
-
-  return tweets
 }
 
 export async function loader({

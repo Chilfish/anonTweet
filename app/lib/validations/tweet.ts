@@ -20,16 +20,24 @@ export const tweetSchema = z.discriminatedUnion('intent', [
   }),
 ])
 
+/**
+ * GET /api/tweet/get 请求 Schema。
+ *
+ * 阶段二任务 1（AC-DECOUPLE-001）起，GET 不再内联 AI 翻译：以下 AI 字段
+ * （enableAITranslation / apiKey / model / provider / baseUrl / thinkingLevel /
+ * translationGlossary）为旧客户端兼容而保留，但路由不再读取——翻译统一走
+ * POST /api/ai-translation，由客户端/截图 SSR 显式触发。
+ */
 export const getTweetSchema = z.object({
   tweetId: z.string().min(1),
-  enableAITranslation: z.boolean().default(false),
+  enableAITranslation: z.boolean().optional(),
   apiKey: z.string().optional(),
   model: z.string().optional(),
   provider: z.enum(['google', 'deepseek', 'openrouter']).optional(),
   baseUrl: z.string().optional(),
   thinkingLevel: z.enum(['minimal', 'low', 'medium', 'high', 'max']).optional(),
   translationGlossary: z.string().optional(),
-  force: z.boolean().default(false),
+  force: z.boolean().optional(),
 })
 
 export type GetTweetSchema = z.infer<typeof getTweetSchema>
