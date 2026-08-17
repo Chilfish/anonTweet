@@ -9,17 +9,28 @@ import { getLocalCache, setLocalCache } from '../localCache'
 export const getLocalTweet = (tweetId: string) => getLocalCache({ id: tweetId, type: 'tweet', getter: () => getDBTweet(tweetId) })
 
 export function mergeTranslationEntities(enrichedTweet: EnrichedTweet, entities: TranslationEntity[]) {
+  const baseIndexSet = new Set(enrichedTweet.entities.map(e => e.index))
+
+  // 1. 按 index 对齐覆盖翻译
   entities.forEach((entity) => {
+    if (!baseIndexSet.has(entity.index))
+      return
     const idx = enrichedTweet.entities.findIndex(e => e.index === entity.index)
     if (idx > -1) {
       enrichedTweet.entities[idx]!.translation = entity.translation
     }
-
-    const isAlts = entity.type === 'media_alt'
-    if (isAlts) {
-      enrichedTweet.entities.push(entity)
-    }
   })
+
+  // 2. base 中不存在索引的额外实体（如句首补充 index: -1）：句首补充插入最前，
+  //    其余（media_alt / AI 流片段等）按 index 排序追加到末尾，避免读取时丢数据
+  const extras = entities
+    .filter(e => !baseIndexSet.has(e.index))
+    .sort((a, b) => a.index - b.index)
+  const prepends = extras.filter(e => e.index < 0)
+  const tails = extras.filter(e => e.index >= 0)
+
+  enrichedTweet.entities.unshift(...prepends)
+  enrichedTweet.entities.push(...tails)
 }
 
 export async function insertToTweetDB(tweets: EnrichedTweet[]) {

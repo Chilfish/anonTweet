@@ -1,6 +1,6 @@
 import type { Entity } from '~/types'
 import { describe, expect, it } from 'vitest'
-import { restoreEntities, serializeForAI } from '~/lib/react-tweet/utils/entitytParser'
+import { applyAITranslations, restoreEntities, serializeForAI } from '~/lib/react-tweet/utils/entitytParser'
 
 describe('entitytParser', () => {
   // AC-TRANS-001/002: serialize → restore 占位符往返（自 verify/translation.verifier 并入）
@@ -82,5 +82,36 @@ describe('entitytParser', () => {
       index: 0,
     })
     expect(restored[0]).not.toHaveProperty('aiTranslation')
+  })
+
+  it('applyAITranslations keeps the full stream when the AI result is not index-aligned (no fragment loss)', () => {
+    const base: Entity[] = [
+      { type: 'hashtag', text: '#めるサマー反田', index: 0, href: 'https://twitter.com/hashtag/x' } as any,
+      { type: 'text', text: ' で渡瀬の名前が出たと聞き...嬉しいねᕕ😄ᕗ', index: 1 },
+    ]
+    const { entityMap } = serializeForAI(base)
+    // AI 把占位符移到句中，restoreEntities 会产生 base 没有的 index（30000）
+    const ai = restoreEntities('听说在 <<__HASHTAG_0__>> 里出现了渡濑的名字…开心捏', entityMap, base)
+
+    expect(ai.length).toBe(3)
+    const merged = applyAITranslations(base, ai)
+
+    // 返回翻译流本身，不丢任何片段
+    expect(merged).toEqual(ai)
+    expect(merged.some(e => e.aiTranslation === '听说在 ')).toBe(true)
+    expect(merged.some(e => e.aiTranslation === ' 里出现了渡濑的名字…开心捏')).toBe(true)
+  })
+
+  it('applyAITranslations merges index-aligned AI results as before', () => {
+    const base: Entity[] = [
+      { type: 'text', text: 'hello', index: 0 },
+    ]
+    const ai: Entity[] = [
+      { type: 'text', text: 'hello', index: 0, aiTranslation: '你好' },
+    ]
+
+    expect(applyAITranslations(base, ai)).toEqual([
+      { ...base[0]!, aiTranslation: '你好' },
+    ])
   })
 })

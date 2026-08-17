@@ -2,6 +2,7 @@ import type { EnrichedTweet, Entity } from '~/types'
 import { useCallback, useRef, useState } from 'react'
 import { toastAIError } from '~/lib/ai-error-toast'
 import { fetcher } from '~/lib/fetcher'
+import { syncTranslationData } from '~/lib/service/translationSync'
 import { useAIConfig, useResolvedAIConfig, useTranslationActions } from '~/lib/stores/hooks'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 import { shouldRenderTranslatedEntitiesDirectly } from '~/lib/translation/resolveEntities'
@@ -150,11 +151,16 @@ export function useTranslationEditorLogic(originalTweet: EnrichedTweet) {
     setTranslation(tweetId, finalTranslations)
     setTranslationVisibility(tweetId, { body: true })
     setIsOpen(false)
+
+    // 持久化到服务端（DB tweetEntities + localCache 刷新），刷新页面后仍可恢复
+    // 手动翻译与句首补充（句首补充为 index: -1 的实体）。
+    syncTranslationData([originalTweet], { [tweetId]: finalTranslations })
+
     console.log('[Editor] Saved Translation Data:', {
       tweetId,
       entities: finalTranslations,
     })
-  }, [editingEntities, enablePrepend, prependText, setTranslation, setTranslationVisibility, tweetId])
+  }, [editingEntities, enablePrepend, prependText, setTranslation, setTranslationVisibility, tweetId, originalTweet])
 
   // AI 翻译逻辑
   const requestAITranslation = useCallback(async () => {

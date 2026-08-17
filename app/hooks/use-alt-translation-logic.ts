@@ -2,6 +2,7 @@ import type { EnrichedTweet, Entity } from '~/types'
 import { useCallback, useState } from 'react'
 import { toastAIError } from '~/lib/ai-error-toast'
 import { fetcher } from '~/lib/fetcher'
+import { syncTranslationData } from '~/lib/service/translationSync'
 import { useAIConfig, useResolvedAIConfig, useTranslationActions } from '~/lib/stores/hooks'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 import { decodeHtmlEntities, toast } from '~/lib/utils'
@@ -138,7 +139,9 @@ export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
     setTranslation(tweetId, editingEntities)
     setTranslationVisibility(tweetId, { alt: true })
     setIsOpen(false)
-  }, [tweetId, editingEntities, setTranslation, setTranslationVisibility])
+    // 持久化到服务端（DB tweetEntities + localCache 刷新），刷新页面后仍可恢复
+    syncTranslationData([originalTweet], { [tweetId]: editingEntities })
+  }, [tweetId, editingEntities, setTranslation, setTranslationVisibility, originalTweet])
 
   // 隐藏/删除显示
   const hideTranslations = useCallback(() => {

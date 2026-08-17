@@ -309,6 +309,14 @@ export function restoreEntities(
  * 将 AI 翻译结果合并回原始实体数组中
  */
 export function applyAITranslations(base: Entity[], ai: Entity[]): Entity[] {
+  // AI 结果可能是独立翻译流（结构与 base 不对齐，如占位符被移到句中，
+  // restoreEntities 会产生 base 没有的 index，例如 30000+ 的文本片段）。
+  // 此时直接返回翻译流，避免 index 对齐合并时把片段静默丢弃（与显示层的
+  // shouldRenderTranslatedEntitiesDirectly 逻辑一致）。
+  if (ai.length !== base.length || ai.some(e => !base.some(b => b.index === e.index))) {
+    return ai
+  }
+
   const aiMap = new Map(ai.map(e => [e.index, e]))
 
   return base.map((original) => {
