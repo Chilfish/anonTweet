@@ -51,13 +51,13 @@ export async function action({ request }: Route.ActionArgs) {
   try {
     tweets = await getTweets(tweetId, getLocalTweet)
   }
-  catch (error: any) {
+  catch (error: unknown) {
     console.log(`get tweet ${tweetId}`, error)
     return data({
       success: false,
       error: 'Tweet not found',
       status: 404,
-      message: error.message,
+      message: error instanceof Error ? error.message : 'Unknown error',
     })
   }
 
@@ -139,13 +139,17 @@ export async function loader({
     const tweets = await getTweets(tweetId)
     return tweets
   }
-  catch (error: any) {
-    console.log(`Error fetching tweets for ${tweetId}: ${error.message}`)
+  catch (error: unknown) {
+    console.log(`Error fetching tweets for ${tweetId}:`, error)
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    const status = error instanceof Error && 'status' in error
+      ? Number((error as { status: unknown }).status) || 500
+      : 500
     return data({
       error: 'Failed to fetch tweets',
-      message: `无法获取推文，${error.message}`,
+      message: `无法获取推文，${message}`,
     }, {
-      status: error.status || 500,
+      status,
     })
   }
 }

@@ -115,7 +115,7 @@ async function handleIGTranslation(args: Extract<AITranslationSchema, { type: 'i
 /**
  * Twitter 推文实体翻译（原逻辑不变）
  */
-async function handleTweetTranslation(args: Extract<AITranslationSchema, { tweet: any }>) {
+async function handleTweetTranslation(args: Extract<AITranslationSchema, { type?: 'twitter' }>) {
   const {
     tweet,
     enableAITranslation,
@@ -139,7 +139,7 @@ async function handleTweetTranslation(args: Extract<AITranslationSchema, { tweet
     }
 
     const isZhTweet = tweet.lang === 'zh'
-    const hasNewTranslation = tweet.entities?.some((e: any) => !!e.aiTranslation)
+    const hasNewTranslation = tweet.entities?.some(e => !!e.aiTranslation)
     const hasOldTranslation = !!tweet.autoTranslationEntities?.length
     const hasTranslation = hasNewTranslation || hasOldTranslation
 
@@ -187,7 +187,9 @@ async function handleTweetTranslation(args: Extract<AITranslationSchema, { tweet
         },
       })
     }
-    catch {}
+    catch (error: unknown) {
+      console.warn('[AI-Trans] local cache write failed:', error)
+    }
 
     return data({
       success: true,
