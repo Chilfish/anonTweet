@@ -2,7 +2,7 @@
 
 > 最后更新：2026-08-13
 > 评审对象：`feat/ai-vision` → PR #14（42 文件 / +3546 / 12 commit）
-> 上游：`docs/planning/ai-vision-plan.md`（原计划）｜ `docs/feature_ai_vision.md`（需求）
+> 上游：`docs/archive/ai-vision-plan.md`（原计划）｜ `docs/features/ai-vision/ai-vision.md`（需求）
 > 评审视角：Apple 产品 × 研发（设计克制、验证诚实、评审粒度、安全边界）
 
 ---
@@ -48,7 +48,7 @@
 
 | #    | 问题                                                                                                                                                                                            | 建议                                                                            |
 | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| P1-1 | 文档承诺 vs 代码现实：`feature_ai_vision.md §4.4` 写"失败走 proxy 回退 + 单图 `status:'error'` 不整批失败"；实际 `fetchMediaImages` 一张图抛错全批 500，`status:'error'` 字段定义了但几乎不可达 | 实现 proxy 回退或单图 error 标记；或改文档对齐。字段已定义、UI 已渲染，倾向实现 |
+| P1-1 | 文档承诺 vs 代码现实：`docs/features/ai-vision/ai-vision.md §4.4` 写"失败走 proxy 回退 + 单图 `status:'error'` 不整批失败"；实际 `fetchMediaImages` 一张图抛错全批 500，`status:'error'` 字段定义了但几乎不可达 | 实现 proxy 回退或单图 error 标记；或改文档对齐。字段已定义、UI 已渲染，倾向实现 |
 | P1-2 | `describeImages.ts` 重试只覆盖 `VisionParseError`；翻译步真实踩过的 SDK 层 `NoObjectGeneratedError` 不在内，generate 路径撞上即 500                                                             | SDK 层结构化失败也纳入 validate+retry                                           |
 | P1-3 | `alignVisionIndexes` 数量不一致时"交由上层按内容合并"——无上层实现                                                                                                                               | 代码显式注明 known limitation                                                   |
 | P1-4 | 多图串行抓图，N 张 = N 次串行网络往返                                                                                                                                                           | 二期加并发限流                                                                  |
@@ -108,7 +108,7 @@ dev-log 2026-08-13 自述"全量 test 105 pass，仅剩 env.server/getTweet 既�
 
 #### 第二轮（2026-08-13，用户反馈"UX 还是丑"后更本质的视觉重设计）
 
-第一轮只是减密度/清文案，格局没变。第二轮做结构性改造，真正落在 design system 上（`docs/ui-design/OVERVIEW.md`：native-first / invisible design / bg-card 分组 / 4px grid）：
+第一轮只是减密度/清文案，格局没变。第二轮做结构性改造，真正落在 design system 上（`docs/ui-design/README.md`：native-first / invisible design / bg-card 分组 / 4px grid）：
 
 - **`AIVisionEditorDialog` 模式选择下拉 → `ToggleGroup` 分段控件**（iOS 风格，看图说话 / OCR 识别 / 自定义）——这是"丑"的最大来源，一个下拉塞三个动作是 web 味；分段控件把模式选择变成显式互斥状态
 - **编辑器状态上提**：`useVisionLogic` 从弹窗内部上提到 `AIVisionBlock`，弹窗不再自带 trigger（改受控 Dialog）。头栏编辑入口与**空态 CTA** 共用同一打开入口——Apple 的空态是主动邀请动作，不再是无说明的灰字

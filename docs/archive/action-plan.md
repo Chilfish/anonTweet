@@ -1,4 +1,7 @@
-# 行动计划
+# 行动计划（已归档）
+
+> **状态**: ✅ 全部里程碑已完成（最后更新 2026-08-17；2026-08 文档整理时归档）
+> **未决任务**: 见 `docs/planning/backlog.md`（本文件的历史完成记录）
 
 **最后更新**: 2026-08-09
 
@@ -37,7 +40,7 @@ Anon Tweet — 匿名浏览 Twitter/X 推文与 Instagram 帖子的全栈应用�
 | L4 CLI Verify Tool     | ✅ 17 PASS / 0 FAIL / 3 SKIP                              |
 | L5 CI/CD Pipeline      | ✅ 已实施（Phase 2 S5，AC-CI-001~004）                    |
 
-> 详见 `docs/verification-gap-analysis.md`、`verify/README.md`。
+> 详见 `docs/archive/verification-gap-analysis.md`、`verify/README.md`。
 
 ## 当前阶段 — 测试验证基建重构 ✅ 已完成（2026-08-14）
 
@@ -65,7 +68,7 @@ verify/ 同一逻辑双实现、弱断言/重复样板蔓延。决策：**保留
   test/（124 it / 15 文件，**parseTweet 零覆盖 P0**、fetchTweet 真网络脚本混入、test↔verify 双实现）
 - **决策**：Vitest `test.projects` 三层（unit / integration / acceptance）；AC 编号 = test 名；
   去重原则「每个行为恰好一个测试文件」；保留 AnonTweetClient/TestServer/fixtures，删除 framework/
-- **产出**：`docs/planning/testing-infra-refactor.md`（Phase A~~E + AC-TEST-001~~008）
+- **产出**：`docs/archive/testing-infra-refactor.md`（Phase A~~E + AC-TEST-001~~008）
 - 详见 `docs/development-log/2026-08-14.md`
 
 ### 2026-08-14 — AI 图片描述防幻觉强化 + 上下文丰富注入（对齐翻译侧水准）
@@ -116,7 +119,7 @@ verify/ 同一逻辑双实现、弱断言/重复样板蔓延。决策：**保留
 
 ### 2026-08-13 — AI Vision PR #14 评审修复 + UI 打磨
 
-- 对 `feat/ai-vision`（PR #14，42 文件）做 Apple 产品 × 研发视角评审，产出 `docs/planning/ai-vision-review.md`
+- 对 `feat/ai-vision`（PR #14，42 文件）做 Apple 产品 × 研发视角评审，产出 `docs/reviews/review-2026-08-13-ai-vision.md`
 - **合前必修 2 安全点已修**：P0-1 SSRF（`fetchImageDataUri` host 精确白名单 `assertAllowedMediaHost`，绕过 `/api/proxy/image` 白名单的问题）；P0-2 未认证缓存写（`app/lib/validations/vision.ts` 强校验 + save/generate 落盘前校验）
 - **P1-2**：`describeImages.ts` 重试扩展覆盖 SDK 层 `NoObjectGeneratedError`
 - **UI 打磨（Apple HIG）**：`AIVisionBlock`（文字级 toggle / 去编号徽章 / 字阶收敛 / hairline）、`AIVisionEditorDialog`（自然语言 label / 按钮层级 / footer 减负 / Select 值统一字符串）、`AIVisionSettings`（文案精简）
@@ -127,11 +130,11 @@ verify/ 同一逻辑双实现、弱断言/重复样板蔓延。决策：**保留
 
 ### 2026-08-13 — 新特性规划：AI 视觉描述子系统（Phase 0 文档先行）
 
-- 规划文档化：`docs/feature_ai_vision.md`（需求与上下文）、`docs/planning/ai-vision-plan.md`（行动计划 + DR-1~~7 + commit 拆分）、`verify/acceptance-criteria/AC-vision.md`（AC-VISION-001~~008）
+- 规划文档化：`docs/features/ai-vision/ai-vision.md`（需求与上下文）、`docs/archive/ai-vision-plan.md`（行动计划 + DR-1~~7 + commit 拆分）、`verify/acceptance-criteria/AC-vision.md`（AC-VISION-001~~008）
 - 目标：为推文配图提供**结构化** AI 视觉描述（看图说话 / 结构化 OCR+翻译 / 自定义提示），默认 `xiaomi/mimo-v2.5` via OpenRouter，与文本翻译解耦、可并行、可进截图
 - 关键决策：复用 `@ai-sdk/openai-compatible`（零新依赖）；`AIVisionInfo` 独立对象不并入 Entity；独立设置 Tab + 独立 `POST /api/ai/vision` 路由
 - 前置依赖：工作区未提交的 baseUrl/自定义模型 threading 先落地
-- 详见 `docs/planning/ai-vision-plan.md`
+- 详见 `docs/archive/ai-vision-plan.md`
 
 ### 2026-08-09 — Phase 2 S10 完成：Postmortem 预发布检查自动化
 
@@ -185,14 +188,14 @@ verify/ 同一逻辑双实现、弱断言/重复样板蔓延。决策：**保留
 - **CLAUDE.md 真实化**：符号链接 → 普通文件，写入对标 Float 的完整规范（强制规范 / 命令 / 结构 / Current State）
 - **AGENTS.md 弃用**：技术内容并入 CLAUDE.md + docs，删除文件
 - **postmortem 迁移**：根目录 `postmortem/` → `docs/postmortem/`（对齐 Float 结构），新增 TEMPLATE.md + 高频雷区自查
-- **文档体系**：新建 `docs/README.md` 索引、`docs/engineering/{code-style,git-workflow,release-checklist}.md`、`docs/planning/{action-plan,architecture}.md`、`docs/development-log/`
+- **文档体系**：新建 `docs/README.md`（2026-08 整理时更名 `docs/INDEX.md`）索引、`docs/engineering/{code-style,git-workflow,release-checklist}.md`、`docs/planning/{action-plan,architecture}.md`、`docs/development-log/`
 - **补齐**：CHANGELOG.md、CONTRIBUTING.md；lefthook pre-push 占位符 → 真实 gate（⚠️ 预先存在的 verify ~20 TS 错误 + test 7 失败会拦截 push，修复为独立任务）；断链修复（`docs/SKILL/zustand-state-management.md`）
 
 ### 2026-07-04 — 验证体系搭建
 
 - 五层闭环验证体系（AC / Fixture / SDK / CLI / CI）
 - 25 条 AC + 7 fixtures + AnonTweetClient + TestServer + VerifyRunner
-- P0 全部完成，Phase 2（S5-S10）规划见 `docs/next-steps.md`
+- P0 全部完成，Phase 2（S5-S10）规划见 `docs/archive/next-steps.md`
 
 ### 2026-05-31 — IG 集成 + 代码质量修复
 

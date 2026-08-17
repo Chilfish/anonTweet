@@ -72,7 +72,7 @@ IG 的 `ins.tsx` 只有 `InstagramPostCard`，缺少全部操作入口。但基�
   app/components/ins/IGScreenshotButton.tsx
   app/lib/service/getIGPost.server.ts
   app/routes/api/ig/translate.ts
-  docs/ig-actions-integration.md
+  docs/features/instagram/ig-actions-integration.md
 
 修改:
   app/routes/ins.tsx
@@ -87,7 +87,7 @@ IG 的 `ins.tsx` 只有 `InstagramPostCard`，缺少全部操作入口。但基�
 ### 2026-05-31
 
 - **16:50** 分析现状，确认 Phase 4 已有基础设施（翻译/截图/下载）未接入 UI
-- **16:53** 创建 `docs/ig-actions-integration.md` 实施追踪文档
+- **16:53** 创建 `docs/features/instagram/ig-actions-integration.md` 实施追踪文档
 - **16:54** Phase 1 完成 ✅ — IGHeader + 4 个子组件 + useIGOperations hook + InstagramPostCard ref + ins.tsx 全状态接入
 - **16:55** Phase 2 完成 ✅ — `ig_post` DB 表 + 迁移 SQL + `getIGPost.server.ts` 三层缓存
 - **16:56** Phase 3 完成 ✅ — API 路由接入 DB 缓存 + AI 翻译管线（ProviderStrategy）

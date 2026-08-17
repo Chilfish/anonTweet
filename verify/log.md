@@ -2,7 +2,7 @@
 
 > 项目：Anon Tweet
 > 开始日期：2026-07-04
-> 参考：`docs/verification-gap-analysis.md`
+> 参考：`docs/archive/verification-gap-analysis.md`
 
 ---
 
@@ -107,8 +107,8 @@ L1: Acceptance Criteria ← ✅ 25 ACs
 
 产出文件：
 
-- `docs/verification-gap-analysis.md` — 首轮差距分析
-- `docs/next-steps.md` — 下阶段行动计划 & 验收标准
+- `docs/archive/verification-gap-analysis.md` — 首轮差距分析
+- `docs/archive/next-steps.md` — 下阶段行动计划 & 验收标准
 - `verify/` — 完整验证体系（Fixture / SDK / Framework / CLI / AC）
 
 git commit message:

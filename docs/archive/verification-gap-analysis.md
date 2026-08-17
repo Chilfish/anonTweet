@@ -97,9 +97,9 @@ Postmortem #001 已明确提出需要 snapshot test：
 
 这是参考笔记的核心批评，完全适用于本项目：
 
-- `docs/project_architecture.md` — 描述性文档，无 AC
-- `docs/feature_translation.md` — 设计说明，无 AC
-- `docs/integration_instagram.md` — 实施追踪，无 AC
+- `docs/planning/project-architecture.md` — 描述性文档，无 AC
+- `docs/features/translation/translation.md` — 设计说明，无 AC
+- `docs/features/instagram/instagram-integration.md` — 实施追踪，无 AC
 
 每个模块的定义只有描述，没有"实现完成后 AI 可以运行来验证"的断言集合。
 
@@ -250,7 +250,7 @@ Duration: 18.3s
 
 ### S4 — 验收标准文档化（~1.5 天）
 
-为 `docs/` 下的每个模块补充 AC 文件：
+为 `docs/` 下的每个模块补充 AC 文件（后续落地于 `verify/acceptance-criteria/`）：
 
 ```
 docs/

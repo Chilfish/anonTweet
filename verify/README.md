@@ -11,7 +11,7 @@
 「验证先行」：每个功能先有 AC（验收标准），再写测试，最后实现。AC 编号即测试名
 （`it('AC-TWEET-001: ...')`），文档 ↔ 代码 1:1 可追溯，AI 与人都可精确指定某条验收。
 
-执行引擎为 [Vitest](https://vitest.dev) 三层架构（见 [docs/planning/testing-infra-refactor.md](../docs/planning/testing-infra-refactor.md)）：
+执行引擎为 [Vitest](https://vitest.dev) 三层架构（见 [docs/archive/testing-infra-refactor.md](../docs/archive/testing-infra-refactor.md)）：
 
 ```
 test/

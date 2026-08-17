@@ -7,7 +7,7 @@
  * - 统一规则：data ?? testCases ?? parsed（无包裹时原样返回）
  *
  * fixtures 目录：test/fixtures（由 verify/fixtures 迁移而来，见
- * docs/planning/testing-infra-refactor.md Phase A/E）
+ * docs/archive/testing-infra-refactor.md Phase A/E）
  */
 import fs from 'node:fs'
 import path from 'node:path'

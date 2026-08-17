@@ -14,7 +14,7 @@ Anon Tweet — 匿名浏览 Twitter/X 推文与 Instagram 帖子，AI 翻译（G
 - **Persistence**: PostgreSQL（Neon Serverless）+ Drizzle ORM（可选缓存层，`tweet` / `tweet_entities` / `tweet_user` / `ig_post` 表）
 - **UI**: Tailwind CSS v4 + shadcn/ui + Lucide React
 - **BFF Pattern**: API 路由（`app/routes/api/*`）聚合 Twitter / IG / DB / AI 数据
-- **验证体系**: `verify/` — CLI 自验证工具 + fixture + AC 验收标准（详见 [docs/README.md](docs/README.md)）
+- **验证体系**: `verify/` — CLI 自验证工具 + fixture + AC 验收标准（详见 [docs/INDEX.md](docs/INDEX.md)）
 - **VCS**: GitHub（`Chilfish/anonTweet`），Conventional Commits
 
 ## Essential Commands
@@ -64,7 +64,7 @@ app/
 │   └── plain-ig.tsx     # 截图专用纯 IG 路由
 verify/                  # 验证套件（fixtures / sdk / framework / modules / acceptance-criteria）
 test/                    # Vitest 单元测试
-docs/                    # 技术文档与规范（见 docs/README.md，含 docs/postmortem/ 尸检报告）
+docs/                    # 技术文档与规范（见 docs/INDEX.md：features/ 功能 · planning/ 规划 · engineering/ 规范 · ui-design/ · postmortem/ 尸检报告 · reviews/ · development-log/ · archive/）
 ```
 
 ### 核心机制
@@ -102,15 +102,15 @@ docs/                    # 技术文档与规范（见 docs/README.md，含 docs
 
 2. **验证先行（verification-first）**：每个功能先有 AC（验收标准，`verify/acceptance-criteria/`）再实现。新功能实现后必须补 verifier + fixture，`bun run verify/index.ts` 通过后才算完成。涉及 Screenshot 功能必须有 `waitForRenderReady`。
 
-3. **文档先行（docs-first）**：每个任务第一步先更新相关文档（开发日志 `docs/development-log/README.md`、任务状态 `docs/planning/action-plan.md`、方案文档），再开始写代码。实施过程中随实际反馈同步修改文档、记录开发日志与踩坑，而非事后补记。
+3. **文档先行（docs-first）**：每个任务第一步先更新相关文档（开发日志 `docs/development-log/README.md`、任务状态 `docs/planning/backlog.md`（已完成里程碑见 `docs/archive/action-plan.md`）、方案文档），再开始写代码。实施过程中随实际反馈同步修改文档、记录开发日志与踩坑，而非事后补记。
 
 4. **开写代码前先读尸检报告**（`docs/postmortem/README.md`）：本仓库历史踩坑沉淀于此（零测试解析器、状态耦合、CSS 无 token 等），写码/重构前对照「高频雷区」自查。**每个 commit 提交前本地跑 `bun run typecheck && bun run lint && bun test`**，确认通过再走，不要等 pre-push 钩子/CI 才发现违规。遇到新的返工/事故按 [TEMPLATE.md](docs/postmortem/TEMPLATE.md) 沉淀一条 postmortem。
 
 ## Current State
 
-**Instagram 集成（5 阶段）+ 翻译子系统 + verify 验收框架**：✅ 已完成（2026-05 ~ 2026-07，见 `docs/planning/action-plan.md`）。
+**Instagram 集成（5 阶段）+ 翻译子系统 + verify 验收框架**：✅ 已完成（2026-05 ~ 2026-07，见 `docs/archive/action-plan.md`）。
 
-**当前阶段 — verify 套件二期（进行中）**：`docs/next-steps.md` 定义 Phase 2（S5 CI/CD Pipeline / S6 Screenshot Verifier / S7 Media Proxy Verifier / S8 服务器自动管理 / S9 IG 集成测试 / S10 Postmortem 自动化），详见 `docs/planning/action-plan.md`。
+**当前阶段 — verify 套件二期 + 测试验证基建重构**：✅ 已完成（Phase 2 S5~S10 与 Vitest 三层架构，见 `docs/archive/action-plan.md`；Phase 2 底稿已归档 `docs/archive/next-steps.md`）。
 
 ## GitHub CLI Flow
 

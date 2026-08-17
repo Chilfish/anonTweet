@@ -55,4 +55,4 @@
 
 ## 项目结构
 
-参见 [docs/README.md](docs/README.md) 与 [docs/project_architecture.md](docs/project_architecture.md)
+参见 [docs/INDEX.md](docs/INDEX.md) 与 [docs/planning/project-architecture.md](docs/planning/project-architecture.md)

@@ -2,7 +2,7 @@ import type { RawTweet } from '~/types'
 /**
  * test/unit/parseTweet.spec.ts
  *
- * P0 补缺（docs/planning/testing-infra-refactor.md Phase B / AC-TEST-006）：
+ * P0 补缺（docs/archive/testing-infra-refactor.md Phase B / AC-TEST-006）：
  * postmortem #001 高危表榜首 parseTweet.ts（10 次 fix）此前零覆盖。
  *
  * 覆盖：enrichTweet（note_tweet 优先 / Tombstone / retweet 递归）、

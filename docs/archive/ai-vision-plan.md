@@ -1,8 +1,8 @@
-# AI 视觉描述子系统 — 行动计划
+# AI 视觉描述子系统 — 行动计划（已归档）
 
 > 最后更新：2026-08-13
-> 状态：**Phase 1~4 已完成（P1 e278444 · P2 1bfc2f0 · P3 da66c5c · P4a d666ddc · P4b 1171f46 · 数据正确性修复 本 commit），Phase 5 截图+缓存待实施**
-> 上游：`docs/feature_ai_vision.md`（需求与上下文）｜ `verify/acceptance-criteria/AC-vision.md`（验收）
+> 状态：**✅ 全部完成（Phase 0~5，2026-08-13 起；2026-08 文档整理时归档）。二期候选见 §7，未决项汇总于 `docs/planning/backlog.md`**
+> 上游：`docs/features/ai-vision/ai-vision.md`（需求与上下文）｜ `verify/acceptance-criteria/AC-vision.md`（验收）
 > 前置依赖：baseUrl / 自定义模型输入（已落库）
 
 ---
@@ -34,10 +34,10 @@
 
 ### Phase 0 — 文档与 AC（本 commit）
 
-- `docs/feature_ai_vision.md`（需求）
-- `docs/planning/ai-vision-plan.md`（本文档）
+- `docs/features/ai-vision/ai-vision.md`（需求）
+- `docs/archive/ai-vision-plan.md`（本文档，2026-08 已归档）
 - `verify/acceptance-criteria/AC-vision.md`
-- `docs/README.md` 索引 + `docs/development-log/2026-08-13.md`
+- `docs/INDEX.md` 索引 + `docs/development-log/2026-08-13.md`
 - commit: `docs(ai): plan AI vision subsystem with OpenRouter + mimo-v2.5`
 
 ### Phase 1 — OpenRouter Provider 策略（翻译/通用侧）

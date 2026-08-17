@@ -4,7 +4,7 @@
 > 对应 Postmortem：#002（翻译系统耦合）/ #005（媒体 URL 重复）/ #007（新功能无验收清单）
 > 关联 Verifier：`verify/modules/vision.verifier.ts`（Phase 3 起，v0.2 补 AC-VISION-009，v0.3 补 AC-VISION-011/012）
 > 执行命令：`bun verify --module vision [--ac AC-VISION-NNN]`
-> 上游需求：`docs/feature_ai_vision.md`
+> 上游需求：`docs/features/ai-vision/ai-vision.md`
 
 ---
 

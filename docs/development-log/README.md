@@ -16,4 +16,4 @@
 - 新的一天新建 `YYYY-MM-DD.md`；跨天工作按天分开记录
 - 一天内多条变更按时间顺序用 `##` 段落记录，同一天的多段共用该日期文件
 - 踩坑同步沉淀到 [postmortem](../postmortem/README.md)，日志里可链接引用对应编号
-- 文档目录分类见 [docs 索引](../README.md)
+- 文档目录分类见 [docs 索引](../INDEX.md)

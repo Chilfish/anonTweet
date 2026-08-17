@@ -98,7 +98,7 @@ const { theme, fontScale } = useAppConfigStore(useShallow(s => ({ theme: s.theme
 
 ## 组件规范
 
-样式细节见 [docs/ui-design/OVERVIEW.md](../ui-design/OVERVIEW.md)：
+样式细节见 [docs/ui-design/README.md](../ui-design/README.md)：
 
 - **Color**: `bg-background` / `bg-card` / `text-muted-foreground` 语义 token
 - **Spacing**: 4px 基准，核心间距 8/16/24px

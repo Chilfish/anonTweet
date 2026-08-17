@@ -1,7 +1,7 @@
 # TODO（后续）
 
-> 说明：本文件用于跨会话记录项目整体需求、约束与下一步计划。
-> 核心设计文档：`docs/project_architecture.md` / `docs/feature_translation.md`
+> 说明：本文件用于跨会话记录项目整体需求、约束与下一步计划（已完成部分，未决项已迁 `docs/planning/backlog.md`）。
+> 核心设计文档：`docs/planning/project-architecture.md` / `docs/features/translation/translation.md`
 
 ## 已完成（2026-05）
 

@@ -1,8 +1,8 @@
-# 测试验证基建重构 —— 审计报告与行动计划
+# 测试验证基建重构 —— 审计报告与行动计划（已归档）
 
-> **状态**: 🔄 进行中（Phase A 待启动）
+> **状态**: ✅ 已完成（Phase A~E 全部落地，2026-08-14；2026-08 文档整理时归档）
 > **日期**: 2026-08-14
-> **关联**: [ADR-007](architecture.md#adr-007-verify-验收框架)（verify 验收框架）、[差距分析](../verification-gap-analysis.md)、[Postmortem 索引](../postmortem/README.md)
+> **关联**: [ADR-007](../planning/architecture.md#adr-007-verify-验收框架)（verify 验收框架）、[差距分析](verification-gap-analysis.md)、[Postmortem 索引](../postmortem/README.md)
 > **决策前提**: 保留「验证先行 / AC 可追溯 / AI 自验证闭环」理念，把**自研执行引擎替换为标准 Vitest 三层架构**，消除双轨重复。
 
 ---

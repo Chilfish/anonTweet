@@ -2,8 +2,8 @@
 
 > 版本：0.1（草案）｜ 日期：2026-08-13
 > 状态：**文档先行，尚未实现**
-> 关联：OpenRouter（`xiaomi/mimo-v2.5` 上游）｜ 文本翻译子系统（`feature_translation.md`）｜ 截图子系统
-> 配套：`docs/planning/ai-vision-plan.md`（行动计划）｜ `verify/acceptance-criteria/AC-vision.md`（验收标准）
+> 关联：OpenRouter（`xiaomi/mimo-v2.5` 上游）｜ 文本翻译子系统（`docs/features/translation/translation.md`）｜ 截图子系统
+> 配套：`docs/archive/ai-vision-plan.md`（行动计划，已完成）｜ `verify/acceptance-criteria/AC-vision.md`（验收标准）
 
 ---
 
@@ -269,10 +269,10 @@ describeImages.ts
 
 ## 6. 验收标准
 
-见 [`verify/acceptance-criteria/AC-vision.md`](../verify/acceptance-criteria/AC-vision.md)（AC-VISION-001~008）。
+见 [`verify/acceptance-criteria/AC-vision.md`](../../../verify/acceptance-criteria/AC-vision.md)（AC-VISION-001~008）。
 
 ---
 
 ## 7. 里程碑
 
-实施顺序与 commit 拆分见 [`docs/planning/ai-vision-plan.md`](planning/ai-vision-plan.md)。核心顺序：**文档/AC → OpenRouter 策略 → 数据模型+纯函数 → 服务端 API → UI/设置 → 截图/存储**。
+实施顺序与 commit 拆分见 [`docs/archive/ai-vision-plan.md`](../../archive/ai-vision-plan.md)。核心顺序：**文档/AC → OpenRouter 策略 → 数据模型+纯函数 → 服务端 API → UI/设置 → 截图/存储**。

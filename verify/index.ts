@@ -3,7 +3,7 @@
  * verify/index.ts — 验证套件薄 CLI（Phase E 收口）
  *
  * 执行引擎已迁移为 Vitest 三层架构（unit / acceptance / integration，见
- * docs/planning/testing-infra-refactor.md）。本文件只做参数映射，保持既有命令兼容：
+ * docs/archive/testing-infra-refactor.md）。本文件只做参数映射，保持既有命令兼容：
  *
  *   bun run verify/index.ts                    # 全三层（integration 自动起 TestServer）
  *   bun run verify/index.ts --ac AC-TWEET-001  # 单 AC（vitest -t 过滤）

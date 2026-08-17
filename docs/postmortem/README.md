@@ -46,7 +46,7 @@
 
 ### 3. 无 design token 的单行 CSS fix（#003）
 
-20 次 z-index / overflow / min-width 单行修复。对策：用 Tailwind 语义 token（`bg-background` / `bg-card` / `rounded-xl`），组件样式走 `docs/ui-design/OVERVIEW.md` 规范。
+20 次 z-index / overflow / min-width 单行修复。对策：用 Tailwind 语义 token（`bg-background` / `bg-card` / `rounded-xl`），组件样式走 `docs/ui-design/README.md` 规范。
 
 ### 4. store 订阅与迁移脆弱（#006）
 

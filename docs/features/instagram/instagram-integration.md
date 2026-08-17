@@ -65,7 +65,7 @@
   app/components/ins/PlainIGPost.tsx
   app/lib/translateIGCaption.ts
   app/hooks/use-ig-screenshot-action.ts
-  docs/integration_instagram.md
+  docs/features/instagram/instagram-integration.md
 
 修改:
   app/types/index.ts

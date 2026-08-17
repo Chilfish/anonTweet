@@ -1,12 +1,12 @@
 # 下阶段行动计划 & 验收标准
 
 > 日期：2026-07-04
-> 基于：`docs/verification-gap-analysis.md`（差距分析）
+> 基于：`docs/archive/verification-gap-analysis.md`（差距分析）
 > 当前进度：P0 已完成（Fixture + SDK + CLI + 25 AC）
 >
 > ⚠️ **本文档为 Phase 2 工作底稿，Phase 2（S5~S10）已全部完成。**
 > 下一阶段为**测试验证基建重构**（自研 verify 引擎 → Vitest 三层架构），
-> 完整审计与行动计划见 [docs/planning/testing-infra-refactor.md](planning/testing-infra-refactor.md)。
+> 完整审计与行动计划见 [docs/archive/testing-infra-refactor.md](testing-infra-refactor.md)。
 
 ---
 
@@ -185,7 +185,7 @@ $ bun run verify/index.ts --server --module ig
 
 ### S10 — Postmortem 预发布检查自动化（优先级 P4，~1 天）✅ 已完成（2026-08-09）
 
-当前 [CLAUDE.md](../CLAUDE.md) 定义了 Phase 2 预发布检查流程，但需手动执行。用脚本自动化：
+当前 [CLAUDE.md](../../CLAUDE.md) 定义了 Phase 2 预发布检查流程，但需手动执行。用脚本自动化：
 
 ```
 scripts/postmortem-check.ts

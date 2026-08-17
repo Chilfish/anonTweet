@@ -42,7 +42,7 @@ API 层作为 BFF，主要负责将异构数据源（Database, Twitter Private A
 
 ### 2.2 Instagram Domain (`/api/ig/*`)
 
-Instagram 帖子数据获取、翻译与缓存管理。于 2026-05 完成 5 阶段集成（参见 `docs/integration_instagram.md`）。
+Instagram 帖子数据获取、翻译与缓存管理。于 2026-05 完成 5 阶段集成（参见 `docs/features/instagram/instagram-integration.md`）。
 
 - **`POST /api/ig/get/:id`**
   - **Handler**: `app/routes/api/ig/get.ts`
