@@ -31,7 +31,7 @@ const PROJECT_ROOT = path.resolve(__dirname, '..', '..')
 export interface TestServerConfig {
   /** Port to run on (default: 9081 to avoid conflict with dev server on 9080) */
   port?: number
-  /** Max wait time for server ready (ms, default: 30000) */
+  /** Max wait time for server ready (ms, default: 90000) */
   readyTimeoutMs?: number
   /** Interval for health check polling (ms, default: 500) */
   pollIntervalMs?: number
@@ -55,7 +55,9 @@ export class TestServer {
   constructor(config: TestServerConfig = {}) {
     this.config = {
       port: config.port ?? 9081,
-      readyTimeoutMs: config.readyTimeoutMs ?? 30_000,
+      // 冷启动 SSR 编译在本机实测 23s（缓存热）~ 50s+（并发/缓存冷），
+      // 30s 默认值在并发或冷态下会误杀（对齐 2026-08-14 冷加载超时修复的调参思路）
+      readyTimeoutMs: config.readyTimeoutMs ?? 90_000,
       pollIntervalMs: config.pollIntervalMs ?? 500,
       isolateExternal: config.isolateExternal ?? true,
     }
