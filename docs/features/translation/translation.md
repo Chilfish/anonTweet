@@ -145,9 +145,9 @@ interface TranslationSettings {
 - AI 翻译入口：`app/lib/AITranslation.ts`（支持 `google` / `deepseek` 双提供商）
 - 占位符序列化/还原：`app/lib/react-tweet/utils/entitytParser.ts`
 - 翻译结果合并：`applyAITranslations()` — 将 AI 翻译按 `index` 精准合并回原始实体数组
-- API 路由：
-  - `POST /api/tweet/get/:id`：`app/routes/api/tweet/get.ts`（拉取推文并可选服务端翻译）
-  - `POST /api/ai-translation`：`app/routes/api/ai/ai-translation.ts`（仅翻译单条推文，支持 `force: true` 强制重翻译）
+- 翻译入口（统一端点）：`POST /api/ai-translation`：`app/routes/api/ai/ai-translation.ts`（推特分支 `type: 'twitter'` 翻译单条推文实体，支持 `force: true` 强制重翻译；IG 分支 `type: 'ins'` 翻译 caption）
+- 推文拉取：`POST /api/tweet/get/:id`：`app/routes/api/tweet/get.ts`（**阶段二起只拉取 DB 缓存 → 原文，不再内联 AI 翻译**——review P1-2 / AC-DECOUPLE-001：开启 AI 翻译时首屏不阻塞等待 LLM；客户端经 `app/hooks/use-auto-translate.ts` 触发 `/api/ai-translation`，截图 SSR 走 `plain.tsx` 两步流程）
+- 超时兜底：所有服务端 AI 调用携带 `AbortSignal.timeout`（`app/lib/ai-timeout.ts`，默认 120s，`AI_TRANSLATION_TIMEOUT_MS` 可覆盖，AC-DECOUPLE-002）
 
 **流程**：
 
