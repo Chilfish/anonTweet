@@ -82,6 +82,9 @@ export function TweetMedia({ tweet, quoted, onMediaClick }: Props) {
                     <img
                       src={getMediaUrl(media, 'medium')}
                       alt={media.ext_alt_text || 'Image'}
+                      // AC-PERF-001：长链/大量媒体不 eager 加载全量图（截图等待只等视口内图片）
+                      loading="lazy"
+                      decoding="async"
                       className={cn(
                         'm-0 object-cover object-center w-full h-full',
                         isInlineMedia ? 'relative' : 'absolute inset-0',

@@ -33,6 +33,9 @@ export function TweetHeader({ tweet, avatarSize, className }: Props) {
           <AvatarImage
             src={user.profile_image_url_https}
             alt={user.name}
+            // AC-PERF-001：头像同样懒加载，长链线程不并发拉取全部头像
+            loading="lazy"
+            decoding="async"
           />
           <AvatarFallback>{user.name[0]}</AvatarFallback>
         </Avatar>
