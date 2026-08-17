@@ -75,7 +75,7 @@ Instagram 帖子数据获取、翻译与缓存管理。于 2026-05 完成 5 阶�
   - **逻辑**: AI 连通性测试及代理接口。
   - **多提供商适配**: 根据 `provider` 参数选择对应的 AI SDK 提供商和 `providerOptions` 进行连通性测试。
 
-### 2.3 User Domain (`/api/user/*`)
+### 2.4 User Domain (`/api/user/*`)
 
 用户画像与时间线数据的聚合。
 
@@ -85,13 +85,15 @@ Instagram 帖子数据获取、翻译与缓存管理。于 2026-05 完成 5 阶�
 - **`GET /api/user/timeline/:username`**
   - **逻辑**: 获取指定用户的推文时间线，经过 `enrichTweet` 清洗。
 
-### 2.4 Integration Domain
+### 2.5 Integration Domain
 
 - **`POST /api/bili-post`**
-  - **Handler**: `app/routes/api/bili-post.tsx`
+  - **定位**: ⚠️ **隐藏自用入口，非产品功能，不宣传**（所有者定调：保留自用、不扩展、不参与产品叙事）。由 `ENABLE_BILI` 环境开关控制（`app/lib/env.server.ts`），默认开启（自用入口始终可用）。
   - **逻辑**: Bilibili 动态发布代理。
   - **流程**: 接收 FormData -> 提取凭证 -> 并发上传图片至 Bilibili BFS -> 构造动态 Payload -> 发布。
-  - **缺陷**： 未实现指定代理，目前所有发送到B站动态的ip来源都来自服务器IP
+  - **已知限制**（评审 review 2026-08-17 P2-1）：
+    1. IP 暴露：未实现指定代理，所有发往 B 站动态的请求源 IP 均为服务器公网 IP（自用场景可接受；公开部署前需补代理出口）。
+    2. 凭证经 FormData 明文过境（`bili_jct` / `DedeUserID`），仅限本机自用。
 
 ---
 

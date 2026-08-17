@@ -25,7 +25,8 @@ bun run dev              # 开发服务器 (http://localhost:9080)
 bun run build            # 生产构建
 bun run typecheck        # 类型检查（react-router typegen + tsc）
 bun run lint             # ESLint（@antfu/eslint-config，autofix）
-bun test                 # Vitest 单元测试
+bun run test             # Vitest 单元+验收测试（真实门禁）。裸 `bun test` 走 Bun 原生 runner（非 vitest），
+                         #   其并行执行对共享模块存在 export 竞态（Bun 1.3.14/1.4 均有）→ 需要原生冒烟时用 `bun test --parallel=2`
 bun run verify/index.ts  # 验证套件（离线，无需服务器/API key）
 
 # 验证套件进阶
@@ -104,7 +105,7 @@ docs/                    # 技术文档与规范（见 docs/INDEX.md：features/
 
 3. **文档先行（docs-first）**：每个任务第一步先更新相关文档（开发日志 `docs/development-log/README.md`、任务状态 `docs/planning/backlog.md`（已完成里程碑见 `docs/archive/action-plan.md`）、方案文档），再开始写代码。实施过程中随实际反馈同步修改文档、记录开发日志与踩坑，而非事后补记。
 
-4. **开写代码前先读尸检报告**（`docs/postmortem/README.md`）：本仓库历史踩坑沉淀于此（零测试解析器、状态耦合、CSS 无 token 等），写码/重构前对照「高频雷区」自查。**每个 commit 提交前本地跑 `bun run typecheck && bun run lint && bun test`**，确认通过再走，不要等 pre-push 钩子/CI 才发现违规。遇到新的返工/事故按 [TEMPLATE.md](docs/postmortem/TEMPLATE.md) 沉淀一条 postmortem。
+4. **开写代码前先读尸检报告**（`docs/postmortem/README.md`）：本仓库历史踩坑沉淀于此（零测试解析器、状态耦合、CSS 无 token 等），写码/重构前对照「高频雷区」自查。**每个 commit 提交前本地跑 `bun run typecheck && bun run lint && bun run test`**，确认通过再走，不要等 pre-push 钩子/CI 才发现违规。遇到新的返工/事故按 [TEMPLATE.md](docs/postmortem/TEMPLATE.md) 沉淀一条 postmortem。
 
 ## Current State
 

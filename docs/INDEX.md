@@ -14,6 +14,8 @@ Anon Tweet — 匿名浏览 Twitter/X 推文与 Instagram 帖子的全栈应用�
 - **状态**：Zustand v5（client）/ SWR（server）｜ **持久化**：PostgreSQL（Neon Serverless）+ Drizzle ORM
 - **验证**：`verify/` 验证套件（Vitest 三层架构）+ AC 验收标准 + Postmortem 雷区
 
+> ⚠️ **隐藏入口**：`POST /api/bili-post`（Bilibili 动态发布）为**自用隐藏入口，非产品功能，不宣传**，默认开启（`ENABLE_BILI`），详见 `docs/planning/project-architecture.md` §2.5。
+
 ---
 
 ## 二、文档目录结构
@@ -98,7 +100,7 @@ bun run dev              # 开发服务器 (http://localhost:9080)
 bun run build            # 生产构建
 bun run typecheck        # 类型检查（react-router typegen + tsc）
 bun run lint             # ESLint（@antfu/eslint-config，autofix）
-bun test                 # Vitest 单元测试
+bun run test             # Vitest 单元+验收测试（真实门禁；勿用裸 `bun test`，其走 Bun 原生 runner 非 vitest）
 bun run verify/index.ts  # 验证套件（离线，无需服务器/API key；--exit-on-fail CI 模式）
 bun run db:push          # 推送 Schema（可选 DB 缓存层）
 bun run storybook        # 组件视觉用例 (http://localhost:6006)
@@ -138,7 +140,7 @@ UI 设计     docs/ui-design/（README · GENERAL · SETTINGS）
 
 ### 验证门禁（commit / PR 前）
 
-`bun run typecheck` → `bun run lint` → `bun test`；pre-push 另跑 `bun run verify/index.ts --exit-on-fail`。lefthook 已配置，**禁止 `--no-verify`**。详见 `docs/engineering/git-workflow.md`。
+`bun run typecheck` → `bun run lint` → `bun run test`；pre-push 另跑 `bun run verify/index.ts --exit-on-fail`。lefthook 已配置，**禁止 `--no-verify`**。详见 `docs/engineering/git-workflow.md`。
 
 ---
 

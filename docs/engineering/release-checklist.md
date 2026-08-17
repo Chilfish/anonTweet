@@ -14,7 +14,7 @@
 
 - [ ] `bun run typecheck` 通过
 - [ ] `bun run lint` 通过（无 error）
-- [ ] `bun test` 全部通过
+- [ ] `bun run test` 全部通过
 - [ ] `bun run verify/index.ts --exit-on-fail` 全部 PASS（离线 AC）
 - [ ] Postmortem 预发布检查（对照 `docs/postmortem/README.md`：Changed Files 重叠？模式复现？）
 

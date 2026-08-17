@@ -31,7 +31,7 @@
    ```bash
    bun run typecheck
    bun run lint
-   bun test
+   bun run test
    bun run verify/index.ts --exit-on-fail
    ```
 6. 提交：`git commit -m "feat: your feature description"`
