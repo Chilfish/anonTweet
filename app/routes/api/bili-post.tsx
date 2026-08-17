@@ -3,6 +3,7 @@ import type { ActionFunctionArgs } from 'react-router'
 import type { CreateDynResult, UploadImageResult } from '~/types/bili'
 import axios from 'axios'
 import { data } from 'react-router'
+import { env } from '~/lib/env.server'
 
 // 基础配置
 const API_BASE = 'https://api.bilibili.com'
@@ -15,6 +16,14 @@ function getCookieValue(cookie: string, key: string) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
+  // 隐藏自用入口：默认开启；仅显式关闭（`ENABLE_BILI=false`）时拒绝（见 env.server.ts）
+  if (!env.ENABLE_BILI) {
+    return data(
+      { error: 'Not enabled', message: 'Bili 发布为隐藏自用入口，已通过 ENABLE_BILI=false 关闭' },
+      { status: 404 },
+    )
+  }
+
   const formData = await request.formData()
   const title = formData.get('title') as string
   const content = formData.get('content') as string
@@ -45,7 +54,7 @@ export async function action({ request }: ActionFunctionArgs) {
   })
 
   // 统一错误处理包装
-  const requestApi = async function<T>(method: 'post' | 'postForm', url: string, data: any) {
+  const requestApi = async function<T>(method: 'post' | 'postForm', url: string, data: unknown) {
     const res = await client[method](url, data)
     const code = Number(res.data?.code) ?? -1
     // Cookie 已失效，没有登录信息
@@ -108,8 +117,8 @@ export async function action({ request }: ActionFunctionArgs) {
     console.log(`Published: ${result.dyn_id_str}`)
     return data(result)
   }
-  catch (error: any) {
+  catch (error: unknown) {
     console.error('Publish Failed:', error)
-    return { error: error.message || 'Service Error' }
+    return { error: error instanceof Error ? error.message : 'Service Error' }
   }
 }
