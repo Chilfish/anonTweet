@@ -1,4 +1,5 @@
 import { env } from './env.server'
+import { obsLog, suffix } from './obs-log'
 
 export type CacheType = 'tweet' | 'user' | 'replies' | 'ig-post'
 
@@ -205,6 +206,12 @@ export async function getLocalCache<T>({ id, getter, type, ttl = 3600 * 1000 }: 
   // 2. 尝试读取缓存
   try {
     const cachedData = await adapter.get<T>(key)
+    obsLog('cache.get', {
+      type,
+      keySuffix: suffix(key, 16),
+      adapter: adapter.name,
+      hit: cachedData !== null,
+    })
     if (cachedData !== null) {
       return cachedData
     }

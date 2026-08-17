@@ -1,3 +1,4 @@
+import { obsLog, suffix } from '~/lib/obs-log'
 import { FetcherService } from '~/lib/rettiwt-api'
 import { RettiwtConfig } from '~/lib/rettiwt-api/models/RettiwtConfig'
 
@@ -205,8 +206,13 @@ export class RettiwtPool {
 
   private warnRotation(key: string | undefined, error: unknown): void {
     const message = error instanceof Error ? error.message : String(error)
-    const suffix = key ? `Key ending in ...${key.slice(-10)} hit rate limit/credential error` : 'Hit rate limit/credential error'
-    console.warn(`[RettiwtPool] ${suffix} (${message}). Cooling down & rotating...`)
+    const state = this.getState(key)
+    obsLog('pool.rotate', {
+      keySuffix: suffix(key, 10),
+      failStreak: state.failStreak,
+      cooldownMs: Math.max(0, state.cooldownUntil - Date.now()),
+      reason: message.slice(0, 160),
+    })
   }
 
   private buildExhaustedError(attempt: number, lastError: unknown): Error {
@@ -216,6 +222,7 @@ export class RettiwtPool {
       const cooldownLeft = Math.max(0, s.cooldownUntil - Date.now())
       return `${label}: streak=${s.failStreak}, cooldownLeft=${cooldownLeft}ms`
     }).join('; ')
+    obsLog('pool.exhaust', { attempts: attempt + 1, states: summary })
     const message = lastError instanceof Error ? lastError.message : String(lastError)
     return new Error(`[RettiwtPool] All keys exhausted after ${attempt + 1} attempts. Last error: ${message}. States: ${summary}`)
   }

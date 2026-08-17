@@ -2,6 +2,7 @@ import type { LanguageModel, ModelMessage } from 'ai'
 import type { IGPost } from '~/types'
 import { generateText, Output } from 'ai'
 import { createAITranslationAbortSignal } from '~/lib/ai-timeout'
+import { obsLog, suffix } from '~/lib/obs-log'
 
 /**
  * IG Caption 翻译参数（精简版 — 只传真正需要的）
@@ -24,14 +25,20 @@ export interface TranslateIGCaptionArgs {
  */
 export async function translateIGCaption(args: TranslateIGCaptionArgs): Promise<string> {
   const { post, modelInstance, translationGlossary } = args
+  const startedAt = Date.now()
+  let attempts = 0
 
   const text = post.description
-  if (!text)
+  if (!text) {
+    obsLog('ai.translate.ig', { ok: true, skipped: 'no-text', ms: Date.now() - startedAt, postId: suffix(post.id) })
     return ''
+  }
 
   // 检测中文 — 如果 50%+ 是中文，跳过翻译（返回空，由调用方保持原文显示）
-  if (isChinese(text))
+  if (isChinese(text)) {
+    obsLog('ai.translate.ig', { ok: true, skipped: 'chinese', ms: Date.now() - startedAt, postId: suffix(post.id) })
     return ''
+  }
 
   const glossarySection = translationGlossary
     ? `\n<Glossary>\n(Priority Level: HIGH. Use these exact translations.)\n${translationGlossary}\n</Glossary>\n`
@@ -81,6 +88,7 @@ ${glossarySection}
 ${text}`
 
   try {
+    attempts += 1
     const messages: ModelMessage[] = [
       { role: 'user', content: userContent },
     ]
@@ -99,6 +107,7 @@ ${text}`
 
     // 简单重试：如果结果为空或是纯空白，再试一次
     if (!translated || translated === text) {
+      attempts += 1
       result = await generateText({
         model: modelInstance,
         system: systemPrompt,
@@ -117,9 +126,22 @@ ${text}`
       translated = result.text?.trim() ?? ''
     }
 
+    obsLog('ai.translate.ig', {
+      ok: true,
+      ms: Date.now() - startedAt,
+      attempts,
+      postId: suffix(post.id),
+    })
     return translated
   }
   catch (error) {
+    obsLog('ai.translate.ig', {
+      ok: false,
+      ms: Date.now() - startedAt,
+      attempts,
+      postId: suffix(post.id),
+      reason: error instanceof Error ? error.message : 'unknown',
+    })
     console.error('[IG Translation] Failed:', error)
     throw error
   }

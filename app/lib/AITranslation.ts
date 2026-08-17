@@ -6,6 +6,7 @@ import { generateText, Output, zodSchema } from 'ai'
 import { z } from 'zod'
 import { createAITranslationAbortSignal } from '~/lib/ai-timeout'
 import { models } from '~/lib/constants'
+import { obsLog, suffix } from '~/lib/obs-log'
 import { getProviderStrategy, getThinkingConfig } from '~/lib/providers'
 import {
   applyAITranslations,
@@ -250,6 +251,9 @@ ${maskedText}
     description: 'A single JSON object containing the translated text.',
   })
 
+  const startedAt = Date.now()
+  // 可观测性（AC-OBS-001）：翻译计时与尝试次数，catch 侧也需要，故提到 try 外
+  let attempts = 0
   try {
     let messages = baseMessages
     let lastValidation = { ok: false, missing: [] as string[], extra: [] as string[] }
@@ -259,6 +263,7 @@ ${maskedText}
     } = { ok: true as const, errors: [] }
 
     for (let attempt = 0; attempt < 2; attempt++) {
+      attempts += 1
       const response = await generateText({
         model,
         system: systemPrompt,
@@ -278,6 +283,14 @@ ${maskedText}
       const newlineOk = expectedNewlineCount === 0 || countNewlines(translated) > 0
       if (lastValidation.ok && lastOverrideValidation.ok) {
         if (newlineOk || attempt === 1) {
+          obsLog('ai.translate', {
+            ok: true,
+            ms: Date.now() - startedAt,
+            attempts,
+            model: modelName,
+            provider: strategy?.name ?? 'unknown',
+            tweetId: suffix(tweet.id_str),
+          })
           return {
             translatedText: translated,
             entityText: response.output.entityText,
@@ -310,6 +323,15 @@ ${maskedText}
     throw new Error(`AI Translation Validation Failed (missing=${lastValidation.missing.length}, extra=${lastValidation.extra.length}, entityTextErrors=${lastOverrideValidation.errors.length})`)
   }
   catch (error) {
+    obsLog('ai.translate', {
+      ok: false,
+      ms: Date.now() - startedAt,
+      attempts,
+      model: modelName,
+      provider: strategy?.name ?? 'unknown',
+      tweetId: suffix(tweet.id_str),
+      reason: error instanceof Error ? error.message : 'unknown',
+    })
     console.error('AI Translation Failed:', error)
     throw error
   }
