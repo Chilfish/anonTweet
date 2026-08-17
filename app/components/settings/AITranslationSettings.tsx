@@ -248,6 +248,10 @@ export function AITranslationSettings() {
       {/* Main Engine Selection */}
       <div className="space-y-2">
         <h4 className="px-1 text-sm font-medium text-muted-foreground">AI 翻译引擎</h4>
+        <p className="px-1 text-xs text-muted-foreground leading-relaxed">
+          隐私提示：API Key 经服务器中继（BFF 代理）后访问 AI 提供商，不会暴露给第三方页面；
+          自定义 baseUrl 仅限官方已知域名白名单（AC-SEC-001），不可指向任意端点。
+        </p>
         <SettingsGroup>
           <SettingsRow
             label="启用 AI 翻译"
