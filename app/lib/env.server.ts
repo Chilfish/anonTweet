@@ -29,13 +29,20 @@ const serverEnvSchema = z.object({
   GEMINI_API_KEY: z.string().min(1).optional(),
   GEMINI_MODEL: z.string().min(1).optional().default('models/gemini-3-flash-preview'),
   ENABLE_AI_TRANSLATION: z.stringbool().default(false),
+  // 隐藏自用入口开关（Bili 动态发布代理）：默认开启（自用入口始终可用），不宣传、不扩展，
+  // 见 docs/planning/project-architecture.md §2.5 已知限制
+  ENABLE_BILI: z.stringbool().default(true),
 })
 
+export type ServerEnv = z.infer<typeof serverEnvSchema> & { HOSTNAME?: string }
+
 /**
- * Validated server environment variables
+ * 纯函数：从给定的 env 源（默认 process.env）校验并构建环境对象。
+ * 抽离为纯函数以便测试注入合成 env（无需 vi.resetModules，vitest / bun 原生 runner 双兼容），
+ * 且符合 postmortem #002「纯逻辑下沉 lib + 单测」规范。dotenv 副作用仍只在模块加载时执行一次。
  */
-export const env = (() => {
-  const parsed = serverEnvSchema.safeParse(process.env)
+export function createEnv(source: Record<string, string | undefined> = process.env): ServerEnv {
+  const parsed = serverEnvSchema.safeParse(source)
 
   if (parsed.success === false) {
     console.error(
@@ -45,10 +52,10 @@ export const env = (() => {
     throw new Error('Invalid environment variables')
   }
 
-  const validatedData = parsed.data as z.infer<typeof serverEnvSchema> & { HOSTNAME?: string }
+  const validatedData = parsed.data as ServerEnv
 
   if (!validatedData.HOSTNAME && validatedData.ENVIRONMENT === 'development') {
-    const port = Number.parseInt(process.env.PORT || '9080')
+    const port = Number.parseInt(source.PORT || '9080')
     validatedData.HOSTNAME = `http://localhost:${Number.isFinite(port) ? port : 9080}`
   }
 
@@ -65,4 +72,9 @@ export const env = (() => {
   }
 
   return validatedData
-})()
+}
+
+/**
+ * Validated server environment variables
+ */
+export const env: ServerEnv = createEnv()
