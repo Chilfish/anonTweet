@@ -7,10 +7,11 @@
  * 确定性：本地像素服务器（Bun.serve 随机端口）作为上游，不依赖真实 CDN。
  */
 import { describe, expect, it } from 'vitest'
+import { testEnv } from '../helpers/env'
 import { startPixelServer } from '../helpers/pixel-server'
 import { getClient } from '../helpers/test-context'
 
-describe('AC-MEDIA proxy endpoint (local pixel server)', () => {
+describe.skipIf(!testEnv.hasServer)('AC-MEDIA proxy endpoint (local pixel server)', () => {
   it('AC-MEDIA-001: tweet image proxy reachable (*.png suffix allowlist)', async () => {
     const pixel = await startPixelServer()
     try {

@@ -13,7 +13,7 @@ import { getClient } from '../helpers/test-context'
 const IG_FIXTURE_SHORTCODE = 'DWlr-eBgVfR'
 const STORY_FIXTURE = process.env.IG_STORY_FIXTURE
 
-describe('AC-IG-009 missing cookies', () => {
+describe.skipIf(!testEnv.hasServer)('AC-IG-009 missing cookies', () => {
   it('AC-IG-009: missing INS_COOKIES returns 500', async () => {
     // 隔离服务器（无 INS_COOKIES）下确定性断言；有 key 时前置条件不满足 → 跳过
     const res = await getClient().ig.postRaw('__no_cookies_verify__')
@@ -22,7 +22,7 @@ describe('AC-IG-009 missing cookies', () => {
   })
 })
 
-describe.skipIf(!testEnv.hasInsCookies)('AC-IG-007/008 IG endpoints (needs INS_COOKIES)', () => {
+describe.skipIf(!testEnv.hasServer || !testEnv.hasInsCookies)('AC-IG-007/008 IG endpoints (needs INS_COOKIES + server)', () => {
   it('AC-IG-007: posts endpoint returns IGPost', async () => {
     const posts = await getClient().ig.get({ igId: IG_FIXTURE_SHORTCODE })
     const post = posts[0] as IGPost | undefined

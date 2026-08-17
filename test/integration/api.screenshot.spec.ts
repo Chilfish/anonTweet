@@ -13,7 +13,7 @@ const HTML_RE = /<!DOCTYPE html>|<html/i
 const IG_FIXTURE_SHORTCODE = 'DWlr-eBgVfR'
 const IG_FIXTURE_USERNAME = 'meeeei.gt'
 
-describe('AC-SHOT plain screenshot endpoints', () => {
+describe.skipIf(!testEnv.hasServer)('AC-SHOT plain screenshot endpoints', () => {
   it('AC-SHOT-001: plain tweet endpoint returns HTML', async () => {
     const html = await getClient().plain.tweet('__screenshot_verify__')
     expect(html).toMatch(HTML_RE)

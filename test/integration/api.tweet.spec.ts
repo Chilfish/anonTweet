@@ -11,7 +11,7 @@ import { testEnv } from '../helpers/env'
 import { loadFixture } from '../helpers/load-fixture'
 import { getClient } from '../helpers/test-context'
 
-describe.skipIf(!testEnv.hasTweetKeys)('AC-TWEET-005/008 tweet API (needs TWEET_KEYS)', () => {
+describe.skipIf(!testEnv.hasServer || !testEnv.hasTweetKeys)('AC-TWEET-005/008 tweet API (needs TWEET_KEYS + server)', () => {
   it('AC-TWEET-005: API endpoint returns tweet', async () => {
     const tweet = loadFixture<EnrichedTweet>('tweets/normal-ja.json')
     const result = await getClient().tweet.get({ tweetId: tweet.id_str })
@@ -31,7 +31,7 @@ describe.skipIf(!testEnv.hasTweetKeys)('AC-TWEET-005/008 tweet API (needs TWEET_
   })
 })
 
-describe('AC-TWEET-006 invalid tweet', () => {
+describe.skipIf(!testEnv.hasServer)('AC-TWEET-006 invalid tweet', () => {
   it('AC-TWEET-006: invalid tweet returns empty (or errors acceptably)', async () => {
     let result: EnrichedTweet[]
     try {
