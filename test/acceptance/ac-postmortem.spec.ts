@@ -12,7 +12,7 @@ import { projectPath, readProjectFile } from '../helpers/read-project-file'
 
 const POSTMORTEM_DIR_REL = path.join('docs', 'postmortem')
 const SCRIPT_REL = path.join('scripts', 'postmortem-check.ts')
-const REPORT_IDS = ['001', '002', '003', '004', '005', '006', '007', '008']
+const REPORT_IDS = ['001', '002', '003', '004', '005', '006', '007', '008', '009']
 const REPORT_FILE_RE = /^\d{3}-.+\.md$/
 const STATUS_RE = /\*\*状态\*\*:\s*(?:Active|Mitigated)/
 const HOT_FILE_REF_RE = /#\d{3}/g

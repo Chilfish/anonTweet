@@ -1,13 +1,9 @@
----
-编号: 009
-主题: 句首补充在 index 对齐合并链路中多处丢失（显示/持久化双失效）
-日期: 2026-08-17
-严重度: 中
-状态: 行动项进行中
-根因归类: 设计建模
----
+# Postmortem 009: 句首补充在 index 对齐合并链路中多处丢失（显示/持久化双失效）
 
-# 009 — 句首补充在 index 对齐合并链路中多处丢失
+- **日期**: 2026-08-17
+- **严重级别**: 中
+- **状态**: Active
+- **根因归类**: 设计建模
 
 ## 摘要
 
@@ -75,3 +71,15 @@ AI 翻译流丢片段把 AI 译文拆到只剩第一段。功能本身在 `9cec9
 
 - 凡是「按 index 对齐合并」的实现，必须显式回答「base 里不存在的实体怎么办」——哨兵 index
   （`-1` / `30000+`）是这类 bug 的高发点，写进 `docs/postmortem/README.md` 高频雷区自查清单
+
+## Changed Files
+
+```
+app/lib/translation/resolveEntities.ts
+app/lib/markdown.ts
+app/lib/service/getTweet.server.ts
+app/lib/react-tweet/utils/entitytParser.ts
+app/routes/api/tweet/set.ts
+app/hooks/use-translation-editor-logic.ts
+app/hooks/use-alt-translation-logic.ts
+```
