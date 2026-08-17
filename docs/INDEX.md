@@ -46,50 +46,50 @@ docs/
 
 ### 按功能领域
 
-| 任务场景                                       | 必读文档                                                                                       | 说明                                                             |
-| ---------------------------------------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| **新增/修改翻译逻辑**                          | `features/translation/translation.md`                                                          | 数据流、占位符机制、6 级决策链、stream/overlay 分工              |
-| **修改 AI Provider / DeepSeek 参数**           | `features/translation/deepseek-ai-sdk.md`                                                      | provider 级/模型级/callOptions 参数暴露策略                      |
-| **修改 Instagram 集成**                        | `features/instagram/instagram-integration.md` + `features/instagram/ig-actions-integration.md`  | IG 5 阶段管线、操作区、DB 缓存、caption 翻译                     |
-| **修改 AI Vision（看图说话/OCR）**             | `features/ai-vision/ai-vision.md` + `archive/ai-vision-plan.md`                               | 需求与上下文、已完成行动计划 + DR、AC-VISION              |
-| **部署 / 环境配置**                            | `features/deploy/deployment.md`                                                                | Vercel / 自托管、环境变量、缓存层                                |
-| **修改 UI 组件、页面**                         | `engineering/code-style.md` + `ui-design/README.md`                                            | 组件拆分、命名、导入顺序、原生优先原则                           |
-| **修改原子组件（Button/Input/Dialog 等）**     | `ui-design/GENERAL.md` + `ui-design/select-cossui.md`                                          | shadcn/coss 组件使用规范                                         |
-| **修改 Settings 页面**                         | `ui-design/SETTINGS.md`                                                                        | SettingsGroup / SettingsItem 强制规范                            |
-| **架构级变更前**                               | `planning/architecture.md`（ADR）+ `planning/project-architecture.md`（系统架构 v3.0）          | 先读 ADR 历史决策，再对照架构总览                                |
-| **规划下一阶段任务**                           | `planning/backlog.md` + `archive/action-plan.md`                                               | 未决任务清单、已完成里程碑记录                                    |
-| **测试验证体系**                               | `../verify/README.md` + `archive/testing-infra-refactor.md`                                   | Vitest 三层架构（unit / integration / acceptance）               |
-| **写码前防复现 / 新 Bug 模式**                 | `postmortem/README.md`（+ `TEMPLATE.md`）                                                      | 高频雷区自查；新 Bug 模式写 postmortem                           |
-| **每次 commit / PR**                           | `engineering/git-workflow.md`                                                                  | 分支模型、Conventional Commits、commit 纪律、验证门禁            |
-| **里程碑发布前**                               | `engineering/release-checklist.md`                                                             | 本地门禁 + 功能冒烟 + Postmortem 预发布检查                      |
-| **了解历史决策 / 已知问题**                    | `reviews/` + `development-log/` + `archive/`                                                   | 评审记录、按天开发日志、已完成阶段存档                           |
+| 任务场景                                   | 必读文档                                                                                       | 说明                                                  |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| **新增/修改翻译逻辑**                      | `features/translation/translation.md`                                                          | 数据流、占位符机制、6 级决策链、stream/overlay 分工   |
+| **修改 AI Provider / DeepSeek 参数**       | `features/translation/deepseek-ai-sdk.md`                                                      | provider 级/模型级/callOptions 参数暴露策略           |
+| **修改 Instagram 集成**                    | `features/instagram/instagram-integration.md` + `features/instagram/ig-actions-integration.md` | IG 5 阶段管线、操作区、DB 缓存、caption 翻译          |
+| **修改 AI Vision（看图说话/OCR）**         | `features/ai-vision/ai-vision.md` + `archive/ai-vision-plan.md`                                | 需求与上下文、已完成行动计划 + DR、AC-VISION          |
+| **部署 / 环境配置**                        | `features/deploy/deployment.md`                                                                | Vercel / 自托管、环境变量、缓存层                     |
+| **修改 UI 组件、页面**                     | `engineering/code-style.md` + `ui-design/README.md`                                            | 组件拆分、命名、导入顺序、原生优先原则                |
+| **修改原子组件（Button/Input/Dialog 等）** | `ui-design/GENERAL.md` + `ui-design/select-cossui.md`                                          | shadcn/coss 组件使用规范                              |
+| **修改 Settings 页面**                     | `ui-design/SETTINGS.md`                                                                        | SettingsGroup / SettingsItem 强制规范                 |
+| **架构级变更前**                           | `planning/architecture.md`（ADR）+ `planning/project-architecture.md`（系统架构 v3.0）         | 先读 ADR 历史决策，再对照架构总览                     |
+| **规划下一阶段任务**                       | `planning/backlog.md` + `archive/action-plan.md`                                               | 未决任务清单、已完成里程碑记录                        |
+| **测试验证体系**                           | `../verify/README.md` + `archive/testing-infra-refactor.md`                                    | Vitest 三层架构（unit / integration / acceptance）    |
+| **写码前防复现 / 新 Bug 模式**             | `postmortem/README.md`（+ `TEMPLATE.md`）                                                      | 高频雷区自查；新 Bug 模式写 postmortem                |
+| **每次 commit / PR**                       | `engineering/git-workflow.md`                                                                  | 分支模型、Conventional Commits、commit 纪律、验证门禁 |
+| **里程碑发布前**                           | `engineering/release-checklist.md`                                                             | 本地门禁 + 功能冒烟 + Postmortem 预发布检查           |
+| **了解历史决策 / 已知问题**                | `reviews/` + `development-log/` + `archive/`                                                   | 评审记录、按天开发日志、已完成阶段存档                |
 
 ### 按文档类型速查
 
-| 需要什么                     | 去哪里                                                              |
-| ---------------------------- | ------------------------------------------------------------------- |
-| 系统架构总览（BFF/数据流）   | `planning/project-architecture.md`                                  |
-| 架构决策记录（ADR-001~008）  | `planning/architecture.md`                                           |
-| 当前阶段行动计划 / 里程碑    | `archive/action-plan.md`（已完成，历史记录）                            |
-| 未决任务清单（backlog）      | `planning/backlog.md`                                                 |
-| 代码规范（TS/React/Zustand） | `engineering/code-style.md`                                           |
-| Git/Commit/PR 流程           | `engineering/git-workflow.md`                                         |
-| 开发日志（按天）             | `development-log/README.md`（+ `development-log/YYYY-MM-DD.md`）      |
-| 尸检报告索引                 | `postmortem/README.md`                                                |
-| 代码审查记录                 | `reviews/README.md`                                                   |
-| 已完成阶段的规划文档         | `archive/README.md`（历史查阅，不主动读取）                           |
+| 需要什么                     | 去哪里                                                           |
+| ---------------------------- | ---------------------------------------------------------------- |
+| 系统架构总览（BFF/数据流）   | `planning/project-architecture.md`                               |
+| 架构决策记录（ADR-001~008）  | `planning/architecture.md`                                       |
+| 当前阶段行动计划 / 里程碑    | `archive/action-plan.md`（已完成，历史记录）                     |
+| 未决任务清单（backlog）      | `planning/backlog.md`                                            |
+| 代码规范（TS/React/Zustand） | `engineering/code-style.md`                                      |
+| Git/Commit/PR 流程           | `engineering/git-workflow.md`                                    |
+| 开发日志（按天）             | `development-log/README.md`（+ `development-log/YYYY-MM-DD.md`） |
+| 尸检报告索引                 | `postmortem/README.md`                                           |
+| 代码审查记录                 | `reviews/README.md`                                              |
+| 已完成阶段的规划文档         | `archive/README.md`（历史查阅，不主动读取）                      |
 
 ---
 
 ## 四、验证体系（verify/）
 
-| 文档                                                         | 说明                                                                   |
-| ------------------------------------------------------------ | ---------------------------------------------------------------------- |
-| [Verification Suite](../verify/README.md)                    | 验证套件 — Vitest 三层架构 + Fixture 库 + API 测试 SDK                 |
+| 文档                                                        | 说明                                                                        |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------- |
+| [Verification Suite](../verify/README.md)                   | 验证套件 — Vitest 三层架构 + Fixture 库 + API 测试 SDK                      |
 | [Testing Infra Refactor](archive/testing-infra-refactor.md) | 测试验证基建重构 — 审计报告 + 三层架构行动计划（Phase A~E，已完成，已归档） |
-| [AI Vision AC](../verify/acceptance-criteria/AC-vision.md)   | AI 视觉描述验收标准（AC-VISION-001~012）                               |
-| [Resolver AC](../verify/acceptance-criteria/AC-resolver.md) | 翻译选择链收敛验收标准（AC-RESOLVER-001）                             |
-| 存档：差距分析 / 二期计划                                    | `archive/verification-gap-analysis.md`（首轮差距分析，Phase 2 已完成）  |
+| [AI Vision AC](../verify/acceptance-criteria/AC-vision.md)  | AI 视觉描述验收标准（AC-VISION-001~012）                                    |
+| [Resolver AC](../verify/acceptance-criteria/AC-resolver.md) | 翻译选择链收敛验收标准（AC-RESOLVER-001）                                   |
+| 存档：差距分析 / 二期计划                                   | `archive/verification-gap-analysis.md`（首轮差距分析，Phase 2 已完成）      |
 
 ---
 
@@ -147,9 +147,9 @@ UI 设计     docs/ui-design/（README · GENERAL · SETTINGS）
 
 ## 七、根目录文档
 
-| 文档                                       | 说明                       |
-| ------------------------------------------ | -------------------------- |
-| [../README.md](../README.md)               | 项目介绍、技术栈、快速开始 |
-| [../CHANGELOG.md](../CHANGELOG.md)         | 变更日志                   |
-| [../CONTRIBUTING.md](../CONTRIBUTING.md)   | 贡献指南                   |
-| [../LICENSE](../LICENSE)                   | MIT License                |
+| 文档                                     | 说明                       |
+| ---------------------------------------- | -------------------------- |
+| [../README.md](../README.md)             | 项目介绍、技术栈、快速开始 |
+| [../CHANGELOG.md](../CHANGELOG.md)       | 变更日志                   |
+| [../CONTRIBUTING.md](../CONTRIBUTING.md) | 贡献指南                   |
+| [../LICENSE](../LICENSE)                 | MIT License                |

@@ -1,6 +1,6 @@
 # Anon Tweet Apple 视角锐评与行动计划（2026-08-17 · 最终版）
 
-> 依据：CLAUDE.md / docs/INDEX.md / planning/backlog.md / planning/architecture.md / planning/project-architecture.md / postmortem/README.md / features/{translation,instagram,ai-vision} / engineering/{code-style,git-workflow} / 代码抽查（SmartPool.ts、resolveTranslationView.ts、app/routes/api/*、verify/acceptance-criteria/*）及实测命令结果。修订说明：bili 经所有者确认为隐藏自用测试入口（不宣传、保留），IG Story 保留 todo（SDK 已验证可接入），本版按此裁决重写。
+> 依据：CLAUDE.md / docs/INDEX.md / planning/backlog.md / planning/architecture.md / planning/project-architecture.md / postmortem/README.md / features/{translation,instagram,ai-vision} / engineering/{code-style,git-workflow} / 代码抽查（SmartPool.ts、resolveTranslationView.ts、app/routes/api/_、verify/acceptance-criteria/_）及实测命令结果。修订说明：bili 经所有者确认为隐藏自用测试入口（不宣传、保留），IG Story 保留 todo（SDK 已验证可接入），本版按此裁决重写。
 
 ## 1. 执行摘要
 
@@ -16,16 +16,16 @@
 
 ## 2. 评价框架（8 条检验标准）
 
-| # | 标准 | 探针问题 |
-|---|---|---|
-| 1 | 聚焦减法 | 主干上每个功能能否一句话说清"为谁解决什么"？砍不掉的存量有多少？ |
-| 2 | 端到端拥有 | 输入 URL → 解析 → 翻译 → 截图 → 导出，是否一条链路完整拥有、无断点无重复实现？ |
-| 3 | 工艺细节 | 渲染/字体/截图/空态/错误态是否达交付级？是否容忍"shame bug"？ |
-| 4 | 隐私信任 | "匿名"承诺与真实数据流一致吗？最敏感数据（Key/Cookie）实际在谁的机器上出网？ |
-| 5 | 性能预算 | 核心路径（首访→翻译→截图）有无可测量基线（LCP/耗时/字节）？ |
-| 6 | 测试纪律 | 高频雷区文件有无单测？失败/跳过语义是否确定？门禁命令是否真实可跑？ |
-| 7 | 复杂度税 | 决策链/合并逻辑是否单一实现？兼容层在收敛还是叠加？ |
-| 8 | 流程责任 | 每个改动是否有 DRI、AC、文档同步、postmortem 闭环？ |
+| #   | 标准       | 探针问题                                                                       |
+| --- | ---------- | ------------------------------------------------------------------------------ |
+| 1   | 聚焦减法   | 主干上每个功能能否一句话说清"为谁解决什么"？砍不掉的存量有多少？               |
+| 2   | 端到端拥有 | 输入 URL → 解析 → 翻译 → 截图 → 导出，是否一条链路完整拥有、无断点无重复实现？ |
+| 3   | 工艺细节   | 渲染/字体/截图/空态/错误态是否达交付级？是否容忍"shame bug"？                  |
+| 4   | 隐私信任   | "匿名"承诺与真实数据流一致吗？最敏感数据（Key/Cookie）实际在谁的机器上出网？   |
+| 5   | 性能预算   | 核心路径（首访→翻译→截图）有无可测量基线（LCP/耗时/字节）？                    |
+| 6   | 测试纪律   | 高频雷区文件有无单测？失败/跳过语义是否确定？门禁命令是否真实可跑？            |
+| 7   | 复杂度税   | 决策链/合并逻辑是否单一实现？兼容层在收敛还是叠加？                            |
+| 8   | 流程责任   | 每个改动是否有 DRI、AC、文档同步、postmortem 闭环？                            |
 
 ## 3. 锐评报告（P1 → P3）
 
@@ -84,7 +84,7 @@
 ### P2-4 文档腐烂：唯一入口在骗人
 
 - 【问题】架构/功能文档多处滞后于 main 代码。
-- 【证据】project-architecture.md L7/L11"React Router v7" vs ADR-001/CLAUDE.md"v8"；L63/L78 两个 §2.3 小节；ai-vision.md L4"状态：尚未实现" vs main 上 12+ commit（309f62a 等，含 `app/routes/api/ai/vision.ts`、AC-VISION-001~012 全落地）；ai-vision.md §6"AC-VISION-001~008" vs AC-vision.md L162 实为 12 条；bili 功能完全未入文档体系（见 P2-1）。
+- 【证据】project-architecture.md L7/L11"React Router v7" vs ADR-001/CLAUDE.md"v8"；L63/L78 两个 §2.3 小节；ai-vision.md L4"状态：尚未实现" vs main 上 12+ commit（309f62a 等，含 `app/routes/api/ai/vision.ts`、AC-VISION-001~~012 全落地）；ai-vision.md §6"AC-VISION-001~~008" vs AC-vision.md L162 实为 12 条；bili 功能完全未入文档体系（见 P2-1）。
 - 【影响】P2（标准 8）：文档先行机制失守，新成员按 INDEX 取到的信息是错的。
 - 【建议】同步 ai-vision.md 状态与 AC 数、修 project-architecture.md 版本号与章节号、补 bili 隐藏入口标注；把"文档同步"纳入 PR 审查清单执行（git-workflow.md L114 已有条款）。
 - 【成本】低（1 人日）/ 风险低。
@@ -133,23 +133,23 @@
 
 ### 不做清单（Apple 式减法）
 
-| 砍/缓 | 理由 |
-|---|---|
-| Bili 发布功能扩展 | 保留自用隐藏入口（所有者确定），但**不宣传、不扩展**：仅做卫生化 + 开关，避免回到"发布工具"定位幻影 |
-| Threads/Bluesky 等新数据源 | 定位裁决前一律不接 |
-| 编辑器 stream 独立推进 | 与阶段二"翻译流式化"合并，不单独立项 |
-| 视觉模型训练/微调 | ai-vision.md §1.3 已明确非目标，维持 |
-| IG Story 提前到阶段二 | 价值密度低于核心体验修复，SDK 虽已验证但逆向接口随版本漂移，排期靠后进阶段三 |
+| 砍/缓                      | 理由                                                                                                |
+| -------------------------- | --------------------------------------------------------------------------------------------------- |
+| Bili 发布功能扩展          | 保留自用隐藏入口（所有者确定），但**不宣传、不扩展**：仅做卫生化 + 开关，避免回到"发布工具"定位幻影 |
+| Threads/Bluesky 等新数据源 | 定位裁决前一律不接                                                                                  |
+| 编辑器 stream 独立推进     | 与阶段二"翻译流式化"合并，不单独立项                                                                |
+| 视觉模型训练/微调          | ai-vision.md §1.3 已明确非目标，维持                                                                |
+| IG Story 提前到阶段二      | 价值密度低于核心体验修复，SDK 虽已验证但逆向接口随版本漂移，排期靠后进阶段三                        |
 
 ### backlog 逐条裁决
 
-| 条目 | 裁决 | 理由 |
-|---|---|---|
-| [ux] 长链推文/大量媒体渲染与截图性能（backlog L19） | **采纳**（阶段二） | 直接对应 P1-2/P5 性能预算；与 ADR-008 媒体代理统一（S7 待实施）耦合，一并做 |
-| [ux] Instagram Story 支持（L20） | **采纳（延后至阶段三）** | 所有者确认保留 todo，SDK `@chilfish/gallery-dl-instagram` 已验证可接入、成本可控；价值密度低于核心体验修复，故排期靠后（详见不做清单末行） |
-| [refactor] Translation View Resolver 收敛（L24） | **采纳**（阶段一） | P2-3 证据确凿（两 hook 重复链），低风险高收益 |
-| [refactor] 编辑器兼容 stream（L25） | **延后→并入阶段二/三** | 当前管线为非流式 generateText；先做"GET 不阻塞"再谈流式编辑 |
-| [refactor] 性能：并发/限流策略 + 可观测性（L26） | **采纳**（限流进阶段一，可观测进阶段二） | 限流=SmartPool 重构（P1-1）；可观测=阶段二任务 3 |
+| 条目                                                | 裁决                                     | 理由                                                                                                                                       |
+| --------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| [ux] 长链推文/大量媒体渲染与截图性能（backlog L19） | **采纳**（阶段二）                       | 直接对应 P1-2/P5 性能预算；与 ADR-008 媒体代理统一（S7 待实施）耦合，一并做                                                                |
+| [ux] Instagram Story 支持（L20）                    | **采纳（延后至阶段三）**                 | 所有者确认保留 todo，SDK `@chilfish/gallery-dl-instagram` 已验证可接入、成本可控；价值密度低于核心体验修复，故排期靠后（详见不做清单末行） |
+| [refactor] Translation View Resolver 收敛（L24）    | **采纳**（阶段一）                       | P2-3 证据确凿（两 hook 重复链），低风险高收益                                                                                              |
+| [refactor] 编辑器兼容 stream（L25）                 | **延后→并入阶段二/三**                   | 当前管线为非流式 generateText；先做"GET 不阻塞"再谈流式编辑                                                                                |
+| [refactor] 性能：并发/限流策略 + 可观测性（L26）    | **采纳**（限流进阶段一，可观测进阶段二） | 限流=SmartPool 重构（P1-1）；可观测=阶段二任务 3                                                                                           |
 
 ## 5. 反方自审与开放问题
 
