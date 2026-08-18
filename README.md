@@ -1,3 +1,5 @@
+
+
 # Anon Tweet
 
 **Anon Tweet** 是一个基于 **React Router v7** 构建的现代化全栈应用程序，旨在提供极致的推文与 Instagram 帖子匿名浏览体验。本项目集成了 **Google Gemini / DeepSeek AI** 双提供商翻译功能，支持推文卡片与 IG 帖子导出（截图 + Markdown）。
@@ -33,7 +35,7 @@
 
 ### 1. Installation
 
-确保本地已安装 [Bun](https://bun.sh/)。
+确保本地已安装 [Bun 1.3.14](https://bun.sh/)。
 
 ```bash
 # Clone repository
