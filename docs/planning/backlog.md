@@ -45,16 +45,18 @@
 - [ ] [refactor] 编辑器兼容 stream（原 backlog L25 延后并入；关联：review；文件：`app/components/translation/TranslationEditor.tsx`、`resolveTranslationView.ts` isAIStream 扩展；前置：阶段二 GET 解耦流式化）
 - [ ] [ux] Instagram Story 接入（原 backlog L20 采纳延后；关联：review 不做清单末行；文件：`app/routes/api/ig/get.ts` 扩展、`IGCaption`/`PlainIGPost` 渲染；前置：SDK `@chilfish/gallery-dl-instagram` 已验证；先写 `AC-IG-STORY` + fixture 再实现；风险：中，上游接口漂移需 fixture 维护余量）
 - [ ] [refactor] 三层缓存规模化与命中率指标（文件：`app/lib/service/getTweet.server.ts`；前置：阶段二可观测性）
+- [ ] [refactor] Tweet 卡片 jetfuel 全量数据接入（用户抓包 2026-08-19 确认：`TweetRequests.details` 换 queryId `GZsN2Pc4knAoit6pXa4HSA` + 对齐官方 features 即取到 `jetfuel_attachment`，内含 trending-card 标题/描述/日期/分类/头像/posts 数/图，官方 HTML 同源；文件：`app/lib/rettiwt-api/requests/Tweet.ts`、`app/lib/react-tweet/utils/parseTweet.ts`（payload 长度前缀字符串提取）、`app/components/tweet/TweetCard.tsx`（渲染扩展）；工作量：1-2 人日 / 风险：中，私有二进制格式需 fixture 维护；fixture 存档 `tmp/raw-tweet-2089577916694942006-jetfuel.json`；详见 `docs/development-log/2026-08-18.md` 补充调查）— **实施中**（分支 `feat/trending-card`，方案 `docs/features/tweet/trending-card.md`，AC `verify/acceptance-criteria/AC-card.md`；已确认最小触发 = 仅翻 `responsive_web_jetfuel_frame: true`，无需换 queryId）
+- [x] [refactor] unified_card 解析兼容多组件布局（`details` / `media_with_details_horizontal`；文件：`app/lib/react-tweet/utils/parseTweet.ts`、`test/unit/parseTweet.spec.ts`；工作量：0.5 人日 / 风险：低）— ✅ 完成（2026-08-18）：`parseUnifiedCard` 遍历 `component_objects`，兼容 `topic_detail` 布局（Trending/topic 卡），domain 优先取 `url_data.vanity`；详见 `docs/development-log/2026-08-18.md`
 
 ## 不做清单（裁决为删除/延后，Apple 式减法）
 
-| 条目                         | 裁决           | 理由                                                                                      |
-| ---------------------------- | -------------- | ----------------------------------------------------------------------------------------- |
-| Threads / Bluesky 等新数据源 | 删除（不接）   | 产品定位（工具 vs 平台）裁决前一律不接（review Q1）                                       |
-| Bili 发布功能扩展            | 延后（无限期） | 保留为隐藏自用入口，不宣传、不扩展、仅卫生化（review P2-1）                               |
-| 编辑器 stream 单独立项       | 延后           | 与阶段二"翻译流式化"合并，不单独立项（review backlog 裁决）                               |
-| IG Story 提前到阶段二        | 延后           | 价值密度低于核心体验修复；SDK 已验证但逆向接口随版本漂移，排期靠后（review 不做清单末行） |
-| 视觉模型训练 / 微调          | 删除（不接）   | `docs/features/ai-vision/ai-vision.md` §1.3 已明确非目标，维持                            |
+| 条目                                                         | 裁决           | 理由                                                                                                              |
+| ------------------------------------------------------------ | -------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Threads / Bluesky 等新数据源                                 | 删除（不接）   | 产品定位（工具 vs 平台）裁决前一律不接（review Q1）                                                               |
+| Bili 发布功能扩展                                            | 延后（无限期） | 保留为隐藏自用入口，不宣传、不扩展、仅卫生化（review P2-1）                                                       |
+| 编辑器 stream 单独立项                                       | 延后           | 与阶段二"翻译流式化"合并，不单独立项（review backlog 裁决）                                                       |
+| IG Story 提前到阶段二                                        | 延后           | 价值密度低于核心体验修复；SDK 已验证但逆向接口随版本漂移，排期靠后（review 不做清单末行）                         |
+| 视觉模型训练 / 微调                                          | 删除（不接）   | `docs/features/ai-vision/ai-vision.md` §1.3 已明确非目标，维持                                                    |
 
 ## 原未决条目裁决明细（2026-08-17）
 
