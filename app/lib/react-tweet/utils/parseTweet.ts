@@ -5,6 +5,8 @@ import type {
   RawTweet,
   TweetUser,
 } from '~/types'
+import { obsLog } from '~/lib/obs-log'
+import { parseTrendingCard } from '~/lib/rettiwt-api/parsers/jetfuel'
 import { getEntities } from './entitytParser'
 
 /**
@@ -41,7 +43,7 @@ export function enrichTweet(sourceData: RawTweet, retweetedOrignalId?: string): 
     in_reply_to_status_id_str: tweet.legacy.in_reply_to_status_id_str,
     entities: getEntities(tweet, text),
     quoted_tweet_id: tweet.quoted_status_result?.result?.rest_id,
-    card: mapTwitterCard(tweet.card),
+    card: mapTwitterCard(tweet.card, (tweet as any).jetfuel_attachment),
     mediaDetails: mapMediaDetails(tweet),
     retweetedOrignalId,
     isInlineMeida: !!tweet.note_tweet?.note_tweet_results?.result?.media?.inline_media?.length,
@@ -162,11 +164,14 @@ function parseUnifiedCard(jsonStr: string | undefined) {
   }
 }
 
-export function mapTwitterCard(cardData: any): LinkPreviewCard | undefined {
+export function mapTwitterCard(
+  cardData: any,
+  jetfuelAttachment?: { payload?: string } | null,
+): LinkPreviewCard | undefined {
   if (!cardData)
     return undefined
 
-  // 1. 数据归一化：无论是新旧结构，都提取出核心的 name 和 binding_values
+  // 数据归一化：无论是新旧结构，都提取出核心的 name 和 binding_values
   const legacy = cardData.legacy || cardData
   const name = legacy.name
   const bindingValues = legacy.binding_values
@@ -199,6 +204,31 @@ export function mapTwitterCard(cardData: any): LinkPreviewCard | undefined {
     }
   }
 
+  // 4.5 jetfuel 增强：解析 responsive_web_jetfuel_frame 附件数据（Trending/topic 卡全量）
+  if (jetfuelAttachment?.payload) {
+    const trending = parseTrendingCard(jetfuelAttachment.payload)
+    if (trending) {
+      // 优先使用 jetfuel 数据（官方渲染同源，含更新版描述/图片 + 分类/头像/posts 数）
+      card = {
+        ...card,
+        url: trending.url || card.url,
+        imageUrl: trending.imageUrl || card.imageUrl,
+        title: trending.title || card.title,
+        description: trending.description || card.description,
+        domain: card.domain || getDomainFromUrl(trending.url),
+        trending,
+      }
+    }
+    else {
+      // 解析失败：回退 unified_card 结果，并提示开发者 payload 结构已变更
+      obsLog('jetfuel.parse.fallback', {
+        card: name,
+        payloadHash: hashPayload(jetfuelAttachment.payload),
+        reason: 'payload did not yield url/image/title',
+      })
+    }
+  }
+
   // 5. 最终校验与清洗
   // 必须至少有 标题 或 描述 或 图片
   if (!card.title && !card.description && !card.imageUrl) {
@@ -214,6 +244,21 @@ export function mapTwitterCard(cardData: any): LinkPreviewCard | undefined {
   }
 
   return card
+}
+
+/** 轻量 payload 指纹（前 8B base64），用于日志中标识结构版本 */
+function hashPayload(payload: string): string {
+  const head = Buffer.from(payload.slice(0, 12), 'base64')
+  return Array.from(head.subarray(0, 8)).map(x => x.toString(16).padStart(2, '0')).join('')
+}
+
+function getDomainFromUrl(url: string): string | null {
+  try {
+    return new URL(url).hostname
+  }
+  catch {
+    return null
+  }
 }
 
 export function mapMediaDetails(tweet: RawTweet): MediaDetails[] | undefined {

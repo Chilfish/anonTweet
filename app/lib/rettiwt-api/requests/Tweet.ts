@@ -143,6 +143,7 @@ export class TweetRequests {
           responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
           responsive_web_graphql_timeline_navigation_enabled: true,
           responsive_web_enhance_cards_enabled: false,
+          responsive_web_jetfuel_frame: true,
           responsive_web_grok_community_note_auto_translation_is_enabled: false,
           responsive_web_grok_imagine_annotation_enabled: false,
           responsive_web_profile_redirect_enabled: true,

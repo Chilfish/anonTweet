@@ -32,6 +32,11 @@ interface Result {
   in_reply_to_status_id_str?: string
   quoted_status_result?: TweetResult
   card?: any
+  /** JetFuel 附件（responsive_web_jetfuel_frame 开启时返回）：官方渲染卡全量数据 */
+  jetfuel_attachment?: {
+    height: number
+    payload: string
+  }
   tombstone?: {
     __typename: 'TextTombstone'
   }

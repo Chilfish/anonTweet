@@ -13,6 +13,7 @@ export type ObsEvent
     | 'cache.get' // 本地缓存读取：type / keySuffix / hit / adapter
     | 'pool.rotate' // RettiwtPool 冷却轮换：keySuffix / failStreak / cooldownMs / reason
     | 'pool.exhaust' // RettiwtPool 全部 Key 耗尽：attempts / states
+    | 'jetfuel.parse.fallback' // jetfuel payload 解析失败回退 unified_card：card / payloadHash / reason
 
 export interface ObsFields {
   [key: string]: string | number | boolean | null | undefined
