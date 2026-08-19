@@ -1,9 +1,12 @@
 # Tweet 卡片（Trending / Jetfuel）验收标准
 
-> 版本：1.0 | 日期：2026-08-19
+> 版本：1.1 | 日期：2026-08-19
 > 对应 Postmortem：001 (Tweet Parsing)
 > 关联方案：`docs/features/tweet/trending-card.md`
 > 执行命令：`bun run verify/index.ts --module card`
+> 2026-08-19 修订（review P1-1）：AC-CARD-005 v1.0 声称「Storybook / 快照驱动」，
+> 实为源码字符串扫描——验证方法名实不符。v1.1 改为 `renderToString` 真实渲染断言
+> （`card-render.spec.ts`），源码级检查降级为辅助 AC-CARD-009。
 
 ---
 
@@ -65,20 +68,59 @@
 
 ---
 
-## AC-CARD-005：Trending 卡片组件渲染（视觉回归）
+## AC-CARD-005：Trending 卡片组件真实渲染（视觉回归）
 
-- **输入**：含 `trending` 字段的 EnrichedTweet（Snapshot/blocks 驱动）
+- **输入**：`card.trending` 非空的 EnrichedTweet（由真实 jetfuel fixture 解析值构造）
 - **预期输出**：`TweetLinkCard` 渲染官方 Trending 卡片变体
-- **验证方法**：Storybook / 单测快照断言结构类名与内容
+- **验证方法**：`renderToString(createElement(TweetLinkCard, ...))` + HTML 断言
+  （`test/acceptance/card-render.spec.ts`）
 - **Pass 条件**：
-  - 渲染 `<a>` 外层 + 图片区（`aspect-[18/10]` 或等价比例类）
-  - 渲染 meta 行（分类文本）、标题（`line-clamp-3`）、头像组、posts 计数、
-    描述（`line-clamp-2`）
-  - 无 `trending` 字段时渲染现有布局（无回归）
+  - 渲染 `<a href=趋势 URL>` 外层 + 大图区（`aspect-[18/10]`）与底部渐变遮罩
+  - 渲染 meta 行（分类文本）、标题（`line-clamp-3`）、头像组（≥3 图）、
+    posts 计数（`16.5k posts`）、描述（`line-clamp-2`）
+  - 主图与头像 `alt=""`（装饰图；标题 h3 承载可访问名称，避免读屏重复朗读）
+  - 无 JS 截断残留（截断只靠 CSS clamp）
 
 ---
 
-## 总计：5 条 AC
+## AC-CARD-006：无 trending 数据回退普通链接卡
+
+- **输入**：普通 `summary` 卡（无 `trending` 字段）
+- **预期输出**：渲染普通链接卡布局（不渲染 `aspect-[18/10]` 变体）
+- **验证方法**：`renderToString` + HTML 断言（`card-render.spec.ts`）
+- **Pass 条件**：
+  - 不包含 `aspect-[18/10]`
+  - 包含小图缩略布局（`w-20 h-20`）、标题文本、原始 `card.url` 跳转
+
+---
+
+## AC-CARD-007：trending 主图缺失不塌陷
+
+- **输入**：`trending` 存在但 `imageUrl` 缺失/空
+- **预期输出**：布局不塌陷——`aspect-[18/10]` 容器、标题、跳转仍在
+  （图片走 MediaImage 错误占位，不再整块 `return null`，P2-2）
+- **验证方法**：`renderToString` + HTML 断言（`card-render.spec.ts`）
+- **Pass 条件**：标题文本、趋势 URL href、`aspect-[18/10]` 均存在，无异常
+
+---
+
+## AC-CARD-008：无卡片数据空渲染
+
+- **输入**：`card` 为 `undefined` 的 EnrichedTweet
+- **预期输出**：`TweetLinkCard` 返回空串（不渲染、不报错）
+- **验证方法**：`renderToString` 断言（`card-render.spec.ts`）
+
+---
+
+## AC-CARD-009：源码层变体锁定（辅助检查）
+
+- **输入**：`TweetCard.tsx` 与 `TrendingCard.tsx` 源码
+- **预期输出**：变体分支与官方结构关键类名存在
+- **验证方法**：源码字符串扫描（`ac-card.spec.ts`；渲染断言以 AC-CARD-005~008 为准）
+
+---
+
+## 总计：9 条 AC
 
 | AC          | 分类          | 依赖外部 API | 依赖 AI |
 | ----------- | ------------- | ------------ | ------- |
@@ -86,7 +128,11 @@
 | AC-CARD-002 | 纯函数/离线   | 否           | 否      |
 | AC-CARD-003 | 纯函数/离线   | 否           | 否      |
 | AC-CARD-004 | 纯函数/离线   | 否           | 否      |
-| AC-CARD-005 | 组件/Snapshot | 否           | 否      |
+| AC-CARD-005 | 组件/真实渲染 | 否           | 否      |
+| AC-CARD-006 | 组件/真实渲染 | 否           | 否      |
+| AC-CARD-007 | 组件/真实渲染 | 否           | 否      |
+| AC-CARD-008 | 组件/真实渲染 | 否           | 否      |
+| AC-CARD-009 | 源码扫描      | 否           | 否      |
 
 > 离线 AC 依赖 fixture（`test/fixtures/jetfuel/trending.json`），验证时无需服务器。
-> AC-CARD-005 由 Storybook 或组件快照测试驱动，无外部依赖。
+> AC-CARD-005~008 由真实渲染测试驱动（`card-render.spec.ts`），无外部依赖。
