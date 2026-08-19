@@ -29,13 +29,17 @@ binding 子集升级到 `jetfuel_attachment` 全量数据，同时为解析不�
 
 ## 实施计划
 
-| Phase   | 内容                                                   | 状态      |
-| ------- | ------------------------------------------------------ | --------- |
-| Phase 1 | 请求层：`TweetRequests.details` 启用 jetfuel frame     | ⏳ 待做   |
-| Phase 2 | 解析器：`parseJetfuelPayload` 纯函数 + 类型扩展        | ⏳ 待做   |
-| Phase 3 | 组件：`TweetLinkCard` 还原官方 Trending 卡片样式        | ⏳ 待做   |
-| Phase 4 | 测试 + fixture + AC verifier                           | ⏳ 待做   |
-| Phase 5 | 门禁 + 提交 + PR                                        | ⏳ 待做   |
+| Phase   | 内容                                                                    | 状态    |
+| ------- | ----------------------------------------------------------------------- | ------- |
+| Phase 1 | 请求层：`TweetRequests.details` 启用 jetfuel frame                      | ✅ 完成 |
+| Phase 2 | 解析器：`decodeJetfuelPayload` / `parseTrendingCard` 纯函数 + 类型扩展  | ✅ 完成 |
+| Phase 3 | 回退补偿 + `jetfuel.parse.fallback` 开发者日志（`mapTwitterCard` 合并） | ✅ 完成 |
+| Phase 4 | 组件：`TweetLinkCard` 还原官方 Trending 卡片样式                        | ✅ 完成 |
+| Phase 5 | 测试 + fixture + AC verifier + 门禁 + 提交                              | ✅ 完成 |
+
+> 备注：Phase 3/4 提交时发现 typecheck 残留 10 个错误（`2cec41d` 的
+> `noUncheckedIndexedAccess` 越界索引与 `source: 'jetfuel'` 字面量拓宽、`getDomainFromUrl`
+> 返回 `string | null`），已在本轮 `feat(tweet)` 提交中一并修净（详见开发日志）。
 
 ## 技术设计
 
@@ -94,7 +98,7 @@ mapTwitterCard(cardData, jetfuelAttachment?)
    字段（分类/头像/posts 数）——官方 HTML 用的就是这份数据（样本中其描述/图与
    unified_card 不同，更新的版本）；
 4. **失败 / 解析为空** → 保留 unified_card 结果，并 `obsLog('jetfuel.parse.fallback',
-   { reason, payloadHash, keyCount })`，提示开发者「payload 结构变更，需更新解析器」；
+{ reason, payloadHash, keyCount })`，提示开发者「payload 结构变更，需更新解析器」；
 5. `jetfuel_attachment` 缺失（旧响应缓存）→ 静默走 unified_card（无日志，正常路径）。
 
 ### Phase 4 — 组件（还原官方样式）
