@@ -250,7 +250,9 @@ export function AITranslationSettings() {
         <h4 className="px-1 text-sm font-medium text-muted-foreground">AI 翻译引擎</h4>
         <p className="px-1 text-xs text-muted-foreground leading-relaxed">
           隐私提示：API Key 经服务器中继（BFF 代理）后访问 AI 提供商，不会暴露给第三方页面；
-          自定义 baseUrl 仅限官方已知域名白名单（AC-SEC-001），不可指向任意端点。
+          自定义 Base URL 默认可指向任意端点（第三方中转站 / 自建服务）；
+          公开部署可开启可选白名单加固（ENABLE_AI_BASE_URL_WHITELIST=true），
+          届时仅放行官方域名或 ALLOWED_AI_BASE_URL_HOSTS 列出的域名（AC-SEC-001）。
         </p>
         <SettingsGroup>
           <SettingsRow

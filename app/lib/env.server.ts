@@ -32,6 +32,12 @@ const serverEnvSchema = z.object({
   // 隐藏自用入口开关（Bili 动态发布代理）：默认开启（自用入口始终可用），不宣传、不扩展，
   // 见 docs/planning/project-architecture.md §2.5 已知限制
   ENABLE_BILI: z.stringbool().default(true),
+  // 可选安全加固：AI baseUrl 白名单校验（默认关闭——第三方中转站/自建端点直接可用；
+  // 公开部署可设 true 开启，配合 ALLOWED_AI_BASE_URL_HOSTS 扩展白名单域名）
+  ENABLE_AI_BASE_URL_WHITELIST: z.stringbool().default(false),
+  // 白名单额外域名（逗号分隔，仅当 ENABLE_AI_BASE_URL_WHITELIST=true 时生效；
+  // 与内置官方域名合并校验）
+  ALLOWED_AI_BASE_URL_HOSTS: z.string().optional(),
 })
 
 export type ServerEnv = z.infer<typeof serverEnvSchema> & { HOSTNAME?: string }

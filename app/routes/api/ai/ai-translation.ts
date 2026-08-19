@@ -76,7 +76,7 @@ async function handleIGTranslation(args: Extract<AITranslationSchema, { type: 'i
       success: false,
       error: 'baseUrl not allowed',
       status: 400,
-      message: 'baseUrl 不在白名单内，仅支持官方提供商域名（AC-SEC-001）',
+      message: 'baseUrl 不在白名单内：仅支持官方提供商域名或 ALLOWED_AI_BASE_URL_HOSTS 扩展域名（AC-SEC-001，ENABLE_AI_BASE_URL_WHITELIST=true）',
     })
   }
 
@@ -180,7 +180,7 @@ async function handleTweetTranslation(args: Extract<AITranslationSchema, { type?
         success: false,
         error: 'baseUrl not allowed',
         status: 400,
-        message: 'baseUrl 不在白名单内，仅支持官方提供商域名（AC-SEC-001）',
+        message: 'baseUrl 不在白名单内：仅支持官方提供商域名或 ALLOWED_AI_BASE_URL_HOSTS 扩展域名（AC-SEC-001，ENABLE_AI_BASE_URL_WHITELIST=true）',
       })
     }
 
