@@ -13,7 +13,9 @@ import { getClient } from '../helpers/test-context'
 const IG_FIXTURE_SHORTCODE = 'DWlr-eBgVfR'
 const STORY_FIXTURE = process.env.IG_STORY_FIXTURE
 
-describe.skipIf(!testEnv.hasServer)('AC-IG-009 missing cookies', () => {
+// 有 INS_COOKIES 时服务器带真实 key，500 路径不可达（请求真实端点返回 404），
+// 依注释意图「无 cookies 隔离环境确定性断言」跳过
+describe.skipIf(!testEnv.hasServer || testEnv.hasInsCookies)('AC-IG-009 missing cookies', () => {
   it('AC-IG-009: missing INS_COOKIES returns 500', async () => {
     // 隔离服务器（无 INS_COOKIES）下确定性断言；有 key 时前置条件不满足 → 跳过
     const res = await getClient().ig.postRaw('__no_cookies_verify__')
