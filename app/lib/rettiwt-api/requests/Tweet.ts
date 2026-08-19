@@ -119,7 +119,6 @@ export class TweetRequests {
           c9s_tweet_anatomy_moderator_badge_enabled: true,
           responsive_web_grok_analyze_button_fetch_trends_enabled: false,
           responsive_web_grok_analyze_post_followups_enabled: false,
-          responsive_web_jetfuel_frame: false,
           responsive_web_grok_share_attachment_enabled: true,
           articles_preview_enabled: true,
           responsive_web_edit_tweet_api_enabled: true,
