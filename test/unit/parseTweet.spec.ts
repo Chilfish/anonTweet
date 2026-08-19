@@ -193,7 +193,7 @@ describe('mapTwitterCard', () => {
   it('AC-TEST-006: parses unified_card JSON payload', () => {
     const unified = JSON.stringify({
       component_objects: { details_1: { data: { title: { content: 'YT Video' }, subtitle: { content: 'youtube.com' } } } },
-      destination_objects: { browser_1: { data: { url_data: { url: 'https://youtu.be/abc' } } } },
+      destination_objects: { browser_1: { data: { url_data: { url: 'https://youtu.be/abc', vanity: 'youtube.com' } } } },
       media_entities: { m1: { media_url_https: 'https://img.youtube.com/vi/abc/hqdefault.jpg' } },
     })
     const card = mapTwitterCard(cardWith({ unified_card: { string_value: unified } }, 'unified_card'))
@@ -204,6 +204,55 @@ describe('mapTwitterCard', () => {
       url: 'https://youtu.be/abc',
       imageUrl: 'https://img.youtube.com/vi/abc/hqdefault.jpg',
     })
+  })
+
+  it('AC-TEST-006: parses unified_card with media_with_details_horizontal (topic_detail) layout', () => {
+    // 真实 payload：推文 2089577916694942006 的 Trending 卡片（2026-08-18 线下抓取）
+    const unified = JSON.stringify({
+      display_options: { hide_bottom_padding: true },
+      component_objects: {
+        media_with_details_horizontal_1: {
+          type: 'media_with_details_horizontal',
+          data: {
+            media_id: 'media_1',
+            destination: 'browser_1',
+            topic_detail: {
+              title: { content: '仲町あられの誕生日をファンと盛大に祝う', is_rtl: false },
+              subtitle: { content: '仮想バンド「夢限大みゅーたいぷ」のボーカル・仲町あられの誕生日を、8月16日にXでファンアートやメッセージが大いに盛り上げています。', is_rtl: false },
+            },
+          },
+        },
+      },
+      destination_objects: {
+        browser_1: {
+          type: 'browser',
+          data: { url_data: { url: 'https://x.com/i/trending/2088645888549994981', vanity: 'x.com' } },
+        },
+      },
+      media_entities: {
+        media_1: { type: 'photo', id: '1683353770267234304', media_url_https: 'https://pbs.twimg.com/media/F1x5VdQX0AA9Sgt.jpg' },
+      },
+      components: ['media_with_details_horizontal_1'],
+    })
+    const card = mapTwitterCard(cardWith({ unified_card: { string_value: unified } }, 'unified_card'))
+    expect(card).toMatchObject({
+      type: 'unified_card',
+      title: '仲町あられの誕生日をファンと盛大に祝う',
+      description: '仮想バンド「夢限大みゅーたいぷ」のボーカル・仲町あられの誕生日を、8月16日にXでファンアートやメッセージが大いに盛り上げています。',
+      domain: 'x.com',
+      url: 'https://x.com/i/trending/2088645888549994981',
+      imageUrl: 'https://pbs.twimg.com/media/F1x5VdQX0AA9Sgt.jpg',
+    })
+  })
+
+  it('AC-TEST-006: unified_card falls back to legacy subtitle for domain when vanity missing', () => {
+    const unified = JSON.stringify({
+      component_objects: { details_1: { data: { title: { content: 'T' }, subtitle: { content: 'legacy.example.com' } } } },
+      destination_objects: { browser_1: { data: { url_data: { url: 'https://legacy.example.com/x' } } } },
+    })
+    const card = mapTwitterCard(cardWith({ unified_card: { string_value: unified } }, 'unified_card'))
+    expect(card!.domain).toBe('legacy.example.com')
+    expect(card!.url).toBe('https://legacy.example.com/x')
   })
 
   it('AC-TEST-006: returns undefined for card without title/description/image', () => {
