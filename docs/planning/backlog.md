@@ -35,7 +35,7 @@
   > ✅ **解耦部分完成（2026-08-17）**：AC-DECOUPLE-001~002 落地且 verify 绿；GET 移除内联 `autoTranslateTweet`（`tweet/get.ts` 源码扫描无 LLM 调用），客户端 `use-auto-translate.ts` 触发 `/api/ai-translation`（不阻塞首屏），plain 截图路由两步走；`app/lib/ai-timeout.ts` 统一超时（默认 120s，`AI_TRANSLATION_TIMEOUT_MS` 可覆盖）。**剩余：AI 端点 stream 化按计划并入阶段三（与「编辑器兼容 stream」L25 合并）**。
 - [x] [ux] 长链推文/大量媒体渲染与截图性能（原 backlog L19 采纳；关联：review 阶段二；文件：`verify/acceptance-criteria/AC-screenshot.md` 扩、`plain.tsx`、`plain-ig.tsx`；工作量：2-3 人日 / 风险：中）— 与 ADR-008 媒体代理统一（S7 待实施）耦合，一并做 — ✅ 完成（2026-08-17）：AC-PERF-001 落地（AC-screenshot.md v1.2，verify 绿）；基线实测 15 条线程 SSR 中位 20ms / 单推 1ms，回归阈值 = max(绝对兜底 500/150ms, 基线×5)；媒体/头像补 `loading="lazy"`（长链不并发拉全量图）。ADR-008 媒体代理统一保持 S7 待实施（独立于本 AC）
 - [x] [refactor] 可观测性：翻译耗时/缓存命中率/RettiwtPool 状态结构化日志（原 backlog L26 后半采纳；关联：review 阶段二；文件：`app/lib/translation/`、`app/lib/SmartPool.ts`；工作量：2 人日）— 为阶段三缓存规模化提供指标 — ✅ 完成（2026-08-17）：`app/lib/obs-log.ts` 统一单行 JSON 日志（AC-OBS-001 落地，verify 绿）；`ai.translate`/`ai.translate.ig`（ms/attempts/ok）、`cache.get`（hit/adapter/type）、`pool.rotate`/`pool.exhaust` 接入；敏感字段（apiKey/Cookie/baseUrl）一律不入日志 → 阶段三可基于此产出命中率/耗时报表
-- [x] [ux] 隐私加固：`baseUrl` 白名单 + 隐私页披露（关联：review P1-3；文件：`app/routes/api/ai/vision.ts`、`ai-translation.ts`、设置页；工作量：1-2 人日）— 仅放行已知提供商域名；设置页声明"Key 经服务器中继" — ✅ 完成（2026-08-17）：`app/lib/ai-base-url.ts` 白名单（无 baseUrl 放行 / 官方域名 hostname 精确匹配 / 未知+IP+后缀伪装拒绝）；ai-translation（twitter+ins）、vision（generate+translate）、ai-test 三处边界校验，拒绝 400；设置页披露 Key 中继 + 白名单说明（AC-SEC-001 落地，verify 绿）
+- [x] [ux] 隐私加固：`baseUrl` 白名单 + 隐私页披露（关联：review P1-3；文件：`app/routes/api/ai/vision.ts`、`ai-translation.ts`、设置页；工作量：1-2 人日）— 设置页声明"Key 经服务器中继" — ✅ 完成（2026-08-17）：`app/lib/ai-base-url.ts` 白名单（无 baseUrl 放行 / 官方域名 hostname 精确匹配 / 未知+IP+后缀伪装拒绝）；ai-translation（twitter+ins）、vision（generate+translate）、ai-test 三处边界校验，拒绝 400；设置页披露 Key 中继 + 白名单说明（AC-SEC-001 落地，verify 绿）— 🔄 修订（2026-08-19）：白名单改**可选加固，默认关闭**（`ENABLE_AI_BASE_URL_WHITELIST` 默认 false）——自定义 baseUrl（第三方中转站/自建端点）默认可直接使用、部署零配置；公开部署可开启 + `ALLOWED_AI_BASE_URL_HOSTS` 逗号分隔扩展域名；单测/AC-SEC-001 同步更新（AC-sec.md v1.1）
 
 ### 阶段三（7-8 周+）护城河：Vision 闭环、流式编辑器、Story 接入、缓存规模化
 
@@ -50,13 +50,13 @@
 
 ## 不做清单（裁决为删除/延后，Apple 式减法）
 
-| 条目                                                         | 裁决           | 理由                                                                                                              |
-| ------------------------------------------------------------ | -------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Threads / Bluesky 等新数据源                                 | 删除（不接）   | 产品定位（工具 vs 平台）裁决前一律不接（review Q1）                                                               |
-| Bili 发布功能扩展                                            | 延后（无限期） | 保留为隐藏自用入口，不宣传、不扩展、仅卫生化（review P2-1）                                                       |
-| 编辑器 stream 单独立项                                       | 延后           | 与阶段二"翻译流式化"合并，不单独立项（review backlog 裁决）                                                       |
-| IG Story 提前到阶段二                                        | 延后           | 价值密度低于核心体验修复；SDK 已验证但逆向接口随版本漂移，排期靠后（review 不做清单末行）                         |
-| 视觉模型训练 / 微调                                          | 删除（不接）   | `docs/features/ai-vision/ai-vision.md` §1.3 已明确非目标，维持                                                    |
+| 条目                         | 裁决           | 理由                                                                                      |
+| ---------------------------- | -------------- | ----------------------------------------------------------------------------------------- |
+| Threads / Bluesky 等新数据源 | 删除（不接）   | 产品定位（工具 vs 平台）裁决前一律不接（review Q1）                                       |
+| Bili 发布功能扩展            | 延后（无限期） | 保留为隐藏自用入口，不宣传、不扩展、仅卫生化（review P2-1）                               |
+| 编辑器 stream 单独立项       | 延后           | 与阶段二"翻译流式化"合并，不单独立项（review backlog 裁决）                               |
+| IG Story 提前到阶段二        | 延后           | 价值密度低于核心体验修复；SDK 已验证但逆向接口随版本漂移，排期靠后（review 不做清单末行） |
+| 视觉模型训练 / 微调          | 删除（不接）   | `docs/features/ai-vision/ai-vision.md` §1.3 已明确非目标，维持                            |
 
 ## 原未决条目裁决明细（2026-08-17）
 

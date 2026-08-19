@@ -302,9 +302,10 @@ v2.1 新增的纯函数模块，提供通用的翻译实体合并能力：
 ## 8. 安全与隐私
 
 1. **API Key 安全**: 用户输入的 API Key 仅存储在本地浏览器 LocalStorage 中，或通过服务器端环境变量注入（用于公共部署）。
-2. **结构化输出**: 服务端强制 JSON schema，降低"多余文本/思考 token"污染下游解析的风险。
-3. **中文跳过**: 对于已存在 `aiTranslation` 的中文推文，跳过 AI 翻译请求，节省 Token。
-4. **双 Key 隔离**: Google 和 DeepSeek 的 API Key 独立存储、独立使用，互不干扰。
+2. **Base URL 白名单（可选加固，默认关闭）**: 客户端可自定义 `baseUrl` 指向第三方中转站/自建端点（默认放行，部署零配置）；公开部署可设 `ENABLE_AI_BASE_URL_WHITELIST=true` 开启白名单校验，仅放行内置官方域名（`generativelanguage.googleapis.com` / `api.deepseek.com` / `openrouter.ai`）+ `ALLOWED_AI_BASE_URL_HOSTS`（逗号分隔）扩展域名，防止 BFF 成为任意 LLM 端点代理（AC-SEC-001）。
+3. **结构化输出**: 服务端强制 JSON schema，降低"多余文本/思考 token"污染下游解析的风险。
+4. **中文跳过**: 对于已存在 `aiTranslation` 的中文推文，跳过 AI 翻译请求，节省 Token。
+5. **双 Key 隔离**: Google 和 DeepSeek 的 API Key 独立存储、独立使用，互不干扰。
 
 ---
 
