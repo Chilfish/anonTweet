@@ -16,6 +16,8 @@
  * 任一关键字段缺失 → 返回 null 交由上层回退补偿（见 mapTwitterCard 合并策略）。
  */
 
+import type { TrendingCardInfo } from '~/types'
+
 export interface JetfuelFrame {
   /** framing 信息：payload 长度 / 节点计数 / footer hex */
   frame: { payloadLen: number | null, count: number | null, footer: string | null }
@@ -77,8 +79,8 @@ export function decodeJetfuelPayload(input: string | Uint8Array): JetfuelFrame |
       return null
 
     const frame = {
-      payloadLen: (b[0] | (b[1] << 8)) || null,
-      count: n >= 6 ? b[5] : null,
+      payloadLen: n >= 2 ? (b[0]! | (b[1]! << 8)) || null : null,
+      count: n >= 6 ? b[5]! : null,
       footer: n >= 3
         ? Array.from(b.subarray(n - 3, n)).map(x => x.toString(16).padStart(2, '0')).join('')
         : null,
@@ -96,7 +98,7 @@ export function decodeJetfuelPayload(input: string | Uint8Array): JetfuelFrame |
     const tokens: Array<{ type: 'node' | 'atom' | 'list' | 'string' }> = []
 
     while (i < end - 1) {
-      const byte = b[i]
+      const byte = b[i]!
 
       if (byte === 0x11) {
         tokens.push({ type: 'node' })
@@ -105,7 +107,7 @@ export function decodeJetfuelPayload(input: string | Uint8Array): JetfuelFrame |
         continue
       }
       if (byte === 0x02 && i + 9 <= end && b[i + 2] === 0 && b[i + 3] === 0 && b[i + 4] === 0) {
-        const field = b[i + 1]
+        const field = b[i + 1]!
         const hash = Array.from(b.subarray(i + 5, i + 9)).map(x => x.toString(16).padStart(2, '0')).join('')
         atoms.push({ field, hash })
         tokens.push({ type: 'atom' })
@@ -113,7 +115,7 @@ export function decodeJetfuelPayload(input: string | Uint8Array): JetfuelFrame |
         continue
       }
       if (byte === 0x03 && i + 7 <= end && b[i + 3] === 0 && b[i + 4] === 0 && b[i + 5] === 0 && b[i + 6] === 0) {
-        lists.push({ kind: b[i + 1], count: b[i + 2] })
+        lists.push({ kind: b[i + 1]!, count: b[i + 2]! })
         tokens.push({ type: 'list' })
         i += 7
         continue
@@ -170,11 +172,11 @@ function pickUrl(strings: string[], needle?: string): string | undefined {
  * 从 payload 解析 Trending 卡片结构化信息。
  * 任一关键字段缺失（无 URL / 无主图 / 无标题）→ 返回 null（触发上层回退）。
  */
-export function parseTrendingCard(input: string | Uint8Array): ReturnType<typeof buildTrendingCard> {
+export function parseTrendingCard(input: string | Uint8Array): TrendingCardInfo | null {
   return buildTrendingCard(extractJetfuelStrings(input))
 }
 
-function buildTrendingCard(strings: string[]) {
+function buildTrendingCard(strings: string[]): TrendingCardInfo | null {
   if (strings.length === 0)
     return null
 

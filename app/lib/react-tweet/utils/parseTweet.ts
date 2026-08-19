@@ -215,7 +215,7 @@ export function mapTwitterCard(
         imageUrl: trending.imageUrl || card.imageUrl,
         title: trending.title || card.title,
         description: trending.description || card.description,
-        domain: card.domain || getDomainFromUrl(trending.url),
+        domain: card.domain || getDomainFromUrl(trending.url) || '',
         trending,
       }
     }
