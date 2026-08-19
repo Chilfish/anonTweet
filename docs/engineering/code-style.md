@@ -105,3 +105,15 @@ const { theme, fontScale } = useAppConfigStore(useShallow(s => ({ theme: s.theme
 - **Radius**: `rounded-xl`(12px) / `rounded-2xl`(16px)
 - **Dark mode**: 一等公民，所有颜色必须有 Dark 变体
 - **Motion**: 短动画 150-200ms，长动画 300-350ms，`ease-out`
+
+### Storybook 强制项（2026-08-19，review-2026-08-19 P1-2 裁决）🔴
+
+- **每个被使用到的组件必须有一个 Storybook story**（`app/stories/<Component>.stories.tsx`），
+  场景矩阵覆盖：默认 / 加载 / 错误 / 空态；有官方对照时（Tweet/IG 数据）以官方结构或
+  真实 fixture 为视觉输入；有自身优化（翻译可见性、暗色、移动端）时按状态各建 story。
+- **交互/视觉/布局改动必须伴随 story 或渲染测试**；新增组件若无 story，PR 审查不通过
+  （`git-workflow.md` 审查清单已同步）。
+- **渲染测试**：命门组件（截图/官方还原类）优先用 `renderToString` + HTML 断言
+  （参考 `test/acceptance/card-render.spec.ts` 规划）；纯函数逻辑（解析器/截断/域提取）
+  下沉 `app/lib/` 并单测，组件文件内不留不可测逻辑。
+- **验证命令**：`bun run build-storybook`（零报错）与 `bun run test` 均在 pre-push 门禁内。

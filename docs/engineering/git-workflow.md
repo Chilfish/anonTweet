@@ -110,6 +110,8 @@ git commit -m "docs: update dev log for IG integration"
 - [ ] 遵循代码规范（`bun run lint` 无 error）
 - [ ] 无硬编码 Key / Cookie / CDN URL
 - [ ] Zustand 用 selector + `useShallow`，无整 store 订阅
+- [ ] **UI 变更附带 Storybook story + 渲染测试**（2026-08-19 起强制，见 code-style.md 组件规范；新组件必须配 story，交互/视觉改动必须更新或新增 story）
+- [ ] `bun run build-storybook` 通过（UI 变更时）
 - [ ] UI 变更附带截图/录屏
 - [ ] 相关文档已更新（开发日志、CHANGELOG）
 
