@@ -29,6 +29,23 @@ describe('env.server createEnv', () => {
     expect(mod.ENABLE_DB_CACHE).toBe(false)
   })
 
+  it('defaults AI baseUrl whitelist OFF and allows host extension (AC-SEC-001)', () => {
+    // 白名单默认关闭：第三方中转/自建端点零配置可用
+    const def = createEnv({ ENVIRONMENT: 'development', TWEET_KEYS: '' })
+    expect(def.ENABLE_AI_BASE_URL_WHITELIST).toBe(false)
+    expect(def.ALLOWED_AI_BASE_URL_HOSTS).toBeUndefined()
+
+    // 显式开启 + 扩展域名
+    const hardened = createEnv({
+      ENVIRONMENT: 'production',
+      TWEET_KEYS: 'k',
+      ENABLE_AI_BASE_URL_WHITELIST: 'true',
+      ALLOWED_AI_BASE_URL_HOSTS: 'my-proxy.example.com,api.openai.com',
+    })
+    expect(hardened.ENABLE_AI_BASE_URL_WHITELIST).toBe(true)
+    expect(hardened.ALLOWED_AI_BASE_URL_HOSTS).toBe('my-proxy.example.com,api.openai.com')
+  })
+
   it('keeps explicit HOSTNAME when provided (no inference override)', () => {
     const mod = createEnv({
       ENVIRONMENT: 'development',

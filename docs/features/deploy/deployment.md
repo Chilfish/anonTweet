@@ -10,6 +10,10 @@
 
 - **构建预设**: `@vercel/react-router` (由 `VERCEL=1` 环境变量自动触发行内 Preset)。
 - **核心配置**: 必须在 Vercel 仪表盘设置 `TWEET_KEYS` 与 `HOSTNAME`。
+- **可选（AI 端点加固）**: `ENABLE_AI_BASE_URL_WHITELIST=true` 开启 baseUrl 白名单校验
+  （默认关闭：自定义 baseUrl 第三方中转/自建端点直接可用）；开启后配合
+  `ALLOWED_AI_BASE_URL_HOSTS`（逗号分隔）扩展白名单域名（AC-SEC-001，详见
+  `verify/acceptance-criteria/AC-sec.md`）。
 
 ### B. 自托管容器化/物理机 (Linux/Node/Bun)
 

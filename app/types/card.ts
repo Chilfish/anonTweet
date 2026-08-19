@@ -79,4 +79,28 @@ export interface LinkPreviewCard {
   domain: string
   /** 图片地址 */
   imageUrl: string
+  /** jetfuel 增强信息（Trending/topic 等官方渲染卡，可选） */
+  trending?: TrendingCardInfo
+}
+
+/**
+ * jetfuel_attachment payload 解析出的 Trending 卡片全量信息
+ * （官方前端渲染同源数据：分类/头像/posts 数/更新版描述与图片）。
+ */
+export interface TrendingCardInfo {
+  source: 'jetfuel'
+  /** 跳转目标（如 x.com/i/trending/...） */
+  url: string
+  /** 主图 URL（官方渲染用大图） */
+  imageUrl: string
+  /** 话题分类（Entertainment / Celebrity 等，仅当 payload 内明确携带） */
+  categories: string[]
+  /** 贡献者头像组（最多 3 个） */
+  avatars: string[]
+  /** 帖文计数显示文本（如 "16.5k posts"） */
+  postsCount?: string
+  /** 标题 */
+  title: string
+  /** 描述（可选） */
+  description?: string
 }

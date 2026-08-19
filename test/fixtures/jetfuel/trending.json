@@ -1,0 +1,63 @@
+{
+  "_meta": {
+    "source": "raw-tweet-2089577916694942006-jetfuel.json",
+    "exportedAt": "2026-08-19T07:04:25.221Z",
+    "label": "Trending card jetfuel payload (tweet 2089577916694942006)"
+  },
+  "card": {
+    "legacy": {
+      "binding_values": [
+        {
+          "key": "unified_card",
+          "value": {
+            "string_value": "{\"display_options\":{\"hide_bottom_padding\":true},\"component_objects\":{\"media_with_details_horizontal_1\":{\"type\":\"media_with_details_horizontal\",\"data\":{\"media_id\":\"media_1\",\"destination\":\"browser_1\",\"topic_detail\":{\"title\":{\"content\":\"\\u4ef2\\u753a\\u3042\\u3089\\u308c\\u306e\\u8a95\\u751f\\u65e5\\u3092\\u30d5\\u30a1\\u30f3\\u3068\\u76db\\u5927\\u306b\\u795d\\u3046\",\"is_rtl\":false},\"subtitle\":{\"content\":\"\\u4eee\\u60f3\\u30d0\\u30f3\\u30c9\\u300c\\u5922\\u9650\\u5927\\u307f\\u3085\\u30fc\\u305f\\u3044\\u3077\\u300d\\u306e\\u30dc\\u30fc\\u30ab\\u30eb\\u30fb\\u4ef2\\u753a\\u3042\\u3089\\u308c\\u306e\\u8a95\\u751f\\u65e5\\u3092\\u30018\\u670816\\u65e5\\u306bX\\u3067\\u30d5\\u30a1\\u30f3\\u30a2\\u30fc\\u30c8\\u3084\\u30e1\\u30c3\\u30bb\\u30fc\\u30b8\\u304c\\u5927\\u3044\\u306b\\u76db\\u308a\\u4e0a\\u3052\\u3066\\u3044\\u307e\\u3059\\u3002\\u3042\\u3089\\u308c\\u3055\\u3093\\u306fYouTube\\u767b\\u9332\\u8005\\u657055,555\\u4eba\\u7a81\\u7834\\u3092\\u795d\\u3044\\u3064\\u3064\\u611f\\u8b1d\\u3092\\u4f1d\\u3048\\u3001\\u516c\\u5f0f\\u30a2\\u30ab\\u30a6\\u30f3\\u30c8\\u306f22\\u6642\\u304b\\u3089\\u306e\\u751f\\u8a95\\u8a18\\u5ff5\\u914d\\u4fe1\\u3092\\u544a\\u77e5\\u3002\\u5927\\u4e8b\\u306a\\u304a\\u77e5\\u3089\\u305b\\u3082\\u3042\\u308a\\u3001\\u30d6\\u30b7\\u30ed\\u30fc\\u30c9\\u30aa\\u30f3\\u30e9\\u30a4\\u30f3\\u30b9\\u30c8\\u30a2\\u3067\\u306f\\u63cf\\u304d\\u4e0b\\u308d\\u3057\\u30a4\\u30e9\\u30b9\\u30c8\\u306e\\u30d0\\u30fc\\u30b9\\u30c7\\u30fc\\u30b0\\u30c3\\u30ba\\u53d7\\u6ce8\\u304c\\u30b9\\u30bf\\u30fc\\u30c8\\u3057\\u307e\\u3057\\u305f\\u3002\\u8eab\\u9577154cm\\u306e\\u5143\\u6c17\\u306a\\u3042\\u3089\\u308c\\u3061\\u3083\\u3093\\u3092\\u3001\\u30d5\\u30a1\\u30f3\\u307f\\u3093\\u306a\\u3067\\u795d\\u3046\\u4e00\\u65e5\\u3067\\u3059\\u3002\",\"is_rtl\":false}}}}},\"destination_objects\":{\"browser_1\":{\"type\":\"browser\",\"data\":{\"url_data\":{\"url\":\"https:\\/\\/x.com\\/i\\/trending\\/2088645888549994981\",\"vanity\":\"x.com\"}}}},\"media_entities\":{\"media_1\":{\"type\":\"photo\",\"id\":\"1683353770267234304\",\"id_str\":\"https:\\/\\/pbs.twimg.com\\/media\\/F1x5VdQX0AA9Sgt.jpg\",\"indices\":[0,0],\"media_url\":\"https:\\/\\/pbs.twimg.com\\/media\\/F1x5VdQX0AA9Sgt.jpg\",\"media_url_https\":\"https:\\/\\/pbs.twimg.com\\/media\\/F1x5VdQX0AA9Sgt.jpg\",\"url\":\"https:\\/\\/pbs.twimg.com\\/media\\/F1x5VdQX0AA9Sgt.jpg\",\"display_url\":\"\",\"expanded_url\":\"\",\"original_info\":{\"width\":1600,\"height\":1600}}},\"components\":[\"media_with_details_horizontal_1\"]}",
+            "type": "STRING"
+          }
+        },
+        {
+          "key": "card_url",
+          "value": {
+            "scribe_key": "card_url",
+            "string_value": "https://t.co/2cFszADge0",
+            "type": "STRING"
+          }
+        }
+      ],
+      "card_platform": {
+        "platform": {
+          "audience": {
+            "name": "production"
+          },
+          "device": {
+            "name": "Swift",
+            "version": "12"
+          }
+        }
+      },
+      "name": "unified_card",
+      "url": "https://t.co/2cFszADge0",
+      "user_refs_results": []
+    },
+    "rest_id": "https://t.co/2cFszADge0"
+  },
+  "jetfuel_attachment": {
+    "height": 300,
+    "payload": "uAUAAAAUy0QCQOkHgPkIAAAAdeABQOkHAQAAALiCA0DpDK2TDUznDgAAADOZAkDpDE3fDwAAADOZAkDpDE3fEAAAADOZAkDpEU3fEgAAAHXgAUDpCwUCAwQDBQAAdeABQOkKAQYAADOZA0DpFE3fFTx/FgAAAMtEAkDpGYD5GgAAAMtEAkDpG4D5HAAAAMtEAkDpG4D5HQAAAHXgAUDpGAMJCgsAADOZAkDpDE3fHgAAAHXgAUDpFwIMDQAAM5kDQOkfTd8gPH8hAAAAdeABQOkTAwgODwAAdeABQOkJAgcQAACCUQFA6QYCAREAAFeaBkDpANCQASlXApnyA1y4BHKjBQESAAAiAwEEAAAAABx3ETfJESirh+LNXgXNzMzMzMz8PxEBCWNvbXBvbmVudA10cmVuZGluZy1jYXJkEQALLGh0dHBzOi8veC5jb20vaS90cmVuZGluZy8yMDg4NjQ1ODg4NTQ5OTk0OTgxCgMDCAgAAAAAHHcRNyYk2CjxWfzGf02LHFSuOmIgEVEzJiJm0AIMAAAAilJD8gILAAAA0oA57gINAAAAIoKCxQIBAAAAtjp94AIhAAAAM7P2+AIjAAAAM7P2+AIiAAAA9jI95gMBAgAAAAAcdxE3CzlodHRwczovL3Bicy50d2ltZy5jb20vbWVkaWEvSFB4WmhNMGFRQUFaeHozLmpwZz9uYW1lPW9yaWcDAQUAAAAAHHcRNzVo3E4TNPd6WnrMtwMBBwAAAADtq3mmrS5ErEIPPgE4ATsbscUxYCqojV4DAQQAAAAA7at5pkms22RoJiFNAwEDAAAAACh5q+4ZvxUBDrCCgGoAAAAACgAAA+KAogANRW50ZXJ0YWlubWVudAMBAwAAAADae4e8Gb8VAQAJQ2VsZWJyaXR5AwEGAAAAABM093pY3pbMOAE7G72NrPlJrNtkAwEEAAAAAHvk9s4oeavuhacGrAA55Luy55S644GC44KJ44KM44Gu6KqV55Sf5pel44KS44OV44Kh44Oz44Go55ub5aSn44Gr56Wd44GGAQMAAAADAQYAAAAA7at5pugoetNkcAUgaCYhTUms22QDAQIAAAAA7at5pgMBBgAAAAD+q2me/mCJVyOBrV/5ezzIf02LHAtMaHR0cHM6Ly9wYnMudHdpbWcuY29tL3Byb2ZpbGVfaW1hZ2VzLzIwNzM3NDUyNzczODM4MTkyNjUvaE5JVkdZMWhfbm9ybWFsLmpwZwMBBwAAAADLxwxc/qtpnv5giVcjga1f+Xs8yH9NixwLTGh0dHBzOi8vcGJzLnR3aW1nLmNvbS9wcm9maWxlX2ltYWdlcy8yMDM0NTQxMzQ5MTY5Nzc0NTkyL1k2NXQ5UDVGX25vcm1hbC5qcGcLTGh0dHBzOi8vcGJzLnR3aW1nLmNvbS9wcm9maWxlX2ltYWdlcy8xNzIyNjAyODM1Mjk5NTAwMDMzL2hYc2tWajlGX25vcm1hbC5wbmcAD+KAoiAxNi41ayBwb3N0cwMCAwAAAAAoeavuGb8VAQIcAAAARekzPgCmAueskemhlOOBhOOBo+OBseOBhOOBruOBguOCieOCjOOBoeOCg+OCk+OCpOODqeOCueODiOOChOeMq+iAs+Wnv+OBruODleOCoeODs+OCouODvOODiOOBjOasoeOAheaKleeov+OBleOCjOOAgeODleOCoeODs+OCs+ODn+ODpeODi+ODhuOCo+OBjOa4qeOBi+OBhOOBiuelneOBhOODoOODvOODieOBq+WMheOBvuOCjOOBpuOBhOOBvuOBmeOAguOBguOCieOCjOacrOS6uuOBr+OAjOOBv+OCk+OBquOBqOi/juOBiOOCieOCjOOCi+OBruOAgeW5uOOBmeOBjuOCi+OBreOAjeOBqOWWnOOBs+OCkue2tOOCiuOBvuOBl+OBn+OAggECAAAAIlGFagMAAAABEwA="
+  },
+  "legacy": {
+    "full_text": "WOW…！むっぴょうれぴー！⸜🌷︎⸝‍✨️\n嬉しいからポストして残しとこう\n\n https://t.co/2cFszADge0",
+    "entities": {
+      "urls": [
+        {
+          "display_url": "x.com/i/trending/208…",
+          "expanded_url": "https://x.com/i/trending/2088645888549994981",
+          "indices": [
+            40,
+            63
+          ],
+          "url": "https://t.co/2cFszADge0"
+        }
+      ]
+    }
+  }
+}
