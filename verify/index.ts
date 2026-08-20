@@ -17,6 +17,10 @@
 import { spawnSync } from 'node:child_process'
 import { parseArgs } from 'node:util'
 
+// verify 只跑三个 node 项目；storybook 浏览器项目（chromium 视觉测试）用
+// `bun run test:storybook` 单独触发（见 vitest.config.ts 注释）
+const NODE_PROJECTS = ['unit', 'acceptance', 'integration'] as const
+
 const { values } = parseArgs({
   args: Bun.argv.slice(2),
   options: {
@@ -50,7 +54,13 @@ if (values.help) {
   process.exit(0)
 }
 
-const vitestArgs: string[] = ['run']
+const vitestArgs: string[] = [
+  'run',
+  // 只跑三个 node 项目（unit/acceptance/integration）。Storybook 浏览器测试
+  // （storybook 项目，需 chromium）是独立可视化基线，用 `bun run test:storybook`
+  // （`--project 'storybook:*'`）显式触发，不进 verify/pre-push 门禁。
+  ...NODE_PROJECTS.flatMap(p => ['--project', p] as string[]),
+]
 
 // AC 过滤：vitest -t 子串匹配 test 名（AC 编号 = test 名契约）
 if (values.ac) {
