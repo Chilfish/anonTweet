@@ -37,7 +37,106 @@ const TWEET_COMPONENTS = [
   'AIVisionBlock',
 ] as const
 
-describe('AC-UI-VISION-001: every used tweet component has a story (P1-2)', () => {
+// ins 目录全部组件（index.ts 为 barrel 不算组件；InstagramPostCard 等 6 个由
+// InstagramPostCard.stories.tsx 覆盖，其余 8 个由 2026-08-19 新增 stories 补齐）
+const INS_COMPONENTS = [
+  'InstagramPostCard',
+  'IGActionBar',
+  'IGCaption',
+  'IGCardHeader',
+  'IGHeader',
+  'IGMediaGrid',
+  'IGMusicInfo',
+  'IGOptionsMenu',
+  'IGPostSkeleton',
+  'IGScreenshotButton',
+  'IGTranslateDialog',
+  'IGTranslateToggle',
+  'InsLogo',
+  'PlainIGPost',
+] as const
+
+// translation 在用目录（AltEditorComponents / EditorComponents 是内部部件，由
+// TranslationEditor / AltTranslationEditor story 透出，不单独计）
+const TRANSLATION_IN_USE = [
+  'AIErrorDetail',
+  'AIVisionEditorDialog',
+  'AltTranslationEditor',
+  'BackButton',
+  'DictionaryViewer',
+  'DownloadMedia',
+  'SaveAsImageButton',
+  'ToggleTransButton',
+  'TranslationDisplay',
+  'TranslationEditor',
+] as const
+
+// settings 在用目录（SettingsPanel 等 4 个由 Settings.stories.tsx 覆盖）
+const SETTINGS_IN_USE = [
+  'AITranslationSettings',
+  'AIVisionSettings',
+  'GeneralSettings',
+  'SettingsPanel',
+  'SettingsUI',
+  'ThemeSwitcher',
+  'SeparatorTemplateManager',
+  'TranslationDictionaryManager',
+] as const
+
+// ui 在用原语（「被使用即覆盖」口径：app 内被导入使用的组件）
+const UI_IN_USE = [
+  'alert',
+  'avatar',
+  'badge',
+  'button',
+  'card',
+  'checkbox',
+  'dialog',
+  'dropdown-menu',
+  'empty',
+  'input',
+  'label',
+  'media',
+  'popover',
+  'preview-card',
+  'scroll-area',
+  'select',
+  'separator',
+  'skeleton',
+  'spinner',
+  'switch',
+  'toggle',
+  'tooltip',
+] as const
+
+const STORY_FILES_CACHE = {
+  names: null as string[] | null,
+  content: '' as string,
+}
+
+function storyFiles(): { names: string[], content: string } {
+  if (!STORY_FILES_CACHE.names) {
+    const names = readdir('app/stories').filter(f => f.endsWith('.stories.tsx'))
+    const content = names.map(f => read(`app/stories/${f}`)).join('\n')
+    STORY_FILES_CACHE.names = names
+    STORY_FILES_CACHE.content = content
+  }
+  return { names: STORY_FILES_CACHE.names, content: STORY_FILES_CACHE.content }
+}
+
+function expectCovered(names: readonly string[], scope: string) {
+  const issues: string[] = []
+  for (const name of names) {
+    const fileExists = storyFiles().names.includes(`${name}.stories.tsx`)
+    const imported = new RegExp(`import\\s*\\{?[^;{]*\\b${name}\\b`, 'm').test(storyFiles().content)
+    if (!fileExists && !imported) {
+      issues.push(`${scope}/${name} has no story file and is not rendered by any story`)
+    }
+  }
+  expect(issues, [scope, ...issues].join('\n')).toEqual([])
+}
+
+describe('AC-UI-VISION-001: every used component has a story (P1-2)', () => {
   it('tweet directory contains at least the 14 core component files', () => {
     const files = readdir('app/components/tweet')
     for (const name of TWEET_COMPONENTS) {
@@ -45,8 +144,8 @@ describe('AC-UI-VISION-001: every used tweet component has a story (P1-2)', () =
     }
   })
 
-  it('each of the 14 components has a non-empty story file', () => {
-    const stories = new Set(readdir('app/stories').filter(f => f.endsWith('.stories.tsx')))
+  it('each of the 14 tweet components has a non-empty story file', () => {
+    const stories = new Set(storyFiles().names)
     for (const name of TWEET_COMPONENTS) {
       const storyFile = `${name}.stories.tsx`
       expect(stories, `missing story ${storyFile}`).toContain(storyFile)
@@ -55,6 +154,22 @@ describe('AC-UI-VISION-001: every used tweet component has a story (P1-2)', () =
       // 每个 story 至少 export 一个具名场景
       expect(content, `${storyFile} should export at least one named story`).toMatch(/export const [A-Z]\w*/)
     }
+  })
+
+  it('every ins component is covered by a story (file or rendered in a bundle)', () => {
+    expectCovered(INS_COMPONENTS, 'ins')
+  })
+
+  it('every in-use translation component is covered by a story', () => {
+    expectCovered(TRANSLATION_IN_USE, 'translation')
+  })
+
+  it('every in-use settings component is covered by a story', () => {
+    expectCovered(SETTINGS_IN_USE, 'settings')
+  })
+
+  it('every used ui primitive is covered by a story (bundle ui-primitives)', () => {
+    expectCovered(UI_IN_USE, 'ui')
   })
 
   it('total story files grew from 4 to at least 18', () => {
