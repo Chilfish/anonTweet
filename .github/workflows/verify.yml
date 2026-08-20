@@ -43,8 +43,7 @@ jobs:
       - name: Lint
         run: bunx eslint .
 
-      - name: Unit tests
-        run: bun run test
-
-      - name: Verification suite
+      - name: Verification suite (unit + acceptance + integration)
+        # verify 已包含 unit + acceptance（见 verify/index.ts scoping），
+        # 不再单独跑 bun run test，避免同一套 node 测试在 CI 里重复执行
         run: bun run verify/index.ts --exit-on-fail

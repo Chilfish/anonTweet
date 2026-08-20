@@ -1,13 +1,19 @@
 import type { TestProjectConfiguration } from 'vitest/config'
 import path from 'node:path'
+import storybookTest from '@storybook/addon-vitest/vitest-plugin'
+import { playwright } from '@vitest/browser-playwright'
 import { defineConfig } from 'vitest/config'
 
 /**
- * Vitest 三层架构（docs/archive/testing-infra-refactor.md Phase A~E）
+ * Vitest 三层架构 + Storybook 视觉测试（docs/archive/testing-infra-refactor.md Phase A~E）
  *
  * - unit:        L1 纯函数/解析器单测（test/unit/**，node 环境，快）
  * - acceptance:  L3 AC 语义层（test/acceptance/**，fixture 回归 + 仓库级静态检查）
  * - integration: L2 BFF API 集成（test/integration/**，setupFiles 起 TestServer，串行）
+ * - storybook:   视觉测试（app/stories/**，真实 Chromium 浏览器渲染 story）
+ *                仅随 addon-vitest 面板（Storybook Test）或显式
+ *                `vitest run --project 'storybook:*'` 启动；`bun run test` 用
+ *                `--project unit --project acceptance` 并不包含它。
  *
  * 注意：projects 模式下顶层 resolve/plugins 与 test 选项（testTimeout/maxWorkers 等）
  * 均不被项目继承，必须通过共享对象展开到每个项目（见下方 sharedProjectConfig /
@@ -36,6 +42,12 @@ const sharedProjectTest = {
   clearMocks: true,
   restoreMocks: true,
 }
+
+// storybookTest() 需在配置加载期 await（返回 Promise<Plugin[]>）。
+// 依赖 @vitest/browser + @vitest/browser-playwright + playwright chromium（已装）。
+// 设置文件复用 .storybook/vitest.setup.ts（projectAnnotations + a11y addon）。
+const storybookConfigDir = path.resolve(__dirname, '.storybook').replace(/\\/g, '/')
+const storybookPlugins = await storybookTest({ configDir: '.storybook' })
 
 export default defineConfig({
   test: {
@@ -66,6 +78,28 @@ export default defineConfig({
           // 单 TestServer 单 worker：串行，避免每 worker 各起一个 dev server
           maxWorkers: 1,
           fileParallelism: false,
+        },
+      },
+      {
+        ...sharedProjectConfig,
+        plugins: [...storybookPlugins],
+        test: {
+          // 项目名必须为 `storybook:<configDir 绝对前向路径>`：addon-vitest 面板以
+          // `--project storybook:<STORYBOOK_CONFIG_DIR>` 过滤，Vitest 按
+          // wildcardPatternToRegExp 精确匹配该项名（name 或 browser instance 名）。
+          // 直接跑用 `vitest run --project 'storybook:*'`（通配前缀）。
+          name: `storybook:${storybookConfigDir}`,
+          setupFiles: ['./.storybook/vitest.setup.ts'],
+          // 真实浏览器渲染每个 story；axe（a11y addon）随 story 测试执行
+          browser: {
+            enabled: true,
+            provider: playwright(),
+            instances: [{ browser: 'chromium', name: 'chromium' }],
+            headless: true,
+          },
+          // 浏览器冷启动 + 全量 story 渲染较慢
+          testTimeout: 60_000,
+          hookTimeout: 60_000,
         },
       },
     ],

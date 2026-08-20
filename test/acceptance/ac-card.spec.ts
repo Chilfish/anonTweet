@@ -15,7 +15,9 @@ import { loadFixture } from '../helpers/load-fixture'
  * - AC-CARD-002：真实 jetfuel payload 解码（strings 含 CJK/分类/posts/头像/图）
  * - AC-CARD-003：trending 卡片字段提取完整
  * - AC-CARD-004：解析失败回退 unified_card + `jetfuel.parse.fallback` 日志提示
- * - AC-CARD-005：TweetLinkCard 含 Trending 变体渲染分支（视觉结构断言）
+ * - AC-CARD-005~008：真实渲染测试（见 card-render.spec.ts，评审 P1-1/P1-3：
+ *   原「快照驱动」说法名实不符，已改为 renderToString + HTML 断言）
+ * - AC-CARD-009：源码层锁定 Trending 变体分支与关键类名（辅助检查）
  */
 
 const read = (rel: string) => fs.readFileSync(path.resolve(import.meta.dirname, '..', '..', rel), 'utf8')
@@ -26,6 +28,7 @@ const FILES = {
   jetfuel: 'app/lib/rettiwt-api/parsers/jetfuel.ts',
   obsLog: 'app/lib/obs-log.ts',
   card: 'app/components/tweet/TweetCard.tsx',
+  trendingCard: 'app/components/tweet/TrendingCard.tsx',
   types: 'app/types/card.ts',
 } as const
 
@@ -90,18 +93,21 @@ describe('AC-CARD tweet card jetfuel enhancement', () => {
     expect(typesSrc).toContain('trending')
   })
 
-  it('AC-CARD-005: TweetLinkCard renders official-style trending variant', () => {
+  it('AC-CARD-009: source-level sanity of trending variant (helper)', () => {
     const src = read(FILES.card)
-    // Trending 变体组件 + 渲染分支
-    expect(src).toContain('TrendingCardView')
+    const trendingSrc = read(FILES.trendingCard)
+    // Trending 变体组件 + 渲染分支（2026-08-19 P2-1 拆分为 TrendingCard.tsx）
     expect(src).toContain('card?.trending')
-    // 官方结构关键视觉元素（对照 cache/trending.html）
-    expect(src).toContain('aspect-[18/10]')
-    expect(src).toContain('line-clamp-3')
-    expect(src).toContain('line-clamp-2')
+    expect(src).toContain('TrendingCardView')
+    // 官方结构关键视觉元素（对照 cache/trending.html，现位于 TrendingCard.tsx）
+    expect(trendingSrc).toContain('aspect-[18/10]')
+    expect(trendingSrc).toContain('line-clamp-3')
+    expect(trendingSrc).toContain('line-clamp-2')
     // 头像组：组件渲染的是解析后的 avatars 列表（profile_images 是解析器层关注点）
-    expect(src).toContain('trending.avatars')
-    expect(src).toContain('postsCount')
-    expect(src).toContain('bg-gradient-to-t')
+    expect(trendingSrc).toContain('trending.avatars')
+    expect(trendingSrc).toContain('postsCount')
+    expect(trendingSrc).toContain('bg-gradient-to-t')
+    // 主图为装饰图（alt 空），标题 h3 承载可访问名称（P1-2 a11y）
+    expect(trendingSrc).toContain('alt=""')
   })
 })
