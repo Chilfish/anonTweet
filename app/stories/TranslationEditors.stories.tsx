@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { EnrichedTweet } from '~/types'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { AIVisionEditorDialog } from '~/components/translation/AIVisionEditorDialog'
 import { AltTranslationEditor } from '~/components/translation/AltTranslationEditor'
 import { TranslationDisplay } from '~/components/translation/TranslationDisplay'
@@ -65,10 +65,15 @@ export const VisionDialogOpen: Story = {
 
 function VisionDialogOpened({ tweet }: { tweet: EnrichedTweet }) {
   const editor = useVisionLogic(tweet)
-  // 挂载时打开弹窗一次，展示编辑态视觉
+  const openedRef = useRef(false)
+  // 挂载时打开弹窗一次（展示编辑态视觉）；editor 每次渲染都是新对象，
+  // 依赖必须用稳定的 initializeEditor，并用 ref 防抖保证只触发一次，避免无限重渲染。
   useEffect(() => {
+    if (openedRef.current)
+      return
+    openedRef.current = true
     editor.initializeEditor()
-  }, [editor])
+  }, [editor.initializeEditor])
 
   return <AIVisionEditorDialog editor={editor} />
 }
