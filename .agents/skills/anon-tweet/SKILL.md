@@ -42,11 +42,10 @@ metadata:
 | GET | `/api/tweet/replies/{id}?cursor=...` | 推文回复（cursor 分页） |
 | GET | `/api/tweet/list/{id}` | List 时间线（EnrichedTweet 数组） |
 | GET | `/api/user/get/{username}` | 用户资料（DB 缓存，无记录返回 null） |
+| GET | `/api/user/timeline/{username}` | 用户时间线（EnrichedTweet 数组） |
 | GET | `/api/ig/get/{id}` | IG 帖子（id 为 shortcode；未配 INS_COOKIES 返回空数组） |
 | POST | `/api/ig/translate/{id}` | IG caption 翻译（manualTranslation 传入则跳过 AI） |
 | GET | `/api/proxy/image?url=...` | 图片代理（url 白名单校验，返回二进制） |
-
-⚠️ `/api/user/timeline/{username}` 当前固定返回 429（防滥用），查询用户时间线请用自部署实例 + 自己的 Key。
 
 ## 搜索参数
 
