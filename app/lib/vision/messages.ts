@@ -1,6 +1,8 @@
 import type { ModelMessage } from 'ai'
 import type { VisionPromptPreset } from './prompts'
 
+const DATA_URI_RE = /^data:([^;,]+);base64,(.+)$/s
+
 /**
  * AI 视觉描述 —— 消息构建纯函数（app/lib/vision/messages.ts）
  *
@@ -50,7 +52,7 @@ type UserContentPart
     | { type: 'text', text: string }
 
 function parseDataUri(dataUri: string): { mediaType: string, base64: string } {
-  const m = /^data:([^;,]+);base64,(.+)$/s.exec(dataUri)
+  const m = DATA_URI_RE.exec(dataUri)
   if (!m) {
     throw new Error(`Invalid data URI (expected data:<mime>;base64,<data>): ${dataUri.slice(0, 48)}`)
   }

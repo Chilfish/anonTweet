@@ -5,6 +5,9 @@ import { z } from 'zod'
 import { isChinese } from '~/lib/translateIGCaption'
 import { VisionParseError } from './parse'
 
+const NUMERIC_KEY_RE = /^\d+$/
+const FENCED_BLOCK_RE = /```(?:json)?([\s\S]*?)```/
+
 /**
  * AI 视觉描述 —— OCR 结果翻译（app/lib/vision/translateOCR.ts）
  *
@@ -56,7 +59,7 @@ function parseKeyedTranslations(
     return null
   const out: Array<{ index: number, translatedText: string }> = []
   for (const [key, value] of entries) {
-    if (!/^\d+$/.test(key) || typeof value !== 'string')
+    if (!NUMERIC_KEY_RE.test(key) || typeof value !== 'string')
       return null
     out.push({ index: Number(key), translatedText: value })
   }
@@ -105,7 +108,7 @@ function extractJson(text: string): unknown {
   catch {
     // fall through
   }
-  const fenced = trimmed.match(/```(?:json)?([\s\S]*?)```/)
+  const fenced = trimmed.match(FENCED_BLOCK_RE)
   if (fenced?.[1])
     candidates.push(fenced[1].trim())
   const firstBrace = trimmed.indexOf('{')

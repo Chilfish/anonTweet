@@ -1,5 +1,7 @@
 import type { Entity, EntityWithType, RawTweet, SeparatorEntity } from '~/types'
 
+const LEADING_MENTION_RE = /^(@\w{1,15}\s*)+/
+
 // 用于 AI 交互的载荷
 export interface TranslationPayload {
   maskedText: string
@@ -85,7 +87,7 @@ function createFinalEntity(base: any, text: string, index: number): Entity {
 }
 
 export function getEntities(tweet: RawTweet, rawText: string): Entity[] {
-  const leadingMentionMatch = rawText.match(/^(@\w{1,15}\s*)+/)
+  const leadingMentionMatch = rawText.match(LEADING_MENTION_RE)
   const leadingMentionEndIndex = leadingMentionMatch ? leadingMentionMatch[0].length : 0
   const displayText = rawText.slice(leadingMentionEndIndex)
 

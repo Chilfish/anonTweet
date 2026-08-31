@@ -10,24 +10,34 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+const TWEET_ID_ONLY_RE = /^\d+$/
+const TWITTER_STATUS_RE = /(?:https?:\/\/)?(?:www\.)?twitter\.com\/\w+\/status\/(\d+)/i
+const X_STATUS_RE = /(?:https?:\/\/)?(?:www\.)?x\.com\/\w+\/status\/(\d+)/i
+const MOBILE_TWITTER_STATUS_RE = /(?:https?:\/\/)?(?:mobile\.)?twitter\.com\/\w+\/status\/(\d+)/i
+const MOBILE_X_STATUS_RE = /(?:https?:\/\/)?(?:mobile\.)?x\.com\/\w+\/status\/(\d+)/i
+const IG_POST_RE = /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:[\w.-]+\/)?p\/([\w-]+)/i
+const IG_REEL_RE = /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:[\w.-]+\/)?reel\/([\w-]+)/i
+const IG_STORIES_RE = /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:[\w.-]+\/)?stories\/([^/]+)\/(\d+)/i
+const HTML_ENTITY_RE = /&(#x[0-9a-fA-F]+|#\d+|[a-zA-Z0-9]+);/g
+
 export function extractTweetId(input: string): string | null {
   // Remove whitespace
   const trimmed = input.trim()
 
   // If it's already just a tweet ID (numeric string)
-  if (/^\d+$/.test(trimmed)) {
+  if (TWEET_ID_ONLY_RE.test(trimmed)) {
     return trimmed
   }
 
   // Twitter URL patterns
   const patterns = [
     // Standard twitter.com URLs
-    /(?:https?:\/\/)?(?:www\.)?twitter\.com\/\w+\/status\/(\d+)/i,
+    TWITTER_STATUS_RE,
     // x.com URLs
-    /(?:https?:\/\/)?(?:www\.)?x\.com\/\w+\/status\/(\d+)/i,
+    X_STATUS_RE,
     // Mobile URLs
-    /(?:https?:\/\/)?(?:mobile\.)?twitter\.com\/\w+\/status\/(\d+)/i,
-    /(?:https?:\/\/)?(?:mobile\.)?x\.com\/\w+\/status\/(\d+)/i,
+    MOBILE_TWITTER_STATUS_RE,
+    MOBILE_X_STATUS_RE,
   ]
 
   for (const pattern of patterns) {
@@ -50,11 +60,11 @@ export function extractIGId(input: string): string | null {
 
   const patterns = [
     // post: instagram.com/p/{shortcode}/ or instagram.com/{user}/p/{shortcode}/
-    /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:[\w.-]+\/)?p\/([\w-]+)/i,
+    IG_POST_RE,
     // reel: instagram.com/reel/{shortcode}/ or instagram.com/{user}/reel/{shortcode}/
-    /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:[\w.-]+\/)?reel\/([\w-]+)/i,
+    IG_REEL_RE,
     // story: instagram.com/stories/{username}/{story_id}/
-    /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:[\w.-]+\/)?stories\/([^/]+)\/(\d+)/i,
+    IG_STORIES_RE,
   ]
 
   for (const pattern of patterns) {
@@ -190,7 +200,7 @@ export function decodeHtmlEntities(text: string): string {
   //   [a-z0-9]+   : 命名实体 (如 &amp;)
   // )           : 捕获组结束
   // ;           : 匹配 ; 结束
-  const entityPattern = /&(#x[0-9a-fA-F]+|#\d+|[a-zA-Z0-9]+);/g
+  const entityPattern = HTML_ENTITY_RE
 
   return text.replace(entityPattern, (fullMatch, content) => {
     // 1. 优先查表 (最快路径)

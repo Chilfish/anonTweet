@@ -2,6 +2,8 @@ import type React from 'react'
 import type { JSX } from 'react'
 import { cn } from '~/lib/utils'
 
+const REPLY_INFO_RE = /^@(\w{4,15})\s(.+)/s
+
 // --- Components for parsed elements ---
 
 interface LinkProps {
@@ -145,7 +147,7 @@ const parseRichText = createTextParser(
  */
 function getReplyInfo(text: string) {
   // Match reply-to format at the start of the tweet
-  const regex = /^@(\w{4,15})\s(.+)/s
+  const regex = REPLY_INFO_RE
   const match = text.match(regex)
 
   if (match) {

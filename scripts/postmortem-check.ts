@@ -37,6 +37,14 @@ const HOT_FILES: Array<{ pattern: string, fixes: number, reports: string[] }> = 
 ]
 
 const REPORT_FILE_RE = /^\d{3}-.+\.md$/
+const NEWLINE_RE = /\r?\n/
+const FILE_ID_PREFIX_RE = /^\d{3}-/
+const MD_SUFFIX_RE = /\.md$/
+const DASH_RE = /-/g
+const POSTMORTEM_HEADER_RE = /^# Postmortem \d{3}:/
+const POSTMORTEM_HEADER_STRIP_RE = /^# Postmortem \d{3}:\s*/
+const STATUS_KEY_RE = /^\*\*状态\*\*:/
+const STATUS_STRIP_RE = /^\*\*状态\*\*:\s*/
 
 interface Postmortem {
   id: string
@@ -57,7 +65,7 @@ function listPostmortems(): string[] {
  * backtracking between `\s*` and `[\s\S]*?` on report files.
  */
 function parseChangedFiles(content: string): string[] {
-  const lines = content.split(/\r?\n/)
+  const lines = content.split(NEWLINE_RE)
   const header = lines.findIndex(l => l.trim() === '## Changed Files')
   if (header === -1)
     return []
@@ -82,16 +90,16 @@ function parsePostmortem(file: string): Postmortem {
   const id = file.slice(0, 3)
 
   // Line-based parsing avoids super-linear backtracking with \s* + .+
-  const lines = content.split(/\r?\n/)
-  let title = file.replace(/^\d{3}-/, '').replace(/\.md$/, '').replace(/-/g, ' ')
+  const lines = content.split(NEWLINE_RE)
+  let title = file.replace(FILE_ID_PREFIX_RE, '').replace(MD_SUFFIX_RE, '').replace(DASH_RE, ' ')
   let status = 'Unknown'
   for (const raw of lines) {
     const line = raw.trim()
-    if (/^# Postmortem \d{3}:/.test(line)) {
-      title = line.replace(/^# Postmortem \d{3}:\s*/, '').trim()
+    if (POSTMORTEM_HEADER_RE.test(line)) {
+      title = line.replace(POSTMORTEM_HEADER_STRIP_RE, '').trim()
     }
-    if (/^\*\*状态\*\*:/.test(line)) {
-      status = line.replace(/^\*\*状态\*\*:\s*/, '').trim()
+    if (STATUS_KEY_RE.test(line)) {
+      status = line.replace(STATUS_STRIP_RE, '').trim()
     }
   }
   const files = parseChangedFiles(content)
