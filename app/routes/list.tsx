@@ -124,10 +124,7 @@ function ListIdInputForm() {
   )
 }
 
-export default function TweetPage({
-  params,
-  loaderData,
-}: Route.ComponentProps) {
+export default function TweetPage(_props: Route.ComponentProps) {
   return (
     <div className="flex flex-col gap-4 px-1">
       <div className="flex items-center w-full gap-4">

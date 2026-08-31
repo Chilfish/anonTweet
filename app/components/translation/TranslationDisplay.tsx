@@ -10,7 +10,7 @@ interface TranslationDisplayProps {
 }
 
 export const TranslationDisplay: React.FC<TranslationDisplayProps> = ({
-  tweetId,
+  tweetId: _tweetId,
   originalTweet,
 }) => {
   const settings = useTranslationSettings()

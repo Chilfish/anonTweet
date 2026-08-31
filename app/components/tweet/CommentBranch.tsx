@@ -81,7 +81,7 @@ const CommentBranchComponent = forwardRef<HTMLDivElement, CommentBranchProps>(({
       {hasReplies && (
         <div>
           {replies.map((reply, index) => (
-            <CommentBranch
+            <CommentBranchComponent
               key={reply.id_str}
               tweet={reply}
               isTopLevel={false}

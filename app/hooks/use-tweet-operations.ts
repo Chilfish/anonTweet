@@ -114,7 +114,7 @@ export function useTweetOperations() {
       })
       toast.success('下载任务结束', { description: `成功处理 ${mediaItems.length} 个文件` })
     }
-    catch (globalError) {
+    catch {
       toast.error('批量下载进程异常终止')
     }
   }
@@ -126,7 +126,7 @@ export function useTweetOperations() {
       await navigator.clipboard.writeText(markdown)
       toast.success('已复制 Markdown 到剪贴板')
     }
-    catch (error) {
+    catch {
       toast.error('复制失败', { description: '请确保浏览器可写剪贴板' })
     }
   }
@@ -138,7 +138,7 @@ export function useTweetOperations() {
       await navigator.clipboard.writeText(text)
       toast.success('已复制正文到剪贴板')
     }
-    catch (error) {
+    catch {
       toast.error('复制失败', { description: '请确保浏览器可写剪贴板' })
     }
   }

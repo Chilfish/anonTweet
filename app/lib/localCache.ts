@@ -24,6 +24,8 @@ interface ICacheAdapter {
 
   /**
    * 设置缓存
+   * @param key 缓存键
+   * @param value 缓存值
    * @param ttl 毫秒数
    */
   set: <T>(key: string, value: T, ttl?: number) => Promise<void>
@@ -127,7 +129,7 @@ class NodeFsCacheAdapter implements ICacheAdapter {
 
       return wrapper.data
     }
-    catch (e: any) {
+    catch {
       // 文件不存在或 JSON 损坏
       return null
     }
@@ -185,7 +187,7 @@ async function getAdapter(): Promise<ICacheAdapter> {
       adapterInstance = adapter
       return adapter
     }
-    catch (e) {
+    catch {
       // console.warn('FS adapter init failed, falling back to Memory', e)
     }
   }

@@ -77,7 +77,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   )
 }
 
-export default function App({ loaderData }: Route.ComponentProps) {
+export default function App(_props: Route.ComponentProps) {
   return (
     <ThemeProvider>
       <Outlet />
