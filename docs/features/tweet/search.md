@@ -1,0 +1,96 @@
+# 推文搜索 — 实施追踪
+
+> 创建时间：2026-08-31
+> 分支：`feat/tweet-search`
+> 关联：`docs/planning/backlog.md`（阶段二待办）、`verify/acceptance-criteria/AC-tweet.md`（AC-TWEET-009/010）
+> 数据层：`rettiwt-api`（`TweetService.search` 已具备，本任务补齐授权组与 App 接入）
+
+## 目标
+
+打通 Twitter/X 搜索链路：`/search` 页面输入关键词 → BFF `/api/tweet/search` →
+`rettiwt-api` `TWEET_SEARCH` 资源 → X `SearchTimeline`，返回分页推文列表
+（推文元素格式同 `/api/tweet/get` 的 `EnrichedTweet`，支持 `cursor` 翻页）。
+
+## 现状盘点（2026-08-31）
+
+- `rettiwt-api` 底层搜索能力**已完整**：`TweetRequests.search()`（SearchTimeline 请求）、
+  `TweetService.search()`（含按时间倒序）、`Extractors.TWEET_SEARCH`（CursoredData 解析）、
+  `Requests.TWEET_SEARCH` 映射均已就位，`FetchResourcesGroup` 已包含 `TWEET_SEARCH`。
+- **缺口 1（rettiwt-api 层）**：`AllowGuestAuthenticationGroup` 未包含 `TWEET_SEARCH`——
+  无 `apiKey` 的 guest 池直接抛 `RESOURCE_NOT_ALLOWED`。补上后无 Key 部署也可尝试 guest 搜索。
+- **缺口 2（App 数据层）**：`app/lib/react-tweet/utils/get-tweet.ts` 无搜索 fetch/解析函数。
+- **缺口 3（BFF + 前端）**：无 `/api/tweet/search` 路由、无 `/search` 页面、footer 无入口。
+
+## 接口约定
+
+### GET /api/tweet/search?q=<关键词>&type=<top|latest>&cursor=<光标>&count=<每页数量>
+
+- `q`：必填，关键词（等价 `includeWords`，多词空格分词）
+- `type`：可选，`top`（热门）| `latest`（最新，默认）
+- `cursor`：可选，上一页返回的 `nextCursor`（X SearchTimeline Bottom 光标）
+- `count`：可选，每页数量（默认 20，上限 50）
+- 返回：`{ tweets: EnrichedTweet[], nextCursor: string | null }` —— 推文元素与
+  `GET/POST /api/tweet/get` 相同格式（`id_str` / `text` / `entities` / `user`）；
+  分页形态对齐 `/api/tweet/replies` 的 `RepliesResponse`
+
+## 实施计划
+
+| Phase   | 内容                                                                 | 状态    |
+| ------- | -------------------------------------------------------------------- | ------- |
+| Phase 1 | rettiwt-api：`TWEET_SEARCH` 加入 `AllowGuestAuthenticationGroup`     | ✅ 完成 |
+| Phase 2 | 数据层：`parseSearchTimeline` 纯函数 + `fetchSearchTweets`（池化）   | ✅ 完成 |
+| Phase 3 | BFF：`/api/tweet/search` loader + `validations/search.ts` + 路由注册 | ✅ 完成 |
+| Phase 4 | 前端：`/search` 页面 + footer 入口                                   | ✅ 完成 |
+| Phase 5 | 测试：fixture + 单测 + AC-TWEET-009/010 + 门禁 + 提交 + PR           | ✅ 完成 |
+
+## 迭代记录（2026-08-31）
+
+- **高级搜索语法**：`q` 以原样透传为 `rawQuery`（`TweetFilter.includeWords.join(' ')`），
+  `(from:7KoWa) until:2025-12-20` 这类 X 高级语法不做任何改写（`TweetFilter` 单测锁定）。
+- **快捷输入组件**：`/search` 页「高级搜索」面板提供 10 个运算符快捷插入 chip
+  （from: / to: / # / min_faves: / min_retweets: / since: / until: / lang: / - / 精确短语）。
+- **解析健壮性**：`parseSearchTimeline` 自动解包 `TweetWithVisibilityResults`
+  （真实推文在 `.tweet` 下）；空结果页区分「无结果」与「搜索失败」两种状态，
+  不再误显示「推文未找到/已删除」。
+
+## 技术设计
+
+### Phase 2 — 数据层
+
+`app/lib/react-tweet/utils/get-tweet.ts` 新增：
+
+- `parseSearchTimeline(response: ITweetSearchResponse)` —— **纯函数**：遍历
+  `data.search_by_raw_query.search_timeline.timeline.instructions`，只取
+  `entryId` 前缀 `tweet-` 且非 `TimelineTimelineCursor` 的 entry，
+  提取 `itemContent.tweet_results.result`（`as unknown as RawTweet`），复用
+  `getBottomCursor` 取下一页光标（Bottom cursor，分页透传给前端）。
+- `fetchSearchTweets(query, { type, count, cursor })` —— `twitterPool.run` +
+  `fetcher.request(ResourceType.TWEET_SEARCH, { filter: { includeWords: [query], top }, count, cursor })`，
+  返回 `{ tweets, nextCursor }`（`parseSearchTimeline` 结果）。
+
+> 解析策略对齐 `fetchListTweets`（同款 timeline 结构），避免引入新解析范式，
+> 规避 postmortem #001（解析器零测试/多分支漂移）：纯函数直接单测。
+
+### Phase 3 — BFF
+
+- `app/lib/validations/search.ts`：`searchTweetSchema`（`q` trim 1..500、`type` enum、
+  `cursor` 可选、`count` 1..50 默认 20；校验失败 400）。
+- `app/routes/api/tweet/search.ts`：loader 读 searchParams → `fetchSearchTweets` →
+  `enrichTweet` 映射过滤 → 返回 `{ tweets: EnrichedTweet[], nextCursor }`；
+  异常 `data({ error }, { status })`。
+- `app/routes.ts`：`prefix('tweet')` 下注册 `route('search', 'routes/api/tweet/search.ts')`。
+
+### Phase 4 — 前端
+
+- `app/routes/search.tsx`：搜索框（Input + 提交）+ Latest/Top 切换 → 导航
+  `/search?q=&type=`，`clientLoader` 拉取第一页渲染（复用 `MyTweet` 单推模式，
+  同 `/list/:id`）；「加载更多」按钮用 `nextCursor` 追加下一页（`useState` 累积 +
+  URL 参数变化时重置）；meta `noindex`。
+- footer「More」区新增内链 `/search`（react-router `Link`，不走外链 `FooterLink`）。
+
+## 验证
+
+- 单测：`parseSearchTimeline`（fixture 提取/光标/容错）+ `/api/tweet/search` 路由
+  （缺 q → 400 / 合法 q → 数组 / cursor 透传）
+- AC-TWEET-009（离线，fixture 解析回归）
+- AC-TWEET-010（集成，`TWEET_KEYS` + server：端点返回 EnrichedTweet[]）

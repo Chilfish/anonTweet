@@ -1,12 +1,14 @@
+import type { ITweetSearchResponse } from '~/lib/rettiwt-api/types/raw/tweet/Search'
 import type { EnrichedTweet, Entity } from '~/types'
 /**
  * test/acceptance/ac-tweet.spec.ts
  *
  * L3 AC 语义层 — Tweet 离线验收（自 verify/modules/tweet.verifier.ts 迁移，Phase B 去重）：
  * AC-TWEET-001~004 / 007（fixture 回归）；AC-TWEET-005/006/008 为集成测试，
- * 迁至 test/integration/（Phase C）。
+ * 迁至 test/integration/（Phase C）。AC-TWEET-009（搜索解析，离线）同处本文件。
  */
 import { describe, expect, it } from 'vitest'
+import { parseSearchTimeline } from '~/lib/react-tweet/utils/get-tweet'
 import { loadFixture } from '../helpers/load-fixture'
 
 const fixtures = [
@@ -77,5 +79,18 @@ describe('AC-TWEET tweet parsing (fixture regression)', () => {
         failures.push(`${file} (quoted)`)
     }
     expect(failures).toEqual([])
+  })
+
+  it('AC-TWEET-009: search response parses tweets + bottom cursor, excluding cursors/ads', () => {
+    const response = loadFixture<ITweetSearchResponse>('search/search-tweets.json')
+    const { tweets, nextCursor } = parseSearchTimeline(response)
+
+    // fixture 含 2 条 tweet- 前缀推文 + 1 条 promoted- 广告 + Top/Bottom 光标
+    expect(tweets).toHaveLength(2)
+    for (const tweet of tweets) {
+      expect((tweet as { rest_id?: string }).rest_id).toBeTruthy()
+    }
+    expect(JSON.stringify(tweets)).not.toContain('TimelineTimelineCursor')
+    expect(nextCursor).toBe('dGhlX2JvdHRvbV9jdXJzb3Jfb2Zfc2VhcmNo')
   })
 })

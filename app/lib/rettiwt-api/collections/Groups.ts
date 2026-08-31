@@ -7,6 +7,7 @@ import { ResourceType } from '../enums/Resource'
  */
 export const AllowGuestAuthenticationGroup = [
   ResourceType.TWEET_DETAILS,
+  ResourceType.TWEET_SEARCH,
   ResourceType.USER_DETAILS_BY_USERNAME,
   ResourceType.USER_TIMELINE,
 ]
