@@ -35,13 +35,23 @@
 
 ## 实施计划
 
-| Phase   | 内容                                                              | 状态 |
-| ------- | ----------------------------------------------------------------- | ---- |
-| Phase 1 | rettiwt-api：`TWEET_SEARCH` 加入 `AllowGuestAuthenticationGroup` | ⬜ |
-| Phase 2 | 数据层：`parseSearchTimeline` 纯函数 + `fetchSearchTweets`（池化） | ⬜ |
-| Phase 3 | BFF：`/api/tweet/search` loader + `validations/search.ts` + 路由注册 | ⬜ |
-| Phase 4 | 前端：`/search` 页面 + footer 入口                                 | ⬜ |
-| Phase 5 | 测试：fixture + 单测 + AC-TWEET-009/010 + 门禁 + 提交 + PR         | ⬜ |
+| Phase   | 内容                                                                 | 状态 |
+| ------- | -------------------------------------------------------------------- | ---- |
+| Phase 1 | rettiwt-api：`TWEET_SEARCH` 加入 `AllowGuestAuthenticationGroup`     | ✅ 完成 |
+| Phase 2 | 数据层：`parseSearchTimeline` 纯函数 + `fetchSearchTweets`（池化）   | ✅ 完成 |
+| Phase 3 | BFF：`/api/tweet/search` loader + `validations/search.ts` + 路由注册 | ✅ 完成 |
+| Phase 4 | 前端：`/search` 页面 + footer 入口                                   | ✅ 完成 |
+| Phase 5 | 测试：fixture + 单测 + AC-TWEET-009/010 + 门禁 + 提交 + PR           | ✅ 完成 |
+
+## 迭代记录（2026-08-31）
+
+- **高级搜索语法**：`q` 以原样透传为 `rawQuery`（`TweetFilter.includeWords.join(' ')`），
+  `(from:7KoWa) until:2025-12-20` 这类 X 高级语法不做任何改写（`TweetFilter` 单测锁定）。
+- **快捷输入组件**：`/search` 页「高级搜索」面板提供 10 个运算符快捷插入 chip
+  （from: / to: / # / min_faves: / min_retweets: / since: / until: / lang: / - / 精确短语）。
+- **解析健壮性**：`parseSearchTimeline` 自动解包 `TweetWithVisibilityResults`
+  （真实推文在 `.tweet` 下）；空结果页区分「无结果」与「搜索失败」两种状态，
+  不再误显示「推文未找到/已删除」。
 
 ## 技术设计
 
