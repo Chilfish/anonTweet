@@ -1,6 +1,6 @@
 # Tweet API 验收标准
 
-> 版本：1.0 | 日期：2026-07-04
+> 版本：1.1 | 日期：2026-08-31（新增 AC-TWEET-009/010 搜索验收）
 > 对应 Postmortem：001 (Tweet Parsing), 005 (Media)
 > 关联 Verifier：`verify/modules/tweet.verifier.ts`
 > 执行命令：`bun verify --module tweet [--ac AC-TWEET-NNN]`
@@ -103,17 +103,47 @@
 
 ---
 
-## 总计：8 条 AC
+## AC-TWEET-009：搜索响应解析不丢推文与光标（离线）
 
-| AC           | 分类        | 依赖外部 API | 依赖 AI |
-| ------------ | ----------- | ------------ | ------- |
-| AC-TWEET-001 | 纯函数/离线 | 否           | 否      |
-| AC-TWEET-002 | 纯函数/离线 | 否           | 否      |
-| AC-TWEET-003 | 纯函数/离线 | 否           | 否      |
-| AC-TWEET-004 | 纯函数/离线 | 否           | 否      |
-| AC-TWEET-005 | 集成        | 是 (Twitter) | 否      |
-| AC-TWEET-006 | 集成        | 是 (Twitter) | 否      |
-| AC-TWEET-007 | 纯函数/离线 | 否           | 否      |
-| AC-TWEET-008 | 集成        | 是 (Twitter) | 否      |
+- **输入**：`test/fixtures/search/search-tweets.json`（SearchTimeline 原始响应，
+  含 2 条推文 entry + Top/Bottom 光标 entry）
+- **预期输出**：`parseSearchTimeline` 提取出 2 条原始推文；`entryId` 前缀非 `tweet-`
+  或 `TimelineTimelineCursor` 的 entry 被排除；Bottom 光标值被提取
+- **验证方法**：`bun verify --ac AC-TWEET-009`（vitest `-t` 过滤）或
+  `bun run verify/index.ts --module tweet`
+- **Pass 条件**：
+  - 提取的推文数量 = fixture 中推文 entry 数量
+  - 无任何 `TimelineTimelineCursor` 混入推文列表
+  - `nextCursor` 与 fixture 的 Bottom 光标 `value` 一致；畸形响应（空对象）不抛错
+
+---
+
+## AC-TWEET-010：搜索端点返回推文列表（集成）
+
+- **输入**：合法关键词（如 `q=twitter`）请求 `GET /api/tweet/search`
+- **预期输出**：返回 `EnrichedTweet[]` 数组（格式同 `/api/tweet/get`，目前不含分页字段）
+- **验证方法**：`bun verify --ac AC-TWEET-010`
+- **前置条件**：`TWEET_KEYS` 已配置，测试服务器运行中
+- **Pass 条件**：
+  - HTTP 状态码 200
+  - 返回体为数组（允许为空——搜索无结果时返回空数组，不 500）
+  - 非空时数组元素含 `id_str`、`text`、`entities`、`user` 字段
+
+---
+
+## 总计：10 条 AC
+
+| AC            | 分类        | 依赖外部 API | 依赖 AI |
+| ------------- | ----------- | ------------ | ------- |
+| AC-TWEET-001  | 纯函数/离线 | 否           | 否      |
+| AC-TWEET-002  | 纯函数/离线 | 否           | 否      |
+| AC-TWEET-003  | 纯函数/离线 | 否           | 否      |
+| AC-TWEET-004  | 纯函数/离线 | 否           | 否      |
+| AC-TWEET-005  | 集成        | 是 (Twitter) | 否      |
+| AC-TWEET-006  | 集成        | 是 (Twitter) | 否      |
+| AC-TWEET-007  | 纯函数/离线 | 否           | 否      |
+| AC-TWEET-008  | 集成        | 是 (Twitter) | 否      |
+| AC-TWEET-009  | 纯函数/离线 | 否           | 否      |
+| AC-TWEET-010  | 集成        | 是 (Twitter) | 否      |
 
 > 离线 AC 可通过 fixture 直接验证，无需网络；集成 AC 需要 `TWEET_KEYS` 环境变量。
