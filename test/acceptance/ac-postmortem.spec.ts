@@ -10,6 +10,8 @@ import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { projectPath, readProjectFile } from '../helpers/read-project-file'
 
+const LINE_BREAK_RE = /\r?\n/
+
 const POSTMORTEM_DIR_REL = path.join('docs', 'postmortem')
 const SCRIPT_REL = path.join('scripts', 'postmortem-check.ts')
 const REPORT_IDS = ['001', '002', '003', '004', '005', '006', '007', '008', '009']
@@ -31,7 +33,7 @@ function listReports(): string[] {
  * backtracking between `\s*` and `[\s\S]*?` on report files.
  */
 function parseChangedFiles(content: string): string[] {
-  const lines = content.split(/\r?\n/)
+  const lines = content.split(LINE_BREAK_RE)
   const header = lines.findIndex(l => l.trim() === '## Changed Files')
   if (header === -1)
     return []

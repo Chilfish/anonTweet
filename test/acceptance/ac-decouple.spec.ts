@@ -2,6 +2,11 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
+const AI_TRANSLATION_IMPORT_RE = /from ['"]~\/lib\/AITranslation['"]/
+const LLM_CALL_FEATURE_RE = /generateText|streamText/
+const TIMEOUT_MS_EXPORT_RE = /export const AI_TRANSLATION_TIMEOUT_MS/
+const ABORT_SIGNAL_TIMEOUT_RE = /AbortSignal\.timeout/
+
 /**
  * test/acceptance/ac-decouple.spec.ts
  *
@@ -27,12 +32,12 @@ describe('AC-DECOUPLE-001: GET /api/tweet/get does not inline LLM calls', () => 
   it('tweet/get.ts does not import or call autoTranslateTweet', () => {
     const src = read(GET_ROUTE)
     expect(src).not.toContain('autoTranslateTweet')
-    expect(src).not.toMatch(/from ['"]~\/lib\/AITranslation['"]/)
+    expect(src).not.toMatch(AI_TRANSLATION_IMPORT_RE)
   })
 
   it('tweet/get.ts has no LLM call features (generateText / streamText)', () => {
     const src = read(GET_ROUTE)
-    expect(src).not.toMatch(/generateText|streamText/)
+    expect(src).not.toMatch(LLM_CALL_FEATURE_RE)
   })
 
   it('tweet page triggers translation via /api/ai-translation (client-side)', () => {
@@ -52,8 +57,8 @@ describe('AC-DECOUPLE-001: GET /api/tweet/get does not inline LLM calls', () => 
 describe('AC-DECOUPLE-002: server AI calls carry AbortSignal timeout', () => {
   it('ai-timeout helper exports positive bounded default ms and a signal factory', () => {
     const src = read(TIMEOUT_HELPER)
-    expect(src).toMatch(/export const AI_TRANSLATION_TIMEOUT_MS/)
-    expect(src).toMatch(/AbortSignal\.timeout/)
+    expect(src).toMatch(TIMEOUT_MS_EXPORT_RE)
+    expect(src).toMatch(ABORT_SIGNAL_TIMEOUT_RE)
   })
 
   it('aITranslation.translateText passes abortSignal to generateText', () => {

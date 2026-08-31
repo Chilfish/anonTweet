@@ -12,6 +12,8 @@ import { describe, expect, it } from 'vitest'
 import { extractIGId, formatIGTime } from '~/lib/utils'
 import { loadFixture } from '../helpers/load-fixture'
 
+const POST_DESC_ASSIGN_RE = /post\.description\s*=/
+
 const TRANSLATE_CAPTION_REL = path.join('app', 'lib', 'translateIGCaption.ts')
 
 describe('AC-IG Instagram offline acceptance', () => {
@@ -75,6 +77,6 @@ describe('AC-IG Instagram offline acceptance', () => {
 
     // translateIGCaption 必须是纯函数 —— 返回字符串且绝不改写 post.description
     const src = fs.readFileSync(path.resolve(import.meta.dirname, '..', '..', TRANSLATE_CAPTION_REL), 'utf8')
-    expect(src).not.toMatch(/post\.description\s*=/)
+    expect(src).not.toMatch(POST_DESC_ASSIGN_RE)
   })
 })

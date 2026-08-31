@@ -8,6 +8,8 @@ import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { readProjectFile } from '../helpers/read-project-file'
 
+const ON_PUSH_RE = /\bon:\s*push/
+
 const WORKFLOW_REL = path.join('.github', 'workflows', 'verify.yml')
 
 describe('AC-CI ci workflow integrity', () => {
@@ -18,7 +20,7 @@ describe('AC-CI ci workflow integrity', () => {
   })
 
   it('AC-CI-002: typecheck runs in CI on push', () => {
-    expect(workflow).toMatch(/\bon:\s*push/)
+    expect(workflow).toMatch(ON_PUSH_RE)
     expect(workflow).toContain('bun run typecheck')
   })
 

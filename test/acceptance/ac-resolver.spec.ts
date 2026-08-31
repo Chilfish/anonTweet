@@ -2,6 +2,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
+const DERIVE_MANUAL_EXPORT_RE = /export function deriveManualTranslation/
+
 /**
  * test/acceptance/ac-resolver.spec.ts
  *
@@ -42,6 +44,6 @@ describe('AC-RESOLVER-001: hooks converge on deriveManualTranslation (source sca
   it('deriveManualTranslation is exported from resolveEntities.ts', () => {
     const abs = path.resolve(import.meta.dirname, '..', '..', 'app/lib/translation/resolveEntities.ts')
     const src = fs.readFileSync(abs, 'utf8')
-    expect(src).toMatch(/export function deriveManualTranslation/)
+    expect(src).toMatch(DERIVE_MANUAL_EXPORT_RE)
   })
 })

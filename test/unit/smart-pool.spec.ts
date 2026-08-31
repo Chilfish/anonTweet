@@ -2,6 +2,9 @@ import type { FetcherService } from '~/lib/rettiwt-api'
 import { describe, expect, it, vi } from 'vitest'
 import { RettiwtPool } from '~/lib/SmartPool'
 
+const ALL_KEYS_EXHAUSTED_RE = /All keys exhausted/
+const FORBIDDEN_RE = /forbidden/
+
 /**
  * test/unit/smart-pool.spec.ts
  *
@@ -91,7 +94,7 @@ describe('rettiwtPool', () => {
       createFetcher: throwingFetcher(429),
     })
 
-    await expect(pool.run(fetch)).rejects.toThrow(/All keys exhausted/)
+    await expect(pool.run(fetch)).rejects.toThrow(ALL_KEYS_EXHAUSTED_RE)
   })
 
   it('propagates non-retryable errors without retry (HTTP 500 / generic Error)', async () => {
@@ -118,7 +121,7 @@ describe('rettiwtPool', () => {
       createFetcher: () => f as unknown as FetcherService,
     })
 
-    await expect(pool.run(fetch)).rejects.toThrow(/All keys exhausted/)
+    await expect(pool.run(fetch)).rejects.toThrow(ALL_KEYS_EXHAUSTED_RE)
     expect(f.request).toHaveBeenCalledTimes(3) // 初始 1 次 + 2 次退避重试
   })
 
@@ -131,7 +134,7 @@ describe('rettiwtPool', () => {
       shouldRetry: error => (error as { status?: number }).status === 429,
     })
 
-    await expect(pool.run(fetch)).rejects.toThrow(/forbidden/)
+    await expect(pool.run(fetch)).rejects.toThrow(FORBIDDEN_RE)
     expect(f.request).toHaveBeenCalledTimes(1)
   })
 

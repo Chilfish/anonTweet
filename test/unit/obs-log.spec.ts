@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { obsLog, suffix } from '~/lib/obs-log'
 
+const NEWLINE_RE = /\n/
+
 /**
  * AC-OBS-001 P5：obs-log helper 单测——单行 JSON 格式与敏感字段摘要。
  */
@@ -23,7 +25,7 @@ describe('obs-log (AC-OBS-001)', () => {
     expect(parsed.adapter).toBe('Memory(LRU)')
     expect(new Date(parsed.ts).getTime()).not.toBeNaN()
     // 单行：无换行符，便于聚合采集
-    expect(line).not.toMatch(/\n/)
+    expect(line).not.toMatch(NEWLINE_RE)
   })
 
   it('suffix shortens long ids and passes short/empty through', () => {

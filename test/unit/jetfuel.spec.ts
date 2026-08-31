@@ -7,6 +7,8 @@ import {
   parseTrendingCard,
 } from '~/lib/rettiwt-api/parsers/jetfuel'
 
+const POSTS_COUNT_RE = /16\.5k posts/
+
 /**
  * test/unit/jetfuel.spec.ts
  *
@@ -84,7 +86,7 @@ describe('parseTrendingCard', () => {
     expect(card!.categories).toContain('Entertainment')
     expect(card!.categories).toContain('Celebrity')
     expect(card!.avatars.length).toBeGreaterThanOrEqual(2)
-    expect(card!.postsCount).toMatch(/16\.5k posts/)
+    expect(card!.postsCount).toMatch(POSTS_COUNT_RE)
     expect(card!.title).toBe('仲町あられの誕生日をファンと盛大に祝う')
     expect(card!.description && card!.description.length).toBeGreaterThan(50)
   })

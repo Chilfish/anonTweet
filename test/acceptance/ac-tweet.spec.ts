@@ -11,6 +11,9 @@ import { describe, expect, it } from 'vitest'
 import { parseSearchTimeline } from '~/lib/react-tweet/utils/get-tweet'
 import { loadFixture } from '../helpers/load-fixture'
 
+const NON_WHITESPACE_START_RE = /^\S/
+const NON_WHITESPACE_END_RE = /\S$/
+
 const fixtures = [
   'tweets/normal-ja.json',
   'tweets/with-card-ja.json',
@@ -64,8 +67,8 @@ describe('AC-TWEET tweet parsing (fixture regression)', () => {
     const tweet = loadFixture<EnrichedTweet>('tweets/normal-ja.json')
     const text = tweet.text || ''
 
-    expect(text.trimStart()).toMatch(/^\S/)
-    expect(text.trimEnd()).toMatch(/\S$/)
+    expect(text.trimStart()).toMatch(NON_WHITESPACE_START_RE)
+    expect(text.trimEnd()).toMatch(NON_WHITESPACE_END_RE)
     expect(text.trim().length).toBeGreaterThan(0)
   })
 

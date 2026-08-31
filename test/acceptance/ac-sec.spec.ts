@@ -2,6 +2,18 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
+const ALLOWLIST_EXPORT_RE = /export const ALLOWED_AI_BASE_URL_HOSTS/
+const VALIDATOR_EXPORT_RE = /export function isAllowedAIBaseUrl/
+const TOGGLE_EXPORT_RE = /export function isAIBaseUrlWhitelistEnabled/
+const HOSTS_EXPORT_RE = /export function getAIBaseUrlWhitelistHosts/
+const ENABLE_VAR_DEFAULT_FALSE_RE = /ENABLE_AI_BASE_URL_WHITELIST:\s*z\.stringbool\(\)\.default\(false\)/
+const ALLOWED_HOSTS_VAR_RE = /ALLOWED_AI_BASE_URL_HOSTS:\s*z\.string\(\)\.optional\(\)/
+const VALIDATOR_CALL_RE = /isAllowedAIBaseUrl\(/
+const SDK_PROVIDER_RE = /createSDKProvider/
+const RELAY_TEXT_RE = /Key 经服务器中继/
+const WHITELIST_TEXT_RE = /白名单/
+const ARBITRARY_ENDPOINT_TEXT_RE = /默认可指向任意端点/
+
 /**
  * test/acceptance/ac-sec.spec.ts
  *
@@ -26,27 +38,27 @@ const SETTINGS = 'app/components/settings/AITranslationSettings.tsx'
 describe('AC-SEC-001: optional baseUrl allowlist helper exists and is wired on every boundary', () => {
   it('ai-base-url.ts exports the allowlist, validator and toggle', () => {
     const src = read(HELPER)
-    expect(src).toMatch(/export const ALLOWED_AI_BASE_URL_HOSTS/)
-    expect(src).toMatch(/export function isAllowedAIBaseUrl/)
-    expect(src).toMatch(/export function isAIBaseUrlWhitelistEnabled/)
-    expect(src).toMatch(/export function getAIBaseUrlWhitelistHosts/)
+    expect(src).toMatch(ALLOWLIST_EXPORT_RE)
+    expect(src).toMatch(VALIDATOR_EXPORT_RE)
+    expect(src).toMatch(TOGGLE_EXPORT_RE)
+    expect(src).toMatch(HOSTS_EXPORT_RE)
   })
 
   it('whitelist defaults OFF in env schema (arbitrary baseUrl allowed, zero-config deploy)', () => {
     const src = read(ENV_SCHEMA)
     // 开关存在且默认 false
-    expect(src).toMatch(/ENABLE_AI_BASE_URL_WHITELIST:\s*z\.stringbool\(\)\.default\(false\)/)
+    expect(src).toMatch(ENABLE_VAR_DEFAULT_FALSE_RE)
     // 扩展域名字段存在
-    expect(src).toMatch(/ALLOWED_AI_BASE_URL_HOSTS:\s*z\.string\(\)\.optional\(\)/)
+    expect(src).toMatch(ALLOWED_HOSTS_VAR_RE)
   })
 
   for (const rel of BOUNDARIES) {
     it(`${path.basename(rel)} imports and calls isAllowedAIBaseUrl before provider creation`, () => {
       const src = read(rel)
       expect(src).toContain('from \'~/lib/ai-base-url\'')
-      expect(src).toMatch(/isAllowedAIBaseUrl\(/)
+      expect(src).toMatch(VALIDATOR_CALL_RE)
       // provider 工厂同一个文件里被使用（说明校验与 provider 创建共存，未被删掉）
-      expect(src).toMatch(/createSDKProvider/)
+      expect(src).toMatch(SDK_PROVIDER_RE)
     })
   }
 
@@ -64,9 +76,9 @@ describe('AC-SEC-001: optional baseUrl allowlist helper exists and is wired on e
 
   it('settings page discloses key relay, allowlist and default-off semantics', () => {
     const src = read(SETTINGS)
-    expect(src).toMatch(/Key 经服务器中继/)
-    expect(src).toMatch(/白名单/)
+    expect(src).toMatch(RELAY_TEXT_RE)
+    expect(src).toMatch(WHITELIST_TEXT_RE)
     // 声明自定义 Base URL 默认可指向任意端点（第三方中转/自建）
-    expect(src).toMatch(/默认可指向任意端点/)
+    expect(src).toMatch(ARBITRARY_ENDPOINT_TEXT_RE)
   })
 })

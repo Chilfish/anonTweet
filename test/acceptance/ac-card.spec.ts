@@ -7,6 +7,11 @@ import {
 } from '~/lib/rettiwt-api/parsers/jetfuel'
 import { loadFixture } from '../helpers/load-fixture'
 
+const JETFUEL_FRAME_RE = /responsive_web_jetfuel_frame:\s*true/
+const TWIMG_MEDIA_RE = /pbs\.twimg\.com\/media\//
+const POSTS_COUNT_RE = /16\.5k posts/
+const RETURN_NULL_RE = /return null/
+
 /**
  * test/acceptance/ac-card.spec.ts
  *
@@ -36,7 +41,7 @@ describe('AC-CARD tweet card jetfuel enhancement', () => {
   it('AC-CARD-001: tweet details request enables jetfuel frame', () => {
     const src = read(FILES.requests)
     // details() 的 features 块内 jetfuel_frame 必须为 true（最小触发 flag）
-    expect(src).toMatch(/responsive_web_jetfuel_frame:\s*true/)
+    expect(src).toMatch(JETFUEL_FRAME_RE)
     // queryId 保持原样（最小改动原则，未升级到抓包的新 hash）
     expect(src).toContain('aFvUsJm2c-oDkJV75blV6g')
   })
@@ -53,7 +58,7 @@ describe('AC-CARD tweet card jetfuel enhancement', () => {
     expect(all).toContain('16.5k posts')
     expect(all).toContain('仲町あられの誕生日をファンと盛大に祝う')
     expect(all).toContain('笑顔いっぱいのあられちゃんイラスト')
-    expect(all).toMatch(/pbs\.twimg\.com\/media\//)
+    expect(all).toMatch(TWIMG_MEDIA_RE)
     expect((all.match(/profile_images\//g) || []).length).toBeGreaterThanOrEqual(3)
   })
 
@@ -68,7 +73,7 @@ describe('AC-CARD tweet card jetfuel enhancement', () => {
     expect(card!.categories).toContain('Entertainment')
     expect(card!.categories).toContain('Celebrity')
     expect(card!.avatars.length).toBeGreaterThanOrEqual(2)
-    expect(card!.postsCount).toMatch(/16\.5k posts/)
+    expect(card!.postsCount).toMatch(POSTS_COUNT_RE)
     expect(card!.title).toBe('仲町あられの誕生日をファンと盛大に祝う')
     expect(card!.description && card!.description.length).toBeGreaterThan(50)
   })
@@ -76,7 +81,7 @@ describe('AC-CARD tweet card jetfuel enhancement', () => {
   it('AC-CARD-004: parser has fallback compensation + developer warning logging', () => {
     // 1) 解析器存在明确的失败语义
     const jetfuelSrc = read(FILES.jetfuel)
-    expect(jetfuelSrc).toMatch(/return null/)
+    expect(jetfuelSrc).toMatch(RETURN_NULL_RE)
 
     // 2) mapTwitterCard 接入了 jetfuel 合并与回退日志
     const parseSrc = read(FILES.parseTweet)

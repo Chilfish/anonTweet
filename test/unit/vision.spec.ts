@@ -9,6 +9,9 @@ import { getVisionPreset, VISION_PROMPT_PRESETS } from '~/lib/vision/prompts'
 import { parseOcrTranslation } from '~/lib/vision/translateOCR'
 
 const DATA_URI = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD'
+const SCHEMA_VALIDATION_FAILED_RE = /schema validation failed/
+const DISALLOWED_MEDIA_HOST_RE = /Disallowed media host/
+const EXPECTED_COUNT_MISMATCH_RE = /expected 2, got 1/
 
 describe('vision AC-VISION-001: AIVisionInfo 结构完整', () => {
   it('describe 结果含 description，不含 ocr 字段', () => {
@@ -84,26 +87,26 @@ describe('vision AC-VISION-002: describe 结构化 schema 校验', () => {
 
   it('缺 description → 校验失败', () => {
     expect(() => parseVisionResult(VISION_PROMPT_PRESETS.describe, { descriptions: [{ index: 0 }] }))
-      .toThrow(/schema validation failed/)
+      .toThrow(SCHEMA_VALIDATION_FAILED_RE)
   })
 
   it('多余键被 schema 拒绝', () => {
     expect(() => parseVisionResult(VISION_PROMPT_PRESETS.describe, { descriptions: [{ index: 0, description: 'x', extra: 1 }] }))
-      .toThrow(/schema validation failed/)
+      .toThrow(SCHEMA_VALIDATION_FAILED_RE)
     expect(() => parseVisionResult(VISION_PROMPT_PRESETS.describe, { descriptions: [{ index: 0, description: 'x' }], extra: 1 }))
-      .toThrow(/schema validation failed/)
+      .toThrow(SCHEMA_VALIDATION_FAILED_RE)
   })
 
   it('index 非数字 → 校验失败', () => {
     expect(() => parseVisionResult(VISION_PROMPT_PRESETS.describe, { descriptions: [{ index: '0', description: 'x' }] }))
-      .toThrow(/schema validation failed/)
+      .toThrow(SCHEMA_VALIDATION_FAILED_RE)
   })
 
   it('空字符串 / 纯空白 description → 校验失败（模型不得输出空描述）', () => {
     expect(() => parseVisionResult(VISION_PROMPT_PRESETS.describe, { descriptions: [{ index: 0, description: '' }] }))
-      .toThrow(/schema validation failed/)
+      .toThrow(SCHEMA_VALIDATION_FAILED_RE)
     expect(() => parseVisionResult(VISION_PROMPT_PRESETS.describe, { descriptions: [{ index: 0, description: '   ' }] }))
-      .toThrow(/schema validation failed/)
+      .toThrow(SCHEMA_VALIDATION_FAILED_RE)
   })
 
   it('带首尾空白的 description 被 trim 后通过', () => {
@@ -125,12 +128,12 @@ describe('vision AC-VISION-003: ocr 纯 OCR schema 校验', () => {
 
   it('缺 originalText → 校验失败', () => {
     expect(() => parseVisionResult(VISION_PROMPT_PRESETS.ocr, { texts: [{ index: 0 }] }))
-      .toThrow(/schema validation failed/)
+      .toThrow(SCHEMA_VALIDATION_FAILED_RE)
   })
 
   it('多余键 translatedText 被 strict 拒绝（翻译走独立翻译步）', () => {
     expect(() => parseVisionResult(VISION_PROMPT_PRESETS.ocr, { texts: [{ index: 0, originalText: 'x', translatedText: '你好' }] }))
-      .toThrow(/schema validation failed/)
+      .toThrow(SCHEMA_VALIDATION_FAILED_RE)
   })
 
   it('空数组 → 返回空 AIVisionInfo[]（不抛错）', () => {
@@ -172,7 +175,7 @@ describe('vision translate: parseOcrTranslation 宽容解析翻译结果', () =>
 
   it('缺 translatedText → 校验失败', () => {
     expect(() => parseOcrTranslation({ translations: [{ index: 0 }] }))
-      .toThrow(/schema validation failed/)
+      .toThrow(SCHEMA_VALIDATION_FAILED_RE)
   })
 })
 
@@ -496,7 +499,7 @@ describe('vision 安全: assertAllowedMediaHost host 白名单（防 SSRF）', (
       'http://10.0.0.5/secret.png',
       'https://evil.example.com/x.jpg',
     ]) {
-      expect(() => assertAllowedMediaHost(url)).toThrow(/Disallowed media host/)
+      expect(() => assertAllowedMediaHost(url)).toThrow(DISALLOWED_MEDIA_HOST_RE)
     }
   })
 })
@@ -553,7 +556,7 @@ describe('vision AC-VISION-011: 反幻觉内容防线（空描述拒绝 + 结果
       descriptions: [{ index: 0, description: '图 A' }],
     })
     expect(() => assertVisionResultCount(info, 2)).toThrow(VisionContentError)
-    expect(() => assertVisionResultCount(info, 2)).toThrow(/expected 2, got 1/)
+    expect(() => assertVisionResultCount(info, 2)).toThrow(EXPECTED_COUNT_MISMATCH_RE)
   })
 })
 

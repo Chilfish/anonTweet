@@ -8,6 +8,8 @@ import { describe, expect, it } from 'vitest'
 import { MyPlainTweet } from '~/components/tweet/PlainTweet'
 import { loadFixture } from '../helpers/load-fixture'
 
+const SCRIPT_SRC_RE = /<script[^>]*src=/
+
 /**
  * test/acceptance/ac-perf.spec.ts
  *
@@ -87,7 +89,7 @@ describe('AC-PERF-001: screenshot render baseline x regression threshold (offlin
     expect(lazyImgs.length).toBe(imgTags.length)
 
     // 无脚本注入（screenshot 页面只渲染内容，不引入运行时脚本）
-    expect(html).not.toMatch(/<script[^>]*src=/)
+    expect(html).not.toMatch(SCRIPT_SRC_RE)
   })
 
   it('long-thread render time stays within baseline x regression ratio', () => {

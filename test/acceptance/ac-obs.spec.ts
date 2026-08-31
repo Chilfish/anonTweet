@@ -2,6 +2,15 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
+const OBS_LOG_EXPORT_RE = /export function obsLog/
+const OBS_EVENT_TYPE_RE = /export type ObsEvent/
+const SUFFIX_EXPORT_RE = /export function suffix/
+const MS_NOW_STARTED_AT_RE = /ms: Date\.now\(\) - startedAt/
+const ATTEMPTS_RE = /attempts/
+const SENSITIVE_FIELD_RE = /apiKey|baseUrl|authorization/i
+const CACHE_HIT_RE = /hit: cachedData !== null/
+const ADAPTER_NAME_RE = /adapter: adapter\.name/
+
 /**
  * test/acceptance/ac-obs.spec.ts
  *
@@ -22,9 +31,9 @@ const FILES = {
 describe('AC-OBS-001: structured JSON observability logs', () => {
   it('obs-log.ts exports obsLog, ObsEvent and suffix', () => {
     const src = read(HELPER)
-    expect(src).toMatch(/export function obsLog/)
-    expect(src).toMatch(/export type ObsEvent/)
-    expect(src).toMatch(/export function suffix/)
+    expect(src).toMatch(OBS_LOG_EXPORT_RE)
+    expect(src).toMatch(OBS_EVENT_TYPE_RE)
+    expect(src).toMatch(SUFFIX_EXPORT_RE)
     for (const event of ['ai.translate', 'ai.translate.ig', 'cache.get', 'pool.rotate', 'pool.exhaust']) {
       expect(src).toContain(event)
     }
@@ -33,27 +42,27 @@ describe('AC-OBS-001: structured JSON observability logs', () => {
   it('translation paths log latency with ms and attempts (no secrets)', () => {
     const tweetSrc = read(FILES.aiTweet)
     expect(tweetSrc).toContain('obsLog(\'ai.translate\'')
-    expect(tweetSrc).toMatch(/ms: Date\.now\(\) - startedAt/)
-    expect(tweetSrc).toMatch(/attempts/)
+    expect(tweetSrc).toMatch(MS_NOW_STARTED_AT_RE)
+    expect(tweetSrc).toMatch(ATTEMPTS_RE)
 
     const igSrc = read(FILES.aiIG)
     expect(igSrc).toContain('obsLog(\'ai.translate.ig\'')
-    expect(igSrc).toMatch(/ms: Date\.now\(\) - startedAt/)
+    expect(igSrc).toMatch(MS_NOW_STARTED_AT_RE)
 
     // 敏感字段禁入日志：obsLog 调用行不得引用 apiKey/baseUrl
     const tweetLogLines = tweetSrc.split('\n').filter(l => l.includes('obsLog(\'ai.translate\''))
     for (const line of tweetLogLines)
-      expect(line).not.toMatch(/apiKey|baseUrl|authorization/i)
+      expect(line).not.toMatch(SENSITIVE_FIELD_RE)
     const igLogLines = igSrc.split('\n').filter(l => l.includes('obsLog(\'ai.translate.ig\''))
     for (const line of igLogLines)
-      expect(line).not.toMatch(/apiKey|baseUrl|authorization/i)
+      expect(line).not.toMatch(SENSITIVE_FIELD_RE)
   })
 
   it('local cache logs cache.get with hit flag and adapter name', () => {
     const src = read(FILES.cache)
     expect(src).toContain('obsLog(\'cache.get\'')
-    expect(src).toMatch(/hit: cachedData !== null/)
-    expect(src).toMatch(/adapter: adapter\.name/)
+    expect(src).toMatch(CACHE_HIT_RE)
+    expect(src).toMatch(ADAPTER_NAME_RE)
   })
 
   it('pool logs rotation and exhaustion events', () => {

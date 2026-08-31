@@ -2,6 +2,9 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
+const NAMED_STORY_EXPORT_RE = /export const [A-Z]\w*/
+const AXE_TEST_MODE_RE = /test:\s*'(todo|error)'/
+
 /**
  * test/acceptance/ac-ui.spec.ts
  *
@@ -152,7 +155,7 @@ describe('AC-UI-VISION-001: every used component has a story (P1-2)', () => {
       const content = read(`app/stories/${storyFile}`)
       expect(content.trim(), `${storyFile} should not be empty`).not.toBe('')
       // 每个 story 至少 export 一个具名场景
-      expect(content, `${storyFile} should export at least one named story`).toMatch(/export const [A-Z]\w*/)
+      expect(content, `${storyFile} should export at least one named story`).toMatch(NAMED_STORY_EXPORT_RE)
     }
   })
 
@@ -188,7 +191,7 @@ describe('AC-UI-A11Y-001: a11y baseline configured + known violations fixed (P1-
   it('preview configures axe checks (test todo or error)', () => {
     const preview = read('.storybook/preview.tsx')
     expect(preview).toContain('a11y:')
-    expect(preview).toMatch(/test:\s*'(todo|error)'/)
+    expect(preview).toMatch(AXE_TEST_MODE_RE)
   })
 
   it('trending main image is decorative (alt empty) so h3 title is the single accessible name', () => {
