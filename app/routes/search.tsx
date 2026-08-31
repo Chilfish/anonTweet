@@ -1,17 +1,22 @@
 import type { FormEvent } from 'react'
 import type { EnrichedTweet } from '~/types'
-import { SearchIcon } from 'lucide-react'
+import { ArrowRightIcon, ChevronDownIcon, SearchIcon, SearchXIcon } from 'lucide-react'
 import { memo, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { BackButton } from '~/components/translation/BackButton'
 import { MyTweet } from '~/components/tweet/Tweet'
 import { Button } from '~/components/ui/button'
-import { Field } from '~/components/ui/field'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible'
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty'
 import { Form } from '~/components/ui/form'
-import { Input } from '~/components/ui/input'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '~/components/ui/input-group'
+import { ToggleGroup, ToggleGroupItem } from '~/components/ui/toggle-group'
 import { fetcher } from '~/lib/fetcher'
 import { TweetSkeleton } from '~/lib/react-tweet'
-import { cn } from '~/lib/utils'
 
 export function meta() {
   return [
@@ -161,85 +166,102 @@ export default function SearchPage() {
 
   return (
     <div className="flex flex-col gap-4 px-1 w-full">
-      <div className="flex flex-col w-full gap-2">
-        <div className="flex items-center w-full gap-4">
-          <BackButton />
-          <Form
-            className="justify-center flex-row items-center flex-1"
-            onSubmit={onSubmit}
-          >
-            <Field name="q" className="flex-1">
-              <Input
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                placeholder="搜索 Twitter/X 推文... 支持 from: / until: 等语法"
-                type="search"
-                className="w-full"
-                autoComplete="off"
-                enterKeyHint="search"
-              />
-            </Field>
-            <Button type="submit" size="icon" aria-label="搜索">
-              <SearchIcon className="size-4" />
-            </Button>
-          </Form>
-        </div>
+      <div className="flex items-center w-full gap-4">
+        <BackButton />
+        <Form
+          className="flex-1"
+          onSubmit={onSubmit}
+        >
+          <InputGroup>
+            <InputGroupAddon align="inline-start">
+              <SearchIcon className="size-4 text-muted-foreground" />
+            </InputGroupAddon>
+            <InputGroupInput
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              placeholder="搜索 Twitter/X 推文..."
+              aria-label="搜索关键词"
+              autoComplete="off"
+              enterKeyHint="search"
+            />
+            <InputGroupAddon align="inline-end">
+              <Button
+                type="submit"
+                variant="ghost"
+                size="icon-sm"
+                aria-label="搜索"
+                className="text-muted-foreground"
+              >
+                <ArrowRightIcon className="size-4" />
+              </Button>
+            </InputGroupAddon>
+          </InputGroup>
+        </Form>
+      </div>
 
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className={cn(type === 'top' && 'border-(--primary-brand) text-(--primary-brand)')}
-            onClick={() => switchType('top')}
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <ToggleGroup
+          value={[type]}
+          onValueChange={(value) => {
+            const next = value[0]
+            if (next === 'top' || next === 'latest')
+              switchType(next)
+          }}
+          variant="outline"
+          size="sm"
+        >
+          <ToggleGroupItem value="top">热门</ToggleGroupItem>
+          <ToggleGroupItem value="latest">最新</ToggleGroupItem>
+        </ToggleGroup>
+
+        <Collapsible
+          open={showAdvanced}
+          onOpenChange={setShowAdvanced}
+        >
+          <CollapsibleTrigger
+            render={
+              <Button variant="ghost" size="sm" className="text-muted-foreground" />
+            }
           >
-            热门
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className={cn(type === 'latest' && 'border-(--primary-brand) text-(--primary-brand)')}
-            onClick={() => switchType('latest')}
-          >
-            最新
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="ml-auto text-muted-foreground"
-            onClick={() => setShowAdvanced(v => !v)}
-          >
+            <ChevronDownIcon
+              className={showAdvanced ? 'rotate-180 transition-transform duration-200 ease-out' : 'transition-transform duration-200 ease-out'}
+            />
             高级搜索
-          </Button>
-        </div>
-
-        {showAdvanced && (
-          <div className="flex flex-wrap items-center justify-center gap-1.5 rounded-lg border border-border/60 bg-card/60 p-2.5 text-xs text-muted-foreground">
-            <span className="mr-1">快捷插入：</span>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="flex flex-wrap items-center justify-center gap-1.5 p-3 rounded-lg border border-border/60 bg-card/60 mt-2">
+            <span className="text-xs text-muted-foreground mr-1">快捷插入：</span>
             {ADVANCED_OPERATORS.map(op => (
-              <button
+              <Button
                 key={op.label}
                 type="button"
+                variant="outline"
+                size="xs"
+                className="font-mono"
                 title={op.hint ?? `${op.insert}${op.label.includes('@') ? '用户名' : '…'}`}
-                className="rounded-full border border-border/60 px-2 py-0.5 font-mono transition-colors hover:border-(--primary-brand) hover:text-(--primary-brand)"
                 onClick={() => insertOperator(op.insert)}
               >
                 {op.label}
-              </button>
+              </Button>
             ))}
-          </div>
-        )}
+          </CollapsibleContent>
+        </Collapsible>
       </div>
 
       {!q && (
-        <p className="text-center text-sm text-muted-foreground">
-          输入关键词开始搜索，支持
-          {' '}
-          <code className="font-mono text-xs">from:用户名</code>
-          、
-          <code className="font-mono text-xs">until:日期</code>
-          {' '}
-          等高级语法
-        </p>
+        <Empty>
+          <EmptyHeader>
+            <EmptyTitle>输入关键词开始搜索</EmptyTitle>
+            <EmptyDescription>
+              支持
+              {' '}
+              <code className="font-mono text-xs">from:用户名</code>
+              、
+              <code className="font-mono text-xs">until:日期</code>
+              {' '}
+              等高级语法，点击「高级搜索」可快捷插入运算符
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       )}
 
       {isLoading && (
@@ -249,28 +271,35 @@ export default function SearchPage() {
       )}
 
       {!isLoading && error && (
-        <div className="flex flex-col items-center gap-2 py-10 text-center">
-          <p className="text-sm text-muted-foreground">
-            搜索失败：
-            {error}
-          </p>
-          <p className="text-xs text-muted-foreground/60">
-            可尝试切换到「热门」结果，或使用简单关键词重试
-          </p>
-        </div>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <SearchXIcon />
+            </EmptyMedia>
+            <EmptyTitle>搜索失败</EmptyTitle>
+            <EmptyDescription>
+              {error}
+              ，可尝试切换到「最新 / 热门」或使用简单关键词重试
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       )}
 
       {!isLoading && !error && q && tweets.length === 0 && (
-        <div className="flex flex-col items-center gap-2 py-10 text-center">
-          <p className="text-sm">
-            没有找到与「
-            {q}
-            」相关的推文
-          </p>
-          <p className="text-xs text-muted-foreground/60">
-            试试「热门」结果，或确认高级语法（如 from: / until: / min_faves:）拼写是否正确
-          </p>
-        </div>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <SearchXIcon />
+            </EmptyMedia>
+            <EmptyTitle>没有找到相关推文</EmptyTitle>
+            <EmptyDescription>
+              与「
+              {q}
+              」匹配的结果为空，试试切换「热门」，或检查高级语法
+              （from: / until: / min_faves:）拼写是否正确
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       )}
 
       {!isLoading && !error && tweets.length > 0 && (

@@ -116,7 +116,7 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
                     to="/search"
                     className="inline-flex items-center gap-1.5 transition-colors hover:text-(--primary-brand) hover:underline underline-offset-4 decoration-dotted"
                   >
-                    <SearchIcon className="size-3" />
+                    <SearchIcon className="size-3.5" />
                     推文搜索
                   </Link>
                 </span>
