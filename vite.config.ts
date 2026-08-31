@@ -1,3 +1,4 @@
+import type { Plugin } from 'vite'
 import { execSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -6,6 +7,26 @@ import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
 import babel from 'vite-plugin-babel'
 import { env } from './app/lib/env.server'
+
+/**
+ * dev 静态服务 charset 修复：public 静态文件由 sirv 提供，.md 响应头
+ * `Content-Type: text/markdown` 缺 charset → 浏览器按系统默认编码（GBK/CP1252）
+ * 渲染 UTF-8 中文产生乱码。sirv 的 send() 会尊重预设的 Content-Type，故在
+ * 静态中间件之前设好即可；构建产物（Vercel）由 vercel.json headers 规则补齐。
+ */
+function skillsMarkdownCharset(): Plugin {
+  return {
+    name: 'skills-markdown-charset',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if (req.url?.startsWith('/skills/anon-tweet/SKILL.md')) {
+          res.setHeader('Content-Type', 'text/markdown; charset=utf-8')
+        }
+        next()
+      })
+    },
+  }
+}
 
 // 获取 git 信息
 function getGitInfo() {
@@ -42,6 +63,7 @@ export default defineConfig(({ isSsrBuild }) => ({
   plugins: [
     tailwindcss(),
     reactRouter(),
+    skillsMarkdownCharset(),
     babel({
       include: babelInclude,
       babelConfig: {
