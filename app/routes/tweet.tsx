@@ -11,6 +11,7 @@ import { useTweetOperations } from '~/hooks/use-tweet-operations'
 import { fetcher } from '~/lib/fetcher'
 import { TweetNotFound, TweetSkeleton } from '~/lib/react-tweet'
 import { getTweets } from '~/lib/service/getTweet'
+import { getLocalTweet } from '~/lib/service/getTweet.server'
 import { useMainTweet, useTranslationActions, useTweets } from '~/lib/stores/hooks'
 import { decodeHtmlEntities, extractTweetId } from '~/lib/utils'
 
@@ -23,7 +24,9 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     return { tweet: null, tweetId: null, baseUrl }
   }
   try {
-    const tweets = await getTweets(tweetId)
+    // SSR 也走缓存链（localCache → DB → API）：结果由缓存层隐式持久化，
+    // 重读命中缓存不再重复打 API；ENABLE_* 关闭时降级回直连，行为不变
+    const tweets = await getTweets(tweetId, getLocalTweet)
     const mainTweet = tweets[0] || null
     return { tweet: mainTweet, tweetId, baseUrl }
   }

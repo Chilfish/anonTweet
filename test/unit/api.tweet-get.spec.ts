@@ -1,3 +1,5 @@
+import fs from 'node:fs'
+import path from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('~/lib/service/getTweet', () => ({
@@ -62,5 +64,26 @@ describe('/api/tweet/get/:id', () => {
     const tweet = (res as any[])[0]
     // 解耦后 GET 不注入 aiTranslation（翻译走 /api/ai-translation）
     expect(tweet.entities).toEqual([])
+  })
+})
+
+describe('/api/tweet/get/:id 入口统一走缓存链', () => {
+  it('loader 传 getLocalTweet（缓存层隐式持久化，非裸 getEnrichedTweet）', async () => {
+    const { loader } = await import('~/routes/api/tweet/get')
+    const { getTweets } = await import('~/lib/service/getTweet')
+    const { getLocalTweet } = await import('~/lib/service/getTweet.server')
+
+    await loader({ params: { id: '1' } } as any)
+
+    expect(getTweets).toHaveBeenCalledWith('1', getLocalTweet)
+  })
+
+  it('tweet.tsx SSR loader 源码同样经 getLocalTweet（防回退裸 getter）', () => {
+    const page = fs.readFileSync(
+      path.resolve(import.meta.dirname, '..', '..', 'app/routes/tweet.tsx'),
+      'utf8',
+    )
+    expect(page).toContain('import { getLocalTweet } from \'~/lib/service/getTweet.server\'')
+    expect(page).toContain('getTweets(tweetId, getLocalTweet)')
   })
 })

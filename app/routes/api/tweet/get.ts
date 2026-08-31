@@ -8,12 +8,18 @@ import { getTweetSchema } from '~/lib/validations/tweet'
 
 /**
  * POST /api/tweet/get/:id — 拉取推文（DB 缓存 → 原文）。
+ * GET  /api/tweet/get/:id — 同上，loader 也走 `getLocalTweet` 缓存链。
  *
  * 阶段二任务 1（review P1-2 / AC-DECOUPLE-001）：GET 不再内联 AI 翻译——
  * 开启 AI 翻译时首屏不再阻塞等待 LLM 完整返回。翻译统一由客户端触发
  * `/api/ai-translation`（见 app/hooks/use-auto-translate.ts），截图 SSR 走
  * `app/routes/plain.tsx` 的两步流程。schema 中的 AI 字段为旧客户端兼容保留，
  * 本路由不读取。
+ *
+ * 缓存说明：action 与 loader 均经 `getLocalTweet`（localCache → DB → API），
+ * “接口完成后”的结果由缓存层隐式持久化（本地层 fire-and-forget 异步写、
+ * DB 落库由 getDBTweet 兜底），路由无需主动调 setLocalCache；ENABLE_* 开关
+ * 关闭时逐层降级回 `getEnrichedTweet`，行为与直连一致。
  */
 export async function action({ request }: Route.ActionArgs) {
   const jsonData = await request.json()
@@ -58,7 +64,7 @@ export async function loader({
     return []
   }
   try {
-    const tweets = await getTweets(tweetId)
+    const tweets = await getTweets(tweetId, getLocalTweet)
     return tweets
   }
   catch (error: unknown) {
