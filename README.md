@@ -76,6 +76,10 @@ GEMINI_MODEL="models/gemini-3-flash-preview"
 # 启用本地文件缓存（Node/Bun 环境）
 ENABLE_LOCAL_CACHE="true"
 
+# 用户时间线接口开关（默认关闭，固定 429 防滥用）
+# 自部署实例可设 true 启用，需配合自己的 TWEET_KEYS
+ENABLE_TIMELINE="false"
+
 # 如果不配置 DB_URL，系统将直接调用 API 而不使用持久化缓存。
 # DB_URL="postgres://..."
 ENABLE_DB_CACHE="false"

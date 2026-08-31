@@ -55,4 +55,16 @@ describe('env.server createEnv', () => {
 
     expect(mod.HOSTNAME).toBe('https://example.test')
   })
+
+  it('defaults ENABLE_TIMELINE OFF and parses explicit true', () => {
+    const def = createEnv({ ENVIRONMENT: 'development', TWEET_KEYS: '' })
+    expect(def.ENABLE_TIMELINE).toBe(false)
+
+    const enabled = createEnv({
+      ENVIRONMENT: 'development',
+      TWEET_KEYS: 'k',
+      ENABLE_TIMELINE: 'true',
+    })
+    expect(enabled.ENABLE_TIMELINE).toBe(true)
+  })
 })

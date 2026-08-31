@@ -32,6 +32,10 @@ const serverEnvSchema = z.object({
   // 隐藏自用入口开关（Bili 动态发布代理）：默认开启（自用入口始终可用），不宣传、不扩展，
   // 见 docs/planning/project-architecture.md §2.5 已知限制
   ENABLE_BILI: z.stringbool().default(true),
+  // 用户时间线接口（GET /api/user/timeline/:username）功能开关：默认关闭。
+  // 关闭时固定返回 429 防滥用；自部署实例设 ENABLE_TIMELINE=true 并配置
+  // 自己的 TWEET_KEYS 后可启用（见 app/routes/api/user/timeline.ts）
+  ENABLE_TIMELINE: z.stringbool().default(false),
   // 可选安全加固：AI baseUrl 白名单校验（默认关闭——第三方中转站/自建端点直接可用；
   // 公开部署可设 true 开启，配合 ALLOWED_AI_BASE_URL_HOSTS 扩展白名单域名）
   ENABLE_AI_BASE_URL_WHITELIST: z.stringbool().default(false),

@@ -184,10 +184,19 @@ describe('AC-LLMS-002: openapi.json is a valid OpenAPI 3.1 doc covering all back
     expect(doc.paths['/api/bili-post']?.post?.requestBody?.content['multipart/form-data']?.schema).toBeTruthy()
   })
 
-  it('marks user timeline as permanently rate-limited (429)', () => {
+  it('documents user timeline as a normal endpoint (200 EnrichedTweet array + errors)', () => {
     const op = doc.paths['/api/user/timeline/{username}']?.get
+    expect(op?.responses?.['200']).toBeTruthy()
     expect(op?.responses?.['429']).toBeTruthy()
-    expect(op?.responses?.['200']).toBeFalsy()
+    expect(op?.responses?.['500']).toBeTruthy()
+
+    const schema = (op?.responses?.['200'] as { content?: Record<string, { schema?: { type?: string, items?: unknown } }> })
+      ?.content?.['application/json']
+      ?.schema
+    expect(schema).toMatchObject({
+      type: 'array',
+      items: { $ref: '#/components/schemas/EnrichedTweet' },
+    })
   })
 
   describe('response schemas reference concrete component definitions', () => {

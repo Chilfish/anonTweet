@@ -15,6 +15,7 @@ Anon Tweet — 匿名浏览 Twitter/X 推文与 Instagram 帖子的全栈应用�
 - **验证**：`verify/` 验证套件（Vitest 三层架构）+ AC 验收标准 + Postmortem 雷区
 
 > ⚠️ **隐藏入口**：`POST /api/bili-post`（Bilibili 动态发布）为**自用隐藏入口，非产品功能，不宣传**，默认开启（`ENABLE_BILI`），详见 `docs/planning/project-architecture.md` §2.5。
+> ⚠️ **默认关闭**：`GET /api/user/timeline/:username` 用户时间线接口由 `ENABLE_TIMELINE` 开关控制（默认关闭，固定 429 防滥用；自部署实例设 `ENABLE_TIMELINE=true` + 自己的 `TWEET_KEYS` 后启用），详见 `app/lib/env.server.ts`。
 
 ---
 

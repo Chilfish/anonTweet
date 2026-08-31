@@ -83,6 +83,7 @@ Instagram 帖子数据获取、翻译与缓存管理。于 2026-05 完成 5 阶�
   - **逻辑**: 获取用户基础元数据。支持通过 **用户名** 或 **用户 ID** 查询。优先查库，失败则回源。
 
 - **`GET /api/user/timeline/:username`**
+  - **开关**: 由 `ENABLE_TIMELINE` 环境开关控制（`app/lib/env.server.ts`），**默认关闭**（固定返回 429 防滥用，提示自部署实例 + 自己的 Key）；自部署实例设 `ENABLE_TIMELINE=true` 后启用。
   - **逻辑**: 获取指定用户的推文时间线，经过 `enrichTweet` 清洗。
 
 ### 2.5 Integration Domain

@@ -62,7 +62,7 @@ export const apiEndpoints: ApiEndpointLink[] = [
   { method: 'POST', path: '/api/ig/translate/{id}', label: 'POST /api/ig/translate/{id}', href: `/api/ig/translate/${LLMS_EXAMPLES.igShortcode}`, description: 'IG caption AI 翻译或手动翻译（manualTranslation 直接写入）' },
   // ── User ───────────────────────────────────────────────
   { method: 'GET', path: '/api/user/get/{username}', label: 'GET /api/user/get/{username}', href: `/api/user/get/${LLMS_EXAMPLES.username}`, description: '查询用户资料（DB 缓存）' },
-  { method: 'GET', path: '/api/user/timeline/{username}', label: 'GET /api/user/timeline/{username}', href: `/api/user/timeline/${LLMS_EXAMPLES.username}`, description: '用户时间线（当前固定 429 限流，建议自部署实例 + 自己的 Key）' },
+  { method: 'GET', path: '/api/user/timeline/{username}', label: 'GET /api/user/timeline/{username}', href: `/api/user/timeline/${LLMS_EXAMPLES.username}`, description: '用户时间线（EnrichedTweet 数组）' },
   // ── AI ─────────────────────────────────────────────────
   { method: 'POST', path: '/api/ai-test', label: 'POST /api/ai-test', href: '/api/ai-test', description: 'AI 提供商连通性测试（apiKey + model）' },
   { method: 'POST', path: '/api/ai-translation', label: 'POST /api/ai-translation', href: '/api/ai-translation', description: '统一 AI 翻译端点（type: twitter 或 ins）' },
@@ -414,11 +414,16 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
         get: {
           tags: ['User'],
           operationId: 'userTimeline',
-          summary: '用户时间线（当前禁用）',
-          description: '固定返回 429：防止对上游接口的滥用；建议使用自部署实例与自己的 Key（https://github.com/Chilfish/anonTweet）。',
+          summary: '用户时间线',
+          description: '获取指定用户的推文时间线，经 enrichTweet 清洗后返回 EnrichedTweet 数组。',
           parameters: [pathParam('username', '用户名')],
           responses: {
-            429: errorJson('限流（固定返回）'),
+            200: jsonOk('EnrichedTweet 数组', {
+              type: 'array',
+              items: { $ref: '#/components/schemas/EnrichedTweet' },
+            }),
+            429: errorJson('上游限流（未配置 TWEET_KEYS 或风控）'),
+            500: errorJson('获取用户时间线失败'),
           },
         },
       },

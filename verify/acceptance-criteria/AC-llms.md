@@ -34,7 +34,8 @@
   - 每个 operation 具备 `operationId` / `summary` / `tags`，响应统一挂在 `responses` 下且至少一条
   - 响应 schema 通过 `$ref` 指向 `components.schemas` 中带真实字段的定义（EnrichedTweet / IGPost / AIVisionInfo / RawUser 等），非占位 `type: object`
   - 关键端点：search 含 q/type/cursor/count query 参数；replies 含 cursor；
-    proxy/image 含 url query；`/api/user/timeline/{username}` 固定 429 且无 200
+    proxy/image 含 url query；`/api/user/timeline/{username}` 按正常接口文档化
+    （200 EnrichedTweet 数组 + 429/500 错误响应）
 
 ---
 
