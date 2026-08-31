@@ -35,8 +35,8 @@
 
 ## 实施计划
 
-| Phase   | 内容                                                                 | 状态 |
-| ------- | -------------------------------------------------------------------- | ---- |
+| Phase   | 内容                                                                 | 状态    |
+| ------- | -------------------------------------------------------------------- | ------- |
 | Phase 1 | rettiwt-api：`TWEET_SEARCH` 加入 `AllowGuestAuthenticationGroup`     | ✅ 完成 |
 | Phase 2 | 数据层：`parseSearchTimeline` 纯函数 + `fetchSearchTweets`（池化）   | ✅ 完成 |
 | Phase 3 | BFF：`/api/tweet/search` loader + `validations/search.ts` + 路由注册 | ✅ 完成 |
