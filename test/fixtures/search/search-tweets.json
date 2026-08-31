@@ -1,0 +1,246 @@
+{
+  "_meta": {
+    "source": "anonTweet fixture — synthesized from ITweetSearchResponse shape (SearchTimeline)",
+    "exportedAt": "2026-08-31",
+    "schema": "ITweetSearchResponse"
+  },
+  "data": {
+    "data": {
+      "search_by_raw_query": {
+        "search_timeline": {
+          "timeline": {
+            "instructions": [
+              {
+                "type": "TimelineAddEntries",
+                "entries": [
+                  {
+                    "entryId": "tweet-1234567890123456789",
+                    "sortIndex": "1700000000000000000",
+                    "content": {
+                      "entryType": "TimelineTimelineItem",
+                      "__typename": "TimelineTimelineItem",
+                      "itemContent": {
+                        "itemType": "TimelineTweet",
+                        "__typename": "TimelineTweet",
+                        "tweet_results": {
+                          "result": {
+                            "__typename": "Tweet",
+                            "rest_id": "1234567890123456789",
+                            "has_birdwatch_notes": false,
+                            "core": {
+                              "user_results": {
+                                "result": {
+                                  "__typename": "User",
+                                  "id": "98765",
+                                  "rest_id": "98765",
+                                  "is_blue_verified": true,
+                                  "profile_image_shape": "Circle",
+                                  "legacy": {
+                                    "name": "Search Fixture User",
+                                    "screen_name": "searchfixture",
+                                    "description": "",
+                                    "followers_count": 1024,
+                                    "friends_count": 256,
+                                    "statuses_count": 4096,
+                                    "profile_image_url_https": "https://pbs.twimg.com/profile_images/searchfixture_normal.jpg",
+                                    "verified": false
+                                  }
+                                }
+                              }
+                            },
+                            "views": { "count": "128", "state": "Enabled" },
+                            "legacy": {
+                              "bookmark_count": 0,
+                              "bookmarked": false,
+                              "created_at": "Wed Aug 30 12:00:00 +0000 2026",
+                              "conversation_id_str": "1234567890123456789",
+                              "display_text_range": [0, 42],
+                              "entities": {
+                                "user_mentions": [],
+                                "urls": [],
+                                "hashtags": [],
+                                "symbols": []
+                              },
+                              "favorite_count": 24,
+                              "favorited": false,
+                              "full_text": "Hello from the anonymous tweet search fixture",
+                              "is_quote_status": false,
+                              "lang": "en",
+                              "quote_count": 0,
+                              "reply_count": 1,
+                              "retweet_count": 3,
+                              "retweeted": false,
+                              "user_id_str": "98765",
+                              "id_str": "1234567890123456789"
+                            }
+                          }
+                        },
+                        "tweetDisplayType": "Tweet"
+                      },
+                      "clientEventInfo": {
+                        "component": "search",
+                        "element": "tweet"
+                      }
+                    }
+                  },
+                  {
+                    "entryId": "tweet-2234567890123456789",
+                    "sortIndex": "1690000000000000000",
+                    "content": {
+                      "entryType": "TimelineTimelineItem",
+                      "__typename": "TimelineTimelineItem",
+                      "itemContent": {
+                        "itemType": "TimelineTweet",
+                        "__typename": "TimelineTweet",
+                        "tweet_results": {
+                          "result": {
+                            "__typename": "Tweet",
+                            "rest_id": "2234567890123456789",
+                            "has_birdwatch_notes": false,
+                            "core": {
+                              "user_results": {
+                                "result": {
+                                  "__typename": "User",
+                                  "id": "87654",
+                                  "rest_id": "87654",
+                                  "is_blue_verified": false,
+                                  "profile_image_shape": "Circle",
+                                  "legacy": {
+                                    "name": "Second Search Fixture",
+                                    "screen_name": "searchfixture2",
+                                    "description": "",
+                                    "followers_count": 128,
+                                    "friends_count": 64,
+                                    "statuses_count": 512,
+                                    "profile_image_url_https": "https://pbs.twimg.com/profile_images/searchfixture2_normal.jpg",
+                                    "verified": false
+                                  }
+                                }
+                              }
+                            },
+                            "views": { "count": "64", "state": "Enabled" },
+                            "legacy": {
+                              "bookmark_count": 0,
+                              "bookmarked": false,
+                              "created_at": "Tue Aug 29 12:00:00 +0000 2026",
+                              "conversation_id_str": "2234567890123456789",
+                              "display_text_range": [0, 31],
+                              "entities": {
+                                "user_mentions": [],
+                                "urls": [],
+                                "hashtags": [],
+                                "symbols": []
+                              },
+                              "favorite_count": 8,
+                              "favorited": false,
+                              "full_text": "Second fixture tweet for search",
+                              "is_quote_status": false,
+                              "lang": "en",
+                              "quote_count": 0,
+                              "reply_count": 0,
+                              "retweet_count": 1,
+                              "retweeted": false,
+                              "user_id_str": "87654",
+                              "id_str": "2234567890123456789"
+                            }
+                          }
+                        },
+                        "tweetDisplayType": "Tweet"
+                      }
+                    }
+                  },
+                  {
+                    "entryId": "promoted-3234567890123456789",
+                    "sortIndex": "1680000000000000000",
+                    "content": {
+                      "entryType": "TimelineTimelineItem",
+                      "__typename": "TimelineTimelineItem",
+                      "itemContent": {
+                        "itemType": "TimelineTweet",
+                        "__typename": "TimelineTweet",
+                        "tweet_results": {
+                          "result": {
+                            "__typename": "Tweet",
+                            "rest_id": "3234567890123456789",
+                            "has_birdwatch_notes": false,
+                            "core": {
+                              "user_results": {
+                                "result": {
+                                  "__typename": "User",
+                                  "id": "76543",
+                                  "rest_id": "76543",
+                                  "is_blue_verified": false,
+                                  "profile_image_shape": "Circle",
+                                  "legacy": {
+                                    "name": "Promoted Fixture",
+                                    "screen_name": "promoted_fixture",
+                                    "description": "",
+                                    "followers_count": 10,
+                                    "friends_count": 10,
+                                    "statuses_count": 10,
+                                    "profile_image_url_https": "https://pbs.twimg.com/profile_images/promoted_fixture_normal.jpg",
+                                    "verified": false
+                                  }
+                                }
+                              }
+                            },
+                            "views": { "count": "1", "state": "Enabled" },
+                            "legacy": {
+                              "bookmark_count": 0,
+                              "bookmarked": false,
+                              "created_at": "Mon Aug 28 12:00:00 +0000 2026",
+                              "conversation_id_str": "3234567890123456789",
+                              "display_text_range": [0, 21],
+                              "entities": {
+                                "user_mentions": [],
+                                "urls": [],
+                                "hashtags": [],
+                                "symbols": []
+                              },
+                              "favorite_count": 0,
+                              "favorited": false,
+                              "full_text": "Promoted entry should be filtered",
+                              "is_quote_status": false,
+                              "lang": "en",
+                              "quote_count": 0,
+                              "reply_count": 0,
+                              "retweet_count": 0,
+                              "retweeted": false,
+                              "user_id_str": "76543",
+                              "id_str": "3234567890123456789"
+                            }
+                          }
+                        },
+                        "tweetDisplayType": "Promoted"
+                      }
+                    }
+                  },
+                  {
+                    "entryId": "cursor-bottom-1",
+                    "sortIndex": "1670000000000000000",
+                    "content": {
+                      "entryType": "TimelineTimelineCursor",
+                      "__typename": "TimelineTimelineCursor",
+                      "value": "dGhlX2JvdHRvbV9jdXJzb3Jfb2Zfc2VhcmNo",
+                      "cursorType": "Bottom"
+                    }
+                  },
+                  {
+                    "entryId": "cursor-top-1",
+                    "sortIndex": "1710000000000000000",
+                    "content": {
+                      "entryType": "TimelineTimelineCursor",
+                      "__typename": "TimelineTimelineCursor",
+                      "value": "dGhlX3RvcF9jdXJzb3Jfb2Zfc2VhcmNo",
+                      "cursorType": "Top"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

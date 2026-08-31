@@ -43,3 +43,23 @@ describe.skipIf(!testEnv.hasServer)('AC-TWEET-006 invalid tweet', () => {
     expect(result).toEqual([])
   })
 })
+
+describe.skipIf(!testEnv.hasServer || !testEnv.hasTweetKeys)('AC-TWEET-010 tweet search API (needs TWEET_KEYS + server)', () => {
+  it('AC-TWEET-010: search endpoint returns paginated tweet list', async () => {
+    const result = await getClient().tweet.search({ q: 'twitter', type: 'latest', count: 5 })
+
+    // 分页形态：{ tweets, nextCursor: string | null }
+    expect(result).toHaveProperty('tweets')
+    expect(result).toHaveProperty('nextCursor')
+    expect(Array.isArray(result.tweets)).toBe(true)
+    expect(result.nextCursor === null || typeof result.nextCursor === 'string').toBe(true)
+
+    // 元素格式同 /api/tweet/get（EnrichedTweet）
+    for (const tweet of result.tweets) {
+      expect(tweet.id_str).toBeTruthy()
+      expect(tweet.text).toBeTruthy()
+      expect(Array.isArray(tweet.entities)).toBe(true)
+      expect(tweet.user?.screen_name).toBeTruthy()
+    }
+  })
+})

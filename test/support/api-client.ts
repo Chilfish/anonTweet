@@ -166,6 +166,26 @@ export class AnonTweetClient {
     replies: async (tweetId: string): Promise<EnrichedTweet[]> => {
       return this.get<EnrichedTweet[]>(`/api/tweet/${tweetId}/replies`)
     },
+
+    /**
+     * GET /api/tweet/search — search tweets (paginated, format:
+     * { tweets: EnrichedTweet[], nextCursor: string | null })
+     */
+    search: async (params: {
+      q: string
+      type?: 'top' | 'latest'
+      cursor?: string
+      count?: number
+    }): Promise<{ tweets: EnrichedTweet[], nextCursor: string | null }> => {
+      const search = new URLSearchParams({ q: params.q })
+      if (params.type)
+        search.set('type', params.type)
+      if (params.cursor)
+        search.set('cursor', params.cursor)
+      if (params.count)
+        search.set('count', String(params.count))
+      return this.get<{ tweets: EnrichedTweet[], nextCursor: string | null }>(`/api/tweet/search?${search.toString()}`)
+    },
   }
 
   // ── Instagram API ──────────────────────────────────────
