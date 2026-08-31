@@ -114,6 +114,7 @@ ${apiBullets}
 
 ## Machine Readable
 
+- [/skills/anon-tweet/SKILL.md](/skills/anon-tweet/SKILL.md): Agent Skill — 匿名浏览 Twitter/X 与 IG 帖子的 API 使用指南（Agent Skills 规范，可导入 Claude Code / claude.ai）
 - [/sitemap.xml](/sitemap.xml): XML 站点地图
 - [/robots.txt](/robots.txt): 爬虫规则（Disallow /api/，llms.txt 与 openapi.json 不受限）
 `
