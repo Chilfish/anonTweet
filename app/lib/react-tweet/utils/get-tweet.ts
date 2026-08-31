@@ -1,6 +1,7 @@
 import type { IListTweetsResponse } from '~/lib/rettiwt-api/types/raw/list/Tweets'
 import type { ITweetDetailsResponse } from '~/lib/rettiwt-api/types/raw/tweet/Details'
 import type { ITweetRepliesResponse } from '~/lib/rettiwt-api/types/raw/tweet/Replies'
+import type { ITweetSearchResponse } from '~/lib/rettiwt-api/types/raw/tweet/Search'
 import type { IUserDetailsResponse } from '~/lib/rettiwt-api/types/raw/user/Details'
 import type { IUserTweetsResponse } from '~/lib/rettiwt-api/types/raw/user/Tweets'
 import type { EnrichedTweet, RawTweet, RawUser } from '~/types'
@@ -130,6 +131,85 @@ export async function fetchReplies(tweetId: string, cursor?: string): Promise<Fe
       ],
       nextCursor: getBottomCursor(response.data),
     }
+  })
+}
+
+export interface FetchSearchResult {
+  tweets: RawTweet[]
+  nextCursor: string | null
+}
+
+export interface SearchTweetOptions {
+  /** 搜索结果类型：`top` 热门（默认 X 页面 Mod）| `latest` 最新。缺省走 latest。 */
+  type?: 'top' | 'latest'
+  /** 每页数量（SearchTimeline 上限约 20）。 */
+  count?: number
+  /** 上一页返回的 bottom cursor，用于翻页。 */
+  cursor?: string
+}
+
+/**
+ * 搜索结果中的单个 tweet result 可能是 `TweetWithVisibilityResults` 包装
+ * （真实推文在 `.tweet` 下），统一解包为 RawTweet 再交给 enrich。
+ */
+function unwrapSearchTweetResult(result: unknown): RawTweet {
+  if (!result || typeof result !== 'object')
+    return result as RawTweet
+
+  const wrapped = result as { __typename?: string, tweet?: RawTweet }
+  return wrapped.__typename === 'TweetWithVisibilityResults' && wrapped.tweet
+    ? wrapped.tweet
+    : result as RawTweet
+}
+
+/**
+ * 解析 SearchTimeline 原始响应 → 推文列表 + 下一页光标。
+ *
+ * 纯函数（可直接单测，规避 postmortem #001 解析器零测试）：遍历
+ * `search_by_raw_query.search_timeline.timeline.instructions`，只取 entryId
+ * 前缀 `tweet-` 且非 TimelineTimelineCursor 的 entry，提取
+ * `itemContent.tweet_results.result`（自动解包 TweetWithVisibilityResults）；
+ * 光标复用 `getBottomCursor`。解析范式对齐 `fetchListTweets`（同款 timeline 结构）。
+ *
+ * 关键词（query）以原样透传为 rawQuery —— X 高级搜索语法（`from:` / `to:` /
+ * `min_faves:` / `since:` / `until:` / `lang:` / `#话题` / `-排除` / `"精确短语"`
+ * 等）随 `TweetFilter.includeWords.join(' ')` 原样进入请求，不做改写。
+ */
+export function parseSearchTimeline(response: ITweetSearchResponse): FetchSearchResult {
+  const instructions
+    = response.data?.search_by_raw_query?.search_timeline?.timeline?.instructions || []
+
+  const tweets = instructions
+    .flatMap(instruction => instruction.entries || [])
+    .filter(entry => entry.entryId?.startsWith('tweet-'))
+    .filter(entry => entry.content?.entryType !== 'TimelineTimelineCursor')
+    .map(entry => unwrapSearchTweetResult(entry.content.itemContent?.tweet_results?.result))
+    .filter(tweet => !!tweet)
+
+  return {
+    tweets,
+    nextCursor: getBottomCursor(response.data),
+  }
+}
+
+export async function fetchSearchTweets(
+  query: string,
+  options: SearchTweetOptions = {},
+): Promise<FetchSearchResult> {
+  return twitterPool.run(async (fetcher) => {
+    const response = await fetcher.request<ITweetSearchResponse>(
+      ResourceType.TWEET_SEARCH,
+      {
+        filter: {
+          includeWords: [query],
+          top: options.type === 'top',
+        },
+        count: options.count,
+        cursor: options.cursor,
+      },
+    )
+
+    return parseSearchTimeline(response)
   })
 }
 
