@@ -121,12 +121,14 @@
 ## AC-TWEET-010：搜索端点返回推文列表（集成）
 
 - **输入**：合法关键词（如 `q=twitter`）请求 `GET /api/tweet/search`
-- **预期输出**：返回 `EnrichedTweet[]` 数组（格式同 `/api/tweet/get`，目前不含分页字段）
+- **预期输出**：返回 `{ tweets: EnrichedTweet[], nextCursor: string | null }`
+  （分页形态对齐 `/api/tweet/replies`；推文元素格式同 `/api/tweet/get`）
 - **验证方法**：`bun verify --ac AC-TWEET-010`
 - **前置条件**：`TWEET_KEYS` 已配置，测试服务器运行中
 - **Pass 条件**：
   - HTTP 状态码 200
-  - 返回体为数组（允许为空——搜索无结果时返回空数组，不 500）
+  - `tweets` 为数组（允许为空——搜索无结果时返回空数组，不 500）
+  - `nextCursor` 为 `string | null`（有更多结果时非空，供翻页）
   - 非空时数组元素含 `id_str`、`text`、`entities`、`user` 字段
 
 ---

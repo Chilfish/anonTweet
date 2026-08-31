@@ -8,8 +8,8 @@
 ## 目标
 
 打通 Twitter/X 搜索链路：`/search` 页面输入关键词 → BFF `/api/tweet/search` →
-`rettiwt-api` `TWEET_SEARCH` 资源 → X `SearchTimeline`，返回推文列表（格式同
-`/api/tweet/get` 的 `EnrichedTweet[]`，**目前只返回推文列表，不做分页**）。
+`rettiwt-api` `TWEET_SEARCH` 资源 → X `SearchTimeline`，返回分页推文列表
+（推文元素格式同 `/api/tweet/get` 的 `EnrichedTweet`，支持 `cursor` 翻页）。
 
 ## 现状盘点（2026-08-31）
 
@@ -23,12 +23,15 @@
 
 ## 接口约定
 
-### GET /api/tweet/search?q=<关键词>&type=<top|latest>
+### GET /api/tweet/search?q=<关键词>&type=<top|latest>&cursor=<光标>&count=<每页数量>
 
 - `q`：必填，关键词（等价 `includeWords`，多词空格分词）
 - `type`：可选，`top`（热门）| `latest`（最新，默认）
-- 返回：`EnrichedTweet[]` —— 与 `GET/POST /api/tweet/get` 相同格式（数组，元素含
-  `id_str` / `text` / `entities` / `user`），无分页字段（当前阶段）
+- `cursor`：可选，上一页返回的 `nextCursor`（X SearchTimeline Bottom 光标）
+- `count`：可选，每页数量（默认 20，上限 50）
+- 返回：`{ tweets: EnrichedTweet[], nextCursor: string | null }` —— 推文元素与
+  `GET/POST /api/tweet/get` 相同格式（`id_str` / `text` / `entities` / `user`）；
+  分页形态对齐 `/api/tweet/replies` 的 `RepliesResponse`
 
 ## 实施计划
 
@@ -50,25 +53,29 @@
   `data.search_by_raw_query.search_timeline.timeline.instructions`，只取
   `entryId` 前缀 `tweet-` 且非 `TimelineTimelineCursor` 的 entry，
   提取 `itemContent.tweet_results.result`（`as unknown as RawTweet`），复用
-  `getBottomCursor` 取下一页光标（当前阶段不对外暴露）。
+  `getBottomCursor` 取下一页光标（Bottom cursor，分页透传给前端）。
 - `fetchSearchTweets(query, { type, count, cursor })` —— `twitterPool.run` +
-  `fetcher.request(ResourceType.TWEET_SEARCH, { filter: { includeWords: [query], top }, ... })`，
-  返回 `parseSearchTimeline` 结果。
+  `fetcher.request(ResourceType.TWEET_SEARCH, { filter: { includeWords: [query], top }, count, cursor })`，
+  返回 `{ tweets, nextCursor }`（`parseSearchTimeline` 结果）。
 
 > 解析策略对齐 `fetchListTweets`（同款 timeline 结构），避免引入新解析范式，
 > 规避 postmortem #001（解析器零测试/多分支漂移）：纯函数直接单测。
 
 ### Phase 3 — BFF
 
-- `app/lib/validations/search.ts`：`searchTweetSchema`（`q` trim 1..500、`type` enum、校验失败 400）。
+- `app/lib/validations/search.ts`：`searchTweetSchema`（`q` trim 1..500、`type` enum、
+  `cursor` 可选、`count` 1..50 默认 20；校验失败 400）。
 - `app/routes/api/tweet/search.ts`：loader 读 searchParams → `fetchSearchTweets` →
-  `enrichTweet` 映射过滤 → 返回 `EnrichedTweet[]`；异常 `data({ error }, { status })`。
+  `enrichTweet` 映射过滤 → 返回 `{ tweets: EnrichedTweet[], nextCursor }`；
+  异常 `data({ error }, { status })`。
 - `app/routes.ts`：`prefix('tweet')` 下注册 `route('search', 'routes/api/tweet/search.ts')`。
 
 ### Phase 4 — 前端
 
-- `app/routes/search.tsx`：搜索框（Input + 提交）+ Latest/Top 切换 → 导航 `/search?q=&type=`，
-  `clientLoader` 拉取列表渲染（复用 `MyTweet` 单推模式，同 `/list/:id`）；meta `noindex`。
+- `app/routes/search.tsx`：搜索框（Input + 提交）+ Latest/Top 切换 → 导航
+  `/search?q=&type=`，`clientLoader` 拉取第一页渲染（复用 `MyTweet` 单推模式，
+  同 `/list/:id`）；「加载更多」按钮用 `nextCursor` 追加下一页（`useState` 累积 +
+  URL 参数变化时重置）；meta `noindex`。
 - footer「More」区新增内链 `/search`（react-router `Link`，不走外链 `FooterLink`）。
 
 ## 验证
