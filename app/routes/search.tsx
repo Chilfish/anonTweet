@@ -4,6 +4,7 @@ import { ArrowRightIcon, ChevronDownIcon, SearchIcon, SearchXIcon } from 'lucide
 import { memo, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { BackButton } from '~/components/translation/BackButton'
+import { OpenDetailLink } from '~/components/tweet/OpenDetailLink'
 import { MyTweet } from '~/components/tweet/Tweet'
 import { Button } from '~/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible'
@@ -34,10 +35,13 @@ interface SearchResponse {
 const MemoizedTweetItem = memo(({ tweet }: { tweet: EnrichedTweet }) => {
   const wrappedTweets = useMemo(() => [tweet], [tweet])
   return (
-    <MyTweet
-      tweets={wrappedTweets}
-      mainTweetId={tweet.id_str}
-    />
+    <div className="w-full sm:min-w-[450px] sm:max-w-[600px]">
+      <MyTweet
+        tweets={wrappedTweets}
+        mainTweetId={tweet.id_str}
+      />
+      <OpenDetailLink tweetId={tweet.id_str} />
+    </div>
   )
 })
 

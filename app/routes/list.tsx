@@ -6,6 +6,7 @@ import axios from 'axios'
 import { memo, Suspense, useMemo, useState } from 'react'
 import { Await, useLoaderData, useNavigate } from 'react-router'
 import { BackButton } from '~/components/translation/BackButton'
+import { OpenDetailLink } from '~/components/tweet/OpenDetailLink'
 import { MyTweet } from '~/components/tweet/Tweet'
 import { Button } from '~/components/ui/button'
 import { Field } from '~/components/ui/field'
@@ -51,10 +52,13 @@ export async function clientLoader({
 const MemoizedTweetItem = memo(({ tweet }: { tweet: any }) => {
   const wrappedTweets = useMemo(() => [tweet], [tweet])
   return (
-    <MyTweet
-      tweets={wrappedTweets}
-      mainTweetId={tweet.id_str}
-    />
+    <div className="w-full sm:min-w-[450px] sm:max-w-[600px]">
+      <MyTweet
+        tweets={wrappedTweets}
+        mainTweetId={tweet.id_str}
+      />
+      <OpenDetailLink tweetId={tweet.id_str} />
+    </div>
   )
 })
 
