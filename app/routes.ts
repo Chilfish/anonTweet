@@ -16,6 +16,7 @@ export default [
     route('/tweets/:id', 'routes/tweet.tsx'),
     route('/ins/:id', 'routes/ins.tsx'),
     route('/bili', 'routes/bili.tsx'),
+    route('/search', 'routes/search.tsx'),
   ]),
 
   ...prefix('api', [
@@ -29,6 +30,7 @@ export default [
       route('get/:id', 'routes/api/tweet/get.ts'),
       route('set', 'routes/api/tweet/set.ts'),
       route('list/:id', 'routes/api/tweet/list.ts'),
+      route('search', 'routes/api/tweet/search.ts'),
       route('/replies/:id', 'routes/api/tweet/replies.ts'),
     ]),
 
