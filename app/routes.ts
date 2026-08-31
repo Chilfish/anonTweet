@@ -49,4 +49,6 @@ export default [
   route('*', 'routes/not-found.tsx'),
   route('robots.txt', 'routes/robots.txt.ts'),
   route('sitemap.xml', 'routes/sitemap.xml.ts'),
+  route('llms.txt', 'routes/llms.txt.ts'),
+  route('openapi.json', 'routes/openapi.json.ts'),
 ] satisfies RouteConfig
