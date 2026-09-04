@@ -1,10 +1,10 @@
 import type { FormEvent } from 'react'
 import type { EnrichedTweet } from '~/types'
 import { ArrowRightIcon, ChevronDownIcon, SearchIcon, SearchXIcon } from 'lucide-react'
-import { memo, useEffect, useMemo, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
+import { SearchToolbar } from '~/components/search/SearchToolbar'
 import { BackButton } from '~/components/translation/BackButton'
-import { OpenDetailLink } from '~/components/tweet/OpenDetailLink'
 import { MyTweet } from '~/components/tweet/Tweet'
 import { Button } from '~/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible'
@@ -18,6 +18,12 @@ import {
 import { ToggleGroup, ToggleGroupItem } from '~/components/ui/toggle-group'
 import { fetcher } from '~/lib/fetcher'
 import { TweetSkeleton } from '~/lib/react-tweet'
+import {
+  useIsCapturingSelected,
+  useIsTweetSelected,
+  useTranslationActions,
+  useTweetById,
+} from '~/lib/stores/hooks'
 
 export function meta() {
   return [
@@ -32,16 +38,34 @@ interface SearchResponse {
   nextCursor: string | null
 }
 
-const MemoizedTweetItem = memo(({ tweet }: { tweet: EnrichedTweet }) => {
-  const wrappedTweets = useMemo(() => [tweet], [tweet])
+/**
+ * 单条搜索结果卡片。
+ *
+ * 数据流：卡片经 `appendTweets` 并入全局 store（合并去重、不动 mainTweet），渲染从
+ * store 按 id 订阅（`useTweetById`）——这样翻译弹窗的 AI 翻译（updateTweet）与手动
+ * 编辑（setTranslation）才会实时反映到卡片。AI 翻译只按需显式触发（卡片弹窗里的
+ * 「AI 翻译」按钮），搜索加载时不会自动翻译全部结果。
+ *
+ * 选择截图时：未选中的卡片整卡隐藏（不留 .tweet-container 边框空壳），而非只藏内部节点。
+ */
+const MemoizedTweetItem = memo(({ tweet: initialTweet }: { tweet: EnrichedTweet }) => {
+  const { appendTweets } = useTranslationActions()
+  const displayTweet = useTweetById(initialTweet.id_str) ?? initialTweet
+  const isCapturingSelected = useIsCapturingSelected()
+  const isSelected = useIsTweetSelected(initialTweet.id_str)
+
+  useEffect(() => {
+    appendTweets([initialTweet])
+  }, [initialTweet, appendTweets])
+
+  if (isCapturingSelected && !isSelected)
+    return null
+
   return (
-    <div className="w-full sm:min-w-[450px] sm:max-w-[600px]">
-      <MyTweet
-        tweets={wrappedTweets}
-        mainTweetId={tweet.id_str}
-      />
-      <OpenDetailLink tweetId={tweet.id_str} />
-    </div>
+    <MyTweet
+      tweets={[displayTweet]}
+      mainTweetId={initialTweet.id_str}
+    />
   )
 })
 
@@ -82,6 +106,8 @@ export default function SearchPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // 结果列表容器：页级操作条的截图捕获节点（不含操作条/加载更多按钮）
+  const listRef = useRef<HTMLDivElement | null>(null)
 
   // URL 参数变化（回退/前进/新搜索）时同步输入框
   useEffect(() => {
@@ -308,7 +334,15 @@ export default function SearchPage() {
 
       {!isLoading && !error && tweets.length > 0 && (
         <>
-          <div className="flex flex-col gap-3 items-center justify-center w-[96vw]">
+          <SearchToolbar
+            tweets={tweets}
+            listRef={listRef}
+          />
+
+          <div
+            ref={listRef}
+            className="flex flex-col gap-3 items-center justify-center mx-auto w-fit"
+          >
             {tweets.map(tweet => (
               <MemoizedTweetItem
                 tweet={tweet}
