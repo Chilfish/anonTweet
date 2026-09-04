@@ -1,6 +1,7 @@
 import type { EnrichedTweet } from '~/types'
 import { useMemo } from 'react'
 import { MediaImage } from '~/components/ui/media'
+import { normalizeMediaUrl } from '~/lib/media-url'
 import { useProxyMedia } from '~/lib/stores/appConfig'
 import { cn } from '~/lib/utils'
 import { TrendingCardView } from './TrendingCard'
@@ -40,7 +41,7 @@ function CardImage({ imageUrl, altText, isLarge = false }: CardImageProps) {
       )}
     >
       <MediaImage
-        src={proxyMedia(imageUrl)}
+        src={proxyMedia(normalizeMediaUrl(imageUrl))}
         alt={altText}
         className={cn(
           'h-full w-full object-cover',

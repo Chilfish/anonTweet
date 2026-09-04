@@ -269,34 +269,38 @@ describe('vision AC-VISION-005: mediaIndex → mediaDetails 映射', () => {
   })
 })
 
-describe('vision AC-VISION-005 配套: buildMediaUrl 复用 format+name 变换', () => {
-  it('无 proxy，format/name 与 getMediaUrl 一致（Postmortem #005）', () => {
+describe('vision AC-VISION-005 配套: buildMediaUrl 归一化媒体 URL', () => {
+  it('已带扩展名 → 原样返回（无 proxy、无 query）', () => {
     const url = buildMediaUrl({
       type: 'photo',
       index: 0,
       media_url_https: 'https://pbs.twimg.com/media/x.jpg',
       original_info: { height: 100, width: 100 },
     })
-    expect(url).toContain('format=jpg')
-    expect(url).toContain('name=small')
+    expect(url).toBe('https://pbs.twimg.com/media/x.jpg')
     expect(url).not.toContain('proxy')
+    expect(url).not.toContain('format=')
+    expect(url).not.toContain('name=')
   })
 
-  it('默认 small 缩略图（DR-5 token 成本控制），可覆盖为 medium', () => {
-    const small = buildMediaUrl({
+  it('query 形态（?format=jpg&name=small）统一为 /slug.jpg', () => {
+    const url = buildMediaUrl({
       type: 'photo',
       index: 0,
-      media_url_https: 'https://pbs.twimg.com/media/x.jpg',
+      media_url_https: 'https://pbs.twimg.com/media/x?format=jpg&name=small',
       original_info: { height: 100, width: 100 },
-    }, 'small')
-    const medium = buildMediaUrl({
+    })
+    expect(url).toBe('https://pbs.twimg.com/media/x.jpg')
+  })
+
+  it('其他 name/format（orig / png，参数顺序无关）同样归一', () => {
+    const url = buildMediaUrl({
       type: 'photo',
       index: 0,
-      media_url_https: 'https://pbs.twimg.com/media/x.jpg',
+      media_url_https: 'https://pbs.twimg.com/media/card-slug?name=orig&format=png',
       original_info: { height: 100, width: 100 },
-    }, 'medium')
-    expect(small).toContain('name=small')
-    expect(medium).toContain('name=medium')
+    })
+    expect(url).toBe('https://pbs.twimg.com/media/card-slug.png')
   })
 })
 

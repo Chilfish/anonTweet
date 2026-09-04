@@ -1,5 +1,6 @@
 import type { TrendingCardInfo } from '~/types'
 import { MediaImage } from '~/components/ui/media'
+import { normalizeMediaUrl } from '~/lib/media-url'
 import { useProxyMedia } from '~/lib/stores/appConfig'
 import { cn } from '~/lib/utils'
 
@@ -33,7 +34,7 @@ export function TrendingCardView({
     >
       <div className="relative aspect-[18/10] bg-muted/50">
         <MediaImage
-          src={proxyMedia(trending.imageUrl)}
+          src={proxyMedia(normalizeMediaUrl(trending.imageUrl))}
           alt=""
           className="absolute inset-0 size-full object-cover"
           loading="lazy"

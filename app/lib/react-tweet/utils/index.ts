@@ -1,4 +1,5 @@
 import type { MediaAnimatedGif, MediaDetails, MediaVideo } from '~/types'
+import { normalizeMediaUrl } from '~/lib/media-url'
 import { useProxyMedia } from '~/lib/stores/appConfig'
 
 export * from './date-utils'
@@ -11,19 +12,10 @@ export interface TweetCoreProps {
   onError?: (error: any) => any
 }
 
-export function getMediaUrl(media: MediaDetails, size: 'small' | 'medium' | 'large'): string {
-  const url = new URL(media.media_url_https)
-  const extension = url.pathname.split('.').pop()
-
-  if (!extension)
-    return media.media_url_https
-
-  url.pathname = url.pathname.replace(`.${extension}`, '')
-  url.searchParams.set('format', extension)
-  url.searchParams.set('name', size)
-
+/** 媒体图片 URL：统一为 <slug>.<ext> 路径形态（不携带 ?name=/&format= 查询参数），再走代理 */
+export function getMediaUrl(media: MediaDetails): string {
   const proxyMedia = useProxyMedia()
-  return proxyMedia(url.toString())
+  return proxyMedia(normalizeMediaUrl(media.media_url_https))
 }
 
 export function getMp4Videos(media: MediaAnimatedGif | MediaVideo) {

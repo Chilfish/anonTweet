@@ -30,7 +30,7 @@ export function TweetMediaVideo({ media }: Props) {
   return (
     <>
       <MediaImage
-        src={getMediaUrl(media, 'large')}
+        src={getMediaUrl(media)}
         alt="Video"
         className={imageClasses}
         draggable

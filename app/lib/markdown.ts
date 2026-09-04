@@ -1,5 +1,6 @@
 import type { EnrichedTweet, Entity, MediaDetails, TweetData } from '~/types'
 import { format } from 'date-fns'
+import { normalizeMediaUrl } from './media-url'
 import { formatDate } from './react-tweet'
 
 export function generateText(tweet: EnrichedTweet): string {
@@ -178,6 +179,8 @@ function generateTextFromEntities(entities: Entity[], useTranslation: boolean): 
  */
 function generateMediaMarkdown(media: MediaDetails[], altTranslationEntities: Entity[]): string {
   return media.map((item, idx) => {
+    // 媒体链接统一为 <slug>.<ext> 形态（与界面渲染同一套归一化）
+    const src = normalizeMediaUrl(item.media_url_https)
     if (item.type === 'photo') {
       const alt = item.ext_alt_text ? `
 
@@ -188,7 +191,7 @@ Alt(${idx + 1} of ${media.length}): ${item.ext_alt_text}` : ''
       )
       const autoAlt = altEntity?.translation || altEntity?.aiTranslation
 
-      return `![Image(${idx + 1} of ${media.length})](${item.media_url_https})${alt}${autoAlt ? `
+      return `![Image(${idx + 1} of ${media.length})](${src})${alt}${autoAlt ? `
 
 **Alt Translation:** ${autoAlt}` : ''}`
     }
@@ -198,7 +201,7 @@ Alt(${idx + 1} of ${media.length}): ${item.ext_alt_text}` : ''
         .sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0))[0]
 
       const videoUrl = bestVariant?.url || item.media_url_https
-      return `![Video Thumbnail](${item.media_url_https})
+      return `![Video Thumbnail](${src})
 [Watch Video](${videoUrl})`
     }
     return ''

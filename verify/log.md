@@ -186,7 +186,7 @@ Postmortem #005（媒体管线重复）：代理/视频/截图各路径 URL 转�
 ### 踩坑
 
 - **lint `regexp/no-unused-capturing-group` + `e18e/prefer-static-regex`**：`walkTsFiles` 内联 `/\.(ts|tsx)$/` 捕获组未用且每次调用重新编译 → 提为模块常量 `TS_FILE_RE = /\.(?:ts|tsx)$/`（非捕获组）
-- **proxy 白名单 `IMAGE_EXT_RE` 要求 URL 以图片后缀结尾**：真实 pbs.twimg.com 媒体 URL 常以 `?format=jpg&name=…` 结尾（不匹配）且不含 IG 域名 → 会被 403 拒绝。这是 Tweet 真实媒体走该端点的潜在缺口（当前 Tweet 走 `mediaProxyUrl` 前缀方案，不依赖此端点）；AC-MEDIA-001 用本地 `*.png` 验证后缀路径本身无误，边界已记录在 AC 文档
+- **proxy 白名单 `IMAGE_EXT_RE` 要求 URL 以图片后缀结尾**：真实 pbs.twimg.com 媒体 URL 常以 `?format=jpg&name=…` 结尾（不匹配）且不含 IG 域名 → 会被 403 拒绝。这是 Tweet 真实媒体走该端点的潜在缺口（当前 Tweet 走 `mediaProxyUrl` 前缀方案，不依赖此端点）；AC-MEDIA-001 用本地 `*.png` 验证后缀路径本身无误，边界已记录在 AC 文档。**2026-09-04 起媒体 URL 统一为 `<slug>.<ext>` 形态（normalizeMediaUrl），后缀缺口已消除**
 
 ### 验收
 

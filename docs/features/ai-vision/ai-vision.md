@@ -180,8 +180,11 @@ z.object({
 
 ### 4.4 图片获取（服务端 fetch → base64）
 
-- 服务端 `fetch` `media.media_url_https`（经 `createMediaUrl` 统一，Postmortem #005）→ `arrayBuffer` → `data:image/...;base64,...`。
-- 可选：twimg 追加 `?format=jpg&name=medium` 缩小体积（base64 膨胀 ~1.33×，token 与延迟敏感）。
+- 服务端 `fetch` `media.media_url_https`（经 `buildMediaUrl`/`normalizeMediaUrl` 统一为
+  `<slug>.<ext>` 形态，Postmortem #005）→ `arrayBuffer` → `data:image/...;base64,...`。
+- 注：URL 不再携带 `?format=&name=<size>` 查询参数（2026-09-04 起统一为 `/slug.jpg`
+  原始图）。若后续要重新做体积控制，可加 `name=<size>` query 或 `.jpg:small` 后缀再做
+  token 权衡（base64 膨胀 ~1.33×，token 与延迟敏感）。
 - 失败回退：走 `mediaProxyUrl` 前缀重试；仍失败则该项标记 `status: 'error'`，不整批失败。
 
 ### 4.5 API 路由（独立，与翻译解耦）
