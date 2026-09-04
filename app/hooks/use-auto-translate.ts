@@ -1,4 +1,4 @@
-import type { EnrichedTweet } from '~/types'
+import type { EnrichedTweet, Entity } from '~/types'
 import { useEffect, useRef } from 'react'
 import { fetcher } from '~/lib/fetcher'
 import { useAIConfig, useResolvedAIConfig, useTranslationActions } from '~/lib/stores/hooks'
@@ -15,8 +15,15 @@ import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionar
  * 语义对齐旧 GET 内联逻辑：
  * - 已翻译（entities[].aiTranslation / autoTranslationEntities）与中文推文跳过；
  * - 每个推文与其嵌套 quoted tweet 都会尝试翻译（按 id 去重，避免重复调用）。
+ *
+ * @param tweets 待翻译的推文数组（未定义或为空时不触发）。
+ * @param onTranslated 可选的翻译回调（搜索等不经过 store 的多卡片场景传入，
+ *   把结果合并回组件本地状态）；不传则走默认的 store `updateTweet`。
  */
-export function useAutoTranslateTweets(tweets: EnrichedTweet[] | undefined) {
+export function useAutoTranslateTweets(
+  tweets: EnrichedTweet[] | undefined,
+  onTranslated?: (tweetId: string, entities: Entity[]) => void,
+) {
   const { enableAITranslation, translationGlossary } = useAIConfig()
   const aiConfig = useResolvedAIConfig()
   const dictEntries = useTranslationDictionaryStore(state => state.getFormattedEntries)
@@ -73,10 +80,15 @@ export function useAutoTranslateTweets(tweets: EnrichedTweet[] | undefined) {
           })
 
           if (data.success && data.data?.entities) {
-            updateTweet(tweet.id_str, {
-              entities: data.data.entities,
-              autoTranslationEntities: undefined,
-            })
+            if (onTranslated) {
+              onTranslated(tweet.id_str, data.data.entities)
+            }
+            else {
+              updateTweet(tweet.id_str, {
+                entities: data.data.entities,
+                autoTranslationEntities: undefined,
+              })
+            }
           }
         }
         catch (error: unknown) {
@@ -84,5 +96,5 @@ export function useAutoTranslateTweets(tweets: EnrichedTweet[] | undefined) {
         }
       }
     })()
-  }, [tweets, enableAITranslation, aiConfig, translationGlossary, dictEntries, updateTweet])
+  }, [tweets, enableAITranslation, aiConfig, translationGlossary, dictEntries, updateTweet, onTranslated])
 }

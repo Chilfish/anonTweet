@@ -1,4 +1,4 @@
-import type { TweetData } from '~/types'
+import type { EnrichedTweet, TweetData } from '~/types'
 import { useEffect, useState } from 'react'
 import { extractDownloadItemsFromTweets } from '~/components/translation/DownloadMedia'
 import { downloadFiles } from '~/lib/downloader'
@@ -13,11 +13,23 @@ interface RepliesResponse {
   nextCursor: string | null
 }
 
-export function useTweetOperations() {
+interface TweetOperationsData {
+  /**
+   * 数据覆写：搜索结果等多卡片场景传入当前列表，让下载媒体/复制等
+   * 操作作用于列表本身；不传则用全局 store（详情页单线程模式）。
+   */
+  tweets?: TweetData
+  /** 主推文覆写：搜索场景传 null（禁用评论相关操作）。不传则用 store mainTweet。 */
+  mainTweet?: EnrichedTweet | null
+}
+
+export function useTweetOperations(data?: TweetOperationsData) {
   const [isLoadingComments, setIsLoadingComments] = useState(false)
   const [repliesCursor, setRepliesCursor] = useState<string | null>(null)
-  const tweets = useTweets()
-  const mainTweet = useMainTweet()
+  const storeTweets = useTweets()
+  const storeMainTweet = useMainTweet()
+  const tweets = data?.tweets ?? storeTweets
+  const mainTweet = data?.mainTweet === undefined ? storeMainTweet : data.mainTweet
   const commentIds = useCommentIds()
   const translations = useTranslations()
   const { appendTweets, setCommentIds } = useTranslationActions()

@@ -209,6 +209,15 @@ export function useTweets() {
   return useTranslationStore(useShallow(state => state.tweets))
 }
 
+/**
+ * 读取 store 中指定 id 的推文（精确订阅：仅该推文变化时重渲染）。
+ * 搜索等多卡片场景：卡片数据经 `appendTweets` 写入 store 后，
+ * 翻译弹窗的 `updateTweet` / `setTranslation` 才能实时反映到卡片渲染。
+ */
+export function useTweetById(tweetId: string): EnrichedTweet | undefined {
+  return useTranslationStore(state => state.tweets.find(t => t.id_str === tweetId))
+}
+
 export function useMainTweet() {
   return useTranslationStore(useShallow(state => state.mainTweet))
 }

@@ -1,4 +1,5 @@
 import type { Options as ScreenshotOptions } from 'modern-screenshot'
+import type { RefObject } from 'react'
 import type { EnrichedTweet } from '~/types'
 import { domToJpeg, domToPng } from 'modern-screenshot'
 import { useCallback, useState } from 'react'
@@ -17,9 +18,23 @@ import { waitForRenderReady } from '~/lib/utils'
 
 interface UseScreenshotActionProps {
   tweets: EnrichedTweet[]
+  /**
+   * 捕获节点覆写：搜索结果等多卡片场景传列表容器。
+   * 不传则回退到 store 的 tweetElRef（详情页单线程模式）。
+   */
+  captureRef?: RefObject<HTMLDivElement | null>
+  /** 文件名主推文覆写（搜索场景传首条结果）。不传则用 store mainTweet。 */
+  mainTweetOverride?: EnrichedTweet | null
+  /** 截图后是否同步翻译数据到服务端（详情页默认 true）；搜索等本地翻译场景传 false。 */
+  syncTranslations?: boolean
 }
 
-export function useScreenshotAction({ tweets }: UseScreenshotActionProps) {
+export function useScreenshotAction({
+  tweets,
+  captureRef,
+  mainTweetOverride,
+  syncTranslations = true,
+}: UseScreenshotActionProps) {
   const [isCapturing, setIsCapturing] = useState(false)
 
   const { tweetElRef, selectedTweetIds } = useUIState()
@@ -34,6 +49,10 @@ export function useScreenshotAction({ tweets }: UseScreenshotActionProps) {
   } = useTranslationUIActions()
 
   const { screenshotFormat } = useAppConfigStore()
+
+  // 多卡片场景（搜索/列表）用外部容器，详情页回退到 store 的 tweetElRef
+  const captureNode = captureRef?.current ?? tweetElRef
+  const mainForFile = mainTweetOverride ?? mainTweet
 
   // 私有：执行截图的底层逻辑
   const performCapture = useCallback(async (node: HTMLElement) => {
@@ -79,7 +98,7 @@ export function useScreenshotAction({ tweets }: UseScreenshotActionProps) {
 
   // 公开：主流程
   const handleScreenshot = useCallback(async (useSelection = false) => {
-    if (!tweetElRef || !mainTweet) {
+    if (!captureNode || !mainForFile) {
       toastManager.add({ title: '初始化失败：未找到推文节点', type: 'error' })
       return
     }
@@ -103,11 +122,11 @@ export function useScreenshotAction({ tweets }: UseScreenshotActionProps) {
     }
 
     // 等待 DOM 更新 (React Render + Layout paint)
-    await waitForRenderReady(tweetElRef)
+    await waitForRenderReady(captureNode)
 
     try {
       // 2. 执行截图 (Action)
-      const dataUrl = await performCapture(tweetElRef)
+      const dataUrl = await performCapture(captureNode)
 
       if (dataUrl) {
         const now = new Date().toLocaleString('zh-CN', {
@@ -120,13 +139,15 @@ export function useScreenshotAction({ tweets }: UseScreenshotActionProps) {
         }).replace(/[/\s:]/g, '-') // 稍微清洗下文件名
 
         const ext = screenshotFormat === 'png' ? 'png' : 'jpg'
-        const fileName = `${mainTweet.user.screen_name}-${mainTweet.id_str}-${now}.${ext}`
+        const fileName = `${mainForFile.user.screen_name}-${mainForFile.id_str}-${now}.${ext}`
 
         downloadImage(dataUrl, fileName)
         toastManager.add({ title: '截图保存成功', type: 'success' })
 
-        // 副作用：同步数据
-        await syncTranslationData(tweets, translations)
+        // 副作用：同步数据（搜索等多卡片本地翻译场景跳过）
+        if (syncTranslations) {
+          await syncTranslationData(tweets, translations)
+        }
       }
       else {
         throw new Error('生成的图片数据为空')
@@ -150,7 +171,7 @@ export function useScreenshotAction({ tweets }: UseScreenshotActionProps) {
       }
       setIsCapturing(false)
     }
-  }, [tweetElRef, mainTweet, selectedTweetIds, performCapture, screenshotFormat, tweets, setScreenshoting, setShowTranslationButton, setIsCapturingSelected, translationMode, toggleSelectionMode])
+  }, [captureNode, mainForFile, selectedTweetIds, performCapture, screenshotFormat, tweets, setScreenshoting, setShowTranslationButton, setIsCapturingSelected, translationMode, toggleSelectionMode, syncTranslations, translations])
 
   return {
     handleScreenshot,
