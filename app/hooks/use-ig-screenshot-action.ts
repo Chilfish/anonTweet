@@ -3,6 +3,7 @@ import type { IGPost } from '~/types'
 import { domToJpeg, domToPng } from 'modern-screenshot'
 import { useCallback, useRef, useState } from 'react'
 import { toastManager } from '~/components/ui/toast'
+import { dataUrlToFile, shareImageOut } from '~/lib/share'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { waitForRenderReady } from '~/lib/utils'
 
@@ -53,7 +54,16 @@ export function useIGScreenshotAction({ post }: UseIGScreenshotActionProps) {
       : domToJpeg(node, { ...options, scale: 2, backgroundColor: '#ffffff' })
   }, [screenshotFormat])
 
-  const handleScreenshot = useCallback(async () => {
+  // 私有：下载文件
+  const downloadImage = (dataUrl: string, filename: string) => {
+    const a = document.createElement('a')
+    a.href = dataUrl
+    a.download = filename
+    a.click()
+  }
+
+  // 公开：主流程（mode='share' 走 AC-PWA-007，系统分享卡片图片，不支持则回退下载）
+  const runCapture = useCallback(async (mode: 'download' | 'share') => {
     if (!containerRef.current || !post) {
       toastManager.add({ title: '截图失败：未找到 IG 帖子节点', type: 'error' })
       return
@@ -79,12 +89,24 @@ export function useIGScreenshotAction({ post }: UseIGScreenshotActionProps) {
         const ext = screenshotFormat === 'png' ? 'png' : 'jpg'
         const fileName = `ig-${post.username}-${post.id}-${now}.${ext}`
 
-        const a = document.createElement('a')
-        a.href = dataUrl
-        a.download = fileName
-        a.click()
-
-        toastManager.add({ title: '截图保存成功', type: 'success' })
+        if (mode === 'share') {
+          // AC-PWA-007：优先系统分享图片，不支持/失败回退下载；shared/aborted 静默收尾
+          const outcome = await shareImageOut(
+            dataUrlToFile(dataUrl, fileName),
+            `${post.fullname || `@${post.username}`} (@${post.username}) 的帖子卡片`,
+          )
+          if (outcome === 'unsupported') {
+            downloadImage(dataUrl, fileName)
+            toastManager.add({ title: '已保存图片（当前环境不支持直接分享图片）', type: 'success' })
+          }
+          else if (outcome === 'failed') {
+            toastManager.add({ title: '图片分享失败', type: 'error' })
+          }
+        }
+        else {
+          downloadImage(dataUrl, fileName)
+          toastManager.add({ title: '截图保存成功', type: 'success' })
+        }
       }
       else {
         throw new Error('生成的图片数据为空')
@@ -99,9 +121,16 @@ export function useIGScreenshotAction({ post }: UseIGScreenshotActionProps) {
     }
   }, [post, performCapture, screenshotFormat])
 
+  /** 截图后下载保存（默认行为）。 */
+  const handleScreenshot = useCallback(() => runCapture('download'), [runCapture])
+
+  /** AC-PWA-007：截图后系统分享卡片图片（不支持则回退下载）。 */
+  const shareScreenshot = useCallback(() => runCapture('share'), [runCapture])
+
   return {
     containerRef,
     handleScreenshot,
+    shareScreenshot,
     isCapturing,
   }
 }

@@ -2,6 +2,7 @@ import {
   Copy,
   Download,
   FileText,
+  ImagePlus,
   MoreHorizontal,
   Settings,
   Share2,
@@ -21,21 +22,26 @@ interface IGOptionsMenuProps {
   disableActions: boolean
   onDownload: () => void
   onShare: () => void
+  onShareScreenshot: () => void
   onCopyText: () => void
   onCopyMarkdown: () => void
+  /** 截图进行中（禁用分享截图项，防止并发截图）。 */
+  isCapturing?: boolean
 }
 
 /**
  * Instagram 三点菜单。
  *
- * 收纳低频操作：设置、下载媒体、分享、复制文本、复制 Markdown。
+ * 收纳低频操作：设置、下载媒体、分享、分享截图、复制文本、复制 Markdown。
  */
 export function IGOptionsMenu({
   disableActions,
   onDownload,
   onShare,
+  onShareScreenshot,
   onCopyText,
   onCopyMarkdown,
+  isCapturing = false,
 }: IGOptionsMenuProps) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
@@ -85,6 +91,15 @@ export function IGOptionsMenu({
           >
             <Share2 className="h-4 w-4 mr-2" />
             <span>分享</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
+            onClick={onShareScreenshot}
+            disabled={disableActions || isCapturing}
+            className="menu-item-class"
+          >
+            <ImagePlus className="h-4 w-4 mr-2" />
+            <span>{isCapturing ? '截图中...' : '分享截图'}</span>
           </DropdownMenuItem>
 
           <DropdownMenuItem

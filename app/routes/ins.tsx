@@ -104,7 +104,12 @@ export default function IGPostPage() {
   const { downloadMedia, copyText, copyMarkdown, share } = useIGOperations(post)
 
   // 截图 hook
-  const { containerRef, handleScreenshot, isCapturing } = useIGScreenshotAction({ post })
+  const {
+    containerRef,
+    handleScreenshot,
+    shareScreenshot,
+    isCapturing,
+  } = useIGScreenshotAction({ post })
 
   // 翻译完成回调（IGTranslateDialog 保存后触发）
   const handleTranslated = (captionTranslation: string) => {
@@ -133,6 +138,7 @@ export default function IGPostPage() {
     onTranslationModeChange: setTranslationMode,
     isCapturing,
     onScreenshot: handleScreenshot,
+    onShareScreenshot: shareScreenshot,
     onDownload: downloadMedia,
     onShare: share,
     onCopyText: copyText,

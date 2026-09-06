@@ -30,6 +30,7 @@ const actions = {
   onScreenshot: () => {},
   onDownload: () => {},
   onShare: () => {},
+  onShareScreenshot: () => {},
   onCopyText: () => {},
   onCopyMarkdown: () => {},
 }

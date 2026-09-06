@@ -48,6 +48,7 @@ export const OptionsEnabled: Story = {
       disableActions={false}
       onDownload={() => {}}
       onShare={() => {}}
+      onShareScreenshot={() => {}}
       onCopyText={() => {}}
       onCopyMarkdown={() => {}}
     />
@@ -60,6 +61,7 @@ export const OptionsDisabled: Story = {
       disableActions
       onDownload={() => {}}
       onShare={() => {}}
+      onShareScreenshot={() => {}}
       onCopyText={() => {}}
       onCopyMarkdown={() => {}}
     />

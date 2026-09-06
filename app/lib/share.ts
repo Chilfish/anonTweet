@@ -25,6 +25,9 @@ export interface SharedContent {
   url?: string
 }
 
+/** dataURL 头部的 mime 提取（模块级静态正则，e18e/prefer-static-regex）。 */
+const DATA_URL_MIME_RE = /^data:([^;]+);/
+
 /**
  * 从分享 payload 中挑选用于解析的内容。
  * 大部分 Android 源 App 把链接放 `url`、把正文放 `text`；少数只放其中一个，
@@ -119,6 +122,59 @@ export async function shareOut(payload: SharePayload): Promise<'shared' | 'abort
     return 'copied'
   }
   catch {
+    return 'failed'
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 图片文件分享（AC-PWA-007）：截图卡片走 Web Share Level 2（navigator.share files）
+// ---------------------------------------------------------------------------
+
+/** dataURL（`data:image/png;base64,…`）→ File；正确处理负载里的 `,`，供系统分享图片。 */
+export function dataUrlToFile(dataUrl: string, filename: string): File {
+  const comma = dataUrl.indexOf(',')
+  const meta = comma >= 0 ? dataUrl.slice(0, comma) : ''
+  const payload = comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl
+  const mime = DATA_URL_MIME_RE.exec(meta)?.[1] || 'image/png'
+
+  const binary = atob(payload)
+  const bytes = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++)
+    bytes[i] = binary.charCodeAt(i)
+
+  return new File([bytes], filename, { type: mime })
+}
+
+/** 当前环境能否把文件作为分享内容（Web Share Level 2；Node / Firefox / 旧浏览器为 false）。 */
+export function canShareFiles(file: File): boolean {
+  return (
+    typeof navigator !== 'undefined'
+    && typeof navigator.canShare === 'function'
+    && navigator.canShare({ files: [file] })
+  )
+}
+
+export type ImageShareOutcome = 'shared' | 'aborted' | 'unsupported' | 'failed'
+
+/**
+ * 系统分享单个图片文件；不支持时返回 'unsupported'（调用方回退下载保存），
+ * 用户取消（AbortError）返回 'aborted' 视为完成不报错。
+ */
+export async function shareImageOut(
+  file: File,
+  title?: string,
+  text?: string,
+): Promise<ImageShareOutcome> {
+  if (!canShareFiles(file))
+    return 'unsupported'
+
+  try {
+    await navigator.share({ files: [file], title, text })
+    return 'shared'
+  }
+  catch (error) {
+    if (typeof error === 'object' && error !== null && 'name' in error && error.name === 'AbortError')
+      return 'aborted'
     return 'failed'
   }
 }

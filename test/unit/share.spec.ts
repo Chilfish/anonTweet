@@ -4,17 +4,22 @@ import {
   buildIGSharePayload,
   buildTweetSharePayload,
   canNativeShare,
+  canShareFiles,
+  dataUrlToFile,
   hasSharedContent,
   pickSharedInput,
   resolveShareTarget,
+  shareImageOut,
 } from '~/lib/share'
 
 /**
- * AC-PWA-003/006 单元验证：
+ * AC-PWA-003/006/007 单元验证：
  * - AC-PWA-003：Web Share Target 接收决策（app/lib/share.ts）与首页 TweetInputForm
  *   手动提交同语义——可识别 X/IG 链接 → 自动跳转目标；不可识别 → 留框报错。
  * - AC-PWA-006：出向分享载荷（buildTweetSharePayload / buildIGSharePayload）与
  *   原生分享能力判定（canNativeShare，无 navigator 的环境返回 false 供降级复制链接）。
+ * - AC-PWA-007：截图卡片转 File 系统分享（dataUrlToFile / canShareFiles / shareImageOut，
+ *   无 navigator.canShare 的环境返回 false / 'unsupported' 供回退下载保存）。
  */
 
 function mkTweet(overrides: Record<string, unknown> = {}): EnrichedTweet {
@@ -170,6 +175,41 @@ describe('AC-PWA-006: share-out payload（Web Share 出向）', () => {
   describe('canNativeShare', () => {
     it('node（无 navigator.share）返回 false，供调用方降级复制链接', () => {
       expect(canNativeShare()).toBe(false)
+    })
+  })
+})
+
+describe('AC-PWA-007: 截图卡片以文件系统分享（Web Share Level 2 files）', () => {
+  // 1x1 透明 PNG（真实 base64，非占位）
+  const onePixelPng = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
+
+  describe('dataUrlToFile', () => {
+    it('解码 dataURL 为 File：文件名/mime 正确且字节非空', () => {
+      const file = dataUrlToFile(onePixelPng, 'card.png')
+      expect(file).toBeInstanceOf(File)
+      expect(file.name).toBe('card.png')
+      expect(file.type).toBe('image/png')
+      expect(file.size).toBeGreaterThan(0)
+    })
+
+    it('负载内含 `,` 不截断（仅首个逗号作分隔）', () => {
+      const withComma = `data:image/jpeg;base64,${btoa('AA,BB')}`
+      const file = dataUrlToFile(withComma, 'card.jpg')
+      expect(file.type).toBe('image/jpeg')
+      expect(file.size).toBe(5)
+    })
+  })
+
+  describe('canShareFiles', () => {
+    it('node（无 navigator.canShare）返回 false', () => {
+      expect(canShareFiles(dataUrlToFile(onePixelPng, 'card.png'))).toBe(false)
+    })
+  })
+
+  describe('shareImageOut', () => {
+    it('不支持 files 分享的环境返回 unsupported（调用方回退下载保存）', async () => {
+      const outcome = await shareImageOut(dataUrlToFile(onePixelPng, 'card.png'), '标题')
+      expect(outcome).toBe('unsupported')
     })
   })
 })

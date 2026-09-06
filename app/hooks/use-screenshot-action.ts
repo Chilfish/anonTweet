@@ -5,6 +5,7 @@ import { domToJpeg, domToPng } from 'modern-screenshot'
 import { useCallback, useState } from 'react'
 import { toastManager } from '~/components/ui/toast'
 import { syncTranslationData } from '~/lib/service/translationSync'
+import { dataUrlToFile, shareImageOut } from '~/lib/share'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 import {
   useGlobalTranslationMode,
@@ -96,8 +97,8 @@ export function useScreenshotAction({
     a.click()
   }
 
-  // 公开：主流程
-  const handleScreenshot = useCallback(async (useSelection = false) => {
+  // 公开：主流程（mode='share' 走 AC-PWA-007，系统分享卡片图片，不支持则回退下载）
+  const runCapture = useCallback(async (useSelection: boolean, mode: 'download' | 'share') => {
     if (!captureNode || !mainForFile) {
       toastManager.add({ title: '初始化失败：未找到推文节点', type: 'error' })
       return
@@ -141,8 +142,24 @@ export function useScreenshotAction({
         const ext = screenshotFormat === 'png' ? 'png' : 'jpg'
         const fileName = `${mainForFile.user.screen_name}-${mainForFile.id_str}-${now}.${ext}`
 
-        downloadImage(dataUrl, fileName)
-        toastManager.add({ title: '截图保存成功', type: 'success' })
+        if (mode === 'share') {
+          // AC-PWA-007：优先系统分享图片，不支持/失败回退下载；shared/aborted 静默收尾
+          const outcome = await shareImageOut(
+            dataUrlToFile(dataUrl, fileName),
+            `${mainForFile.user.name} (@${mainForFile.user.screen_name}) 的推文卡片`,
+          )
+          if (outcome === 'unsupported') {
+            downloadImage(dataUrl, fileName)
+            toastManager.add({ title: '已保存图片（当前环境不支持直接分享图片）', type: 'success' })
+          }
+          else if (outcome === 'failed') {
+            toastManager.add({ title: '图片分享失败', type: 'error' })
+          }
+        }
+        else {
+          downloadImage(dataUrl, fileName)
+          toastManager.add({ title: '截图保存成功', type: 'success' })
+        }
 
         // 副作用：同步数据（搜索等多卡片本地翻译场景跳过）
         if (syncTranslations) {
@@ -173,8 +190,21 @@ export function useScreenshotAction({
     }
   }, [captureNode, mainForFile, selectedTweetIds, performCapture, screenshotFormat, tweets, setScreenshoting, setShowTranslationButton, setIsCapturingSelected, translationMode, toggleSelectionMode, syncTranslations, translations])
 
+  /** 默认行为：截图后下载保存。 */
+  const handleScreenshot = useCallback(
+    (useSelection = false) => runCapture(useSelection, 'download'),
+    [runCapture],
+  )
+
+  /** AC-PWA-007：截图后系统分享卡片图片（不支持则回退下载）。 */
+  const shareScreenshot = useCallback(
+    (useSelection = false) => runCapture(useSelection, 'share'),
+    [runCapture],
+  )
+
   return {
     handleScreenshot,
+    shareScreenshot,
     isCapturing,
   }
 }

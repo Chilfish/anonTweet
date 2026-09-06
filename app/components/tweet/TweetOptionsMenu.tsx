@@ -3,6 +3,7 @@ import {
   EyeIcon,
   EyeOff,
   FileText,
+  ImagePlus,
   LayoutGrid,
   MoreHorizontal,
   Rows4Icon,
@@ -21,9 +22,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
+import { useScreenshotAction } from '~/hooks/use-screenshot-action'
 import { useTweetOperations } from '~/hooks/use-tweet-operations'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
-import { useTranslationUIActions, useUIState } from '~/lib/stores/hooks'
+import {
+  useExcludeCommentsTweets,
+  useTranslationUIActions,
+  useUIState,
+} from '~/lib/stores/hooks'
 
 interface TweetOptionsMenuProps {
   disableActions: boolean
@@ -46,6 +52,12 @@ export function TweetOptionsMenu({ disableActions }: TweetOptionsMenuProps) {
     copyTweetText,
     shareTweet,
   } = useTweetOperations()
+
+  // AC-PWA-007：「分享截图」复用截图管线（整条线程），系统分享卡片图片、不支持回退下载
+  const excludeCommentsTweets = useExcludeCommentsTweets()
+  const { shareScreenshot, isCapturing: isSharingScreenshot } = useScreenshotAction({
+    tweets: excludeCommentsTweets,
+  })
 
   return (
     <>
@@ -73,6 +85,15 @@ export function TweetOptionsMenu({ disableActions }: TweetOptionsMenuProps) {
           <DropdownMenuItem onClick={shareTweet} disabled={disableActions} className="menu-item-class">
             <Share2 className="h-4 w-4 mr-2" />
             <span>分享</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
+            onClick={() => shareScreenshot(false)}
+            disabled={disableActions || isSharingScreenshot}
+            className="menu-item-class"
+          >
+            <ImagePlus className="h-4 w-4 mr-2" />
+            <span>{isSharingScreenshot ? '截图中...' : '分享截图'}</span>
           </DropdownMenuItem>
 
           <DropdownMenuCheckboxItem checked={isInlineMedia} onCheckedChange={setIsInlineMedia} className="menu-item-class">
