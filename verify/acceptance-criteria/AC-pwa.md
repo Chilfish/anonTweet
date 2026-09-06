@@ -1,14 +1,16 @@
 # PWA 安装 + Web Share Target 验收标准
 
-> 版本：1.2 | 日期：2026-09-06（v1.0 新增 AC-PWA-001/002/003；v1.1 增 AC-PWA-004/005/006：
+> 版本：1.3 | 日期：2026-09-06（v1.0 新增 AC-PWA-001/002/003；v1.1 增 AC-PWA-004/005/006：
 > iOS 安装外壳 head meta、manifest shortcuts + screenshots、Web Share 出向分享；
-> v1.2 增 AC-PWA-007：截图卡片以文件形式系统分享（Web Share Level 2 files））
+> v1.2 增 AC-PWA-007：截图卡片以文件形式系统分享（Web Share Level 2 files）；
+> v1.3 增 AC-PWA-008：已安装用户优雅版本更新（新版本探测 → 提示刷新，不自动打断））
 > 对应规范：[MDN share_target](https://developer.mozilla.org/en-US/docs/Web/Manifest/share_target)、
 > [MDN Web Share API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Share_API)、
 > [MDN Navigator.canShare](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/canShare)、
+> [MDN Service Worker 更新](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API/Using_Service_Workers)、
 > [MDN manifest screenshots/shortcuts](https://developer.mozilla.org/en-US/docs/Web/Manifest)
-> 关联 Verifier：`test/acceptance/ac-pwa.spec.ts`（AC-PWA-001/002/004/005 静态检查）+
-> `test/unit/share.spec.ts`（AC-PWA-003/006/007 语义）
+> 关联 Verifier：`test/acceptance/ac-pwa.spec.ts`（AC-PWA-001/002/004/005/008 静态检查）+
+> `test/unit/share.spec.ts`（AC-PWA-003/006/007 语义）+ `test/unit/pwa-update.spec.ts`（AC-PWA-008 语义）
 > 执行命令：`bun verify --module pwa`
 
 ---
@@ -107,6 +109,24 @@ service worker 为**极简网络透传**：不缓存、不做离线，仅用于�
 
 ---
 
+## AC-PWA-008：已安装用户优雅版本更新（探测 → 提示刷新，不自动打断）
+
+- **验证方法**：`bun verify --ac AC-PWA-008`（`test/acceptance/ac-pwa.spec.ts` 静态 +
+  `test/unit/pwa-update.spec.ts` 语义）
+- **背景**：SW 网络透传、零缓存（AC-PWA-002），无「旧 HTML 滞留」问题；已打开窗口跑旧 bundle 的
+  唯一解法是 reload。本 AC 不自动刷新（避免打断翻译/阅读），改为**检测到新版本后提示用户刷新**。
+- **Pass 条件**：
+  - `app/lib/pwa/update.ts`：可见/聚焦时**节流**调 `registration.update()`；监听 `updatefound` →
+    `reg.installing` 的 `statechange`；判定函数 `shouldOfferUpdate(hasController, state)` ——
+    **无 controller（首次访问/纯初次安装）不提示**；`installed/activating/activated` 且受控才提示
+    （`test/unit/pwa-update.spec.ts`）
+  - `app/components/pwa/UpdateNotice.tsx` 挂载于 root：提示横幅「发现新版本」+「立即刷新」按钮，
+    reload 前若存在 `waiting` worker 先 `postMessage({ type: 'SKIP_WAITING' })`；可「稍后」隐藏（单会话）
+  - `public/sw.js` 支持 `SKIP_WAITING` message（`self.skipWaiting()`），保留零缓存铁律
+  - root `<body>` 已挂载 `<UpdateNotice />`（静态断言，`test/acceptance/ac-pwa.spec.ts`）
+
+---
+
 ## 真机验证（沙箱无设备，提交后由部署者在真机执行）
 
 前置：https://anon-tweet.chilfish.top/ 已部署本特性并 HTTPS 可达。
@@ -125,6 +145,9 @@ service worker 为**极简网络透传**：不缓存、不做离线，仅用于�
    含「搜索推文」直达 `/search`。
 8. 分享截图：Android Chrome / 桌面 Chrome 打开推文或 IG → 三点菜单「分享截图」→ 系统分享面板出现
    卡片图片（可发送到聊天/相册）；在不支持 files 分享的环境（如 Firefox）应回退下载保存并提示。
+9. 版本更新：部署新版（改 sw.js 字节）后，保持一个已打开窗口不刷新 → 回到页面（可见/聚焦）应出现
+   「发现新版本」横幅 → 点「立即刷新」后页面加载新版本；首次访问不弹横幅。Android 安装应用在后台
+   被更新后，下次启动也应直接是新版本。
 
 > 图标为从 `public/icon.webp` 生成的方形 PNG（透明背景）。**图标美术 / `theme_color` /
 > maskable 变体属视觉项，最终观感需所有者验收微调**（本仓库历史惯例）；`apple-touch-icon.png`
@@ -135,7 +158,8 @@ service worker 为**极简网络透传**：不缓存、不做离线，仅用于�
 ## 变更约定
 
 新增/调整分享接收/出向语义或 PWA 基建时同步：`public/manifest.webmanifest`、`public/sw.js`、
-`app/root.tsx`（head meta）、`app/lib/share.ts`（入向 + 出向纯函数 + 图片文件分享辅助）、
+`app/root.tsx`（head meta + UpdateNotice 挂载）、`app/lib/share.ts`（入向 + 出向纯函数 + 图片文件
+分享辅助）、`app/lib/pwa/update.ts`（版本更新探测）、`app/components/pwa/UpdateNotice.tsx`、
 `app/components/tweet/TweetInputForm.tsx`、`app/hooks/use-tweet-operations.ts`、
 `app/hooks/use-ig-operations.ts`、`app/hooks/use-screenshot-action.ts`、
 `app/hooks/use-ig-screenshot-action.ts`、`app/components/tweet/TweetOptionsMenu.tsx`、
