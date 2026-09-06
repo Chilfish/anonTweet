@@ -60,7 +60,7 @@
 
 > 阶段计划之外、按需推进的增量项，完成后勾选。
 
-- [ ] [ux] 可安装 PWA + Web Share Target：系统分享 X/IG 链接直达推文/IG（方案：`docs/features/pwa/web-share-target.md`；AC：`verify/acceptance-criteria/AC-pwa.md`；域名：https://anon-tweet.chilfish.top/）— 进行中：manifest+极简网络透传 SW+首页 GET 接收已实现（AC-PWA-001/002/003 落地）；**待真机验证**（安装 + 系统分享，沙箱无设备）。视觉遗留：图标/theme_color/maskable 待所有者验收。
+- [ ] [ux] 可安装 PWA + Web Share Target：系统分享 X/IG 链接直达推文/IG（方案：`docs/features/pwa/web-share-target.md`；AC：`verify/acceptance-criteria/AC-pwa.md`；域名：https://anon-tweet.chilfish.top/）— ✅ 已实现（AC-PWA-001/002/003 落地）；✅ 能力盘点（`docs/features/pwa/capability-audit.md`，2026-09-06：线上与仓库同步、SW #6900 健康；候选优先级 P0= iOS meta + maskable 收尾，P1= share 外发（navigator.share）/manifest shortcuts+screenshots，P2= showSaveFilePicker / 最近查看 / 静态缓存需 ADR——待 owner 裁决）。**待真机验证**（安装 + 系统分享，沙箱无设备）。视觉遗留：图标/theme_color/maskable 待所有者验收。
 
 ## 不做清单（裁决为删除/延后，Apple 式减法）
 

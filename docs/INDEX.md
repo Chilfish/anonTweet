@@ -27,6 +27,7 @@ docs/
 ├── features/                   # 功能文档，按子系统组织
 │   ├── translation/            #   翻译子系统（translation.md · deepseek-ai-sdk.md）
 │   ├── instagram/              #   Instagram 集成（instagram-integration.md · ig-actions-integration.md）
+│   ├── pwa/                    #   PWA（web-share-target.md · capability-audit.md）
 │   ├── ai-vision/              #   AI 视觉描述（ai-vision.md）
 │   └── deploy/                 #   部署（deployment.md）
 ├── planning/                   # 规划与决策（architecture ADR · project-architecture · backlog）
@@ -54,6 +55,7 @@ docs/
 | **修改 Instagram 集成**                    | `features/instagram/instagram-integration.md` + `features/instagram/ig-actions-integration.md` | IG 5 阶段管线、操作区、DB 缓存、caption 翻译          |
 | **修改 AI Vision（看图说话/OCR）**         | `features/ai-vision/ai-vision.md` + `archive/ai-vision-plan.md`                                | 需求与上下文、已完成行动计划 + DR、AC-VISION          |
 | **部署 / 环境配置**                        | `features/deploy/deployment.md`                                                                | Vercel / 自托管、环境变量、缓存层                     |
+| **修改 PWA / SW / manifest / 安装体验**   | `features/pwa/web-share-target.md` + `features/pwa/capability-audit.md`                        | share_target 方案 + 能力盘点（线上核查、场景裁决、候选优先级） |
 | **修改 UI 组件、页面**                     | `engineering/code-style.md` + `ui-design/README.md`                                            | 组件拆分、命名、导入顺序、原生优先原则                |
 | **修改原子组件（Button/Input/Dialog 等）** | `ui-design/GENERAL.md` + `ui-design/select-cossui.md`                                          | shadcn/coss 组件使用规范                              |
 | **修改 Settings 页面**                     | `ui-design/SETTINGS.md`                                                                        | SettingsGroup / SettingsItem 强制规范                 |
