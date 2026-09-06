@@ -1,8 +1,12 @@
 # PWA 安装 + Web Share Target 验收标准
 
-> 版本：1.0 | 日期：2026-09-06（新增 AC-PWA-001/002/003）
-> 对应规范：[MDN share_target](https://developer.mozilla.org/en-US/docs/Web/Manifest/share_target)
-> 关联 Verifier：`test/acceptance/ac-pwa.spec.ts`（AC-PWA-001/002 静态检查）+ `test/unit/share.spec.ts`（AC-PWA-003 语义）
+> 版本：1.1 | 日期：2026-09-06（v1.0 新增 AC-PWA-001/002/003；v1.1 增 AC-PWA-004/005/006：
+> iOS 安装外壳 head meta、manifest shortcuts + screenshots、Web Share 出向分享）
+> 对应规范：[MDN share_target](https://developer.mozilla.org/en-US/docs/Web/Manifest/share_target)、
+> [MDN Web Share API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Share_API)、
+> [MDN manifest screenshots/shortcuts](https://developer.mozilla.org/en-US/docs/Web/Manifest)
+> 关联 Verifier：`test/acceptance/ac-pwa.spec.ts`（AC-PWA-001/002/004/005 静态检查）+
+> `test/unit/share.spec.ts`（AC-PWA-003/006 语义）
 > 执行命令：`bun verify --module pwa`
 
 ---
@@ -56,6 +60,35 @@ service worker 为**极简网络透传**：不缓存、不做离线，仅用于�
 
 ---
 
+## AC-PWA-004：iOS 安装外壳（root `<head>` 补 apple 系 meta 与图标）
+
+- **验证方法**：`bun verify --ac AC-PWA-004`（`test/acceptance/ac-pwa.spec.ts`）
+- **Pass 条件**：
+  - `app/root.tsx` 的 `<head>` 含 `<link rel="apple-touch-icon">`（`/icons/apple-touch-icon.png`）与
+    `apple-mobile-web-app-capable`、`apple-mobile-web-app-status-bar-style` meta（iOS Safari 忽略多数
+    manifest 字段，仅认这些 head 声明，缺则「添加到主屏幕」不进入全屏 App 形态）
+  - `public/icons/apple-touch-icon.png`（180x180，不透明底）实际存在
+
+## AC-PWA-005：manifest shortcuts + screenshots（安装对话框与快捷方式）
+
+- **验证方法**：`bun verify --ac AC-PWA-005`（`test/acceptance/ac-pwa.spec.ts`）
+- **Pass 条件**：
+  - `public/manifest.webmanifest` `shortcuts` 含指向 `/search` 的入口（name/url 合法、复用安装图标）
+  - `screenshots` 含 ≥2 条：`src` 指向真实存在文件、`sizes` 合法、`form_factor` 覆盖 `wide` 与 `narrow`、
+    `type` 为 `image/png`（Chrome 安装对话框展示；尺寸至少 320px 一边、真实 App 页面截图）
+
+## AC-PWA-006：Web Share 出向（把正在看的推文/IG 分享出去）
+
+- **验证方法**：`bun verify --ac AC-PWA-006`（`test/unit/share.spec.ts`）
+- **Pass 条件**（`app/lib/share.ts` 出向纯函数）：
+  - `buildTweetSharePayload`：`url` 取 `tweet.url` 或回退 `https://x.com/{screen_name}/status/{id_str}`；
+    `title` 含作者名与 handle；`text` 优先译文（entities 含 translation/aiTranslation）否则原文
+  - `buildIGSharePayload`：`url` = `post.url`；`title` 含 `@username`；`text` 优先 `captionTranslation`
+    否则 `description`
+  - `canNativeShare()`：无 `navigator.share`（Node / 旧浏览器）返回 `false`，供调用方降级复制链接
+
+---
+
 ## 真机验证（沙箱无设备，提交后由部署者在真机执行）
 
 前置：https://anon-tweet.chilfish.top/ 已部署本特性并 HTTPS 可达。
@@ -66,13 +99,23 @@ service worker 为**极简网络透传**：不缓存、不做离线，仅用于�
    系统分享面板应出现 **Anon Tweet**。
 3. 选中后应自动跳转并加载该推文 / IG 帖子（首页自动预填并提交，效果等同手动粘贴）。
 4. 分享一条非链接文本 → 应落在首页，输入框已填内容并显示「无法识别…」错误待手动改。
+5. iOS Safari 打开首页 → 「分享 → 添加到主屏幕」→ 以全屏独立形态打开（无浏览器栏）；
+   iOS 上 share_target 不受支持属已知限制（手动粘贴路径仍可用）。
+6. 出向分享：Android/iOS/桌面 Chrome 打开一条推文或 IG 帖子 → 三点菜单「分享」→ 系统分享面板出现
+   文本 + 原文链接；无 `navigator.share` 的环境（或取消分享）不报错，回退复制原文链接并提示。
+7. 安装对话框（Android Chrome 安装应用时）应展示 `screenshots` 中的真实页面截图；长按图标快捷方式
+   含「搜索推文」直达 `/search`。
 
 > 图标为从 `public/icon.webp` 生成的方形 PNG（透明背景）。**图标美术 / `theme_color` /
-> maskable 变体属视觉项，最终观感需所有者验收微调**（本仓库历史惯例）。
+> maskable 变体属视觉项，最终观感需所有者验收微调**（本仓库历史惯例）；`apple-touch-icon.png`
+> 为白底 180x180（iOS 要求不透明），生成命令见开发日志，观感不喜可换底色重生成。
 
 ---
 
 ## 变更约定
 
-新增/调整分享接收语义或 PWA 基建时同步：`public/manifest.webmanifest`、`public/sw.js`、
-`app/lib/share.ts`、`app/components/tweet/TweetInputForm.tsx` 与对应 spec。
+新增/调整分享接收/出向语义或 PWA 基建时同步：`public/manifest.webmanifest`、`public/sw.js`、
+`app/root.tsx`（head meta）、`app/lib/share.ts`（入向 + 出向纯函数）、
+`app/components/tweet/TweetInputForm.tsx`、`app/hooks/use-tweet-operations.ts`、
+`app/hooks/use-ig-operations.ts`、`app/components/tweet/TweetOptionsMenu.tsx`、
+`app/components/ins/IGOptionsMenu.tsx` 与对应 spec。
