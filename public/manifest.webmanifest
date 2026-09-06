@@ -26,6 +26,37 @@
       "purpose": "any"
     }
   ],
+  "shortcuts": [
+    {
+      "name": "搜索推文",
+      "short_name": "搜索",
+      "description": "按关键词或 X 高级语法搜索推文",
+      "url": "/search",
+      "icons": [
+        {
+          "src": "/icons/pwa-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/pwa-home-wide.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "首页 — 匿名浏览 Twitter/X 推文与 Instagram 帖子"
+    },
+    {
+      "src": "/screenshots/pwa-home-narrow.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "首页（移动端）"
+    }
+  ],
   "share_target": {
     "action": "/",
     "method": "GET",

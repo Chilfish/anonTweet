@@ -49,6 +49,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <link rel="icon" type="image/jpeg" href="/icon.webp" />
+        {/* iOS PWA 外壳：Safari 忽略多数 manifest 字段，靠这些 head 声明进入全屏 App 形态（AC-PWA-004） */}
+        <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="AnonTweet" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#1D9BF0" />
         <title>Anon Tweet — 匿名推文浏览器</title>
