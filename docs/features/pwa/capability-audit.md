@@ -49,9 +49,9 @@ beforeinstallprompt、`onLine` 处理。
 | # | 能力（来源清单） | 现状 | 裁决 | 理由 / 备注 |
 | --- | --- | --- | --- | --- |
 | 1 | A2HS 可安装 | ✅ 已实现 | 收尾 | standalone/图标/SW/theme-color 齐备；**真机安装验证仍待 owner**（backlog） |
-| 2 | iOS PWA 外壳元数据 | ❌ 缺 | **P0 做** | iOS Safari 忽略多数 manifest，认 `<head>` meta/图标：补 `apple-touch-icon` + `apple-mobile-web-app-capable` + `apple-mobile-web-app-status-bar-style`——与 ui-design「iOS PWA 原生感」目标直接相关；纯 `<head>` 小改、零风险 |
+| 2 | iOS PWA 外壳元数据 | ✅ 已实现（2026-09-06） | ✅ 已做 | AC-PWA-004：root `<head>` 补 `apple-touch-icon`（白底 180，由 pwa-512 生成）+ `apple-mobile-web-app-capable/status-bar-style/title`——观感可换底色重生成（视觉项） |
 | 3 | maskable 图标 | ❌ 缺 | P0（资产，待 owner） | Android 会把图标裁成圆/自适应，现方形透明 any 图标会被裁难观；需生成含 80% 安全区的 maskable PNG 并声明 `purpose: "any maskable"`；backlog 已记「视觉遗留」 |
-| 4 | manifest `screenshots` / `shortcuts` | ❌ 缺 | P1 候选 | Chrome 安装对话框更丰富 + 右键/长按快捷方式直达 `/search`；素材可复用 `public/images/ui-*.png` |
+| 4 | manifest `screenshots` / `shortcuts` | ✅ 已实现（2026-09-06） | ✅ 已做 | AC-PWA-005：shortcuts（搜索推文 → `/search`）+ screenshots（wide 1280x800 / narrow 390x844，Playwright 对线上首页真实截图，见 `public/screenshots/`） |
 | 5 | `display_override` / WCO | ❌ | 不做（延后） | 桌面目标 macOS 原生感、WCO 仅 Chromium 桌面有意义，收益低 |
 | 6 | 离线 App 内容 / SW 缓存 / IndexedDB 内容缓存 | ❌ 有意为零 | **不做** | 匿名只读「即看即取」无离线必读诉求；数据来自私有 API + AI，回源铁律（AC-PWA-002）与 serverless 导航冲突；推文无客户端草稿可缓存 |
 | 7 | 静态资源网络优先缓存（弱网壳加速） | ❌ | 延后（需 ADR） | 有微弱价值（hash 静态 JS/CSS precache），但需修订 AC-PWA-002 铁律 + 更新/rollout 策略评审；**现阶段不动** |
@@ -64,7 +64,7 @@ beforeinstallprompt、`onLine` 处理。
 | 14 | File System Access（另存为） | ❌ | P2 候选 | 桌面导出截图/媒体的「保存到…」增强；现 `a[download]` 已可用，价值中低 |
 | 15 | Share Target 接收 | ✅ 已实现 | 真机验证 | 移动端系统分享 → 直达；**待 owner 真机验证**（AC-pwa.md「真机验证」清单） |
 | 16 | Share Target L2（POST 收文件/图） | ❌ | 不做 | 收图后无下游管线（无反向检索/导入） |
-| 17 | **对外分享 `navigator.share`** | ❌ 无 | **P1 候选（推荐）** | 现只有「收」没有「出」：推文/IG 详情 OptionsMenu 加「分享」（title+text+url），与 share_target 成对闭环「进/出」；无 `navigator.share` 环境降级为复制链接。安装用户从「看」到「传」的天然下一步 |
+| 17 | **对外分享 `navigator.share`** | ✅ 已实现（2026-09-06） | ✅ 已做 | AC-PWA-006：推文/IG OptionsMenu 加「分享」（title+text+url，译文优先）；无 `navigator.share` 环境降级复制原文链接——与 share_target 成对闭环「进/出」 |
 | 18 | BT / USB / Serial / Contacts / WebRTC | ❌ | 不做 | 无硬件/音视频/通讯录业务场景 |
 | 19 | Screen Wake Lock | ❌ | 不做 | 截图/翻译/阅读均秒级，无常亮诉求 |
 | 20 | Clipboard | ✅ 已用 | — | 写文本/Markdown/词典；无读剪贴板场景 |
@@ -72,22 +72,19 @@ beforeinstallprompt、`onLine` 处理。
 | 22 | Media Session | ❌ | 延后 | `media.tsx` 有 `<video>`（preload=metadata）；仅解锁播放时锁屏控制有价值，收益低 |
 | 23 | 「最近查看 / 本地历史」 | ❌（弱 PWA 关联） | P2 候选 | 无账号下解决「回访同一推文/IG」痛点：localStorage 记最近 N 条 → 首页快捷入口；与词典同思路，成本低 |
 
-## 4. 建议下一步（待 owner 裁决）
+## 4. 实施与下一步（2026-09-06 owner 选定 3 项并已落地）
 
-**P0（收尾，可与真机验证同批）**
+**✅ 已落地（AC-pwa.md v1.1：AC-PWA-004/005/006，门禁 typecheck/lint/test 356/verify pwa 全绿）**
 
-1. root `<head>` 补 iOS meta + `apple-touch-icon`（引 `/icons/pwa-192x192.png` 或新 180 图标）；
-2. maskable 图标资产 + manifest `icons[].purpose` 扩展（视觉项，owner 出图）；
-3. owner 真机验证安装 + 系统分享（backlog 待办收口）。
+1. iOS 安装外壳：root `<head>` apple-touch-icon + apple-mobile-web-app-* meta（AC-PWA-004）；
+2. manifest shortcuts（搜索推文 → `/search`）+ screenshots（真实 wide/narrow 首页截图）（AC-PWA-005）；
+3. 分享外发：推文/IG OptionsMenu「分享」= navigator.share，无 API 降级复制原文链接（AC-PWA-006）。
 
-**P1（新体验）**
+**剩余（未做 / 待 owner）**
 
-4. 「分享」外发（Web Share API + 复制链接降级）——与现有 share_target 对称；
-5. manifest `shortcuts` + `screenshots`（安装对话框增强）。
-
-**P2（可选 / 延后）**
-
-6. `showSaveFilePicker` 桌面导出另存为；7. 「最近查看」本地历史；8. 静态资源缓存（先 ADR）。
+- 真机验证收口：安装 + 系统分享进出 + iOS 添加主屏幕 + 安装对话框截图（backlog 待办）；
+- maskable 图标（P0 视觉资产，owner 出图）；`apple-touch-icon` 底色观感微调可选；
+- P2 候选：`showSaveFilePicker` 桌面导出另存为；「最近查看」本地历史；静态资源缓存（先 ADR 修订 AC-PWA-002）。
 
 **不做（明列，理由见 §3）**：离线 App 内容 / IndexedDB 内容缓存 / Background Sync / Periodic Sync /
 Web Push / Badging / Payment / BT-USB-Serial / Wake Lock / 分享收文件。
