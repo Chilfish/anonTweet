@@ -101,7 +101,7 @@ export default function IGPostPage() {
   const post = posts?.[0] ?? null
 
   // IG 操作 hook
-  const { downloadMedia, copyText, copyMarkdown } = useIGOperations(post)
+  const { downloadMedia, copyText, copyMarkdown, share } = useIGOperations(post)
 
   // 截图 hook
   const { containerRef, handleScreenshot, isCapturing } = useIGScreenshotAction({ post })
@@ -134,6 +134,7 @@ export default function IGPostPage() {
     isCapturing,
     onScreenshot: handleScreenshot,
     onDownload: downloadMedia,
+    onShare: share,
     onCopyText: copyText,
     onCopyMarkdown: copyMarkdown,
   }

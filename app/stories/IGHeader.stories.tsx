@@ -29,6 +29,7 @@ const actions = {
   onTranslationModeChange: () => {},
   onScreenshot: () => {},
   onDownload: () => {},
+  onShare: () => {},
   onCopyText: () => {},
   onCopyMarkdown: () => {},
 }

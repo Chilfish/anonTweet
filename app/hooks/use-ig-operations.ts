@@ -2,6 +2,7 @@ import type { IGPost } from '~/types'
 import { useCallback } from 'react'
 import { downloadFiles } from '~/lib/downloader'
 import { extractIGDownloadItems } from '~/lib/igDownloader'
+import { buildIGSharePayload, shareOut } from '~/lib/share'
 import { toast } from '~/lib/utils'
 
 /**
@@ -80,9 +81,25 @@ export function useIGOperations(post: IGPost | null) {
     }
   }, [post])
 
+  /** 出向分享（AC-PWA-006）：系统分享 IG 帖子；无 navigator.share 时降级复制原文链接。 */
+  const share = useCallback(async () => {
+    if (!post)
+      return
+
+    const result = await shareOut(buildIGSharePayload(post))
+    if (result === 'shared' || result === 'aborted')
+      return
+    if (result === 'copied') {
+      toast.success('已复制原文链接', { description: '当前浏览器不支持系统分享，已改为复制链接' })
+      return
+    }
+    toast.error('分享失败', { description: '请重试或改用「复制正文文本」' })
+  }, [post])
+
   return {
     downloadMedia,
     copyText,
     copyMarkdown,
+    share,
   }
 }

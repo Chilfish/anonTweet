@@ -12,6 +12,7 @@ interface IGHeaderProps {
   isCapturing: boolean
   onScreenshot: () => void
   onDownload: () => void
+  onShare: () => void
   onCopyText: () => void
   onCopyMarkdown: () => void
 }
@@ -31,6 +32,7 @@ export function IGHeader({
   isCapturing,
   onScreenshot,
   onDownload,
+  onShare,
   onCopyText,
   onCopyMarkdown,
 }: IGHeaderProps) {
@@ -57,6 +59,7 @@ export function IGHeader({
         <IGOptionsMenu
           disableActions={!hasPost}
           onDownload={onDownload}
+          onShare={onShare}
           onCopyText={onCopyText}
           onCopyMarkdown={onCopyMarkdown}
         />

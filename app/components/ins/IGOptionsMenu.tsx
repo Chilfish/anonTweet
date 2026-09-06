@@ -4,6 +4,7 @@ import {
   FileText,
   MoreHorizontal,
   Settings,
+  Share2,
 } from 'lucide-react'
 import { useState } from 'react'
 import { SettingsPanel } from '~/components/settings/SettingsPanel'
@@ -19,6 +20,7 @@ import {
 interface IGOptionsMenuProps {
   disableActions: boolean
   onDownload: () => void
+  onShare: () => void
   onCopyText: () => void
   onCopyMarkdown: () => void
 }
@@ -26,11 +28,12 @@ interface IGOptionsMenuProps {
 /**
  * Instagram 三点菜单。
  *
- * 收纳低频操作：设置、下载媒体、复制文本、复制 Markdown。
+ * 收纳低频操作：设置、下载媒体、分享、复制文本、复制 Markdown。
  */
 export function IGOptionsMenu({
   disableActions,
   onDownload,
+  onShare,
   onCopyText,
   onCopyMarkdown,
 }: IGOptionsMenuProps) {
@@ -73,6 +76,15 @@ export function IGOptionsMenu({
           >
             <Download className="h-4 w-4 mr-2" />
             <span>下载媒体</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
+            onClick={onShare}
+            disabled={disableActions}
+            className="menu-item-class"
+          >
+            <Share2 className="h-4 w-4 mr-2" />
+            <span>分享</span>
           </DropdownMenuItem>
 
           <DropdownMenuItem

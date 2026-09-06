@@ -7,6 +7,7 @@ import {
   MoreHorizontal,
   Rows4Icon,
   Settings,
+  Share2,
 } from 'lucide-react'
 import { useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
@@ -43,6 +44,7 @@ export function TweetOptionsMenu({ disableActions }: TweetOptionsMenuProps) {
     downloadMedia,
     copyMarkdown,
     copyTweetText,
+    shareTweet,
   } = useTweetOperations()
 
   return (
@@ -66,6 +68,11 @@ export function TweetOptionsMenu({ disableActions }: TweetOptionsMenuProps) {
           <DropdownMenuItem onClick={downloadMedia} disabled={disableActions} className="menu-item-class">
             <Download className="h-4 w-4 mr-2" />
             <span>下载媒体</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem onClick={shareTweet} disabled={disableActions} className="menu-item-class">
+            <Share2 className="h-4 w-4 mr-2" />
+            <span>分享</span>
           </DropdownMenuItem>
 
           <DropdownMenuCheckboxItem checked={isInlineMedia} onCheckedChange={setIsInlineMedia} className="menu-item-class">

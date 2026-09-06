@@ -47,6 +47,7 @@ export const OptionsEnabled: Story = {
     <IGOptionsMenu
       disableActions={false}
       onDownload={() => {}}
+      onShare={() => {}}
       onCopyText={() => {}}
       onCopyMarkdown={() => {}}
     />
@@ -58,6 +59,7 @@ export const OptionsDisabled: Story = {
     <IGOptionsMenu
       disableActions
       onDownload={() => {}}
+      onShare={() => {}}
       onCopyText={() => {}}
       onCopyMarkdown={() => {}}
     />

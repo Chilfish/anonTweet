@@ -1,14 +1,48 @@
+import type { EnrichedTweet, IGPost } from '~/types'
 import { describe, expect, it } from 'vitest'
 import {
+  buildIGSharePayload,
+  buildTweetSharePayload,
+  canNativeShare,
   hasSharedContent,
   pickSharedInput,
   resolveShareTarget,
 } from '~/lib/share'
 
 /**
- * AC-PWA-003 单元验证：Web Share Target 接收决策（app/lib/share.ts）与首页
- * TweetInputForm 手动提交同语义——可识别 X/IG 链接 → 自动跳转目标；不可识别 → 留框报错。
+ * AC-PWA-003/006 单元验证：
+ * - AC-PWA-003：Web Share Target 接收决策（app/lib/share.ts）与首页 TweetInputForm
+ *   手动提交同语义——可识别 X/IG 链接 → 自动跳转目标；不可识别 → 留框报错。
+ * - AC-PWA-006：出向分享载荷（buildTweetSharePayload / buildIGSharePayload）与
+ *   原生分享能力判定（canNativeShare，无 navigator 的环境返回 false 供降级复制链接）。
  */
+
+function mkTweet(overrides: Record<string, unknown> = {}): EnrichedTweet {
+  return {
+    id_str: '1234567890',
+    url: 'https://x.com/elonmusk/status/1234567890',
+    text: 'Hello world',
+    user: { name: 'Elon Musk', screen_name: 'elonmusk' },
+    entities: [{ type: 'text', index: 0, text: 'Hello world' }],
+    ...overrides,
+  } as unknown as EnrichedTweet
+}
+
+function mkIGPost(overrides: Record<string, unknown> = {}): IGPost {
+  return {
+    id: 'AbCdEf',
+    post_id: '987654321',
+    url: 'https://www.instagram.com/p/AbCdEf/',
+    username: 'nasa',
+    fullname: 'NASA',
+    description: 'Look at this view',
+    tags: [],
+    likes: 10,
+    type: 'post',
+    media: [],
+    ...overrides,
+  } as unknown as IGPost
+}
 describe('AC-PWA-003: share target receive decision', () => {
   describe('pickSharedInput', () => {
     it('url 优先于 text / title', () => {
@@ -83,6 +117,59 @@ describe('AC-PWA-003: share target receive decision', () => {
 
     it('明显非 URL 的普通文本不误判为推文 id', () => {
       expect(resolveShareTarget('abc def')).toEqual({ ok: false, error: expect.any(String) })
+    })
+  })
+})
+
+describe('AC-PWA-006: share-out payload（Web Share 出向）', () => {
+  describe('buildTweetSharePayload', () => {
+    it('url 取完整链接，title 含作者名与 handle，text 为原文', () => {
+      const p = buildTweetSharePayload(mkTweet())
+      expect(p.url).toBe('https://x.com/elonmusk/status/1234567890')
+      expect(p.title).toContain('Elon Musk')
+      expect(p.title).toContain('@elonmusk')
+      expect(p.text).toContain('Hello world')
+    })
+
+    it('无 url 时回退 x.com 规范链接', () => {
+      const p = buildTweetSharePayload(mkTweet({ url: '' }))
+      expect(p.url).toBe('https://x.com/elonmusk/status/1234567890')
+    })
+
+    it('entities 含翻译时 text 译文优先（原文不翻译段仍保留）', () => {
+      const p = buildTweetSharePayload(mkTweet({
+        entities: [
+          { type: 'text', index: 0, text: 'Hello', translation: '你好' },
+          { type: 'text', index: 1, text: ' world' },
+        ],
+      }))
+      expect(p.text).toContain('你好')
+    })
+
+    it('无任何翻译时 text 为原文', () => {
+      const p = buildTweetSharePayload(mkTweet({ entities: [{ type: 'text', index: 0, text: 'Hello world' }] }))
+      expect(p.text).toBe('Hello world')
+    })
+  })
+
+  describe('buildIGSharePayload', () => {
+    it('url/title 来自帖子，text 优先 captionTranslation', () => {
+      const p = buildIGSharePayload(mkIGPost({ captionTranslation: '看这个景色' }))
+      expect(p.url).toBe('https://www.instagram.com/p/AbCdEf/')
+      expect(p.title).toContain('NASA')
+      expect(p.title).toContain('@nasa')
+      expect(p.text).toBe('看这个景色')
+    })
+
+    it('无 captionTranslation 时回退 description 原文', () => {
+      const p = buildIGSharePayload(mkIGPost())
+      expect(p.text).toBe('Look at this view')
+    })
+  })
+
+  describe('canNativeShare', () => {
+    it('node（无 navigator.share）返回 false，供调用方降级复制链接', () => {
+      expect(canNativeShare()).toBe(false)
     })
   })
 })

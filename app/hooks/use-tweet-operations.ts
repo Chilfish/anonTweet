@@ -4,6 +4,7 @@ import { extractDownloadItemsFromTweets } from '~/components/translation/Downloa
 import { downloadFiles } from '~/lib/downloader'
 import { fetcher } from '~/lib/fetcher'
 import { generateMarkdownFromTweets, generateText } from '~/lib/markdown'
+import { buildTweetSharePayload, shareOut } from '~/lib/share'
 import { useCommentIds, useMainTweet, useTranslationActions, useTranslations, useTweets } from '~/lib/stores/hooks'
 import { materializeTweetsWithManualTranslations } from '~/lib/translation/materialize'
 import { toast } from '~/lib/utils'
@@ -155,12 +156,35 @@ export function useTweetOperations(data?: TweetOperationsData) {
     }
   }
 
+  /** 出向分享（AC-PWA-006）：系统分享推文；无 navigator.share 时降级复制原文链接。 */
+  const shareTweet = async () => {
+    if (tweets.length === 0) {
+      toast.info('暂无可分享的推文')
+      return
+    }
+
+    const viewTweets = materializeTweetsWithManualTranslations(tweets, translations)
+    const tweet = viewTweets[0]
+    if (!tweet)
+      return
+
+    const result = await shareOut(buildTweetSharePayload(tweet))
+    if (result === 'shared' || result === 'aborted')
+      return
+    if (result === 'copied') {
+      toast.success('已复制原文链接', { description: '当前浏览器不支持系统分享，已改为复制链接' })
+      return
+    }
+    toast.error('分享失败', { description: '请重试或改用「复制正文文本」' })
+  }
+
   return {
     isLoadingComments,
     loadComments,
     loadMoreComments,
     hasMoreComments: !!repliesCursor,
     copyTweetText,
+    shareTweet,
     downloadMedia,
     copyMarkdown,
     hasTweets: tweets.length > 0,
