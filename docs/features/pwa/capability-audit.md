@@ -72,15 +72,18 @@ beforeinstallprompt、`onLine` 处理。
 | 22 | Media Session | ❌ | 延后 | `media.tsx` 有 `<video>`（preload=metadata）；仅解锁播放时锁屏控制有价值，收益低 |
 | 23 | 「最近查看 / 本地历史」 | ❌（弱 PWA 关联） | P2 候选 | 无账号下解决「回访同一推文/IG」痛点：localStorage 记最近 N 条 → 首页快捷入口；与词典同思路，成本低 |
 
-## 4. 实施与下一步（2026-09-06 owner 选定并落地 4 项）
+## 4. 实施与下一步（2026-09-06 owner 选定并落地 5 项）
 
-**✅ 已落地（AC-pwa.md v1.2：AC-PWA-004~007，门禁 typecheck/lint/test 360/verify pwa 全绿）**
+**✅ 已落地（AC-pwa.md v1.3：AC-PWA-004~008，门禁 typecheck/lint/test 366/verify pwa 44 全绿）**
 
 1. iOS 安装外壳：root `<head>` apple-touch-icon + apple-mobile-web-app-* meta（AC-PWA-004）；
 2. manifest shortcuts（搜索推文 → `/search`）+ screenshots（真实 wide/narrow 首页截图）（AC-PWA-005）；
 3. 分享外发：推文/IG OptionsMenu「分享」= navigator.share，无 API 降级复制原文链接（AC-PWA-006）；
 4. 分享截图：推文/IG OptionsMenu「分享截图」把截图卡片转 File 走 Web Share L2（navigator.share files），
-   不支持环境回退下载保存（AC-PWA-007；owner 追问「分享能否带图」衍生的场景）。
+   不支持环境回退下载保存（AC-PWA-007；owner 追问「分享能否带图」衍生的场景）；
+5. 优雅版本更新：`lib/pwa/update.ts` 节流探测新 SW + root 挂载「发现新版本·立即刷新」横幅，
+   用户点击才 reload（不打断编辑/阅读），首次访问不提示（AC-PWA-008；owner 经典问题「已安装用户
+   如何版本更新」落地，见 devlog）。
 
 **剩余（未做 / 待 owner）**
 
