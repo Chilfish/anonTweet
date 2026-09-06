@@ -1,6 +1,6 @@
 # Backlog（任务清单）
 
-**项目**: anonTweet | **最后更新**: 2026-08-31
+**项目**: anonTweet | **最后更新**: 2026-09-06
 
 > 未决任务跨阶段收拢。规划下一个阶段时从这里选任务；完成后勾选并（如为阶段计划）`git mv` 到 `docs/archive/`。
 > 历史完成记录见 `docs/archive/TODO.md`。
@@ -42,7 +42,7 @@
 - [x] [refactor] AC-CARD-005 换真渲染测试 + **jetfuel 回退渲染测试**（裁决：评审 P1-1/P1-3；文件：`test/acceptance/card-render.spec.ts`、`app/stories/TweetCard.stories.tsx`；工作量：1-1.5 人日）— ✅ 完成（2026-08-19）：`card-render.spec.ts` AC-CARD-005（trending 渲染）/006（无 trending 回退普通卡）/007（缺图不塌陷）/008（无卡空渲染）；AC-card.md v1.1 验证方法如实改为 renderToString；源码级锁定降级为 AC-CARD-009 辅助检查
 - [ ] [ux] AI 端点 stream 化（原 L26 剩余；文件：`app/routes/api/ai/ai-translation.ts`、客户端 hooks；工作量：3-5 人日 / 风险：高）— 与「编辑器兼容 stream」L25 合并，阶段三执行
 - [x] [ux] Twitter 推文搜索（方案：`docs/features/tweet/search.md`；文件：`app/lib/rettiwt-api/collections/Groups.ts`、`app/lib/react-tweet/utils/get-tweet.ts`、`app/routes/api/tweet/search.ts`、`app/routes/search.tsx`、`app/components/layout/Layout.tsx`；工作量：1-2 人日 / 风险：中，guest 搜索可能受限）— ✅ 完成（2026-08-31，分支 `feat/tweet-search`）：`TWEET_SEARCH` 补 guest 授权组；`parseSearchTimeline`/`fetchSearchTweets` 数据层；`GET /api/tweet/search` BFF（返回 `{ tweets, nextCursor }`，cursor 分页）；`/search` 页面（高级语法快捷插入 + 热门/最新切换 + 加载更多）+ footer 入口；AC-TWEET-009/010 落地；门禁全绿（test 294、verify 301+5skip、lint 0 error）
-- [x] [refactor] llms.txt + openapi.json 接入（文件：`app/lib/llms.ts`、`app/routes/llms.txt.ts`、`app/routes/openapi.json.ts`、`app/routes.ts`；工作量：0.5 人日 / 风险：低）— ✅ 完成（2026-08-31）：按 [llmstxt.org](https://llmstxt.org/) 规范新增 GET /llms.txt（H1 → blockquote → H2 分区 → 子弹链接列表，纯 markdown）+ GET /openapi.json（OpenAPI 3.1 全量 BFF 规范，覆盖 api/* 全部 16 条路径）；AC-LLMS-001/002 落地（ est/unit/llms.spec.ts），门禁全绿
+- [x] [refactor] llms.txt + openapi.json 接入（文件：`app/lib/llms.ts`、`app/routes/llms.txt.ts`、`app/routes/openapi.json.ts`、`app/routes.ts`；工作量：0.5 人日 / 风险：低）— ✅ 完成（2026-08-31）：按 [llmstxt.org](https://llmstxt.org/) 规范新增 GET /llms.txt（H1 → blockquote → H2 分区 → 子弹链接列表，纯 markdown）+ GET /openapi.json（OpenAPI 3.1 全量 BFF 规范，覆盖 api/\* 全部 16 条路径）；AC-LLMS-001/002 落地（ est/unit/llms.spec.ts），门禁全绿
 - [x] [ux] 用户时间线接口改开关控制（文件：`app/routes/api/user/timeline.ts`、`app/lib/env.server.ts`、`app/lib/llms.ts`、`AC-llms.md`；工作量：0.5 人日 / 风险：低）— ✅ 完成（2026-08-31）：`ENABLE_TIMELINE` 开关（**默认关闭**，固定 429 防滥用；自部署实例设 true + 自己的 TWEET_KEYS 启用）+ README/INDEX/project-architecture §2.4/SKILL.md 文档标注 + OpenAPI 补 200/429/500 + 单测
 
 ### 阶段三（7-8 周+）护城河：Vision 闭环、流式编辑器、Story 接入、缓存规模化
@@ -55,6 +55,12 @@
 - [ ] [refactor] 三层缓存规模化与命中率指标（文件：`app/lib/service/getTweet.server.ts`；前置：阶段二可观测性）
 - [x] [refactor] Tweet 卡片 jetfuel 全量数据接入（用户抓包 2026-08-19 确认：`TweetRequests.details` 换 queryId `GZsN2Pc4knAoit6pXa4HSA` + 对齐官方 features 即取到 `jetfuel_attachment`，内含 trending-card 标题/描述/日期/分类/头像/posts 数/图，官方 HTML 同源；文件：`app/lib/rettiwt-api/requests/Tweet.ts`、`app/lib/react-tweet/utils/parseTweet.ts`（payload 长度前缀字符串提取）、`app/components/tweet/TweetCard.tsx`（渲染扩展）；工作量：1-2 人日 / 风险：中，私有二进制格式需 fixture 维护；fixture 存档 `tmp/raw-tweet-2089577916694942006-jetfuel.json`；详见 `docs/development-log/2026-08-18.md` 补充调查）— ✅ 完成（2026-08-19，分支 `feat/trending-card`，方案 `docs/features/tweet/trending-card.md`，AC `verify/acceptance-criteria/AC-card.md` AC-CARD-001~005）：最小触发 = 仅翻 `responsive_web_jetfuel_frame: true`（无需换 queryId，但需清掉 details() 内残留的重复 `false` 键）；`decodeJetfuelPayload`/`parseTrendingCard` 双策略解析（结构扫描 + 语义化正则）；`mapTwitterCard` 合并 + `jetfuel.parse.fallback` 回退日志；`TweetLinkCard` Trending 变体还原官方样式（aspect-[18/10] 渐变覆盖层）；门禁全绿（typecheck / lint / test 264 / verify 全量）
 - [x] [refactor] unified_card 解析兼容多组件布局（`details` / `media_with_details_horizontal`；文件：`app/lib/react-tweet/utils/parseTweet.ts`、`test/unit/parseTweet.spec.ts`；工作量：0.5 人日 / 风险：低）— ✅ 完成（2026-08-18）：`parseUnifiedCard` 遍历 `component_objects`，兼容 `topic_detail` 布局（Trending/topic 卡），domain 优先取 `url_data.vanity`；详见 `docs/development-log/2026-08-18.md`
+
+## 独立增量（2026-09-06）
+
+> 阶段计划之外、按需推进的增量项，完成后勾选。
+
+- [ ] [ux] 可安装 PWA + Web Share Target：系统分享 X/IG 链接直达推文/IG（方案：`docs/features/pwa/web-share-target.md`；AC：`verify/acceptance-criteria/AC-pwa.md`；域名：https://anon-tweet.chilfish.top/）— 进行中：manifest+极简网络透传 SW+首页 GET 接收已实现（AC-PWA-001/002/003 落地）；**待真机验证**（安装 + 系统分享，沙箱无设备）。视觉遗留：图标/theme_color/maskable 待所有者验收。
 
 ## 不做清单（裁决为删除/延后，Apple 式减法）
 
