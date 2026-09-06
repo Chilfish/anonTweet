@@ -1,0 +1,39 @@
+{
+  "name": "Anon Tweet — 匿名推文 / Instagram 浏览器",
+  "short_name": "AnonTweet",
+  "description": "匿名浏览 Twitter/X 推文与 Instagram 帖子，支持 AI 翻译与卡片导出，无需登录。",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f5f9fb",
+  "theme_color": "#1D9BF0",
+  "lang": "zh",
+  "dir": "ltr",
+  "categories": ["social", "news"],
+  "icons": [
+    {
+      "src": "/icons/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
+}

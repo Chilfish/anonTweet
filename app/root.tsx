@@ -1,5 +1,6 @@
 import type { Route } from './+types/root'
 import { AlertTriangle, Loader2 } from 'lucide-react'
+import { useEffect } from 'react'
 import {
   isRouteErrorResponse,
   Link,
@@ -15,6 +16,7 @@ import stylesheet from './app.css?url'
 import { ProgressBar } from './components/progress-bar'
 import { Button } from './components/ui/button'
 import { useNonce } from './hooks/use-nonce'
+import { registerServiceWorker } from './lib/pwa/register'
 import './fonts.css'
 
 export const links: Route.LinksFunction = () => [
@@ -32,6 +34,7 @@ export const links: Route.LinksFunction = () => [
     rel: 'stylesheet',
     href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap',
   },
+  { rel: 'manifest', href: '/manifest.webmanifest' },
 ]
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -47,6 +50,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta charSet="utf-8" />
         <link rel="icon" type="image/jpeg" href="/icon.webp" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#1D9BF0" />
         <title>Anon Tweet — 匿名推文浏览器</title>
         <meta name="description" content="Anon Tweet — 第三方 Twitter/X 推文浏览器，支持 AI 翻译、推文卡片导出、匿名浏览。无需登录即可查看推文内容与评论区。" />
         <meta name="robots" content="index, follow" />
@@ -78,6 +82,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App(_props: Route.ComponentProps) {
+  // 生产构建下注册极简 service worker（网络透传，满足可安装判定；见 app/lib/pwa/register.ts）
+  useEffect(() => {
+    registerServiceWorker()
+  }, [])
+
   return (
     <ThemeProvider>
       <Outlet />
