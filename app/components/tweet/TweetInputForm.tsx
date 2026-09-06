@@ -1,13 +1,17 @@
 import type { FormEvent } from 'react'
 import { AlertCircle, Hash } from 'lucide-react'
-import { useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
-import { detectInputType, extractIGId, extractTweetId } from '~/lib/utils'
+import {
+  hasSharedContent,
+  pickSharedInput,
+  resolveShareTarget,
+} from '~/lib/share'
 
 function FormatListItem({ children }: { children: React.ReactNode }) {
   return (
@@ -22,39 +26,52 @@ export function TweetInputForm() {
   const [input, setInput] = useState('')
   const [error, setError] = useState('')
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+
+  /** 提交原始内容（与「手动粘贴点查看」走同一套解析/跳转，见 app/lib/share.ts）。 */
+  const submitRaw = (raw: string) => {
+    setError('')
+    const result = resolveShareTarget(raw)
+    if (result.ok) {
+      navigate(result.to)
+    }
+    else {
+      setError(result.error)
+    }
+  }
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
-    setError('')
+    submitRaw(input)
+  }
 
-    const trimmedInput = input.trim()
-    if (!trimmedInput) {
-      setError('请输入 Tweet 或 Instagram 的 URL。')
+  // 一次性处理系统分享落地（PWA share_target，action="/" 携带 title/text/url）：
+  // 把分享内容填进输入框后照常 submitRaw——可识别链接自动跳转，不可识别留框报错待手动改。
+  // ref 守卫：仅首次且仅在真实存在分享字段时触发，避免普通访问首页 / 热重载误触发。
+  const shareHandled = useRef(false)
+  useEffect(() => {
+    if (shareHandled.current)
       return
-    }
 
-    const type = detectInputType(trimmedInput)
+    const title = searchParams.get('title') ?? ''
+    const text = searchParams.get('text') ?? ''
+    const url = searchParams.get('url') ?? ''
+    if (!hasSharedContent({ title, text, url }))
+      return
 
-    if (type === 'twitter') {
-      const tweetId = extractTweetId(trimmedInput)
-      if (!tweetId) {
-        setError('无法识别有效的 Tweet URL 或 ID，请检查格式。')
-        return
-      }
-      navigate(`/tweets/${tweetId}`)
-    }
-    else if (type === 'instagram') {
-      const igId = extractIGId(trimmedInput)
-      if (!igId) {
-        setError('无法识别有效的 Instagram URL，请检查格式。')
-        return
-      }
-      navigate(`/ins/${igId}`)
+    shareHandled.current = true
+    const shared = pickSharedInput({ title, text, url })
+    setInput(shared)
+
+    const result = resolveShareTarget(shared)
+    if (result.ok) {
+      navigate(result.to)
     }
     else {
-      setError('无法识别有效的 Tweet 或 Instagram URL，请检查格式。')
+      setError(result.error)
     }
-  }
+    // searchParams 变化即重新评估；配合 ref 保证只落地一次
+  }, [searchParams, navigate])
 
   return (
     <Card className="w-full max-w-md">
