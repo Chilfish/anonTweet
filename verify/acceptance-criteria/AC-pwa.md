@@ -1,12 +1,14 @@
 # PWA 安装 + Web Share Target 验收标准
 
-> 版本：1.1 | 日期：2026-09-06（v1.0 新增 AC-PWA-001/002/003；v1.1 增 AC-PWA-004/005/006：
-> iOS 安装外壳 head meta、manifest shortcuts + screenshots、Web Share 出向分享）
+> 版本：1.2 | 日期：2026-09-06（v1.0 新增 AC-PWA-001/002/003；v1.1 增 AC-PWA-004/005/006：
+> iOS 安装外壳 head meta、manifest shortcuts + screenshots、Web Share 出向分享；
+> v1.2 增 AC-PWA-007：截图卡片以文件形式系统分享（Web Share Level 2 files））
 > 对应规范：[MDN share_target](https://developer.mozilla.org/en-US/docs/Web/Manifest/share_target)、
 > [MDN Web Share API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Share_API)、
+> [MDN Navigator.canShare](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/canShare)、
 > [MDN manifest screenshots/shortcuts](https://developer.mozilla.org/en-US/docs/Web/Manifest)
 > 关联 Verifier：`test/acceptance/ac-pwa.spec.ts`（AC-PWA-001/002/004/005 静态检查）+
-> `test/unit/share.spec.ts`（AC-PWA-003/006 语义）
+> `test/unit/share.spec.ts`（AC-PWA-003/006/007 语义）
 > 执行命令：`bun verify --module pwa`
 
 ---
@@ -89,6 +91,22 @@ service worker 为**极简网络透传**：不缓存、不做离线，仅用于�
 
 ---
 
+## AC-PWA-007：截图卡片以文件系统分享（Web Share Level 2 files）
+
+- **验证方法**：`bun verify --ac AC-PWA-007`（`test/unit/share.spec.ts`）
+- **背景**：现有「截图」管线已产出卡片 PNG/JPEG（modern-screenshot dataURL），本 AC 把产物作为
+  `File` 走系统分享（`navigator.share({ files })`），减少「先下载再转发」；无能力环境回退下载保存。
+- **Pass 条件**（`app/lib/share.ts` 出向图片辅助 + 两处 OptionsMenu）：
+  - `dataUrlToFile(dataUrl, filename)`：正确解析 `data:image/png;base64,…`（含 `,` 负载）为 `File`，
+    类型/文件名正确、字节与 base64 一致
+  - `canShareFiles(file)`：无 `navigator.canShare`（Node / 旧浏览器 / Firefox）返回 `false`
+  - `shareImageOut(file, title, text?)`：`canShareFiles` 为 false 返回 `'unsupported'`；支持时调
+    `navigator.share({ files, title, text })`，用户取消（AbortError）返回 `'aborted'` 不报错
+  - 推文与 IG 三点菜单均含「分享截图」项：能分享时 `navigator.share({files})`；`'unsupported'` /
+    分享失败时回退 `a[download]` 保存并 toast 提示
+
+---
+
 ## 真机验证（沙箱无设备，提交后由部署者在真机执行）
 
 前置：https://anon-tweet.chilfish.top/ 已部署本特性并 HTTPS 可达。
@@ -105,6 +123,8 @@ service worker 为**极简网络透传**：不缓存、不做离线，仅用于�
    文本 + 原文链接；无 `navigator.share` 的环境（或取消分享）不报错，回退复制原文链接并提示。
 7. 安装对话框（Android Chrome 安装应用时）应展示 `screenshots` 中的真实页面截图；长按图标快捷方式
    含「搜索推文」直达 `/search`。
+8. 分享截图：Android Chrome / 桌面 Chrome 打开推文或 IG → 三点菜单「分享截图」→ 系统分享面板出现
+   卡片图片（可发送到聊天/相册）；在不支持 files 分享的环境（如 Firefox）应回退下载保存并提示。
 
 > 图标为从 `public/icon.webp` 生成的方形 PNG（透明背景）。**图标美术 / `theme_color` /
 > maskable 变体属视觉项，最终观感需所有者验收微调**（本仓库历史惯例）；`apple-touch-icon.png`
@@ -115,7 +135,8 @@ service worker 为**极简网络透传**：不缓存、不做离线，仅用于�
 ## 变更约定
 
 新增/调整分享接收/出向语义或 PWA 基建时同步：`public/manifest.webmanifest`、`public/sw.js`、
-`app/root.tsx`（head meta）、`app/lib/share.ts`（入向 + 出向纯函数）、
+`app/root.tsx`（head meta）、`app/lib/share.ts`（入向 + 出向纯函数 + 图片文件分享辅助）、
 `app/components/tweet/TweetInputForm.tsx`、`app/hooks/use-tweet-operations.ts`、
-`app/hooks/use-ig-operations.ts`、`app/components/tweet/TweetOptionsMenu.tsx`、
+`app/hooks/use-ig-operations.ts`、`app/hooks/use-screenshot-action.ts`、
+`app/hooks/use-ig-screenshot-action.ts`、`app/components/tweet/TweetOptionsMenu.tsx`、
 `app/components/ins/IGOptionsMenu.tsx` 与对应 spec。
