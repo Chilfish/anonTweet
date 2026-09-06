@@ -24,6 +24,14 @@ globalThis.addEventListener('activate', (event) => {
   event.waitUntil(globalThis.clients.claim())
 })
 
+// AC-PWA-008：页面点击「立即刷新」前可显式让 waiting worker 接管（user gesture 通道）
+globalThis.addEventListener('message', (event) => {
+  const data = event.data
+  if (data && typeof data === 'object' && data.type === 'SKIP_WAITING') {
+    globalThis.skipWaiting()
+  }
+})
+
 globalThis.addEventListener('fetch', (event) => {
   const { request } = event
   if (request.method !== 'GET')

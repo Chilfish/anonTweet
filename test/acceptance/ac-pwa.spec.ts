@@ -5,14 +5,16 @@ import { describe, expect, it } from 'vitest'
 /**
  * test/acceptance/ac-pwa.spec.ts
  *
- * AC-PWA-001/002/004/005 仓库级静态检查：
+ * AC-PWA-001/002/004/005/008 仓库级静态检查：
  * - manifest 声明 Web Share Target（GET action="/"，params url/text/title）且安装用图标齐备；
  *   另含 shortcuts(/search) 与 screenshots（wide/narrow 真实截图，AC-PWA-005）；
  * - service worker 为「极简网络透传」——同源 GET 一律回源、绝不写 Cache，异源/非 GET 交给默认，
  *   且仅在生产构建经 root 注册；manifest 已在 root <head> 通过 <link rel="manifest"> 引入；
- * - root <head> 含 iOS 安装外壳（apple-touch-icon + apple-mobile-web-app-*，AC-PWA-004）。
+ * - root <head> 含 iOS 安装外壳（apple-touch-icon + apple-mobile-web-app-*，AC-PWA-004）；
+ * - 版本更新提示链（AC-PWA-008）：update.ts 探测 + UpdateNotice 挂载 root + sw.js SKIP_WAITING。
  *
- * AC-PWA-003/006 的语义分别由 test/unit/share.spec.ts 承担（接收决策 + 出向载荷）。
+ * AC-PWA-003/006/007 的语义由 test/unit/share.spec.ts 承担（接收决策 + 出向载荷 + 图片分享），
+ * AC-PWA-008 的判定语义由 test/unit/pwa-update.spec.ts 承担。
  */
 
 const read = (rel: string) => fs.readFileSync(path.resolve(import.meta.dirname, '..', '..', rel), 'utf8')
@@ -48,6 +50,11 @@ const APPLE_TOUCH_HREF_RE = /href="\/icons\/apple-touch-icon\.png"/
 const APPLE_CAPABLE_RE = /apple-mobile-web-app-capable/
 const APPLE_STATUS_RE = /apple-mobile-web-app-status-bar-style/
 const SIZES_RE = /^\d+x\d+$/
+const UPDATE_FOUND_RE = /updatefound/
+const UPDATE_CONTROLLER_RE = /serviceWorker\.controller/
+const UPDATE_NOTICE_MOUNT_RE = /<UpdateNotice/
+const SW_MESSAGE_RE = /addEventListener\('message'/
+const SW_SKIP_WAITING_MSG_RE = /SKIP_WAITING/
 
 describe('AC-PWA-001: manifest 声明可安装 PWA + Web Share Target（首页 GET 接收）', () => {
   it('manifest 是合法 JSON 且含 display/start_url/scope', () => {
@@ -166,5 +173,26 @@ describe('AC-PWA-005: manifest shortcuts + screenshots（安装对话框与快�
     for (const file of SHOTS) {
       expect(exists(file), `${file} 应存在`).toBe(true)
     }
+  })
+})
+
+describe('AC-PWA-008: 版本更新提示链（探测 update.ts + 横幅 + sw SKIP_WAITING）', () => {
+  it('update.ts 监听 updatefound 并检查 controller（受控才提示）', () => {
+    const src = read('app/lib/pwa/update.ts')
+    expect(src).toMatch(UPDATE_FOUND_RE)
+    expect(src).toMatch(UPDATE_CONTROLLER_RE)
+  })
+
+  it('updateNotice 组件存在且挂载于 root <body>', () => {
+    expect(exists('app/components/pwa/UpdateNotice.tsx')).toBe(true)
+    expect(read(ROOT)).toMatch(UPDATE_NOTICE_MOUNT_RE)
+  })
+
+  it('sw.js 支持 SKIP_WAITING message（skipWaiting 通道，仍零缓存）', () => {
+    const sw = read(SW)
+    expect(sw).toMatch(SW_MESSAGE_RE)
+    expect(sw).toMatch(SW_SKIP_WAITING_MSG_RE)
+    expect(sw).toMatch(SKIP_WAITING_RE)
+    expect(sw).not.toMatch(CACHES_OPEN_RE)
   })
 })

@@ -10,6 +10,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from 'react-router'
+import { UpdateNotice } from '~/components/pwa/UpdateNotice'
 import { ThemeProvider } from '~/components/ThemeProvider'
 import { AnchoredToastProvider, ToastProvider } from '~/components/ui/toast'
 import stylesheet from './app.css?url'
@@ -81,6 +82,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </ToastProvider>
 
         <ScrollRestoration getKey={location => location.pathname} />
+        {/* AC-PWA-008：新版本探测提示（SSR 下渲染 null，仅在客户端有更新时显示） */}
+        <UpdateNotice />
         <Scripts nonce={nonce} />
       </body>
     </html>
