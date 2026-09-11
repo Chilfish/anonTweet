@@ -1,10 +1,9 @@
 # Backlog（任务清单）
 
-**项目**: anonTweet | **最后更新**: 2026-09-06
+**项目**: anonTweet | **最后更新**: 2026-09-11
 
-> 未决任务跨阶段收拢。规划下一个阶段时从这里选任务；完成后勾选并（如为阶段计划）`git mv` 到 `docs/archive/`。
-> 历史完成记录见 `docs/archive/TODO.md`。
-> 本版排期依据：`docs/reviews/review-2026-08-17-apple-critique.md`（Apple 视角锐评与行动计划，最终版）+ `review-2026-08-19-tweetcard-storybook-critique.md`（TweetCard 组件评审，所有者三项裁定落地）。
+> 本清单**只保留当前阶段关注的未决任务**，不累积已完成条目。规划下一阶段时从这里选任务；条目完成后移入归档。
+> 已完成归档：[backlog-completed-2026-09-11.md](../archive/backlog-completed-2026-09-11.md)（三阶段排期已完成条目 + 原未决条目裁决明细）；历史完成记录：[TODO.md](../archive/TODO.md)。
 
 ## 约定
 
@@ -15,52 +14,49 @@
 - 裁决语义：**采纳**（按排期做）/ **延后**（注明并入阶段）/ **删除**（进不做清单，附理由）
 - 里程碑发布前，本清单应为空或全部注明延后理由
 
-## 三阶段排期（2026-08-17 起）
+## 当前焦点：验证诚信修复（2026-09-11 审查发现）
 
-### 阶段一（1-2 周）止血：门禁、规范、命门组件
+> 来源：`docs/reviews/review-2026-09-11-test-suite-honesty.md`。**核心问题**：unit 层是真测试，但 acceptance 层大量「扫源码字符串」、integration 层「裸跑永远绿」，且 `--ac` / `--module` 选不中用例时 exit 0 → 「verify 全绿」对部分功能不携带信号；同时门禁命令当前因 dev server 崩溃而变红。编号 F1~F13 对应审查文档 §4。
 
-> 验收：`bun run test` 190+ 全绿；`bun test` 不再红；`bun run verify/index.ts --exit-on-fail` 全绿；`bun run lint` 0 error；新增 `AC-RESOLVER-001`（三处选择链一致性）+ `test/unit/smart-pool.spec.ts`（≥6 用例）。
+### 阶段 0（P0）先做：让门禁重新可信
 
-- [x] [refactor] 门禁命令统一与集成测试守卫（关联：review P3-1；文件：`CLAUDE.md`、`README.md`、`test/integration/*.spec.ts`；工作量：0.5 人日 / DRI：维护者 / 风险：低）— ✅ 完成（2026-08-17）：CLAUDE.md 强制命令改指 `bun run test`；`testEnv.hasServer` 无服务器时 `describe.skipIf`；`env.server.ts` 抽 `createEnv` 纯函数（双 runner 兼容）；裸 `bun test` 的并行 export 竞态（Bun 1.3.14/1.4 均有）以 `--parallel=2` 规避
-- [x] [refactor] SmartPool 限流/冷却/失败隔离重构 + 单测（关联：review P1-1；文件：`app/lib/SmartPool.ts`、`test/unit/smart-pool.spec.ts`；工作量：2-3 人日 / DRI：核心后端 / 风险：中，改核心链路需 mock 回归）— ✅ 完成（2026-08-17）：per-key `cooldownUntil` / `failStreak` / `inFlight`，单 Key 指数退避，耗尽抛聚合错误；`test/unit/smart-pool.spec.ts` 8 用例
-- [x] [refactor] Translation View Resolver 收敛（原 backlog L24 采纳；关联：review P2-3；文件：`app/hooks/use-translation-editor-logic.ts`、`use-alt-translation-logic.ts`、`app/lib/translation/resolveEntities.ts`；工作量：1-2 人日 / 风险：中，hot files）— ✅ 完成（2026-08-17）：新增 `deriveManualTranslation` 纯函数 + `AC-RESOLVER-001`（源码扫描 + 7 组单测一致性断言），两 hook 复用，无内联选择链
-- [x] [refactor] `catch any` / 空 catch 清零（关联：review P2-2；文件：`app/routes/api/tweet/get.ts` L54/L142、`ai-translation.ts` L118/L142/L190、`bili-post.tsx` L111；工作量：1 人日 / 风险：低）— ✅ 完成（2026-08-17）：全部收窄为 `catch (error: unknown)` + `instanceof Error`，空 catch 补结构化 console
-- [x] [ux] Bili 隐藏功能卫生化（关联：review P2-1；文件：`app/routes/api/bili-post.tsx`、`docs/INDEX.md`、`docs/planning/project-architecture.md`；工作量：1 人日 / 风险：低）— ✅ 完成（2026-08-17）：`ENABLE_BILI` 开关（**默认开启**，所有者手动确认；隐藏自用入口始终可用）+ INDEX/§2.5 文档标注 + IP 暴露与明文 Cookie 过境列入已知限制
+- [ ] [refactor] F1 修复 dev server 启动崩溃（`jsxDEV is not a function` / `Cannot access 'abort' before initialization`），恢复 `bun run verify/index.ts --exit-on-fail` 可跑满三层（关联：审查 P1-5；文件：待定位 `vite.config.ts` / React·Vite·Bun jsx runtime 配置；工作量：0.5-2 人日 / 风险：中，可能涉版本与 jsx runtime）— ⚠️ 阻塞项：不修则所有 integration 修复无法验证
+- [ ] [refactor] F2 `verify/index.ts` 零匹配守卫 + 修正模块别名映射（translation→`AC-TRANS` / screenshot→`AC-SHOT`+`AC-PERF` / postmortem→`AC-PM`）+ `--module` 白名单启动校验（关联：审查 P1-1；文件：`verify/index.ts` L46-71；工作量：0.5 人日 / 风险：低）— 验收：未知 AC/模块 exit≠0，文档给出的 `--module` 命令真跑对应用例
+- [ ] [refactor] F3 删除 `ac-sec.spec.ts` 死 `return`（`// 暂时不管他`），如实标注或补齐 AC-SEC-001 P3 设置页披露断言（关联：审查 P1-2；文件：`test/acceptance/ac-sec.spec.ts` L78-79（死分支）、`verify/acceptance-criteria/AC-sec.md`；工作量：0.1-0.5 人日 / 风险：低）
+- [ ] [refactor] F4 新增 AC 编号 ↔ 测试名一致性元测试（扫描 `verify/acceptance-criteria/*.md` vs `test/**` 的 `it('AC-...')`，差集非空即失败）（关联：审查 P1-6；文件：`test/acceptance/ac-contract.spec.ts`（新）；工作量：0.5 人日 / 风险：低）
 
-### 阶段二（3-6 周）核心体验：UI 组件 Storybook 全覆盖 + 视觉基线（主线，评审 P1-2 裁决）+ 翻译不阻塞、性能基座
+### 阶段 1（P1）把「假绿」改成「可失败」
 
-> 验收：新增 AC-UI-VISION-001（每组件 ≥1 story）与 AC-UI-A11Y-001（a11y addon 零 violation）且 verify 全绿；`bun run build-storybook` 通过并入 pre-push；AC-PERF-001 / AC-SEC-001 维持绿。— ✅（2026-08-19）：AC-UI-VISION-001/AC-UI-A11Y-001 落地（`verify/acceptance-criteria/AC-ui.md` + `test/acceptance/ac-ui.spec.ts` 8 用例）；`build-storybook` 已并入 pre-push；AC-PERF-001 / AC-SEC-001 维持绿。
+- [ ] [refactor] F5 AC-CI-003 改为解析 workflow `run:` / `uses:` 步骤，禁止 substring（当前被 `verify.yml` L48 注释误判为通过）（关联：审查 P1-3；文件：`test/acceptance/ac-ci.spec.ts`；工作量：0.3 人日 / 风险：低）
+- [ ] [refactor] F6 静态扫描型 AC 逐条处置：降级为「辅助检查」并如实改名，或改真行为测试（media 004/005/006、obs、decouple、resolver、sec P2、shot 003/004、vision 008/009/010、ui、pwa、card 004/009）（关联：审查 P1-3；文件：`test/acceptance/*` + 对应 `AC-*.md`；前置：所有者裁决「降级 vs 重写」；工作量：3-6 人日 / 风险：中，需引入 msw 等）
+- [ ] [refactor] F7 集成层可失败化：CI 注入真 key 或录制 fixture + msw；AC-SHOT-001/002 改真实 fixture id 并断言内容特征；AC-TWEET-006 去掉 `catch { return }` 半恒真（关联：审查 P1-4；文件：`test/integration/*`、`.github/workflows/verify.yml`；前置：所有者裁决集成策略；工作量：2-4 人日 / 风险：中）
+- [ ] [refactor] F8 去 fixture 自证：AC-TWEET-001~004/007、AC-IG-001/002/006 改为「fixture 作输入 → 调解析/翻译函数 → 断言产出」（AC-IG-006 需真正调用 `translateIGCaption`）（关联：审查 P2-1；文件：`test/acceptance/ac-tweet.spec.ts`、`ac-ig.spec.ts`；工作量：1-2 人日 / 风险：低）
+- [ ] [refactor] F9 补 AC-TRANS-002/005/006/007 的 `it('AC-...')` 命名（部分语义已有单测覆盖，仅需对齐命名/文档，不重复造测试）+ 登记 `AC-TEST-006`（关联：审查 P1-6；文件：`test/unit/*`、`verify/acceptance-criteria/AC-translation.md`；工作量：0.5-1 人日 / 风险：低）
 
-- [x] [ux] GET 与 AI 翻译解耦（原 backlog L26 前半采纳；关联：review P1-2；文件：`app/routes/api/tweet/get.ts`、`app/routes/api/ai/ai-translation.ts`、客户端 hooks）— ✅ 完成（2026-08-17）：AC-DECOUPLE-001~002 落地且 verify 绿；GET 移除内联 `autoTranslateTweet`（源码扫描无 LLM 调用），客户端 `use-auto-translate.ts` 触发 `/api/ai-translation`（不阻塞首屏），plain 截图路由两步走；`app/lib/ai-timeout.ts` 统一超时（默认 120s，`AI_TRANSLATION_TIMEOUT_MS` 可覆盖）。**剩余：AI 端点 stream 化并入下方 ux 条目**。
-- [x] [ux] 长链推文/大量媒体渲染与截图性能（原 backlog L19 采纳；文件：`verify/acceptance-criteria/AC-screenshot.md` 扩、`plain.tsx`、`plain-ig.tsx`）— ✅ 完成（2026-08-17）：AC-PERF-001 落地（AC-screenshot.md v1.2，verify 绿）；基线实测 15 条线程 SSR 中位 20ms / 单推 1ms，回归阈值 = max(绝对兜底 500/150ms, 基线×5)；媒体/头像补 `loading="lazy"`。ADR-008 媒体代理统一保持 S7 待实施（独立于本 AC）
-- [x] [refactor] 可观测性：翻译耗时/缓存命中率/RettiwtPool 状态结构化日志（原 backlog L26 后半采纳；文件：`app/lib/translation/`、`app/lib/SmartPool.ts`）— ✅ 完成（2026-08-17）：`app/lib/obs-log.ts` 统一单行 JSON 日志（AC-OBS-001 落地）；`ai.translate`/`cache.get`/`pool.rotate`/`pool.exhaust` 接入；敏感字段不入日志 → 阶段三可基于此产出命中率/耗时报表
-- [x] [ux] 隐私加固：`baseUrl` 白名单 + 设置页披露（文件：`app/routes/api/ai/vision.ts`、`ai-translation.ts`、设置页）— ✅ 完成（2026-08-17）：`app/lib/ai-base-url.ts` 白名单 + 三处边界校验 + 设置页披露 Key 中继（AC-SEC-001 落地）— 🔄 修订（2026-08-19）：白名单改**可选加固，默认关闭**（`ENABLE_AI_BASE_URL_WHITELIST` 默认 false）——自定义 baseUrl 默认可直接使用、部署零配置；公开部署可开启 + `ALLOWED_AI_BASE_URL_HOSTS` 扩展；单测/AC-SEC-001 同步更新（AC-sec.md v1.1）
-- [x] [ui] **tweet 目录 14 组件逐一生成 story（主线）**（关联：review-2026-08-19 P1-2；文件：`app/components/tweet/*`、`app/stories/`；工作量：4-6 人日 / DRI：UI / 风险：低）— ✅ 完成（2026-08-19，分支 `feat/storybook-tweet`）：14 组件全部落 story（TweetCard 五态 / TrendingCard / TweetHeader / TweetTextBody / TweetMediaAlt / TweetOptionsMenu / PlainTweet / TweetNode / SelectableTweetWrapper / TweetInputForm / CommentBranch / ThreadLine / FilterUnrelatedToggle / AIVisionBlock），场景矩阵覆盖默认/加载/错误/空 × 官方对照（真实 jetfuel fixture 数据）× 自身优化（翻译可见性/移动端窄屏）；共享 fixture `app/stories/tweet.fixtures.ts` + store 种子 `story.store.tsx`；`.storybook/preview.tsx` 全局单一 MemoryRouter（修复 story 内嵌套 Router 运行时报错）；修复 Trending 主图 alt 与 h3 重复朗读（P1-2 a11y）。验证：`bun run build-storybook` 0 报错
-- [x] [ui] **ins 目录补全 story**（文件：`app/components/ins/*`；工作量：2-3 人日；风险：低）— ✅ 完成（2026-08-19）：补齐 IGCaption / IGHeader / IGHeaderActions（IGTranslateToggle/IGScreenshotButton/IGOptionsMenu）/ IGTranslateDialog / InsLogo / PlainIGPost（ig.fixtures 共享数据）；InstagramPostCard/IGMediaGrid/IGCardHeader/IGActionBar/IGMusicInfo/IGPostSkeleton 已有
-- [x] [ui] translation / settings / ui 在用原语按「被使用即覆盖」补 story（文件：`app/components/{translation,settings,ui}/*`；工作量：3-4 人日 / 风险：低）— ✅ 完成（2026-08-19）：translation TranslationsActions+Editors 10 组件；settings AITranslationSettings/AIVisionSettings/GeneralSettings/SettingsUI；ui-primitives 22 在用原语；AC-UI-VISION-001 覆盖范围扩为 tweet14+ins14+translation10+settings8+ui22
-- [ ] [refactor] 视觉基线接入：chromatic 或本地截图 diff 对比（文件：`.storybook/main.ts`、CI；工作量：1-2 人日 / 风险：中，需 owner 定基线形态）— 🔄 大进展（2026-08-19）：**addon-vitest 接线完成**——`@vitest/browser` + `@vitest/browser-playwright` + chromium 已装，`vitest.config.ts` 新增 `storybook` 项目，`bun run test:storybook` 28 files / 137 tests 全过（真实浏览器渲染 + axe）；AC-UI-VISION-001 / AC-UI-A11Y-001 已落地；`bun run build-storybook` 已并入 pre-push。**剩余：基线形态待 owner 拍板**（review 开放问题 1：chromatic 云服务 vs 本地截图 diff）与 CI 中 chromium 安装/门禁收编（storybook 测试暂不进 pre-push，避免 CI 依赖浏览器二进制下载）
-- [x] [refactor] AC-CARD-005 换真渲染测试 + **jetfuel 回退渲染测试**（裁决：评审 P1-1/P1-3；文件：`test/acceptance/card-render.spec.ts`、`app/stories/TweetCard.stories.tsx`；工作量：1-1.5 人日）— ✅ 完成（2026-08-19）：`card-render.spec.ts` AC-CARD-005（trending 渲染）/006（无 trending 回退普通卡）/007（缺图不塌陷）/008（无卡空渲染）；AC-card.md v1.1 验证方法如实改为 renderToString；源码级锁定降级为 AC-CARD-009 辅助检查
-- [ ] [ux] AI 端点 stream 化（原 L26 剩余；文件：`app/routes/api/ai/ai-translation.ts`、客户端 hooks；工作量：3-5 人日 / 风险：高）— 与「编辑器兼容 stream」L25 合并，阶段三执行
-- [x] [ux] Twitter 推文搜索（方案：`docs/features/tweet/search.md`；文件：`app/lib/rettiwt-api/collections/Groups.ts`、`app/lib/react-tweet/utils/get-tweet.ts`、`app/routes/api/tweet/search.ts`、`app/routes/search.tsx`、`app/components/layout/Layout.tsx`；工作量：1-2 人日 / 风险：中，guest 搜索可能受限）— ✅ 完成（2026-08-31，分支 `feat/tweet-search`）：`TWEET_SEARCH` 补 guest 授权组；`parseSearchTimeline`/`fetchSearchTweets` 数据层；`GET /api/tweet/search` BFF（返回 `{ tweets, nextCursor }`，cursor 分页）；`/search` 页面（高级语法快捷插入 + 热门/最新切换 + 加载更多）+ footer 入口；AC-TWEET-009/010 落地；门禁全绿（test 294、verify 301+5skip、lint 0 error）
-- [x] [refactor] llms.txt + openapi.json 接入（文件：`app/lib/llms.ts`、`app/routes/llms.txt.ts`、`app/routes/openapi.json.ts`、`app/routes.ts`；工作量：0.5 人日 / 风险：低）— ✅ 完成（2026-08-31）：按 [llmstxt.org](https://llmstxt.org/) 规范新增 GET /llms.txt（H1 → blockquote → H2 分区 → 子弹链接列表，纯 markdown）+ GET /openapi.json（OpenAPI 3.1 全量 BFF 规范，覆盖 api/\* 全部 16 条路径）；AC-LLMS-001/002 落地（ est/unit/llms.spec.ts），门禁全绿
-- [x] [ux] 用户时间线接口改开关控制（文件：`app/routes/api/user/timeline.ts`、`app/lib/env.server.ts`、`app/lib/llms.ts`、`AC-llms.md`；工作量：0.5 人日 / 风险：低）— ✅ 完成（2026-08-31）：`ENABLE_TIMELINE` 开关（**默认关闭**，固定 429 防滥用；自部署实例设 true + 自己的 TWEET_KEYS 启用）+ README/INDEX/project-architecture §2.4/SKILL.md 文档标注 + OpenAPI 补 200/429/500 + 单测
+### 阶段 2（P2）防复发
 
-### 阶段三（7-8 周+）护城河：Vision 闭环、流式编辑器、Story 接入、缓存规模化
+- [ ] [refactor] F10 接入 `eslint-plugin-vitest`（`expect-expect` / `no-conditional-expect` / `no-standalone-expect`），把「每条 `it` 至少一条断言」变为机器可查（关联：审查 P2-3；文件：`eslint.config.mjs`；工作量：1 人日 / 风险：低）
+- [ ] [refactor] F11 mutation testing 试点（Stryker，先跑 `app/lib/**` 纯函数，观察存活变异体）（关联：审查 P2-3；前置：所有者裁决是否入正式门禁；工作量：2-3 人日 / 风险：低）
+- [ ] [refactor] F12 修订 `verify/README.md` 不实表述（「AC 编号即测试名，1:1 可追溯」不成立；「裸跑永远绿」是缺陷而非卖点）（关联：审查 P1-1/P1-6；文件：`verify/README.md`；工作量：0.2 人日 / 风险：低）
+- [ ] [refactor] F13 清理 `--server` / `--server-port` no-op 参数标注 deprecated，并做 P3 类型打磨（`hasEntityType` 形参收窄为联合类型）（关联：审查 P3；文件：`verify/index.ts`、`test/acceptance/ac-tweet.spec.ts`；工作量：0.3 人日 / 风险：低）
 
-> 验收：AC-VISION-008 手动项转自动断言；新增 `AC-IG-STORY-001~003`（story 提取/渲染/缓存）且 verify 全绿；缓存命中率 → 结构化日志报表；**Storybook 用例纳入 `bun run verify/index.ts --module ui` 门禁（组件新增必须伴随 story，写入 code-style + PR 审查清单）**。
+> ⚠️ 复发性：本类问题已复发一次（`review-2026-08-19` P1-1「AC-CARD-005 源码扫描冒充渲染断言」→ 本次 P1-3）。开放问题 4：是否按 CLAUDE.md 规则 4 沉淀 postmortem 010（「验证名实不符 / 空跑报绿」）。
 
-- [ ] [refactor] AI Vision 截图导出 E2E 闭环（关联：review 阶段三；文件：`plain.tsx`、`app/components/tweet/AIVisionBlock.tsx`；前置：阶段二可观测性）
-- [ ] [refactor] 编辑器兼容 stream（原 backlog L25 延后并入；关联：review；文件：`app/components/translation/TranslationEditor.tsx`、`resolveTranslationView.ts` isAIStream 扩展；前置：阶段二 GET 解耦流式化）
-- [ ] [ux] Instagram Story 接入（原 backlog L20 采纳延后；关联：review 不做清单末行；文件：`app/routes/api/ig/get.ts` 扩展、`IGCaption`/`PlainIGPost` 渲染；前置：SDK `@chilfish/gallery-dl-instagram` 已验证；先写 `AC-IG-STORY` + fixture 再实现；风险：中，上游接口漂移需 fixture 维护余量）
+## 下一阶段候选（原三阶段排期剩余）
+
+> 阶段一/二已完成、阶段三部分完成，已完成条目见 [归档](../archive/backlog-completed-2026-09-11.md)。以下为尚未开工的条目，规划下一阶段时按价值取舍。
+
+- [ ] [ux] AI 端点 stream 化 + 编辑器兼容 stream（合并原「AI 端点 stream 化」与「编辑器兼容 stream」两项；文件：`app/routes/api/ai/ai-translation.ts`、`app/components/translation/TranslationEditor.tsx`、`app/lib/translation/resolveTranslationView.ts` isAIStream 扩展、客户端 hooks；工作量：3-5 人日 / 风险：高）— 当前管线为非流式 `generateText`；先做端点流式化，再把 stream 映射到 overlay 编辑器
+- [ ] [refactor] AI Vision 截图导出 E2E 闭环（关联：review-2026-08-17 阶段三；文件：`plain.tsx`、`app/components/tweet/AIVisionBlock.tsx`；前置：阶段二可观测性）
 - [ ] [refactor] 三层缓存规模化与命中率指标（文件：`app/lib/service/getTweet.server.ts`；前置：阶段二可观测性）
-- [x] [refactor] Tweet 卡片 jetfuel 全量数据接入（用户抓包 2026-08-19 确认：`TweetRequests.details` 换 queryId `GZsN2Pc4knAoit6pXa4HSA` + 对齐官方 features 即取到 `jetfuel_attachment`，内含 trending-card 标题/描述/日期/分类/头像/posts 数/图，官方 HTML 同源；文件：`app/lib/rettiwt-api/requests/Tweet.ts`、`app/lib/react-tweet/utils/parseTweet.ts`（payload 长度前缀字符串提取）、`app/components/tweet/TweetCard.tsx`（渲染扩展）；工作量：1-2 人日 / 风险：中，私有二进制格式需 fixture 维护；fixture 存档 `tmp/raw-tweet-2089577916694942006-jetfuel.json`；详见 `docs/development-log/2026-08-18.md` 补充调查）— ✅ 完成（2026-08-19，分支 `feat/trending-card`，方案 `docs/features/tweet/trending-card.md`，AC `verify/acceptance-criteria/AC-card.md` AC-CARD-001~005）：最小触发 = 仅翻 `responsive_web_jetfuel_frame: true`（无需换 queryId，但需清掉 details() 内残留的重复 `false` 键）；`decodeJetfuelPayload`/`parseTrendingCard` 双策略解析（结构扫描 + 语义化正则）；`mapTwitterCard` 合并 + `jetfuel.parse.fallback` 回退日志；`TweetLinkCard` Trending 变体还原官方样式（aspect-[18/10] 渐变覆盖层）；门禁全绿（typecheck / lint / test 264 / verify 全量）
-- [x] [refactor] unified_card 解析兼容多组件布局（`details` / `media_with_details_horizontal`；文件：`app/lib/react-tweet/utils/parseTweet.ts`、`test/unit/parseTweet.spec.ts`；工作量：0.5 人日 / 风险：低）— ✅ 完成（2026-08-18）：`parseUnifiedCard` 遍历 `component_objects`，兼容 `topic_detail` 布局（Trending/topic 卡），domain 优先取 `url_data.vanity`；详见 `docs/development-log/2026-08-18.md`
+- [ ] [ux] Instagram Story 接入（关联：review-2026-08-17 不做清单末行；文件：`app/routes/api/ig/get.ts` 扩展、`IGCaption`/`PlainIGPost` 渲染；前置：SDK `@chilfish/gallery-dl-instagram` 已验证；先写 `AC-IG-STORY` + fixture 再实现；风险：中，上游接口漂移需 fixture 维护余量）
+- [ ] [refactor] 视觉基线接入：chromatic 或本地截图 diff 对比（文件：`.storybook/main.ts`、CI；工作量：1-2 人日 / 风险：中，需 owner 定基线形态）— 🔄 大进展（2026-08-19）：**addon-vitest 接线完成**——`@vitest/browser` + `@vitest/browser-playwright` + chromium 已装，`vitest.config.ts` 新增 `storybook` 项目，`bun run test:storybook` 28 files / 137 tests 全过（真实浏览器渲染 + axe）；AC-UI-VISION-001 / AC-UI-A11Y-001 已落地；`bun run build-storybook` 已并入 pre-push。**剩余：基线形态待 owner 拍板**（review 开放问题 1：chromatic 云服务 vs 本地截图 diff）与 CI 中 chromium 安装/门禁收编（storybook 测试暂不进 pre-push，避免 CI 依赖浏览器二进制下载）
 
-## 独立增量（2026-09-06）
+## 独立增量
 
-> 阶段计划之外、按需推进的增量项，完成后勾选。
+> 阶段计划之外、按需推进的增量项，完成后勾选、移入归档。
 
-- [ ] [ux] 可安装 PWA + Web Share Target：系统分享 X/IG 链接直达推文/IG（方案：`docs/features/pwa/web-share-target.md`；AC：`verify/acceptance-criteria/AC-pwa.md`；域名：https://anon-tweet.chilfish.top/）— ✅ 已实现（AC-PWA-001/002/003 落地）；✅ 能力盘点（`docs/features/pwa/capability-audit.md`，2026-09-06：线上与仓库同步、SW #6900 健康）；✅ 场景落地（2026-09-06，AC-pwa.md v1.3 AC-PWA-004~008）：iOS 安装外壳 meta（apple-touch-icon + apple-mobile-web-app-\*）+ manifest shortcuts(/search)/screenshots(wide/narrow 真实截图) + share 出向（navigator.share，降级复制原文链接）+ share 截图（卡片图转 File 走 Web Share L2 files，不支持降级下载）+ 版本更新提示（可见/聚焦探测新 SW → 横幅「立即刷新」，首次访问不打扰，AC-PWA-008）。**待真机验证**（安装 + 系统分享进出 + iOS 添加主屏幕 + 安装对话框截图，沙箱无设备）。视觉遗留：图标/theme_color/maskable/apple-touch-icon 底色待所有者验收。P2 候选（showSaveFilePicker / 最近查看 / 静态缓存需 ADR）见 capability-audit.md。
+- [ ] [ux] 可安装 PWA + Web Share Target：系统分享 X/IG 链接直达推文/IG（方案：`docs/features/pwa/web-share-target.md`；AC：`verify/acceptance-criteria/AC-pwa.md`；域名：https://anon-tweet.chilfish.top/）— ✅ 已实现（AC-PWA-001/002/003 落地）；✅ 能力盘点（`docs/features/pwa/capability-audit.md`，2026-09-06：线上与仓库同步、SW #6900 健康）；✅ 场景落地（2026-09-06，AC-pwa.md v1.3 AC-PWA-004~008）：iOS 安装外壳 meta（apple-touch-icon + apple-mobile-web-app-\*）+ manifest shortcuts(/search)/screenshots(wide/narrow 真实截图) + share 出向（navigator.share，降级复制原文链接）+ share 截图（卡片图转 File 走 Web Share L2 files，不支持降级下载）+ 版本更新提示（可见/聚焦探测新 SW → 横幅「立即刷新」，首次访问不打扰，AC-PWA-008）。**剩余：真机验证**（安装 + 系统分享进出 + iOS 添加主屏幕 + 安装对话框截图，沙箱无设备）+ 视觉验收（图标/theme_color/maskable/apple-touch-icon 底色）。P2 候选（showSaveFilePicker / 最近查看 / 静态缓存需 ADR）见 capability-audit.md。
 
 ## 不做清单（裁决为删除/延后，Apple 式减法）
 
@@ -68,22 +64,15 @@
 | ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------ |
 | Threads / Bluesky 等新数据源 | 删除（不接）   | 产品定位（工具 vs 平台）裁决前一律不接（review Q1）                                              |
 | Bili 发布功能扩展            | 延后（无限期） | 保留为隐藏自用入口，不宣传、不扩展、仅卫生化（review P2-1）                                      |
-| 编辑器 stream 单独立项       | 延后           | 与阶段二"翻译流式化"合并，不单独立项（review backlog 裁决）                                      |
+| 编辑器 stream 单独立项       | 延后           | 与"翻译流式化"合并，不单独立项（review backlog 裁决）                                            |
 | IG Story 提前到阶段二        | 延后           | 价值密度低于核心体验修复；SDK 已验证但逆向接口随版本漂移，排期靠后（review 不做清单末行）        |
 | 视觉模型训练 / 微调          | 删除（不接）   | `docs/features/ai-vision/ai-vision.md` §1.3 已明确非目标，维持                                   |
 | 外链离开匿名环境提示/设置项  | 删除（不接）   | **所有者裁定（2026-08-19）**：「外链这件事不用管它」；链接卡跳转外部为目标行为，不设提示         |
 | jetfuel 官方改版巡检专项     | 删除（不接）   | **所有者裁定（2026-08-19）**：解析改版直接回退普通卡，用户感知反馈后再更新解析程序，不设巡检机制 |
 
-## 原未决条目裁决明细（2026-08-17 + 2026-08-19 增补）
+## 归档记录
 
-| 原条目                                              | 裁决                                            | 理由                                                                                                         |
-| --------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| [ux] 长链推文/大量媒体渲染与截图性能（L19）         | **采纳** → 阶段二                               | 对应 review P1-2/性能预算；与 ADR-008 媒体代理统一耦合                                                       |
-| [ux] Instagram Story 支持（L20）                    | **采纳（延后）** → 阶段三                       | 所有者确认保留 todo；SDK `@chilfish/gallery-dl-instagram` 已验证可接入，成本可控；价值密度低于核心体验修复   |
-| [refactor] Translation View Resolver 收敛（L24）    | **采纳** → 阶段一                               | review P2-3 证据确凿（两 hook 重复链），低风险高收益                                                         |
-| [refactor] 编辑器兼容 stream（L25）                 | **延后** → 阶段二/三                            | 当前管线为非流式 generateText；先做"GET 不阻塞"再谈流式编辑                                                  |
-| [refactor] 性能：并发/限流策略 + 可观测性（L26）    | **采纳（拆分）** → 限流进阶段一、可观测进阶段二 | 限流 = SmartPool 重构（review P1-1）；可观测 = 阶段二任务                                                    |
-| 新增：组件 Storybook 全覆盖 + 视觉基线 + a11y 门禁  | **采纳** → 阶段二主线（2026-08-19）             | review-2026-08-19 P1-2（111 组件仅 4 stories）+ 所有者裁定「下一阶段主攻 Storybook/视觉验证/自动化场景用例」 |
-| 新增：AC-CARD-005 真渲染测试 + jetfuel 回退渲染测试 | **采纳** → 阶段二（2026-08-19）                 | review-2026-08-19 P1-1/P1-3；配合外链不做、巡检不做的所有者裁定                                              |
-| 新增：外链隐私披露                                  | **删除**（2026-08-19）                          | 所有者裁定不做，见不做清单                                                                                   |
-| 新增：jetfuel 官方改版巡检                          | **删除**（2026-08-19）                          | 所有者裁定不做，见不做清单                                                                                   |
+| 日期       | 内容                                                                          | 去向                                                                              |
+| ---------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| 2026-09-11 | 三阶段排期（阶段一全部 / 阶段二除 2 项 / 阶段三已完成 2 项）已完成条目 + 原未决条目裁决明细 | [archive/backlog-completed-2026-09-11.md](../archive/backlog-completed-2026-09-11.md) |
+| 2026-08    | 历史规划（已完成记录 + 约束 + 待办）                                          | [archive/TODO.md](../archive/TODO.md)                                             |
