@@ -48,6 +48,7 @@ SKIP 语义：无 `TWEET_KEYS` / `INS_COOKIES` 等外部凭据时，相关集成
 | [AC-media.md](acceptance-criteria/AC-media.md)             | AC-MEDIA-001~006（媒体代理）                    |
 | [AC-postmortem.md](acceptance-criteria/AC-postmortem.md)   | AC-PM-001~007（预发布检查）                     |
 | [AC-ci.md](acceptance-criteria/AC-ci.md)                   | AC-CI-001~004（CI workflow）                    |
+| [AC-build.md](acceptance-criteria/AC-build.md)             | AC-BUILD-001~002（Babel/.tsx 构建管线）         |
 | [AC-vision.md](acceptance-criteria/AC-vision.md)           | AC-VISION-001~012（AI 视觉）                    |
 | [AC-resolver.md](acceptance-criteria/AC-resolver.md)       | AC-RESOLVER-001（决策链收敛）                   |
 | [AC-decouple.md](acceptance-criteria/AC-decouple.md)       | AC-DECOUPLE-001~002（GET 解耦 + AI 超时）       |
