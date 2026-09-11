@@ -8,17 +8,18 @@
 
 ## 索引表
 
-| #                                     | 主题             | 严重级 | 分类         | 状态         | 一句话根因                                                 |
-| ------------------------------------- | ---------------- | ------ | ------------ | ------------ | ---------------------------------------------------------- |
-| [001](001-twitter-content-parsing.md) | Twitter 推文解析 | SEV-2  | Architecture | 🔴 Active    | `parseTweet.ts` 无测试、无内部分层，每次改动风险全局       |
-| [002](002-translation-system.md)      | 翻译系统         | SEV-2  | Architecture | 🔴 Active    | 翻译逻辑全部耦合在 React 组件内，store 迁移静默丢数据      |
-| [003](003-ui-styling-layout.md)       | UI 样式/布局     | SEV-3  | Bug          | 🟡 Active    | 20 次单行 CSS fix，无 design token，无视觉回归测试         |
-| [004](004-build-configuration.md)     | 构建配置         | SEV-2  | Change       | 🟢 Mitigated | 客户端/服务端边界不清，`lib/` 无 import 约束               |
-| [005](005-media-handling.md)          | 媒体管线         | SEV-2  | Architecture | 🔴 Active    | 代理/视频/截图四套重复 URL 转换逻辑                        |
-| [006](006-state-management.md)        | 状态管理         | SEV-2  | Bug          | 🟢 Mitigated | zustand 整 store 订阅 + 无类型迁移                         |
-| [007](007-instagram-integration.md)   | Instagram 集成   | SEV-3  | Change       | 🔴 Active    | 新功能无验收清单、无测试 fixture                           |
-| [008](008-fonts-and-rendering.md)     | 字体/渲染        | SEV-2  | Bug          | 🟢 Mitigated | Web font 加载与 headless 截图竞争                          |
-| [009](009-prepend-persistence.md)     | 翻译句首补充     | SEV-2  | Bug          | 🟡 Active    | index 对齐合并四处漂移，base 外实体（-1/30000+）被静默丢弃 |
+| #                                     | 主题             | 严重级 | 分类         | 状态         | 一句话根因                                                      |
+| ------------------------------------- | ---------------- | ------ | ------------ | ------------ | --------------------------------------------------------------- |
+| [001](001-twitter-content-parsing.md) | Twitter 推文解析 | SEV-2  | Architecture | 🔴 Active    | `parseTweet.ts` 无测试、无内部分层，每次改动风险全局            |
+| [002](002-translation-system.md)      | 翻译系统         | SEV-2  | Architecture | 🔴 Active    | 翻译逻辑全部耦合在 React 组件内，store 迁移静默丢数据           |
+| [003](003-ui-styling-layout.md)       | UI 样式/布局     | SEV-3  | Bug          | 🟡 Active    | 20 次单行 CSS fix，无 design token，无视觉回归测试              |
+| [004](004-build-configuration.md)     | 构建配置         | SEV-2  | Change       | 🟢 Mitigated | 客户端/服务端边界不清，`lib/` 无 import 约束                    |
+| [005](005-media-handling.md)          | 媒体管线         | SEV-2  | Architecture | 🔴 Active    | 代理/视频/截图四套重复 URL 转换逻辑                             |
+| [006](006-state-management.md)        | 状态管理         | SEV-2  | Bug          | 🟢 Mitigated | zustand 整 store 订阅 + 无类型迁移                              |
+| [007](007-instagram-integration.md)   | Instagram 集成   | SEV-3  | Change       | 🔴 Active    | 新功能无验收清单、无测试 fixture                                |
+| [008](008-fonts-and-rendering.md)     | 字体/渲染        | SEV-2  | Bug          | 🟢 Mitigated | Web font 加载与 headless 截图竞争                               |
+| [009](009-prepend-persistence.md)     | 翻译句首补充     | SEV-2  | Bug          | 🟡 Active    | index 对齐合并四处漂移，base 外实体（-1/30000+）被静默丢弃      |
+| [010](010-babel-major-drift.md)       | 依赖/Babel 构建  | SEV-3  | Dependency   | 🟢 Mitigated | preset 越过 core 主版本 + 门禁不跑生产构建，`.tsx` 全量构建失败 |
 
 ## 高危文件（写码前自查）
 
@@ -68,6 +69,14 @@ base 并按 index 覆盖——句首补充（`index: -1`）与 AI 流片段（`3
 收敛为单一纯函数复用，并补「extra 不被丢」的回归测试**。改动前自查 `resolveEntities.ts` /
 `getTweet.server.ts#mergeTranslationEntities` / `entitytParser.ts#applyAITranslations`。
 
+### 8. 依赖升级绕过构建门禁（#010）
+
+升级打包器/编译器/preset（Babel、Vite、react-compiler 相关）可静默打断 `.tsx` 转换链，
+而旧门禁只跑 typecheck/lint/test——构建失败直到部署才暴露。对策：**跨主版本由他人 peer
+决定的依赖用 `~`/精确版本锁定（`@babel/preset-typescript` 必须与 `@babel/core` 同主版本）；
+`bun run build` 已纳入 pre-push 与 CI；AC-BUILD-001~003 兜底**。升级依赖前先读
+`vite.config.ts` 的版本约束注释。
+
 ## Pre-Release 检查（每次 Release 前）
 
 **步骤**：
@@ -83,10 +92,10 @@ base 并按 index 覆盖——句首补充（`index: -1`）与 AI 流片段（`3
 
 ### 按严重级
 
-- **SEV-2（6 份）**：001 / 002 / 004 🟢 / 005 / 006 🟢 / 008 🟢
-- **SEV-3（2 份）**：003 / 007
+- **SEV-2（7 份）**：001 / 002 / 004 🟢 / 005 / 006 🟢 / 008 🟢 / 009
+- **SEV-3（3 份）**：003 / 007 / 010 🟢
 
 ### 按状态
 
 - 🔴 **Active（仍可能复发）**：001 / 002 / 003 / 005 / 007
-- 🟢 **Mitigated（已预防）**：004 / 006 / 008
+- 🟢 **Mitigated（已预防）**：004 / 006 / 008 / 010
