@@ -48,24 +48,24 @@ docs/
 
 ### 按功能领域
 
-| 任务场景                                   | 必读文档                                                                                       | 说明                                                  |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| **新增/修改翻译逻辑**                      | `features/translation/translation.md`                                                          | 数据流、占位符机制、6 级决策链、stream/overlay 分工   |
-| **修改 AI Provider / DeepSeek 参数**       | `features/translation/deepseek-ai-sdk.md`                                                      | provider 级/模型级/callOptions 参数暴露策略           |
-| **修改 Instagram 集成**                    | `features/instagram/instagram-integration.md` + `features/instagram/ig-actions-integration.md` | IG 5 阶段管线、操作区、DB 缓存、caption 翻译          |
-| **修改 AI Vision（看图说话/OCR）**         | `features/ai-vision/ai-vision.md` + `archive/ai-vision-plan.md`                                | 需求与上下文、已完成行动计划 + DR、AC-VISION          |
-| **部署 / 环境配置**                        | `features/deploy/deployment.md`                                                                | Vercel / 自托管、环境变量、缓存层                     |
-| **修改 PWA / SW / manifest / 安装体验**   | `features/pwa/web-share-target.md` + `features/pwa/capability-audit.md`                        | share_target 方案 + 能力盘点（线上核查、场景裁决、候选优先级） |
-| **修改 UI 组件、页面**                     | `engineering/code-style.md` + `ui-design/README.md`                                            | 组件拆分、命名、导入顺序、原生优先原则                |
-| **修改原子组件（Button/Input/Dialog 等）** | `ui-design/GENERAL.md` + `ui-design/select-cossui.md`                                          | shadcn/coss 组件使用规范                              |
-| **修改 Settings 页面**                     | `ui-design/SETTINGS.md`                                                                        | SettingsGroup / SettingsItem 强制规范                 |
-| **架构级变更前**                           | `planning/architecture.md`（ADR）+ `planning/project-architecture.md`（系统架构 v3.0）         | 先读 ADR 历史决策，再对照架构总览                     |
-| **规划下一阶段任务**                       | `planning/backlog.md` + `archive/action-plan.md`                                               | 未决任务清单、已完成里程碑记录                        |
-| **测试验证体系**                           | `../verify/README.md` + `archive/testing-infra-refactor.md`                                    | Vitest 三层架构（unit / integration / acceptance）    |
-| **写码前防复现 / 新 Bug 模式**             | `postmortem/README.md`（+ `TEMPLATE.md`）                                                      | 高频雷区自查；新 Bug 模式写 postmortem                |
-| **每次 commit / PR**                       | `engineering/git-workflow.md`                                                                  | 分支模型、Conventional Commits、commit 纪律、验证门禁 |
-| **里程碑发布前**                           | `engineering/release-checklist.md`                                                             | 本地门禁 + 功能冒烟 + Postmortem 预发布检查           |
-| **了解历史决策 / 已知问题**                | `reviews/` + `development-log/` + `archive/`                                                   | 评审记录、按天开发日志、已完成阶段存档                |
+| 任务场景                                   | 必读文档                                                                                       | 说明                                                           |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| **新增/修改翻译逻辑**                      | `features/translation/translation.md`                                                          | 数据流、占位符机制、6 级决策链、stream/overlay 分工            |
+| **修改 AI Provider / DeepSeek 参数**       | `features/translation/deepseek-ai-sdk.md`                                                      | provider 级/模型级/callOptions 参数暴露策略                    |
+| **修改 Instagram 集成**                    | `features/instagram/instagram-integration.md` + `features/instagram/ig-actions-integration.md` | IG 5 阶段管线、操作区、DB 缓存、caption 翻译                   |
+| **修改 AI Vision（看图说话/OCR）**         | `features/ai-vision/ai-vision.md` + `archive/ai-vision-plan.md`                                | 需求与上下文、已完成行动计划 + DR、AC-VISION                   |
+| **部署 / 环境配置**                        | `features/deploy/deployment.md`                                                                | Vercel / 自托管、环境变量、缓存层                              |
+| **修改 PWA / SW / manifest / 安装体验**    | `features/pwa/web-share-target.md` + `features/pwa/capability-audit.md`                        | share_target 方案 + 能力盘点（线上核查、场景裁决、候选优先级） |
+| **修改 UI 组件、页面**                     | `engineering/code-style.md` + `ui-design/README.md`                                            | 组件拆分、命名、导入顺序、原生优先原则                         |
+| **修改原子组件（Button/Input/Dialog 等）** | `ui-design/GENERAL.md` + `ui-design/select-cossui.md`                                          | shadcn/coss 组件使用规范                                       |
+| **修改 Settings 页面**                     | `ui-design/SETTINGS.md`                                                                        | SettingsGroup / SettingsItem 强制规范                          |
+| **架构级变更前**                           | `planning/architecture.md`（ADR）+ `planning/project-architecture.md`（系统架构 v3.0）         | 先读 ADR 历史决策，再对照架构总览                              |
+| **规划下一阶段任务**                       | `planning/backlog.md` + `archive/action-plan.md`                                               | 未决任务清单、已完成里程碑记录                                 |
+| **测试验证体系**                           | `../verify/README.md` + `archive/testing-infra-refactor.md`                                    | Vitest 三层架构（unit / integration / acceptance）             |
+| **写码前防复现 / 新 Bug 模式**             | `postmortem/README.md`（+ `TEMPLATE.md`）                                                      | 高频雷区自查；新 Bug 模式写 postmortem                         |
+| **每次 commit / PR**                       | `engineering/git-workflow.md`                                                                  | 分支模型、Conventional Commits、commit 纪律、验证门禁          |
+| **里程碑发布前**                           | `engineering/release-checklist.md`                                                             | 本地门禁 + 功能冒烟 + Postmortem 预发布检查                    |
+| **了解历史决策 / 已知问题**                | `reviews/` + `development-log/` + `archive/`                                                   | 评审记录、按天开发日志、已完成阶段存档                         |
 
 ### 按文档类型速查
 
