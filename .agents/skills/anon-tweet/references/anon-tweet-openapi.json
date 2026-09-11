@@ -3,7 +3,7 @@
   "info": {
     "title": "Anon Tweet API",
     "description": "Anon Tweet 后端 BFF 聚合接口：Twitter/X 推文、Instagram 帖子、AI 翻译（Google Gemini / DeepSeek）、AI 视觉与截图导出缓存。人类可读说明见站点根 /llms.txt。",
-    "version": "1.0.0"
+    "version": "0.2.1"
   },
   "servers": [
     {
