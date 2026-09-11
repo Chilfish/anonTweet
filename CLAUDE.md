@@ -135,4 +135,7 @@ gh pr merge <N> --merge --delete-branch   # Create a Merge Commit
 
 ## Project Skills
 
-- `coss` / `coss-particles`（`.agents/skills/`）— coss UI 组件技能
+- `anon-tweet`（`.agents/skills/anon-tweet/`）— 仓库自有 skill：本站 API 使用指南（Agent Skills 规范），
+  随附 `scripts/anon-tweet.ps1` 与 `references/anon-tweet-openapi.json`；经 `public/skills/` 软链发布到
+  `/skills/anon-tweet/SKILL.md`，可被 `npx skills add Chilfish/anonTweet` 等第三方工具安装
+- `coss` / `coss-particles`（`.agents/skills/`）— coss UI 组件技能（vendored，`skills-lock.json` 登记）
