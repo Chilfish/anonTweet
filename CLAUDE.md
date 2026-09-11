@@ -113,9 +113,11 @@ docs/                    # 技术文档与规范（见 docs/INDEX.md：features/
 
 **verify 套件二期 + 测试验证基建重构**：✅ 已完成（Phase 2 S5~S10 与 Vitest 三层架构，见 `docs/archive/action-plan.md`）。
 
-**当前阶段 — 三阶段排期·阶段一（止血）**：✅ 已完成（2026-08-17，见 `docs/reviews/review-2026-08-17-apple-critique.md` 与 `docs/planning/backlog.md`）。门禁命令统一（`bun run test` + 集成无服务器 skipIf）、SmartPool 限流/冷却/失败隔离（单测 8 用例）、Resolver 收敛（AC-RESOLVER-001）、catch any 清零、Bili 隐藏入口卫生化（ENABLE_BILI 默认开）。验收：`bun run test` 211/211、`bun test --parallel=2` 0 fail、`verify --exit-on-fail` 218 PASS、lint 0 error。
+**三阶段排期（2026-08-17 起）**：阶段一（止血）✅、阶段二（核心体验）✅ 除「视觉基线接入」「AI 端点 stream 化」外；阶段三（护城河）部分完成。已完成条目与裁决明细已归档：`docs/archive/backlog-completed-2026-09-11.md`。
 
-**下一阶段 — 阶段二（核心体验，3-6 周，按 backlog 排期）**：GET 与 AI 翻译解耦 + 流式化、长链/截图性能基线（AC-PERF-001）、翻译可观测性、baseUrl 白名单（AC-SEC-001）。
+**当前阶段 — 验证诚信修复（2026-09-11 审查发现）**：`bun run verify/index.ts --exit-on-fail` 当前为红（dev server 崩溃）；acceptance 层静态扫描冒充行为断言、integration 层结构性不可失败、CLI 零匹配 exit 0。修复计划 F1~F13 见 `docs/reviews/review-2026-09-11-test-suite-honesty.md` 与 `docs/planning/backlog.md`（F1 为阻塞项）。
+
+**后续候选（未开工）**：AI 端点/编辑器 stream 化、AI Vision 截图 E2E、三层缓存规模化、IG Story 接入、视觉基线（待 owner 拍板）。PWA 已实现，剩余真机验证与视觉验收。
 
 ## GitHub CLI Flow
 

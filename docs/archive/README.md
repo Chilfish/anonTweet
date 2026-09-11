@@ -21,3 +21,4 @@
 | [next-steps.md](next-steps.md)                               | 下阶段行动计划底稿（Phase 2 S5~S10 已完成）                | 2026-08  |
 | [verification-gap-analysis.md](verification-gap-analysis.md) | 验证体系差距分析（Phase 2 S5~S10 已完成）                  | 2026-08  |
 | [TODO.md](TODO.md)                                           | 历史规划（已完成记录 + 约束 + 待办，未决项已迁 backlog）   | 2026-08  |
+| [backlog-completed-2026-09-11.md](backlog-completed-2026-09-11.md) | 三阶段排期已完成条目 + 原未决条目裁决明细（活跃清单见 `../planning/backlog.md`） | 2026-09 |
