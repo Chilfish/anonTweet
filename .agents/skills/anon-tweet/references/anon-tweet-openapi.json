@@ -1,0 +1,2041 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Anon Tweet API",
+    "description": "Anon Tweet 后端 BFF 聚合接口：Twitter/X 推文、Instagram 帖子、AI 翻译（Google Gemini / DeepSeek）、AI 视觉与截图导出缓存。人类可读说明见站点根 /llms.txt。",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://anon-tweet.chilfish.top",
+      "description": "当前部署实例"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Tweet",
+      "description": "Twitter/X 推文与 List"
+    },
+    {
+      "name": "Instagram",
+      "description": "Instagram 帖子与翻译"
+    },
+    {
+      "name": "User",
+      "description": "用户查询"
+    },
+    {
+      "name": "AI",
+      "description": "AI 翻译 / 视觉 / 连通性测试"
+    },
+    {
+      "name": "Proxy",
+      "description": "图片代理"
+    },
+    {
+      "name": "Bili",
+      "description": "Bili 动态发布（隐藏自用）"
+    }
+  ],
+  "paths": {
+    "/api/tweet/get/{id}": {
+      "get": {
+        "tags": [
+          "Tweet"
+        ],
+        "operationId": "tweetGet",
+        "summary": "拉取单条推文",
+        "description": "三层缓存（Memory → FS → DB → Twitter API）拉取推文并 enrich；不再内联 AI 翻译（AC-DECOUPLE-001）。",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "推文 ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "EnrichedTweet 数组（与 react-tweet 结构对齐）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "description": "推文数据（可能为空数组）",
+                  "items": {
+                    "$ref": "#/components/schemas/EnrichedTweet"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "推文未找到",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "上游/解析错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tweet"
+        ],
+        "operationId": "tweetGetAction",
+        "summary": "旧式拉取推文（兼容旧客户端）",
+        "description": "与 GET 同链路；请求体 AI 字段为旧客户端兼容保留，路由不再读取。",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "推文 ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "tweetId"
+                ],
+                "properties": {
+                  "tweetId": {
+                    "type": "string",
+                    "description": "推文 ID"
+                  },
+                  "enableAITranslation": {
+                    "type": "boolean",
+                    "description": "兼容字段，不再读取"
+                  },
+                  "apiKey": {
+                    "type": "string",
+                    "description": "兼容字段，不再读取"
+                  },
+                  "model": {
+                    "type": "string",
+                    "description": "兼容字段，不再读取"
+                  },
+                  "provider": {
+                    "type": "string",
+                    "enum": [
+                      "google",
+                      "deepseek",
+                      "openrouter"
+                    ],
+                    "description": "兼容字段，不再读取"
+                  },
+                  "baseUrl": {
+                    "type": "string",
+                    "description": "兼容字段，不再读取"
+                  },
+                  "thinkingLevel": {
+                    "type": "string",
+                    "enum": [
+                      "minimal",
+                      "low",
+                      "medium",
+                      "high",
+                      "max"
+                    ],
+                    "description": "兼容字段，不再读取"
+                  },
+                  "translationGlossary": {
+                    "type": "string",
+                    "description": "兼容字段，不再读取"
+                  },
+                  "force": {
+                    "type": "boolean",
+                    "description": "兼容字段，不再读取"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "同 GET",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnrichedTweet"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "参数校验失败（zod flatten）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "推文未找到",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tweet/list/{id}": {
+      "get": {
+        "tags": [
+          "Tweet"
+        ],
+        "operationId": "tweetList",
+        "summary": "拉取 List 时间线",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "List ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "EnrichedTweet 数组",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnrichedTweet"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "上游/解析错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tweet/replies/{id}": {
+      "get": {
+        "tags": [
+          "Tweet"
+        ],
+        "operationId": "tweetReplies",
+        "summary": "拉取推文回复",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "推文 ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "分页游标（base62）",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回复列表 + 下一页游标",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RepliesResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "上游/解析错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tweet/search": {
+      "get": {
+        "tags": [
+          "Tweet"
+        ],
+        "operationId": "tweetSearch",
+        "summary": "推文搜索",
+        "description": "X 高级搜索语法直接可用（如 (from:user) until:2025-12-20）；q 缺省或超长返回 400 + 空结果。",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "搜索关键词（≤500 字符）",
+            "schema": {
+              "type": "string",
+              "maxLength": 500
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "排序方式",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "latest",
+                "top"
+              ],
+              "default": "latest"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "分页游标",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "required": false,
+            "description": "每页数量",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "搜索推文列表 + 下一页游标",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "缺少/非法 q",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "搜索失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tweet/set": {
+      "post": {
+        "tags": [
+          "Tweet"
+        ],
+        "operationId": "tweetSet",
+        "summary": "保存推文实体编辑",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "intent",
+                  "data"
+                ],
+                "properties": {
+                  "intent": {
+                    "type": "string",
+                    "const": "updateEntities"
+                  },
+                  "data": {
+                    "type": "array",
+                    "description": "每项包含 tweetId 与 entities（TranslationEntity[]）",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "tweetId",
+                        "entities"
+                      ],
+                      "properties": {
+                        "tweetId": {
+                          "type": "string"
+                        },
+                        "entities": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/TranslationEntity"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "保存结果",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "校验失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ig/get/{id}": {
+      "get": {
+        "tags": [
+          "Instagram"
+        ],
+        "operationId": "igGet",
+        "summary": "拉取 IG 帖子（简化版）",
+        "description": "SDK 抓取并标准化为 IGPost；不触发 AI 翻译。未配置 INS_COOKIES 时返回空数组。",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "shortcode 或 stories 段（username/story_id）",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "IGPost 数组（可能为空）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IGPost"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "抓取失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Instagram"
+        ],
+        "operationId": "igGetAction",
+        "summary": "拉取 IG 帖子（可启用 AI 翻译）",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "shortcode 或 stories 段（username/story_id）",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "enableAITranslation": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "apiKey": {
+                    "type": "string",
+                    "description": "启用翻译时必填"
+                  },
+                  "model": {
+                    "type": "string",
+                    "description": "启用翻译时必填"
+                  },
+                  "provider": {
+                    "type": "string",
+                    "enum": [
+                      "google",
+                      "deepseek",
+                      "openrouter"
+                    ],
+                    "default": "google"
+                  },
+                  "thinkingLevel": {
+                    "type": "string",
+                    "enum": [
+                      "minimal",
+                      "low",
+                      "medium",
+                      "high",
+                      "max"
+                    ]
+                  },
+                  "translationGlossary": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "IGPost 数组（可能为空）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IGPost"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "缺少 id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "解析失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INS_COOKIES 未配置 / 抓取失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ig/translate/{id}": {
+      "post": {
+        "tags": [
+          "Instagram"
+        ],
+        "operationId": "igTranslate",
+        "summary": "IG caption AI / 手动翻译",
+        "description": "manualTranslation 直接写入跳过 AI；否则需 apiKey + model。结果写回 DB + localCache。",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "IG shortcode",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "apiKey": {
+                    "type": "string"
+                  },
+                  "model": {
+                    "type": "string"
+                  },
+                  "provider": {
+                    "type": "string",
+                    "enum": [
+                      "google",
+                      "deepseek",
+                      "openrouter"
+                    ],
+                    "default": "google"
+                  },
+                  "thinkingLevel": {
+                    "type": "string",
+                    "enum": [
+                      "minimal",
+                      "low",
+                      "medium",
+                      "high",
+                      "max"
+                    ]
+                  },
+                  "translationGlossary": {
+                    "type": "string"
+                  },
+                  "manualTranslation": {
+                    "type": "string",
+                    "description": "手动翻译文本，提供则跳过 AI"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "翻译结果",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "captionTranslation": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "缺少 API Key/Model 或非法 JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "帖子未找到或无 caption",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "翻译失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/get/{username}": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "operationId": "userGet",
+        "summary": "查询用户资料",
+        "description": "从 DB 缓存读取用户；无记录返回 null。",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "description": "用户名（screen_name）",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "RawUser 或 null",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/RawUser"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/timeline/{username}": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "operationId": "userTimeline",
+        "summary": "用户时间线",
+        "description": "获取指定用户的推文时间线，经 enrichTweet 清洗后返回 EnrichedTweet 数组。",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "description": "用户名",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "EnrichedTweet 数组",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnrichedTweet"
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "上游限流（未配置 TWEET_KEYS 或风控）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "获取用户时间线失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai-test": {
+      "post": {
+        "tags": [
+          "AI"
+        ],
+        "operationId": "aiTest",
+        "summary": "AI 提供商连通性测试",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "apiKey",
+                  "model"
+                ],
+                "properties": {
+                  "apiKey": {
+                    "type": "string"
+                  },
+                  "model": {
+                    "type": "string",
+                    "description": "模型名（app/lib/constants.ts 的 models 列表）"
+                  },
+                  "provider": {
+                    "type": "string",
+                    "enum": [
+                      "google",
+                      "deepseek",
+                      "openrouter"
+                    ],
+                    "description": "默认按模型推断"
+                  },
+                  "baseUrl": {
+                    "type": "string",
+                    "description": "自定义 OpenAI 兼容 baseUrl"
+                  },
+                  "thinkingLevel": {
+                    "type": "string",
+                    "enum": [
+                      "minimal",
+                      "low",
+                      "medium",
+                      "high",
+                      "max"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "生成文本 + 请求参数回显",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "text": {
+                          "type": "string"
+                        },
+                        "model": {
+                          "type": "string"
+                        },
+                        "thinkingConfig": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "缺少 model/apiKey 或 baseUrl 不在白名单",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "生成失败（含 aiError 归一化）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai-translation": {
+      "post": {
+        "tags": [
+          "AI"
+        ],
+        "operationId": "aiTranslation",
+        "summary": "统一 AI 翻译端点",
+        "description": "type=twitter（默认）翻译推文实体；type=ins 翻译 IG caption。baseUrl 走 ENABLE_AI_BASE_URL_WHITELIST 可选白名单（AC-SEC-001）。",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "twitter",
+                      "ins"
+                    ],
+                    "default": "twitter"
+                  },
+                  "tweet": {
+                    "$ref": "#/components/schemas/EnrichedTweet",
+                    "description": "type=twitter 时必填"
+                  },
+                  "igPost": {
+                    "$ref": "#/components/schemas/IGPost",
+                    "description": "type=ins 时必填"
+                  },
+                  "enableAITranslation": {
+                    "type": "boolean",
+                    "description": "twitter 分支守卫"
+                  },
+                  "force": {
+                    "type": "boolean",
+                    "description": "强制重新翻译"
+                  },
+                  "apiKey": {
+                    "type": "string"
+                  },
+                  "model": {
+                    "type": "string"
+                  },
+                  "provider": {
+                    "type": "string",
+                    "enum": [
+                      "google",
+                      "deepseek",
+                      "openrouter"
+                    ]
+                  },
+                  "baseUrl": {
+                    "type": "string"
+                  },
+                  "thinkingLevel": {
+                    "type": "string",
+                    "enum": [
+                      "minimal",
+                      "low",
+                      "medium",
+                      "high",
+                      "max"
+                    ]
+                  },
+                  "translationGlossary": {
+                    "type": "string",
+                    "maxLength": 4000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "翻译结果",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "tweetId": {
+                          "type": "string"
+                        },
+                        "entities": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/TranslationEntity"
+                          }
+                        },
+                        "captionTranslation": {
+                          "type": "string",
+                          "description": "ins 分支"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "缺少参数 / baseUrl 不在白名单",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "tweet/igPost 缺失",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "翻译失败（含 aiError）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai-vision": {
+      "post": {
+        "tags": [
+          "AI"
+        ],
+        "operationId": "aiVision",
+        "summary": "AI 视觉描述 / OCR 翻译 / 保存",
+        "description": "三种严格互斥请求形态：generate（mediaIndexes + mode，无 action）、translate（action=translate + items）、save（action=save + tweet.visionInfo）。",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "触发形态由字段组合严格互斥（详见路由内 zod strict 校验）",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "translate",
+                      "save"
+                    ],
+                    "description": "translate/save 形态必填；generate 不带"
+                  },
+                  "tweet": {
+                    "$ref": "#/components/schemas/EnrichedTweet",
+                    "description": "客户端可携带 visionInfo（generate 合并用）"
+                  },
+                  "mediaIndexes": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "description": "generate 形态必填"
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "describe",
+                      "ocr",
+                      "custom"
+                    ],
+                    "description": "generate 形态必填"
+                  },
+                  "customPrompt": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "withContext": {
+                    "type": "boolean"
+                  },
+                  "items": {
+                    "type": "array",
+                    "description": "translate 形态：{ index, originalText }[]",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "apiKey": {
+                    "type": "string"
+                  },
+                  "model": {
+                    "type": "string"
+                  },
+                  "provider": {
+                    "type": "string",
+                    "enum": [
+                      "google",
+                      "deepseek",
+                      "openrouter"
+                    ]
+                  },
+                  "baseUrl": {
+                    "type": "string"
+                  },
+                  "thinkingLevel": {
+                    "type": "string",
+                    "enum": [
+                      "minimal",
+                      "low",
+                      "medium",
+                      "high",
+                      "max"
+                    ]
+                  },
+                  "translationGlossary": {
+                    "type": "string",
+                    "maxLength": 4000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "操作结果",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "visionInfo": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/AIVisionInfo"
+                          }
+                        },
+                        "translations": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "非法 JSON / 形状不匹配任一形态 / baseUrl 不在白名单",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "生成/保存/翻译失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/proxy/image": {
+      "get": {
+        "tags": [
+          "Proxy"
+        ],
+        "operationId": "proxyImage",
+        "summary": "图片代理",
+        "description": "解决 Instagram CDN CORS/CORP 拦截；仅允许图片扩展名或 cdninstagram.com / fbcdn.net 域名（防 SSRF）。",
+        "parameters": [
+          {
+            "name": "url",
+            "in": "query",
+            "required": true,
+            "description": "图片 URL（同源响应返回，带缓存头）",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "图片二进制（Content-Type 透传上游）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "缺少 url",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "URL 不在白名单",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "上游拉取失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bili-post": {
+      "post": {
+        "tags": [
+          "Bili"
+        ],
+        "operationId": "biliPost",
+        "summary": "Bili 动态发布（隐藏自用）",
+        "description": "隐藏自用入口：转发到 api.bilibili.com 上传图片并发布动态；ENABLE_BILI=false 时返回 404。",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "content",
+                  "cookie"
+                ],
+                "properties": {
+                  "content": {
+                    "type": "string",
+                    "description": "动态正文"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "cookie": {
+                    "type": "string",
+                    "description": "Bili Cookie（需含 bili_jct 与 DedeUserID）"
+                  },
+                  "images": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    },
+                    "description": "可选图片文件"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "发布结果（CreateDynResult）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "dyn_id_str": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "失败时"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "ENABLE_BILI=false 未启用",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "发布失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "description": "统一错误响应",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "default": false
+          },
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "cause": {},
+          "aiError": {
+            "description": "AI 提供商归一化错误（可选）"
+          }
+        }
+      },
+      "TweetUser": {
+        "type": "object",
+        "description": "推文作者（app/types/user.ts TweetUser）",
+        "required": [
+          "id_str",
+          "name",
+          "profile_image_url_https",
+          "profile_image_shape",
+          "screen_name",
+          "verified",
+          "is_blue_verified"
+        ],
+        "properties": {
+          "id_str": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "profile_image_url_https": {
+            "type": "string",
+            "format": "uri",
+            "description": "头像 URL"
+          },
+          "profile_image_shape": {
+            "type": "string",
+            "enum": [
+              "Circle",
+              "Square",
+              "Hexagon"
+            ]
+          },
+          "screen_name": {
+            "type": "string"
+          },
+          "verified": {
+            "type": "boolean"
+          },
+          "verified_type": {
+            "type": "string",
+            "enum": [
+              "Business",
+              "Government"
+            ],
+            "description": "可选"
+          },
+          "is_blue_verified": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Entity": {
+        "type": "object",
+        "description": "推文实体（app/types/entities.ts Entity）。type 决定附加字段：hashtag/mention/url/media/symbol 带 href；media_alt/separator 无 href；separator 带 mediaIndex。",
+        "required": [
+          "text",
+          "type",
+          "index"
+        ],
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "index": {
+            "type": "integer",
+            "description": "实体的文本偏移索引"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "text",
+              "hashtag",
+              "mention",
+              "url",
+              "media",
+              "symbol",
+              "media_alt",
+              "separator"
+            ]
+          },
+          "href": {
+            "type": "string",
+            "description": "除 text/media_alt/separator 外的类型带链接"
+          },
+          "translation": {
+            "type": "string",
+            "description": "手动翻译"
+          },
+          "aiTranslation": {
+            "type": "string",
+            "description": "AI 翻译（ai-translation 端点写入）"
+          },
+          "mediaIndex": {
+            "type": "integer",
+            "description": "separator 类型：对应媒体索引"
+          }
+        },
+        "additionalProperties": true
+      },
+      "TranslationEntity": {
+        "type": "object",
+        "description": "存储在 DB 的翻译实体（app/types/entities.ts TranslationEntity），类型限于 text/hashtag/media_alt/separator，含翻译字段。",
+        "required": [
+          "text",
+          "type",
+          "index"
+        ],
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "index": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "text",
+              "hashtag",
+              "media_alt",
+              "separator"
+            ]
+          },
+          "href": {
+            "type": "string"
+          },
+          "translation": {
+            "type": "string"
+          },
+          "aiTranslation": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      },
+      "AIVisionInfo": {
+        "type": "object",
+        "description": "AI 视觉描述条目（app/types/vision.ts AIVisionInfo），挂在 EnrichedTweet.visionInfo[]",
+        "required": [
+          "index",
+          "mode",
+          "promptId",
+          "provider",
+          "model",
+          "status",
+          "createdAt"
+        ],
+        "properties": {
+          "index": {
+            "type": "integer",
+            "description": "对应 mediaDetails 数组索引（0-based）"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "describe",
+              "ocr",
+              "custom"
+            ]
+          },
+          "promptId": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string",
+            "description": "实际使用的 provider"
+          },
+          "model": {
+            "type": "string",
+            "description": "实际使用的模型 slug"
+          },
+          "description": {
+            "type": "string",
+            "description": "describe/custom 模式：看图说话描述"
+          },
+          "originalText": {
+            "type": "string",
+            "description": "ocr 模式：图片原文"
+          },
+          "translatedText": {
+            "type": "string",
+            "description": "ocr 模式：简体中文翻译"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "done",
+              "error"
+            ]
+          },
+          "error": {
+            "type": "string",
+            "description": "status=error 时"
+          },
+          "createdAt": {
+            "type": "integer",
+            "description": "epoch ms"
+          }
+        }
+      },
+      "EnrichedTweet": {
+        "type": "object",
+        "description": "enrich 后的推文（app/types/index.ts EnrichedTweet），字段类型与媒体验证为 open schema。",
+        "required": [
+          "lang",
+          "created_at",
+          "entities",
+          "id_str",
+          "text",
+          "user",
+          "url"
+        ],
+        "properties": {
+          "__typename": {
+            "type": "string",
+            "enum": [
+              "Tweet"
+            ]
+          },
+          "lang": {
+            "type": "string",
+            "description": "语言代码，如 en/ja"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601"
+          },
+          "id_str": {
+            "type": "string",
+            "description": "推文唯一 ID"
+          },
+          "text": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "推文完整 URL"
+          },
+          "user": {
+            "$ref": "#/components/schemas/TweetUser"
+          },
+          "entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Entity"
+            }
+          },
+          "autoTranslationEntities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Entity"
+            },
+            "description": "旧版自动翻译实体"
+          },
+          "visionInfo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AIVisionInfo"
+            },
+            "description": "AI 视觉描述结果"
+          },
+          "quoted_tweet_id": {
+            "type": "string",
+            "description": "引用推文 ID"
+          },
+          "quotedTweet": {
+            "$ref": "#/components/schemas/EnrichedTweet",
+            "description": "引用推文（递归）"
+          },
+          "card": {
+            "type": "object",
+            "description": "预览卡片（LinkPreviewCard）"
+          },
+          "comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnrichedTweet"
+            },
+            "description": "内联评论线程"
+          },
+          "in_reply_to_status_id_str": {
+            "type": "string"
+          },
+          "mediaDetails": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "媒体详情（图片/视频，见 app/types/media.ts）"
+            }
+          },
+          "possibly_sensitive": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": true
+      },
+      "IGAudio": {
+        "type": "object",
+        "description": "IG 帖子附带音频/音乐信息（app/types/ins.ts IGAudio）",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "string"
+          },
+          "artist": {
+            "type": "string"
+          },
+          "duration": {
+            "type": "number"
+          },
+          "cover_artwork_uri": {
+            "type": "string",
+            "format": "uri"
+          },
+          "cover_artwork_thumbnail_uri": {
+            "type": "string",
+            "format": "uri"
+          },
+          "has_lyrics": {
+            "type": "boolean"
+          },
+          "is_explicit": {
+            "type": "boolean"
+          }
+        }
+      },
+      "IGMedia": {
+        "type": "object",
+        "description": "IG 媒体项（app/types/ins.ts IGMedia）",
+        "required": [
+          "num",
+          "media_id",
+          "display_url",
+          "width",
+          "height",
+          "type"
+        ],
+        "properties": {
+          "num": {
+            "type": "integer",
+            "description": "帖内序号"
+          },
+          "media_id": {
+            "type": "string"
+          },
+          "shortcode": {
+            "type": "string",
+            "description": "媒体级短码"
+          },
+          "display_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "video_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri",
+            "description": "视频 CDN URL（图片为 null）"
+          },
+          "width": {
+            "type": "integer"
+          },
+          "height": {
+            "type": "integer"
+          },
+          "width_original": {
+            "type": "integer"
+          },
+          "height_original": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "photo",
+              "video"
+            ]
+          },
+          "tagged_users": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                },
+                "full_name": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "IGPost": {
+        "type": "object",
+        "description": "IG 帖子标准化结构（app/types/ins.ts IGPost）",
+        "required": [
+          "id",
+          "post_id",
+          "url",
+          "username",
+          "fullname",
+          "description",
+          "likes",
+          "type",
+          "media"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "URL shortcode，路由主键"
+          },
+          "post_id": {
+            "type": "string",
+            "description": "帖子数字 ID"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "username": {
+            "type": "string"
+          },
+          "fullname": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "description": "caption，翻译目标文本"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "#hashtag 列表"
+          },
+          "likes": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "post",
+              "reel",
+              "story",
+              "highlight"
+            ]
+          },
+          "media": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IGMedia"
+            }
+          },
+          "avatar_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 字符串"
+          },
+          "location_name": {
+            "type": "string"
+          },
+          "coauthors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "username": {
+                  "type": "string"
+                },
+                "fullname": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "verified": {
+            "type": "boolean"
+          },
+          "audio": {
+            "$ref": "#/components/schemas/IGAudio"
+          },
+          "captionTranslation": {
+            "type": "string",
+            "description": "AI / 手动翻译后的 caption"
+          }
+        }
+      },
+      "RawUser": {
+        "type": "object",
+        "description": "用户资料（app/lib/rettiwt-api/types/data/User.ts IUser）",
+        "required": [
+          "createdAt",
+          "followersCount",
+          "followingsCount",
+          "fullName",
+          "id",
+          "isVerified",
+          "likeCount",
+          "profileImage",
+          "statusesCount",
+          "userName"
+        ],
+        "properties": {
+          "createdAt": {
+            "type": "string",
+            "description": "账号创建时间"
+          },
+          "description": {
+            "type": "string",
+            "description": "用户简介"
+          },
+          "followersCount": {
+            "type": "integer"
+          },
+          "followingsCount": {
+            "type": "integer"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "description": "rest id"
+          },
+          "isFollowed": {
+            "type": "boolean",
+            "description": "仅登录态可得"
+          },
+          "isFollowing": {
+            "type": "boolean",
+            "description": "仅登录态可得"
+          },
+          "isVerified": {
+            "type": "boolean"
+          },
+          "likeCount": {
+            "type": "integer"
+          },
+          "location": {
+            "type": "string"
+          },
+          "pinnedTweet": {
+            "type": "string"
+          },
+          "profileBanner": {
+            "type": "string",
+            "description": "封面图 URL"
+          },
+          "profileImage": {
+            "type": "string",
+            "format": "uri"
+          },
+          "statusesCount": {
+            "type": "integer"
+          },
+          "userName": {
+            "type": "string",
+            "description": "screen_name"
+          }
+        }
+      },
+      "RepliesResponse": {
+        "type": "object",
+        "required": [
+          "tweets",
+          "nextCursor"
+        ],
+        "properties": {
+          "tweets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnrichedTweet"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "SearchResponse": {
+        "type": "object",
+        "required": [
+          "tweets",
+          "nextCursor"
+        ],
+        "properties": {
+          "tweets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnrichedTweet"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
