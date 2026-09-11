@@ -10,4 +10,5 @@ pre-push:
     - run: bun run typecheck
     - run: bunx eslint .
     - run: bun run verify/index.ts --exit-on-fail
+    - run: bun run build
     - run: bun run build-storybook
