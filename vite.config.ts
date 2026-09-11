@@ -67,7 +67,13 @@ export default defineConfig(({ isSsrBuild }) => ({
     babel({
       include: babelInclude,
       babelConfig: {
-        presets: ['@babel/preset-typescript'], // if you use TypeScript
+        // 版本约束：vite-plugin-babel@1.x 的 peer 为 @babel/core ^7，而
+        // @babel/preset-typescript v8 的 peer 是 @babel/core ^8，且 v8 移除了
+        // isTSX/allExtensions —— 不再自动为 .tsx 开启 JSX 解析（需另配
+        // @babel/plugin-syntax-jsx）。二者混用会让 .tsx 的 <Jsx/> 被当作 TS
+        // 类型断言解析而构建失败。故该 preset 必须锁在 core-7 线（见 package.json
+        // 的 `~7.29.7`）与 postmortem 010。升级前请先确认 vite-plugin-babel 支持 core 8。
+        presets: ['@babel/preset-typescript'],
         plugins: [
           ['babel-plugin-react-compiler', ReactCompilerConfig],
         ],
