@@ -51,8 +51,17 @@ function Write-Ui {
   }
 }
 
+# skill 版本单源：从同级 SKILL.md 的 frontmatter 读取，避免 UA 里的手写副本漂移。
+function Get-SkillVersion {
+  $skill = Join-Path $PSScriptRoot '..' 'SKILL.md'
+  if (-not (Test-Path -LiteralPath $skill)) { return 'unknown' }
+  $m = Select-String -LiteralPath $skill -Pattern '^\s*version:\s*"?([0-9]+\.[0-9]+\.[0-9]+)"?\s*$' | Select-Object -First 1
+  if ($m) { return $m.Matches.Groups[1].Value }
+  return 'unknown'
+}
+
 $script:BaseUrl = if ($env:ANON_TWEET_BASE_URL) { $env:ANON_TWEET_BASE_URL.TrimEnd('/') } else { 'https://anon-tweet.chilfish.top' }
-$script:UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) anon-tweet-skill/1.2'
+$script:UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) anon-tweet-skill/$(Get-SkillVersion)"
 $script:ValueFlags = @('--type', '--count', '--cursor', '--manual', '--out')
 
 function Fail {

@@ -7,16 +7,23 @@
  *   且 Data Shapes 小节给出常用接口（搜索/获取推文）出入参形态
  * - AC-LLMS-002：OpenAPI 3.1 结构合法，paths 与端点清单三方奇偶校验
  *   （apiEndpoints ↔ OpenAPI paths ↔ 期望路径列表），关键端点参数/请求体完整，
- *   响应 schema $ref 指向带真实字段定义的 components.schemas
+ *   响应 schema $ref 指向带真实字段定义的 components.schemas；
+ *   另做版本奇偶校验——`info.version` 单源取自 package.json，随附快照不得漂移
  */
 import { describe, expect, it } from 'vitest'
 import { apiEndpoints, buildLlmsTxt, buildOpenApiDoc } from '~/lib/llms'
+import pkg from '../../package.json'
+import { readProjectFile } from '../helpers/read-project-file'
 
 const BASE_URL = 'https://anon-tweet.example.com'
+
+/** 随本 skill 分发的 OpenAPI 快照（由 /openapi.json 重新生成） */
+const OPENAPI_SNAPSHOT_REL = '.agents/skills/anon-tweet/references/anon-tweet-openapi.json'
 
 // 复用的规范化检查正则（模块作用域，避免每次调用重新编译）
 const LINK_BULLET_RE = /^- \[[^\]]+\]\([^)]+\): /
 const HTML_TAG_RE = /<[a-z/]/i
+const SEMVER_RE = /^\d+\.\d+\.\d+/
 
 // ── 期望路径清单（与 app/routes.ts 的 api/* 前缀一一对应） ────────────────
 const EXPECTED_PATHS = [
@@ -137,6 +144,19 @@ describe('AC-LLMS-002: openapi.json is a valid OpenAPI 3.1 doc covering all back
     expect(doc.openapi.startsWith('3.1.')).toBe(true)
     expect(doc.info.title).toBe('Anon Tweet API')
     expect(doc.servers[0]?.url).toBe(BASE_URL)
+  })
+
+  it('info.version is single-sourced from package.json (no hardcoded literal)', () => {
+    expect(pkg.version).toMatch(SEMVER_RE)
+    expect(doc.info.version).toBe(pkg.version)
+  })
+
+  it('bundled skill OpenAPI snapshot mirrors the generated spec version', () => {
+    const raw = readProjectFile(OPENAPI_SNAPSHOT_REL)
+    expect(raw).toBeTruthy()
+
+    const snapshot = JSON.parse(raw ?? '{}') as { info?: { version?: string } }
+    expect(snapshot.info?.version).toBe(pkg.version)
   })
 
   it('paths parity: apiEndpoints ↔ openapi paths ↔ expected list', () => {

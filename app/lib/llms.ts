@@ -17,7 +17,13 @@
  * ⚠️ 端点清单变更时（新增/删除/改路径）必须同步更新 `apiEndpoints` 与
  * `buildOpenApiDoc` 的 paths——`test/unit/llms.spec.ts`（AC-LLMS-002）会做
  * 「OpenAPI 路径 ↔ 端点清单 ↔ 期望列表」三方奇偶校验兜底。
+ *
+ * OpenAPI `info.version` 单源取自 `package.json`（本模块仅在服务端使用），
+ * 避免与发版版本手写漂移；随附快照
+ * `.agents/skills/anon-tweet/references/anon-tweet-openapi.json` 由
+ * `/openapi.json` 重新生成，故同样通过 AC-LLMS-002 校验其版本一致。
  */
+import pkg from '../../package.json'
 
 /** llms.txt / OpenAPI 使用的示例值（优先取仓库 fixture 里真实存在的 id） */
 export const LLMS_EXAMPLES = {
@@ -147,7 +153,7 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
     info: {
       title: 'Anon Tweet API',
       description: 'Anon Tweet 后端 BFF 聚合接口：Twitter/X 推文、Instagram 帖子、AI 翻译（Google Gemini / DeepSeek）、AI 视觉与截图导出缓存。人类可读说明见站点根 /llms.txt。',
-      version: '1.0.0',
+      version: pkg.version,
     },
     servers: [
       { url: baseUrl, description: '当前部署实例' },

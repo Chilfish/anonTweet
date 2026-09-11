@@ -5,7 +5,17 @@
 
 ## 版本纪律
 
-- 版本**单源**在 `package.json` 的 `version` 字段，禁止手改多处
+两个版本域**各自单源**，禁止同一域内手改多处：
+
+- **应用 / API 版本** — 单源 `package.json` 的 `version` 字段。
+  `/openapi.json` 的 `info.version` 与随附快照
+  `.agents/skills/anon-tweet/references/anon-tweet-openapi.json` 均由
+  `app/lib/llms.ts` 直接读取该字段注入，不手写；
+  `test/unit/llms.spec.ts`（AC-LLMS-002）做版本奇偶校验兜底。
+- **anon-tweet skill 版本** — 单源 `SKILL.md` 的 `metadata.version`
+  （第三方安装器 `npx skills add` 读取该字段）。`scripts/anon-tweet.ps1` 的
+  User-Agent 运行时从 `../SKILL.md` 读取，不再维护手写副本。
+  skill 独立于应用发版：skill 迭代不代表应用接口变更，反之亦然。
 - 发版走 `docs/engineering/git-workflow.md#版本发布`：CHANGELOG 更新 → 版本号 → PR → tag → GitHub Release
 - **tag 只打在门禁绿的 commit 上**
 - 版本号严格递增，禁止回退

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ## [Unreleased]
 
+### 版本单源治理（2026-09-11）
+
+- **Changed** OpenAPI `info.version` 由硬编码 `1.0.0` 改为读取 `package.json`（`app/lib/llms.ts`），随附 skill 快照 `references/anon-tweet-openapi.json` 随之重新生成对齐
+- **Changed** `anon-tweet.ps1` 的 User-Agent 版本改为运行时从 `../SKILL.md` frontmatter 读取（`Get-SkillVersion`），删除手写副本
+- **Added** AC-LLMS-002 版本奇偶校验：`info.version` ↔ `package.json` ↔ 随附快照三方一致
+- **Changed** 版本纪律（`release-checklist.md` / `git-workflow.md`）由「单源 package.json」更正为「应用 / API 版本」与「skill 版本」两个独立单源域
+
 ### 测试验证基建重构（2026-08-14）
 
 - **Changed** verify 引擎：自研 VerifyRunner/Verifier 框架删除，57 条 AC 迁移到标准 **Vitest 三层架构**（`test/unit` 纯函数 / `test/acceptance` AC 语义层 / `test/integration` BFF API），AC 编号 = test 名保持可追溯

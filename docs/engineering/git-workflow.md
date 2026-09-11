@@ -180,11 +180,17 @@ gh pr merge 1 --merge --delete-branch
 
 1. 从 `main` 创建 `release/x.y.z` 分支
 2. 更新 `CHANGELOG.md`
-3. 更新 `package.json` 的 `version` 字段
-4. 创建 PR → 合并到 `main`
-5. 在 `main` 上打 Tag: `git tag v1.0.0 && git push --tags`
-6. GitHub Release: `gh release create v1.0.0 --generate-notes`
-7. 走 `docs/engineering/release-checklist.md` 真机验收
+3. 更新 `package.json` 的 `version` 字段（`/openapi.json` 的 `info.version` 取自该字段，自动生效）
+4. 重新生成并同步 skill 随附快照 `references/anon-tweet-openapi.json`
+   （其 `info.version` 需与 `package.json` 一致，AC-LLMS-002 兜底）
+5. 创建 PR → 合并到 `main`
+6. 在 `main` 上打 Tag: `git tag v1.0.0 && git push --tags`
+7. GitHub Release: `gh release create v1.0.0 --generate-notes`
+8. 走 `docs/engineering/release-checklist.md` 真机验收
+
+> **skill 版本另算**：`anon-tweet` skill 的 `SKILL.md` `metadata.version` 独立于
+> 应用版本（第三方安装器读取该字段），skill 迭代不随应用发版；其 `scripts/anon-tweet.ps1`
+> 的 UA 版本运行时从 `SKILL.md` 读取，无需同步。详见 `release-checklist.md#版本纪律`。
 
 ## Issue 管理
 
