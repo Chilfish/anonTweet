@@ -1,9 +1,11 @@
 # 翻译系统验收标准
 
-> 版本：1.0 | 日期：2026-07-04
+> 版本：1.1 | 日期：2026-07-04（v1.1 2026-09-12：AC-TRANS-005/006/007 对齐 `it/describe` 命名，
+> 修复「文档有、测试无」断链；AC-TRANS-007 由 Dual Provider 更正为 google/deepseek/openrouter）
 > 对应 Postmortem：002 (Translation System)
-> 关联 Verifier：`verify/modules/translation.verifier.ts`
-> 执行命令：`bun verify --module translation [--ac AC-TRANS-NNN]`
+> 关联 Verifier：`test/unit/entitytParser.spec.ts` / `resolveTranslationView.spec.ts` /
+> `translationMaterialize.spec.ts` / `provider-strategy.spec.ts`
+> 执行命令：`bun run verify/index.ts --module translation [--ac AC-TRANS-NNN]`
 
 ---
 
@@ -87,14 +89,16 @@
 
 ---
 
-## AC-TRANS-007：Dual Provider 切换
+## AC-TRANS-007：Provider Strategy 切换（google / deepseek / openrouter）
 
-- **验证对象**：AI provider 选择逻辑（`app/lib/providers/`）
-- **输入**：`provider='google'` 和 `provider='deepseek'` 分别调用 `getProviderStrategy()`
-- **预期输出**：返回不同的 strategy 实例
+- **验证对象**：AI provider 选择逻辑（`app/lib/providers/`，`getProviderStrategy` / `getThinkingConfig`）
+- **测试**：`test/unit/provider-strategy.spec.ts`
+- **输入**：`provider='google'`、`'deepseek'`、`'openrouter'` 分别调用 `getProviderStrategy()`
+- **预期输出**：返回对应 strategy 实例；未知 provider 抛错
 - **Pass 条件**：
   - `getProviderStrategy('google')` 返回 Google strategy
   - `getProviderStrategy('deepseek')` 返回 DeepSeek strategy
+  - `getProviderStrategy('openrouter')` 返回 OpenRouter strategy
   - 非法 provider 名称抛出明确错误
 
 ---

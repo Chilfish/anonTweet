@@ -13,7 +13,7 @@ function makeTweet(base: Entity[], ai?: Entity[]): EnrichedTweet {
   } as any
 }
 
-describe('resolveTranslationView', () => {
+describe('AC-TRANS-005: resolveTranslationView 优先级（manual > ai > original）', () => {
   it('forces original when manual translation is explicitly hidden (null)', () => {
     const base: Entity[] = [{ type: 'text', text: 'x', index: 0 }]
     const ai: Entity[] = [{ type: 'text', text: 'x', index: 0, translation: 'y' }]

@@ -191,7 +191,7 @@ describe('openrouterStrategy', () => {
   })
 })
 
-describe('getProviderStrategy', () => {
+describe('AC-TRANS-007: provider strategy 切换（google / deepseek / openrouter）', () => {
   it('returns google strategy for "google"', () => {
     expect(getProviderStrategy('google')).toBe(googleStrategy)
   })

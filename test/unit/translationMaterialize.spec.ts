@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { stripTranslationsFromTweets } from '~/lib/stores/logic'
 import { materializeTweetWithManualTranslations } from '~/lib/translation/materialize'
 
-describe('translation materialization', () => {
+describe('AC-TRANS-006: materialize 不修改原始 tweet', () => {
   it('strips translation fields from tweet.entities without mutating input', () => {
     const input: EnrichedTweet = {
       id_str: '1',
