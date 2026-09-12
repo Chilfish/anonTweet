@@ -55,8 +55,8 @@ describe('AC-IG Instagram offline acceptance', () => {
     expect(problems).toEqual([])
   })
 
-  it('AC-IG-003: stories URL parsing returns username/story_id', () => {
-    expect(extractIGId('https://www.instagram.com/stories/testuser/12345/')).toBe('testuser/12345')
+  it('AC-IG-003: stories URL parsing returns the canonical story id', () => {
+    expect(extractIGId('https://www.instagram.com/stories/testuser/12345/')).toBe('story~testuser~12345')
   })
 
   it('AC-IG-004: post URL parsing returns shortcode', () => {

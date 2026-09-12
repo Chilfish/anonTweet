@@ -100,8 +100,10 @@ describe('AC-PWA-003: share target receive decision', () => {
       expect(resolveShareTarget('https://instagram.com/reel/AbCd123/')).toEqual({ ok: true, to: '/ins/AbCd123' })
     })
 
-    it('iG stories → /ins/{username}/{id}', () => {
-      expect(resolveShareTarget('https://www.instagram.com/stories/foo/987654/')).toEqual({ ok: true, to: '/ins/foo/987654' })
+    it('iG stories 单条/全量/精选集 → /ins/{canonical id}', () => {
+      expect(resolveShareTarget('https://www.instagram.com/stories/foo/987654/')).toEqual({ ok: true, to: '/ins/story~foo~987654' })
+      expect(resolveShareTarget('https://www.instagram.com/stories/foo/')).toEqual({ ok: true, to: '/ins/stories~foo' })
+      expect(resolveShareTarget('https://www.instagram.com/stories/highlights/18104059936919418/')).toEqual({ ok: true, to: '/ins/highlight~18104059936919418' })
     })
 
     it('混在正文里的 X 链接也能识别（源 App 常把正文与链接拼在 text）', () => {

@@ -1,6 +1,7 @@
 # Instagram 集成验收标准
 
-> 版本：1.3 | 日期：2026-09-12（v1.3：Story 接入 AC 单列至 [AC-ig-story.md](AC-ig-story.md)；v1.2 2026-09-12：F8 去 fixture 自证）
+> 版本：1.4 | 日期：2026-09-12（v1.4：AC-IG-003 单条 story id 改为 canonical `story~{user}~{media}`，
+> 列表型 tray/精选集见 [AC-ig-story.md](AC-ig-story.md)；v1.3：Story 接入 AC 单列；v1.2：F8 去 fixture 自证）
 > 对应 Postmortem：007 (Instagram Integration)
 > 关联 Verifier：`test/acceptance/ac-ig.spec.ts`（离线）/ `test/integration/api.ig.spec.ts`（集成）
 > 执行命令：`bun run verify/index.ts --module ig [--ac AC-IG-NNN]`
@@ -50,8 +51,10 @@
 - **验证对象**：`extractIGId()` + API 路由 URL 构造
 - **预期输出**：生成正确的 stories URL
 - **Pass 条件**：
-  - `extractIGId("username/story_id")` 返回 `"username/story_id"`
-  - 生成的 URL 为 `https://www.instagram.com/stories/username/story_id/`
+  - `extractIGId("https://www.instagram.com/stories/testuser/12345/")` 返回 canonical `"story~testuser~12345"`
+  - 由 `igIdToSourceUrl()` 生成的 URL 为 `https://www.instagram.com/stories/testuser/12345/`
+- **备注**：v1.4 起单条 story id 由 `username/story_id` 改为单段 canonical id（含 `/` 的旧值
+  命中不了 `/ins/:id`、`/api/ig/get/:id` 单段路由）；用户级 tray / 精选集列表见 `AC-IG-STORY-004`
 
 ---
 

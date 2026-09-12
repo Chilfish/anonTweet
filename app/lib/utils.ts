@@ -10,6 +10,8 @@ export {
   detectInputType,
   extractIGId,
   extractTweetId,
+  igIdToSourceUrl,
+  isIGListId,
 } from '~/lib/url-detect'
 
 export function cn(...inputs: ClassValue[]) {
