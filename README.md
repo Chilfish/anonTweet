@@ -1,165 +1,173 @@
 # Anon Tweet
 
-**Anon Tweet** 是一个基于 **React Router v7** 构建的现代化全栈应用程序，旨在提供极致的推文与 Instagram 帖子匿名浏览体验。本项目集成了 **Google Gemini / DeepSeek AI** 双提供商翻译功能，支持推文卡片与 IG 帖子导出（截图 + Markdown）。
+不用登录就能浏览 Twitter/X 推文和 Instagram 帖子，支持 AI 翻译与卡片导出。
 
-## 🛠 Tech Stack
+线上实例：<https://anon-tweet.chilfish.top>
 
-本项目采用现代 React 全栈架构，利用 Bun 作为高性能运行时。
+## 功能
 
-- **Core Framework**: [React Router v7](https://reactrouter.com/) (Fullstack, SSR/CSR)
-- **Language & Runtime**: TypeScript, [Bun](https://bun.sh/)
-- **AI & Automation**:
-  - [Google Gemini API](https://ai.google.dev/) + [DeepSeek API](https://platform.deepseek.com/) (双提供商翻译引擎)
-  - [Vercel AI SDK](https://sdk.vercel.ai/docs) (Stream & State Management)
-- **Data Sources**:
-  - Twitter/X Private API (via bundled `rettiwt-api`)
-  - Instagram (via `@chilfish/gallery-dl-instagram` SDK)
-- **UI System**:
-  - [Tailwind CSS v4](https://tailwindcss.com/) (Styling)
-  - [shadcn/ui](https://ui.shadcn.com/) (Component Primitives)
-  - [Lucide React](https://lucide.dev/) (Icons)
-- **Data & State**:
-  - [Drizzle ORM](https://orm.drizzle.team/) + PostgreSQL / Neon Serverless (Optional, for caching)
-  - [SWR](https://swr.vercel.app/) (Data Fetching)
-  - [Zustand](https://zustand-demo.pmnd.rs/) (Client-side global state)
-- **Export & Media**:
-  - [modern-screenshot](https://www.npmjs.com/package/modern-screenshot) (Screenshot export)
-  - [xlsx](https://www.npmjs.com/package/xlsx) (Dictionary import/export)
-  - [html-to-image](https://www.npmjs.com/package/html-to-image) (Alternative screenshot backend)
+**推文**
 
-## 🚀 Getting Started
+- 单条推文、评论线程、引用推文
+- List 时间线、关键词搜索（支持 `from:`、`since:` 等 X 高级语法）
 
-按照以下步骤在本地启动开发环境。
+**Instagram**
 
-### 1. Installation
+- Post / Reel / Story
+- 图片与视频直链下载
 
-确保本地已安装 [Bun](https://bun.sh/)。
+**AI 翻译**
+
+- Google Gemini、DeepSeek、OpenRouter（Vercel AI SDK）
+- 双语对照，可在双语 / 原文 / 仅译文之间切换
+- 逐条手动编辑，手动结果与 AI 结果并存，互不覆盖
+- 送模型前用占位符保护 URL、@、话题标签，避免被改写
+
+**导出**
+
+- 卡片截图（PNG / JPEG）
+- Markdown、纯文本复制
+- 媒体下载
+
+**其他**
+
+- 三层缓存：内存 LRU → 本地文件 → PostgreSQL（可选）
+- PWA：可安装到桌面，支持从系统分享菜单直接发到本站
+- 机器可读接口：`/openapi.json`、`/llms.txt`
+
+## 技术栈
+
+- **框架**：React Router v8（SSR + CSR）
+- **运行时**：Bun 1.4、TypeScript
+- **数据源**：Twitter/X 接口（内置 `rettiwt-api` 逆向适配）、Instagram（`@chilfish/gallery-dl-instagram`）
+- **AI**：Vercel AI SDK（Gemini / DeepSeek / OpenRouter）
+- **UI**：Tailwind CSS v4、shadcn/ui、coss、Lucide
+- **状态**：Zustand（客户端）、SWR（服务端数据）
+- **持久化**：Drizzle ORM + PostgreSQL（Neon），可选
+- **测试**：Vitest（unit / integration / acceptance 三层）、Storybook
+
+## 快速开始
+
+环境要求：Bun 1.4 以上（仓库的 `packageManager` 为 `bun@1.4.2`）。
 
 ```bash
-# Clone repository
 git clone https://github.com/Chilfish/anonTweet.git
 cd anonTweet
-
-# Install dependencies
 bun install
 ```
 
-### 2. Environment Setup
+### 配置
 
-在项目根目录创建 `.env` 文件，并参照以下配置设置关键变量。
-
-> **注意**: AI 翻译功能依赖于 Google Gemini 或 DeepSeek API，截图功能依赖于正确的 HOSTNAME 配置。
+把 `example.env` 复制成 `.env`，按需修改。
 
 ```env
-ENVIRONMENT="development" # development | production
-HOSTNAME="http://localhost:9080" # ⚠️ 截图服务回调地址，生产环境请填写实际域名
+ENVIRONMENT="development"
+HOSTNAME="http://localhost:9080"   # 截图回调用的绝对地址，不填时开发环境自动推断
 
-# ⚠️ 必需。用于服务端获取推文数据流。
-# 若不配置，将受到严格的 Rate Limit 限制。
-# 支持配置多个 Key（用英文逗号分隔）以实现轮询 + 故障转移。
-TWEET_KEYS="your_twitter_auth_token_1,your_twitter_auth_token_2"
+TWEET_KEYS=""        # 不填也能用，但会被上游限流；多个 Key 用逗号分隔
+INS_COOKIES=""       # Instagram cookies；不填时 /api/ig/get 返回空数组
 
-# 🆕 Instagram 解析 — 必需。从浏览器 DevTools 复制 cookies JSON
-INS_COOKIES='{"sessionid":"...","csrftoken":"..."}'
-
-# 启用 AI 翻译功能
 ENABLE_AI_TRANSLATION="true"
-# Google Gemini API Key
-GEMINI_API_KEY="AIzaSy..."
-# 模型选择（默认 gemini-3-flash-preview）
+GEMINI_API_KEY=""
 GEMINI_MODEL="models/gemini-3-flash-preview"
+# DEEPSEEK_API_KEY=""
 
-# DeepSeek（可选，双提供商切换）
-# DEEPSEEK_API_KEY="sk-..."
-# DEEPSEEK_MODEL="deepseek-v4-flash"
-
-# 启用本地文件缓存（Node/Bun 环境）
 ENABLE_LOCAL_CACHE="true"
-
-# 用户时间线接口开关（默认关闭，固定 429 防滥用）
-# 自部署实例可设 true 启用，需配合自己的 TWEET_KEYS
-ENABLE_TIMELINE="false"
-
-# 如果不配置 DB_URL，系统将直接调用 API 而不使用持久化缓存。
-# DB_URL="postgres://..."
 ENABLE_DB_CACHE="false"
+# DB_URL="postgres://..."
 
-# 部署到 Vercel 时必须设置为 true，本地开发设为 false 或留空
-VERCEL="false"
+ENABLE_TIMELINE="false"   # 用户时间线接口，默认关闭（固定 429 防滥用）
 ```
 
-#### 🔑 关于 TWEET_KEYS 的获取
+<details>
+<summary>TWEET_KEYS 怎么获取</summary>
 
-本项目使用 Rettiwt-API 进行数据抓取。为获取完整访问权限并降低风控概率，需注入 Twitter 用户凭证。支持配置多个账号凭证以应对高频请求时的 Rate Limit 问题。
+内置的 rettiwt-api 走 Twitter 用户凭证抓取，配置多个 Key 可以轮换，降低被限流的概率。
 
-**操作步骤：**
+1. 安装浏览器扩展：Chrome 用 [X Auth Helper](https://chromewebstore.google.com/detail/x-auth-helper/igpkhkjmpdecacocghpgkghdcmcmpfhp)，Firefox 用 [Rettiwt Auth Helper](https://addons.mozilla.org/en-US/firefox/addon/rettiwt-auth-helper)
+2. 建议在无痕窗口里登录 X 账号
+3. 打开扩展，点 `Get Key`，复制生成的字符串
+4. 填入 `.env` 的 `TWEET_KEYS`，多个用逗号分隔
 
-1.  安装浏览器扩展：
-    - **Chrome/Chromium**: [X Auth Helper](https://chromewebstore.google.com/detail/x-auth-helper/igpkhkjmpdecacocghpgkghdcmcmpfhp)
-    - **Firefox**: [Rettiwt Auth Helper](https://addons.mozilla.org/en-US/firefox/addon/rettiwt-auth-helper)
-2.  建议使用浏览器的**无痕/隐私模式**登录 Twitter/X 账号。
-3.  登录后打开扩展，点击 `Get Key` / `Get API Key` 并复制生成的字符串。
-4.  将该字符串填入 `.env` 的 `TWEET_KEYS` 字段（多个 Key 用逗号分隔）。
+这个字符串是账号 Cookies 的 Base64 编码，权限等同于账号密码，不要外传。获取后不要手动点登出，直接关掉浏览器窗口，否则服务端会话会失效。
 
-> **⚠️ Security Note**: 该 Key 本质上是账号 Cookies 的 Base64 编码，拥有完全账户权限，安全等级等同于你的账号+密码。请勿泄露。
-> **⚠️ Session Keep-alive**: 获取 Key 后，**请勿手动点击登出 (Log out)**，否则服务端 Session 将失效。直接关闭浏览器窗口即可。
+</details>
 
-### 3. Database Migration (Optional)
+其余变量的含义见 [`docs/features/deploy/deployment.md`](docs/features/deploy/deployment.md)。
 
-如果你启用了数据库（配置了 `DB_URL` 且 `ENABLE_DB_CACHE=true`），则需要初始化数据库 Schema。
+### 数据库（可选）
+
+只有配置了 `DB_URL` 且 `ENABLE_DB_CACHE=true` 时才需要初始化。
 
 ```bash
-# 将 Schema 推送到数据库 (Prototyping)
-bun run db:push
-
-# 或者生成迁移文件并执行 (Production)
-# bun run db:generate
-# bun run db:migrate
+bun run db:push       # 推送 schema，适合原型阶段
+bun run db:generate   # 或生成迁移文件
+bun run db:migrate
 ```
 
-### 4. Start Dev Server
-
-启动开发服务器，默认运行在 `http://localhost:9080`。
+### 启动
 
 ```bash
 bun run dev
 ```
 
-## 📦 Deployment
+默认运行在 <http://localhost:9080>。
 
-### Vercel 部署
+## 部署
 
-本项目针对 Vercel Serverless 环境进行了适配。
+**Vercel**
 
-1.  在 Vercel 项目设置中，务必添加环境变量 `VERCEL="true"` 以激活 React Router 的适配器逻辑。
-2.  配置 `GEMINI_API_KEY` 以启用线上的翻译服务。
-3.  确保 `HOSTNAME` 设置为生产环境域名，否则推文截图功能将无法正确回调渲染。
+在项目设置里添加 `VERCEL=true` 以启用适配器，并配置 `TWEET_KEYS`、`GEMINI_API_KEY` 和 `HOSTNAME`。`HOSTNAME` 必须是生产域名，否则截图功能拿不到正确的回调地址。
 
-## 🚧 Features
-
-| 功能              | Twitter                                     | Instagram                   |
-| ----------------- | ------------------------------------------- | --------------------------- |
-| 匿名浏览          | ✅ 推文 + 评论 + 引用                       | ✅ Post / Reel / Story      |
-| AI 翻译           | ✅ Google Gemini + DeepSeek，实体占位符保护 | ✅ 纯文本翻译，中日检测     |
-| 手动翻译编辑器    | ✅ 实体级编辑（三态：手动/AI/原文）         | ✅ `IGTranslateDialog` 弹窗 |
-| 双语对照          | ✅ 三模式（双语/原文/仅译文）               | ✅ 同上                     |
-| 截图导出          | ✅ PNG/JPEG                                 | ✅ 同上                     |
-| Markdown/文本复制 | ✅                                          | ✅                          |
-| 媒体下载          | ✅                                          | ✅ 图片 + 视频直链          |
-| DB 缓存           | ✅ `tweet` + `tweet_entities` 表            | ✅ `ig_post` 表             |
-| 纯文本路由        | ✅ `/plain/:id`                             | ✅ `/plain-ins/:id`         |
-
-### External Libraries
-
-项目包含部分定制的第三方库核心，位于 `app/lib/` 目录下：
-
-- **`react-tweet`**: 经深度修改以适配 Tailwind v4，增加了 AI 翻译实体渲染支持。
-- **`rettiwt-api`**: 针对 Twitter GraphQL 接口逆向适配，支持多 Key 轮询（429/401/403 自动故障转移）。
-
-### Storybook
+**自托管**
 
 ```bash
-bun run storybook    # 启动在 http://localhost:6006
+bun run build
+bun run start
 ```
 
-14 个 IG 组件用例 + Twitter 推文渲染用例。
+`bun run start` 走 `server/express.js`，默认监听 9080，可用 `PORT` 覆盖。自托管可以用本地文件缓存，建议开 `ENABLE_LOCAL_CACHE=true`；Serverless 的文件系统只读，不能用。
+
+公开部署时还可以设 `ENABLE_AI_BASE_URL_WHITELIST=true`，配合 `ALLOWED_AI_BASE_URL_HOSTS` 限制 AI 请求的 baseUrl 目标。
+
+## 接口
+
+BFF 接口都在 `/api` 下，覆盖 tweet / ig / user / ai / proxy 几组，完整 schema 见线上的 [`/openapi.json`](https://anon-tweet.chilfish.top/openapi.json)；[`/llms.txt`](https://anon-tweet.chilfish.top/llms.txt) 是给 AI 爬虫和 agent 看的站点索引。
+
+仓库同时维护了一个 agent skill（`.agents/skills/anon-tweet/`），可以用 `npx skills add Chilfish/anonTweet` 安装，之后直接调本站接口搜索推文、读取 IG 帖子。
+
+用于截图的纯路由是 `/plain-tweet/:id` 和 `/plain-ins/:id`。
+
+## 常用命令
+
+```bash
+bun run dev                              # 开发服务器
+bun run build                            # 生产构建
+bun run typecheck                        # 类型检查（typegen + tsc）
+bun run lint                             # ESLint（含自动修复）
+bun run test                             # 单元 + 验收测试
+bun run test:integration                 # 集成测试
+bun run verify/index.ts --exit-on-fail   # 离线验证套件，CI 模式
+bun run storybook                        # 组件用例，http://localhost:6006
+```
+
+## 项目结构
+
+```
+app/
+├── components/   # UI 组件（tweet / ins / ui）
+├── lib/          # 缓存、翻译、数据访问层、逆向 API 客户端
+├── routes/       # 页面路由与 api/* BFF 路由
+└── stores/       # Zustand stores
+verify/           # 验收标准（AC）与验证套件
+test/             # Vitest 三层测试
+docs/             # 文档入口，见 docs/INDEX.md
+```
+
+## 贡献
+
+见 [CONTRIBUTING.md](CONTRIBUTING.md)。提交前请确保 `bun run typecheck && bun run lint && bun run test` 全部通过。
+
+## License
+
+[MIT](LICENSE)
