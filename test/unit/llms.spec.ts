@@ -61,10 +61,10 @@ describe('AC-LLMS-001: llms.txt matches llmstxt.org spec shape and covers all en
     // 每个含链接的子弹必须是 `- [文本](链接): 描述` 完整格式
     const bulletLines = lines.filter(l => l.trim().startsWith('- '))
     expect(bulletLines.length).toBeGreaterThan(5)
-    for (const line of bulletLines) {
-      if (line.includes(']('))
-        expect(line).toMatch(LINK_BULLET_RE)
-    }
+    const linkBullets = bulletLines.filter(l => l.includes(']('))
+    expect(linkBullets.length).toBeGreaterThan(0)
+    for (const line of linkBullets)
+      expect(line).toMatch(LINK_BULLET_RE)
   })
 
   it('is plain markdown: no HTML, no tables, no code fences', () => {

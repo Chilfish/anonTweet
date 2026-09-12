@@ -109,10 +109,7 @@ describe('AC-PWA-003: share target receive decision', () => {
     })
 
     it('空串/纯空白 → 提示输入', () => {
-      const r = resolveShareTarget('')
-      expect(r.ok).toBe(false)
-      if (!r.ok)
-        expect(r.error).toContain('请输入')
+      expect(resolveShareTarget('')).toEqual({ ok: false, error: expect.stringContaining('请输入') })
     })
 
     it('不可识别文本 → ok:false 留框报错（不自动跳转）', () => {

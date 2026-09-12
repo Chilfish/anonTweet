@@ -23,5 +23,11 @@ export default antfu({
     'e18e/prefer-static-regex': 'warn',
     // AC 验收编号命名（AC-TWEET-001 等）是验证体系的可追溯契约，豁免小写标题规则
     'test/prefer-lowercase-title': ['error', { allowedPrefixes: ['AC-'] }],
+    // F10（review-2026-09-11 P2-3）：把「每条 it 至少一条断言」变成机器可查，
+    // 并拦住条件断言 / 裸 expect —— 原 ac-sec 死 `return` 那类问题由此可被 lint 发现。
+    // `expectCovered` 是 ac-ui 的内部断言辅助（内部调用 expect）。
+    'test/expect-expect': ['error', { assertFunctionNames: ['expect', 'expectCovered'] }],
+    'test/no-conditional-expect': 'error',
+    'test/no-standalone-expect': 'error',
   },
 })
