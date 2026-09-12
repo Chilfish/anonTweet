@@ -144,3 +144,35 @@ Story（`/stories/{username}/{id}/`）与 Highlight 的识别、抓取早已可�
 > ⚠️ **验证边界**：离线 fixture（`test/fixtures/ig-posts/story-*.json`）为按 SDK 类型契约构造的
 > **合成输入**（沙箱无 `INS_COOKIES`，无法录制真实 payload），验证的是标准化映射行为，不代表上游
 > 字段未漂移；真实链路仍由集成层 `AC-IG-008`（需 cookies）把关，上游改版时需同步更新 fixture。
+
+## Story 列表：tray / 精选集（2026-09-12）
+
+输入框此前只认 `/stories/{user}/{mediaId}/`，而且返回的 id 含 `/`，单段路由（`/ins/:id`、
+`/api/ig/get/:id`）根本命中不了——单条 story 实际从未跑通。本轮把三种输入统一为**单段 canonical id**
+（`~` 分隔，URL path 与 Windows 文件名都安全），并把列表型输入展开成**每个 item 一张卡**：
+
+| 输入                         | canonical id     | 结果                             |
+| ---------------------------- | ---------------- | -------------------------------- |
+| `…/p/{sc}/`、`…/reel/{sc}/`  | `{sc}`           | 单卡（多图收进一张）             |
+| `…/stories/{u}/{m}/`         | `story~{u}~{m}`  | 单卡                             |
+| `…/stories/{u}/`             | `stories~{u}`    | **N 张卡**（该用户当前全部快拍） |
+| `…/stories/highlights/{id}/` | `highlight~{id}` | **N 张卡**（精选集全部条目）     |
+
+- **提取扇出**：`normalizeIGPosts()` 对 `story`/`highlight` 逐 `url` 消息产出一张 `IGPost`
+  （`id` 即该 item 的 canonical 缓存键，`expires`/`created_at`/链接贴纸取该 item）；仅含音频的消息
+  不再变成伪 media。普通 post/reel 行为不变。
+- **取数**：`getIGPostList()` 每次新鲜拉取（列表本身不缓存——故事 24h 变化、也避免翻译后列表陈旧），
+  但**每个 item 以自身 id 落 localCache + DB**，使每张卡可独立寻址。代价：每次列表访问一次 SDK
+  `reels_media`。
+- **渲染（下载优先）**：快拍/精选集用 `IGStoryList`——顶部「共 N 条 · 全选 · 下载选中(n) · 全部下载
+  （带进度）」，每卡勾选框（**默认不选**）+ 媒体 + 链接贴纸/精选标题 + 时间 + 单条下载；快拍只保留
+  下载，不套用帖子的截图/翻译/更多菜单（`IGHeader` 传 `storyMode` 后只留返回）。普通 post/reel 仍走
+  `IGPostList` 单卡 + `IGHeader` 全套操作（行为不变）。下载文件名
+  `ig-{username}-story-{media shortcode}.{ext}`（`extractIGStoryDownloadItems`）。
+- **验收**：`AC-IG-STORY-001~005`（`test/acceptance/ac-ig-story.spec.ts`），文档
+  [`verify/acceptance-criteria/AC-ig-story.md`](../../../verify/acceptance-criteria/AC-ig-story.md)。
+
+> 需求口径（所有者）：快拍主要就是拿来**下载图片/视频**，翻译或截图不是需求点 → 列表只保留下载，
+> 默认不勾选、手动选择后「下载选中」或直接「全部下载」。
+
+> 未纳入本轮：列表级缓存（短 TTL）、`{username}/highlights/`（用户全部精选集）与 legacy base64 精选集 URL。
