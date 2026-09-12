@@ -1,58 +1,55 @@
 # 贡献指南
 
-**项目**: Anon Tweet | **最后更新**: 2026-08-09
-
 ## 行为准则
 
-本项目遵循 [Contributor Covenant 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/)。简言之：友善、尊重、建设性。
+参与本项目请遵守[行为准则](CODE_OF_CONDUCT.md)。发现安全漏洞请走 [SECURITY.md](SECURITY.md) 的渠道，不要开公开 issue。
 
-## 如何贡献
+## 报告问题
 
-### 报告 Bug
+1. 先在 [Issues](https://github.com/Chilfish/anonTweet/issues) 搜一下有没有相同问题
+2. 没有的话用 Bug Report 模板新建 issue，写清复现步骤、预期行为、实际行为和运行环境
 
-1. 在 [Issues](https://github.com/Chilfish/anonTweet/issues) 搜索是否已有相同问题
-2. 使用 **Bug Report** 模板创建 Issue
-3. 填写：复现步骤、预期行为、实际行为、设备信息、截图
+## 提议功能
 
-### 提议功能
+1. 同样先搜一遍 Issues
+2. 用 Feature Request 模板说明使用场景和期望行为
+3. 等讨论确认后再动手，避免白做
 
-1. 在 Issues 搜索是否已有类似提议
-2. 使用 **Feature Request** 模板创建 Issue
-3. 描述：使用场景、期望行为、备选方案
-4. 等待讨论确认后再开始实现（避免浪费精力）
+## 提交代码
 
-### 提交代码
+1. Fork 并克隆仓库，从 `main` 切分支：`git checkout -b feat/your-feature`（修 bug 用 `fix/` 前缀）
+2. 代码风格按 [`docs/engineering/code-style.md`](docs/engineering/code-style.md) 来
+3. 新增或修改行为时，先补验收标准（`verify/acceptance-criteria/`）和测试，再写实现
+4. 本地跑完这几项：
 
-1. Fork 本仓库
-2. 创建 Feature 分支：`git checkout -b feat/your-feature`
-3. 遵循代码规范（见 `docs/engineering/code-style.md`）
-4. **验证先行**：先写 AC（`verify/acceptance-criteria/`）+ 测试，再实现
-5. 确保所有检查通过：
    ```bash
    bun run typecheck
    bun run lint
-   bun run test
+   bun run build
    bun run verify/index.ts --exit-on-fail
    ```
-6. 提交：`git commit -m "feat: your feature description"`
-7. Push 并创建 Pull Request（使用 PR 模板）
 
-### PR 要求
+   `verify` 已经覆盖单元、验收和集成测试，不用再单独跑 `bun run test`。
 
-- [ ] 代码通过所有测试
-- [ ] 新功能有测试覆盖 + 验证套件通过
-- [ ] Lint 零错误
-- [ ] Commit 遵循 Conventional Commits
-- [ ] 无 merge conflict
-- [ ] PR 描述清楚改了什么、为什么
-- [ ] 相关文档已更新（开发日志 `docs/development-log/`、CHANGELOG）
+5. 提交信息用 Conventional Commits：`git commit -m "feat: ..."`
+6. Push 后开 PR，按模板填写
+
+## PR 检查项
+
+- [ ] `bun run typecheck`、`bun run lint`、`bun run build` 通过
+- [ ] `bun run verify/index.ts --exit-on-fail` 通过
+- [ ] 新行为有对应测试和验收标准
+- [ ] 提交信息符合 Conventional Commits
+- [ ] 没有遗留冲突
+- [ ] 文档已同步（相关 `docs/` 文档、`CHANGELOG.md`）
 
 ## 开发环境
 
-- **Runtime**: Bun 1.3+
-- **Node**: 通过 Bun 运行（`packageManager: bun@1.3.14`）
-- **数据库**（可选）: PostgreSQL（Neon Serverless）+ Drizzle
+- Bun 1.4 以上，仓库的 `packageManager` 为 `bun@1.4.2`，Node 由 Bun 提供
+- 数据库可选：PostgreSQL（Neon）+ Drizzle，只在开启 `ENABLE_DB_CACHE` 时才需要
+- 环境变量配置见 [README 的配置一节](README.md#配置)
 
 ## 项目结构
 
-参见 [docs/INDEX.md](docs/INDEX.md) 与 [docs/planning/project-architecture.md](docs/planning/project-architecture.md)
+- 文档入口：[`docs/INDEX.md`](docs/INDEX.md)
+- 架构总览：[`docs/planning/project-architecture.md`](docs/planning/project-architecture.md)

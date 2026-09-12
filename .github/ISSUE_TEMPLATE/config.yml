@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 安全漏洞
+    url: https://github.com/Chilfish/anonTweet/security/advisories/new
+    about: 请勿公开提交安全问题，走私有渠道报告

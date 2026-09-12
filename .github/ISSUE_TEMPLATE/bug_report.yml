@@ -1,0 +1,65 @@
+name: Bug Report
+description: 报告一个可以复现的问题
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提交前请先搜索是否已有相同 issue。
+        安全漏洞不要在这里公开提交，请走 [SECURITY.md](https://github.com/Chilfish/anonTweet/blob/main/SECURITY.md) 的渠道。
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 问题描述
+      description: 实际发生了什么
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 打开 ...
+        2. 点击 ...
+        3. 看到 ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期行为
+    validations:
+      required: true
+  - type: dropdown
+    id: deploy
+    attributes:
+      label: 部署方式
+      options:
+        - 线上实例 anon-tweet.chilfish.top
+        - 自部署（Vercel）
+        - 自部署（自托管）
+        - 本地开发
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: 相关链接
+      description: 出问题的推文 / IG 帖子链接，或线上实例地址
+    validations:
+      required: false
+  - type: input
+    id: environment
+    attributes:
+      label: 运行环境
+      description: 浏览器版本、操作系统；本地开发请附 Bun 版本
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志或截图
+      description: 服务端日志、控制台报错或界面截图。贴之前请先删掉 TWEET_KEYS、INS_COOKIES 等凭据。
+      render: shell
+    validations:
+      required: false
