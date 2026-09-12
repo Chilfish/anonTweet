@@ -14,7 +14,7 @@ const LINE_BREAK_RE = /\r?\n/
 
 const POSTMORTEM_DIR_REL = path.join('docs', 'postmortem')
 const SCRIPT_REL = path.join('scripts', 'postmortem-check.ts')
-const REPORT_IDS = ['001', '002', '003', '004', '005', '006', '007', '008', '009', '010']
+const REPORT_IDS = ['001', '002', '003', '004', '005', '006', '007', '008', '009', '010', '011']
 const REPORT_FILE_RE = /^\d{3}-.+\.md$/
 const STATUS_RE = /\*\*状态\*\*:\s*(?:Active|Mitigated)/
 const HOT_FILE_REF_RE = /#\d{3}/g
@@ -54,7 +54,7 @@ function parseChangedFiles(content: string): string[] {
 }
 
 describe('AC-PM postmortem pre-release integrity', () => {
-  it('AC-PM-001: report directory complete (001~010 + README + TEMPLATE)', () => {
+  it('AC-PM-001: report directory complete (001~011 + README + TEMPLATE)', () => {
     const dir = projectPath(POSTMORTEM_DIR_REL)
     const reports = listReports()
     const ids = reports.map(f => f.slice(0, 3))

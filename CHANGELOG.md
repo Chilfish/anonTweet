@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ## [Unreleased]
 
+### 验证诚信修复（2026-09-12，backlog F1~F13）
+
+- **Fixed** dev server 在外层 `NODE_ENV=production` 下崩溃（`jsxDEV is not a function`）：`dev`/`build` 脚本经 `cross-env` 固定 `NODE_ENV`，不再依赖宿主环境（F1）
+- **Fixed** `verify/index.ts` 空跑报绿：`--ac` / `--module` 零匹配（0 executed）现在非零退出并说明原因；修正模块别名（translation→`AC-TRANS` / screenshot→`AC-SHOT`+`AC-PERF` / postmortem→`AC-PM`）；`--module` 白名单启动校验（F2）
+- **Fixed** `ac-sec.spec.ts` AC-SEC-001 死 `return`（`// 暂时不管他`）；配合所有者裁定移除过噪的设置页隐私披露文案及其断言（F3）
+- **Added** `test/acceptance/ac-contract.spec.ts`：文档 AC 编号 ↔ `describe/it` 名 1:1 元测试（F4）
+- **Changed** AC-CI-002/003/004 改为解析 workflow `run:` / `uses:` 步骤断言，注释不再能冒充步骤（F5）
+- **Changed** AC-TWEET-001~004/007、AC-IG-001/006 去 fixture 自证，改为断言真实函数产出；AC-IG-006 真实调用 `translateIGCaption`（LLM 打桩）（F8）
+- **Changed** 补 AC-TRANS-005/006/007 命名；新增 `verify/acceptance-criteria/AC-test.md` 登记 `AC-TEST-006`；新增 `AC-dev.md`（F1/F9）
+- **Added** eslint `test/expect-expect` / `no-conditional-expect` / `no-standalone-expect`（F10）
+- **Changed** `verify/README.md` 修订「AC 编号即测试名 1:1 可追溯」「裸跑永远绿」失实表述（F12）
+- **Changed** `--server` / `--server-port` 标注 deprecated（no-op）；`hasEntityType` 形参收窄为 `Entity['type']`（F13）
+- **Fixed** 集成层半恒真：AC-TWEET-006 去掉 `catch { return }`，改为断言「`[]` 或干净 HTTP 错误」；AC-SHOT-001/002 拆分 `it.skipIf` 并对真实 fixture id 断言内容特征（F7 部分）
+- **Added** postmortem 011（验证名实不符 / dev 模式泄漏）；完成项归档至 `docs/archive/backlog-completed-2026-09-12.md`
+- **Deferred** F6 / F7（剩余 msw 全量替换）/ F11（Stryker 变异体检）经所有者裁定「暂不修复」延后归档；测试基建收口，后续转功能开发
+
 ### 版本单源治理（2026-09-11）
 
 - **Changed** OpenAPI `info.version` 由硬编码 `1.0.0` 改为读取 `package.json`（`app/lib/llms.ts`），随附 skill 快照 `references/anon-tweet-openapi.json` 随之重新生成对齐

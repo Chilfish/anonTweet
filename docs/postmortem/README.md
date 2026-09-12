@@ -20,6 +20,7 @@
 | [008](008-fonts-and-rendering.md)     | 字体/渲染        | SEV-2  | Bug          | 🟢 Mitigated | Web font 加载与 headless 截图竞争                               |
 | [009](009-prepend-persistence.md)     | 翻译句首补充     | SEV-2  | Bug          | 🟡 Active    | index 对齐合并四处漂移，base 外实体（-1/30000+）被静默丢弃      |
 | [010](010-babel-major-drift.md)       | 依赖/Babel 构建  | SEV-3  | Dependency   | 🟢 Mitigated | preset 越过 core 主版本 + 门禁不跑生产构建，`.tsx` 全量构建失败 |
+| [011](011-verification-honesty.md)    | 验证诚信         | SEV-3  | Process      | 🟢 Mitigated | AC 空跑报绿 / 静态扫描冒充行为 / dev 模式泄漏，门禁不携带信号   |
 
 ## 高危文件（写码前自查）
 
@@ -77,6 +78,15 @@ base 并按 index 覆盖——句首补充（`index: -1`）与 AI 流片段（`3
 `bun run build` 已纳入 pre-push 与 CI；AC-BUILD-001~003 兜底**。升级依赖前先读
 `vite.config.ts` 的版本约束注释。
 
+### 9. 验证名实不符：空跑报绿 / 静态扫描冒充行为（#011，已复发）
+
+「全绿」可能只是「没有断言失败」，不代表功能被验证。已复发的坑：源码字符串扫描冒充行为
+断言、`--ac`/`--module` 0 匹配仍 `exit 0`、用例开头死 `return`、`catch { return }` 半恒真、
+fixture 自证（断言 JSON 自身而非解析器产出）。对策：**门禁先问「改坏被测行为它会红吗」；
+CLI 包装层拒绝 0 executed；AC 编号 ↔ 测试名由 `ac-contract.spec.ts` 强制；断言存在性由
+eslint `test/expect-expect` / `no-conditional-expect` 强制；进程启动自证运行模式（`NODE_ENV`）；
+AC 文档必须区分「行为断言」与「源码扫描（辅助检查）」**。
+
 ## Pre-Release 检查（每次 Release 前）
 
 **步骤**：
@@ -93,9 +103,9 @@ base 并按 index 覆盖——句首补充（`index: -1`）与 AI 流片段（`3
 ### 按严重级
 
 - **SEV-2（7 份）**：001 / 002 / 004 🟢 / 005 / 006 🟢 / 008 🟢 / 009
-- **SEV-3（3 份）**：003 / 007 / 010 🟢
+- **SEV-3（4 份）**：003 / 007 / 010 🟢 / 011 🟢
 
 ### 按状态
 
 - 🔴 **Active（仍可能复发）**：001 / 002 / 003 / 005 / 007
-- 🟢 **Mitigated（已预防）**：004 / 006 / 008 / 010
+- 🟢 **Mitigated（已预防）**：004 / 006 / 008 / 010 / 011

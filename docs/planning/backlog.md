@@ -1,9 +1,9 @@
 # Backlog（任务清单）
 
-**项目**: anonTweet | **最后更新**: 2026-09-11
+**项目**: anonTweet | **最后更新**: 2026-09-12
 
 > 本清单**只保留当前阶段关注的未决任务**，不累积已完成条目。规划下一阶段时从这里选任务；条目完成后移入归档。
-> 已完成归档：[backlog-completed-2026-09-11.md](../archive/backlog-completed-2026-09-11.md)（三阶段排期已完成条目 + 原未决条目裁决明细）；历史完成记录：[TODO.md](../archive/TODO.md)。
+> 已完成/收口归档：[backlog-completed-2026-09-12.md](../archive/backlog-completed-2026-09-12.md)（验证诚信修复 F1~F13：主体已完成，F6/F7/F11 所有者裁定「暂不修复」延后归档，测试基建到此收口）+ [backlog-completed-2026-09-11.md](../archive/backlog-completed-2026-09-11.md)（三阶段排期已完成条目 + 原未决条目裁决明细）；历史完成记录：[TODO.md](../archive/TODO.md)。
 
 ## 约定
 
@@ -14,37 +14,9 @@
 - 裁决语义：**采纳**（按排期做）/ **延后**（注明并入阶段）/ **删除**（进不做清单，附理由）
 - 里程碑发布前，本清单应为空或全部注明延后理由
 
-## 当前焦点：验证诚信修复（2026-09-11 审查发现）
-
-> 来源：`docs/reviews/review-2026-09-11-test-suite-honesty.md`。**核心问题**：unit 层是真测试，但 acceptance 层大量「扫源码字符串」、integration 层「裸跑永远绿」，且 `--ac` / `--module` 选不中用例时 exit 0 → 「verify 全绿」对部分功能不携带信号；同时门禁命令当前因 dev server 崩溃而变红。编号 F1~F13 对应审查文档 §4。
-
-### 阶段 0（P0）先做：让门禁重新可信
-
-- [ ] [refactor] F1 修复 dev server 启动崩溃（`jsxDEV is not a function` / `Cannot access 'abort' before initialization`），恢复 `bun run verify/index.ts --exit-on-fail` 可跑满三层（关联：审查 P1-5；文件：待定位 `vite.config.ts` / React·Vite·Bun jsx runtime 配置；工作量：0.5-2 人日 / 风险：中，可能涉版本与 jsx runtime）— ⚠️ 阻塞项：不修则所有 integration 修复无法验证
-- [ ] [refactor] F2 `verify/index.ts` 零匹配守卫 + 修正模块别名映射（translation→`AC-TRANS` / screenshot→`AC-SHOT`+`AC-PERF` / postmortem→`AC-PM`）+ `--module` 白名单启动校验（关联：审查 P1-1；文件：`verify/index.ts` L46-71；工作量：0.5 人日 / 风险：低）— 验收：未知 AC/模块 exit≠0，文档给出的 `--module` 命令真跑对应用例
-- [ ] [refactor] F3 删除 `ac-sec.spec.ts` 死 `return`（`// 暂时不管他`），如实标注或补齐 AC-SEC-001 P3 设置页披露断言（关联：审查 P1-2；文件：`test/acceptance/ac-sec.spec.ts` L78-79（死分支）、`verify/acceptance-criteria/AC-sec.md`；工作量：0.1-0.5 人日 / 风险：低）
-- [ ] [refactor] F4 新增 AC 编号 ↔ 测试名一致性元测试（扫描 `verify/acceptance-criteria/*.md` vs `test/**` 的 `it('AC-...')`，差集非空即失败）（关联：审查 P1-6；文件：`test/acceptance/ac-contract.spec.ts`（新）；工作量：0.5 人日 / 风险：低）
-
-### 阶段 1（P1）把「假绿」改成「可失败」
-
-- [ ] [refactor] F5 AC-CI-003 改为解析 workflow `run:` / `uses:` 步骤，禁止 substring（当前被 `verify.yml` L48 注释误判为通过）（关联：审查 P1-3；文件：`test/acceptance/ac-ci.spec.ts`；工作量：0.3 人日 / 风险：低）
-- [ ] [refactor] F6 静态扫描型 AC 逐条处置：降级为「辅助检查」并如实改名，或改真行为测试（media 004/005/006、obs、decouple、resolver、sec P2、shot 003/004、vision 008/009/010、ui、pwa、card 004/009）（关联：审查 P1-3；文件：`test/acceptance/*` + 对应 `AC-*.md`；前置：所有者裁决「降级 vs 重写」；工作量：3-6 人日 / 风险：中，需引入 msw 等）
-- [ ] [refactor] F7 集成层可失败化：CI 注入真 key 或录制 fixture + msw；AC-SHOT-001/002 改真实 fixture id 并断言内容特征；AC-TWEET-006 去掉 `catch { return }` 半恒真（关联：审查 P1-4；文件：`test/integration/*`、`.github/workflows/verify.yml`；前置：所有者裁决集成策略；工作量：2-4 人日 / 风险：中）
-- [ ] [refactor] F8 去 fixture 自证：AC-TWEET-001~004/007、AC-IG-001/002/006 改为「fixture 作输入 → 调解析/翻译函数 → 断言产出」（AC-IG-006 需真正调用 `translateIGCaption`）（关联：审查 P2-1；文件：`test/acceptance/ac-tweet.spec.ts`、`ac-ig.spec.ts`；工作量：1-2 人日 / 风险：低）
-- [ ] [refactor] F9 补 AC-TRANS-002/005/006/007 的 `it('AC-...')` 命名（部分语义已有单测覆盖，仅需对齐命名/文档，不重复造测试）+ 登记 `AC-TEST-006`（关联：审查 P1-6；文件：`test/unit/*`、`verify/acceptance-criteria/AC-translation.md`；工作量：0.5-1 人日 / 风险：低）
-
-### 阶段 2（P2）防复发
-
-- [ ] [refactor] F10 接入 `eslint-plugin-vitest`（`expect-expect` / `no-conditional-expect` / `no-standalone-expect`），把「每条 `it` 至少一条断言」变为机器可查（关联：审查 P2-3；文件：`eslint.config.mjs`；工作量：1 人日 / 风险：低）
-- [ ] [refactor] F11 mutation testing 试点（Stryker，先跑 `app/lib/**` 纯函数，观察存活变异体）（关联：审查 P2-3；前置：所有者裁决是否入正式门禁；工作量：2-3 人日 / 风险：低）
-- [ ] [refactor] F12 修订 `verify/README.md` 不实表述（「AC 编号即测试名，1:1 可追溯」不成立；「裸跑永远绿」是缺陷而非卖点）（关联：审查 P1-1/P1-6；文件：`verify/README.md`；工作量：0.2 人日 / 风险：低）
-- [ ] [refactor] F13 清理 `--server` / `--server-port` no-op 参数标注 deprecated，并做 P3 类型打磨（`hasEntityType` 形参收窄为联合类型）（关联：审查 P3；文件：`verify/index.ts`、`test/acceptance/ac-tweet.spec.ts`；工作量：0.3 人日 / 风险：低）
-
-> ⚠️ 复发性：本类问题已复发一次（`review-2026-08-19` P1-1「AC-CARD-005 源码扫描冒充渲染断言」→ 本次 P1-3）。开放问题 4：是否按 CLAUDE.md 规则 4 沉淀 postmortem 010（「验证名实不符 / 空跑报绿」）。
-
 ## 下一阶段候选（原三阶段排期剩余）
 
-> 阶段一/二已完成、阶段三部分完成，已完成条目见 [归档](../archive/backlog-completed-2026-09-11.md)。以下为尚未开工的条目，规划下一阶段时按价值取舍。
+> 验证基建已收口（含延后项，见页首归档）。阶段一/二已完成、阶段三部分完成，已完成条目见 [归档](../archive/backlog-completed-2026-09-11.md)。以下为尚未开工的条目，规划下一阶段时按价值取舍。
 
 - [ ] [ux] AI 端点 stream 化 + 编辑器兼容 stream（合并原「AI 端点 stream 化」与「编辑器兼容 stream」两项；文件：`app/routes/api/ai/ai-translation.ts`、`app/components/translation/TranslationEditor.tsx`、`app/lib/translation/resolveTranslationView.ts` isAIStream 扩展、客户端 hooks；工作量：3-5 人日 / 风险：高）— 当前管线为非流式 `generateText`；先做端点流式化，再把 stream 映射到 overlay 编辑器
 - [ ] [refactor] AI Vision 截图导出 E2E 闭环（关联：review-2026-08-17 阶段三；文件：`plain.tsx`、`app/components/tweet/AIVisionBlock.tsx`；前置：阶段二可观测性）
@@ -72,7 +44,8 @@
 
 ## 归档记录
 
-| 日期       | 内容                                                                          | 去向                                                                              |
-| ---------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| 日期       | 内容                                                                                        | 去向                                                                                  |
+| ---------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| 2026-09-12 | 验证诚信修复 F1~~F5 / F8~~F10 / F12 / F13 已完成条目（F6/F7/F11 剩余项已回填活跃清单）      | [archive/backlog-completed-2026-09-12.md](../archive/backlog-completed-2026-09-12.md) |
 | 2026-09-11 | 三阶段排期（阶段一全部 / 阶段二除 2 项 / 阶段三已完成 2 项）已完成条目 + 原未决条目裁决明细 | [archive/backlog-completed-2026-09-11.md](../archive/backlog-completed-2026-09-11.md) |
-| 2026-08    | 历史规划（已完成记录 + 约束 + 待办）                                          | [archive/TODO.md](../archive/TODO.md)                                             |
+| 2026-08    | 历史规划（已完成记录 + 约束 + 待办）                                                        | [archive/TODO.md](../archive/TODO.md)                                                 |

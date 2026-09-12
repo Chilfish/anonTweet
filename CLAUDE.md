@@ -115,7 +115,7 @@ docs/                    # 技术文档与规范（见 docs/INDEX.md：features/
 
 **三阶段排期（2026-08-17 起）**：阶段一（止血）✅、阶段二（核心体验）✅ 除「视觉基线接入」「AI 端点 stream 化」外；阶段三（护城河）部分完成。已完成条目与裁决明细已归档：`docs/archive/backlog-completed-2026-09-11.md`。
 
-**当前阶段 — 验证诚信修复（2026-09-11 审查发现）**：`bun run verify/index.ts --exit-on-fail` 当前为红（dev server 崩溃）；acceptance 层静态扫描冒充行为断言、integration 层结构性不可失败、CLI 零匹配 exit 0。修复计划 F1~F13 见 `docs/reviews/review-2026-09-11-test-suite-honesty.md` 与 `docs/planning/backlog.md`（F1 为阻塞项）。
+**当前阶段 — 验证诚信修复（2026-09-11 审查发现）**：主力已落地（F1~~F5 / F8~~F10 / F12 / F13，已完成条目见 `docs/archive/backlog-completed-2026-09-12.md`）——门禁恢复可跑满三层（`bun run verify/index.ts --exit-on-fail` 绿；此前因 dev 继承 `NODE_ENV=production` 崩在 `jsxDEV`）；CLI 零匹配非零退出；AC 编号 ↔ 测试名由 `test/acceptance/ac-contract.spec.ts` 元测试强制；断言存在性由 eslint `test/*` 规则强制；`verify/README.md` 已修订失实表述。**剩余**：F6（静态扫描 AC 逐条处置）、F7（集成层录制 fixture + msw）、F11（Stryker 一次性体检）见 `docs/planning/backlog.md`。沉淀：[postmortem 011](docs/postmortem/011-verification-honesty.md)。
 
 **后续候选（未开工）**：AI 端点/编辑器 stream 化、AI Vision 截图 E2E、三层缓存规模化、IG Story 接入、视觉基线（待 owner 拍板）。PWA 已实现，剩余真机验证与视觉验收。
 
