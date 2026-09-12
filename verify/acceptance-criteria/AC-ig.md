@@ -1,19 +1,24 @@
 # Instagram 集成验收标准
 
-> 版本：1.1 | 日期：2026-08-09
+> 版本：1.2 | 日期：2026-08-09（v1.2 2026-09-12：F8 去 fixture 自证）
 > 对应 Postmortem：007 (Instagram Integration)
-> 关联 Verifier：`verify/modules/ig.verifier.ts`
-> 执行命令：`bun verify --module ig [--ac AC-IG-NNN]`
+> 关联 Verifier：`test/acceptance/ac-ig.spec.ts`（离线）/ `test/integration/api.ig.spec.ts`（集成）
+> 执行命令：`bun run verify/index.ts --module ig [--ac AC-IG-NNN]`
 >
 > v1.1 修订（S9）：端点路径对齐真实路由 —— IG 帖子/故事统一走 `POST /api/ig/get/:id`（action handler 内置 stories 分支，无独立 stories 路由）；新增 AC-IG-007（Posts 端点集成）、AC-IG-008（Stories 端点集成）、AC-IG-009（未配置 cookies → 500）；AC-IG-006 语义与 next-steps 的「翻译 caption 不丢失」合并保留。
+>
+> v1.2 修订（F8，review-2026-09-11 P2-1）：AC-IG-006 改为**真实调用 `translateIGCaption`**
+> （LLM 边界打桩），断言返回译文且不改写 `post.description`（原实现从不调用该函数）；
+> AC-IG-001 增加 `extractIGId(url) === id` 交叉校验。AC-IG-001/002 的其余字段检查为
+> **fixture 快照辅助检查**（真实 IG 解析在上游 SDK，离线无本地解析器可调），已如实标注。
 
 ---
 
-## AC-IG-001：Post 类型解析完整性
+## AC-IG-001：Post 类型解析完整性（fixture 快照 + URL 交叉校验）
 
-- **输入**：`verify/fixtures/ig-posts/post-with-media.json`
-- **验证对象**：`normalizeIGPost()` 函数
-- **预期输出**：`IGPost` 结构包含所有核心字段
+- **输入**：`test/fixtures/ig-posts/post-with-media.json`
+- **验证对象**：`extractIGId()` + fixture 结构
+- **预期输出**：`IGPost` 结构包含所有核心字段，且 URL 可被解析回同一 shortcode
 - **Pass 条件**：
   - `id`（shortcode）非空
   - `username` 非空
@@ -21,10 +26,12 @@
   - `media` 数组长度 ≥ 1
   - `type` 为 `'post'`
   - `likes` ≥ 0
+  - `extractIGId(post.url) === post.id`（真实纯函数交叉校验）
+- **备注**：字段检查为**快照辅助检查**（上游 SDK 解析不在本仓库离线可测范围内）
 
 ---
 
-## AC-IG-002：Media 数组结构正确
+## AC-IG-002：Media 数组结构正确（fixture 快照辅助检查）
 
 - **输入**：同上 fixture
 - **预期输出**：每条 `IGMedia` 结构正确
@@ -33,6 +40,7 @@
   - `type` 为 `'photo'` 或 `'video'`
   - 视频类型的 media 有 `video_url`
   - `width > 0 && height > 0`
+- **备注**：**fixture 快照辅助检查**，非解析器行为断言
 
 ---
 
@@ -72,12 +80,14 @@
 
 ## AC-IG-006：Caption 翻译不破坏原文
 
-- **输入**：IG post fixture
-- **验证对象**：翻译后 `post.description` 不变，`post.captionTranslation` 存放译文
+- **输入**：IG post fixture（+ 中文 caption / 空 caption 变体）
+- **验证对象**：`translateIGCaption()`（`app/lib/translateIGCaption.ts`，LLM 边界打桩）
+- **预期输出**：返回译文串；`post.description` 全程不被改写
 - **Pass 条件**：
-  - 翻译前后 `post.description` 不变
-  - 翻译成功后 `post.captionTranslation` 非空
-  - `captionTranslation !== description`
+  - 非中文 caption → 返回译文（`generateText` 打桩）
+  - 已是中文 caption → 跳过翻译返回 `''`
+  - 空 caption → 返回 `''`
+  - 三种路径下 `post.description` 均保持不变
 
 ---
 

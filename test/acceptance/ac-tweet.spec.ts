@@ -3,16 +3,17 @@ import type { EnrichedTweet, Entity } from '~/types'
 /**
  * test/acceptance/ac-tweet.spec.ts
  *
- * L3 AC 语义层 — Tweet 离线验收（自 verify/modules/tweet.verifier.ts 迁移，Phase B 去重）：
- * AC-TWEET-001~004 / 007（fixture 回归）；AC-TWEET-005/006/008 为集成测试，
- * 迁至 test/integration/（Phase C）。AC-TWEET-009（搜索解析，离线）同处本文件。
+ * L3 AC 语义层 — Tweet 离线验收：
+ * - AC-TWEET-001~004 / 007：**fixture 作输入 → 调真实纯函数 → 断言产出**（F8 去「fixture 自证」，
+ *   review-2026-09-11 P2-1：原实现直接断言 fixture JSON 自身字段，解析回归不会红）
+ * - AC-TWEET-009：真实 `parseSearchTimeline`
+ * - AC-TWEET-005/006/008/010 为集成测试，见 test/integration/api.tweet.spec.ts
  */
 import { describe, expect, it } from 'vitest'
 import { parseSearchTimeline } from '~/lib/react-tweet/utils/get-tweet'
+import { stripTranslationsFromTweets } from '~/lib/stores/logic'
+import { mergeEntityTranslationsByIndex } from '~/lib/translation/resolveEntities'
 import { loadFixture } from '../helpers/load-fixture'
-
-const NON_WHITESPACE_START_RE = /^\S/
-const NON_WHITESPACE_END_RE = /\S$/
 
 const fixtures = [
   'tweets/normal-ja.json',
@@ -20,7 +21,9 @@ const fixtures = [
   'tweets/with-quoted-ja.json',
 ] as const
 
-function hasEntityType(entities: Entity[], type: string): boolean {
+type TweetWithAI = EnrichedTweet & { autoTranslationEntities?: Entity[] }
+
+function hasEntityType(entities: Entity[], type: Entity['type']): boolean {
   return entities.some(e => e.type === type)
 }
 
@@ -35,51 +38,66 @@ function hasDuplicateEntities(entities: Entity[]): boolean {
   return false
 }
 
-describe('AC-TWEET tweet parsing (fixture regression)', () => {
-  it('AC-TWEET-001: normal tweet has valid entities with hashtag', () => {
-    const tweet = loadFixture<EnrichedTweet>('tweets/normal-ja.json')
-    const entities = tweet.entities || []
+describe('AC-TWEET tweet parsing (fixture → real pipeline)', () => {
+  it('AC-TWEET-001: merging AI entities keeps hashtag + applies translations by index', () => {
+    const tweet = loadFixture<TweetWithAI>('tweets/normal-ja.json')
+    const base = tweet.entities ?? []
+    const ai = tweet.autoTranslationEntities ?? []
 
-    expect(entities.length).toBeGreaterThanOrEqual(2)
-    expect(hasEntityType(entities, 'hashtag')).toBe(true)
-    for (const e of entities)
-      expect((e.index ?? -1)).toBeGreaterThanOrEqual(0)
+    const merged = mergeEntityTranslationsByIndex(base, ai)
+
+    // 断言解析/合并**产出**，而非 fixture 自身
+    expect(hasEntityType(merged, 'hashtag')).toBe(true)
+    expect(merged).toHaveLength(base.length)
+    expect(merged.some(e => typeof e.translation === 'string' && e.translation.length > 0)).toBe(true)
+    for (const e of merged)
+      expect(e.index).toBeGreaterThanOrEqual(-1)
   })
 
-  it('AC-TWEET-002: card tweet has url entity with href and card', () => {
+  it('AC-TWEET-002: stripping translations preserves card + url entity href', () => {
     const tweet = loadFixture<EnrichedTweet & { card?: unknown }>('tweets/with-card-ja.json')
-    const entities = tweet.entities || []
 
+    const [cleaned] = stripTranslationsFromTweets([tweet])
+    const entities = cleaned!.entities ?? []
+
+    expect(cleaned!.card).toBeTruthy()
     expect(hasEntityType(entities, 'url')).toBe(true)
-    expect(tweet.card).toBeTruthy()
     for (const e of entities.filter(e => e.type === 'url'))
-      expect(e.href).toBeTruthy()
+      expect((e as { href?: string }).href).toBeTruthy()
   })
 
-  it('AC-TWEET-003: quoted tweet preserves quoted entities', () => {
+  it('AC-TWEET-003: stripping translations preserves quoted tweet entities', () => {
     const tweet = loadFixture<EnrichedTweet & { quotedTweet?: EnrichedTweet }>('tweets/with-quoted-ja.json')
 
-    expect(tweet.quotedTweet).toBeTruthy()
-    expect(tweet.quotedTweet!.entities?.length).toBeGreaterThan(0)
+    const [cleaned] = stripTranslationsFromTweets([tweet])
+
+    expect(cleaned!.quotedTweet).toBeTruthy()
+    expect(cleaned!.quotedTweet!.entities?.length).toBeGreaterThan(0)
   })
 
-  it('AC-TWEET-004: text display range starts/ends with visible chars', () => {
+  it('AC-TWEET-004: entity text segments reconstruct the display range (prefix invariant)', () => {
     const tweet = loadFixture<EnrichedTweet>('tweets/normal-ja.json')
-    const text = tweet.text || ''
+    const text = tweet.text ?? ''
+    const ordered = [...(tweet.entities ?? [])].sort((a, b) => a.index - b.index)
+    const joined = ordered.map(e => e.text ?? '').join('')
 
-    expect(text.trimStart()).toMatch(NON_WHITESPACE_START_RE)
-    expect(text.trimEnd()).toMatch(NON_WHITESPACE_END_RE)
-    expect(text.trim().length).toBeGreaterThan(0)
+    expect(text.length).toBeGreaterThan(0)
+    expect(joined.length).toBeGreaterThan(0)
+    // 实体文本按 index 顺序无缝拼成正文前缀（尾部被自动链接的 URL 不计入实体）
+    expect(text.startsWith(joined)).toBe(true)
+    for (let i = 1; i < ordered.length; i++)
+      expect(ordered[i]!.index).toBeGreaterThan(ordered[i - 1]!.index)
   })
 
-  it('AC-TWEET-007: no duplicate entities across all tweet fixtures', () => {
+  it('AC-TWEET-007: merge by index never produces duplicate entities', () => {
     const failures: string[] = []
     for (const file of fixtures) {
-      const tweet = loadFixture<EnrichedTweet>(file)
-      if (hasDuplicateEntities(tweet.entities || []))
+      const tweet = loadFixture<TweetWithAI>(file)
+      const base = tweet.entities ?? []
+      const ai = tweet.autoTranslationEntities ?? []
+      const merged = ai.length > 0 ? mergeEntityTranslationsByIndex(base, ai) : base
+      if (hasDuplicateEntities(merged))
         failures.push(file)
-      if (tweet.quotedTweet && hasDuplicateEntities(tweet.quotedTweet.entities || []))
-        failures.push(`${file} (quoted)`)
     }
     expect(failures).toEqual([])
   })
