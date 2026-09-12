@@ -5,8 +5,8 @@
   "private": true,
   "packageManager": "bun@1.4.2",
   "scripts": {
-    "build": "react-router build",
-    "dev": "react-router dev",
+    "build": "cross-env NODE_ENV=production react-router build",
+    "dev": "cross-env NODE_ENV=development react-router dev",
     "start": "node ./server/express.js",
     "typecheck": "react-router typegen && tsc",
     "test": "vitest run --project unit --project acceptance",
