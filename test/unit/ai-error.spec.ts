@@ -7,7 +7,7 @@ describe('normalizeAIError', () => {
     const err = new APICallError({
       message: 'Invalid API key.',
       url: 'https://opencode.ai/zen/go/v1/chat/completions',
-      requestBodyValues: { model: 'deepseek-v4-flash' },
+      requestBodyValues: { model: 'deepseek-flash' },
       statusCode: 401,
       responseBody: '{"error":{"type":"AuthError","message":"Invalid API key."}}',
       isRetryable: false,

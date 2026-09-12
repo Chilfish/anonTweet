@@ -15,6 +15,8 @@ export interface ModelConfig {
   text: string
   provider: AIProviderName
   thinkingType: 'level' | 'budget' | 'none'
+  /** 是否支持图片输入：AI 视觉子系统的模型下拉按此过滤（`deepseek-v4-pro` 不支持） */
+  supportsVision: boolean
   supportedLevels?: ThinkingLevel[]
 }
 
@@ -24,6 +26,7 @@ export const models: ModelConfig[] = [
     text: 'Gemini 3 Flash Preview',
     provider: 'google',
     thinkingType: 'level',
+    supportsVision: true,
     supportedLevels: ['minimal', 'low', 'medium', 'high'],
   },
   {
@@ -31,6 +34,7 @@ export const models: ModelConfig[] = [
     text: 'Gemini 3.1 Pro Preview',
     provider: 'google',
     thinkingType: 'level',
+    supportsVision: true,
     supportedLevels: ['low', 'high'],
   },
   {
@@ -38,19 +42,22 @@ export const models: ModelConfig[] = [
     text: 'Gemini 3.1 Flash Lite',
     provider: 'google',
     thinkingType: 'budget',
+    supportsVision: true,
   },
   {
-    name: 'deepseek-v4-flash',
-    text: 'DeepSeek V4 Flash',
+    name: 'deepseek-flash',
+    text: 'DeepSeek Flash',
     provider: 'deepseek',
     thinkingType: 'level',
+    supportsVision: true,
     supportedLevels: ['minimal', 'high', 'max'],
   },
   {
-    name: 'deepseek v4 pro',
+    name: 'deepseek-v4-pro',
     text: 'DeepSeek V4 Pro',
     provider: 'deepseek',
     thinkingType: 'level',
+    supportsVision: false,
     supportedLevels: ['minimal', 'high', 'max'],
   },
   {
@@ -58,6 +65,7 @@ export const models: ModelConfig[] = [
     text: 'MiMo V2.5 (OpenRouter)',
     provider: 'openrouter',
     thinkingType: 'level',
+    supportsVision: true,
     supportedLevels: ['minimal', 'low', 'medium', 'high'],
   },
 ]

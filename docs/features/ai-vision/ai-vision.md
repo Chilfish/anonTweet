@@ -1,7 +1,7 @@
 # AI 视觉描述子系统（AI Vision）— 需求与上下文文档
 
-> 版本：0.1（草案）｜ 日期：2026-08-13
-> 状态：**文档先行，尚未实现**
+> 版本：0.2｜ 日期：2026-09-12（v0.2：新增 DeepSeek 视觉渠道与模型图片能力门控）
+> 状态：**已实现**（provider：Google Gemini / DeepSeek / OpenRouter）
 > 关联：OpenRouter（`xiaomi/mimo-v2.5` 上游）｜ 文本翻译子系统（`docs/features/translation/translation.md`）｜ 截图子系统
 > 配套：`docs/archive/ai-vision-plan.md`（行动计划，已完成）｜ `verify/acceptance-criteria/AC-vision.md`（验收标准）
 
@@ -108,6 +108,21 @@ export const openrouterStrategy: ProviderStrategy = {
 
 - **图片输入**：AI SDK 消息 `{ type: 'image', image: dataUri }` → openai-compatible 转 `image_url` → OpenRouter 接受 base64 data URI。
 - **结构化输出**：`Output.object` → `response_format: { type: 'json_schema' }`，OpenRouter 透传，MiMo-V2.5 支持 structured outputs。
+
+### 4.1.1 视觉 Provider 现状（2026-09-12）
+
+视觉 provider 与翻译侧共用策略注册表（`app/lib/providers/`）及 Key / 模型配置，当前支持：
+
+| Provider      | 视觉模型                             | 图片输入         |
+| ------------- | ------------------------------------ | ---------------- |
+| Google Gemini | `models/gemini-3-flash-preview` 等   | 支持             |
+| DeepSeek      | `deepseek-flash`                     | 支持（仅 flash） |
+| OpenRouter    | `xiaomi/mimo-v2.5` 等                | 支持             |
+
+- `IMAGE_CAPABLE_PROVIDERS`（`app/lib/ai-provider-config.ts`）在 provider 粒度放行 `google` / `deepseek` / `openrouter`。
+- `ModelConfig.supportsVision` 标记模型图片能力：`deepseek-v4-pro` 为纯文本（`false`），视觉模型下拉按此过滤；
+  切换 provider 时若当前模型不支持图片输入，回退到该 provider 首个支持图片的模型。
+- 验收：`AC-VISION-013`（`verify/acceptance-criteria/AC-vision.md`）。
 
 ### 4.2 数据模型：`AIVisionInfo`（独立对象）
 

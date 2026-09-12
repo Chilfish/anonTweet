@@ -71,12 +71,16 @@ export function resolveAIConfig(cfg: AIConfigSource): ResolvedAIConfig {
   }
 }
 
-/** 只允许支持图片输入的 provider（DR-8）：vision 不列 deepseek */
-export const IMAGE_CAPABLE_PROVIDERS: AIProvider[] = ['google', 'openrouter']
+/**
+ * 支持图片输入的 provider：google / deepseek / openrouter。
+ * deepseek 仅 `deepseek-flash` 模型支持图片输入（`deepseek-v4-pro` 不支持），
+ * 模型粒度由 `ModelConfig.supportsVision` 在设置面板过滤。
+ */
+export const IMAGE_CAPABLE_PROVIDERS: AIProvider[] = ['google', 'deepseek', 'openrouter']
 
 /**
  * 解析视觉 provider 的生效配置——复用 resolveAIConfig，但按 visionProvider 选择
- * 对应 provider 的 key/model/baseUrl/thinkingLevel（DR-8：识图与翻译可共用同一 Key）。
+ * 对应 provider 的 key/model/baseUrl/thinkingLevel（识图与翻译可共用同一 Key）。
  * 纯函数，逻辑下沉 lib（Postmortem #002）。
  */
 export function resolveVisionConfig(

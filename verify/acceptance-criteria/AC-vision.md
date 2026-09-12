@@ -1,8 +1,8 @@
 # AI 视觉描述验收标准
 
-> 版本：0.3 | 日期：2026-08-14
+> 版本：0.4 | 日期：2026-09-12
 > 对应 Postmortem：#002（翻译系统耦合）/ #005（媒体 URL 重复）/ #007（新功能无验收清单）
-> 关联 Verifier：`verify/modules/vision.verifier.ts`（Phase 3 起，v0.2 补 AC-VISION-009，v0.3 补 AC-VISION-011/012）
+> 关联 Verifier：`verify/modules/vision.verifier.ts`（Phase 3 起，v0.2 补 AC-VISION-009，v0.3 补 AC-VISION-011/012，v0.4 补 AC-VISION-013）
 > 执行命令：`bun verify --module vision [--ac AC-VISION-NNN]`
 > 上游需求：`docs/features/ai-vision/ai-vision.md`
 
@@ -159,7 +159,18 @@
 
 ---
 
-## 总计：12 条 AC
+## AC-VISION-013：DeepSeek 视觉渠道 + 模型图片能力门控
+
+- **验证对象**：`app/lib/ai-provider-config.ts`（`IMAGE_CAPABLE_PROVIDERS` / `resolveVisionConfig`）+ `app/lib/constants.ts`（`models` 注册表 + `supportsVision`）+ `app/components/settings/AIVisionSettings.tsx`（provider 选项 + 模型过滤）
+- **输入**：`visionProvider='deepseek'`，`deepseekModel` 分别取 `deepseek-flash`（支持图片）/ `deepseek-v4-pro`（不支持）
+- **Pass 条件**：
+  - `IMAGE_CAPABLE_PROVIDERS` 含 `deepseek`；`resolveVisionConfig({ visionProvider: 'deepseek', deepseekModel: 'deepseek-flash', … })` 返回 provider `deepseek` + model `deepseek-flash`（不抛错）
+  - `models` 注册表：`deepseek-flash` / `deepseek-v4-pro` 存在，旧名 `deepseek-v4-flash` / `deepseek v4 pro` 不再存在；`deepseek-flash.supportsVision === true`，`deepseek-v4-pro.supportsVision === false`
+  - source scan：`AIVisionSettings.tsx` 的 `VISION_PROVIDER_OPTIONS` 含 `deepseek`，模型下拉按 `supportsVision` 过滤；切换 provider 时若当前模型不支持图片输入则回退到该 provider 首个支持图片的模型
+
+---
+
+## 总计：13 条 AC
 
 | AC            | 分类       | 依赖 AI | 依赖 Fixture | 阶段  |
 | ------------- | ---------- | ------- | ------------ | ----- |
@@ -175,5 +186,6 @@
 | AC-VISION-010 | 可见性门控 | 否      | 否           | ✅ P5 |
 | AC-VISION-011 | 纯函数     | 否      | 否           | ✅ P5 |
 | AC-VISION-012 | 纯函数     | 否      | 否           | ✅ P5 |
+| AC-VISION-013 | 纯函数     | 否      | 否           | ✅ P6 |
 
 > 注：AC-VISION-001~007 离线确定性；AC-VISION-008/009/010 source scan 离线确定性；AC-VISION-011/012 纯函数离线确定性。真实 API Key 的端到端（`/api/ai/vision` 真跑 MiMo）不纳入 AC 断言，作为手动验收清单项。

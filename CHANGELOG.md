@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ### Added
 
+#### DeepSeek 视觉渠道（2026-09-12）
+
+- AI 图片描述新增 DeepSeek 渠道（`deepseek-flash` 支持图片输入；`deepseek-v4-pro` 为纯文本，设置页按 `supportsVision` 过滤并在切换 provider 时回退）
+- `AC-VISION-013`（`verify/acceptance-criteria/AC-vision.md`）+ `test/unit/ai-provider-config.spec.ts`
+
 #### 验证诚信修复（2026-09-12）
 
 - `test/acceptance/ac-contract.spec.ts`：文档 AC 编号 ↔ `describe/it` 名 1:1 元测试（F4）
@@ -31,6 +36,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 - `CHANGELOG.md`、`CONTRIBUTING.md`
 
 ### Changed
+
+#### DeepSeek 视觉渠道（2026-09-12）
+
+- DeepSeek 模型 slug 对齐官方文档：`deepseek-v4-flash` → `deepseek-flash`、`deepseek v4 pro` → `deepseek-v4-pro`（顺带修 review P1-5 模型名空格）；persist v6 迁移改写旧 slug
 
 #### 验证诚信修复（2026-09-12）
 

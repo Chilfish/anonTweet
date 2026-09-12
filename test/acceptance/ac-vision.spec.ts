@@ -18,6 +18,8 @@ const GET_TWEET_SERVER_REL = path.join('app', 'lib', 'service', 'getTweet.server
 const APPCONFIG_REL = path.join('app', 'lib', 'stores', 'appConfig.ts')
 const SETTINGS_REL = path.join('app', 'components', 'settings', 'AIVisionSettings.tsx')
 const TWEET_NODE_REL = path.join('app', 'components', 'tweet', 'TweetNode.tsx')
+const AI_PROVIDER_CONFIG_REL = path.join('app', 'lib', 'ai-provider-config.ts')
+const CONSTANTS_REL = path.join('app', 'lib', 'constants.ts')
 
 describe('AC-VISION source scan checks', () => {
   it('AC-VISION-008: screenshot route renders vision block', () => {
@@ -64,5 +66,21 @@ describe('AC-VISION source scan checks', () => {
     expect(tweetNode).toContain('setVisionVisibility')
     expect(tweetNode).toContain('initializeEditor')
     expect(tweetNode).toContain('showVisionEntry')
+  })
+
+  it('AC-VISION-013: vision settings expose the DeepSeek channel and gate models by image capability', () => {
+    const settings = readProjectFile(SETTINGS_REL) ?? ''
+    const aiProviderConfig = readProjectFile(AI_PROVIDER_CONFIG_REL) ?? ''
+    const constants = readProjectFile(CONSTANTS_REL) ?? ''
+
+    // provider 选项含 deepseek；模型下拉按 supportsVision 过滤；切换 provider 回退到支持图片的模型
+    expect(settings).toContain('{ label: \'DeepSeek\', value: \'deepseek\' }')
+    expect(settings).toContain('m.provider === visionProvider && m.supportsVision')
+    expect(settings).toContain('handleSelectProvider')
+
+    // provider 门控含 deepseek；注册表使用官方文档 slug
+    expect(aiProviderConfig).toContain('[\'google\', \'deepseek\', \'openrouter\']')
+    expect(constants).toContain('name: \'deepseek-flash\'')
+    expect(constants).toContain('name: \'deepseek-v4-pro\'')
   })
 })

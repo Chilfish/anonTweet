@@ -58,8 +58,8 @@ describe('createSDKProvider baseUrl forwarding', () => {
   it('injects thinking disabled when reasoning_effort is absent', () => {
     const sdk = deepseekStrategy.createSDKProvider('key', '') as any
     const transform = sdk.__settings.transformRequestBody as (body: Record<string, any>) => Record<string, any>
-    expect(transform({ model: 'deepseek-v4-flash', messages: [] })).toEqual({
-      model: 'deepseek-v4-flash',
+    expect(transform({ model: 'deepseek-flash', messages: [] })).toEqual({
+      model: 'deepseek-flash',
       messages: [],
       thinking: { type: 'disabled' },
     })
@@ -68,7 +68,7 @@ describe('createSDKProvider baseUrl forwarding', () => {
   it('leaves body unchanged when reasoning_effort is present', () => {
     const sdk = deepseekStrategy.createSDKProvider('key', '') as any
     const transform = sdk.__settings.transformRequestBody as (body: Record<string, any>) => Record<string, any>
-    const body = { model: 'deepseek-v4-flash', reasoning_effort: 'high', messages: [] }
+    const body = { model: 'deepseek-flash', reasoning_effort: 'high', messages: [] }
     expect(transform(body)).toBe(body)
   })
 

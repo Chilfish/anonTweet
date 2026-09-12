@@ -76,7 +76,7 @@ interface AIConfig {
 
   // DeepSeek 配置 (v2.1 新增)
   deepseekApiKey: string
-  deepseekModel: string // e.g., "deepseek-v4-flash"
+  deepseekModel: string // e.g., "deepseek-flash"
   deepseekThinkingLevel: ThinkingLevel
 
   // 翻译显示风格

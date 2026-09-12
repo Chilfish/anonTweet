@@ -39,5 +39,6 @@
 | 2026-09-12 | Instagram Story 列表（tray / 精选集）已完成条目（AC-IG-STORY-001~005 + canonical id + 扇出） | [archive/backlog-completed-2026-09-12-ig-story-list.md](../archive/backlog-completed-2026-09-12-ig-story-list.md)       |
 | 2026-09-12 | 快拍列表改造为网格相册 + 全屏查看器 + 快拍骨架屏 + 移动端适配（AC-IG-STORY-002/006/007）     | [archive/backlog-completed-2026-09-12-ig-story-gallery.md](../archive/backlog-completed-2026-09-12-ig-story-gallery.md) |
 | 2026-09-12 | 验证诚信修复 F1~~F5 / F8~~F10 / F12 / F13 已完成条目（F6/F7/F11 剩余项已回填活跃清单）       | [archive/backlog-completed-2026-09-12.md](../archive/backlog-completed-2026-09-12.md)                                   |
+| 2026-09-12 | DeepSeek 视觉渠道 + 模型对齐官方文档（AC-VISION-013）                                        | [archive/backlog-completed-2026-09-12-deepseek-vision.md](../archive/backlog-completed-2026-09-12-deepseek-vision.md)   |
 | 2026-09-11 | 三阶段排期（阶段一全部 / 阶段二除 2 项 / 阶段三已完成 2 项）已完成条目 + 原未决条目裁决明细  | [archive/backlog-completed-2026-09-11.md](../archive/backlog-completed-2026-09-11.md)                                   |
 | 2026-08    | 历史规划（已完成记录 + 约束 + 待办）                                                         | [archive/TODO.md](../archive/TODO.md)                                                                                   |

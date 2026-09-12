@@ -205,10 +205,14 @@ v2.1 对翻译实体存储进行了重大重构：
 
 ### 5.1 提供商模型
 
-| 提供商        | SDK                         | 模型                                   | 思考模式                               |
-| ------------- | --------------------------- | -------------------------------------- | -------------------------------------- |
-| Google Gemini | `@ai-sdk/google`            | `gemini-3-flash-preview` 等            | `thinkingLevel` + `thinkingBudget`     |
-| DeepSeek      | `@ai-sdk/openai-compatible` | `deepseek-v4-flash`, `deepseek v4 pro` | `reasoning_effort` (disabled/high/max) |
+| 提供商        | SDK                         | 模型                                | 思考模式                               |
+| ------------- | --------------------------- | ----------------------------------- | -------------------------------------- |
+| Google Gemini | `@ai-sdk/google`            | `gemini-3-flash-preview` 等         | `thinkingLevel` + `thinkingBudget`     |
+| DeepSeek      | `@ai-sdk/openai-compatible` | `deepseek-flash`, `deepseek-v4-pro` | `reasoning_effort` (disabled/high/max) |
+| OpenRouter    | `@ai-sdk/openai-compatible` | `xiaomi/mimo-v2.5` 等               | `reasoning: { enabled, effort }`       |
+
+> 视觉子系统（`/api/ai-vision`）复用同一策略注册表，provider 粒度为 `google` / `deepseek` / `openrouter`；
+> DeepSeek 仅 `deepseek-flash` 支持图片输入（`deepseek-v4-pro` 为纯文本），模型下拉按 `ModelConfig.supportsVision` 过滤（AC-VISION-013）。
 
 ### 5.2 思考强度映射
 

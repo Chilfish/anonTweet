@@ -12,7 +12,7 @@ import {
 } from '~/components/ui/select'
 import { Switch } from '~/components/ui/switch'
 import { resolveVisionConfig } from '~/lib/ai-provider-config'
-import { DEFAULT_GEMINI_BASE_URL, DEFAULT_OPENROUTER_BASE_URL, models } from '~/lib/constants'
+import { DEFAULT_DEEPSEEK_BASE_URL, DEFAULT_GEMINI_BASE_URL, DEFAULT_OPENROUTER_BASE_URL, models } from '~/lib/constants'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 
 /** 模型下拉中的「自定义」哨兵项，用于切换到手写模型名的输入模式 */
@@ -22,11 +22,13 @@ const CUSTOM_MODEL_VALUE = '__custom__'
 const CUSTOM_MODEL_OPTION = { label: '自定义模型…', value: CUSTOM_MODEL_VALUE }
 
 /**
- * 视觉 provider 只列支持图片输入的（DR-8）：Google Gemini / OpenRouter，
- * 不列 DeepSeek（纯文本）。已有 Gemini Key 的用户可「识图+翻译」共用一个 Key。
+ * 视觉 provider 选项：Google Gemini / DeepSeek / OpenRouter。
+ * DeepSeek 仅 `deepseek-flash` 模型支持图片输入（`deepseek-v4-pro` 不支持），
+ * 模型下拉按 `ModelConfig.supportsVision` 过滤。已有 Key 的用户可「识图+翻译」共用一个 Key。
  */
 const VISION_PROVIDER_OPTIONS: Array<{ label: string, value: AIProvider }> = [
   { label: 'Google Gemini', value: 'google' },
+  { label: 'DeepSeek', value: 'deepseek' },
   { label: 'OpenRouter', value: 'openrouter' },
 ]
 
@@ -47,6 +49,10 @@ export function AIVisionSettings() {
     geminiModel,
     geminiBaseUrl,
     geminiThinkingLevel,
+    deepseekApiKey,
+    deepseekModel,
+    deepseekBaseUrl,
+    deepseekThinkingLevel,
     openrouterApiKey,
     openrouterModel,
     openrouterBaseUrl,
@@ -58,6 +64,10 @@ export function AIVisionSettings() {
     setGeminiModel,
     setGeminiBaseUrl,
     setGeminiThinkingLevel,
+    setDeepseekApiKey,
+    setDeepseekModel,
+    setDeepseekBaseUrl,
+    setDeepseekThinkingLevel,
     setOpenrouterApiKey,
     setOpenrouterModel,
     setOpenrouterBaseUrl,
@@ -71,6 +81,10 @@ export function AIVisionSettings() {
       geminiModel: state.geminiModel,
       geminiBaseUrl: state.geminiBaseUrl,
       geminiThinkingLevel: state.geminiThinkingLevel,
+      deepseekApiKey: state.deepseekApiKey,
+      deepseekModel: state.deepseekModel,
+      deepseekBaseUrl: state.deepseekBaseUrl,
+      deepseekThinkingLevel: state.deepseekThinkingLevel,
       openrouterApiKey: state.openrouterApiKey,
       openrouterModel: state.openrouterModel,
       openrouterBaseUrl: state.openrouterBaseUrl,
@@ -82,6 +96,10 @@ export function AIVisionSettings() {
       setGeminiModel: state.setGeminiModel,
       setGeminiBaseUrl: state.setGeminiBaseUrl,
       setGeminiThinkingLevel: state.setGeminiThinkingLevel,
+      setDeepseekApiKey: state.setDeepseekApiKey,
+      setDeepseekModel: state.setDeepseekModel,
+      setDeepseekBaseUrl: state.setDeepseekBaseUrl,
+      setDeepseekThinkingLevel: state.setDeepseekThinkingLevel,
       setOpenrouterApiKey: state.setOpenrouterApiKey,
       setOpenrouterModel: state.setOpenrouterModel,
       setOpenrouterBaseUrl: state.setOpenrouterBaseUrl,
@@ -89,35 +107,40 @@ export function AIVisionSettings() {
     })),
   )
 
-  // resolveVisionConfig 会拒绝 deepseek（不支持图片输入），失败即抛错，保证下方 setter 必命中
   const currentConfig = resolveVisionConfig({
     visionProvider,
     geminiApiKey,
     geminiModel,
     geminiBaseUrl,
     geminiThinkingLevel,
-    deepseekApiKey: '',
-    deepseekModel: '',
-    deepseekBaseUrl: '',
-    deepseekThinkingLevel: 'minimal',
+    deepseekApiKey,
+    deepseekModel,
+    deepseekBaseUrl,
+    deepseekThinkingLevel,
     openrouterApiKey,
     openrouterModel,
     openrouterBaseUrl,
     openrouterThinkingLevel,
   })
 
-  /** 写侧：按 provider 索引 setter（deepseek 不可达，索引前已抛错） */
-  const settersByProvider: Partial<Record<AIProvider, {
+  /** 写侧：按 provider 索引 setter（模型与翻译侧共享，识图与翻译无需分别配置） */
+  const settersByProvider: Record<AIProvider, {
     setApiKey: (v: string) => void
     setModel: (v: string) => void
     setBaseUrl: (v: string) => void
     setThinkingLevel: (v: ThinkingLevel) => void
-  }>> = {
+  }> = {
     google: {
       setApiKey: setGeminiApiKey,
       setModel: setGeminiModel,
       setBaseUrl: setGeminiBaseUrl,
       setThinkingLevel: setGeminiThinkingLevel,
+    },
+    deepseek: {
+      setApiKey: setDeepseekApiKey,
+      setModel: setDeepseekModel,
+      setBaseUrl: setDeepseekBaseUrl,
+      setThinkingLevel: setDeepseekThinkingLevel,
     },
     openrouter: {
       setApiKey: setOpenrouterApiKey,
@@ -126,9 +149,16 @@ export function AIVisionSettings() {
       setThinkingLevel: setOpenrouterThinkingLevel,
     },
   }
-  const setters = settersByProvider[visionProvider]!
+  const setters = settersByProvider[visionProvider]
 
-  const providerModels = models.filter(m => m.provider === visionProvider)
+  /** 各 provider 当前选中的模型（与翻译侧共享配置） */
+  const modelByProvider: Record<AIProvider, string> = {
+    google: geminiModel,
+    deepseek: deepseekModel,
+    openrouter: openrouterModel,
+  }
+
+  const providerModels = models.filter(m => m.provider === visionProvider && m.supportsVision)
   const currentModelConfig = models.find(m => m.name === currentConfig.model)
 
   const thinkingLevelOptions = (currentModelConfig?.supportedLevels || ['minimal', 'low', 'medium', 'high'])
@@ -147,6 +177,15 @@ export function AIVisionSettings() {
       if (!nextModel.supportedLevels.includes(currentConfig.thinkingLevel)) {
         setters.setThinkingLevel(nextModel.supportedLevels[0]!)
       }
+    }
+  }
+
+  /** 切换 provider：若该 provider 当前模型不支持图片输入，回退到其首个支持图片的模型 */
+  const handleSelectProvider = (next: AIProvider) => {
+    setVisionProvider(next)
+    const capable = models.filter(m => m.provider === next && m.supportsVision)
+    if (capable.length && !capable.some(m => m.name === modelByProvider[next])) {
+      settersByProvider[next].setModel(capable[0]!.name)
     }
   }
 
@@ -186,7 +225,7 @@ export function AIVisionSettings() {
               <div className="flex-1 flex justify-end">
                 <Select
                   value={currentProviderOption}
-                  onValueChange={opt => opt && setVisionProvider(opt.value as AIProvider)}
+                  onValueChange={opt => opt && handleSelectProvider(opt.value as AIProvider)}
                 >
                   <SelectTrigger className="w-fit h-8 border-none transition-colors">
                     <SelectValue />
@@ -220,7 +259,9 @@ export function AIVisionSettings() {
                   href={
                     visionProvider === 'google'
                       ? 'https://aistudio.google.com/api-keys'
-                      : 'https://openrouter.ai/settings/keys'
+                      : visionProvider === 'deepseek'
+                        ? 'https://platform.deepseek.com/api_keys'
+                        : 'https://openrouter.ai/settings/keys'
                   }
                   target="_blank"
                   rel="noreferrer"
@@ -258,7 +299,9 @@ export function AIVisionSettings() {
                 placeholder={
                   visionProvider === 'google'
                     ? DEFAULT_GEMINI_BASE_URL
-                    : DEFAULT_OPENROUTER_BASE_URL
+                    : visionProvider === 'deepseek'
+                      ? DEFAULT_DEEPSEEK_BASE_URL
+                      : DEFAULT_OPENROUTER_BASE_URL
                 }
                 className="text-right h-8 sm:min-w-64 bg-secondary/30 border-none focus-visible:ring-1 focus-visible:ring-primary/20"
               />

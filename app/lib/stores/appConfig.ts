@@ -29,7 +29,7 @@ export interface AppConfigs {
   openrouterThinkingLevel: ThinkingLevel
   translationGlossary: string
   enableAIVision: boolean
-  /** 视觉 provider：只允许支持图片输入的（google / openrouter），复用翻译侧对应 key */
+  /** 视觉 provider：支持图片输入的（google / deepseek / openrouter），复用翻译侧对应 key */
   visionProvider: AIProvider
   /** 仅显示译文：AIVisionBlock 展示开关（隐藏 OCR 原文） */
   visionShowTranslatedOnly: boolean
@@ -88,7 +88,7 @@ export const useAppConfigStore = create<AppConfigState>()(
       geminiBaseUrl: '',
       geminiThinkingLevel: 'minimal',
       deepseekApiKey: '',
-      deepseekModel: 'deepseek-v4-flash',
+      deepseekModel: 'deepseek-flash',
       deepseekBaseUrl: '',
       deepseekThinkingLevel: 'high',
       openrouterApiKey: '',
@@ -130,14 +130,24 @@ export const useAppConfigStore = create<AppConfigState>()(
     }),
     {
       name: 'app-config-store',
-      version: 5,
+      version: 6,
       migrate: (persistedState, version) => {
         const state = persistedState as Partial<AppConfigs>
+        let next = state
         // v4 → v5：AI 图片描述默认仅显示译文（保留其余设置）
         if (version < 5) {
-          return { ...state, visionShowTranslatedOnly: true }
+          next = { ...next, visionShowTranslatedOnly: true }
         }
-        return state
+        // v5 → v6：DeepSeek 模型 slug 对齐官方文档（旧名 deepseek-v4-flash / deepseek v4 pro 已退役）
+        if (version < 6) {
+          if (next.deepseekModel === 'deepseek-v4-flash') {
+            next = { ...next, deepseekModel: 'deepseek-flash' }
+          }
+          else if (next.deepseekModel === 'deepseek v4 pro') {
+            next = { ...next, deepseekModel: 'deepseek-v4-pro' }
+          }
+        }
+        return next
       },
       onRehydrateStorage: (state) => {
         return () => state?.setHasHydrated(true)

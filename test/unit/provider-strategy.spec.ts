@@ -8,6 +8,7 @@ function makeModelConfig(overrides: Partial<ModelConfig> = {}): ModelConfig {
     text: 'Test Model',
     provider: 'google',
     thinkingType: 'level',
+    supportsVision: true,
     ...overrides,
   }
 }
@@ -219,8 +220,8 @@ describe('getThinkingConfig', () => {
   })
 
   it('delegates to deepseek strategy for deepseek models', () => {
-    expect(getThinkingConfig('deepseek-v4-flash', 'max')).toBe('max')
-    expect(getThinkingConfig('deepseek-v4-flash', 'minimal')).toBe('disabled')
+    expect(getThinkingConfig('deepseek-flash', 'max')).toBe('max')
+    expect(getThinkingConfig('deepseek-flash', 'minimal')).toBe('disabled')
   })
 
   it('delegates to openrouter strategy for openrouter models', () => {
