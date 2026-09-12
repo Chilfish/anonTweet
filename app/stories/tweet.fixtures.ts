@@ -40,7 +40,7 @@ export const summaryCard = {
   title: '渡瀬結月の6げんめっ！=15げんめっ=',
   description: '番組ハッシュタグ：#6げんめっ パーソナリティ：渡瀬結月 渡瀬結月がお届けする、生放送バラエティ番組です！ 番組では、皆様からのお便りも募集しております。',
   domain: 'live.nicovideo.jp',
-  imageUrl: 'https://pbs.twimg.com/card_img/2067826373734055936/2dzFQKk9?format=png&name=orig',
+  imageUrl: 'https://pbs.twimg.com/media/HQVvgGIbAAAWXed.jpg',
 }
 
 export const largeImageCard = {
@@ -49,7 +49,7 @@ export const largeImageCard = {
   title: 'YouTube 影片预览：寬幅揮洒大圖卡',
   description: '这是一个 summary_large_image 卡片的示例描述，足够长以测试 line-clamp 的截断效果。',
   domain: 'youtube.com',
-  imageUrl: 'https://pbs.twimg.com/card_img/2067826373734055936/2dzFQKk9?format=jpg&name=orig',
+  imageUrl: 'https://pbs.twimg.com/media/HQVvgGIbAAAWXed.jpg',
 }
 
 export const longDescriptionCard = {
