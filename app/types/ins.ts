@@ -41,6 +41,20 @@ export interface IGMedia {
 }
 
 /**
+ * 故事链接贴纸（swipe-up / CTA 链接）— 对应 SDK ParsedMedia 的 `story_link_*`
+ */
+export interface IGStoryLink {
+  /** 外链目标 */
+  url: string
+  /** 贴纸标题文案（如 "Live 配信はこちら"） */
+  title: string
+  /** 展示域名文案 */
+  display?: string
+  /** 链接类型（如 'web'） */
+  type?: string
+}
+
+/**
  * Instagram 帖子 — SDK ParsedPost 标准化后的前端消费结构
  */
 export interface IGPost {
@@ -76,6 +90,14 @@ export interface IGPost {
   verified?: boolean
   /** 帖子附带的音频/音乐（Reel 等） */
   audio?: IGAudio
+  /** 故事/精选过期时间（ISO 字符串，仅 story） */
+  expires?: string
+  /** 精选集标题（仅 highlight） */
+  highlight_title?: string
+  /** 故事链接贴纸（swipe-up CTA） */
+  storyLink?: IGStoryLink
+  /** 转发来源（re-share 他人故事时由 SDK `tagged_username` 提供） */
+  resharedFrom?: { username: string, fullname?: string }
   /** AI / 手动翻译后的 caption 文本 */
   captionTranslation?: string
 }

@@ -1,87 +1,14 @@
-import type { DirectoryMsg, Message, ParsedMedia, ParsedPost, UrlMsg } from '@chilfish/gallery-dl-instagram'
+import type { Message } from '@chilfish/gallery-dl-instagram'
 import type { Route } from './+types/get'
-import type { IGAudio, IGMedia, IGPost, IGPostData } from '~/types'
+import type { IGPost, IGPostData } from '~/types'
 import { createSDK } from '@chilfish/gallery-dl-instagram/node'
 import { data } from 'react-router'
 import { env } from '~/lib/env.server'
+import { normalizeIGPost } from '~/lib/ig/normalizeIGPost'
 import { getProviderStrategy } from '~/lib/providers'
 import { getCachedIGPost } from '~/lib/service/getIGPost.server'
 import { translateIGCaption } from '~/lib/translateIGCaption'
 import { extractIGId } from '~/lib/utils'
-
-/**
- * 将 SDK extract() 返回的消息流标准化为前端 IGPost 结构。
- *
- * 消息流通常为：1 个 directory + N 个 url 消息。
- */
-function normalizeIGPost(messages: Message[]): IGPost | null {
-  const dir = messages.find(m => m.type === 'directory') as DirectoryMsg | undefined
-  if (!dir)
-    return null
-
-  const meta = dir.metadata as unknown as ParsedPost & {
-    post_date?: string
-    user?: { profile_pic_url?: string, is_verified?: boolean }
-    location_slug?: string
-    coauthors?: { username: string, full_name?: string }[]
-  }
-  const urlMsgs = messages.filter(m => m.type === 'url') as unknown as UrlMsg[]
-
-  // 从第一条有音频数据的媒体中提取全剧音频信息
-  const audioItem = urlMsgs.find(m => (m.metadata as unknown as ParsedMedia).audio_title)
-  const audioParsed = audioItem?.metadata as unknown as ParsedMedia | undefined
-  const audio: IGAudio | undefined = audioParsed
-    ? {
-        title: audioParsed.audio_title,
-        subtitle: audioParsed.audio_subtitle,
-        artist: audioParsed.audio_artist,
-        duration: audioParsed.audio_duration,
-        cover_artwork_uri: audioParsed.audio_cover_artwork_uri,
-        cover_artwork_thumbnail_uri: audioParsed.audio_cover_artwork_thumbnail_uri,
-        has_lyrics: audioParsed.audio_has_lyrics,
-        is_explicit: audioParsed.audio_is_explicit,
-      }
-    : undefined
-
-  const media: IGMedia[] = urlMsgs.map((msg, i) => {
-    const m = msg.metadata as unknown as ParsedMedia
-    return {
-      num: m.num ?? i,
-      media_id: m.media_id,
-      shortcode: m.shortcode,
-      display_url: m.display_url,
-      video_url: m.video_url,
-      width: m.width,
-      height: m.height,
-      width_original: m.width_original,
-      height_original: m.height_original,
-      type: (m.video_url ? 'video' : 'photo') as IGMedia['type'],
-      tagged_users: m.tagged_users,
-    }
-  })
-
-  return {
-    id: meta.post_shortcode,
-    post_id: meta.post_id,
-    url: meta.post_url,
-    username: meta.username,
-    fullname: meta.fullname,
-    description: meta.description,
-    tags: meta.tags,
-    likes: meta.likes,
-    type: meta.type,
-    media,
-    created_at: meta.post_date,
-    avatar_url: meta.user?.profile_pic_url,
-    audio,
-    verified: meta.user?.is_verified,
-    location_name: meta.location_slug,
-    coauthors: meta.coauthors?.map(c => ({
-      username: c.username,
-      fullname: c.full_name ?? c.username,
-    })),
-  }
-}
 
 /**
  * 通过 SDK 拉取 IG 帖子原始数据并标准化。

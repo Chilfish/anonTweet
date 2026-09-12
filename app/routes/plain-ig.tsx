@@ -1,10 +1,11 @@
-import type { DirectoryMsg, Message, ParsedMedia, ParsedPost, UrlMsg } from '@chilfish/gallery-dl-instagram'
+import type { Message } from '@chilfish/gallery-dl-instagram'
 import type { Route } from './+types/ins'
-import type { IGMedia, IGPostData } from '~/types'
+import type { IGPostData } from '~/types'
 import { createSDK } from '@chilfish/gallery-dl-instagram/node'
 import { Await, useLoaderData } from 'react-router'
 import { PlainIGPost } from '~/components/ins/PlainIGPost'
 import { env } from '~/lib/env.server'
+import { normalizeIGPost } from '~/lib/ig/normalizeIGPost'
 import { extractIGId } from '~/lib/utils'
 
 export async function loader({ params }: Route.LoaderArgs): Promise<{
@@ -29,40 +30,8 @@ export async function loader({ params }: Route.LoaderArgs): Promise<{
       messages.push(msg)
     }
 
-    const dir = messages.find(m => m.type === 'directory') as DirectoryMsg | undefined
-    if (!dir)
-      return { post: null, igId }
-
-    const meta = dir.metadata as unknown as ParsedPost
-    const urlMsgs = messages.filter(m => m.type === 'url') as unknown as UrlMsg[]
-
-    const post: IGPostData = [{
-      id: meta.post_shortcode,
-      post_id: meta.post_id,
-      url: meta.post_url,
-      username: meta.username,
-      fullname: meta.fullname,
-      description: meta.description,
-      tags: meta.tags,
-      likes: meta.likes,
-      type: meta.type,
-      media: urlMsgs.map((msg, i) => {
-        const m = msg.metadata as unknown as ParsedMedia
-        return {
-          num: m.num ?? i,
-          media_id: m.media_id,
-          display_url: m.display_url,
-          video_url: m.video_url,
-          width: m.width,
-          height: m.height,
-          width_original: m.width_original,
-          height_original: m.height_original,
-          type: (m.video_url ? 'video' : 'photo') as IGMedia['type'],
-        }
-      }),
-    }]
-
-    return { post, igId }
+    const post = normalizeIGPost(messages)
+    return { post: post ? [post] : null, igId }
   }
   catch (error) {
     console.error(`[plain-ig] Failed:`, error)
