@@ -61,3 +61,14 @@ export const Capturing: Story = {
     ...actions,
   },
 }
+
+/** 快拍/精选集列表模式：右侧操作区整体隐藏（只留返回） */
+export const StoryMode: Story = {
+  args: {
+    post: makePost(),
+    translationMode: 'original',
+    isCapturing: false,
+    storyMode: true,
+    ...actions,
+  },
+}

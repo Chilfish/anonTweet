@@ -1,19 +1,21 @@
 import type { IGTranslationMode } from '~/components/ins/IGTranslateToggle'
 import type { IGPostData } from '~/types'
 import { AlertCircle } from 'lucide-react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useParams } from 'react-router'
 import useSWR from 'swr'
 import { IGHeader } from '~/components/ins/IGHeader'
+import { IGPostList } from '~/components/ins/IGPostList'
 import { IGPostSkeleton } from '~/components/ins/IGPostSkeleton'
-import { InstagramPostCard } from '~/components/ins/InstagramPostCard'
+import { IGStoryList } from '~/components/ins/IGStoryList'
+import { isStoryPost } from '~/components/ins/IGStoryMeta'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { useIGOperations } from '~/hooks/use-ig-operations'
 import { useIGScreenshotAction } from '~/hooks/use-ig-screenshot-action'
 import { fetcher } from '~/lib/fetcher'
 import { useAIConfig, useResolvedAIConfig } from '~/lib/stores/hooks'
-import { extractIGId } from '~/lib/utils'
+import { extractIGId } from '~/lib/url-detect'
 
 export function meta() {
   return [
@@ -98,39 +100,41 @@ export default function IGPostPage() {
     },
   )
 
-  const post = posts?.[0] ?? null
+  const list = posts ?? []
+  const primaryPost = list[0] ?? null
+  // 快拍 / 精选集：下载优先的列表（无帖子截图/翻译操作）
+  const isStoryList = list.length > 0 && list.every(isStoryPost)
+
+  // 页面级操作：作用于首帖；普通帖子截图捕获 listRef 包裹的卡片
+  const listRef = useRef<HTMLDivElement | null>(null)
 
   // IG 操作 hook
-  const { downloadMedia, copyText, copyMarkdown, share } = useIGOperations(post)
+  const { downloadMedia, copyText, copyMarkdown, share } = useIGOperations(primaryPost)
 
-  // 截图 hook
+  // 截图 hook（多卡捕获整列，单卡等价于原行为）
   const {
-    containerRef,
     handleScreenshot,
     shareScreenshot,
     isCapturing,
-  } = useIGScreenshotAction({ post })
+  } = useIGScreenshotAction({ post: primaryPost, captureRef: listRef })
 
-  // 翻译完成回调（IGTranslateDialog 保存后触发）
-  const handleTranslated = (captionTranslation: string) => {
+  // 翻译完成回调（IGTranslateDialog 保存后触发，按 post.id 精确回写）
+  const handleTranslated = (postId: string, captionTranslation: string) => {
     if (!igId)
       return
 
-    // 更新 SWR 缓存（该路由恒为单帖；不能按 p.id 匹配——story 的 id 与请求键
-    // `username/story_id` 不同，AC-IG-STORY-003）
+    // 该路由的列表可能含多张卡（tray / 精选集）：按 item id 匹配回写
     mutate(
-      (currentData) => {
-        if (!currentData)
-          return currentData
-        return currentData.map(p => ({ ...p, captionTranslation }))
-      },
+      currentData => currentData?.map(p =>
+        p.id === postId ? { ...p, captionTranslation } : p,
+      ),
       { revalidate: false },
     )
   }
 
   // 共享的 header props
   const headerProps = {
-    post,
+    post: primaryPost,
     translationMode,
     onTranslationModeChange: setTranslationMode,
     isCapturing,
@@ -157,13 +161,16 @@ export default function IGPostPage() {
     return (
       <>
         <IGHeader {...headerProps} />
-        <IGPostSkeleton />
+        <div className="flex flex-col gap-4">
+          <IGPostSkeleton />
+          <IGPostSkeleton />
+        </div>
       </>
     )
   }
 
   // 错误 / 无数据
-  if (error || !posts || posts.length === 0) {
+  if (error || list.length === 0) {
     console.error(error)
     return (
       <>
@@ -173,17 +180,22 @@ export default function IGPostPage() {
     )
   }
 
-  // 正常渲染
+  // 正常渲染：快拍/精选集 → 下载优先列表；普通帖子 → 单卡（header 操作）
   return (
     <>
-      <IGHeader {...headerProps} />
-      <InstagramPostCard
-        ref={containerRef}
-        post={post!}
-        translationMode={translationMode}
-        onTranslated={handleTranslated}
-        className="mt-4"
-      />
+      <IGHeader {...headerProps} storyMode={isStoryList} />
+      {isStoryList
+        ? <IGStoryList posts={list} className="mt-4" />
+        : (
+            <div ref={listRef} className="w-full">
+              <IGPostList
+                posts={list}
+                translationMode={translationMode}
+                onTranslated={handleTranslated}
+                className="mt-4"
+              />
+            </div>
+          )}
     </>
   )
 }

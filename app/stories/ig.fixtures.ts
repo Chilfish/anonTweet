@@ -110,3 +110,44 @@ export const highlightPost = makePost({
     tagged_users: [],
   }],
 })
+
+/** 用户当前快拍 tray —— 每个 item 一张卡（IGPostList 多卡场景） */
+export const trayPosts: IGPost[] = [
+  makePost({
+    ...storyPost,
+    id: 'story~chilfish~3984520955544140029',
+    post_id: '3984520955544140029',
+    url: 'https://www.instagram.com/stories/chilfish/3984520955544140029/',
+    created_at: '2026-09-12T10:02:00.000Z',
+    media: [{
+      num: 1,
+      media_id: '3984520955544140029',
+      shortcode: 'DdL3LK7Tvj9',
+      display_url: 'https://picsum.photos/seed/story-1/1080/1920',
+      video_url: null,
+      width: 1179,
+      height: 2096,
+      type: 'photo',
+      tagged_users: [],
+    }],
+  }),
+  makePost({
+    ...storyPost,
+    id: 'story~chilfish~3984520955544149999',
+    post_id: '3984520955544149999',
+    url: 'https://www.instagram.com/stories/chilfish/3984520955544149999/',
+    created_at: '2026-09-12T11:18:00.000Z',
+    storyLink: undefined,
+    media: [{
+      num: 1,
+      media_id: '3984520955544149999',
+      shortcode: 'DdL3LK7Tvj0',
+      display_url: 'https://picsum.photos/seed/story-2/1080/1920',
+      video_url: 'https://example.com/story-2.mp4',
+      width: 1080,
+      height: 1920,
+      type: 'video',
+      tagged_users: [],
+    }],
+  }),
+]

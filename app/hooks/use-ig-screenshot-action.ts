@@ -1,4 +1,5 @@
 import type { Options as ScreenshotOptions } from 'modern-screenshot'
+import type { RefObject } from 'react'
 import type { IGPost } from '~/types'
 import { domToJpeg, domToPng } from 'modern-screenshot'
 import { useCallback, useRef, useState } from 'react'
@@ -9,6 +10,11 @@ import { waitForRenderReady } from '~/lib/utils'
 
 interface UseIGScreenshotActionProps {
   post: IGPost | null
+  /**
+   * 捕获节点覆写：列表/多卡场景传列表容器（导出整列）。
+   * 不传则用内部 `containerRef`（单卡，绑在 `InstagramPostCard` 上）。
+   */
+  captureRef?: RefObject<HTMLDivElement | null>
 }
 
 /**
@@ -16,10 +22,15 @@ interface UseIGScreenshotActionProps {
  *
  * 复用 modern-screenshot 管线，与 Twitter 的 useScreenshotAction 模式一致。
  */
-export function useIGScreenshotAction({ post }: UseIGScreenshotActionProps) {
+export function useIGScreenshotAction({ post, captureRef }: UseIGScreenshotActionProps) {
   const [isCapturing, setIsCapturing] = useState(false)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const { screenshotFormat } = useAppConfigStore()
+
+  const resolveNode = useCallback(
+    () => captureRef?.current ?? containerRef.current,
+    [captureRef],
+  )
 
   const performCapture = useCallback(async (node: HTMLElement) => {
     const filter = (n: Node) => {
@@ -64,7 +75,9 @@ export function useIGScreenshotAction({ post }: UseIGScreenshotActionProps) {
 
   // 公开：主流程（mode='share' 走 AC-PWA-007，系统分享卡片图片，不支持则回退下载）
   const runCapture = useCallback(async (mode: 'download' | 'share') => {
-    if (!containerRef.current || !post) {
+    const node = resolveNode()
+
+    if (!node || !post) {
       toastManager.add({ title: '截图失败：未找到 IG 帖子节点', type: 'error' })
       return
     }
@@ -72,10 +85,10 @@ export function useIGScreenshotAction({ post }: UseIGScreenshotActionProps) {
     setIsCapturing(true)
     toastManager.add({ title: '正在截图中……', type: 'info' })
 
-    await waitForRenderReady(containerRef.current)
+    await waitForRenderReady(node)
 
     try {
-      const dataUrl = await performCapture(containerRef.current)
+      const dataUrl = await performCapture(node)
 
       if (dataUrl) {
         const now = new Date().toLocaleString('zh-CN', {
@@ -119,7 +132,7 @@ export function useIGScreenshotAction({ post }: UseIGScreenshotActionProps) {
     finally {
       setIsCapturing(false)
     }
-  }, [post, performCapture, screenshotFormat])
+  }, [post, performCapture, resolveNode, screenshotFormat])
 
   /** 截图后下载保存（默认行为）。 */
   const handleScreenshot = useCallback(() => runCapture('download'), [runCapture])

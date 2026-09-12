@@ -16,6 +16,8 @@ interface IGHeaderProps {
   onShareScreenshot: () => void
   onCopyText: () => void
   onCopyMarkdown: () => void
+  /** 快拍/精选集列表模式：只保留返回按钮（下载操作在 IGStoryList 内）。 */
+  storyMode?: boolean
 }
 
 /**
@@ -25,6 +27,7 @@ interface IGHeaderProps {
  * ```
  * [←返回]                    [翻译模式] [截图] [···]
  * ```
+ * `storyMode` 下右侧操作区整体隐藏（快拍只保留下载，操作在列表内）。
  */
 export function IGHeader({
   post,
@@ -37,6 +40,7 @@ export function IGHeader({
   onShareScreenshot,
   onCopyText,
   onCopyMarkdown,
+  storyMode = false,
 }: IGHeaderProps) {
   const hasPost = !!post
 
@@ -45,29 +49,31 @@ export function IGHeader({
       {/* 左侧：导航 */}
       <BackButton />
 
-      {/* 右侧：操作区 */}
-      <div className="flex items-center gap-1 sm:gap-2">
-        <IGTranslateToggle
-          mode={translationMode}
-          onModeChange={onTranslationModeChange}
-          disabled={!hasPost}
-        />
+      {/* 右侧：操作区（快拍列表模式下隐藏） */}
+      {!storyMode && (
+        <div className="flex items-center gap-1 sm:gap-2">
+          <IGTranslateToggle
+            mode={translationMode}
+            onModeChange={onTranslationModeChange}
+            disabled={!hasPost}
+          />
 
-        <IGScreenshotButton
-          isCapturing={isCapturing}
-          onScreenshot={onScreenshot}
-        />
+          <IGScreenshotButton
+            isCapturing={isCapturing}
+            onScreenshot={onScreenshot}
+          />
 
-        <IGOptionsMenu
-          disableActions={!hasPost}
-          isCapturing={isCapturing}
-          onDownload={onDownload}
-          onShare={onShare}
-          onShareScreenshot={onShareScreenshot}
-          onCopyText={onCopyText}
-          onCopyMarkdown={onCopyMarkdown}
-        />
-      </div>
+          <IGOptionsMenu
+            disableActions={!hasPost}
+            isCapturing={isCapturing}
+            onDownload={onDownload}
+            onShare={onShare}
+            onShareScreenshot={onShareScreenshot}
+            onCopyText={onCopyText}
+            onCopyMarkdown={onCopyMarkdown}
+          />
+        </div>
+      )}
     </div>
   )
 }
