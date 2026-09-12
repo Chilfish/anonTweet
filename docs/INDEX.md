@@ -153,9 +153,11 @@ UI 设计     docs/ui-design/（README · GENERAL · SETTINGS）
 
 ## 七、根目录文档
 
-| 文档                                     | 说明                       |
-| ---------------------------------------- | -------------------------- |
-| [../README.md](../README.md)             | 项目介绍、技术栈、快速开始 |
-| [../CHANGELOG.md](../CHANGELOG.md)       | 变更日志                   |
-| [../CONTRIBUTING.md](../CONTRIBUTING.md) | 贡献指南                   |
-| [../LICENSE](../LICENSE)                 | MIT License                |
+| 文档                                           | 说明                                 |
+| ---------------------------------------------- | ------------------------------------ |
+| [../README.md](../README.md)                   | 项目介绍、技术栈、快速开始           |
+| [../CHANGELOG.md](../CHANGELOG.md)             | 变更日志                             |
+| [../CONTRIBUTING.md](../CONTRIBUTING.md)       | 贡献指南                             |
+| [../SECURITY.md](../SECURITY.md)               | 安全政策与漏洞报告渠道               |
+| [../CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md) | 行为准则（Contributor Covenant 2.1） |
+| [../LICENSE](../LICENSE)                       | MIT License                          |
