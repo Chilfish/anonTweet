@@ -1,0 +1,56 @@
+{
+  "_meta": {
+    "source": "synthetic — derived from @chilfish/gallery-dl-instagram Message/ParsedPost/ParsedMedia contract",
+    "exportedAt": "2026-09-12T00:00:00.000Z",
+    "label": "IG highlight (type: highlight, with title, video media, no expiry)",
+    "schema": "Message[]"
+  },
+  "data": [
+    {
+      "type": "directory",
+      "metadata": {
+        "post_id": "3909876543210987654",
+        "post_shortcode": "DQ9z8y7x6wV",
+        "post_url": "https://www.instagram.com/stories/highlights/17912345678901234/",
+        "owner_id": "1234567890",
+        "username": "chilfish",
+        "fullname": "Chil Fish",
+        "post_date": "2026-08-30T18:05:00.000Z",
+        "date": "2026-08-30T18:05:00.000Z",
+        "description": "",
+        "tags": [],
+        "likes": 0,
+        "liked": false,
+        "pinned": [],
+        "coauthors": [],
+        "type": "highlight",
+        "count": 1,
+        "highlight_title": "佐世保遠征",
+        "user": {
+          "pk": "1234567890",
+          "username": "chilfish",
+          "full_name": "Chil Fish",
+          "profile_pic_url": "https://scontent.cdninstagram.com/v/t51.2885-19/avatar.jpg",
+          "is_verified": true
+        }
+      }
+    },
+    {
+      "type": "url",
+      "url": "https://scontent.cdninstagram.com/v/t51.82787-15/highlight-media.mp4",
+      "metadata": {
+        "num": 1,
+        "date": "2026-08-30T18:05:00.000Z",
+        "media_id": "3909876543210987654",
+        "shortcode": "DQ9z8y7x6wV",
+        "display_url": "https://scontent.cdninstagram.com/v/t51.82787-15/highlight-cover.jpg",
+        "video_url": "https://scontent.cdninstagram.com/v/t51.82787-15/highlight-media.mp4",
+        "width": 1080,
+        "height": 1920,
+        "width_original": 1080,
+        "height_original": 1920,
+        "tagged_users": []
+      }
+    }
+  ]
+}

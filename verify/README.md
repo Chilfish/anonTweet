@@ -2,7 +2,7 @@
 
 > AI 自验证体系 — AC 验收标准 + Vitest 三层测试架构
 > 项目：[AnonTweet](..)
-> 版本：0.3.0（2026-09-12 验证诚信修复 F1~~F13：见 [backlog](../docs/planning/backlog.md) /
+> 版本：0.3.1（2026-09-12 IG Story 接入 AC-IG-STORY-001~003；0.3.0 为验证诚信修复 F1~~F13：见 [backlog](../docs/planning/backlog.md) /
 > [review](../docs/reviews/review-2026-09-11-test-suite-honesty.md)）
 > 历史建设日志：[log.md](log.md)（2026-07~~08，勿当现行用法）
 
@@ -76,6 +76,7 @@ AC-DEV-001（dev server 健康）、AC-IG-009（缺 cookies → 500）、AC-MEDI
 | [AC-tweet.md](acceptance-criteria/AC-tweet.md)             | AC-TWEET-001~010（解析 + API + 搜索）          |
 | [AC-translation.md](acceptance-criteria/AC-translation.md) | AC-TRANS-001~007（占位符管线 + 视图/Provider） |
 | [AC-ig.md](acceptance-criteria/AC-ig.md)                   | AC-IG-001~009（IG 集成）                       |
+| [AC-ig-story.md](acceptance-criteria/AC-ig-story.md)       | AC-IG-STORY-001~003（Story 提取/渲染/缓存）    |
 | [AC-screenshot.md](acceptance-criteria/AC-screenshot.md)   | AC-SHOT-001~004 + AC-PERF-001（截图/渲染基线） |
 | [AC-media.md](acceptance-criteria/AC-media.md)             | AC-MEDIA-001~006（媒体代理）                   |
 | [AC-postmortem.md](acceptance-criteria/AC-postmortem.md)   | AC-PM-001~007（预发布检查）                    |

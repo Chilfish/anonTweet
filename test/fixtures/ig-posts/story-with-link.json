@@ -1,0 +1,68 @@
+{
+  "_meta": {
+    "source": "synthetic — derived from @chilfish/gallery-dl-instagram Message/ParsedPost/ParsedMedia contract",
+    "exportedAt": "2026-09-12T00:00:00.000Z",
+    "label": "IG story (type: story, single media, with link sticker)",
+    "schema": "Message[]"
+  },
+  "data": [
+    {
+      "type": "directory",
+      "metadata": {
+        "post_id": "3901234567890123456",
+        "post_shortcode": "DQ1a2b3c4dE",
+        "post_url": "https://www.instagram.com/stories/chilfish/3901234567890123456/",
+        "owner_id": "1234567890",
+        "username": "chilfish",
+        "fullname": "Chil Fish",
+        "post_date": "2026-09-11T09:15:00.000Z",
+        "date": "2026-09-11T09:15:00.000Z",
+        "description": "",
+        "tags": [],
+        "location_id": null,
+        "location_slug": "Sasebo, Nagasaki",
+        "likes": 0,
+        "liked": false,
+        "pinned": [],
+        "coauthors": [],
+        "type": "story",
+        "count": 1,
+        "expires": "2026-09-12T09:15:00.000Z",
+        "user": {
+          "pk": "1234567890",
+          "username": "chilfish",
+          "full_name": "Chil Fish",
+          "profile_pic_url": "https://scontent.cdninstagram.com/v/t51.2885-19/avatar.jpg",
+          "is_verified": false
+        }
+      }
+    },
+    {
+      "type": "url",
+      "url": "https://scontent.cdninstagram.com/v/t51.82787-15/story-media.jpg",
+      "metadata": {
+        "num": 1,
+        "date": "2026-09-11T09:15:00.000Z",
+        "media_id": "3901234567890123456",
+        "shortcode": "DQ1a2b3c4dE",
+        "display_url": "https://scontent.cdninstagram.com/v/t51.82787-15/story-media.jpg",
+        "video_url": null,
+        "width": 1080,
+        "height": 1920,
+        "width_original": 1080,
+        "height_original": 1920,
+        "tagged_users": [],
+        "owner": {
+          "pk": "1234567890",
+          "username": "chilfish",
+          "full_name": "Chil Fish"
+        },
+        "expires": "2026-09-12T09:15:00.000Z",
+        "story_link_url": "https://example.com/live",
+        "story_link_title": "Live 配信はこちら",
+        "story_link_display": "example.com",
+        "story_link_type": "web"
+      }
+    }
+  ]
+}

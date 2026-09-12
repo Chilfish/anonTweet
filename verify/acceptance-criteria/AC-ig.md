@@ -1,6 +1,6 @@
 # Instagram 集成验收标准
 
-> 版本：1.2 | 日期：2026-08-09（v1.2 2026-09-12：F8 去 fixture 自证）
+> 版本：1.3 | 日期：2026-09-12（v1.3：Story 接入 AC 单列至 [AC-ig-story.md](AC-ig-story.md)；v1.2 2026-09-12：F8 去 fixture 自证）
 > 对应 Postmortem：007 (Instagram Integration)
 > 关联 Verifier：`test/acceptance/ac-ig.spec.ts`（离线）/ `test/integration/api.ig.spec.ts`（集成）
 > 执行命令：`bun run verify/index.ts --module ig [--ac AC-IG-NNN]`
