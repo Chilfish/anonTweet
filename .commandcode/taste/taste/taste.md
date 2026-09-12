@@ -1,6 +1,6 @@
 # Taste
 
-- Wants to be told to "check the current project state and implement per the documented conventions/spec" — treats repo docs as the authoritative source of process, not ad-hoc decisions. Confidence: 0.85
+- Wants to be told to "check the current project state and implement per the documented conventions/spec" (e.g. "开始按规范实施" on `docs/planning/backlog.md`) — treats repo docs as the authoritative source of process, not ad-hoc decisions. Confidence: 0.9
 - Wants agent actions, logs, and notes persisted into documentation rather than living only in chat; suggests dedicating a separate directory for this. Confidence: 0.8
 - Prefers a "commit first, then document" rhythm: commit the current changes, then record the next-step action plan and acceptance criteria in the docs. Confidence: 0.8
 - Prefers acceptance criteria that are automatable/scriptable (e.g. CLI-based end-to-end verification and regression tests) rather than manual browser testing. Confidence: 0.8
@@ -16,6 +16,7 @@
 - Prefers leaving the working tree fully clean: agent/tooling artifacts (agent settings, learned taste files) should be committed or explicitly gitignored rather than left dangling as untracked leftovers. Confidence: 0.6
 - Distrusts "green = correct": asks the agent to actively audit whether test cases really conform to spec and to expose "self-deceiving" tests (tautological/always-true assertions, static source-string greps instead of behavior checks, dead code after an early `return`, structurally skipped tests). Confidence: 0.8
 - Wants quality judgments grounded in research: before concluding, explicitly asks the agent to look up the relevant specifications and industry consensus, and expects the answer to name/cite them. Confidence: 0.75
+- When a dependency/version behavior is in question, wants the root cause pinned to authoritative upstream sources — changelogs, release notes, and migration/breaking-change docs — not just a local reproduction; asks the agent to "search the changelog to see why" and expects the explanation to cite them. Confidence: 0.8
 - Cares about false-green verification gates — ac/ module filters or test selection that match zero tests and still exit 0 should fail loudly instead. Confidence: 0.6
 - Iterates agent skills in their global user-level skills dir (`~/.agents/skills/<name>`) and then expects the agent to sync those updates back into the repo's `.agents/skills/` (repo stays the committed source of truth), keeping files byte-identical to the local source. Confidence: 0.7
 - When an audit/review surfaces problems, wants the findings plus the follow-up fix steps written into docs per the repo's own conventions, and turned into an actionable TODO backlog of fix tasks (prioritized/phased, with file, effort, risk per item) instead of stopping at chat output. Confidence: 0.75
@@ -24,4 +25,8 @@
 - Wants active planning docs (e.g. `docs/planning/backlog.md`) scoped to only the current phase's open items — completed work must be archived (into an `docs/archive/` file with an index entry) instead of accumulating in the live file; rejects the "keep stacking everything into one list" pattern. Confidence: 0.7
 - Wants a single source of truth for version numbers: dislikes the same version hardcoded in multiple files (code, docs, scripts) where the copies can drift out of sync, and expects versioning to derive from one canonical place (e.g. read `package.json` instead of hand-writing literals). Confidence: 0.85
 - Expects commit messages to match the repo's existing convention: English Conventional Commits subjects (e.g. `docs(review): ...`) with a descriptive body enumerating the included changes, rather than free-form subjects. Confidence: 0.7
-- "Commit your changes" means commit only — do not push unless explicitly asked; report that the branch was left unpushed. Confidence: 0.55
+- "Commit your changes" (e.g. "commit你的更改") means commit only — do not push unless explicitly asked; report that the branch was left unpushed. Confidence: 0.65
+- Fixing a bug is not done until recurrence is prevented: expects the fix to include regression guards (behavioral tests reproducing the failure mode), the relevant check wired into pre-push/CI gates, and inline documentation of the constraint at the point it's used — not just correcting the immediate symptom. Confidence: 0.75
+- Wants non-obvious dependency/version constraints pinned and made visible at the point of use (e.g. using `~`/exact pins and an explanatory comment when a version is bounded by another package's peer range) so a future routine upgrade can't silently drift into an incompatible major. Confidence: 0.7
+- Prefers minimal, non-noisy UI copy: dislikes long/verbose disclosure text placed directly on the page (calls it "太吵" / too noisy), and values restraint over richness ("有时候丰富不代表好") — favor trimming or dropping informative-but-cluttering content instead of adding more. Confidence: 0.8
+- When a feature or UI copy is removed, also delete the now-orphaned tests that assert it — keep the test suite in sync with what actually ships rather than leaving stale assertions behind. Confidence: 0.7
