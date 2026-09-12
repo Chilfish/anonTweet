@@ -14,14 +14,6 @@
 - 裁决语义：**采纳**（按排期做）/ **延后**（注明并入阶段）/ **删除**（进不做清单，附理由）
 - 里程碑发布前，本清单应为空或全部注明延后理由
 
-## 下一阶段候选（原三阶段排期剩余）
-
-> 验证基建已收口（含延后项，见页首归档）。阶段一/二已完成、阶段三部分完成，已完成条目见 [归档](../archive/backlog-completed-2026-09-11.md)。以下为尚未开工的条目，规划下一阶段时按价值取舍。
-
-- [ ] [refactor] AI Vision 截图导出 E2E 闭环（关联：review-2026-08-17 阶段三；文件：`plain.tsx`、`app/components/tweet/AIVisionBlock.tsx`；前置：阶段二可观测性）
-- [ ] [refactor] 三层缓存规模化与命中率指标（文件：`app/lib/service/getTweet.server.ts`；前置：阶段二可观测性）
-- [ ] [refactor] 视觉基线接入：chromatic 或本地截图 diff 对比（文件：`.storybook/main.ts`、CI；工作量：1-2 人日 / 风险：中，需 owner 定基线形态）— 🔄 大进展（2026-08-19）：**addon-vitest 接线完成**——`@vitest/browser` + `@vitest/browser-playwright` + chromium 已装，`vitest.config.ts` 新增 `storybook` 项目，`bun run test:storybook` 28 files / 137 tests 全过（真实浏览器渲染 + axe）；AC-UI-VISION-001 / AC-UI-A11Y-001 已落地；`bun run build-storybook` 已并入 pre-push。**剩余：基线形态待 owner 拍板**（review 开放问题 1：chromatic 云服务 vs 本地截图 diff）与 CI 中 chromium 安装/门禁收编（storybook 测试暂不进 pre-push，避免 CI 依赖浏览器二进制下载）
-
 ## 独立增量
 
 > 阶段计划之外、按需推进的增量项，完成后勾选、移入归档。
@@ -41,9 +33,11 @@
 
 ## 归档记录
 
-| 日期       | 内容                                                                                        | 去向                                                                                                    |
-| ---------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| 2026-09-12 | Instagram Story 接入已完成条目（AC-IG-STORY-001~003 + fixture + 渲染 + 缓存键修复）         | [archive/backlog-completed-2026-09-12-ig-story.md](../archive/backlog-completed-2026-09-12-ig-story.md) |
-| 2026-09-12 | 验证诚信修复 F1~~F5 / F8~~F10 / F12 / F13 已完成条目（F6/F7/F11 剩余项已回填活跃清单）      | [archive/backlog-completed-2026-09-12.md](../archive/backlog-completed-2026-09-12.md)                   |
-| 2026-09-11 | 三阶段排期（阶段一全部 / 阶段二除 2 项 / 阶段三已完成 2 项）已完成条目 + 原未决条目裁决明细 | [archive/backlog-completed-2026-09-11.md](../archive/backlog-completed-2026-09-11.md)                   |
-| 2026-08    | 历史规划（已完成记录 + 约束 + 待办）                                                        | [archive/TODO.md](../archive/TODO.md)                                                                   |
+| 日期       | 内容                                                                                         | 去向                                                                                                                    |
+| ---------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| 2026-09-12 | Instagram Story 接入已完成条目（AC-IG-STORY-001~003 + fixture + 渲染 + 缓存键修复）          | [archive/backlog-completed-2026-09-12-ig-story.md](../archive/backlog-completed-2026-09-12-ig-story.md)                 |
+| 2026-09-12 | Instagram Story 列表（tray / 精选集）已完成条目（AC-IG-STORY-001~005 + canonical id + 扇出） | [archive/backlog-completed-2026-09-12-ig-story-list.md](../archive/backlog-completed-2026-09-12-ig-story-list.md)       |
+| 2026-09-12 | 快拍列表改造为网格相册 + 全屏查看器 + 快拍骨架屏 + 移动端适配（AC-IG-STORY-002/006/007）     | [archive/backlog-completed-2026-09-12-ig-story-gallery.md](../archive/backlog-completed-2026-09-12-ig-story-gallery.md) |
+| 2026-09-12 | 验证诚信修复 F1~~F5 / F8~~F10 / F12 / F13 已完成条目（F6/F7/F11 剩余项已回填活跃清单）       | [archive/backlog-completed-2026-09-12.md](../archive/backlog-completed-2026-09-12.md)                                   |
+| 2026-09-11 | 三阶段排期（阶段一全部 / 阶段二除 2 项 / 阶段三已完成 2 项）已完成条目 + 原未决条目裁决明细  | [archive/backlog-completed-2026-09-11.md](../archive/backlog-completed-2026-09-11.md)                                   |
+| 2026-08    | 历史规划（已完成记录 + 约束 + 待办）                                                         | [archive/TODO.md](../archive/TODO.md)                                                                                   |
