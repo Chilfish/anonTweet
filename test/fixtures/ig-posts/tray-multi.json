@@ -1,0 +1,99 @@
+{
+  "_meta": {
+    "source": "synthetic — derived from @chilfish/gallery-dl-instagram Message/ParsedPost/ParsedMedia contract",
+    "exportedAt": "2026-09-12T00:00:00.000Z",
+    "label": "IG stories tray (type: story, 2 items + audio-only file) — fan-out source",
+    "schema": "Message[]"
+  },
+  "data": [
+    {
+      "type": "directory",
+      "metadata": {
+        "post_id": "55288568126",
+        "post_shortcode": "zfdJk-",
+        "post_url": "https://www.instagram.com/stories/chilfish/",
+        "owner_id": "55288568126",
+        "username": "chilfish",
+        "fullname": "Chil Fish",
+        "post_date": "2026-09-12T10:02:00.000Z",
+        "date": "2026-09-12T10:02:00.000Z",
+        "description": "",
+        "tags": [],
+        "likes": 0,
+        "liked": false,
+        "pinned": [],
+        "coauthors": [],
+        "type": "story",
+        "count": 2,
+        "expires": "2026-09-13T11:18:53.000Z",
+        "user": {
+          "pk": "55288568126",
+          "username": "chilfish",
+          "full_name": "Chil Fish",
+          "profile_pic_url": "https://scontent.cdninstagram.com/v/t51.2885-19/avatar.jpg",
+          "is_verified": false
+        }
+      }
+    },
+    {
+      "type": "url",
+      "url": "https://scontent.cdninstagram.com/v/t51.82787-15/story-1.jpg",
+      "metadata": {
+        "num": 1,
+        "date": "2026-09-12T10:02:00.000Z",
+        "media_id": "3984520955544140029",
+        "shortcode": "DdL3LK7Tvj9",
+        "display_url": "https://scontent.cdninstagram.com/v/t51.82787-15/story-1.jpg",
+        "video_url": null,
+        "width": 1179,
+        "height": 2096,
+        "width_original": 1179,
+        "height_original": 2096,
+        "tagged_users": [],
+        "expires": "2026-09-13T11:18:53.000Z",
+        "story_link_url": "https://example.com/live",
+        "story_link_title": "Live 配信はこちら",
+        "story_link_display": "example.com",
+        "story_link_type": "web"
+      }
+    },
+    {
+      "type": "url",
+      "url": "https://scontent.cdninstagram.com/v/t51.82787-15/story-2.mp4",
+      "metadata": {
+        "num": 2,
+        "date": "2026-09-12T11:18:00.000Z",
+        "media_id": "3984520955544149999",
+        "shortcode": "DdL3LK7Tvj0",
+        "display_url": "https://scontent.cdninstagram.com/v/t51.82787-15/story-2-cover.jpg",
+        "video_url": "https://scontent.cdninstagram.com/v/t51.82787-15/story-2.mp4",
+        "width": 1080,
+        "height": 1920,
+        "width_original": 1080,
+        "height_original": 1920,
+        "tagged_users": [],
+        "expires": "2026-09-13T11:18:53.000Z"
+      }
+    },
+    {
+      "type": "url",
+      "url": "https://scontent.cdninstagram.com/v/t51.82787-15/audio-cover.jpg",
+      "metadata": {
+        "num": 3,
+        "date": "2026-09-12T11:18:00.000Z",
+        "media_id": "music-track-1",
+        "shortcode": "DdL3LK7Tvj1",
+        "display_url": "https://scontent.cdninstagram.com/v/t51.82787-15/audio-cover.jpg",
+        "video_url": null,
+        "width": 640,
+        "height": 640,
+        "width_original": 640,
+        "height_original": 640,
+        "tagged_users": [],
+        "audio_url": "https://scontent.cdninstagram.com/v/t51.82787-15/audio.mp4",
+        "audio_title": "Blue Bird",
+        "audio_artist": "Ikimono Gakari"
+      }
+    }
+  ]
+}
