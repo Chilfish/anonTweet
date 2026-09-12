@@ -31,8 +31,12 @@ export async function getDBIGPost(shortcode: string): Promise<IGPost | null> {
 
 /**
  * 将 IG 帖子写入 DB 缓存（upsert）。
+ *
+ * `shortcode` 必须是**读取侧使用的缓存键**（即请求标识），默认回退到 `post.id`。
+ * story/highlight 的请求键为 `username/story_id`，与 SDK `post.id` 不同；若此处写
+ * `post.id`，读取侧将永远查不到（AC-IG-STORY-003）。
  */
-export async function insertToIGPostDB(post: IGPost): Promise<void> {
+export async function insertToIGPostDB(post: IGPost, shortcode = post.id): Promise<void> {
   if (!isDbAvailable()) {
     return
   }
@@ -42,7 +46,7 @@ export async function insertToIGPostDB(post: IGPost): Promise<void> {
   try {
     await db.insert(igPost)
       .values({
-        postShortcode: post.id,
+        postShortcode: shortcode,
         username: post.username,
         jsonContent: post,
       })
@@ -85,8 +89,8 @@ export async function getCachedIGPost(
         return null
       }
 
-      // 异步写回 DB（不阻塞）
-      insertToIGPostDB(post).catch((e) => {
+      // 异步写回 DB（不阻塞）；写入键必须与读取键一致
+      insertToIGPostDB(post, shortcode).catch((e) => {
         console.error('[IG] Background DB insert failed:', e)
       })
 

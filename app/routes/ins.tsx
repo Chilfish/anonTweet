@@ -116,16 +116,13 @@ export default function IGPostPage() {
     if (!igId)
       return
 
-    // 更新 SWR 缓存
+    // 更新 SWR 缓存（该路由恒为单帖；不能按 p.id 匹配——story 的 id 与请求键
+    // `username/story_id` 不同，AC-IG-STORY-003）
     mutate(
       (currentData) => {
         if (!currentData)
           return currentData
-        return currentData.map(p =>
-          p.id === igId
-            ? { ...p, captionTranslation }
-            : p,
-        )
+        return currentData.map(p => ({ ...p, captionTranslation }))
       },
       { revalidate: false },
     )
