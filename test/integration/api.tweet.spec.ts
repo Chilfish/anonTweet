@@ -11,6 +11,8 @@ import { testEnv } from '../helpers/env'
 import { loadFixture } from '../helpers/load-fixture'
 import { getClient } from '../helpers/test-context'
 
+const HTTP_ERROR_RE = /HTTP [45]\d{2}/
+
 describe.skipIf(!testEnv.hasServer || !testEnv.hasTweetKeys)('AC-TWEET-005/008 tweet API (needs TWEET_KEYS + server)', () => {
   it('AC-TWEET-005: API endpoint returns tweet', async () => {
     const tweet = loadFixture<EnrichedTweet>('tweets/normal-ja.json')
@@ -32,15 +34,20 @@ describe.skipIf(!testEnv.hasServer || !testEnv.hasTweetKeys)('AC-TWEET-005/008 t
 })
 
 describe.skipIf(!testEnv.hasServer)('AC-TWEET-006 invalid tweet', () => {
-  it('AC-TWEET-006: invalid tweet returns empty (or errors acceptably)', async () => {
-    let result: EnrichedTweet[]
-    try {
-      result = await getClient().tweet.get({ tweetId: '__nonexistent__12345' })
-    }
-    catch {
-      return // error is acceptable for invalid tweets
-    }
-    expect(result).toEqual([])
+  it('AC-TWEET-006: invalid tweet id yields [] or a clean HTTP error (never a silent pass)', async () => {
+    // F7：原实现 `try { … } catch { return }`——抛错也算过，半恒真。
+    // 现要求两种可接受结果之一，任何其它结果（非空数组 / 非 HTTP 错误）都判失败。
+    const outcome = await getClient()
+      .tweet
+      .get({ tweetId: '__nonexistent__12345' })
+      .then(result => (Array.isArray(result) && result.length === 0
+        ? 'empty'
+        : `unexpected-result:${JSON.stringify(result).slice(0, 80)}`))
+      .catch((error: unknown) => (error instanceof Error && HTTP_ERROR_RE.test(error.message)
+        ? 'http-error'
+        : `unexpected-error:${String(error)}`))
+
+    expect(['empty', 'http-error']).toContain(outcome)
   })
 })
 
