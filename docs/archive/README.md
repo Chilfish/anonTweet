@@ -13,13 +13,13 @@
 
 ## 目录
 
-| 文件                                                               | 说明                                                                               | 归档日期 |
-| ------------------------------------------------------------------ | ---------------------------------------------------------------------------------- | -------- |
-| [action-plan.md](action-plan.md)                                   | 整体行动计划与里程碑（全部 ✅ 已完成，2026-08-17）                                 | 2026-08  |
-| [testing-infra-refactor.md](testing-infra-refactor.md)             | 测试验证基建重构 — 审计报告 + 三层架构计划（Phase A~E ✅）                         | 2026-08  |
-| [ai-vision-plan.md](ai-vision-plan.md)                             | AI 视觉描述子系统行动计划（Phase 0~5 ✅ 全部完成）                                 | 2026-08  |
-| [next-steps.md](next-steps.md)                                     | 下阶段行动计划底稿（Phase 2 S5~S10 已完成）                                        | 2026-08  |
-| [verification-gap-analysis.md](verification-gap-analysis.md)       | 验证体系差距分析（Phase 2 S5~S10 已完成）                                          | 2026-08  |
-| [TODO.md](TODO.md)                                                 | 历史规划（已完成记录 + 约束 + 待办，未决项已迁 backlog）                           | 2026-08  |
-| [backlog-completed-2026-09-11.md](backlog-completed-2026-09-11.md) | 三阶段排期已完成条目 + 原未决条目裁决明细（活跃清单见 `../planning/backlog.md`）   | 2026-09  |
+| 文件                                                               | 说明                                                                                | 归档日期 |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------------------------- | -------- |
+| [action-plan.md](action-plan.md)                                   | 整体行动计划与里程碑（全部 ✅ 已完成，2026-08-17）                                  | 2026-08  |
+| [testing-infra-refactor.md](testing-infra-refactor.md)             | 测试验证基建重构 — 审计报告 + 三层架构计划（Phase A~E ✅）                          | 2026-08  |
+| [ai-vision-plan.md](ai-vision-plan.md)                             | AI 视觉描述子系统行动计划（Phase 0~5 ✅ 全部完成）                                  | 2026-08  |
+| [next-steps.md](next-steps.md)                                     | 下阶段行动计划底稿（Phase 2 S5~S10 已完成）                                         | 2026-08  |
+| [verification-gap-analysis.md](verification-gap-analysis.md)       | 验证体系差距分析（Phase 2 S5~S10 已完成）                                           | 2026-08  |
+| [TODO.md](TODO.md)                                                 | 历史规划（已完成记录 + 约束 + 待办，未决项已迁 backlog）                            | 2026-08  |
+| [backlog-completed-2026-09-11.md](backlog-completed-2026-09-11.md) | 三阶段排期已完成条目 + 原未决条目裁决明细（活跃清单见 `../planning/backlog.md`）    | 2026-09  |
 | [backlog-completed-2026-09-12.md](backlog-completed-2026-09-12.md) | 验证诚信修复 F1~F13：主体已完成，F6/F7/F11 裁定「暂不修复」延后归档（测试基建收口） | 2026-09  |

@@ -1,6 +1,6 @@
 # Backlog 归档：验证诚信修复 F1~F13（2026-09-12）
 
-> **状态**：收口（主体 F1~F5 / F8~F10 / F12 / F13 已完成；剩余 F6 / F7 / F11 由所有者裁定「暂不修复」延后归档）
+> **状态**：收口（主体 F1~~F5 / F8~~F10 / F12 / F13 已完成；剩余 F6 / F7 / F11 由所有者裁定「暂不修复」延后归档）
 > **来源**：`docs/reviews/review-2026-09-11-test-suite-honesty.md` §4 行动计划
 > **实施记录**：`docs/development-log/2026-09-12.md`；**沉淀**：`docs/postmortem/011-verification-honesty.md`
 > **所有者裁决（2026-09-12）**：集成策略 = 录制 fixture + msw；静态扫描 = 关键路径重写、其余降级；
