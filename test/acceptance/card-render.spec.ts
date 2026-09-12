@@ -19,6 +19,9 @@ import { loadFixture } from '../helpers/load-fixture'
  * 源码级「变体存在 + 关键类名」锁定保留在 ac-card.spec.ts（AC-CARD-009）。
  */
 
+// 卡片外框必须裁剪子元素（overflow-hidden + 圆角边框），保证图片圆角与卡片圆角对齐
+const ANCHOR_CLIP_RE = /overflow-hidden[^"]*border border-border/
+
 // 与 ac-card.spec.ts AC-CARD-003 同源的 jetfuel 解析结果（真实 payload 解码值）
 const trendingInfo: TrendingCardInfo = {
   source: 'jetfuel',
@@ -79,9 +82,21 @@ describe('AC-CARD-006/007/008: fallback render paths (P1-3)', () => {
 
     expect(html).not.toContain('aspect-[18/10]')
     // 小图缩略布局 + 标题 + 原始跳转
-    expect(html).toContain('w-20 h-20')
+    expect(html).toContain('w-20')
     expect(html).toContain('渡瀬結月の6げんめっ！=15げんめっ=')
     expect(html).toContain('href="https://t.co/v34aHROs13"')
+  })
+
+  // 回归（2026-09-12）：缩略卡曾用固定 `h-20` + 外框 `overflow-visible`，
+  // 文本高于 80px 时图片下方留白、与卡片底边错位，且图片直角溢出圆角边框。
+  it('AC-CARD-006b: summary thumbnail stretches to card height and card clips to radius', () => {
+    const html = render(baseWithCard)
+
+    // 外框裁剪子元素，保证图片圆角与卡片圆角对齐（不溢出）
+    expect(html).toMatch(ANCHOR_CLIP_RE)
+    // 缩略图随卡片高度拉伸：只保留最小高度，不再固定 80px
+    expect(html).toContain('w-20 min-h-20 flex-shrink-0 self-stretch')
+    expect(html).not.toContain('w-20 h-20')
   })
 
   it('AC-CARD-007: trending present but image missing keeps layout (no collapse)', () => {

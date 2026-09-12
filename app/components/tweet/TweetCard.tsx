@@ -36,8 +36,12 @@ function CardImage({ imageUrl, altText, isLarge = false }: CardImageProps) {
   return (
     <div
       className={cn(
-        'relative overflow-hidden bg-muted/50 rounded',
-        isLarge ? 'aspect-[1.91/1]' : 'w-20 h-20 flex-shrink-0',
+        // 圆角/裁剪由外层 <a> 的 rounded-md + overflow-hidden 负责（与 TrendingCard 一致），
+        // 此处若自带 rounded 会与外框半径不一致而露出直角。
+        'relative overflow-hidden bg-muted/50',
+        // 缩略图必须随卡片高度拉伸（self-stretch + 仅最小高度），否则固定的 h-20
+        // 会在文本比 80px 高时于图片下方留出空白、与卡片底边错位。
+        isLarge ? 'aspect-[1.91/1]' : 'w-20 min-h-20 flex-shrink-0 self-stretch',
       )}
     >
       <MediaImage
@@ -150,7 +154,8 @@ export function TweetLinkCard({ tweet, className }: TweetLinkCardProps) {
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        'rounded-md mt-2 block border border-border/60',
+        // overflow-hidden：把子元素裁剪到 rounded-md 圆角内，避免图片直角溢出边框。
+        'rounded-md mt-2 block overflow-hidden border border-border/60',
         className,
       )}
     >
@@ -162,7 +167,7 @@ export function TweetLinkCard({ tweet, className }: TweetLinkCardProps) {
       ) : hasImage ? (
         <div className="flex">
           <CardImage imageUrl={imageUrl!} altText={title || 'Link preview'} />
-          <div className="flex-1 min-w-0">
+          <div className="flex min-w-0 flex-1 flex-col justify-center">
             <CardContent domain={domain} title={title} description={description} compact />
           </div>
         </div>

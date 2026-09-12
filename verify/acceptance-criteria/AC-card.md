@@ -1,12 +1,15 @@
 # Tweet 卡片（Trending / Jetfuel）验收标准
 
-> 版本：1.1 | 日期：2026-08-19
+> 版本：1.2 | 日期：2026-09-12
 > 对应 Postmortem：001 (Tweet Parsing)
 > 关联方案：`docs/features/tweet/trending-card.md`
 > 执行命令：`bun run verify/index.ts --module card`
 > 2026-08-19 修订（review P1-1）：AC-CARD-005 v1.0 声称「Storybook / 快照驱动」，
 > 实为源码字符串扫描——验证方法名实不符。v1.1 改为 `renderToString` 真实渲染断言
 > （`card-render.spec.ts`），源码级检查降级为辅助 AC-CARD-009。
+> 2026-09-12 修订（AC-CARD-006）：缩略卡原用固定 `h-20` 且外框 `overflow-visible`，
+> 文本高于 80px 时图片与卡片底边错位、图片直角溢出圆角边框；改为缩略图随卡片高度
+> 拉伸（`min-h-20` + `self-stretch`）+ 外框 `overflow-hidden` 裁剪。
 
 ---
 
@@ -90,7 +93,10 @@
 - **验证方法**：`renderToString` + HTML 断言（`card-render.spec.ts`）
 - **Pass 条件**：
   - 不包含 `aspect-[18/10]`
-  - 包含小图缩略布局（`w-20 h-20`）、标题文本、原始 `card.url` 跳转
+  - 包含小图缩略布局（`w-20`）、标题文本、原始 `card.url` 跳转
+  - 缩略图随卡片高度拉伸（`min-h-20` + `self-stretch`，不再固定 `h-20`），
+    避免文本高于 80px 时图片下方留白、与卡片底边错位
+  - 卡片外框含 `overflow-hidden`，将图片裁剪到 `rounded-md` 圆角内，避免直角溢出边框
 
 ---
 
