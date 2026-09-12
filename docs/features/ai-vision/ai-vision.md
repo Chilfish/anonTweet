@@ -113,11 +113,11 @@ export const openrouterStrategy: ProviderStrategy = {
 
 视觉 provider 与翻译侧共用策略注册表（`app/lib/providers/`）及 Key / 模型配置，当前支持：
 
-| Provider      | 视觉模型                             | 图片输入         |
-| ------------- | ------------------------------------ | ---------------- |
-| Google Gemini | `models/gemini-3-flash-preview` 等   | 支持             |
-| DeepSeek      | `deepseek-flash`                     | 支持（仅 flash） |
-| OpenRouter    | `xiaomi/mimo-v2.5` 等                | 支持             |
+| Provider      | 视觉模型                           | 图片输入         |
+| ------------- | ---------------------------------- | ---------------- |
+| Google Gemini | `models/gemini-3-flash-preview` 等 | 支持             |
+| DeepSeek      | `deepseek-flash`                   | 支持（仅 flash） |
+| OpenRouter    | `xiaomi/mimo-v2.5` 等              | 支持             |
 
 - `IMAGE_CAPABLE_PROVIDERS`（`app/lib/ai-provider-config.ts`）在 provider 粒度放行 `google` / `deepseek` / `openrouter`。
 - `ModelConfig.supportsVision` 标记模型图片能力：`deepseek-v4-pro` 为纯文本（`false`），视觉模型下拉按此过滤；
