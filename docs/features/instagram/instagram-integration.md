@@ -122,3 +122,25 @@
   - `InstagramPostCard` — 主导出组件，透视卡相框 + 模糊互动层
   - Storybook: 14 个 story（单图到 12 图折叠、各子组件独立测试）
   - 全部 24 files, +1470/-18, 7 commits
+
+## Story 支持（2026-09-12）
+
+Story（`/stories/{username}/{id}/`）与 Highlight 的识别、抓取早已可用（URL 解析在三类 pattern 内，
+路由按 `igId.includes('/')` 构造 stories URL），本轮补齐**标准化映射、专属渲染与缓存键一致性**：
+
+- **提取下沉为纯函数**：`normalizeIGPost()` 从 `app/routes/api/ig/get.ts` 抽到
+  `app/lib/ig/normalizeIGPost.ts`，`plain-ig.tsx` 的不完整副本（缺 audio/avatar/coauthors）删除并复用，
+  消除两份映射漂移；新增 story 字段映射：`expires`、`highlight_title`、`storyLink`（`story_link_*`
+  链接贴纸）、`resharedFrom`（`tagged_username`）。
+- **渲染**：新增 `IGStoryMeta`（链接贴纸 / 精选标题 / 转发来源）；`PlainIGPost` 与
+  `InstagramPostCard` 对 `type === 'story' | 'highlight'` **不渲染帖子互动栏**（点赞/评论/收藏），
+  改渲染 Story 元信息。
+- **缓存键一致性（缺陷修复）**：story 的请求键是 `username/story_id`，与 SDK `post.id`（shortcode）
+  不同；此前 `insertToIGPostDB` 写 `post.id`、读取用请求键 → story/highlight 的 DB 缓存永久未命中。
+  现统一以读取键写入；`ins.tsx` 的翻译回写也不再按 `p.id === igId` 匹配（单帖路由，改用 map）。
+- **验收**：`AC-IG-STORY-001~003`（`test/acceptance/ac-ig-story.spec.ts`），AC 文档
+  [`verify/acceptance-criteria/AC-ig-story.md`](../../../verify/acceptance-criteria/AC-ig-story.md)。
+
+> ⚠️ **验证边界**：离线 fixture（`test/fixtures/ig-posts/story-*.json`）为按 SDK 类型契约构造的
+> **合成输入**（沙箱无 `INS_COOKIES`，无法录制真实 payload），验证的是标准化映射行为，不代表上游
+> 字段未漂移；真实链路仍由集成层 `AC-IG-008`（需 cookies）把关，上游改版时需同步更新 fixture。

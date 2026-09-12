@@ -3,7 +3,7 @@
 **项目**: anonTweet | **最后更新**: 2026-09-12
 
 > 本清单**只保留当前阶段关注的未决任务**，不累积已完成条目。规划下一阶段时从这里选任务；条目完成后移入归档。
-> 已完成/收口归档：[backlog-completed-2026-09-12.md](../archive/backlog-completed-2026-09-12.md)（验证诚信修复 F1~F13：主体已完成，F6/F7/F11 所有者裁定「暂不修复」延后归档，测试基建到此收口）+ [backlog-completed-2026-09-11.md](../archive/backlog-completed-2026-09-11.md)（三阶段排期已完成条目 + 原未决条目裁决明细）；历史完成记录：[TODO.md](../archive/TODO.md)。
+> 已完成/收口归档：[backlog-completed-2026-09-12-ig-story.md](../archive/backlog-completed-2026-09-12-ig-story.md)（Instagram Story 接入）+ [backlog-completed-2026-09-12.md](../archive/backlog-completed-2026-09-12.md)（验证诚信修复 F1~F13：主体已完成，F6/F7/F11 所有者裁定「暂不修复」延后归档，测试基建到此收口）+ [backlog-completed-2026-09-11.md](../archive/backlog-completed-2026-09-11.md)（三阶段排期已完成条目 + 原未决条目裁决明细）；历史完成记录：[TODO.md](../archive/TODO.md)。
 
 ## 约定
 
@@ -18,10 +18,8 @@
 
 > 验证基建已收口（含延后项，见页首归档）。阶段一/二已完成、阶段三部分完成，已完成条目见 [归档](../archive/backlog-completed-2026-09-11.md)。以下为尚未开工的条目，规划下一阶段时按价值取舍。
 
-- [ ] [ux] AI 端点 stream 化 + 编辑器兼容 stream（合并原「AI 端点 stream 化」与「编辑器兼容 stream」两项；文件：`app/routes/api/ai/ai-translation.ts`、`app/components/translation/TranslationEditor.tsx`、`app/lib/translation/resolveTranslationView.ts` isAIStream 扩展、客户端 hooks；工作量：3-5 人日 / 风险：高）— 当前管线为非流式 `generateText`；先做端点流式化，再把 stream 映射到 overlay 编辑器
 - [ ] [refactor] AI Vision 截图导出 E2E 闭环（关联：review-2026-08-17 阶段三；文件：`plain.tsx`、`app/components/tweet/AIVisionBlock.tsx`；前置：阶段二可观测性）
 - [ ] [refactor] 三层缓存规模化与命中率指标（文件：`app/lib/service/getTweet.server.ts`；前置：阶段二可观测性）
-- [ ] [ux] Instagram Story 接入（关联：review-2026-08-17 不做清单末行；文件：`app/routes/api/ig/get.ts` 扩展、`IGCaption`/`PlainIGPost` 渲染；前置：SDK `@chilfish/gallery-dl-instagram` 已验证；先写 `AC-IG-STORY` + fixture 再实现；风险：中，上游接口漂移需 fixture 维护余量）
 - [ ] [refactor] 视觉基线接入：chromatic 或本地截图 diff 对比（文件：`.storybook/main.ts`、CI；工作量：1-2 人日 / 风险：中，需 owner 定基线形态）— 🔄 大进展（2026-08-19）：**addon-vitest 接线完成**——`@vitest/browser` + `@vitest/browser-playwright` + chromium 已装，`vitest.config.ts` 新增 `storybook` 项目，`bun run test:storybook` 28 files / 137 tests 全过（真实浏览器渲染 + axe）；AC-UI-VISION-001 / AC-UI-A11Y-001 已落地；`bun run build-storybook` 已并入 pre-push。**剩余：基线形态待 owner 拍板**（review 开放问题 1：chromatic 云服务 vs 本地截图 diff）与 CI 中 chromium 安装/门禁收编（storybook 测试暂不进 pre-push，避免 CI 依赖浏览器二进制下载）
 
 ## 独立增量
@@ -32,20 +30,20 @@
 
 ## 不做清单（裁决为删除/延后，Apple 式减法）
 
-| 条目                         | 裁决           | 理由                                                                                             |
-| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------ |
-| Threads / Bluesky 等新数据源 | 删除（不接）   | 产品定位（工具 vs 平台）裁决前一律不接（review Q1）                                              |
-| Bili 发布功能扩展            | 延后（无限期） | 保留为隐藏自用入口，不宣传、不扩展、仅卫生化（review P2-1）                                      |
-| 编辑器 stream 单独立项       | 延后           | 与"翻译流式化"合并，不单独立项（review backlog 裁决）                                            |
-| IG Story 提前到阶段二        | 延后           | 价值密度低于核心体验修复；SDK 已验证但逆向接口随版本漂移，排期靠后（review 不做清单末行）        |
-| 视觉模型训练 / 微调          | 删除（不接）   | `docs/features/ai-vision/ai-vision.md` §1.3 已明确非目标，维持                                   |
-| 外链离开匿名环境提示/设置项  | 删除（不接）   | **所有者裁定（2026-08-19）**：「外链这件事不用管它」；链接卡跳转外部为目标行为，不设提示         |
-| jetfuel 官方改版巡检专项     | 删除（不接）   | **所有者裁定（2026-08-19）**：解析改版直接回退普通卡，用户感知反馈后再更新解析程序，不设巡检机制 |
+| 条目                                  | 裁决           | 理由                                                                                                                                                  |
+| ------------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Threads / Bluesky 等新数据源          | 删除（不接）   | 产品定位（工具 vs 平台）裁决前一律不接（review Q1）                                                                                                   |
+| Bili 发布功能扩展                     | 延后（无限期） | 保留为隐藏自用入口，不宣传、不扩展、仅卫生化（review P2-1）                                                                                           |
+| AI 端点 stream 化 + 编辑器兼容 stream | 删除（不接）   | **所有者裁定（2026-09-12）**：「AI 端点 stream 是个很没必要的功能」；翻译管线维持非流式 `generateText`；原「编辑器 stream」一并随此删除，不再单独立项 |
+| 视觉模型训练 / 微调                   | 删除（不接）   | `docs/features/ai-vision/ai-vision.md` §1.3 已明确非目标，维持                                                                                        |
+| 外链离开匿名环境提示/设置项           | 删除（不接）   | **所有者裁定（2026-08-19）**：「外链这件事不用管它」；链接卡跳转外部为目标行为，不设提示                                                              |
+| jetfuel 官方改版巡检专项              | 删除（不接）   | **所有者裁定（2026-08-19）**：解析改版直接回退普通卡，用户感知反馈后再更新解析程序，不设巡检机制                                                      |
 
 ## 归档记录
 
-| 日期       | 内容                                                                                        | 去向                                                                                  |
-| ---------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| 2026-09-12 | 验证诚信修复 F1~~F5 / F8~~F10 / F12 / F13 已完成条目（F6/F7/F11 剩余项已回填活跃清单）      | [archive/backlog-completed-2026-09-12.md](../archive/backlog-completed-2026-09-12.md) |
-| 2026-09-11 | 三阶段排期（阶段一全部 / 阶段二除 2 项 / 阶段三已完成 2 项）已完成条目 + 原未决条目裁决明细 | [archive/backlog-completed-2026-09-11.md](../archive/backlog-completed-2026-09-11.md) |
-| 2026-08    | 历史规划（已完成记录 + 约束 + 待办）                                                        | [archive/TODO.md](../archive/TODO.md)                                                 |
+| 日期       | 内容                                                                                        | 去向                                                                                                    |
+| ---------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| 2026-09-12 | Instagram Story 接入已完成条目（AC-IG-STORY-001~003 + fixture + 渲染 + 缓存键修复）         | [archive/backlog-completed-2026-09-12-ig-story.md](../archive/backlog-completed-2026-09-12-ig-story.md) |
+| 2026-09-12 | 验证诚信修复 F1~~F5 / F8~~F10 / F12 / F13 已完成条目（F6/F7/F11 剩余项已回填活跃清单）      | [archive/backlog-completed-2026-09-12.md](../archive/backlog-completed-2026-09-12.md)                   |
+| 2026-09-11 | 三阶段排期（阶段一全部 / 阶段二除 2 项 / 阶段三已完成 2 项）已完成条目 + 原未决条目裁决明细 | [archive/backlog-completed-2026-09-11.md](../archive/backlog-completed-2026-09-11.md)                   |
+| 2026-08    | 历史规划（已完成记录 + 约束 + 待办）                                                        | [archive/TODO.md](../archive/TODO.md)                                                                   |
