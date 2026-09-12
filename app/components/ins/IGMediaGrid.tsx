@@ -70,7 +70,7 @@ function distributeRows(count: number, maxCols: number): number[] {
  * Instagram thumbnails may be pre-cropped; we use `width_original` /
  * `height_original` when available, fall back to display dimensions.
  */
-function getImageFitClass(media: IGMedia): string {
+export function getImageFitClass(media: IGMedia): string {
   const w = media.width_original ?? media.width
   const h = media.height_original ?? media.height
   if (!w || !h)

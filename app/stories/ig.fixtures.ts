@@ -111,7 +111,7 @@ export const highlightPost = makePost({
   }],
 })
 
-/** 用户当前快拍 tray —— 每个 item 一张卡（IGPostList 多卡场景） */
+/** 用户当前快拍 tray —— 每个 item 一张卡（IGStoryList 网格场景） */
 export const trayPosts: IGPost[] = [
   makePost({
     ...storyPost,
@@ -151,3 +151,42 @@ export const trayPosts: IGPost[] = [
     }],
   }),
 ]
+
+/**
+ * 稠密 tray（32 条）—— 验证几十条快拍时的网格扫视、选择态与查看器切条。
+ *
+ * 每 3 条 1 个视频（带封面帧）、每 7 条 1 个链接贴纸；短码/时间唯一，
+ * 便于在查看器里核对序号与切条是否跟手。
+ */
+export const trayPostsMany: IGPost[] = Array.from({ length: 32 }, (_, i) => {
+  const n = i + 1
+  const mediaId = `3984520955544${String(n).padStart(5, '0')}`
+  const isVideo = n % 3 === 0
+
+  return makePost({
+    ...storyPost,
+    id: `story~chilfish~${mediaId}`,
+    post_id: mediaId,
+    url: `https://www.instagram.com/stories/chilfish/${mediaId}/`,
+    created_at: new Date(Date.UTC(2026, 8, 12, 8, 0) + i * 11 * 60_000).toISOString(),
+    storyLink: n % 7 === 0
+      ? {
+          url: 'https://example.com/live',
+          title: 'Live 配信はこちら',
+          display: 'example.com',
+          type: 'web',
+        }
+      : undefined,
+    media: [{
+      num: 1,
+      media_id: mediaId,
+      shortcode: `DdL3LK7Tv${n}`,
+      display_url: `https://picsum.photos/seed/story-${n}/1080/1920`,
+      video_url: isVideo ? `https://example.com/story-${n}.mp4` : null,
+      width: 1080,
+      height: 1920,
+      type: isVideo ? 'video' : 'photo',
+      tagged_users: [],
+    }],
+  })
+})

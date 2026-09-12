@@ -8,6 +8,7 @@ import { IGHeader } from '~/components/ins/IGHeader'
 import { IGPostList } from '~/components/ins/IGPostList'
 import { IGPostSkeleton } from '~/components/ins/IGPostSkeleton'
 import { IGStoryList } from '~/components/ins/IGStoryList'
+import { IGStoryListSkeleton } from '~/components/ins/IGStoryListSkeleton'
 import { isStoryPost } from '~/components/ins/IGStoryMeta'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
@@ -15,7 +16,7 @@ import { useIGOperations } from '~/hooks/use-ig-operations'
 import { useIGScreenshotAction } from '~/hooks/use-ig-screenshot-action'
 import { fetcher } from '~/lib/fetcher'
 import { useAIConfig, useResolvedAIConfig } from '~/lib/stores/hooks'
-import { extractIGId } from '~/lib/url-detect'
+import { extractIGId, isIGStoryLikeId } from '~/lib/url-detect'
 
 export function meta() {
   return [
@@ -73,6 +74,8 @@ async function getIGPost(
 export default function IGPostPage() {
   const { id } = useParams()
   const igId = id ? (extractIGId(id) ?? id) : null
+  // 快拍族（单条 story / tray / 精选集列表）：请求发出前即可判定，决定骨架屏与 header 形态
+  const storyLike = !!igId && isIGStoryLikeId(igId)
 
   // 翻译模式：local state，不依赖全局 Twitter 翻译 store
   const [translationMode, setTranslationMode] = useState<IGTranslationMode>('bilingual')
@@ -156,15 +159,19 @@ export default function IGPostPage() {
     )
   }
 
-  // 加载中
+  // 加载中：快拍族用网格骨架，避免闪出帖子的九宫格 + 互动栏 + caption 行
   if (isLoading) {
     return (
       <>
-        <IGHeader {...headerProps} />
-        <div className="flex flex-col gap-4">
-          <IGPostSkeleton />
-          <IGPostSkeleton />
-        </div>
+        <IGHeader {...headerProps} storyMode={storyLike} />
+        {storyLike
+          ? <IGStoryListSkeleton className="mt-4" />
+          : (
+              <div className="flex flex-col gap-4">
+                <IGPostSkeleton />
+                <IGPostSkeleton />
+              </div>
+            )}
       </>
     )
   }

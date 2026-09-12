@@ -109,6 +109,18 @@ export function isIGListId(id: string): boolean {
   return false
 }
 
+/**
+ * 该 canonical id 是否属于**快拍族**（单条 story / 用户 tray / 精选集列表）。
+ *
+ * 用于在请求发出前决定骨架屏与 header 形态（`/ins/:id` 的 loading 分支）——
+ * 快拍列表不该闪帖子的九宫格骨架与翻译/截图操作。
+ *
+ * 注意：`highlight~{id}~{mediaId}` 是列表项的内部缓存键而非路由 id，返回 false 无影响。
+ */
+export function isIGStoryLikeId(id: string): boolean {
+  return id.startsWith(`story${IG_ID_SEP}`) || isIGListId(id)
+}
+
 /** canonical id → Instagram 源 URL（交给 SDK `extract()`）。 */
 export function igIdToSourceUrl(id: string): string {
   const parts = id.split(IG_ID_SEP)

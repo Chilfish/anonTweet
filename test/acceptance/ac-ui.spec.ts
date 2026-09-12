@@ -40,8 +40,7 @@ const TWEET_COMPONENTS = [
   'AIVisionBlock',
 ] as const
 
-// ins 目录全部组件（index.ts 为 barrel 不算组件；InstagramPostCard 等 6 个由
-// InstagramPostCard.stories.tsx 覆盖，其余 8 个由 2026-08-19 新增 stories 补齐）
+// ins 目录全部组件（index.ts 为 barrel 不算组件；由各 story 文件渲染覆盖）
 const INS_COMPONENTS = [
   'InstagramPostCard',
   'IGActionBar',
@@ -53,6 +52,11 @@ const INS_COMPONENTS = [
   'IGOptionsMenu',
   'IGPostSkeleton',
   'IGScreenshotButton',
+  'IGStoryGrid',
+  'IGStoryList',
+  'IGStoryListSkeleton',
+  'IGStoryMeta',
+  'IGStoryViewer',
   'IGTranslateDialog',
   'IGTranslateToggle',
   'InsLogo',

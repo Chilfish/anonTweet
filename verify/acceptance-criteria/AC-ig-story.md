@@ -1,7 +1,7 @@
 # Instagram Story 接入验收标准
 
-> 版本：1.1 | 日期：2026-09-12（v1.1：tray / 精选集列表 + URL 识别 + 下载优先列表）
-> 关联 Verifier：`test/acceptance/ac-ig-story.spec.ts`
+> 版本：1.2 | 日期：2026-09-12（v1.2：列表改**网格相册 + 全屏查看器 + 快拍骨架屏**；修订 002，新增 006/007）
+> 关联 Verifier：`test/acceptance/ac-ig-story.spec.ts` + `test/unit/ig-story-viewer.spec.ts`（007）
 > 执行命令：`bun run verify/index.ts --module ig [--ac AC-IG-STORY-NNN]`
 > 关联文档：`docs/features/instagram/instagram-integration.md` · `docs/planning/backlog.md`
 > 关联 fixture：`test/fixtures/ig-posts/story-*.json` · `highlight-*.json` · `tray-multi.json`
@@ -41,15 +41,16 @@
 
 ---
 
-## AC-IG-STORY-002：Story / 列表渲染（renderToString 行为断言）
+## AC-IG-STORY-002：Story 卡片与列表入口渲染（renderToString 行为断言）
 
 - **输入**：AC-IG-STORY-001 的标准化产出 + 普通 post fixture（反证）
-- **验证对象**：`PlainIGPost`（单卡）+ `IGStoryList`（tray / 精选集）
+- **验证对象**：`PlainIGPost`（单卡）+ `IGStoryList`（列表型入口，浏览态）
 - **Pass 条件**：
   - story 卡**不渲染**互动栏（HTML 无 `aria-label="点赞"`）；渲染链接贴纸（`href` + 文案）
   - highlight 卡渲染 `highlight_title`
-  - **列表**：`IGStoryList` 传 2 张 story → 工具栏含「条快拍 / 全选 / 下载选中 / 全部下载」，
-    每卡 1 个勾选框（默认不选）+ 1 个单条下载按钮（`aria-label="下载该快拍"`）
+  - **列表（v1.2 网格形态）**：`IGStoryList` 传 2 张 story → 工具栏含「共 N 条快拍 / 选择 /
+    全部下载」；网格 2 格，各带 `aria-label="查看第 k 条快拍"`（浏览态点击 = 打开查看器）
+  - 浏览态**不含**选择态专属的「下载选中」；查看器未打开（HTML 无 `关闭查看器`）
   - **快拍列表只保留下载**：HTML 无 `aria-label="点赞"` / `更多选项` / `截图`
   - **反证**：普通 post 卡仍渲染互动栏
 - **验证方法**：行为断言（真实渲染 HTML）
@@ -96,7 +97,39 @@
 
 ---
 
-## 总计：5 条 AC
+## AC-IG-STORY-006：快拍网格 / 骨架屏结构 + 快拍族 id 判定
+
+- **输入**：tray 产出 2 条（其中 1 条带 `storyLink`）
+- **验证对象**：`IGStoryGrid`（浏览态 / 选择态）+ `IGStoryListSkeleton` + `isIGStoryLikeId()`
+- **Pass 条件**：
+  - **浏览态**（`selectable` 缺省）：2× `aria-label="查看第 k 条快拍"`；无 `选择第` 标签
+  - **选择态**（`selectable` + `selected = {posts[0].id}`）：出现「取消选择第 1 条快拍」与
+    「选择第 2 条快拍」，两者带 `aria-pressed`；选中格 `data-selected="true"`
+  - 含 `storyLink` 的格子带「含链接贴纸」标记；网格无 `aria-label="点赞"`
+  - `IGStoryListSkeleton`：`data-slot="story-skeleton-cell"` 计数 = 12，且含
+    `story-skeleton-toolbar`（与加载后网格同形，避免加载完成跳动）
+  - `isIGStoryLikeId`：`stories~{u}` / `highlight~{id}` / `story~{u}~{m}` → true；
+    `highlight~{id}~{mediaId}`（内部缓存键）/ `DWlr-eBgVfR`（post shortcode）→ false
+- **验证方法**：行为断言（renderToString 结构 + 纯函数）
+
+---
+
+## AC-IG-STORY-007：查看器导航与选择纯逻辑（unit 层）
+
+- **输入**：当前序号 / 列表长度 / 选择动作
+- **验证对象**：`app/lib/ig/storyViewer.ts`（纯函数）
+- **Pass 条件**：
+  - `stepViewerIndex`：`(0,3,-1) → 2`、`(2,3,1) → 0`（末条 ↔ 首条环形）；`total<=1 → 0`
+  - `clampViewerIndex`：越界夹取到 `[0, total-1]`；`total<=0 → 0`
+  - `storySelectionReducer`：`toggle` 加入/移除、`set(ids)` 全选、`clear` 清空；
+    **返回新 Set，不改动入参 state**（不可变）
+- **验证方法**：行为断言（纯函数）
+- **说明**：验收层是 node 环境 + `renderToString`（无 `@testing-library/react` / DOM 环境），
+  交互组件只负责调用，环形步进/夹取/选择集合的真源收敛于此，故在 unit 层断言
+
+---
+
+## 总计：7 条 AC
 
 | AC              | 分类        | 依赖 INS_COOKIES | 依赖 AI | 依赖 server |
 | --------------- | ----------- | ---------------- | ------- | ----------- |
@@ -105,3 +138,5 @@
 | AC-IG-STORY-003 | 服务层/离线 | 否               | 否      | 否          |
 | AC-IG-STORY-004 | 纯函数/离线 | 否               | 否      | 否          |
 | AC-IG-STORY-005 | 纯函数/离线 | 否               | 否      | 否          |
+| AC-IG-STORY-006 | 渲染/纯函数 | 否               | 否      | 否          |
+| AC-IG-STORY-007 | 纯函数/离线 | 否               | 否      | 否          |

@@ -3,24 +3,28 @@ import type { IGPost } from '~/types'
 import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { IGStoryGrid } from '~/components/ins/IGStoryGrid'
 import { IGStoryList } from '~/components/ins/IGStoryList'
+import { IGStoryListSkeleton } from '~/components/ins/IGStoryListSkeleton'
 import { PlainIGPost } from '~/components/ins/PlainIGPost'
 import { normalizeIGPost, normalizeIGPosts } from '~/lib/ig/normalizeIGPost'
 import { extractIGStoryDownloadItems } from '~/lib/igDownloader'
-import { extractIGId, igIdToSourceUrl, isIGListId } from '~/lib/url-detect'
+import { extractIGId, igIdToSourceUrl, isIGListId, isIGStoryLikeId } from '~/lib/url-detect'
 import { loadFixture } from '../helpers/load-fixture'
 
 /**
  * test/acceptance/ac-ig-story.spec.ts
  *
- * AC-IG-STORY-001~005（Instagram Story 接入，2026-09-12）：
+ * AC-IG-STORY-001~007（Instagram Story 接入，2026-09-12）：
  * - 001：合成消息流（SDK 类型契约）→ 真实 `normalizeIGPosts` → 断言单条映射 +
  *        tray 扇出（每 item 一张 post、音频-only 消息被过滤）
- * - 002：`renderToString` 断言 story 卡不套用互动区；tray/精选集渲染为**下载优先列表**
- *        （勾选 + 单条/选中/全部下载），无帖子截图/翻译/更多菜单
+ * - 002：`renderToString` 断言 story 卡不套用互动区；tray/精选集渲染为**缩略图网格**
+ *        （浏览态点格开查看器），无帖子截图/翻译/更多菜单
  * - 003：服务层缓存/持久化键 —— 单帖写读同键；列表逐 item 以自身 canonical id 落缓存
  * - 004：`extractIGId` / `igIdToSourceUrl` / `isIGListId` 的 URL 识别与往返
  * - 005：下载项提取（文件名 + 视频取 video_url）
+ * - 006：网格浏览态/选择态结构 + 快拍骨架屏 + `isIGStoryLikeId` 判定（renderToString）
+ * - 007：查看器导航/选择纯逻辑（`test/unit/ig-story-viewer.spec.ts`）
  *
  * 数据来源限制见 `verify/acceptance-criteria/AC-ig-story.md`：fixture 为按 SDK
  * 类型契约构造的合成输入（真实上游结构已用 cookie 实测核对），真实链路仍由集成层
@@ -149,24 +153,75 @@ describe('AC-IG-STORY-002: story-aware rendering', () => {
     expect(normalHtml).toContain('aria-label="点赞"')
   })
 
-  it('AC-IG-STORY-002: tray renders as a download-first list without post actions', () => {
+  it('AC-IG-STORY-002: tray renders as a thumbnail gallery without post actions', () => {
     const posts = normalizeIGPosts(trayMessages())
     const html = renderToString(createElement(IGStoryList, { posts }))
 
-    // 顶部工具栏：条数 + 全选 + 选中下载 + 全部下载
+    // 浏览态工具栏：条数 + 选择 + 全部下载（选择态专属的「下载选中」此时不出现）
     expect(html).toContain('条快拍')
-    expect(html).toContain('全选')
-    expect(html).toContain('下载选中')
+    expect(html).toContain('选择')
     expect(html).toContain('全部下载')
+    expect(html).not.toContain('下载选中')
 
-    // 每卡：勾选框（默认不选）+ 单条下载
-    expect((html.match(/aria-label="选择该快拍"/g) ?? []).length).toBe(2)
-    expect((html.match(/aria-label="下载该快拍"/g) ?? []).length).toBe(2)
+    // 网格 2 格：浏览态点击 = 打开查看器
+    expect(html).toContain('aria-label="查看第 1 条快拍"')
+    expect(html).toContain('aria-label="查看第 2 条快拍"')
+
+    // 查看器关闭时不渲染遮罩内容
+    expect(html).not.toContain('关闭查看器')
 
     // 快拍只保留下载：无帖子互动区 / 截图 / 更多菜单
     expect(html).not.toContain('aria-label="点赞"')
     expect(html).not.toContain('更多选项')
     expect(html).not.toContain('>截图<')
+  })
+})
+
+describe('AC-IG-STORY-006: story grid, skeleton structure and story-like id detection', () => {
+  it('AC-IG-STORY-006: browsing grid renders one labelled cell per item', () => {
+    const posts = normalizeIGPosts(trayMessages())
+    const html = renderToString(createElement(IGStoryGrid, { posts }))
+
+    expect(html).toContain('aria-label="查看第 1 条快拍"')
+    expect(html).toContain('aria-label="查看第 2 条快拍"')
+    // 浏览态不带选择语义
+    expect(html).not.toContain('选择第')
+    expect(html).not.toContain('aria-pressed')
+
+    // 链接贴纸标记（第一条带 storyLink）
+    expect(html).toContain('含链接贴纸')
+    expect(html).not.toContain('aria-label="点赞"')
+  })
+
+  it('AC-IG-STORY-006: selection mode labels cells as selectable and marks the selected one', () => {
+    const posts = normalizeIGPosts(trayMessages())
+    const html = renderToString(createElement(IGStoryGrid, {
+      posts,
+      selectable: true,
+      selected: new Set([posts[0]!.id]),
+    }))
+
+    expect(html).toContain('aria-label="取消选择第 1 条快拍"')
+    expect(html).toContain('aria-label="选择第 2 条快拍"')
+    expect((html.match(/aria-pressed/g) ?? []).length).toBe(2)
+    expect(html).toContain('data-selected="true"')
+  })
+
+  it('AC-IG-STORY-006: skeleton mirrors the loaded grid shape', () => {
+    const html = renderToString(createElement(IGStoryListSkeleton))
+
+    expect((html.match(/data-slot="story-skeleton-cell"/g) ?? []).length).toBe(12)
+    expect(html).toContain('story-skeleton-toolbar')
+  })
+
+  it('AC-IG-STORY-006: isIGStoryLikeId separates story routes from post shortcodes', () => {
+    expect(isIGStoryLikeId('stories~rin_.t710')).toBe(true)
+    expect(isIGStoryLikeId('highlight~18104059936919418')).toBe(true)
+    expect(isIGStoryLikeId('story~rin_.t710~3906328154789100102')).toBe(true)
+
+    // 内部缓存键（三段 highlight item）与 post/reel shortcode 都不算快拍族
+    expect(isIGStoryLikeId('highlight~18104059936919418~3906328154789100102')).toBe(false)
+    expect(isIGStoryLikeId('DWlr-eBgVfR')).toBe(false)
   })
 })
 

@@ -117,7 +117,7 @@ docs/                    # 技术文档与规范（见 docs/INDEX.md：features/
 
 **当前阶段 — 验证诚信修复（2026-09-11 审查发现）**：主力已落地（F1~~F5 / F8~~F10 / F12 / F13，已完成条目见 `docs/archive/backlog-completed-2026-09-12.md`）——门禁恢复可跑满三层（`bun run verify/index.ts --exit-on-fail` 绿；此前因 dev 继承 `NODE_ENV=production` 崩在 `jsxDEV`）；CLI 零匹配非零退出；AC 编号 ↔ 测试名由 `test/acceptance/ac-contract.spec.ts` 元测试强制；断言存在性由 eslint `test/*` 规则强制；`verify/README.md` 已修订失实表述。**剩余**：F6（静态扫描 AC 逐条处置）、F7（集成层录制 fixture + msw）、F11（Stryker 一次性体检）见 `docs/planning/backlog.md`。沉淀：[postmortem 011](docs/postmortem/011-verification-honesty.md)。
 
-**后续候选（未开工）**：AI Vision 截图 E2E、三层缓存规模化、视觉基线（待 owner 拍板）。PWA 已实现，剩余真机验证与视觉验收。**Instagram Story 接入已完成**（2026-09-12，AC-IG-STORY-001~003，见 `docs/archive/backlog-completed-2026-09-12-ig-story.md`）；**AI 端点/编辑器 stream 化已删除**（所有者裁定不接，见 backlog 不做清单）。
+**后续候选（未开工）**：AI Vision 截图 E2E、三层缓存规模化、视觉基线（待 owner 拍板）。PWA 已实现，剩余真机验证与视觉验收。**Instagram Story 接入已完成**（2026-09-12，三轮）：单条 story（AC-IG-STORY-001~~003，`docs/archive/backlog-completed-2026-09-12-ig-story.md`）→ 列表型输入 tray/精选集 + 下载优先列表（AC-IG-STORY-001~~005，`docs/archive/backlog-completed-2026-09-12-ig-story-list.md`）→ 列表改造为**网格相册 + 全屏查看器 + 快拍骨架屏 + 移动端适配**（AC-IG-STORY-002/006/007，`docs/archive/backlog-completed-2026-09-12-ig-story-gallery.md`）；**AI 端点/编辑器 stream 化已删除**（所有者裁定不接，见 backlog 不做清单）。
 
 ## GitHub CLI Flow
 

@@ -176,3 +176,52 @@ Story（`/stories/{username}/{id}/`）与 Highlight 的识别、抓取早已可�
 > 默认不勾选、手动选择后「下载选中」或直接「全部下载」。
 
 > 未纳入本轮：列表级缓存（短 TTL）、`{username}/highlights/`（用户全部精选集）与 legacy base64 精选集 URL。
+
+## Story 列表：网格相册与全屏查看器（2026-09-12）
+
+上一轮的列表是 `flex flex-col gap-4` 的**竖排卡片**（每条一张 468px 卡 + 勾选框 + 页脚下载按钮）。
+实测两个问题：**几十条快拍时一屏一条**，扫视性为零也不像「相册」；**loading 时闪的是帖子骨架**
+（`IGPostSkeleton` 九宫格 + 点赞/评论/收藏 + caption 行），与快拍内容完全不匹配。
+
+本轮按「Explore（浏览）+ 一次批量动作（下载）」的工作模式重排：**缩略图网格负责扫视，全屏查看器
+负责细看与精确下载**，批量选择收敛为显式选择模式。
+
+- **网格（`IGStoryGrid`）**：`grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1` 方图缩略图（吃满
+  `Layout` 的 `max-w-3xl` 内容列）。格子是 `<button>`：浏览态 `aria-label="查看第 k 条快拍"`（点击
+  开查看器），选择态 `选择第 k 条快拍` / `取消选择第 k 条快拍` + `aria-pressed` + `data-selected`。
+  视频角标 `Play`，含 `storyLink` 的格子带「含链接贴纸」标记。缩略图复用 `IGMediaGrid` 导出的
+  `getImageFitClass`（同一套「竖构图偏上裁切、不砍头」逻辑，避免两份漂移）。
+- **全屏查看器（`IGStoryViewer`）**：受控遮罩层，直接组合 `DialogPrimitive.Portal/Backdrop/Popup`
+  （**不复用** `DialogPopup`：它强制 `max-w-lg` + 圆角 + `row-start-2`，不是全屏形态）。顶栏
+  `i / N` + 选择 + 关闭，主体 `object-contain` 全屏媒体（视频 `controls/playsInline/muted/autoPlay`），
+  底栏 `IGStoryMeta`（`tone="overlay"`）+ 时间 + 下载。切条三通道：左右 44px 按钮、触摸横滑
+  （|Δx|>40 且 |Δx|>|Δy|）、`←/→` 键；末条 ↔ 首条**环形**。相邻条目用隐藏 `<img>` 预热 CDN。
+- **选择模式（`IGStoryList`）**：浏览态工具栏「共 N 条快拍 · 选择 · 全部下载（带进度）」；点「选择」
+  进入多选，工具栏变「已选 n / N · 全选 ⇄ 取消全选 · 下载选中(n) · 取消」，退出时清空选择。工具栏
+  `sticky top-0` + 背景模糊，长列表滚动时操作不丢。沿用 owner 口径：**默认不选、手动选择**。
+- **快拍骨架（`IGStoryListSkeleton`）**：与加载后同形（工具栏占位 + 12 个方图 `Skeleton`，列数断点
+  一致），消除加载完成时的布局跳动。`ins.tsx` 用纯函数 `isIGStoryLikeId()`（`url-detect.ts`，
+  快拍族 = 单条 `story~` / tray `stories~` / 精选集 `highlight~`）在**请求发出前**判定骨架与
+  `IGHeader` 的 `storyMode`，不再等数据回来才切换（也就不会有帖子操作按钮的闪现）。
+- **纯逻辑下沉**：环形步进 `stepViewerIndex`、夹取 `clampViewerIndex`、选择 reducer
+  `storySelectionReducer` 收敛到 `app/lib/ig/storyViewer.ts`。验收层是 node 环境 + `renderToString`
+  （无 `@testing-library/react` / DOM 环境），交互组件只做调用，逻辑真源可离线断言。
+- **移动端**：工具栏在手机上**贴底**（`order-last` + `sticky bottom-0`，拇指区，iOS 相册式），`sm` 起
+  回到贴顶；上下栏留 `env(safe-area-inset-*)`，避免刘海 / Home 指示条压住序号与下载按钮；查看器
+  `h-[100dvh]` 规避地址栏抖动并 `overscroll-contain`。切条在触屏走横滑（|Δx|>40 且 |Δx|>|Δy|，避免与
+  纵向滚动抢手势），左右按钮保留给键盘/桌面 —— 它也是触屏读屏用户唯一可达的切条入口，故不按指针
+  类型隐藏。
+- **背景滚动锁交给 base-ui Dialog**（`useScrollLock`，含 iOS overlay-scrollbar 与滚动位置还原）：
+  查看器内**不要**自行设 `body.overflow` —— base-ui 检测到页面已被作者锁住会主动退让（MutationObserver
+  等待），反而在关闭之后才接管锁。该约束已内联在 `IGStoryViewer` 的注释里。
+- **验收**：AC-IG-STORY-002（修订为网格形态）+ AC-IG-STORY-006（网格/骨架结构 + id 判定）+
+  AC-IG-STORY-007（查看器导航与选择纯逻辑，unit 层）。
+
+> ⚠️ **已知缺口（本次未处理）**：`app/root.tsx` 的 viewport meta 仍是 `width=device-width, initial-scale=1`，
+> 没有 `viewport-fit=cover` —— 于是 `env(safe-area-inset-*)` 在真机上恒为 0，上面那些 safe-area padding
+> 目前是 no-op（写法与既有 `ui/drawer.tsx` 一致，那里同样待生效）。补 `viewport-fit=cover` 是**全站布局**
+> 变更（内容会顶到刘海区，需逐页确认 padding），要真机验收，不适合顺手改 —— 待有设备时单独处理。
+
+> 明确非目标：不做虚拟滚动（30~60 条方图 + `MediaImage` 原生 `loading="lazy"` 足够，出现 200+ 条再议）；
+> 不做按天分组/时间轴（额外信息噪音）；不引入 carousel 等新 UI 依赖。组件名保留 `IGStoryList`
+> （仍是该 surface 入口，改名会牵动 AC/测试/story 的追溯链）。
