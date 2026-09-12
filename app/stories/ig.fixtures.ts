@@ -59,3 +59,54 @@ export const reelPost = makePost({
   },
   captionTranslation: '新出发的旅途 🕊️ #BlueBird 翻唱',
 })
+
+/** Story：单媒体 + 链接贴纸，无 caption、无互动区 */
+export const storyPost = makePost({
+  id: 'DQ1a2b3c4dE',
+  post_id: '3901234567890123456',
+  url: 'https://www.instagram.com/stories/chilfish/3901234567890123456/',
+  type: 'story',
+  description: '',
+  created_at: '2026-09-11T09:15:00.000Z',
+  expires: '2026-09-12T09:15:00.000Z',
+  media: [{
+    num: 1,
+    media_id: 'story1',
+    shortcode: 'DQ1a2b3c4dE',
+    display_url: 'https://picsum.photos/seed/story/1080/1920',
+    video_url: null,
+    width: 1080,
+    height: 1920,
+    type: 'photo',
+    tagged_users: [],
+  }],
+  storyLink: {
+    url: 'https://example.com/live',
+    title: 'Live 配信はこちら',
+    display: 'example.com',
+    type: 'web',
+  },
+})
+
+/** Highlight：精选集标题 + 转发来源 + 视频媒体 */
+export const highlightPost = makePost({
+  id: 'DQ9z8y7x6wV',
+  post_id: '3909876543210987654',
+  url: 'https://www.instagram.com/stories/highlights/17912345678901234/',
+  type: 'highlight',
+  description: '',
+  created_at: '2026-08-30T18:05:00.000Z',
+  highlight_title: '佐世保遠征',
+  resharedFrom: { username: 'sasebo_live', fullname: 'Sasebo Live' },
+  media: [{
+    num: 1,
+    media_id: 'highlight1',
+    shortcode: 'DQ9z8y7x6wV',
+    display_url: 'https://picsum.photos/seed/highlight/1080/1920',
+    video_url: 'https://example.com/highlight.mp4',
+    width: 1080,
+    height: 1920,
+    type: 'video',
+    tagged_users: [],
+  }],
+})

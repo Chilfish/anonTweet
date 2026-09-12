@@ -6,6 +6,7 @@ import { IGCardHeader } from '~/components/ins/IGCardHeader'
 import { IGMediaGrid } from '~/components/ins/IGMediaGrid'
 import { IGMusicInfo } from '~/components/ins/IGMusicInfo'
 import { InstagramPostCard } from '~/components/ins/InstagramPostCard'
+import { highlightPost, storyPost } from './ig.fixtures'
 
 // ─── Mock Data ──────────────────────────────────────────────────────
 
@@ -279,4 +280,16 @@ export const MusicInfoOnly: Story = {
       />
     </div>
   ),
+}
+
+// ─── Story / Highlight Stories ───────────────────────────────────────
+
+/** Story：无互动栏，渲染链接贴纸 */
+export const StoryWithLink: Story = {
+  render: () => <InstagramPostCard post={storyPost} />,
+}
+
+/** Highlight：渲染精选标题 + 转发来源 */
+export const HighlightCard: Story = {
+  render: () => <InstagramPostCard post={highlightPost} />,
 }

@@ -5,6 +5,7 @@ import { IGCaption } from './IGCaption'
 import { IGCardHeader } from './IGCardHeader'
 import { IGMediaGrid } from './IGMediaGrid'
 import { IGMusicInfo } from './IGMusicInfo'
+import { IGStoryMeta, isStoryPost } from './IGStoryMeta'
 
 interface PlainIGPostProps {
   post: IGPost
@@ -13,8 +14,13 @@ interface PlainIGPostProps {
 
 /**
  * 纯净版 — 截图导出专用，与 InstagramPostCard 结构一致。
+ *
+ * Story 类（story / highlight）不渲染帖子互动栏，改渲染 Story 专属元信息
+ * （链接贴纸 / 精选标题 / 转发来源）。
  */
 export function PlainIGPost({ post, className }: PlainIGPostProps) {
+  const isStory = isStoryPost(post)
+
   return (
     <div className={cn('w-full max-w-[468px] bg-background font-sans antialiased', className)}>
       <div className="px-4 pt-3 pb-2">
@@ -30,7 +36,9 @@ export function PlainIGPost({ post, className }: PlainIGPostProps) {
 
       {post.audio && <IGMusicInfo audio={post.audio} />}
 
-      <IGActionBar className="pt-1.5 pb-1" postUrl={post.url} />
+      {isStory
+        ? <IGStoryMeta post={post} />
+        : <IGActionBar className="pt-1.5 pb-1" postUrl={post.url} />}
 
       {post.created_at && (
         <p className="px-4 text-xs text-muted-foreground/50 tabular-nums pb-1">

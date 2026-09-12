@@ -6,6 +6,7 @@ import { IGCaption } from './IGCaption'
 import { IGCardHeader } from './IGCardHeader'
 import { IGMediaGrid } from './IGMediaGrid'
 import { IGMusicInfo } from './IGMusicInfo'
+import { IGStoryMeta, isStoryPost } from './IGStoryMeta'
 
 interface InstagramPostCardProps {
   post: IGPost
@@ -62,8 +63,10 @@ export const InstagramPostCard = forwardRef<HTMLElement, InstagramPostCardProps>
         {/* 音乐信息 — 媒体与 action 之间 */}
         {post.audio && <IGMusicInfo audio={post.audio} />}
 
-        {/* Action Bar */}
-        <IGActionBar className="pt-1.5 pb-1" postUrl={post.url} />
+        {/* Story 类：无互动栏，改渲染 Story 元信息 */}
+        {isStoryPost(post)
+          ? <IGStoryMeta post={post} />
+          : <IGActionBar className="pt-1.5 pb-1" postUrl={post.url} />}
 
         {/* 时间戳 — action 和 caption 之间 */}
         {post.created_at && (
