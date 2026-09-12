@@ -21,3 +21,24 @@ export function extractIGDownloadItems(post: IGPost): DownloadItem[] {
     return { url, filename }
   })
 }
+
+/**
+ * 从 story / highlight 列表提取可下载媒体（tray / 精选集下载场景）。
+ *
+ * 文件名用 media 短码（唯一、稳定），避免把 canonical id 里的 `~` 带进文件名：
+ * `ig-{username}-story-{shortcode}.{ext}`（视频取 video_url）。
+ */
+export function extractIGStoryDownloadItems(posts: IGPost[]): DownloadItem[] {
+  return posts.flatMap(post =>
+    post.media.flatMap((m) => {
+      const isVideo = m.type === 'video'
+      const url = isVideo ? m.video_url : m.display_url
+      if (!url)
+        return []
+
+      const ext = isVideo ? 'mp4' : 'jpg'
+      const key = m.shortcode || m.media_id
+      return [{ url, filename: `ig-${post.username}-story-${key}.${ext}` }]
+    }),
+  )
+}

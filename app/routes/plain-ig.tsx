@@ -5,8 +5,8 @@ import { createSDK } from '@chilfish/gallery-dl-instagram/node'
 import { Await, useLoaderData } from 'react-router'
 import { PlainIGPost } from '~/components/ins/PlainIGPost'
 import { env } from '~/lib/env.server'
-import { normalizeIGPost } from '~/lib/ig/normalizeIGPost'
-import { extractIGId } from '~/lib/utils'
+import { normalizeIGPosts } from '~/lib/ig/normalizeIGPost'
+import { extractIGId, igIdToSourceUrl } from '~/lib/url-detect'
 
 export async function loader({ params }: Route.LoaderArgs): Promise<{
   post: IGPostData | null
@@ -19,19 +19,15 @@ export async function loader({ params }: Route.LoaderArgs): Promise<{
     return { post: null, igId }
   }
 
-  const postUrl = igId.includes('/')
-    ? `https://www.instagram.com/stories/${igId.split('/')[0]}/${igId.split('/')[1]}/`
-    : `https://www.instagram.com/p/${igId}/`
-
   try {
     const ig = await createSDK({ cookies: env.INS_COOKIES })
     const messages: Message[] = []
-    for await (const msg of ig.extract(postUrl)) {
+    for await (const msg of ig.extract(igIdToSourceUrl(igId))) {
       messages.push(msg)
     }
 
-    const post = normalizeIGPost(messages)
-    return { post: post ? [post] : null, igId }
+    const posts = normalizeIGPosts(messages)
+    return { post: posts.length ? posts : null, igId }
   }
   catch (error) {
     console.error(`[plain-ig] Failed:`, error)
@@ -56,8 +52,14 @@ export default function PlainIGPage() {
   return (
     <div id="main-container" className="max-w-fit max-h-fit min-w-125 bg-background">
       <Await resolve={loaderData} errorElement={<IGNotFound />}>
-        {resolved => (resolved.post?.[0]
-          ? <PlainIGPost post={resolved.post[0]} />
+        {resolved => (resolved.post?.length
+          ? (
+              <div className="flex flex-col gap-4">
+                {resolved.post.map(post => (
+                  <PlainIGPost key={post.id} post={post} />
+                ))}
+              </div>
+            )
           : <IGNotFound id={resolved.igId ?? undefined} />)}
       </Await>
     </div>

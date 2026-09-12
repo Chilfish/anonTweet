@@ -4,25 +4,48 @@ import type { IGPost, IGPostData } from '~/types'
 import { createSDK } from '@chilfish/gallery-dl-instagram/node'
 import { data } from 'react-router'
 import { env } from '~/lib/env.server'
-import { normalizeIGPost } from '~/lib/ig/normalizeIGPost'
+import { normalizeIGPosts } from '~/lib/ig/normalizeIGPost'
 import { getProviderStrategy } from '~/lib/providers'
-import { getCachedIGPost } from '~/lib/service/getIGPost.server'
+import { getCachedIGPost, getIGPostList } from '~/lib/service/getIGPost.server'
 import { translateIGCaption } from '~/lib/translateIGCaption'
-import { extractIGId } from '~/lib/utils'
+import { extractIGId, igIdToSourceUrl, isIGListId } from '~/lib/url-detect'
 
-/**
- * 通过 SDK 拉取 IG 帖子原始数据并标准化。
- * 不做缓存写入（由 getCachedIGPost 管理）。
- */
-async function fetchIGPostFromSDK(postUrl: string): Promise<IGPost | null> {
+/** 通过 SDK 拉取 IG 源 URL 的消息流。 */
+async function fetchIGMessages(sourceUrl: string): Promise<Message[]> {
   const ig = await createSDK({ cookies: env.INS_COOKIES })
 
   const messages: Message[] = []
-  for await (const msg of ig.extract(postUrl)) {
+  for await (const msg of ig.extract(sourceUrl)) {
     messages.push(msg)
   }
+  return messages
+}
 
-  return normalizeIGPost(messages)
+/**
+ * 通过 SDK 拉取并标准化单张 IG 帖（post / reel / 单条 story）。
+ * 不做缓存写入（由 getCachedIGPost 管理）。
+ */
+async function fetchIGPostFromSDK(sourceUrl: string): Promise<IGPost | null> {
+  return normalizeIGPosts(await fetchIGMessages(sourceUrl))[0] ?? null
+}
+
+/**
+ * 列表型请求（用户当前快拍 tray / 精选集）：拉取并标准化为每 item 一张 post。
+ * 不做列表级缓存（由 getIGPostList 逐 item 落缓存）。
+ */
+async function fetchIGPostListFromSDK(sourceUrl: string): Promise<IGPost[]> {
+  return normalizeIGPosts(await fetchIGMessages(sourceUrl))
+}
+
+/** 单帖 / 列表两条取数路径，统一返回 `IGPost[]`。 */
+async function loadIGPosts(igId: string): Promise<IGPost[]> {
+  const sourceUrl = igIdToSourceUrl(igId)
+
+  if (isIGListId(igId))
+    return getIGPostList(() => fetchIGPostListFromSDK(sourceUrl))
+
+  const post = await getCachedIGPost(igId, () => fetchIGPostFromSDK(sourceUrl))
+  return post ? [post] : []
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
@@ -57,55 +80,47 @@ export async function action({ request, params }: Route.ActionArgs) {
     translationGlossary,
   } = body
 
-  // 如果是 stories 格式（username/id），需要特殊处理
   const igId = extractIGId(id) ?? id
 
-  let postUrl: string
-  if (igId.includes('/')) {
-    // stories: username/story_id
-    const [username, storyId] = igId.split('/')
-    postUrl = `https://www.instagram.com/stories/${username}/${storyId}/`
-  }
-  else {
-    postUrl = `https://www.instagram.com/p/${igId}/`
-  }
-
   try {
-    // 1. 三层缓存获取帖子（localCache → DB → SDK）
-    const post = await getCachedIGPost(igId, () => fetchIGPostFromSDK(postUrl))
+    // 1. 取数：单帖走三层缓存；tray / 精选集走列表路径（逐 item 落缓存）
+    const posts = await loadIGPosts(igId)
 
-    if (!post) {
+    if (!posts.length) {
       return data(
         { success: false, error: 'Failed to parse Instagram post data' },
         { status: 404 },
       )
     }
 
-    // 2. AI 翻译（如果启用且未翻译过）
-    if (enableAITranslation && post.description && apiKey && model) {
-      try {
-        const strategy = getProviderStrategy(provider)
-        const sdkProvider = strategy.createSDKProvider(apiKey)
-        const modelInstance = sdkProvider.languageModel(model)
+    // 2. AI 翻译（如果启用且该帖有 caption）
+    if (enableAITranslation && apiKey && model) {
+      const translatable = posts.filter(p => !!p.description)
+      if (translatable.length) {
+        try {
+          const strategy = getProviderStrategy(provider)
+          const sdkProvider = strategy.createSDKProvider(apiKey)
+          const modelInstance = sdkProvider.languageModel(model)
 
-        const translated = await translateIGCaption({
-          post,
-          modelInstance,
-          thinkingLevel,
-          translationGlossary,
-        })
-
-        if (translated) {
-          post.captionTranslation = translated
+          for (const post of translatable) {
+            const translated = await translateIGCaption({
+              post,
+              modelInstance,
+              thinkingLevel,
+              translationGlossary,
+            })
+            if (translated)
+              post.captionTranslation = translated
+          }
         }
-      }
-      catch (transError) {
-        console.error('[IG] Translation failed:', transError)
-        // 翻译失败不影响帖子返回
+        catch (transError) {
+          console.error('[IG] Translation failed:', transError)
+          // 翻译失败不影响帖子返回
+        }
       }
     }
 
-    return [post] satisfies IGPostData
+    return posts satisfies IGPostData
   }
   catch (error: any) {
     console.error(`[IG] Failed to extract post ${igId}:`, error)
@@ -131,13 +146,9 @@ export async function loader({ params }: Route.LoaderArgs) {
   }
 
   const igId = extractIGId(id) ?? id
-  const postUrl = igId.includes('/')
-    ? `https://www.instagram.com/stories/${igId.split('/')[0]}/${igId.split('/')[1]}/`
-    : `https://www.instagram.com/p/${igId}/`
 
   try {
-    const post = await getCachedIGPost(igId, () => fetchIGPostFromSDK(postUrl))
-    return post ? [post] : []
+    return await loadIGPosts(igId)
   }
   catch (error) {
     console.error(`[IG] GET ${igId}:`, error)

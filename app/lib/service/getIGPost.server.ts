@@ -100,6 +100,40 @@ export async function getCachedIGPost(
 }
 
 /**
+ * 列表型请求（用户快拍 tray / 精选集）：新鲜拉取，并逐个 item 落缓存。
+ *
+ * 列表本身不缓存（故事 24h 变化；也避免翻译后列表陈旧），代价为每次访问打一次
+ * SDK `reels_media`。每个 item 以**自身 canonical id**（`story~…` / `highlight~…`）
+ * 写入 localCache + DB，使 per-card 翻译端点（`/api/ig/translate/{post.id}`）能解析到
+ * 该条目，并合并已有 `captionTranslation` 以免重复翻译。
+ */
+export async function getIGPostList(getter: () => Promise<IGPost[]>): Promise<IGPost[]> {
+  const posts = await getter()
+  if (!posts.length) {
+    return []
+  }
+
+  return Promise.all(posts.map(async (post) => {
+    const cached = await getLocalCache<IGPost | null>({
+      id: post.id,
+      type: 'ig-post',
+      getter: async () => null,
+    }).catch(() => null)
+
+    const merged = cached?.captionTranslation
+      ? { ...post, captionTranslation: cached.captionTranslation }
+      : post
+
+    setLocalCache({ id: merged.id, type: 'ig-post', value: merged }).catch(() => {})
+    insertToIGPostDB(merged).catch((e) => {
+      console.error('[IG] Failed to cache list item:', e)
+    })
+
+    return merged
+  }))
+}
+
+/**
  * 更新 IG 帖子的翻译结果到 DB + localCache。
  *
  * 用于翻译按钮触发后持久化 captionTranslation。
