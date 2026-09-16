@@ -1,0 +1,60 @@
+{
+  "_meta": {
+    "source": "x.com TweetResultByRestId + AudioSpaceById (tweet 1968314084207788302)",
+    "exportedAt": "2026-09-16",
+    "schema": "enriched-tweet-with-space"
+  },
+  "data": {
+    "id_str": "1968314084207788302",
+    "lang": "zxx",
+    "url": "https://twitter.com/BDP_yumemita/status/1968314084207788302",
+    "created_at": "Wed Sep 17 14:00:21 +0000 2025",
+    "__typename": "Tweet",
+    "text": "https://t.co/gOS5Qc3DS4",
+    "user": {
+      "id_str": "1546362523561390081",
+      "name": "夢限大みゅーたいぷ",
+      "screen_name": "BDP_yumemita",
+      "is_blue_verified": true,
+      "profile_image_shape": "Square",
+      "verified_type": "Business",
+      "profile_image_url_https": "https://pbs.twimg.com/profile_images/1907233594067881984/8eZPMLR5.jpg"
+    },
+    "entities": [
+      {
+        "display_url": "x.com/i/spaces/1yoKM…",
+        "expanded_url": "https://x.com/i/spaces/1yoKMPnjEbOxQ",
+        "url": "https://t.co/gOS5Qc3DS4",
+        "type": "url",
+        "index": 0,
+        "text": "x.com/i/spaces/1yoKM…",
+        "href": "https://x.com/i/spaces/1yoKMPnjEbOxQ"
+      }
+    ],
+    "isInlineMeida": false,
+    "space": {
+      "id": "1yoKMPnjEbOxQ",
+      "url": "https://x.com/i/spaces/1yoKMPnjEbOxQ",
+      "title": "#ゆめみた合宿3日目！ついに最終日！✨コメントはハッシュタグにてお願いします✨",
+      "state": "Ended",
+      "availability": "replayable",
+      "createdAt": 1758117617817,
+      "startedAt": 1758117620659,
+      "endedAt": 1758120181605,
+      "durationMs": 2560946,
+      "listenersCount": 2478,
+      "liveListenersCount": 1245,
+      "replayCount": 1233,
+      "isReplayAvailable": true,
+      "host": {
+        "id_str": "1546362523561390081",
+        "name": "夢限大みゅーたいぷ",
+        "screen_name": "BDP_yumemita",
+        "profile_image_url_https": "https://pbs.twimg.com/profile_images/1907233594067881984/8eZPMLR5_normal.jpg",
+        "verified": false,
+        "is_blue_verified": true,
+        "verified_type": "Business"
+      }
+    }
+  }
+}

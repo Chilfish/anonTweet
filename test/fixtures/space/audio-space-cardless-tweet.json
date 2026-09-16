@@ -1,0 +1,19 @@
+{
+  "_meta": {
+    "source": "TweetResultByRestId (x.com private GraphQL)",
+    "exportedAt": "2026-09-16",
+    "schema": "tweet-space-link",
+    "note": "真实样本：推文 1871586443388420240 没有任何 card，正文里只有一个指向 Space 1djGXroNWDExZ 的 url 实体（该 Space 已删除，AudioSpaceById 无 metadata）"
+  },
+  "data": {
+    "card": null,
+    "entities": [
+      {
+        "display_url": "x.com/i/spaces/1djGX…",
+        "expanded_url": "https://x.com/i/spaces/1djGXroNWDExZ",
+        "url": "https://t.co/ELCNFX5yGy",
+        "indices": [0, 23]
+      }
+    ]
+  }
+}

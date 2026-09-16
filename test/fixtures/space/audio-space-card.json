@@ -1,0 +1,58 @@
+{
+  "_meta": {
+    "source": "TweetResultByRestId / AudioSpaceById (x.com private GraphQL)",
+    "exportedAt": "2026-09-16",
+    "schema": "twitter-card-audiospace",
+    "note": "真实推文 1968314084207788302 的 card"
+  },
+  "data": {
+    "legacy": {
+      "binding_values": [
+        {
+          "key": "tweet_id",
+          "value": {
+            "string_value": "1968314084207788302",
+            "type": "STRING"
+          }
+        },
+        {
+          "key": "narrow_cast_space_type",
+          "value": {
+            "string_value": "0",
+            "type": "STRING"
+          }
+        },
+        {
+          "key": "id",
+          "value": {
+            "string_value": "1yoKMPnjEbOxQ",
+            "type": "STRING"
+          }
+        },
+        {
+          "key": "card_url",
+          "value": {
+            "scribe_key": "card_url",
+            "string_value": "https://t.co/gOS5Qc3DS4",
+            "type": "STRING"
+          }
+        }
+      ],
+      "card_platform": {
+        "platform": {
+          "audience": {
+            "name": "production"
+          },
+          "device": {
+            "name": "Swift",
+            "version": "12"
+          }
+        }
+      },
+      "name": "3691233323:audiospace",
+      "url": "https://t.co/gOS5Qc3DS4",
+      "user_refs_results": []
+    },
+    "rest_id": "https://t.co/gOS5Qc3DS4"
+  }
+}

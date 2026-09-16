@@ -1,4 +1,4 @@
-import type { AIVisionInfo, EnrichedTweet, TrendingCardInfo, TweetUser } from '~/types'
+import type { AIVisionInfo, EnrichedTweet, SpaceDetails, TrendingCardInfo, TweetUser } from '~/types'
 
 /**
  * app/stories/tweet.fixtures.ts —— tweet 组件故事共享数据
@@ -70,6 +70,7 @@ interface MakeTweetOptions {
   lang?: string
   entities?: EnrichedTweet['entities']
   card?: EnrichedTweet['card']
+  space?: EnrichedTweet['space']
   mediaDetails?: EnrichedTweet['mediaDetails']
   visionInfo?: AIVisionInfo[]
   quotedTweet?: EnrichedTweet
@@ -91,6 +92,7 @@ function makeTweet(opts: MakeTweetOptions = {}): EnrichedTweet {
       : { ...user, name: opts.name ?? user.name, screen_name: opts.screenName ?? user.screen_name },
     entities: opts.entities ?? [{ type: 'text', text: '『#渡瀬結月 の #６げんめっ！』#15', index: 0 }],
     card: opts.card,
+    space: opts.space,
     mediaDetails: opts.mediaDetails,
     visionInfo: opts.visionInfo,
     quotedTweet: opts.quotedTweet,
@@ -127,6 +129,128 @@ export const tweetWithTextOnlyCard = makeTweet({
 
 /** 完全无卡片数据（空渲染） */
 export const tweetNoCard = makeTweet({})
+
+/**
+ * 真实 Space 数据（Space `1yoKMPnjEbOxQ`：Ended + 可回放，与 test/fixtures/space 同源）。
+ * 官方卡片实测文案：2,478 人がリスニング/リプレイ / 9月17日 / 42:40。
+ */
+export const spaceDetails: SpaceDetails = {
+  id: '1yoKMPnjEbOxQ',
+  url: 'https://x.com/i/spaces/1yoKMPnjEbOxQ',
+  title: '#ゆめみた合宿3日目！ついに最終日！✨コメントはハッシュタグにてお願いします✨',
+  state: 'Ended',
+  availability: 'replayable',
+  createdAt: 1758117617817,
+  startedAt: 1758117620659,
+  endedAt: 1758120181605,
+  durationMs: 2560946,
+  listenersCount: 2478,
+  liveListenersCount: 1245,
+  replayCount: 1233,
+  isReplayAvailable: true,
+  host: {
+    id_str: '1546362523561390081',
+    name: '夢限大みゅーたいぷ',
+    screen_name: 'BDP_yumemita',
+    profile_image_url_https: 'https://pbs.twimg.com/profile_images/1907233594067881984/8eZPMLR5_normal.jpg',
+    verified: false,
+    is_blue_verified: true,
+    verified_type: 'Business',
+  },
+}
+
+/** Space 卡片（已结束 + 可回放） */
+export const tweetWithSpace = makeTweet({
+  id: '1968314084207788302',
+  lang: 'zxx',
+  text: 'https://t.co/gOS5Qc3DS4',
+  name: '夢限大みゅーたいぷ',
+  screenName: 'BDP_yumemita',
+  createdAt: 'Wed Sep 17 14:00:21 +0000 2025',
+  entities: [{
+    type: 'url',
+    index: 0,
+    url: 'https://t.co/gOS5Qc3DS4',
+    text: 'https://t.co/gOS5Qc3DS4',
+    display_url: 'x.com/i/spaces/1yoKM…',
+    expanded_url: 'https://x.com/i/spaces/1yoKMPnjEbOxQ',
+    href: 'https://x.com/i/spaces/1yoKMPnjEbOxQ',
+  }],
+  space: spaceDetails,
+})
+
+/** 进行中的 Space：无结束时间 → 无时长，回放数为 0 */
+export const tweetWithLiveSpace = makeTweet({
+  ...tweetWithSpace,
+  id: '1968314084207788399',
+  space: {
+    ...spaceDetails,
+    id: '1yoKMPnjEbOxQ',
+    url: 'https://x.com/i/spaces/1yoKMPnjEbOxQ',
+    state: 'Running',
+    endedAt: null,
+    durationMs: null,
+    replayCount: 0,
+    listenersCount: 1245,
+    isReplayAvailable: false,
+  },
+})
+
+/** 超长标题 + 大数字（窄屏截断与千分位） */
+export const tweetWithLongSpaceTitle = makeTweet({
+  ...tweetWithSpace,
+  id: '1968314084207788400',
+  space: {
+    ...spaceDetails,
+    title: '【告知】新アルバム「夢限大みゅーたいぷ」リリース記念スペシャル座談会〜メンバー全員で語り尽くす夜〜',
+    listenersCount: 1234567,
+    liveListenersCount: 1000000,
+    replayCount: 234567,
+  },
+})
+
+/** 已结束但主办方未开启回放：没有录音可放，行动区降级为「录音不可回放」 */
+export const tweetWithNoReplaySpace = makeTweet({
+  ...tweetWithSpace,
+  id: '2057046686871232599',
+  space: {
+    ...spaceDetails,
+    isReplayAvailable: false,
+    availability: 'no-replay',
+  },
+})
+
+/**
+ * Space 已删除 / 不可访问（真实样本：推文 2057046686871232598 → Space 1DGLdvzVZmLGm，
+ * `AudioSpaceById` 只回 `{ is_subscribed: false }`）：渲染中性墓碑条而非紫色卡片。
+ */
+export const tweetWithUnavailableSpace = makeTweet({
+  ...tweetWithSpace,
+  id: '2057046686871232598',
+  space: {
+    id: '1DGLdvzVZmLGm',
+    url: 'https://x.com/i/spaces/1DGLdvzVZmLGm',
+    title: '',
+    state: '',
+    availability: 'unavailable',
+    createdAt: 0,
+    startedAt: null,
+    endedAt: null,
+    durationMs: null,
+    listenersCount: 0,
+    liveListenersCount: 0,
+    replayCount: 0,
+    isReplayAvailable: false,
+    host: {
+      id_str: '',
+      name: '',
+      screen_name: '',
+      profile_image_url_https: '',
+      verified: false,
+      is_blue_verified: false,
+    },
+  },
+})
 
 /** 三张配图 + Alt 文本（对齐 vision fixture；含 media_alt 翻译实体，index 20000+i） */
 export const tweetWithPhotos = makeTweet({

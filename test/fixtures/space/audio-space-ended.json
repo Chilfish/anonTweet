@@ -1,0 +1,152 @@
+{
+  "_meta": {
+    "source": "TweetResultByRestId / AudioSpaceById (x.com private GraphQL)",
+    "exportedAt": "2026-09-16",
+    "schema": "audio-space",
+    "note": "Space 1yoKMPnjEbOxQ（Ended + 可回放）"
+  },
+  "data": {
+    "is_subscribed": false,
+    "metadata": {
+      "conversation_controls": 0,
+      "created_at": 1758117617817,
+      "creator_results": {
+        "result": {
+          "__typename": "User",
+          "affiliates_highlighted_label": {
+            "label": {
+              "badge": {
+                "url": "https://pbs.twimg.com/profile_images/2082827306335371265/XeH4bms6_bigger.jpg"
+              },
+              "description": "バンドリ！ BanG Dream! 公式",
+              "url": {
+                "url": "https://twitter.com/bang_dream_info",
+                "urlType": "DeepLink"
+              },
+              "userLabelType": "BusinessLabel"
+            }
+          },
+          "has_nft_avatar": false,
+          "id": "VXNlcjoxNTQ2MzYyNTIzNTYxMzkwMDgx",
+          "legacy": {
+            "blocked_by": false,
+            "blocking": false,
+            "can_dm": false,
+            "can_media_tag": false,
+            "created_at": "Mon Jul 11 05:15:42 +0000 2022",
+            "default_profile": true,
+            "default_profile_image": false,
+            "description": "夢(バーチャル)と現実(リアル)を飛び越える運命共同体(バンド)「夢限大みゅーたいぷ」。TVアニメ「バンドリ！ ゆめ∞みた」毎週木曜23時より、TOKYO MXほかにて放送中！\nアニメ公式HP：https://t.co/d74j4ZW3Ul\n#バンドリ #アニメゆめみた #ゆめみた",
+            "entities": {
+              "description": {
+                "urls": [
+                  {
+                    "display_url": "anime.bang-dream.com/yumemita/",
+                    "expanded_url": "https://anime.bang-dream.com/yumemita/",
+                    "indices": [
+                      97,
+                      120
+                    ],
+                    "url": "https://t.co/d74j4ZW3Ul"
+                  }
+                ]
+              },
+              "url": {
+                "urls": [
+                  {
+                    "display_url": "bio.to/yumemita",
+                    "expanded_url": "https://bio.to/yumemita",
+                    "indices": [
+                      0,
+                      23
+                    ],
+                    "url": "https://t.co/QGaaGZLtqE"
+                  }
+                ]
+              }
+            },
+            "fast_followers_count": 0,
+            "favourites_count": 16,
+            "follow_request_sent": false,
+            "followed_by": false,
+            "followers_count": 56055,
+            "following": true,
+            "friends_count": 11,
+            "has_custom_timelines": false,
+            "is_translator": false,
+            "listed_count": 363,
+            "location": "",
+            "media_count": 2670,
+            "muting": false,
+            "name": "夢限大みゅーたいぷ",
+            "needs_phone_verification": false,
+            "normal_followers_count": 56055,
+            "notifications": true,
+            "pinned_tweet_ids_str": [
+              "2098057825541136762"
+            ],
+            "possibly_sensitive": false,
+            "profile_banner_url": "https://pbs.twimg.com/profile_banners/1546362523561390081/1783098208",
+            "profile_image_url_https": "https://pbs.twimg.com/profile_images/1907233594067881984/8eZPMLR5_normal.jpg",
+            "profile_interstitial_type": "",
+            "protected": false,
+            "screen_name": "BDP_yumemita",
+            "statuses_count": 5571,
+            "time_zone": "",
+            "translator_type": "none",
+            "url": "https://t.co/QGaaGZLtqE",
+            "utc_offset": 0,
+            "verified": false,
+            "want_retweets": true,
+            "withheld_description": "",
+            "withheld_scope": ""
+          },
+          "rest_id": "1546362523561390081",
+          "super_follow_eligible": false,
+          "super_followed_by": false,
+          "super_following": false
+        }
+      },
+      "disallow_join": false,
+      "ended_at": "1758120181605",
+      "is_employee_only": false,
+      "is_locked": false,
+      "is_space_available_for_clipping": true,
+      "is_space_available_for_replay": true,
+      "media_key": "28_1968314067455733760",
+      "narrow_cast_space_type": 0,
+      "rest_id": "1yoKMPnjEbOxQ",
+      "started_at": 1758117620659,
+      "state": "Ended",
+      "title": "#ゆめみた合宿3日目！ついに最終日！✨コメントはハッシュタグにてお願いします✨",
+      "total_live_listeners": 1245,
+      "total_replay_watched": 1233,
+      "updated_at": 1758120182162
+    },
+    "participants": {
+      "admins": [
+        {
+          "avatar_url": "https://pbs.twimg.com/profile_images/1907233594067881984/8eZPMLR5_normal.jpg",
+          "display_name": "夢限大みゅーたいぷ",
+          "is_muted_by_admin": false,
+          "is_muted_by_guest": false,
+          "is_verified": true,
+          "periscope_user_id": "1oNQlqPDpenKw",
+          "twitter_screen_name": "BDP_yumemita",
+          "user": {
+            "rest_id": "1546362523561390081"
+          },
+          "user_results": {
+            "result": {
+              "__typename": "User",
+              "has_nft_avatar": false
+            }
+          }
+        }
+      ],
+      "listeners": [],
+      "speakers": [],
+      "total": 0
+    }
+  }
+}

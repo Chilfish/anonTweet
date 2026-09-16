@@ -53,6 +53,7 @@ const MODULE_PATTERNS: Record<string, string> = {
   obs: 'AC-OBS',
   pwa: 'AC-PWA',
   card: 'AC-CARD',
+  space: 'AC-SPACE',
   ui: 'AC-UI',
   test: 'AC-TEST',
 }
