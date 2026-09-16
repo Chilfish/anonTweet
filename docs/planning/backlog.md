@@ -35,6 +35,7 @@
 
 | 日期       | 内容                                                                                         | 去向                                                                                                                    |
 | ---------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| 2026-09-16 | X Space 卡片接入（AC-SPACE-001~008 + fixture + 渲染 + 正文去重；非 backlog 条目，直连需求）  | [features/tweet/space-card.md](../features/tweet/space-card.md)                                                         |
 | 2026-09-12 | Instagram Story 接入已完成条目（AC-IG-STORY-001~003 + fixture + 渲染 + 缓存键修复）          | [archive/backlog-completed-2026-09-12-ig-story.md](../archive/backlog-completed-2026-09-12-ig-story.md)                 |
 | 2026-09-12 | Instagram Story 列表（tray / 精选集）已完成条目（AC-IG-STORY-001~005 + canonical id + 扇出） | [archive/backlog-completed-2026-09-12-ig-story-list.md](../archive/backlog-completed-2026-09-12-ig-story-list.md)       |
 | 2026-09-12 | 快拍列表改造为网格相册 + 全屏查看器 + 快拍骨架屏 + 移动端适配（AC-IG-STORY-002/006/007）     | [archive/backlog-completed-2026-09-12-ig-story-gallery.md](../archive/backlog-completed-2026-09-12-ig-story-gallery.md) |

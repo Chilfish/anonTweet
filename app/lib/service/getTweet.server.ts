@@ -3,10 +3,62 @@ import type { AIVisionInfo } from '~/types/vision'
 import { eq } from 'drizzle-orm'
 import { getDbClient, isDbAvailable } from '~/lib/database/db.server'
 import { tweet, tweetEntities } from '~/lib/database/schema'
-import { getEnrichedTweet } from '~/lib/react-tweet/utils/get-tweet'
+import { getEnrichedTweet, resolveSpaceById } from '~/lib/react-tweet/utils/get-tweet'
+import { resolveSpaceId } from '~/lib/react-tweet/utils/space'
 import { getLocalCache, setLocalCache } from '../localCache'
 
-export const getLocalTweet = (tweetId: string) => getLocalCache({ id: tweetId, type: 'tweet', getter: () => getDBTweet(tweetId) })
+/**
+ * 为**已缓存**的推文回填 / 升级 `space` 字段。
+ *
+ * 背景：`space`（及其 `availability`）是后加字段，改动前落地的缓存
+ * （memory LRU / 本地文件 / DB jsonContent）没有它/是旧结构；而命中缓存时不会再走
+ * `getEnrichedTweet`，于是 Space 卡片/墓碑**永远不出现**（实测：已删除的 Space 推文
+ * 在缓存命中时仍然只渲染一个裸链接，`cache.get … hit:true`）。
+ *
+ * 缓存不保留原始 `card`，但 Space 链接始终存在于实体里，故用 `resolveSpaceId(null, entities)`
+ * 即可覆盖「带卡片」与「无卡片」两种推文。回填结果 best-effort 写回两层缓存，
+ * 避免每次浏览都重打上游；取数失败（如 429）保持原样返回。
+ */
+async function backfillSpaceDetails(tweet: EnrichedTweet): Promise<EnrichedTweet> {
+  // 结构已是最新（带 availability）才视为无需处理；缺字段的旧结构顺带升级一次
+  if (tweet.space?.availability)
+    return tweet
+
+  const spaceId = resolveSpaceId(null, tweet.entities)
+  if (!spaceId)
+    return tweet
+
+  const space = await resolveSpaceById(spaceId, tweet.user)
+  if (!space)
+    return tweet
+
+  const patched: EnrichedTweet = { ...tweet, space }
+
+  await Promise.allSettled([
+    setLocalCache({ id: tweet.id_str, type: 'tweet', value: patched }),
+    insertToTweetDB([patched]),
+  ])
+
+  return patched
+}
+
+/**
+ * 读单条推文：localCache → DB → 上游。
+ *
+ * 出口统一做一次 Space 回填（见 `backfillSpaceDetails`），使旧缓存与新抓取走同一呈现路径。
+ */
+export async function getLocalTweet(tweetId: string): Promise<EnrichedTweet | null> {
+  const tweet = await getLocalCache({
+    id: tweetId,
+    type: 'tweet',
+    getter: () => getDBTweet(tweetId),
+  })
+
+  if (!tweet)
+    return tweet
+
+  return backfillSpaceDetails(tweet)
+}
 
 export function mergeTranslationEntities(enrichedTweet: EnrichedTweet, entities: TranslationEntity[]) {
   const baseIndexSet = new Set(enrichedTweet.entities.map(e => e.index))

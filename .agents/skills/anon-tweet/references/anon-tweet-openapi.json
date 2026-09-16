@@ -1692,6 +1692,10 @@
             "type": "object",
             "description": "预览卡片（LinkPreviewCard）"
           },
+          "space": {
+            "type": "object",
+            "description": "X Space 卡片（SpaceDetails，见 app/types/space.ts；仅 Space 推文有）"
+          },
           "comments": {
             "type": "array",
             "items": {

@@ -32,6 +32,7 @@ export * from './requests/DirectMessage'
 
 export * from './requests/List'
 export * from './requests/Media'
+export * from './requests/Space'
 export * from './requests/Tweet'
 export * from './requests/User'
 // MAIN
@@ -88,6 +89,7 @@ export type { IListTweetsResponse as IRawListTweetsResponse } from './types/raw/
 export type { IMediaFinalizeUploadResponse as IRawMediaFinalizeUploadResponse } from './types/raw/media/FinalizeUpload'
 export type { IMediaInitializeUploadResponse as IRawMediaInitializeUploadResponse } from './types/raw/media/InitalizeUpload'
 export type { IMediaLiveVideoStreamResponse as IRawMediaLiveVideoStreamResponse } from './types/raw/media/LiveVideoStream'
+export type { IAudioSpace as IRawAudioSpace, IAudioSpaceByIdResponse as IRawAudioSpaceByIdResponse, ISpaceDetailsResponse as IRawSpaceDetailsResponse } from './types/raw/space/Details'
 export type { ITweetDetailsResponse as IRawTweetDetailsResponse } from './types/raw/tweet/Details'
 export type { ITweetDetailsBulkResponse as IRawTweetDetailsBulkResponse } from './types/raw/tweet/DetailsBulk'
 export type { ITweetLikeResponse as IRawTweetLikeResponse } from './types/raw/tweet/Like'

@@ -1,0 +1,11 @@
+{
+  "_meta": {
+    "source": "TweetResultByRestId / AudioSpaceById (x.com private GraphQL)",
+    "exportedAt": "2026-09-16",
+    "schema": "audio-space",
+    "note": "audioSpace 存在但无 metadata → 已删除 / 不可访问（真实样本 1DGLdvzVZmLGm）"
+  },
+  "data": {
+    "is_subscribed": false
+  }
+}

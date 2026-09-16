@@ -7,7 +7,8 @@ import {
 } from './icons/index'
 
 interface Props {
-  user: TweetUser
+  /** 只依赖认证三字段，故不限 `TweetUser` 本体（Space 主播等精简用户对象也可直接传入） */
+  user: Pick<TweetUser, 'verified' | 'is_blue_verified' | 'verified_type'>
   className?: string
 }
 

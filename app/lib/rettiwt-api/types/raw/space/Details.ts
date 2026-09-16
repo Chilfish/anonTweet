@@ -355,3 +355,27 @@ interface Url7 {
   url: string
   indices: number[]
 }
+
+/**
+ * The `data.audioSpace` node returned by the `AudioSpaceById` GraphQL operation.
+ *
+ * @public
+ */
+export interface IAudioSpace {
+  is_subscribed: boolean
+  /** 卡片所需的全部字段（title / state / started_at / ended_at / total_* / creator_results） */
+  metadata: ISpaceDetailsResponse
+  /** 参与者（admins / speakers / listeners）；官方卡片不展示，故此处不作细类型约束 */
+  participants?: unknown
+}
+
+/**
+ * The raw data received when fetching a Space by its id.
+ *
+ * @public
+ */
+export interface IAudioSpaceByIdResponse {
+  data: {
+    audioSpace?: IAudioSpace
+  }
+}

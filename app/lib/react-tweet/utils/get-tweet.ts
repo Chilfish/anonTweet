@@ -1,15 +1,18 @@
 import type { IListTweetsResponse } from '~/lib/rettiwt-api/types/raw/list/Tweets'
+import type { IAudioSpaceByIdResponse } from '~/lib/rettiwt-api/types/raw/space/Details'
 import type { ITweetDetailsResponse } from '~/lib/rettiwt-api/types/raw/tweet/Details'
 import type { ITweetRepliesResponse } from '~/lib/rettiwt-api/types/raw/tweet/Replies'
 import type { ITweetSearchResponse } from '~/lib/rettiwt-api/types/raw/tweet/Search'
 import type { IUserDetailsResponse } from '~/lib/rettiwt-api/types/raw/user/Details'
 import type { IUserTweetsResponse } from '~/lib/rettiwt-api/types/raw/user/Tweets'
-import type { EnrichedTweet, RawTweet, RawUser } from '~/types'
+import type { EnrichedTweet, RawTweet, RawUser, SpaceDetails } from '~/types'
+import { obsLog } from '~/lib/obs-log'
 import { ResourceType, TweetRepliesSortType } from '~/lib/rettiwt-api'
 import { Extractors } from '~/lib/rettiwt-api/collections/Extractors'
 import { findByFilter } from '~/lib/rettiwt-api/helper/JsonUtils'
 import { RettiwtPool } from '~/lib/SmartPool'
 import { enrichTweet } from './parseTweet'
+import { mapSpaceDetails, resolveSpaceId } from './space'
 // import { writeFile } from 'node:fs/promises'
 
 // config.ts
@@ -26,6 +29,24 @@ export async function fetchTweet(id: string): Promise<RawTweet> {
     )
 
     return response.data.tweetResult.result
+  })
+}
+
+/**
+ * 获取 Space 详情（`AudioSpaceById`）。
+ *
+ * Space 推文的 `card.name` 为 `…:audiospace`，其 `binding_values` 只有 `tweet_id` /
+ * `id` / `card_url`，没有标题与图片，因此推文响应本身**拿不到**卡片要显示的内容，
+ * 必须再打一次这个 GraphQL 端点。查不到（已删除/无权限）时返回 null。
+ */
+export async function fetchSpaceDetails(spaceId: string) {
+  return twitterPool.run(async (fetcher) => {
+    const response = await fetcher.request<IAudioSpaceByIdResponse>(
+      ResourceType.SPACE_DETAILS,
+      { id: spaceId },
+    )
+
+    return response.data.audioSpace ?? null
   })
 }
 
@@ -234,6 +255,57 @@ export async function getEnrichedUserTweet(userId: string): Promise<EnrichedTwee
     })
 }
 
+/**
+ * 取卡片宿主推文：转推时只有被转的原始推文带 `card`（与 enrichTweet 的展开规则一致）。
+ */
+function unwrapCardSource(rawTweet: RawTweet): RawTweet {
+  const base = ('tweet' in rawTweet ? (rawTweet as { tweet?: RawTweet }).tweet : rawTweet) as RawTweet
+  return base?.legacy?.retweeted_status_result?.result ?? base
+}
+
+/**
+ * 按 Space id 取详情并映射为卡片数据（供 `attachSpaceDetails` 与「旧缓存回填」复用）。
+ *
+ * 请求失败（429 / 网络）返回 null：调用方据此降级，**不得**误判成「Space 已删除」。
+ */
+export async function resolveSpaceById(
+  spaceId: string,
+  tweetAuthor?: EnrichedTweet['user'] | null,
+): Promise<SpaceDetails | null> {
+  try {
+    const audioSpace = await fetchSpaceDetails(spaceId)
+    return mapSpaceDetails(spaceId, audioSpace, tweetAuthor)
+  }
+  catch (error) {
+    obsLog('space.fetch.failed', {
+      spaceId,
+      reason: error instanceof Error ? error.message : String(error),
+    })
+    return null
+  }
+}
+
+/**
+ * 补挂 Space 卡片数据（推文带 `…:audiospace` 卡片，或正文里贴了 Space 链接）。
+ *
+ * 三种结果：
+ * - 取到 metadata → 正常卡片（可回放 / 直播中 / 未开始 / 不可回放，由 `availability` 区分）
+ * - 上游说「没有这个 Space」（无 metadata）→ 挂 `unavailable` 墓碑态，给出「已删除或不可访问」提示
+ * - 请求本身失败（429 / 网络）→ 不挂 `space`，正文里的 Space 链接照常渲染。此时**不能**当墓碑，
+ *   否则会把限流误报成「已删除」；仅记 `obsLog('space.fetch.failed')`。
+ */
+async function attachSpaceDetails(enrichedTweet: EnrichedTweet, rawTweet: RawTweet): Promise<void> {
+  // 优先取 card binding 的 id；无卡片时回退正文里的 x.com/i/spaces/… 链接
+  // （实测推文 1871586443388420240 完全没有 card，只有 url 实体）
+  const spaceId = resolveSpaceId(unwrapCardSource(rawTweet)?.card, enrichedTweet.entities)
+  if (!spaceId)
+    return
+
+  const space = await resolveSpaceById(spaceId, enrichedTweet.user)
+  if (space)
+    enrichedTweet.space = space
+}
+
 export async function getEnrichedTweet(
   id: string,
 ): Promise<EnrichedTweet | null> {
@@ -244,6 +316,10 @@ export async function getEnrichedTweet(
   // await writeFile('build/tweet.json', JSON.stringify(tweet, null, 2), 'utf8')
   try {
     const richTweet = enrichTweet(tweet)
+    if (!richTweet) {
+      return null
+    }
+    await attachSpaceDetails(richTweet, tweet)
     return richTweet
   }
   catch (error) {
