@@ -106,7 +106,7 @@ ${apiBullets}
 
 后端主要接口（搜索 / 获取推文）的出参是 EnrichedTweet 数组，字段对齐 react-tweet：
 
-- EnrichedTweet: id_str（推文 ID）、text（推文文本）、url（完整链接）、lang（语言码）、created_at（ISO 8601 创建时间）、user（作者 TweetUser）、entities（实体 Entity[]）、visionInfo（可选，AI 视觉描述）、quotedTweet（可选，引用推文）、card（可选，预览卡片）
+- EnrichedTweet: id_str（推文 ID）、text（推文文本）、url（完整链接）、lang（语言码）、created_at（ISO 8601 创建时间）、user（作者 TweetUser）、entities（实体 Entity[]）、visionInfo（可选，AI 视觉描述）、quotedTweet（可选，引用推文）、card（可选，预览卡片）、space（可选，X Space 卡片：标题/主播/收听人数/时长）
 - TweetUser: id_str、name、screen_name、profile_image_url_https（头像）、verified、is_blue_verified
 - Entity: type（text / hashtag / mention / url / media / symbol / media_alt / separator）、text、index（文本偏移）、href（多数类型带链接）、translation（手动翻译）、aiTranslation（AI 翻译）
 - SearchResponse / RepliesResponse: { tweets: EnrichedTweet[], nextCursor }（nextCursor 为 string 或 null，null 表示没有更多）
@@ -729,6 +729,7 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
             quoted_tweet_id: { type: 'string', description: '引用推文 ID' },
             quotedTweet: { $ref: '#/components/schemas/EnrichedTweet', description: '引用推文（递归）' },
             card: { type: 'object', description: '预览卡片（LinkPreviewCard）' },
+            space: { type: 'object', description: 'X Space 卡片（SpaceDetails，见 app/types/space.ts；仅 Space 推文有）' },
             comments: { type: 'array', items: { $ref: '#/components/schemas/EnrichedTweet' }, description: '内联评论线程' },
             in_reply_to_status_id_str: { type: 'string' },
             mediaDetails: { type: 'array', items: { type: 'object', description: '媒体详情（图片/视频，见 app/types/media.ts）' } },
