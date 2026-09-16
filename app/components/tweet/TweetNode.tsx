@@ -15,6 +15,7 @@ import { cn } from '~/lib/utils'
 import { AIVisionBlock } from './AIVisionBlock'
 import { TweetLinkCard } from './TweetCard'
 import { TweetMediaAlt } from './TweetMediaAlt'
+import { TweetSpaceCard } from './TweetSpaceCard'
 import { TweetTextBody } from './TweetTextBody'
 
 export type TweetVariant = 'thread' | 'quoted' | 'main' | 'main-in-thread'
@@ -137,6 +138,7 @@ export const TweetNode = forwardRef<HTMLDivElement, TweetNodeProps>(({
         <TweetMediaAlt tweet={tweet} />
         <AIVisionBlock tweet={tweet} editor={visionEditor} />
         {tweet.card && <TweetLinkCard tweet={tweet} />}
+        {tweet.space && <TweetSpaceCard tweet={tweet} />}
 
         {tweet.quotedTweet && (
           <TweetNode

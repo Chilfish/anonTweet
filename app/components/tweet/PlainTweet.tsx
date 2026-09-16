@@ -13,6 +13,7 @@ import { cn } from '~/lib/utils'
 import { AIVisionBlock } from './AIVisionBlock'
 import { TweetLinkCard } from './TweetCard'
 import { TweetMediaAlt } from './TweetMediaAlt'
+import { TweetSpaceCard } from './TweetSpaceCard'
 
 function TweetTextBody({ tweet, enableTranslation }: { tweet: EnrichedTweet, enableTranslation: boolean }) {
   if (!enableTranslation) {
@@ -111,6 +112,7 @@ function UnifiedTweet({ tweet, variant, enableTranslation }: UnifiedTweetProps) 
         <AIVisionBlock tweet={tweet} hideChrome />
 
         {tweet.card && <TweetLinkCard tweet={tweet} />}
+        {tweet.space && <TweetSpaceCard tweet={tweet} />}
 
         {quotedTweet && (
           <UnifiedTweet

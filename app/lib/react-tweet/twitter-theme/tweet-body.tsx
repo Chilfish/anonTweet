@@ -1,5 +1,6 @@
 import type { EnrichedTweet } from '~/types'
 import { cn } from '~/lib/utils'
+import { isSpaceUrl } from '../utils/space'
 import { TweetLink } from './tweet-link'
 
 interface TweetBodyProps {
@@ -23,6 +24,10 @@ export function TweetBody({ tweet, isTranslated, lang, className }: TweetBodyPro
 
         switch (item.type) {
           case 'url':
+            // Space 卡片（TweetSpaceCard）已承载同一跳转，官方前端同样不重复展示该链接。
+            // 仅在卡片数据确实渲染出来时才跳过——元数据获取失败时链接照常显示（优雅降级）。
+            if (tweet.space && isSpaceUrl(item.href))
+              return null
             return (
               <TweetLink key={item.index} href={item.href}>
                 {text.length > 36 ? item.display_url : text}
