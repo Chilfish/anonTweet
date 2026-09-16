@@ -14,6 +14,7 @@ export type ObsEvent
     | 'pool.rotate' // RettiwtPool 冷却轮换：keySuffix / failStreak / cooldownMs / reason
     | 'pool.exhaust' // RettiwtPool 全部 Key 耗尽：attempts / states
     | 'jetfuel.parse.fallback' // jetfuel payload 解析失败回退 unified_card：card / payloadHash / reason
+    | 'space.fetch.failed' // Space 元数据（AudioSpaceById）获取失败，卡片降级不展示：spaceId / tweetId / reason
 
 export interface ObsFields {
   [key: string]: string | number | boolean | null | undefined

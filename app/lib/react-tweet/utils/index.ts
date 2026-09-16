@@ -6,6 +6,7 @@ export * from './date-utils'
 export * from './entitytParser'
 // export * from './get-tweet'
 export * from './parseTweet'
+export * from './space'
 
 export interface TweetCoreProps {
   id: string
