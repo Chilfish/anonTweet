@@ -1,88 +1,79 @@
-# Postmortem 002: Translation Editor Complexity Explodes Without Guardrails
+# Postmortem 002: 翻译编辑器复杂度失控，缺少护栏
 
-- **日期**: 2026-05-31
-- **严重级别**: SEV-2
-- **分类**: Architecture
+- **日期**: 2026-05-31（回溯整理）
+- **严重级别**: SEV-1
+- **分类**: 架构
 - **状态**: Active
+- **根因归类**: 设计建模
 
-## Summary
+## 摘要
 
-The `TranslationEditor` component and its supporting infrastructure (dictionary viewer, AI translation prompt, template manager) accumulated 16 fix commits across the project's lifetime. The root cause is a tightly coupled system where the translation UI, dictionary storage, AI prompt engineering, and entity-skipping logic all live in the same component boundary with no clear data flow contract. Changes to any one subsystem (e.g., AI prompt strategy) cascade into the editor's state management.
+`TranslationEditor` 及其周边（字典查看器、AI 提示词、模板管理）累计修了 16 次。翻译 UI、字典存储、提示词工程和实体跳过逻辑挤在同一个组件边界内，没有数据流契约。改任何一个子系统都会波及编辑器状态：HTML 实体显示错乱、"跳过实体" 判断在清空输入时反转、AI 隐藏原文修了两次、store 迁移把 `translationMode` 丢掉。
 
-## Leadup
+## 影响
 
-The translation system evolved iteratively:
+- 用户可见：实体原样显示、翻译内容丢失、AI 开关消失，影响所有使用翻译功能的用户。
+- 返工：2025-10 至 2026-04 跨度内多次热修，其中 `737fe74` 与 `276b8d4` 是同一问题修了两次。
+- 隐藏风险：store 迁移曾可能永久丢失设置，只是恰好被迁移函数兜回。
 
-1. Simple text replacement editor → added entity awareness (mentions, hashtags, URLs should not be translated)
-2. Entity awareness → added dictionary viewer (manual glossary of translations)
-3. Dictionary viewer → added Excel import (`b3af482`: switch to Excel format)
-4. Excel import → added Popover UI (`f6ca27d`: use Popover for DictionaryViewer)
-5. Popover → added AI auto-translation with prompt engineering (`7e68aa3`)
-6. AI translation → added template management with store versioning (`2e9e8a8`)
+## 时间线
 
-Each layer was added directly into the same component or its immediate imports, without extracting into independent, testable modules.
+2026-05-31 回溯整理。除 `276b8d4`（同问题的第二次提交）外，节点均取自各修复 commit。
 
-## Fault
+| 日期 | commit | 事件 |
+| ---- | ------ | ---- |
+| 2025-10-02 | `d0450a9` | 跳过空文本翻译的条件写反 |
+| 2025-12-12 | `b3af482` | 字典改用 Excel 格式 |
+| 2025-12-12 | `f6ca27d` | 字典查看器改用 Popover |
+| 2025-12-17 | `07baf0a` | HTML 实体在编辑器中显示为原文，补 65 行解码 |
+| 2026-01-02 | `fbda221` | 跳过实体判断依据译文而非原文 |
+| 2026-01-12 | `7e68aa3` | AI 翻译提示词策略重构 |
+| 2026-01-13 | `737fe74` | AI 开启时未隐藏原文 |
+| 2026-01-13 | `276b8d4` | 同一问题再修一次，覆盖遗漏路径 |
+| 2026-01-22 | `e23f285` | store 持久化迁移，找回 `translationMode` |
+| 2026-01-23 | `cf7927a` | Alt 编辑器初始化异常 |
+| 2026-04-25 | `2e9e8a8` | 模板管理与存储版本升级 |
 
-The fault patterns:
+## 根因分析
 
-1. **HTML entity display corruption** (`07baf0a`): HTML entities (`&amp;`, `&lt;`) in tweet text appeared raw in the editor because the translation editor was rendering HTML strings without decoding — requiring a 65-line utility function to fix.
+1. 实体跳过逻辑同时依赖原文与译文，却没有不变量约束，条件一改就反转。
+2. 编辑器把 UI 状态、翻译状态、实体过滤和字典查询混在一个组件里，任一处变动都会影响其他部分。
+3. 功能是叠加上去的：字典从简单列表到 Excel 再到 Popover，每次都往同一个组件加状态，没有在中间做重构。
+4. 没有自动化测试，重构风险高，只能最小热修，于是同样的坑反复踩。
 
-2. **Entity skip logic bugs** (`fbda221`): The `shouldSkipEntity` function failed when users cleared translation input — empty inputs caused entities to be "skipped" because the logic checked translation text emptiness, not original text emptiness. Required introducing `originalTweet` reference into the skip logic.
+一句话归纳：翻译逻辑嵌在组件状态里而非抽成可测纯函数，每加一个功能都会动摇既有行为。
 
-3. **Empty-text translation skip** (`d0450a9`): The editor skipped empty text entities even when translation was needed — condition was inverted.
+## 触发条件
 
-4. **AI hide-original regression** (`737fe74`, `276b8d4` — fixed twice): When AI translation was enabled, the original text was not being hidden as expected. Two attempts needed because the first fix didn't cover all code paths.
+用户清空翻译输入、切换 AI 开关、store version 升级后加载旧数据。
 
-5. **Store migration data loss** (`e23f285`): The `translationMode` field was stored at the top level of Zustand state, but the partialize configuration only persisted `settings`. When the store version bumped, `translationMode` was silently dropped — requiring a store migration function to copy it into `settings`.
+## 检测
 
-6. **Alt translation editor display** (`cf7927a`): The alternative translation editor failed to initialize properly because state synchronization between the main and alt editors wasn't linearized.
+以人工测试为主：实体原样显示、空字段、AI 开关消失。当时的盲区是没有 "输入 → 翻译 → 清空 → 校验" 的端到端测试。
 
-## Impact
+## 处置
 
-- **Affected users**: All users who use translation features — broken entity display, lost translations, missing AI toggle
-- **Duration**: Recurring across Dec 2025 – Jan 2026
-- **Data loss risk**: Store migration bug (#5) could permanently lose translation settings
+逐个热修。后续把部分纯逻辑下沉为 `resolveTranslationView`、`materialize` 等模块并补了单测。
 
-## Root Cause
+## 做得对的地方
 
-| Why #    | Question                                                    | Answer                                                                                                                                                                                           |
-| -------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1        | Why does the translation editor have recurring entity bugs? | The entity-skipping logic depends on both original tweet text and current translation input, with no invariant enforcement.                                                                      |
-| 2        | Why is there no invariant enforcement?                      | The editor component mixes UI state, translation state, entity filtering, and dictionary lookups in a single component.                                                                          |
-| 3        | Why is it in a single component?                            | Features were added incrementally without refactoring boundaries. The dictionary went from simple list → Excel → Popover, each adding more state to the same component.                          |
-| 4        | Why wasn't refactoring done between features?               | No automated tests meant every refactor carried high risk. Each fix was a minimal hotfix to restore functionality.                                                                               |
-| 5 (root) | —                                                           | **The translation editor has no pure-function core for entity filtering and text processing — all logic is embedded in React component state, making it untestable without full DOM rendering.** |
+`7e68aa3` 的提示词重构一次成型，边界清晰、描述完整。字典与模板最终收敛进 store，而不是继续散在组件里。
 
-**Root cause (one sentence):** Translation logic is embedded in React component state rather than extracted into testable pure functions, causing each feature addition to destabilize existing behavior.
+## 行动项
 
-## Detection
+### 缓解
 
-- Manual testing caught most issues (users noticed HTML entities appearing raw, empty fields, missing toggle)
-- The store migration bug was a ticking time bomb — only surfaced when users upgraded
-- **Detection gap**: No integration test that runs "enter text → translate → clear → verify" end-to-end
+- [x] 实体过滤与视图解析下沉为纯函数并单测（`test/unit/resolveTranslationView.spec.ts` 等；维护者）
 
-## Recurrence
+### 预防
 
-- `fbda221` and `d0450a9` are essentially the same class of bug (entity skip logic) fixed in different parts of the condition
-- `737fe74` and `276b8d4` are identical commits — the first fix was incomplete
-- Store migration pattern also appears in #006 (Zustand misuse)
+- [ ] HTML 实体解码抽成独立工具，覆盖命名、数字、混合实体（维护者；判据：独立模块 + 30 条以上用例）
+- [ ] store 迁移集成测试：vN 建库、迁移到 vN+1、断言字段不丢（维护者；判据：CI 覆盖每个迁移路径）
+- [ ] 补翻译数据流文档：哪个 store 拥有什么、AI 结果与人工译文如何合并、优先级顺序（维护者；判据：文档存在且被 `TranslationEditor.tsx` 引用）
 
-## Lessons Learned
+## 教训
 
-- **What went right?** The AI prompt refactor (`7e68aa3`) was done well — it restructured the entire prompt strategy in a single cohesive commit with clear description of what changed and why.
-- **What could be better?** "Fix it twice" pattern (`737fe74`/`276b8d4`) indicates the first fix wasn't verified against all usage sites.
-- **Where did we get lucky?** The store migration bug didn't cause user-visible data corruption that required manual recovery. The migration function silently recovered the data.
-
-## Corrective Actions
-
-| #   | Action                                                                                                                                                                | Type       | Owner | Completion Criteria                                                                    |
-| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ----- | -------------------------------------------------------------------------------------- |
-| 1   | Extract `shouldSkipEntity` and entity text processing into a pure function module (`lib/translation/entity-filter.ts`) with unit tests                                | Prevention | —     | 100% test coverage on entity filter logic; no `shouldSkip` logic in components         |
-| 2   | Extract HTML entity decoding into a dedicated utility with exhaustive test cases (all named entities, numeric entities, mixed content)                                | Prevention | —     | `lib/translation/decode-entities.ts` with 30+ test cases                               |
-| 3   | Add a store migration integration test: create store at version N, trigger migration to N+1, assert all fields survive                                                | Detection  | —     | CI test that runs all migration versions in sequence                                   |
-| 4   | Add an E2E smoke test: load a tweet with mixed entities → open translation editor → verify entity placeholders render, type translation → verify no entity corruption | Detection  | —     | Playwright test in CI                                                                  |
-| 5   | Document the translation data flow: which store owns what, how AI results merge with manual translations, the priority resolution order                               | Prevention | —     | `docs/translation-architecture.md` exists and is referenced from TranslationEditor.tsx |
+翻译逻辑进组件等于进黑洞。纯逻辑必须先下沉再接线，否则每个新功能都在给旧 bug 加复发面。
 
 ## Changed Files
 
@@ -97,7 +88,7 @@ app/components/settings/TranslationDictionaryManager.tsx
 app/components/settings/SeparatorTemplateManager.tsx
 ```
 
-## Related Postmortems
+## 关联报告
 
-- #006 (State Management) — store migration pattern
-- #003 (UI Styling/Layout) — Popover and UI integration bugs
+- #006 状态管理：同一类 store 迁移丢字段
+- #003 UI 样式与布局：Popover 集成与布局问题

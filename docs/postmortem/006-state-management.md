@@ -1,122 +1,74 @@
-# Postmortem 006: Zustand Store Misuse — Selector Greed and Migration Fragility
+# Postmortem 006: Zustand 误用，整 store 订阅与脆弱迁移
 
-- **日期**: 2026-05-31
+- **日期**: 2026-05-31（回溯整理）
 - **严重级别**: SEV-2
-- **分类**: Bug
+- **分类**: 缺陷
 - **状态**: Mitigated
+- **根因归类**: 工具反馈
 
-## Summary
+## 摘要
 
-The Zustand stores (`useAppConfigStore`, `useTranslationStore`) accumulated 6 fix commits for persistent issues: store migration data loss, excessive re-renders from unselective subscriptions, and stale comment state after fetching new tweets. The root cause is a pattern of subscribing to entire store objects instead of individual fields, combined with Zustand's manual migration API that silently drops data when the partialize schema doesn't match the migration version.
+两个 store（`useAppConfigStore`、`useTranslationStore`）累计 6 次修复，集中在三处：store 迁移丢字段、整 store 订阅导致多余重渲染、拉取新推文后评论区状态不重置。根因是 Zustand 的默认写法鼓励整 store 订阅，而迁移 API 全手写、无类型，`partialize` 与 `version` 对不上就静默丢字段。
 
-## Leadup
+## 影响
 
-The project uses Zustand with the `persist` middleware for:
+- 用户可见：`translationMode` 静默重置为默认；切换推文后仍显示上一条的评论。
+- 性能：任意设置变动触发 7 个无关组件重渲染。
+- 隐藏风险：迁移是定时炸弹，只在用户升级、带着旧 localStorage 加载时触发，开发期很难碰到。
 
-- `appConfig.ts`: User settings (AI provider, API keys, proxy URL, UI preferences)
-- `translation.ts`: Translation mode, settings, template management
+## 时间线
 
-Zustand's `persist` middleware requires explicit configuration of:
+2026-05-31 回溯整理。
 
-1. `partialize`: Which fields to persist to localStorage
-2. `migrate`: How to transform old versions when the store schema changes
-3. `version`: The current schema version number
+| 日期 | commit | 事件 |
+| ---- | ------ | ---- |
+| 2026-01-22 | `e23f285` | store 持久化迁移，找回 `translationMode` |
+| 2026-01-23 | `13a4148` | 拉新推文时重置评论区状态 |
+| 2026-04-25 | `2e9e84b` | 修复 zustand 错误使用，7 个组件改 `useShallow` |
+| 2026-04-25 | `2e9e8a8` | 模板存储版本升级 |
 
-The migration logic is entirely manual and provides no type safety — old state is typed as `any`, and there's no compile-time check that the migration preserves all fields.
+## 根因分析
 
-## Fault
+1. Zustand 的 `migrate` 用 `any`，`partialize` 的持久化 schema 与迁移函数之间没有类型连接。
+2. `translationMode` 原本是顶层字段，`settings` 先存在，晚加的字段没同步更新持久化策略。
+3. 迁移只在带旧 localStorage 加载时跑一次，开发期频繁清库，这条路径几乎不被覆盖。
+4. `useStore()` 直接返回整个 state，用 selector 需要显式 opt-in，默认写法就是错的。
 
-Key fault patterns:
+一句话归纳：Zustand 的默认写法鼓励整 store 订阅和 any 迁移，项目又没有 store 测试策略，两类 bug 都真的发生了。
 
-1. **Store migration data loss** (`e23f285`): The `translationMode` field was stored at the top level of the Zustand state, but `partialize` only persisted `state.settings`. When the store version bumped to 5, `translationMode` was silently excluded from persistence because `partialize` didn't include it. Fix: implemented a `migrate` function that copies `translationMode` into `settings.translationMode` for versions < 5, and updated `partialize` to nest `translationMode` under `settings`.
+## 触发条件
 
-   ```typescript
-   // Before (broken):
-   partialize: state => ({
-     settings: state.settings,
-     translationMode: state.translationMode,  // persisted separately
-   })
+store 版本升级后加载旧数据；任意设置变动触发订阅。
 
-   // After (fixed):
-   partialize: state => ({
-     settings: {
-       ...state.settings,
-       translationMode: state.translationMode,  // nested under settings
-     },
-   })
-   ```
+## 检测
 
-2. **Zustand misuse — subscribing to entire store** (`2e9e84b`): 7 components were importing the entire store object:
+用户升级后发现设置重置；重渲染问题通过 React DevTools profiling 发现。当时的盲区是没有「序列化 → 升版本 → 反序列化 → 断言字段不丢」的测试。
 
-   ```typescript
-   // Broken: causes re-render on ANY store change
-   const { enableAITranslation, aiProvider, geminiApiKey, ... } = useAppConfigStore()
-   ```
+## 处置
 
-   Fix: Each component now uses `useShallow` with explicit field selectors:
+补 `migrate` 把字段搬进 `settings` 并更新 `partialize`；7 个组件统一改为 `useShallow` + 显式 selector。
 
-   ```typescript
-   const { enableAITranslation, aiProvider, ... } = useAppConfigStore(
-     useShallow(state => ({
-       enableAITranslation: state.enableAITranslation,
-       aiProvider: state.aiProvider,
-       // ... only the fields this component needs
-     }))
-   )
-   ```
+## 做得对的地方
 
-   This affected: `ThemeProvider`, `AITranslationSettings`, `GeneralSettings`, `SeparatorTemplateManager`, `ThemeSwitcher`, `TranslationDictionaryManager`, `TweetOptionsMenu`.
+`useShallow` 修复一次性覆盖全部 7 个文件，没有留下滴漏式跟修。
 
-3. **Stale comment state** (`13a4148`): When fetching new tweets, the comment section state was not reset. This meant old comment threads remained visible when switching to a new tweet. Fix: a 2-line addition to `tweet.tsx` that resets comment state on tweet fetch.
+## 行动项
 
-4. **Template storage versioning** (`2e9e8a8`): Template management needed a storage version upgrade, following the same pattern as #1 — the version number was bumped and migration logic was added to handle old-format templates.
+### 缓解
 
-## Impact
+- [x] 7 个组件改为 selector + `useShallow`（维护者）
+- [x] 补 `migrate` 与 `partialize`，找回 `translationMode`（维护者）
 
-- **Store migration bug (#1)**: Potentially affected all users who upgraded — `translationMode` (show/hide original, AI translation toggle) silently reset to defaults
-- **Re-render bug (#2)**: Performance degradation — every settings change triggered re-renders in 7 unrelated components
-- **Stale comment state (#3)**: UX confusion — users saw comments from the wrong tweet
-- **Duration**: Migration bugs were ticking time bombs that only surfaced on version bump
+### 预防
 
-## Root Cause
+- [ ] 补 store 迁移测试助手 `testMigration(oldState, newVersion, expected)`（维护者；判据：每次升版本都有迁移测试）
+- [ ] ESLint 禁止无 selector 的整 store 订阅（维护者）
+- [ ] `migrate` 签名去掉 `any`，改为类型化 `OldState → NewState`（维护者）
+- [ ] 写 `docs/zustand-conventions.md`：用 selector、测迁移、改 schema 必升 version（维护者）
 
-| Why #    | Question                                                                    | Answer                                                                                                                                                                                      |
-| -------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1        | Why does store migration silently drop data?                                | Zustand's `migrate` function uses `any` types — there's no type-level connection between the persisted partialize schema and the migration function.                                        |
-| 2        | Why was `translationMode` stored at the top level separately from settings? | The store evolved incrementally: `settings` was the original persist target, then `translationMode` was added later as a top-level field without updating the persistence strategy.         |
-| 3        | Why wasn't this caught during development?                                  | The migration only runs once when a user loads the app with an old localStorage version. During development, localStorage is frequently cleared, so the migration path is rarely exercised. |
-| 4        | Why do components subscribe to the entire store?                            | Zustand's API makes it easy: `useStore()` returns the whole state. Using selectors (`useStore(s => s.field)`) requires explicit opt-in, and the ergonomic default is the broken pattern.    |
-| 5 (root) | —                                                                           | **Zustand's defaults encourage anti-patterns (whole-store subscription, `any`-typed migrations), and the project has no automated tests for migration paths or selector correctness.**      |
+## 教训
 
-**Root cause (one sentence):** Zustand's ergonomic defaults encourage subscribing to entire stores and writing untyped migrations — both patterns caused real bugs that could have been prevented with a store testing strategy.
-
-## Detection
-
-- Migration bug: discovered when a user upgraded and their translation settings were lost
-- Re-render bug: discovered via React DevTools profiling (or manual sluggishness observation)
-- Stale comment bug: discovered by manual testing of the tweet fetch flow
-- **Detection gap**: No unit test that serializes a store snapshot, bumps version, and verifies all fields survive
-
-## Recurrence
-
-- The `translationMode` migration pattern also appeared in `2e9e8a8` for templates — same class of bug, different field
-- The `useShallow` fix was applied consistently across 7 files in a single commit — good practice, but only after the pattern was already widespread
-
-## Lessons Learned
-
-- **What went right?** The `useShallow` fix was applied comprehensively in one commit — all 7 affected components were fixed together, preventing a trickle of follow-up fixes.
-- **What could be better?** An ESLint rule (`eslint-plugin-zustand` or custom) could have caught the whole-store subscription pattern at lint time.
-- **Where did we get lucky?** The migration bug was recoverable — `translationMode` had a sensible default, so users weren't blocked, just mildly confused by reset preferences.
-
-## Corrective Actions
-
-| #   | Action                                                                                                                                                  | Type       | Owner | Completion Criteria                                                                          |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ----- | -------------------------------------------------------------------------------------------- |
-| 1   | Add a store migration test helper: `testMigration(oldState, newVersion, expectedState)` that runs the store's `migrate` function and asserts all fields | Detection  | —     | At least one migration test per store version bump                                           |
-| 2   | Add ESLint rule: `no-restricted-syntax` to forbid `useAppConfigStore()` and `useTranslationStore()` without a selector argument                         | Prevention | —     | ESLint blocks whole-store subscriptions at lint time                                         |
-| 3   | Add TypeScript generic constraint: make `migrate` accept a typed `Partial<State>` instead of `any`                                                      | Prevention | —     | `migrate: (state: OldState, version: number) => NewState` — no `any` in migration signatures |
-| 4   | Add a CI test that creates a store with version N's schema, serializes it, then deserializes with version N+1's schema and verifies no field loss       | Detection  | —     | CI catches migration bugs before release                                                     |
-| 5   | Document the Zustand patterns in `docs/zustand-conventions.md`: always use selectors, always test migrations, always bump version on schema change      | Prevention | —     | File exists and is referenced from store files                                               |
+永远用 selector，不用整 store 订阅。改 persist schema 必须升 version 并配迁移测试，否则丢字段是静默的。
 
 ## Changed Files
 
@@ -134,7 +86,6 @@ app/components/tweet/TweetOptionsMenu.tsx
 app/routes/tweet.tsx
 ```
 
-## Related Postmortems
+## 关联报告
 
-- #002 (Translation System) — store migration for translation settings
-- #004 (Build Configuration) — store schema changes have build implications
+- #002 翻译系统：同一类 store 迁移丢字段

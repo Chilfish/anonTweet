@@ -1,77 +1,78 @@
-# Postmortem 001: Tweet Entity Parser Is Monolithic and Brittle
+# Postmortem 001: 推文实体解析器负担过重，改动风险外溢
 
-- **日期**: 2026-05-31
-- **严重级别**: SEV-2
-- **分类**: Architecture
+- **日期**: 2026-05-31（回溯整理）
+- **严重级别**: SEV-1
+- **分类**: 架构
 - **状态**: Active
+- **根因归类**: 设计建模
 
-## Summary
+## 摘要
 
-The `parseTweet.ts` parser is the single most error-prone module in the codebase, with 10 fix commits targeting it directly plus another 5 on adjacent react-tweet components. The parser is a monolithic function that handles entity extraction, deduplication, text range adjustment, media processing, and quoted tweet enrichment — all in a single file. Each upstream Twitter API change or edge case (note_tweet, leading mentions, player cards) triggers a cascade of indexing and range-calculation bugs.
+`parseTweet.ts` 是全项目改动最频繁的模块，被直接修了 10 次，相邻的 react-tweet 组件另有 5 次。实体抽取、去重、文本范围调整、媒体处理和引用推文补全全在一个函数里完成。Twitter 数据一变形，或出现新的边界情况（note_tweet、前置 @、player 卡片），就会带出一串索引和范围计算错误。
 
-## Leadup
+## 影响
 
-The parser was originally forked from the `react-tweet` library's API v2 parser and extended to support Chinese localization features. The introducing commit evolved from a simple `parseTweet` export to a complex function handling `RawTweet → EnrichedTweet` transformation. As features were bolted on (note_tweet text ranges, quoted tweet enrichment, entity deduplication), the function grew to 115+ lines with deeply nested conditionals.
+- 用户可见：@提及丢失、话题标签错乱、媒体链接不可见，影响所有查看看推文的用户。
+- 返工：2025-09 至 2026-01 之间 10 次热修，多数在问题出现后才发现。
+- 隐藏风险：没有回归测试锚定实体解析契约，一次改动可能同时破坏所有实体类型。
 
-## Fault
+## 时间线
 
-The fault manifests as:
+这条时间线是 2026-05-31 回溯整理出来的，不是事发当时的实时记录，持续时间一栏由 commit 日期推断。
 
-1. **Off-by-one errors** in entity indices — mention range checks using `>=` instead of `>` (commit `1cfef30`)
-2. **Entity duplication** — no deduplication logic existed initially, causing the same entity to appear twice in the rendered tweet (commit `801a366`)
-3. **Missing entity types** — player cards (`a905c86`), media entities not handled
-4. **Text range miscalculation** — `display_text_range` offsets not adjusted when stripping leading mentions (commit `801a366`)
-5. **Data source variance** — tweets come in multiple structural shapes (`tweet.legacy` vs `tweet.tweet.legacy`, commit `2950ddd`)
+| 日期 | commit | 事件 |
+| ---- | ------ | ---- |
+| 2025-09-30 | `d592945` | 引用推文显示异常 |
+| 2025-10-01 | `a905c86` | player 类型卡片未映射，补 summary_large_image |
+| 2025-10-19 | `801a366` | 实体重复，且前置 mention 后文本范围未调整 |
+| 2025-10-19 | `a131b5f` | 媒体实体索引范围计算错误 |
+| 2025-10-19 | `44a284a` | note_tweet 文本范围未处理，媒体链接显示不完整 |
+| 2025-10-30 | `2950ddd` | 数据源存在 `tweet.legacy` 与 `tweet.tweet.legacy` 两种结构 |
+| 2025-11-27 | `1cfef30` | mention 范围判断用 `>=`，应为 `>` |
+| 2026-01-22 | `9394201` | 过滤无关内容时评论 ID 丢失 |
 
-The core pattern: every new feature requires modifying the same monolithic function, and each modification introduces new indexing bugs because there are no unit tests pinning the entity extraction contract.
+## 根因分析
 
-## Impact
+按时间顺序的修复都指向同一个系统条件，不是某一次改错。
 
-- **Affected users**: All users viewing tweets — broken entity rendering causes missing @mentions, mangled hashtags, and invisible media links
-- **Duration**: Recurring — each fix commits weeks apart across the entire project history (Oct 2025 – Jan 2026)
-- **Related issues**: `parseTweet.ts` is the most-changed non-config file with 10 fix commits
+1. 索引调整全靠手工。解析器在 `Array.from()` 出来的字符数组上切片，每种实体各自重算偏移，没有统一的 offset 模型，所以每加一个实体类型就多一处可能算错的地方。
+2. 没有分层。「从 API 抽原始实体」和「转成 UI 结构」之间没有边界，两者在同一函数里互相影响。
+3. 起点是 `react-tweet` 的 v2 解析器移植，它假设只有一种简单结构。项目后来要兼容 v1.1 数据、note_tweet、翻译集成，逐步分叉，但没同步拆结构。
+4. 全程没有测试。10 次修复没有一次附带测试，每次都是线上热修。
 
-## Root Cause
+一句话归纳：解析器缺测试锚点和内部分层，任何改动都可能牵动全部实体类型。
 
-| Why #    | Question                             | Answer                                                                                                                                                                                                                   |
-| -------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1        | Why are entity indices wrong?        | The parser manually adjusts indices for leading mentions and text ranges without a centralized offset model.                                                                                                             |
-| 2        | Why is index adjustment manual?      | The parser operates on raw string slices with `Array.from()` character arrays, recalculating offsets ad-hoc for each entity type.                                                                                        |
-| 3        | Why is the parser a single function? | No architectural boundary between "extract raw entities from API" and "convert to UI-friendly structure."                                                                                                                |
-| 4        | Why was it designed this way?        | The parser started as a direct port from `react-tweet`, which assumes a single, simple tweet shape from the v2 API. The project gradually diverged to support v1.1 data shapes, note_tweet, and translation integration. |
-| 5 (root) | —                                    | **The parser has no test coverage and no internal abstraction boundaries — every change risks breaking all entity types simultaneously.**                                                                                |
+## 触发条件
 
-**Root cause (one sentence):** The tweet parser lacks automated tests and internal separation of concerns, making it a single point of failure for all entity rendering.
+上游数据结构变化，或出现此前未覆盖的边界：new note_tweet 格式、文本前置 mention、player 类型卡片。
 
-## Detection
+## 检测
 
-- Discovered by manual testing: Chinese tweet rendering showing duplicate text, missing media URLs, broken @mentions
-- No automated regression tests exist for tweet parsing
-- **Detection gap**: Would need a snapshot test suite of known tweet payloads (`raw_in.json` → `expected_out.json`) run in CI
+靠人工测试发现——中文推文出现重复文本、媒体链接缺失、@提及断裂。当时的盲区是没有回归测试，因此每次都要靠人肉复现。
 
-## Recurrence
+## 处置
 
-This pattern has repeated 10 times across `parseTweet.ts` and 5 more times in adjacent react-tweet files:
+每次针对具体症状做小范围热修，未做结构性调整。后续补上了 `test/unit/parseTweet.spec.ts` 与 `test/unit/entitytParser.spec.ts`。
 
-- `a131b5f`: media entity index range miscalculation (separate from the main parser fix)
-- `44a284a`: note_tweet text range not handled
-- `d592945`: quoted tweet display broken
-- `9394201`: comment IDs lost when filtering
+## 做得对的地方
 
-## Lessons Learned
+单次修复都小而聚焦，没有把无关改动混进热修，所以从未引发级联回归。问题出现后能较快定位到具体实体类型。
 
-- **What went right?** Individual fixes were small and targeted, each addressing a specific symptom.
-- **What could be better?** No test was ever added alongside any parser fix. Each fix was a production hotfix.
-- **Where did we get lucky?** The Twitter API didn't change its entity format often enough to cause a complete outage.
+## 行动项
 
-## Corrective Actions
+### 缓解
 
-| #   | Action                                                                                                                                          | Type       | Owner | Completion Criteria                                                       |
-| --- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ----- | ------------------------------------------------------------------------- |
-| 1   | Add snapshot tests for `parseTweet` with 5+ real tweet payloads covering note_tweet, quoted tweet, media, and player card variants              | Prevention | —     | CI passes on every PR touching `parseTweet.ts`                            |
-| 2   | Extract entity deduplication into its own pure function with explicit input/output types                                                        | Prevention | —     | Deduplication logic lives in `lib/entities/dedup.ts` with dedicated tests |
-| 3   | Add a structural schema assertion on the raw tweet input — if the shape is unrecognized, fail loudly instead of silently producing wrong output | Detection  | —     | `parseTweet` throws `UnknownTweetShapeError` on unrecognized payloads     |
-| 4   | Run the tweet parser in CI against a frozen corpus of 20 raw tweet JSON fixtures                                                                | Detection  | —     | GitHub Actions workflow that fails on any diff in parser output           |
+- [x] 补解析器单元测试 `test/unit/parseTweet.spec.ts`、`test/unit/entitytParser.spec.ts`（维护者）
+
+### 预防
+
+- [ ] 实体去重抽成纯函数，带显式输入输出类型（维护者；判据：逻辑落在独立模块且有专属测试）
+- [ ] 未识别的 raw 结构直接抛错，不再静默产出错误结果（维护者；判据：`parseTweet` 对未知结构抛 `UnknownTweetShapeError`）
+- [ ] 建一份冻结的 raw tweet 语料，在 CI 比对解析器输出（维护者；判据：语料库变化时 CI 失败）
+
+## 教训
+
+解析器的每次改动都要有测试锚点。单函数同时承担抽取与转换，改动面必然外溢到所有实体类型。
 
 ## Changed Files
 
@@ -84,6 +85,6 @@ app/lib/react-tweet/utils/index.ts
 app/components/tweet/Tweet.tsx
 ```
 
-## Related Postmortems
+## 关联报告
 
-- #005 (Media Handling) — media entity parsing touches the same code paths
+- #005 媒体管线：媒体实体解析共用同一段代码

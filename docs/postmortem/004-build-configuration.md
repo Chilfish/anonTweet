@@ -1,87 +1,79 @@
-# Postmortem 004: Build Configuration Churn From Framework Migrations and SSR Complexity
+# Postmortem 004: 构建配置在框架迁移与 SSR 复杂度中反复出问题
 
-- **日期**: 2026-05-31
+- **日期**: 2026-05-31（回溯整理）
 - **严重级别**: SEV-2
-- **分类**: Dependency
+- **分类**: 依赖
 - **状态**: Mitigated
+- **根因归类**: 工具反馈
 
-## Summary
+## 摘要
 
-The build configuration accumulated 10 fix commits spanning Vite config, SSR setup, dependency migration (jsdom→happy-dom), runtime migration (rettiwt-api→Hono), and environment variable schema alignment. Each migration introduced configuration drift that required follow-up fixes. The pattern stabilized after the Hono migration completed, but the underlying fragility remains: there is no build health check that validates the production build against the current config.
+构建配置累计修了 10 次，横跨 Vite 配置、SSR 入口、依赖迁移（jsdom → happy-dom）、运行时迁移（rettiwt-api → Hono）和环境变量 schema。每次迁移都留下配置漂移，需要后续补修。根本问题是当时没有任何构建门禁，客户端/服务端越界和依赖破坏只能等到人工构建或部署时才发现。该缺口后来由 #010 补上。
 
-## Leadup
+## 影响
 
-The project's build system went through several major shifts:
+- 影响面：构建失败会同时阻塞开发与部署。
+- 跨度：2025-11 至 2026-01，几乎贯穿整段开发期。
+- 最重的一次是 `9926698`：71 个文件、2323 行插入，单行 commit message，实际上不可评审。
 
-1. **Initial setup**: Remix + Vite with SSR, forked from a template
-2. **SSR entry point** (`f32eabe`): Server entry point was missing, requiring explicit server configuration
-3. **'use client' cleanup** (`e8a7020`): Redundant `'use client'` directives were scattered across server modules, causing SSR build failures
-4. **Client/server boundary violations** (`5cb2fd5`): Client components were importing server modules (e.g., `constants.ts` importing from server-only code), causing build errors
-5. **node:\* import issues** (`7ab766d`, `645f988`): Node.js built-in module imports (`node:fs`, `node:path`) leaked into client bundles — first removed, then marked as comments when needed for type checking
-6. **Dependency migration** (`dba2ecd`): jsdom was replaced with happy-dom for test compatibility
-7. **Runtime migration** (`9926698`): The entire rettiwt-api was synced from upstream and the runtime was migrated to Hono — a 71-file, 2323-line insertion change
-8. **Hono adapter cleanup** (`ef29efc`): The Hono adapter was removed after initial addition
-9. **Environment variable schema** (`a812bc8`): Direct checks on `isProduction` and `env.ENABLE_DB_CACHE` were replaced with robust env object checks
+## 时间线
 
-## Fault
+2026-05-31 回溯整理。
 
-Key fault patterns:
+| 日期 | commit | 事件 |
+| ---- | ------ | ---- |
+| 2025-11-26 | `f32eabe` | 补 server 入口并配置 SSR 构建 |
+| 2025-11-26 | `7a76f7a` | 集中修 typecheck |
+| 2025-12-20 | `7ab766d` | 移除多余的 `node:` 导入 |
+| 2025-12-20 | `e8a7020` | 清理冗余 `'use client'` 指令 |
+| 2025-12-20 | `a812bc8` | 环境变量 schema 对齐 |
+| 2026-01-02 | `5cb2fd5` | client 组件引用了 server 模块 |
+| 2026-01-10 | `dba2ecd` | jsdom 迁到 happy-dom |
+| 2026-01-10 | `9926698` | 同步 rettiwt-api 上游并迁移 Hono |
+| 2026-01-10 | `ef29efc` | 移除临时 Hono adapter |
+| 2026-01-19 | `645f988` | `node:*` 导入改为注释以通过类型检查 |
+| 2026-01-21 | `22dfe4e` | 修复构建错误 |
 
-1. **Client/server import boundary violations** (`5cb2fd5`, `e8a7020`): The most frequent build error pattern. Vite's SSR mode requires strict separation of client and server code, but the project imports utilities from a shared `lib/` directory without clear demarcation. Constants, types, and utilities intermix freely.
+## 根因分析
 
-2. **node:\* imports in browser bundles** (`7ab766d`, `645f988`): Node.js built-in imports (`node:fs`) leaked into client code. The first fix removed them; the second fix marked them as comments because they were needed for TypeScript type checking of API routes that share files with client code.
+1. `lib/` 没有区分 server-only 与共享代码，client 组件可以直接引用服务端模块。
+2. 项目从 Remix 模板长出，`lib/` 是万能目录，`server/` 存在但未被一致使用。
+3. 预提交与 CI 只跑 typecheck / lint / test，从不跑构建。
+4. 单人流程，没有分支保护或必需状态检查，CI 结果不拦合并。
 
-3. **Massive dependency churn** (`9926698`): The rettiwt-api sync + Hono migration touched 71 files. The scope was too large for a single commit — the `bun.lock` file changed 223 lines, package.json changed 27 lines, and yet the commit message is a single line.
+一句话归纳：没有构建门禁，客户端/服务端越界和依赖破坏只能拖到人工构建或部署才暴露。
 
-4. **Environment variable fragility** (`a812bc8`): The code initially used bare `isProduction` and `env.ENABLE_DB_CACHE` checks, which broke when the environment variable schema was updated. The fix added robust `env` object checks, but the fact that multiple files had the same pattern (browser.ts, db.server.ts, env.server.ts) indicates a copy-paste of fragile code.
+## 触发条件
 
-5. **Build errors post-merge** (`22dfe4e`): A generic "fix: build error" commit touched 3 files (Tweet.tsx, root.tsx, server/express.js) — indicating a build failure that wasn't caught before merge.
+依赖迁移、SSR 配置调整、环境变量 schema 变更。
 
-## Impact
+## 检测
 
-- **Affected users**: Build breakages block all development and deployment
-- **Duration**: Spread across the entire project timeline (Nov 2025 – Jan 2026)
-- **Worst incident**: The rettiwt-api sync (`9926698`) was a 71-file change that could have broken the entire API layer if not tested carefully
+靠人工跑 `bun run build` 发现。当时的盲区是没有预提交构建，类型错误会一直累积到专门的修复提交。
 
-## Root Cause
+## 处置
 
-| Why #    | Question                                                   | Answer                                                                                                                                                                                                 |
-| -------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1        | Why do client/server import boundary violations recur?     | The `lib/` directory has no internal structure separating server-only code from shared code.                                                                                                           |
-| 2        | Why wasn't `lib/` structured this way from the start?      | The project grew from a Remix template where `lib/` is a catch-all. The `server/` directory exists but isn't consistently used for all server-only code.                                               |
-| 3        | Why do dependency migrations cause cascading build issues? | The project has no `tsc --noEmit` or build step in pre-commit hooks. CI exists but wasn't always passing before merge.                                                                                 |
-| 4        | Why wasn't CI enforced?                                    | Solo developer workflow — no branch protection rules, no required status checks.                                                                                                                       |
-| 5 (root) | —                                                          | **The project has no automated build validation in pre-commit or CI that blocks merges when the production build fails, and the `lib/` directory structure doesn't enforce client/server separation.** |
+逐个修复，Hono 迁移收尾后配置趋于稳定。
 
-**Root cause (one sentence):** No automated build gate exists, so client/server import violations and dependency breakages are only discovered after manual inspection or failed deploys.
+## 做得对的地方
 
-## Detection
+Hono 迁移收尾干净（`ef29efc` 移除 adapter），没有留下临时兼容层。上游变更以增量类型为主，服务层兼容性尚可。
 
-- Manual: developer runs `bun run build` after changes and discovers errors
-- The `7a76f7a` commit ("fix: typecheck") suggests TypeScript errors accumulated until a dedicated fix was needed
-- **Detection gap**: No pre-commit hook running `tsc --noEmit` or `bun run build`
+## 行动项
 
-## Recurrence
+### 缓解
 
-- Client/server boundary: at least 3 occurrences (`5cb2fd5`, `e8a7020`, `7ab766d`)
-- Build error: generic "fix: build error" commit suggests pattern is recurring
-- The Hono migration is now complete, so that specific migration risk is mitigated
+- [x] `bun run build` 纳入 pre-push 与 CI（于 #010 补齐；维护者）
 
-## Lessons Learned
+### 预防
 
-- **What went right?** The Hono migration (`9926698`) was completed and the adapter was cleaned up (`ef29efc`) — the migration was closed properly.
-- **What could be better?** The migration should have been split into smaller PRs: (1) sync types, (2) update service layer, (3) switch runtime. A 71-file commit is unreviewable.
-- **Where did we get lucky?** The rettiwt-api upstream changes were mostly additive types — the service layer had reasonable backward compatibility.
+- [ ] 拆 `lib/` 为 `shared/` 与 `server/`，用 ESLint `no-restricted-imports` 阻止越界引用（维护者；判据：CI 在越界时报错）
+- [ ] 生产构建冒烟：启动服务并访问 `/api/health`（维护者；判据：构建产物能启动并响应）
+- [ ] 在 CONTRIBUTING.md 写明客户端/服务端边界规则（维护者）
 
-## Corrective Actions
+## 教训
 
-| #   | Action                                                                                                                                | Type       | Owner | Completion Criteria                                               |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ----- | ----------------------------------------------------------------- |
-| 1   | Restructure `lib/` into `lib/shared/` and `lib/server/` with ESLint `no-restricted-imports` rules blocking server imports from client | Prevention | —     | ESLint rule blocks cross-boundary imports; CI fails on violations |
-| 2   | Add pre-commit hook: `bun run typecheck && bun run build`                                                                             | Detection  | —     | Husky pre-commit hook in `.husky/pre-commit`                      |
-| 3   | Add GitHub Actions CI job: typecheck + build on every PR                                                                              | Detection  | —     | CI status is required before merge                                |
-| 4   | Add a `--mode production` build smoke test that starts the server and hits `/api/health`                                              | Detection  | —     | SSR build doesn't just compile — it boots and responds            |
-| 5   | Document the client/server boundary rules in CONTRIBUTING.md                                                                          | Prevention | —     | File exists and explains `lib/shared` vs `lib/server` vs `app/`   |
+不跑构建的门禁会漏掉产物形态问题。大迁移要拆成可评审的小步，71 个文件的提交等于没评审。
 
 ## Changed Files
 
@@ -99,7 +91,7 @@ app/routes/api/tweet/get.ts
 app/types/global.d.ts
 ```
 
-## Related Postmortems
+## 关联报告
 
-- #005 (Media Handling) — media proxy config intersects with env variable handling
-- #006 (State Management) — store schema changes have build implications
+- #010 Babel 主版本漂移：本篇未竟的构建门禁纠正项
+- #005 媒体管线：代理配置与环境变量处理交叉

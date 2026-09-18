@@ -1,97 +1,79 @@
-# Postmortem 003: UI Styling and Layout Is a Whac-a-Mole of One-Line CSS Fixes
+# Postmortem 003: UI 样式与布局靠单行 CSS 反复打补丁
 
-- **日期**: 2026-05-31
+- **日期**: 2026-05-31（回溯整理）
 - **严重级别**: SEV-3
-- **分类**: Bug
+- **分类**: 缺陷
 - **状态**: Active
+- **根因归类**: 流程缺失
 
-## Summary
+## 摘要
 
-The project accumulated ~20 fix commits for UI styling and layout issues — the largest cluster by volume but individually the smallest in severity. Most fixes are single-property CSS changes (z-index, overflow, min-width) or one-line component adjustments. The pattern reveals a systemic lack of design tokens, layout primitives, and visual regression testing, forcing developers to manually spot and patch every visual bug.
+UI 相关修复累计约 20 次，是数量最大的一簇，单次严重度最低。绝大多数是单属性 CSS 改动（z-index、overflow、min-width）或一行组件调整。根因是没有 design token、没有布局原语、也没有视觉回归，每个视觉 bug 都只能靠人工浏览发现再逐处修补。
 
-## Leadup
+## 影响
 
-The project's UI started as a direct port of `react-tweet`'s Twitter theme CSS, then was extended with:
+- 用户可见：视觉瑕疵。单次不影响功能，但累积拉低整体观感。
+- 返工：约 20 次修复，每次都要求在桌面、移动、plain、截图、线程等模式下人工确认。
+- 隐藏风险：布局改动要在 5 种以上渲染模式交叉验证，是人工难覆盖的组合爆炸。
 
-- Thread lines (comment branching visualization) — custom CSS with manual pixel offsets
-- Screenshot mode (screenshot-as-image feature) — requires layout that looks good at fixed width
-- Plain mode (minimalist view without Twitter chrome) — alternate layout path
-- Mobile responsive — added ad-hoc after desktop-first design
-- Settings panels with tabs, popovers, and drawers — Radix UI component integration
+## 时间线
 
-Each of these features introduced new CSS rules that interact with existing ones in unpredictable ways, especially around z-index stacking and overflow containment.
+2026-05-31 回溯整理。节点取自各 UI 修复 commit。
 
-## Fault
+| 日期 | commit | 事件 |
+| ---- | ------ | ---- |
+| 2025-09-24 | `dc577fb` | Radix 组件改为命名导入 |
+| 2025-12-03 | `1e5ca7a` | 发布到 B 站的按钮移到 footer |
+| 2025-12-04 | `ccdf83c` | 返回按钮改为 `<Link>` |
+| 2025-12-20 | `322e4e8` | `Layout` 组件未接收 `children` |
+| 2025-12-20 | `043273f` | plain 模式缺最小宽度，窄屏塌陷 |
+| 2026-01-15 | `56ee649` | `SettingsRow` 误用于移动端布局 |
+| 2026-01-21 | `3dc1be2` | 连接线算法与截图测量重构（89 行改动） |
+| 2026-01-21 | `513a847` | 推文列表渲染性能与连线显示 |
+| 2026-02-17 | `6af156f` | 截图模式下视频仅显示封面 |
+| 2026-02-22 | `3f9b447` | 单图且竖屏时限制宽度 |
+| 2026-03-15 | `3889e3c` | 长用户名导致 header 溢出 |
+| 2026-04-06 | `352d467` | avatar 的 z-index 低于线程线 |
+| 2026-05-31 | `fa92657` | Storybook TC 类型修复 |
 
-Representative fault patterns:
+## 根因分析
 
-1. **Z-index wars** (`352d467`): Avatar z-index was lower than thread lines, causing the avatar to appear "behind" the connection line. Fixed by changing a single `z-index` value.
+1. CSS 逐组件手写，没有共享 token，也没有布局原语。
+2. 起点是 `react-tweet` 的 Twitter 主题独立样式表，扩展直接加进 `.module.css`，公共值（间距、层级、断点）从未提炼。
+3. 单行改动「感觉不值得重构」，20 次的累积成本没有记录，也就没有触发整理。
+4. 没有视觉回归，每个 bug 都靠人工浏览发现。
 
-2. **Overflow cropping** (`3889e3c`): Long usernames overflowed the tweet header because no `text-overflow: ellipsis` or `overflow: hidden` was applied to the username container.
+一句话归纳：缺设计 token 与视觉回归，每次布局改动都要在 5 种以上渲染模式间人工比对。
 
-3. **Layout component signature** (`322e4e8`): The `Layout` component didn't accept `children`, requiring a prop interface change — a basic React pattern missed during initial implementation.
+## 触发条件
 
-4. **Radix UI imports** (`dc577fb`): Default imports were used instead of named imports for Radix UI components, causing issues with tree-shaking and type resolution.
+新增渲染模式（截图、plain、移动端、线程线）与既有 CSS 发生交互时，层级与溢出问题集中出现。
 
-5. **Thread line measurement** (`3dc1be2`): When screenshot mode toggled, DOM nodes remounted, invalidating height measurements used for thread line positioning. Required `useMemo` + `createRef` restructuring across 89 lines of diff.
+## 检测
 
-6. **Render performance** (`513a847`): Tweet list re-rendered excessively because `MainThreadLine` wasn't memoized and `useElementSize` didn't do deep comparison on size changes.
+全部靠人工浏览发现。Storybook 当时已配置，但未接视觉对比。
 
-7. **Responsive gaps** (`56ee649`): `SettingsRow` component was incorrectly used in mobile layouts, and the mobile breakpoint behavior wasn't consistent across settings panels.
+## 处置
 
-8. **Min-width constraint** (`043273f`): Plain mode had no minimum width, causing content to collapse on narrow viewports.
+逐个修补，每个改动都小且可回滚。
 
-9. **Button placement** (`1e5ca7a`, `ccdf83c`): Bilibili publish button was in the wrong location (item selector vs footer), back button needed to be a `<Link>` instead of a `<button>` for proper navigation.
+## 做得对的地方
 
-10. **Video cover-only mode** (`6af156f`): Videos in the UI needed to show only the cover frame, not the full player, for a cleaner tweet display.
+单次改动小、风险低，没有一次级联回归。Storybook 已在位，可直接作为后续视觉基线的落点。
 
-11. **Single-image portrait restraint** (`3f9b447`): When there's only one image and it's portrait orientation, the width needed to be constrained — a layout rule that only emerged from manual testing.
+## 行动项
 
-## Impact
+### 预防
 
-- **Affected users**: All users — visual bugs degrade perceived quality
-- **Severity**: Individually SEV-3 (cosmetic), but collectively they undermine trust in the UI
-- **Developer cost**: ~20 fix commits is significant overhead for what should be caught by visual regression testing
+- [ ] 定义 z-index 分层 CSS 变量（`--z-header`、`--z-avatar`、`--z-thread-line`、`--z-overlay`、`--z-popover`），并用 stylelint 禁止裸整数（维护者；判据：所有 z-index 走变量）
+- [ ] 提炼 spacing、breakpoint、typography 设计 token（维护者；判据：组件 CSS 不再出现魔法数字）
+- [ ] Storybook 接视觉回归（Chromatic 或 Percy）（维护者；判据：CSS 改动在 PR 上产生视觉 diff）
+- [ ] 为各模式补 stories：default / plain / screenshot / mobile(375px) / 三层以上线程（维护者）
+- [ ] 为布局审查加清单，进 PR 模板（维护者）
 
-## Root Cause
+## 教训
 
-| Why #    | Question                                    | Answer                                                                                                                                                                                                                                                               |
-| -------- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1        | Why do visual bugs keep appearing?          | CSS is written ad-hoc per component without a shared set of design tokens or layout primitives.                                                                                                                                                                      |
-| 2        | Why are there no design tokens?             | The project started from `react-tweet`'s Twitter theme CSS, which is a standalone stylesheet. Extensions were added directly to `.module.css` files without extracting common values.                                                                                |
-| 3        | Why wasn't this systematized?               | CSS changes feel "too small to refactor" — each z-index fix is 1 line. The cumulative cost of 20 such fixes went unnoticed.                                                                                                                                          |
-| 4        | Why aren't visual bugs caught before merge? | No visual regression testing. Every bug was caught by the developer manually browsing the app.                                                                                                                                                                       |
-| 5 (root) | —                                           | **The project has no visual regression testing and no shared CSS design tokens, so every layout change must be manually verified across all modes (desktop, mobile, plain, screenshot, thread) — a combinatorial explosion the developer can't keep in their head.** |
-
-**Root cause (one sentence):** Absence of visual regression testing and shared CSS tokens forces manual verification of every layout change across 5+ rendering modes.
-
-## Detection
-
-- Every bug caught by manual inspection
-- No automated screenshot comparison
-- No Storybook visual tests (despite having Storybook configured — `fa92657` fixed Storybook TC types)
-
-## Recurrence
-
-- Z-index issues: at least 2 separate fixes (`352d467` for avatar, and implicit in `3dc1be2` thread line work)
-- Overflow/truncation: recurring theme across tweet header, settings panel, and media display
-- Component signature issues: `Layout` props, `SettingsRow` usage — basic React patterns missed under time pressure
-
-## Lessons Learned
-
-- **What went right?** Each fix was small and low-risk — no cascading regressions from any individual CSS change.
-- **What could be better?** A visual regression test would have caught 80% of these before merge. Setting one up (Chromatic or Percy) is a one-time cost that pays back after ~5 prevented fixes.
-- **Where did we get lucky?** No CSS bug caused data loss or functional breakage — purely visual issues.
-
-## Corrective Actions
-
-| #   | Action                                                                                                                                                       | Type       | Owner | Completion Criteria                                                       |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | ----- | ------------------------------------------------------------------------- |
-| 1   | Define CSS custom properties for z-index layers (`--z-header`, `--z-avatar`, `--z-thread-line`, `--z-overlay`, `--z-popover`) and enforce via stylelint rule | Prevention | —     | All z-index values reference CSS variables; stylelint blocks raw integers |
-| 2   | Define design tokens for spacing, breakpoints, and typography in a shared `tokens.css`                                                                       | Prevention | —     | No magic numbers in component CSS; all spacing values reference tokens    |
-| 3   | Set up Chromatic or Percy visual regression testing on Storybook stories                                                                                     | Detection  | —     | PR comment shows visual diffs for any CSS change; blocking on regressions |
-| 4   | Add Storybook stories for tweet in all modes: default, plain, screenshot, mobile (375px), thread with 3+ levels                                              | Prevention | —     | CI runs Chromatic on these stories                                        |
-| 5   | Create a Layout audit checklist for new features: verify desktop/mobile/plain/screenshot/thread view                                                         | Prevention | —     | Part of PR template                                                       |
+视觉问题缺回归门禁就会变成长期滴漏。单行修复的成本要按簇看，不能按次看。
 
 ## Changed Files
 
@@ -110,7 +92,7 @@ app/app.css
 app/hooks/use-element-size.ts
 ```
 
-## Related Postmortems
+## 关联报告
 
-- #008 (Fonts and Rendering) — font rendering overlaps with screenshot layout issues
-- #005 (Media Handling) — media display layout overlaps with this cluster
+- #008 字体与渲染：截图布局与字体问题重叠
+- #005 媒体管线：媒体展示布局重叠

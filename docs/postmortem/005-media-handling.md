@@ -1,89 +1,75 @@
-# Postmortem 005: No Unified Media Pipeline — Proxy, Video, and Screenshot Scattered Across the Codebase
+# Postmortem 005: 媒体管线没有统一入口，代理、视频、截图各写一套
 
-- **日期**: 2026-05-31
+- **日期**: 2026-05-31（回溯整理）
 - **严重级别**: SEV-2
-- **分类**: Architecture
-- **状态**: Active
+- **分类**: 架构
+- **状态**: Mitigated
+- **根因归类**: 设计建模
 
-## Summary
+## 摘要
 
-Media handling — proxy URLs, video downloading, screenshot capture, and image display — generated 8 fix commits across 6 different files. The absence of a unified media pipeline means each feature (video proxy, video download, screenshot) implements its own URL transformation and fetching logic, leading to duplicate bugs: double-proxying, missing proxy application, headless browser font failures, and hardcoded wait times.
+媒体处理——代理 URL、视频下载、截图、图片展示——产生 8 次修复，横跨 6 个文件。因为没有统一管线，每个功能各写各的 URL 转换与抓取逻辑，于是同一类坑反复出现：双重代理、漏代理、headless 字体失败、固定等待。后续 `createMediaUrl()` 与 `document.fonts.ready` 落地，问题才收敛。
 
-## Leadup
+## 影响
 
-The media features were added piecemeal:
+- 用户可见：视频播放或下载失败、媒体缺失。
+- 返工：每次媒体修复要动 2~4 个文件，因为代理逻辑是重复的。
+- 隐藏风险：漏代理在本地看着正常，线上被 CORS 拦下才暴露。
 
-1. **Media proxy**: A proxy server to bypass Twitter's cross-origin restrictions on media URLs (`mediaProxyUrl` in app config)
-2. **Video download**: Download media button that fetches video files through the proxy
-3. **Screenshot mode**: Headless browser (Puppeteer/modern-screenshot) captures tweet as JPEG/PNG
-4. **Video cover mode**: During screenshots, videos should display cover frame only (`58bdb57`)
+## 时间线
 
-Each feature was implemented independently, creating parallel URL transformation logic that must stay in sync.
+2026-05-31 回溯整理。
 
-## Fault
+| 日期 | commit | 事件 |
+| ---- | ------ | ---- |
+| 2025-09-23 | `58bdb57` | 截图支持视频封面模式（90 行改动，状态穿透 6 个文件） |
+| 2025-12-10 | `6d21f45` | 移除代理媒体 URL |
+| 2025-12-20 | `09acdc5` | 调整截图浏览器启动参数 |
+| 2026-01-02 | `d3bdbb3` | 媒体代理扩展到推文视频 |
+| 2026-01-23 | `9f0cbd6` | 媒体组件显示与 Twitter 渲染逻辑对齐 |
+| 2026-02-02 | `8047bd6` | 截图字体渲染与加载策略 |
+| 2026-03-23 | `911ece5` | 视频下载改走代理 |
 
-Key fault patterns:
+## 根因分析
 
-1. **Proxy URL not applied to videos** (`d3bdbb3`): The `getMp4Video()` function returned video URLs without applying the media proxy. Because `useProxyMedia()` was only called in React components, the utility function in `lib/react-tweet/utils/index.ts` didn't have access to proxy logic. Fix: imported `useProxyMedia` into the utility and added a `force` parameter.
+1. `useProxyMedia()` 是 React hook，非 React 的工具函数用不了。
+2. 它读 Zustand store，于是代理配置被锁在 React 状态里。
+3. 代理 URL 与开关属于用户设置，天然偏 React，但没有并行的非 React 入口。
+4. 结果 4 条以上代码路径各自实现代理逻辑，语义漂移后互相不一致。
 
-2. **Double proxy prevention missing** (`d3bdbb3`): Once the proxy was applied to video URLs, there was no check to prevent applying it twice. The fix added `url.startsWith(mediaProxyUrl)` guard — but this guard only exists in `useProxyMedia`. If any other code path constructs a proxy URL, there's no protection.
+一句话归纳：代理配置困在 React 状态里，非 React 媒体工具拿不到，于是要么漏代理，要么重复实现。
 
-3. **Proxy URL removed prematurely** (`6d21f45`): The media proxy URL was removed at some point, only to be added back later with more logic. The commit message "remove proxy media url" suggests the proxy was partially disabled rather than managed through configuration.
+## 触发条件
 
-4. **Video download missing proxy** (`911ece5`): The `DownloadMedia` component downloaded videos directly, without going through the proxy. Fix: added proxy URL prefix to the download URL. This is the same class of bug as #1 — different code path, same missing proxy application.
+新增媒体消费方（视频播放、视频下载、截图）时没有复用既有入口。
 
-5. **Screenshot hardcoded wait** (`8047bd6`): Screenshot capture used `setTimeout(..., 500)` to wait for DOM rendering. On slow renders, 500ms wasn't enough; on fast renders, 500ms was wasted. Fix: replaced with `requestAnimationFrame` — but this only works for single-frame renders, not for images or fonts still loading.
+## 检测
 
-6. **Screenshot browser options** (`09acdc5`): Browser launch options for Puppeteer screenshots needed optimization — likely around `--no-sandbox`, `--disable-gpu`, or viewport settings specific to the server environment.
+人工测试发现播放或下载失败。当时的盲区是没有测试断言所有媒体 URL 都带代理前缀。
 
-7. **Screenshot video cover mode** (`58bdb57`): A 90-line change to `tweet-media-video.tsx` added a `showCoverOnly` prop for screenshot mode. This required threading a `screenshoting` state through 6 files — the video component, tweet component, save-as-image component, translation store, tweet media, and the tweet route.
+## 处置
 
-8. **Media component rendering** (`9f0cbd6`): Media components displayed inconsistently because Twitter's media rendering logic wasn't fully ported.
+抽出 `createMediaUrl()` 纯函数，React 与非 React 路径共用；截图等待改用 `document.fonts.ready`。补了 `test/unit/media-url.spec.ts` 与 `AC-media`。
 
-## Impact
+## 做得对的地方
 
-- **Affected users**: Users who view or download media — broken videos, missing proxy, screenshot failures
-- **Silent failures**: Video download without proxy might appear to work but fail in production behind CORS
-- **Developer cost**: Each media fix requires touching 2-4 files because proxy logic is duplicated
+`useProxyMedia` 的 `force` 参数把「用户开关」与「程序需要」分开，设计干净，本应是默认形态。
 
-## Root Cause
+## 行动项
 
-| Why #    | Question                                                         | Answer                                                                                                                                                                                                                                                        |
-| -------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1        | Why is proxy logic scattered across components and utilities?    | `useProxyMedia()` is a React hook, so it can't be used in non-React utility functions like `getMp4Video()`.                                                                                                                                                   |
-| 2        | Why is `useProxyMedia` a hook instead of a pure function?        | It reads from Zustand store (`useAppConfigStore`), which requires the React hook context.                                                                                                                                                                     |
-| 3        | Why does the store need to be the source of proxy config?        | The proxy URL and toggle are user-configurable settings persisted in Zustand.                                                                                                                                                                                 |
-| 4        | Why wasn't a non-React proxy utility created alongside the hook? | The hook was the path of least resistance. Adding a parallel utility seemed like duplication — but the real duplication is in 4+ code paths implementing their own proxy logic.                                                                               |
-| 5 (root) | —                                                                | **Media proxy configuration lives in React state (Zustand), forcing all proxy consumers to be React components or hooks — but media utilities in `lib/` need proxy access too, creating a structural conflict that each fix patches over without resolving.** |
+### 缓解
 
-**Root cause (one sentence):** Proxy configuration is trapped inside React state (Zustand), preventing non-React media utilities from accessing it, causing each utility to either miss proxy application or duplicate the logic.
+- [x] 抽出 `createMediaUrl()` 纯函数，React 与非 React 共用（维护者；见 `test/unit/media-url.spec.ts`）
+- [x] 截图等待改为 `document.fonts.ready`（维护者）
 
-## Detection
+### 预防
 
-- Manual testing: video playback failures, download errors in console
-- No automated test verifies that all media URLs flowing through the app have proxy applied
-- **Detection gap**: A unit test that verifies `getMp4Video()` output contains the proxy URL prefix
+- [ ] 约束直接拼接 Twitter CDN 原始 URL 的写法（维护者；判据：组件层不再出现裸 `pbs.twimg.com` / `video.twimg.com`）
+- [ ] 补测试：`getMp4Video()` 返回代理前缀、下载走代理、双重代理幂等（维护者）
 
-## Recurrence
+## 教训
 
-- Video proxy missing: fixed twice (`d3bdbb3` for playback, `911ece5` for download) — same bug, different consumers
-- The double-proxy guard added in `d3bdbb3` could recur if another media source (images, GIFs) needs proxy
-
-## Lessons Learned
-
-- **What went right?** The `force` parameter design in `useProxyMedia` is clean — it separates the user toggle from the programmatic need for proxy.
-- **What could be better?** The `force` parameter should have been the default design from the start, with the toggle being the optional behavior.
-- **Where did we get lucky?** No user reported broken video playback in production before the proxy fix was applied.
-
-## Corrective Actions
-
-| #   | Action                                                                                                                                                                         | Type       | Owner | Completion Criteria                                                                    |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | ----- | -------------------------------------------------------------------------------------- |
-| 1   | Extract `createMediaUrl(originalUrl, config)` as a pure function in `lib/media/proxy.ts` with a singleton config that doesn't depend on React                                  | Prevention | —     | All code paths (React and non-React) call the same function for proxy URL construction |
-| 2   | Add a debug-only ESLint rule or comment convention that flags any direct use of Twitter media URLs (`pbs.twimg.com`, `video.twimg.com`) without going through `createMediaUrl` | Detection  | —     | grep for raw Twitter CDN URLs in `app/` returns zero results                           |
-| 3   | Add unit tests: `getMp4Video()` returns proxy-prefixed URLs, `DownloadMedia` uses proxy URL, double proxy is idempotent                                                        | Prevention | —     | Tests in `lib/media/__tests__/`                                                        |
-| 4   | Replace screenshot `requestAnimationFrame` wait with a proper font-loading promise: `document.fonts.ready`                                                                     | Prevention | —     | Screenshot doesn't capture until all fonts are loaded                                  |
-| 5   | Create a `MediaPipeline` abstraction that wraps URL transformation, download, and screenshot in one interface                                                                  | Prevention | —     | New media features only implement against `MediaPipeline`, not ad-hoc URL construction |
+配置放在哪一层，决定了谁能用。把配置关进 React 状态，非组件代码就只能复制一份逻辑，复制就是漂移。
 
 ## Changed Files
 
@@ -99,8 +85,7 @@ app/hooks/use-screenshot-action.ts
 app/lib/browser.ts
 ```
 
-## Related Postmortems
+## 关联报告
 
-- #001 (Twitter Content Parsing) — media entity parsing shares code paths with media display
-- #008 (Fonts and Rendering) — screenshot font issues overlap with this cluster
-- #004 (Build Configuration) — env variable handling for proxy config
+- #001 推文解析：媒体实体解析共用同一段代码
+- #008 字体与渲染：截图抓取代码重叠

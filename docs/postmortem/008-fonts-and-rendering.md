@@ -1,109 +1,72 @@
-# Postmortem 008: Font Loading Is OS-Dependent, Headless-Browser-Dependent, and Undertested
+# Postmortem 008: 字体加载依赖系统与 headless 环境，且缺少验证
 
-- **日期**: 2026-05-31
+- **日期**: 2026-05-31（回溯整理）
 - **严重级别**: SEV-2
-- **分类**: Dependency
+- **分类**: 依赖
 - **状态**: Mitigated
+- **根因归类**: 工具反馈
 
-## Summary
+## 摘要
 
-Chinese text and emoji rendering required 3 fix commits spanning font loading strategy, character coverage, and headless browser font availability. The root cause is a fragile dependency chain: the app runs in a browser (user's OS fonts), in a headless browser (Puppeteer, limited system fonts), and in the DOM (web fonts loaded via CSS). Each environment has different font fallback behavior, and there's no automated validation that all three environments render CJK and emoji correctly.
+中文与 emoji 渲染用了 3 次修复，涉及字体栈、字符覆盖和 headless 字体可用性。依赖链脆弱：浏览器（用户系统字体）、headless 浏览器（Puppeteer，字体有限）、SSR 三种环境的字体回退各不相同，却没有自动验证 CJK 与 emoji 是否都渲染正常。
 
-## Leadup
+## 影响
 
-The project renders Chinese text in three contexts:
+- 用户可见：中文显示为方框、截图里 emoji 缺失。主要在截图路径，浏览器 UI 只在缺少中文字体的系统上受影响。
+- 跨度：2025-12 至 2026-02。
+- 隐藏风险：`UnifontEX` 走 CDN，CDN 不可用会让 emoji 再次变方框。
 
-1. **Browser UI**: The React app running in the user's normal browser — uses OS fonts and web fonts (`Inter`, `Noto Sans SC`)
-2. **Screenshot capture**: Puppeteer/modern-screenshot running in a headless Chromium — limited to fonts explicitly loaded or bundled
-3. **Server-side rendering**: SSR during initial page load — fonts may not be loaded yet
+## 时间线
 
-The font stack was initially:
+2026-05-31 回溯整理。
 
-```css
-font-family: 'Inter', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif
-```
+| 日期 | commit | 事件 |
+| ---- | ------ | ---- |
+| 2025-12-20 | `0af302e` | 补 `Noto Sans SC`，去掉多余的 Puppeteer 字体下载 |
+| 2026-01-02 | `138868b` | 修 headless 浏览器的 emoji 字体缺失 |
+| 2026-02-02 | `8047bd6` | 字体渲染与加载策略调整（`requestAnimationFrame`、`unicode-range`、CDN） |
 
-This stack has no Chinese font — it falls back to the OS default, which varies across Windows (SimSun/微软雅黑), macOS (PingFang SC), and Linux (Noto Sans CJK or nothing).
+## 根因分析
 
-## Fault
+1. 初始字体栈没有中文字体，完全依赖系统回退，各平台结果不一。
+2. 项目起点是英文优先的 `react-tweet` 主题，中文支持后加，字体栈没同步更新。
+3. headless Chromium 只有极少的系统字体，emoji 字体必须显式提供。
+4. 截图用 `requestAnimationFrame` 等一帧，挡不住 web font 的异步加载；正确做法是 `document.fonts.ready`。
 
-Key fault patterns:
+一句话归纳：字体栈与加载时序没有覆盖三种运行环境的差异，截图抓取也没等 web font 加载完成。
 
-1. **Missing Chinese font** (`0af302e`): The initial font stack had no Chinese font, relying entirely on OS fallback. On systems without Chinese fonts (headless Linux, some Windows configs), Chinese text rendered as tofu (□). Fix: added `Noto Sans SC` as the primary Chinese font, removed redundant Puppeteer font downloads, and explicitly set the font in the Twitter theme CSS.
+## 触发条件
 
-2. **Emoji rendering in headless browser** (`138868b`): The headless Chromium used for screenshots doesn't have system emoji fonts. The Unicode `Emoji` font was missing, causing emoji to render as empty boxes or fallback glyphs. Fix: added `UnifontEX` (a comprehensive Unicode font covering emoji code points) to the font stack specifically for emoji fallback.
+截图环境缺少系统 CJK 或 emoji 字体；慢网络下 web font 没在等待窗口内到达。
 
-3. **Screenshot font loading race condition** (`8047bd6`): The screenshot capture used a hardcoded 500ms `setTimeout` to wait for fonts to load, but web fonts (Noto Sans SC loaded from CDN) might not arrive within 500ms on slow connections. Fix: replaced `setTimeout` with `requestAnimationFrame`, moved `UnifontEX` to a CDN for cross-origin stability, updated `unicode-range` to be more precise, and adjusted font declaration priority to prefer emoji fonts over text fonts for emoji code points.
+## 检测
 
-   ```typescript
-   // Before:
-   await new Promise(resolve => setTimeout(resolve, 500))  // race condition
+人工看截图发现方框。当时的盲区是没有检测替换字符（U+FFFD）的视觉测试。
 
-   // After:
-   await new Promise(resolve => requestAnimationFrame(resolve))  // still not font-aware
-   ```
+## 处置
 
-   Additionally, the screenshot options were enhanced with explicit font CSS:
+字体栈补 `Noto Sans SC` 与 emoji 字体；截图等待从 `requestAnimationFrame` 改为 `document.fonts.ready`（落在 `app/lib/utils.ts`）。
 
-   ```typescript
-   font: {
-     preferredFormat: 'woff2',
-     cssText: `
-       p {
-         font-family: 'Inter', "Apple Color Emoji", "Segoe UI Emoji",
-           "Noto Color Emoji", "Segoe UI Symbol", 'UnifontEX',
-           'Noto Sans JP', sans-serif;
-       }
-     `,
-   }
-   ```
+## 做得对的地方
 
-## Impact
+三次修复顺序合理：先补中文字体，再补 headless emoji，最后修等待时序。对 headless 与浏览器字体差异有明确判断。
 
-- **Affected users**: All Chinese-reading users — tofu characters in tweet text, missing emoji in screenshots
-- **Affected contexts**: Primarily screenshot capture (headless browser), secondarily browser UI on systems without Chinese fonts
-- **Duration**: Dec 2025 – Feb 2026, 3 fix commits
+## 行动项
 
-## Root Cause
+### 缓解
 
-| Why #    | Question                                                    | Answer                                                                                                                                                                                                             |
-| -------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1        | Why did Chinese characters render as tofu?                  | The font stack had no explicit Chinese font — it relied on OS default fallback.                                                                                                                                    |
-| 2        | Why wasn't a Chinese font in the stack from the start?      | The project started as an English-first Twitter archiver using `react-tweet`'s default theme. Chinese text support was added later, and the font stack wasn't updated.                                             |
-| 3        | Why does the headless browser have different font behavior? | Puppeteer/Chromium in headless mode uses a minimal set of system fonts. Web fonts must be explicitly loaded via CSS `@font-face`. System emoji fonts are not available.                                            |
-| 4        | Why isn't font loading waited on properly?                  | The screenshot code uses `requestAnimationFrame`, which waits for one paint cycle — but web fonts may take multiple cycles or complete asynchronously. `document.fonts.ready` is the correct API and was not used. |
-| 5 (root) | —                                                           | **The font loading strategy is environment-dependent (OS, headless, SSR) with no automated validation that CJK + emoji glyphs render correctly across all three environments.**                                    |
+- [x] 字体栈补 `Noto Sans SC` 与 emoji 字体（维护者）
+- [x] 截图等待改为 `document.fonts.ready`（维护者）
 
-**Root cause (one sentence):** Font rendering for CJK and emoji is validated manually across three runtime environments (browser, headless, SSR), and the screenshot capture doesn't wait for web fonts to finish loading.
+### 预防
 
-## Detection
+- [ ] 截图 CI：抓含中文与 emoji 的推文，检测无替换字符（维护者；判据：CI 能对方框截图报错）
+- [ ] 给 `UnifontEX` 加 `@font-face` 本地回退，去掉 CDN 单点（维护者；判据：本地优先，CDN 断开仍可渲染）
+- [ ] 写 `docs/fonts.md`：字体栈覆盖哪些 Unicode 区块、如何验证新语种（维护者）
 
-- Manual testing: screenshots showed tofu where Chinese or emoji should be
-- No automated screenshot comparison that checks for missing glyphs
-- No CI test that verifies `document.fonts.ready` resolves with the expected font family list
-- **Detection gap**: A "tofu detector" — a visual regression test that checks for the Unicode replacement character (U+FFFD □) in screenshot output
+## 教训
 
-## Recurrence
-
-- The `requestAnimationFrame` fix was applied (`8047bd6`) but still doesn't solve the root problem — it shortens the race window but doesn't close it
-- If a new Unicode block is needed (e.g., Arabic, Korean), the same class of font-stack bug would recur
-- The `UnifontEX` CDN dependency creates a new point of failure — if the CDN is unavailable, screenshots will show tofu for emoji
-
-## Lessons Learned
-
-- **What went right?** The three fixes were applied in the right order: (1) add Chinese font, (2) add emoji font for headless, (3) fix the loading race. Each fix built on the previous.
-- **What could be better?** Using `document.fonts.ready` instead of `requestAnimationFrame` would close the race condition entirely. The `fonts.css` file should be treated as a critical resource.
-- **Where did we get lucky?** Most users are on macOS or Windows with good system CJK fonts, so the browser UI was unaffected. Screenshot was the primary failure mode.
-
-## Corrective Actions
-
-| #   | Action                                                                                                                                                | Type       | Owner | Completion Criteria                                          |
-| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ----- | ------------------------------------------------------------ |
-| 1   | Replace `requestAnimationFrame` with `document.fonts.ready` in screenshot capture                                                                     | Prevention | —     | Screenshot waits for all fonts to load before capturing      |
-| 2   | Add a screenshot CI test: capture a tweet containing Chinese + emoji, verify output image has no U+FFFD replacement characters                        | Detection  | —     | CI test uses OCR or pixel analysis to detect tofu glyphs     |
-| 3   | Add a `@font-face` for `UnifontEX` in `fonts.css` with a local fallback path so the CDN isn't a single point of failure                               | Prevention | —     | `src: local('UnifontEX'), url('...')` — local takes priority |
-| 4   | Document the font stack rationale in `docs/fonts.md`: which fonts cover which Unicode blocks, why they're in this order, and how to test a new locale | Prevention | —     | File exists and is updated when the font stack changes       |
-| 5   | Add a `preload` link tag for critical web fonts (`Noto Sans SC`, `UnifontEX`) in `root.tsx` to begin loading before CSS parsing                       | Prevention | —     | `<link rel="preload" as="font" ...>` in document head        |
+字体是环境相关的，headless 和浏览器不是一回事。截图等字体用 `document.fonts.ready`，不要用固定 delay 或 `requestAnimationFrame`。
 
 ## Changed Files
 
@@ -116,8 +79,7 @@ app/lib/react-tweet/twitter-theme/theme.css
 app/lib/react-tweet/twitter-theme/tweet-body.module.css
 ```
 
-## Related Postmortems
+## 关联报告
 
-- #003 (UI Styling/Layout) — CSS and screenshot layout issues overlap
-- #005 (Media Handling) — screenshot capture code is shared
-- #004 (Build Configuration) — CDN dependency management
+- #005 媒体管线：截图抓取代码重叠
+- #003 UI 样式与布局：截图布局问题重叠

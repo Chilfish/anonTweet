@@ -1,91 +1,77 @@
-# Postmortem 007: Instagram Feature — Rapid Iteration Without Abstraction
+# Postmortem 007: Instagram 集成快速迭代，缺少抽象与验收清单
 
-- **日期**: 2026-05-31
+- **日期**: 2026-05-31（回溯整理）
 - **严重级别**: SEV-3
-- **分类**: Change
+- **分类**: 变更
 - **状态**: Active
+- **根因归类**: 流程缺失
 
-## Summary
+## 摘要
 
-The Instagram integration (newest feature in the project) accumulated 7 fix commits in quick succession during May 2026. These are not "bug fixes" in the traditional sense but feature-completion commits — missing routes, missing behaviors, and UI polish that were deferred from the initial implementation. The cluster is marked "Active" because the feature is new and more edge cases are likely to surface as users exercise it.
+Instagram 集成是当时最新的功能，在 2026-05-31 前后密集产生 7 次修复。它们多数不是传统 bug，而是缺失的路由、缺失的行为和推迟的 UI 细节：`plain-ins/:id` 未注册、翻译按钮行为不完整、人工译文不落库、URL 解析不认用户名前缀。状态仍是 Active，因为功能较新，边界情况还会继续出现。
 
-## Leadup
+## 影响
 
-The Instagram feature was added to extend the tweet archiving/translation tool to support Instagram posts. It required:
+- 用户可见：路由缺失、手动翻译保存无效、UI 不一致。
+- 隐藏风险：人工译文不落库属于潜在数据丢失，只是当时功能太新、几乎没人有译文可丢。
+- 返工：约 7 次快速提交，全部集中在一天。
 
-- New routes: `plain-ins/:id` for Instagram post display
-- New components: `IGActionBar`, `IGCaption`, `IGCardHeader`, `IGMediaGrid`, `IGTranslateDialog`
-- New API endpoints: `/api/ig/translate/:id`
-- URL parsing: `extractIGId()` to parse Instagram URLs
-- Instagram's data model: grid media, carousel indicators, username-prefixed URLs
+## 时间线
 
-The feature was built rapidly, with foundational pieces (route, URL parsing) being completed in the same commit series as UI polish (icon sizes, indicator removal).
+2026-05-31 回溯整理。这批修复都在同一天完成。
 
-## Fault
+| 日期 | commit | 事件 |
+| ---- | ------ | ---- |
+| 2026-05-31 | `fa92657` | 补 `plain-ins/:id` 路由，并修 Storybook TC 类型 |
+| 2026-05-31 | `ce54249` | 支持用户名前缀 URL，更新各处以提及 Instagram |
+| 2026-05-31 | `cbe3d0c` | 翻译按钮只保留一个、截图时隐藏、加原文译文分隔符 |
+| 2026-05-31 | `4fe9dec` | 保存时把人工译文写入 DB |
+| 2026-05-31 | `675b9a3` | 图标尺寸统一 24px，logo 放大到 h-8 |
+| 2026-05-31 | `d548673` | 移除宫格上多余的圆点指示器 |
 
-The commits reveal a "ship then finish" pattern:
+## 根因分析
 
-1. **Missing route** (`fa92657`): The `plain-ins/:id` route was not registered — a foundational piece that should have been part of the initial commit.
+1. 缺结构化验收清单，路由、持久化、URL 解析这些基础项被漏掉。
+2. 新平台需要真实 URL 才能测，部分边界只有上线后才暴露。
+3. 单人流程没有 feature flag 或 beta 阶段，这批修复提交实际充当了发布后 QA。
+4. IG 没有像成熟 Twitter 那样积累 fixture 语料，边界只能靠手测。
 
-2. **Dot indicator removal** (`d548673`): Instagram's grid view had dot indicators (carousel-style pagination dots), but Instagram grids don't paginate — they're a single static grid. The indicator was a leftover from reusing a carousel component.
+一句话归纳：IG 缺验收清单和测试语料，基础缺口被推到线上才补。
 
-3. **Icon inconsistency** (`675b9a3`): The Send icon was a different size (not 24px) and the Instagram logo was smaller (not `h-8`) compared to other action bar icons. A design consistency issue that was deferred.
+## 触发条件
 
-4. **Missing translate button behavior** (`cbe3d0c`): Three fixes in one commit:
-   - Only a single translate button should appear (not one per media item)
-   - The translate button should be hidden during screenshots
-   - A visual separator should appear between original and translated content
+用户用真实 IG URL 操作，进入初始实现未覆盖的路径（用户名前缀、手动翻译保存）。
 
-5. **Manual translation persistence** (`4fe9dec`): When users manually edited a translation for an Instagram post, it wasn't saved to the database. The API endpoint (`/api/ig/translate/:id`) only supported AI translation. Fix: extended the endpoint to accept a `manualTranslation` field that writes directly to the DB without invoking AI. Also fixed a missing `deepseekThinkingLevel` in `useAIConfig`.
+## 检测
 
-6. **URL parsing gap** (`ce54249`): `extractIGId()` only matched URLs with the format `instagram.com/p/CODE/` but not `instagram.com/USERNAME/p/CODE/`. The regex needed updating to support username-prefixed paths.
+开发者用真实 URL 自测。当时的盲区是没有针对一组真实 URL 格式的解析测试。
 
-7. **Description updates** (`ce54249`): Homepage meta tags, `PageHeader`, and `TweetInputForm` descriptions still referenced only Twitter — needed to mention Instagram support. A marketing/UX polish issue that was deferred.
+## 处置
 
-## Impact
+逐个补齐。手动翻译改为走 `/api/ig/translate/:id` 的 `manualTranslation` 字段直写 DB。
 
-- **Affected users**: Instagram feature users — broken routes, missing save functionality, inconsistent UI
-- **Severity**: Mostly polish and edge cases (SEV-3), except for the missing route (#1) and missing persistence (#5) which were functional gaps
-- **Duration**: May 2026, 1 month of rapid iteration
+## 做得对的地方
 
-## Root Cause
+每次修复小而聚焦，没有把多个无关问题混进一个提交，回滚粒度清晰。
 
-| Why #    | Question                                                                           | Answer                                                                                                                                                                                                                      |
-| -------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1        | Why were foundational pieces (route, URL parsing, persistence) shipped incomplete? | The feature was built incrementally: ship the core, then fill in gaps.                                                                                                                                                      |
-| 2        | Why was this approach chosen over a complete initial implementation?               | Building a new feature for a new data model (Instagram) requires real-world testing — some URLs and behaviors only surface from actual use.                                                                                 |
-| 3        | Why wasn't a structured rollout used (feature flag, beta)?                         | Solo developer workflow — no need for feature flags when there's one user base. But the "fix commits" are effectively post-release QA.                                                                                      |
-| 4        | Why weren't these caught in development?                                           | The Instagram feature doesn't have the same test coverage or manual testing rigor as the mature Twitter feature. No test fixtures for Instagram post data exist.                                                            |
-| 5 (root) | —                                                                                  | **The Instagram feature was shipped with a "fix in production" mindset because: (a) no test fixtures for Instagram data, (b) URL formats vary in the wild, (c) no structured acceptance criteria covering all user flows.** |
+## 行动项
 
-**Root cause (one sentence):** The Instagram feature lacked structured acceptance criteria and test fixtures, so foundational gaps (route, persistence, URL parsing) were discovered in production rather than development.
+### 缓解
 
-## Detection
+- [x] 补 `plain-ins/:id` 路由（维护者）
+- [x] 手动译文保存落库（维护者）
+- [x] URL 解析支持用户名前缀（维护者）
 
-- Discovered by developer self-testing with real Instagram URLs
-- Missing route found when navigating to `plain-ins/:id` directly
-- URL parsing gap found when testing with username-prefixed Instagram URLs from real posts
-- **Detection gap**: No automated test that parses a corpus of real Instagram URL formats
+### 预防
 
-## Recurrence
+- [ ] IG 验收清单：路由、URL 解析（3 种以上格式）、AI/手动翻译、截图、持久化（维护者）
+- [ ] 建 IG fixture 语料：网格、单图、视频、轮播、用户名前缀（维护者；判据：目录内存 raw JSON 与期望输出）
+- [ ] 翻译 → 保存 → 读取 的集成测试（维护者）
+- [ ] 合并 Twitter 与 IG 的 URL 解析为单一 `extractPostId()`（维护者）
 
-This is the newest cluster — no recurrence yet because the feature is still active. The pattern is similar to the early Twitter feature commits: ship core, fix edge cases in production.
+## 教训
 
-## Lessons Learned
-
-- **What went right?** Each fix was small and targeted — no single commit tried to fix multiple unrelated issues.
-- **What could be better?** An acceptance checklist before merging the initial IG feature: "Does route work? Does URL parsing handle all formats? Does manual translation persist? Is UI consistent with Twitter mode?"
-- **Where did we get lucky?** The missing persistence (#5) could have been much worse — if users had written translations that were silently lost, it would be data loss (SEV-1). Fortunately, the feature was new enough that few users had manual translations to lose.
-
-## Corrective Actions
-
-| #   | Action                                                                                                                                                | Type       | Owner | Completion Criteria                                                                                            |
-| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ----- | -------------------------------------------------------------------------------------------------------------- |
-| 1   | Create an Instagram feature acceptance checklist: route registration, URL parsing (3+ formats), translate flow (AI + manual), screenshot, persistence | Prevention | —     | Checklist in PR template or issue template                                                                     |
-| 2   | Add test fixtures: 5+ real Instagram post payloads (grid, single image, video, carousel, username-prefixed URL)                                       | Detection  | —     | `tests/fixtures/ig/` directory with raw JSON and expected parsed output                                        |
-| 3   | Add an integration test: `POST /api/ig/translate/:id` with `manualTranslation`, then `GET` to verify it persisted                                     | Detection  | —     | CI test that verifies the full translate→save→retrieve cycle                                                   |
-| 4   | Consolidate Instagram and Twitter URL parsing into a single `extractPostId()` utility that handles both platforms                                     | Prevention | —     | One function, two platform regexes, shared test suite                                                          |
-| 5   | Write a feature spec for any new platform integration before implementation starts                                                                    | Prevention | —     | Spec template includes: route list, URL formats, data model, translation flow, screenshot support, persistence |
+新平台集成先写验收清单和 fixture 再实现，否则路由、持久化这些基础项会被挤到线上补。
 
 ## Changed Files
 
@@ -104,7 +90,7 @@ app/lib/utils.ts
 app/lib/stores/hooks.ts
 ```
 
-## Related Postmortems
+## 关联报告
 
-- #001 (Twitter Content Parsing) — same pattern of incomplete URL/data parsing
-- #002 (Translation System) — translation features now span both Twitter and Instagram
+- #001 推文解析：同类「数据解析不完整」
+- #002 翻译系统：翻译功能开始横跨 Twitter 与 Instagram
