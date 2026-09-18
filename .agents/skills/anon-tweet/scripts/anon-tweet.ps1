@@ -25,17 +25,16 @@
   环境变量：
     ANON_TWEET_BASE_URL   覆盖站点地址（默认 https://anon-tweet.chilfish.top）
 #>
-[CmdletBinding()]
-param(
-  [Parameter(Position = 0)]
-  [string]$Command = 'help',
-
-  [Parameter(Position = 1, ValueFromRemainingArguments = $true)]
-  [string[]]$Rest = @()
-)
-
 $ErrorActionPreference = 'Stop'
 $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
+
+# 入口刻意不声明 param() / [CmdletBinding()]：一旦成为「进阶脚本」就会自动启用通用参数，
+# `--out` 会被当成 -OutVariable / -OutBuffer 的前缀而报 "parameter name 'out' is ambiguous"，
+# 命令根本进不来。简单脚本则把所有参数原样交给 $args，正好配这种 `--flag` 风格 CLI。
+$AllArgs = @($args)
+$Command = if ($AllArgs.Count -gt 0 -and $AllArgs[0]) { [string]$AllArgs[0] } else { 'help' }
+$Rest = @()
+if ($AllArgs.Count -gt 1) { $Rest = @($AllArgs[1..($AllArgs.Count - 1)]) }
 
 # 输出策略：交互式终端保留颜色；被重定向/被上层捕获时改走 stdout。
 # Write-Host 写入的是 PowerShell 信息流，一旦输出被捕获就会序列化成 "#< CLIXML" 噪音。
