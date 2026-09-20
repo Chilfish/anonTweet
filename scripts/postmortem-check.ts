@@ -33,7 +33,9 @@ const HOT_FILES: Array<{ pattern: string, fixes: number, reports: string[] }> = 
   { pattern: 'app/lib/stores/', fixes: 6, reports: ['002', '006'] },
   { pattern: 'app/components/tweet/TweetTextBody.tsx', fixes: 5, reports: ['001'] },
   { pattern: 'app/lib/translation/resolveEntities.ts', fixes: 2, reports: ['002', '009'] },
-  { pattern: 'app/lib/service/getTweet.server.ts', fixes: 1, reports: ['009'] },
+  { pattern: 'app/lib/service/getTweet.server.ts', fixes: 1, reports: ['009', '013'] },
+  { pattern: 'app/lib/localCache.ts', fixes: 1, reports: ['013'] },
+  { pattern: 'app/lib/vision/', fixes: 6, reports: ['015'] },
 ]
 
 const REPORT_FILE_RE = /^\d{3}-.+\.md$/

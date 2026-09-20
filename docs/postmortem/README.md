@@ -4,23 +4,7 @@
 
 原则是 blameless：不追谁写错了，只追什么系统条件让它发生，然后修条件。报告格式见 [TEMPLATE.md](TEMPLATE.md)。001~008 是 2026-05-31 从 git 历史回溯整理的，009 起为事后及时记录。
 
-覆盖范围 2025-09 至 2026-09，共 12 份。
-
-| #                                                         | 主题             | 严重级 | 分类         | 状态         | 一句话根因                                                      |
-| --------------------------------------------------------- | ---------------- | ------ | ------------ | ------------ | --------------------------------------------------------------- |
-| [001](001-twitter-content-parsing.md)                     | Twitter 推文解析 | SEV-2  | Architecture | 🔴 Active    | `parseTweet.ts` 无测试、无内部分层，每次改动风险全局            |
-| [002](002-translation-system.md)                          | 翻译系统         | SEV-2  | Architecture | 🔴 Active    | 翻译逻辑全部耦合在 React 组件内，store 迁移静默丢数据           |
-| [003](003-ui-styling-layout.md)                           | UI 样式/布局     | SEV-3  | Bug          | 🟡 Active    | 20 次单行 CSS fix，无 design token，无视觉回归测试              |
-| [004](004-build-configuration.md)                         | 构建配置         | SEV-2  | Change       | 🟢 Mitigated | 客户端/服务端边界不清，`lib/` 无 import 约束                    |
-| [005](005-media-handling.md)                              | 媒体管线         | SEV-2  | Architecture | 🔴 Active    | 代理/视频/截图四套重复 URL 转换逻辑                             |
-| [006](006-state-management.md)                            | 状态管理         | SEV-2  | Bug          | 🟢 Mitigated | zustand 整 store 订阅 + 无类型迁移                              |
-| [007](007-instagram-integration.md)                       | Instagram 集成   | SEV-3  | Change       | 🔴 Active    | 新功能无验收清单、无测试 fixture                                |
-| [008](008-fonts-and-rendering.md)                         | 字体/渲染        | SEV-2  | Bug          | 🟢 Mitigated | Web font 加载与 headless 截图竞争                               |
-| [009](009-prepend-persistence.md)                         | 翻译句首补充     | SEV-2  | Bug          | 🟡 Active    | index 对齐合并四处漂移，base 外实体（-1/30000+）被静默丢弃      |
-| [010](010-babel-major-drift.md)                           | 依赖/Babel 构建  | SEV-3  | Dependency   | 🟢 Mitigated | preset 越过 core 主版本 + 门禁不跑生产构建，`.tsx` 全量构建失败 |
-| [011](011-verification-honesty.md)                        | 验证诚信         | SEV-3  | Process      | 🟢 Mitigated | AC 空跑报绿 / 静态扫描冒充行为 / dev 模式泄漏，门禁不携带信号   |
-| [012](012-mobile-adaptation-and-scroll-lock-ownership.md) | 移动端适配       | SEV-3  | Process      | 🟢 Mitigated | 断点列表冒充移动端适配；手写滚动锁与浮层原语抢归属              |
-| [013](013-upstream-frontend-drift.md)                     | 上游前端漂移     | SEV-2  | Dependency   | 🟡 Active    | 只认单一页面解析 webpack chunk map，上游换 bundler 即全站硬失败 |
+覆盖范围 2025-09 至 2026-09，共 16 份。
 
 ## 严重级别
 
@@ -52,6 +36,10 @@
 | [010](010-babel-major-drift.md) | Babel 主版本漂移 | SEV-2 | 依赖 | Mitigated | 门禁不跑生产构建，preset 越过 core 主版本 |
 | [011](011-verification-honesty.md) | 验证名实不符 | SEV-1 | 流程 | Active | 空跑报绿、静态扫描冒充行为断言，门禁不携带信号 |
 | [012](012-mobile-adaptation-and-scroll-lock-ownership.md) | 移动端适配 | SEV-3 | 流程 | Active | 断点列表冒充触屏行为清单；手写滚动锁与浮层原语抢归属 |
+| [013](013-cache-persistence-silent-failure.md) | 缓存/持久化静默失效 | SEV-1 | 架构 | Active | 缓存缺身份、版本与失败信号，写没写进去都表现为无声异常 |
+| [014](014-upstream-contract-drift.md) | 上游契约与模型漂移 | SEV-2 | 依赖 | Active | 逆向私有接口与模型 slug 无预警变化，缺漂移检测 |
+| [015](015-llm-structured-output.md) | LLM 输出不可靠 | SEV-2 | 架构 | Mitigated | 模型会自造索引、多给条目、幻觉，需确定性校验兜底 |
+| [016](016-gate-infra-instability.md) | 门禁基建不稳定 | SEV-1 | 流程 | Active | 被接受的红色基线，加上配置、命令面与环境残留制造噪声 |
 
 ## 高危文件
 
@@ -65,7 +53,9 @@
 | `app/lib/stores/` | #002 #006 | 6 |
 | `app/components/tweet/TweetTextBody.tsx` | #001 | 5 |
 | `app/lib/translation/resolveEntities.ts` | #002 #009 | 2 |
-| `app/lib/service/getTweet.server.ts` | #009 | 1 |
+| `app/lib/service/getTweet.server.ts` | #009 #013 | 1 |
+| `app/lib/localCache.ts` | #013 | 1 |
+| `app/lib/vision/` | #015 | 6 |
 
 ## 高频雷区
 
@@ -99,6 +89,17 @@ z-index / overflow / min-width 被单独修了约 20 次。样式走语义 token
 **10. 移动端不是断点列表（#012）**
 触屏行为——拇指区、安全区（需 `viewport-fit=cover` 才生效）、横滑与滚动抢手势、`dvh`、浮层滚动锁——宽度截图看不出来。浮层用 `ui/dialog|sheet|drawer` 时不要手写滚动锁，原语已负责。
 
+**11. 缓存静默失效与陈旧数据（#013）**
+`setLocalCache` 在开关关闭时静默 return、服务端却回 `{ success: true }`、客户端还吞错——遇到「保存了但刷新没了」先查 `ENABLE_LOCAL_CACHE` / `ENABLE_DB_CACHE`。缓存键读写必须同源且不含路径分隔符；缓存对象新增字段要留默认回退或迁移，否则旧条目会把渲染打崩。
+
+**12. 逆向契约与模型规范会变（#014）**
+jetfuel 是无公开 schema 的私有格式，guest 认证、模型 slug、上游精简对象都会无预警变化。改动解析或模型配置前先用探针核实真实返回；新契约先固化 fixture，再做形态快照。
+
+**13. 别把 LLM 当结构化 API（#015）**
+模型会自造索引、多给条目、对图外内容瞎猜。接入新模型或新模式时，输出必须过确定性校验（数量、索引、非空），并让失败可观测；只靠 prompt 约束不够。
+
+**14. 门禁失败必须可归因（#016）**
+不允许把「既有红灯」当基线合入——那是给门禁打洞。失败集每次漂移通常是基建问题（冷加载超时、命令面、环境残留），不是被测逻辑。文档、lefthook、CI 只允许一个测试入口。
 11. 单点依赖上游页面结构 / 上游格式漂移（#013）
 
 `x-client-transaction-id` 只从**一个**页面（`/home`）解析 webpack chunk map（`NNN:"ondemand.s"`）；
@@ -119,9 +120,9 @@ X 把首页换成 Rolldown/Vite 后该 pattern 不再存在，初始化即抛错
 
 ## 分布
 
-按级别：SEV-1 共 3 份（001 002 011）；SEV-2 共 6 份（004 005 006 008 009 010）；SEV-3 共 3 份（003 007 012）。
+按级别：SEV-1 共 5 份（001 002 011 013 016）；SEV-2 共 8 份（004 005 006 008 009 010 014 015）；SEV-3 共 3 份（003 007 012）。
 
-按状态：Active 共 7 份（001 002 003 007 009 011 012）；Mitigated 共 5 份（004 005 006 008 010）。
+按状态：Active 共 10 份（001 002 003 007 009 011 012 013 014 016）；Mitigated 共 6 份（004 005 006 008 010 015）。
 
 ## 延伸阅读
 
