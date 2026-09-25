@@ -58,9 +58,9 @@ X 把登出首页从 webpack 迁到 **Rolldown/Vite**（新 "x-web"）：`/` 与
 
 ### 缓解（针对已发生的具体缺口）
 
-- [x] `_handleXMigration` → `_fetchTransactionDocument`：遍历 `X_LEGACY_HOME_URLS`
-      （`/i/topics` → `/i/display` → `/i/timeline` → `/i/communitynotes` → `/home`），
-      返回第一个 `isUsableXDocument` 为真的文档；无命中则回退最后一个文档，让库抛出更具体的错误（2026-09-25）
+- [x] `_handleXMigration` → `_fetchTransactionDocument`：遍历候选外壳 `X_SHELL_URLS`
+      （`/home` 优先，`/i/topics` 等为 guest 兜底），返回第一个 `isUsableXDocument` 为真的文档；
+      无命中则回退最后一个文档，让库抛出更具体的错误（2026-09-25）
 - [x] 新增 `isUsableXDocument(document)`（`twitter-site-verification` meta + `ondemand.s` 双条件）（2026-09-25）
 - [x] 新增错误 `ApiErrors.HOMEPAGE_FETCH_FAILED`（所有候选均网络失败时使用）（2026-09-25）
 - [x] 单测 `test/unit/rettiwt-transaction-document.spec.ts`（旧/新外壳判定 + 列表非空）（2026-09-25）
@@ -71,12 +71,33 @@ X 把登出首页从 webpack 迁到 **Rolldown/Vite**（新 "x-web"）：`/` 与
       或加一层「外壳健康探针」定时校验并在异常时告警），避免再次全站硬失败
 - [ ] 评估将 transaction 文档做**短 TTL 缓存**，顺带降低每请求 300KB 首页拉取的开销
 
+## 后续修正（2026-09-25）：真正根因是外壳请求缺 cookie
+
+初次修复（探测候选页面）之后进一步实测，定位到**真正根因**并修正：
+
+- 同一 URL `x.com/home`：**匿名** → 新 Rolldown/Vite 外壳（16.8 KB，无 `ondemand.s`）；
+  **带 cookie** → 旧外壳（305 KB，有 `ondemand.s`）。
+- 上游 `_handleXMigration()` 只发 `config.headers`，cookie 只在 `request()` 组装 API 请求时注入
+  → **外壳请求永远匿名**，即便配置了 API Key。
+- 这是**回归**：Rettiwt #885 曾以「抓外壳时附 cookie」修好同一错误，被 #888 合并时丢失；
+  上游 Lqm1 issue #20 亦归因为「需要有效登录 session」。
+
+修法：`buildXShellHeaders(headers, apiKey)` 在存在 API Key 时附带
+`AuthService.decodeCookie(apiKey)`；候选页面列表（`X_SHELL_URLS`，`/home` 优先）降级为
+**无 Key（guest）时的兜底**。实测：真实 `TweetDetail` 与 `TweetLikers`（#908 复现接口）均成功。
+
+另：实测 `ondemand.s` 的 key byte indices **每次构建随机**（30 个日更版本 30/30 不同），
+故只能缓存 **URL**（内容哈希、不可变），不能 pin / 缓存 indices。
+
 ## 教训
 
+- **别只盯「上游库坏了」，先查「我们发出去的请求对不对」**：本次真因是我们自己的请求缺 cookie
+  （且是历史修复被合并丢失的回归），换页面只是绕开症状。诊断顺序应为「我们的请求 → 上游库 → 上游站点」。
+- 「同一 URL 因身份不同返回不同内容」的登录态依赖，必须**同时验证匿名与登录两条路径**。
 - **依赖上游页面/接口结构的功能，必须多候选 + 可用性校验 + 明确降级**，不能把某个 URL
   当成稳定单点；「上游库最新版」不等于「上游已适配」。
 - 上游格式漂移是**运行时**风险，typecheck/lint/test 覆盖不到——关键外部依赖需要有
-  「真实调用冒烟」类验证（本次用真实 guest 请求兜底）。
+  「真实调用冒烟」类验证（本次用真实登录请求兜底）。
 
 ## Changed Files
 
@@ -84,6 +105,7 @@ X 把登出首页从 webpack 迁到 **Rolldown/Vite**（新 "x-web"）：`/` 与
 app/lib/rettiwt-api/services/public/FetcherService.ts
 app/lib/rettiwt-api/enums/Api.ts
 test/unit/rettiwt-transaction-document.spec.ts
+docs/features/tweet/transaction-id.md
 docs/postmortem/013-upstream-frontend-drift.md
 docs/postmortem/README.md
 docs/development-log/2026-09-25.md

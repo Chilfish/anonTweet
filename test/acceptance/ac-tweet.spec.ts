@@ -1,3 +1,4 @@
+import type { AxiosResponse } from 'axios'
 import type { ITweetSearchResponse } from '~/lib/rettiwt-api/types/raw/tweet/Search'
 import type { EnrichedTweet, Entity } from '~/types'
 /**
@@ -7,10 +8,14 @@ import type { EnrichedTweet, Entity } from '~/types'
  * - AC-TWEET-001~004 / 007：**fixture 作输入 → 调真实纯函数 → 断言产出**（F8 去「fixture 自证」，
  *   review-2026-09-11 P2-1：原实现直接断言 fixture JSON 自身字段，解析回归不会红）
  * - AC-TWEET-009：真实 `parseSearchTimeline`
+ * - AC-TWEET-011：mock `axios.get` 后跑真实 `_fetchTransactionDocument`，断言外壳请求带 cookie
  * - AC-TWEET-005/006/008/010 为集成测试，见 test/integration/api.tweet.spec.ts
  */
-import { describe, expect, it } from 'vitest'
+import axios from 'axios'
+import { describe, expect, it, vi } from 'vitest'
 import { parseSearchTimeline } from '~/lib/react-tweet/utils/get-tweet'
+import { RettiwtConfig } from '~/lib/rettiwt-api/models/RettiwtConfig'
+import { FetcherService } from '~/lib/rettiwt-api/services/public/FetcherService'
 import { stripTranslationsFromTweets } from '~/lib/stores/logic'
 import { mergeEntityTranslationsByIndex } from '~/lib/translation/resolveEntities'
 import { loadFixture } from '../helpers/load-fixture'
@@ -113,5 +118,52 @@ describe('AC-TWEET tweet parsing (fixture → real pipeline)', () => {
     }
     expect(JSON.stringify(tweets)).not.toContain('TimelineTimelineCursor')
     expect(nextCursor).toBe('dGhlX2JvdHRvbV9jdXJzb3Jfb2Zfc2VhcmNo')
+  })
+})
+
+/**
+ * AC-TWEET-011 回归防护：外壳请求必须带 cookie。
+ *
+ * 上游 #885 曾以「抓外壳时附 cookie」修好 `OnDemandFileUrlResolutionError`，被 #888 合并时丢失；
+ * 纯函数 `buildXShellHeaders` 的单测无法发现「调用点不再使用它」这一类回归，故这里 mock
+ * `axios.get` 后跑真实 `_fetchTransactionDocument`，断言**实际发出的请求头**。
+ */
+const SHELL_COOKIES = 'auth_token=abc;ct0=def;twid=u%3D12345;'
+const LEGACY_SHELL = [
+  '<!DOCTYPE html><html><head>',
+  '<meta name="twitter-site-verification" content="abc123"/>',
+  '<script>window.__chunks={"5":"ondemand.s"}</script>',
+  '</head><body></body></html>',
+].join('')
+
+interface ShellProbe { _fetchTransactionDocument: () => Promise<unknown> }
+interface ShellRequest { headers: Record<string, string> }
+
+function mockShellGet() {
+  return vi.spyOn(axios, 'get').mockResolvedValue({ data: LEGACY_SHELL } as unknown as AxiosResponse)
+}
+
+describe('AC-TWEET-011: X shell request carries the session cookie', () => {
+  it('attaches the decoded cookie when an API key is configured', async () => {
+    const apiKey = Buffer.from(SHELL_COOKIES).toString('base64')
+    const service = new FetcherService(new RettiwtConfig({ apiKey }))
+    const get = mockShellGet()
+
+    await (service as unknown as ShellProbe)._fetchTransactionDocument()
+
+    expect(get).toHaveBeenCalledTimes(1)
+    const [url, config] = get.mock.calls[0]!
+    expect(url).toBe('https://x.com/home')
+    expect((config as unknown as ShellRequest).headers.cookie).toBe(SHELL_COOKIES)
+  })
+
+  it('stays anonymous when no API key is configured', async () => {
+    const service = new FetcherService(new RettiwtConfig({}))
+    const get = mockShellGet()
+
+    await (service as unknown as ShellProbe)._fetchTransactionDocument()
+
+    const [, config] = get.mock.calls[0]!
+    expect((config as unknown as ShellRequest).headers).not.toHaveProperty('cookie')
   })
 })

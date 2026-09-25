@@ -1,6 +1,6 @@
 # Tweet API 验收标准
 
-> 版本：1.1 | 日期：2026-08-31（新增 AC-TWEET-009/010 搜索验收）
+> 版本：1.2 | 日期：2026-09-25（新增 AC-TWEET-011 外壳请求 cookie 回归防护；1.1 为 AC-TWEET-009/010 搜索验收）
 > 对应 Postmortem：001 (Tweet Parsing), 005 (Media)
 > 关联 Verifier：`verify/modules/tweet.verifier.ts`
 > 执行命令：`bun verify --module tweet [--ac AC-TWEET-NNN]`
@@ -133,19 +133,37 @@
 
 ---
 
-## 总计：10 条 AC
+## AC-TWEET-011：外壳请求携带登录 cookie（回归防护）
 
-| AC           | 分类        | 依赖外部 API | 依赖 AI |
-| ------------ | ----------- | ------------ | ------- |
-| AC-TWEET-001 | 纯函数/离线 | 否           | 否      |
-| AC-TWEET-002 | 纯函数/离线 | 否           | 否      |
-| AC-TWEET-003 | 纯函数/离线 | 否           | 否      |
-| AC-TWEET-004 | 纯函数/离线 | 否           | 否      |
-| AC-TWEET-005 | 集成        | 是 (Twitter) | 否      |
-| AC-TWEET-006 | 集成        | 是 (Twitter) | 否      |
-| AC-TWEET-007 | 纯函数/离线 | 否           | 否      |
-| AC-TWEET-008 | 集成        | 是 (Twitter) | 否      |
-| AC-TWEET-009 | 纯函数/离线 | 否           | 否      |
-| AC-TWEET-010 | 集成        | 是 (Twitter) | 否      |
+- **输入**：`FetcherService`（`apiKey` = base64(`auth_token=…;ct0=…;twid=u%3D…;`)）；`axios.get` 被 spy，
+  返回可用的 legacy 外壳 HTML（含 site verification meta + `ondemand.s`）
+- **预期输出**：解析 transaction 文档时，对 X 外壳 URL 发出的请求头附带**解码后的 cookie**；
+  未配置 `apiKey` 时不带 cookie
+- **验证方法**：`bun run verify/index.ts --ac AC-TWEET-011`
+- **前置条件**：无（mock，离线，不触网）
+- **Pass 条件**：
+  - 首个请求 URL 为 `https://x.com/home`（`X_SHELL_URLS[0]`）
+  - `config.headers.cookie` 等于解码后的 cookie 字符串
+  - 未配置 `apiKey` 时请求头不含 `cookie` 键
+- **回归来源**：上游 Rettiwt #885 曾以「抓外壳时附 cookie」修好同一错误，被 #888 合并时丢失。
+  本 AC 锁住「外壳请求必须带 cookie」这一不变量（见 [postmortem 013](../../docs/postmortem/013-upstream-frontend-drift.md)）
+
+---
+
+## 总计：11 条 AC
+
+| AC           | 分类                  | 依赖外部 API | 依赖 AI |
+| ------------ | --------------------- | ------------ | ------- |
+| AC-TWEET-001 | 纯函数/离线           | 否           | 否      |
+| AC-TWEET-002 | 纯函数/离线           | 否           | 否      |
+| AC-TWEET-003 | 纯函数/离线           | 否           | 否      |
+| AC-TWEET-004 | 纯函数/离线           | 否           | 否      |
+| AC-TWEET-005 | 集成                  | 是 (Twitter) | 否      |
+| AC-TWEET-006 | 集成                  | 是 (Twitter) | 否      |
+| AC-TWEET-007 | 纯函数/离线           | 否           | 否      |
+| AC-TWEET-008 | 集成                  | 是 (Twitter) | 否      |
+| AC-TWEET-009 | 纯函数/离线           | 否           | 否      |
+| AC-TWEET-010 | 集成                  | 是 (Twitter) | 否      |
+| AC-TWEET-011 | 行为断言（mock/离线） | 否           | 否      |
 
 > 离线 AC 可通过 fixture 直接验证，无需网络；集成 AC 需要 `TWEET_KEYS` 环境变量。
