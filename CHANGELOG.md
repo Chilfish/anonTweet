@@ -75,6 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 - X 迁移到 Rolldown/Vite 后不再内嵌 `ondemand.s` webpack chunk map，`x-client-transaction-id` 因此抛 `OnDemandFileUrlResolutionError`，所有走 rettiwt-api 的 X 数据接口失败。**真因是外壳请求漏带登录 cookie**（X 仅对登录态返回仍含该 chunk map 的旧外壳）：新增 `buildXShellHeaders`，配置 API Key 时附带解码后的 cookie，`_fetchXHomePage` 改为使用它
 - 外壳候选列表改为 `X_SHELL_URLS`（`/home` 优先，legacy 路由作无 Key 时的 guest 兜底）+ `isUsableXDocument` 双条件校验；新增/扩充 `test/unit/rettiwt-transaction-document.spec.ts`
 - 沉淀 postmortem 013 与 `docs/features/tweet/transaction-id.md`（含 `ondemand.s` indices 每构建随机、不可 pin 的实测）
+- 补 AC-TWEET-011 回归防护（行为断言：mock `axios.get` 跑真实 `_fetchTransactionDocument`，锁定外壳请求必带 cookie、无 Key 时保持匿名），与 AC 文档 1:1 绑定
 
 #### 验证诚信修复（2026-09-12）
 
