@@ -72,8 +72,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 #### X 前端迁移修复（2026-09-25）
 
-- X 登出首页迁移到 Rolldown/Vite 后不再内嵌 `ondemand.s` webpack chunk map，`x-client-transaction-id` 因此抛 `OnDemandFileUrlResolutionError`，导致所有走 rettiwt-api 的 X 数据接口失败。`FetcherService` 改为在仍提供旧版 webpack 外壳的路由中探测取文档（`X_LEGACY_HOME_URLS` + `isUsableXDocument` 双条件校验），不再固定依赖 `/home`
-- 新增 `test/unit/rettiwt-transaction-document.spec.ts`；沉淀 postmortem 013
+- X 迁移到 Rolldown/Vite 后不再内嵌 `ondemand.s` webpack chunk map，`x-client-transaction-id` 因此抛 `OnDemandFileUrlResolutionError`，所有走 rettiwt-api 的 X 数据接口失败。**真因是外壳请求漏带登录 cookie**（X 仅对登录态返回仍含该 chunk map 的旧外壳）：新增 `buildXShellHeaders`，配置 API Key 时附带解码后的 cookie，`_fetchXHomePage` 改为使用它
+- 外壳候选列表改为 `X_SHELL_URLS`（`/home` 优先，legacy 路由作无 Key 时的 guest 兜底）+ `isUsableXDocument` 双条件校验；新增/扩充 `test/unit/rettiwt-transaction-document.spec.ts`
+- 沉淀 postmortem 013 与 `docs/features/tweet/transaction-id.md`（含 `ondemand.s` indices 每构建随机、不可 pin 的实测）
 
 #### 验证诚信修复（2026-09-12）
 
