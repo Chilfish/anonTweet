@@ -24,6 +24,42 @@ import { ErrorService } from '../internal/ErrorService'
 import { LogService } from '../internal/LogService'
 
 /**
+ * X routes that still serve the legacy (webpack) client shell.
+ *
+ * X is migrating its frontend to a Rolldown/Vite build ("x-web") that no longer
+ * embeds the `ondemand.s` webpack chunk map required by `x-client-transaction-id`
+ * to derive the key byte indices. The landing pages (`/`, `/home`) already serve
+ * the new build, but the routes below still return the legacy shell, so we probe
+ * them in order until one exposes the runtime the library needs.
+ *
+ * @internal
+ */
+export const X_LEGACY_HOME_URLS = [
+  'https://x.com/i/topics',
+  'https://x.com/i/display',
+  'https://x.com/i/timeline',
+  'https://x.com/i/communitynotes',
+  'https://x.com/home',
+]
+
+/**
+ * Whether the given document is a usable legacy X shell for client transaction
+ * ID generation: it must expose both the site verification key and the
+ * `ondemand.s` chunk reference consumed by `ClientTransaction`.
+ *
+ * @param document - The parsed X page document.
+ *
+ * @returns `true` when the document can drive `ClientTransaction` initialization.
+ *
+ * @internal
+ */
+export function isUsableXDocument(document: Document): boolean {
+  const hasVerificationKey = document.querySelector('[name=\'twitter-site-verification\']') !== null
+  const hasOnDemandChunk = (document.documentElement?.outerHTML ?? '').includes('ondemand.s')
+  return hasVerificationKey && hasOnDemandChunk
+}
+
+/**
  * The base service that handles all HTTP requests.
  *
  * @public
@@ -106,8 +142,8 @@ export class FetcherService {
    * @returns The header containing the transaction ID.
    */
   private async _getTransactionHeader(method: string, url: string): Promise<ITransactionHeader> {
-  // Get the X homepage HTML document (using utility function)
-    const document = await this._handleXMigration()
+  // Get the X page shell exposing the legacy client runtime
+    const document = await this._fetchTransactionDocument()
 
     // Create and initialize ClientTransaction instance
     const transaction = await ClientTransaction.create(document)
@@ -123,9 +159,56 @@ export class FetcherService {
     }
   }
 
-  private async _handleXMigration(): Promise<Document> {
-  // Fetch X.com homepage
-    const homePageResponse = await axios.get<string>('https://x.com/home', {
+  /**
+   * Resolves a DOM document that can drive `ClientTransaction` initialization.
+   *
+   * X's new Rolldown/Vite shell dropped the `ondemand.s` webpack chunk map, so
+   * the previous fixed `/home` fetch fails with `OnDemandFileUrlResolutionError`.
+   * We probe the legacy routes in `X_LEGACY_HOME_URLS` and return the first
+   * usable shell, falling back to the last parsed document so the library can
+   * raise its own specific initialization error.
+   *
+   * @returns The parsed X document.
+   */
+  private async _fetchTransactionDocument(): Promise<Document> {
+    let lastDocument: Document | undefined
+    let lastError: unknown
+
+    for (const url of X_LEGACY_HOME_URLS) {
+      try {
+        const document = await this._fetchXHomePage(url)
+
+        if (isUsableXDocument(document)) {
+          return document
+        }
+
+        lastDocument = document
+      }
+      catch (error) {
+        lastError = error
+      }
+    }
+
+    // No candidate exposed the legacy runtime: hand back the last parsed
+    // document so the caller surfaces the library's specific init error.
+    if (lastDocument) {
+      return lastDocument
+    }
+
+    throw lastError instanceof Error ? lastError : new Error(ApiErrors.HOMEPAGE_FETCH_FAILED)
+  }
+
+  /**
+   * Fetches and normalizes one X page into a DOM document, following the legacy
+   * migration redirect/form when X still serves one.
+   *
+   * @param url - The X page URL to fetch.
+   *
+   * @returns The parsed X document.
+   */
+  private async _fetchXHomePage(url: string): Promise<Document> {
+  // Fetch the X page shell
+    const homePageResponse = await axios.get<string>(url, {
       headers: this.config.headers,
       httpAgent: this.config.httpsAgent,
       httpsAgent: this.config.httpsAgent,
@@ -162,7 +245,7 @@ export class FetcherService {
         || document.querySelector('form[action=\'https://x.com/x/migrate\']')
 
     if (migrationForm) {
-      const url = migrationForm.getAttribute('action') || 'https://x.com/x/migrate'
+      const formUrl = migrationForm.getAttribute('action') || 'https://x.com/x/migrate'
       const method = migrationForm.getAttribute('method') || 'POST'
 
       // Collect form input fields
@@ -180,7 +263,7 @@ export class FetcherService {
       // Submit form using POST request
       const formResponse = await axios.request<string>({
         method,
-        url,
+        url: formUrl,
         data: requestPayload,
         headers: {
           'Content-Type': 'multipart/form-data',
