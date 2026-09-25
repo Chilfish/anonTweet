@@ -70,6 +70,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ### Fixed
 
+#### X 前端迁移修复（2026-09-25）
+
+- X 登出首页迁移到 Rolldown/Vite 后不再内嵌 `ondemand.s` webpack chunk map，`x-client-transaction-id` 因此抛 `OnDemandFileUrlResolutionError`，导致所有走 rettiwt-api 的 X 数据接口失败。`FetcherService` 改为在仍提供旧版 webpack 外壳的路由中探测取文档（`X_LEGACY_HOME_URLS` + `isUsableXDocument` 双条件校验），不再固定依赖 `/home`
+- 新增 `test/unit/rettiwt-transaction-document.spec.ts`；沉淀 postmortem 013
+
 #### 验证诚信修复（2026-09-12）
 
 - dev server 在外层 `NODE_ENV=production` 下崩溃（`jsxDEV is not a function`）：`dev`/`build` 脚本经 `cross-env` 固定 `NODE_ENV`，不再依赖宿主环境（F1）

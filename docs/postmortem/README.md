@@ -22,6 +22,7 @@
 | [010](010-babel-major-drift.md)                           | 依赖/Babel 构建  | SEV-3  | Dependency   | 🟢 Mitigated | preset 越过 core 主版本 + 门禁不跑生产构建，`.tsx` 全量构建失败 |
 | [011](011-verification-honesty.md)                        | 验证诚信         | SEV-3  | Process      | 🟢 Mitigated | AC 空跑报绿 / 静态扫描冒充行为 / dev 模式泄漏，门禁不携带信号   |
 | [012](012-mobile-adaptation-and-scroll-lock-ownership.md) | 移动端适配       | SEV-3  | Process      | 🟢 Mitigated | 断点列表冒充移动端适配；手写滚动锁与浮层原语抢归属              |
+| [013](013-upstream-frontend-drift.md)                     | 上游前端漂移     | SEV-2  | Dependency   | 🟡 Active    | 只认单一页面解析 webpack chunk map，上游换 bundler 即全站硬失败 |
 
 ## 高危文件（写码前自查）
 
@@ -97,6 +98,15 @@ AC 文档必须区分「行为断言」与「源码扫描（辅助检查）」**
 base-ui `useScrollLock` 会检测「页面已被作者锁住」并**退让**，override 会把锁的生命周期搞乱
 （表现为「关闭浮层后页面滚不动 / 位置跳动」，极难归因）。
 
+### 11. 单点依赖上游页面结构 / 上游格式漂移（#013）
+
+`x-client-transaction-id` 只从**一个**页面（`/home`）解析 webpack chunk map（`NNN:"ondemand.s"`）；
+X 把首页换成 Rolldown/Vite 后该 pattern 不再存在，初始化即抛错，**所有 X API 调用**在发请求前
+就失败（重试/换 key 都无效）。对策：**依赖上游页面/接口结构的功能必须「多候选 + 可用性校验 +
+明确降级」**，不能把某个 URL 当稳定单点；`isUsableXDocument`（verification meta + `ondemand.s`）
+这类纯函数判定要可导出、可单测；「上游库是最新版」≠「上游已适配」；此类运行时漂移 typecheck/lint/test
+覆盖不到，关键外部依赖要有**真实调用冒烟**验证。详见 [013](013-upstream-frontend-drift.md)。
+
 ## Pre-Release 检查（每次 Release 前）
 
 **步骤**：
@@ -112,10 +122,10 @@ base-ui `useScrollLock` 会检测「页面已被作者锁住」并**退让**，o
 
 ### 按严重级
 
-- **SEV-2（7 份）**：001 / 002 / 004 🟢 / 005 / 006 🟢 / 008 🟢 / 009
+- **SEV-2（8 份）**：001 / 002 / 004 🟢 / 005 / 006 🟢 / 008 🟢 / 009 / 013
 - **SEV-3（5 份）**：003 / 007 / 010 🟢 / 011 🟢 / 012 🟢
 
 ### 按状态
 
-- 🔴 **Active（仍可能复发）**：001 / 002 / 003 / 005 / 007
+- 🔴 **Active（仍可能复发）**：001 / 002 / 003 / 005 / 007 / 013
 - 🟢 **Mitigated（已预防）**：004 / 006 / 008 / 010 / 011 / 012
