@@ -24,23 +24,51 @@ import { ErrorService } from '../internal/ErrorService'
 import { LogService } from '../internal/LogService'
 
 /**
- * X routes that still serve the legacy (webpack) client shell.
+ * Candidate URLs for the X shell document that drives `ClientTransaction`.
  *
- * X is migrating its frontend to a Rolldown/Vite build ("x-web") that no longer
- * embeds the `ondemand.s` webpack chunk map required by `x-client-transaction-id`
- * to derive the key byte indices. The landing pages (`/`, `/home`) already serve
- * the new build, but the routes below still return the legacy shell, so we probe
- * them in order until one exposes the runtime the library needs.
+ * The `ondemand.s` webpack chunk map required by `x-client-transaction-id` only
+ * remains in the legacy shell, and X serves that legacy shell only to an
+ * authenticated session (see `buildXShellHeaders`). The canonical homepage comes
+ * first; the remaining routes still return the legacy shell anonymously, as a
+ * fallback for deployments without an API key.
  *
  * @internal
  */
-export const X_LEGACY_HOME_URLS = [
+export const X_SHELL_URLS = [
+  'https://x.com/home',
   'https://x.com/i/topics',
   'https://x.com/i/display',
   'https://x.com/i/timeline',
   'https://x.com/i/communitynotes',
-  'https://x.com/home',
 ]
+
+/**
+ * Builds the headers used to fetch the X shell document.
+ *
+ * X only serves the shell containing the `ondemand.s` chunk map to an
+ * authenticated session, so the decoded cookie must be attached whenever an API
+ * key is configured. An anonymous request returns the new Rolldown/Vite build
+ * (which dropped the chunk map), making `ClientTransaction` uninitializable.
+ *
+ * @param headers - The base request headers.
+ * @param apiKey - The API key whose cookies are to be attached, if any.
+ *
+ * @returns A copy of the given headers, with the cookie attached when applicable.
+ *
+ * @internal
+ */
+export function buildXShellHeaders(
+  headers: { [key: string]: string },
+  apiKey?: string,
+): { [key: string]: string } {
+  const shellHeaders = { ...headers }
+
+  if (apiKey) {
+    shellHeaders.cookie = AuthService.decodeCookie(apiKey)
+  }
+
+  return shellHeaders
+}
 
 /**
  * Whether the given document is a usable legacy X shell for client transaction
@@ -162,11 +190,11 @@ export class FetcherService {
   /**
    * Resolves a DOM document that can drive `ClientTransaction` initialization.
    *
-   * X's new Rolldown/Vite shell dropped the `ondemand.s` webpack chunk map, so
-   * the previous fixed `/home` fetch fails with `OnDemandFileUrlResolutionError`.
-   * We probe the legacy routes in `X_LEGACY_HOME_URLS` and return the first
-   * usable shell, falling back to the last parsed document so the library can
-   * raise its own specific initialization error.
+   * X's new Rolldown/Vite shell dropped the `ondemand.s` webpack chunk map, which
+   * is why the shell must be fetched with the session cookie (see
+   * `buildXShellHeaders`). We probe the candidates in `X_SHELL_URLS` and return the
+   * first usable shell, falling back to the last parsed document so the library
+   * can raise its own specific initialization error.
    *
    * @returns The parsed X document.
    */
@@ -174,7 +202,7 @@ export class FetcherService {
     let lastDocument: Document | undefined
     let lastError: unknown
 
-    for (const url of X_LEGACY_HOME_URLS) {
+    for (const url of X_SHELL_URLS) {
       try {
         const document = await this._fetchXHomePage(url)
 
@@ -207,9 +235,9 @@ export class FetcherService {
    * @returns The parsed X document.
    */
   private async _fetchXHomePage(url: string): Promise<Document> {
-  // Fetch the X page shell
+  // Fetch the X page shell (with the session cookie, when available)
     const homePageResponse = await axios.get<string>(url, {
-      headers: this.config.headers,
+      headers: buildXShellHeaders(this.config.headers, this.config.apiKey),
       httpAgent: this.config.httpsAgent,
       httpsAgent: this.config.httpsAgent,
     })
