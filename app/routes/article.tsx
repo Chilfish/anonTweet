@@ -22,7 +22,8 @@ async function loadEmbeddedTweets(blocks: ArticleBlock[]): Promise<Record<string
       const tweets = await getTweets(embedId, getLocalTweet)
       return [embedId, tweets.find(t => t.id_str === embedId) ?? tweets[0] ?? null] as const
     }
-    catch {
+    catch (error: unknown) {
+      console.warn(`[article] embedded tweet ${embedId} unavailable:`, error)
       return [embedId, null] as const
     }
   }))
@@ -46,7 +47,9 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     const embeds = tweet?.article?.blocks ? await loadEmbeddedTweets(tweet.article.blocks) : {}
     return { tweet, tweetId, baseUrl, translation, embeds }
   }
-  catch {
+  catch (error: unknown) {
+    // 之前是裸 catch：线上文章页打不开时，日志里连 tweetId 都没有
+    console.error(`[article] load ${tweetId} failed:`, error)
     return { tweet: null, tweetId, baseUrl, translation: null, embeds: {} as Record<string, EnrichedTweet | null> }
   }
 }
