@@ -5,7 +5,7 @@ import { generateText, Output, zodSchema } from 'ai'
 import { z } from 'zod'
 import { createAITranslationAbortSignal } from '~/lib/ai-timeout'
 import { models } from '~/lib/constants'
-import { obsLog } from '~/lib/obs-log'
+import { obsLog, suffix } from '~/lib/obs-log'
 import { getProviderStrategy, getThinkingConfig } from '~/lib/providers'
 import { serializeArticleBlock } from './serialize'
 
@@ -139,6 +139,8 @@ export interface AutoTranslateArticleOptions {
   modelName: string
   thinkingLevel?: ThinkingLevel
   translationGlossary?: string
+  /** 日志归属：文章 id，透传到 `ai.translate.article.batch` 事件，便于线上定位 */
+  targetId?: string
 }
 
 /**
@@ -209,6 +211,7 @@ export async function autoTranslateArticle(
       blocks: items.length,
       translated: Object.keys(lastRaw).length,
       ms: Date.now() - startedAt,
+      targetId: suffix(options.targetId),
       error: lastError instanceof Error ? lastError.message : undefined,
     })
     return lastRaw

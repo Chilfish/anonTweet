@@ -1,5 +1,6 @@
 import { AISDKError, APICallError } from '@ai-sdk/provider'
 import { NoObjectGeneratedError } from 'ai'
+import { obsLog, suffix } from '~/lib/obs-log'
 
 /**
  * 结构化的 AI 传输错误，随 BFF 响应返回给前端。
@@ -78,4 +79,81 @@ export function normalizeAIError(error: unknown): AITransportError {
     return { type: 'Error', message: error.message }
   }
   return { type: 'UnknownError', message: String(error) }
+}
+
+/**
+ * 失败响应的请求上下文：线上定位问题必需。
+ * 早前的失败响应连实体 id 都没有（只有一句泛化 message），无法判断是哪条推文/哪篇文章挂了。
+ */
+export interface AIFailureContext {
+  /** 请求作用的实体 id：tweetId / articleId / igPostId */
+  targetId?: string
+  targetType?: 'tweet' | 'article' | 'ig'
+  model?: string
+  provider?: string
+}
+
+/** AI 路由失败时的统一响应体 */
+export interface AIFailureBody {
+  success: false
+  /** 机器可读的失败类别 */
+  error: string
+  /** 失败分类（400 输入/参数、404 目标缺失、500 网关/上游失败）；HTTP status 固定 200 */
+  status: number
+  message: string
+  targetId?: string
+  targetType?: string
+  model?: string
+  provider?: string
+  aiError: AITransportError
+}
+
+/**
+ * 构造 AI 失败的统一响应体并落一条结构化日志。
+ *
+ * 有意为之的约定（勿改成真实 4xx/5xx）：这些 BFF 端点**始终返回 HTTP 200**，
+ * 失败与否、失败类别由 body 的 `success` + `status` + `error` 表达。
+ * 否则业务逻辑拦截（无效输入、缺 key、baseUrl 不在白名单等）会在 Vercel 日志里
+ * 刷出一堆 error，把真正的网关/上游故障淹掉。
+ *
+ * 路由侧用法：`return data(buildAIFailure(error, { ... }))`。
+ */
+export function buildAIFailure(
+  error: unknown,
+  options: {
+    /** 响应 `error` 字段的值（机器可读的失败类别），保持与既有契约一致 */
+    errorCode: string
+    /** 覆盖 message；缺省用归一化后的错误消息 */
+    message?: string
+    status?: number
+    context?: AIFailureContext
+  },
+): AIFailureBody {
+  const { errorCode, message, status = 500, context } = options
+  const aiError = normalizeAIError(error)
+  const { targetId, targetType, model, provider } = context ?? {}
+
+  console.error(`[AI] ${errorCode} failed:`, { targetType, targetId, model, provider, status }, error)
+  obsLog('ai.fail', {
+    code: errorCode,
+    status,
+    targetType,
+    targetId: suffix(targetId),
+    model,
+    provider,
+    aiErrorType: aiError.type,
+    reason: aiError.message,
+  })
+
+  return {
+    success: false,
+    error: errorCode,
+    status,
+    message: message ?? aiError.message,
+    targetId,
+    targetType,
+    model,
+    provider,
+    aiError,
+  }
 }

@@ -940,7 +940,7 @@
             }
           },
           "500": {
-            "description": "生成失败（含 aiError 归一化）",
+            "description": "生成失败（含 aiError + model/provider 定位上下文）",
             "content": {
               "application/json": {
                 "schema": {
@@ -1098,7 +1098,7 @@
             }
           },
           "500": {
-            "description": "翻译失败（含 aiError）",
+            "description": "翻译失败（含 aiError + targetId/targetType/model/provider 定位上下文；HTTP 仍为 200）",
             "content": {
               "application/json": {
                 "schema": {
@@ -1249,7 +1249,7 @@
             }
           },
           "500": {
-            "description": "生成/保存/翻译失败",
+            "description": "生成/保存/翻译失败（含 aiError + targetId/model/provider 定位上下文；HTTP 仍为 200）",
             "content": {
               "application/json": {
                 "schema": {
@@ -1416,7 +1416,7 @@
     "schemas": {
       "ErrorResponse": {
         "type": "object",
-        "description": "统一错误响应",
+        "description": "统一错误响应。约定：HTTP status 固定 200，失败与否/类别由 success + status + error 表达（业务拦截不刷 Vercel error）。AI 端点（/api/ai-*）额外带定位上下文：targetId / targetType / model / provider",
         "properties": {
           "success": {
             "type": "boolean",
@@ -1429,9 +1429,31 @@
             "type": "string"
           },
           "status": {
-            "type": "integer"
+            "type": "integer",
+            "description": "失败分类（400 输入/参数、404 目标缺失、500 网关/上游失败）；HTTP status 固定 200"
           },
           "cause": {},
+          "targetId": {
+            "type": "string",
+            "description": "AI 端点：请求作用的实体 id（tweetId / articleId / igPostId）"
+          },
+          "targetType": {
+            "type": "string",
+            "enum": [
+              "tweet",
+              "article",
+              "ig"
+            ],
+            "description": "AI 端点：实体类型"
+          },
+          "model": {
+            "type": "string",
+            "description": "AI 端点：请求使用的模型"
+          },
+          "provider": {
+            "type": "string",
+            "description": "AI 端点：实际解析出的 provider"
+          },
           "aiError": {
             "description": "AI 提供商归一化错误（可选）"
           }
