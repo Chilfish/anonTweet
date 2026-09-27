@@ -1,0 +1,526 @@
+{
+  "article_results": {
+    "result": {
+      "content_state": {
+        "blocks": [
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 0,
+                "length": 12,
+                "offset": 7
+              },
+              {
+                "key": 1,
+                "length": 31,
+                "offset": 54
+              },
+              {
+                "key": 2,
+                "length": 10,
+                "offset": 245
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "51kli",
+            "text": "One of Ben Thompson’s favorite analogies is about the newspaper industry in the 1990s. Before the Internet, newspapers were pretty good businesses. They were regional monopolies that had captive attention via limited competition. Warren Buffett loved them.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 3,
+                "length": 14,
+                "offset": 104
+              },
+              {
+                "key": 4,
+                "length": 19,
+                "offset": 164
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "6js7l",
+            "text": "Their monopolies were rooted in their distribution infrastructure – it was (relatively) hard to get the New York Times in Des Moines. It was easier to just get the Des Moines Register.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "g8if",
+            "text": "When the Internet arrived and the cost of distribution went to zero, the market re-organized. The end state (or the current state) became more of a barbell:",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 5,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "9nsae",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {
+              "mentions": [
+                {
+                  "fromIndex": 15,
+                  "text": "lennysan",
+                  "toIndex": 24
+                }
+              ]
+            },
+            "entityRanges": [
+              {
+                "key": 6,
+                "length": 18,
+                "offset": 50
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "4r3vu",
+            "text": "By comparison, @lennysan has >1.2M subscribers to Lenny’s Newsletter (and likely tens of thousands of paying subscribers).",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "fa78g",
+            "text": "If you’re reading this, you probably get your news through some combination of the New York Times, X and various Substacks.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "2288u",
+            "text": "For the newspaper industry, the middle disappeared. You’re either one of the top newspapers in the world or you’re a solopreneur/SMB.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 16,
+                "offset": 0,
+                "style": "Italic"
+              }
+            ],
+            "key": "fpnm",
+            "text": "Software & Moats",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "fkki8",
+            "text": "Today, the idea of competing with Amazon sounds exhausting. Their moats just feel so deep and multi-faceted – dozens of aircraft, hundreds of AWS services, tens of thousands of trucks.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "e3a92",
+            "text": "But if you go back to the beginning though, Amazon feels like the least-defensible initial premise of the major tech companies. They were just selling books on the Internet! They just bought books in bulk from the publishers, repackaged them in smaller boxes and then shipped them out. Anyone could do that.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "b5t8g",
+            "text": "How did they go from the least-defensible to the most-defensible major tech company in ~30 years? Relentless execution and reinvestment. Their moat is 7,500+ days of building things, taking the profits, and building more things.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "b1bbq",
+            "text": "Most software companies have their moats rooted in three pillars:",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "6fshp",
+            "text": "The cost and complexity of replicating what they had already built",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "85ndb",
+            "text": "The switching costs of migrating off the system once adopted",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "5sr77",
+            "text": "The network effects that come from an ecosystem of software connections and human experts and system integrators",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "6dihf",
+            "text": "What happens as the cost of software engineering asymptotically approaches zero? I think historical moats are eroded:",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "90bbl",
+            "text": "Software becomes much faster and cheaper to replicate",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "9dsh6",
+            "text": "Software migrations can be increasingly automated",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "3g8ln",
+            "text": "Integrations can be automated; the AI is a better expert than your p95 human",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 34,
+                "offset": 0,
+                "style": "Italic"
+              }
+            ],
+            "key": "f72pb",
+            "text": "What should software companies do?",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "418ok",
+            "text": "One way to think of Amazon’s moat is in terms of planes, trucks and data centers.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "cbq7g",
+            "text": "Another way to think about it is just relentless reinvestment. Amazon was easy to compete with on day 1. They were still probably easy to compete with by year 2. By year 10, you probably had to replicate most of the prior nine years of work because they never took the foot off the gas.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "cvfsi",
+            "text": "If the amount of software you can build in a given day increases by 1,000x, and you build that amount of software every day for 10 years, you probably still have a moat in the age of AI. It still probably takes years and billions of dollars to replicate that new, AI-powered work. It probably still exhausts your competitors to think about competing with you.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "4l6om",
+            "text": "In general, I suspect the relative power of Helmer’s 7 Powers shifts for software companies – switching costs and network effects become less important, but scale economies and branding become more important.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "au7ar",
+            "text": "At the risk of sounding glib, I think the dominant software strategy in the future will be scale-based – create an unimaginable amount of software every single day and re-invest the profits to create even more over time. Your moat will – in part – be the extreme cost to replicate the software you have already built.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 33,
+                "offset": 0,
+                "style": "Italic"
+              }
+            ],
+            "key": "av849",
+            "text": "The Barbell-ification of Software",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "cbefu",
+            "text": "Long term, I think the evolution of the software industry might mirror what happened to newspapers in the 1990s.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 7,
+                "length": 8,
+                "offset": 278
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "637jt",
+            "text": "There will be a smaller number of very large software companies. In the enterprise, I think there will be one AI-native system per buying center (Sales, Marketing, Finance, HR, IT). For smaller and mid-sized companies, I think there will primarily be one all-in-one system like Rippling.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "5tdvl",
+            "text": "I also think there will be one large software company by industry (e.g., Legal, Finance, Medicine), similar to how there’s often one dominant trade magazine by industry.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "3a22",
+            "text": "Those companies will win both through their sheer amount of product they build and the strength of their GTM. They just need to serve their buying center better than any competitor.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "bs04l",
+            "text": "I think most mid-sized point solutions will likely be consolidated or die off. The optimal strategy for the winner will be to do it all.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 8,
+                "length": 7,
+                "offset": 366
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "b0blb",
+            "text": "Lastly, I think there will be an explosion of “small” software. Most of this will be people building software for themselves or their own companies, but I think there might also be an explosion of small software businesses that make niche software, similar to the D2C explosion of the 2010s (powered by Shopify and Meta Ads). If people make 100M apps via tools like Lovable, there will surely be a power-law to those apps and a handful of them will become thriving SMBs [1].",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "97ci5",
+            "text": "If you are building a venture-backed software company, I think the answer is once again “do it all.” Just build the whole thing – your moat is the totality of what you’ve built and completely owning the buying center. I fear there is no safety in the middle.",
+            "type": "unstyled"
+          },
+          {
+            "data": {
+              "mentions": [
+                {
+                  "fromIndex": 301,
+                  "text": "Lovable",
+                  "toIndex": 309
+                },
+                {
+                  "fromIndex": 311,
+                  "text": "boltdotnew",
+                  "toIndex": 322
+                },
+                {
+                  "fromIndex": 324,
+                  "text": "wabi",
+                  "toIndex": 329
+                }
+              ]
+            },
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "4q7kh",
+            "text": "I don’t yet know what the Substack for the software era is (or how the market plays out). But I think it’s super interesting. I think similar to D2C commerce, there will likely be both an aggregator (e.g., Meta) and a platform (e.g., Shopify, Substack). There are many interesting early attempts like @Lovable, @boltdotnew, @wabi and more. If you have thoughts on this side of the barbell, let me know.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 266,
+                "offset": 0,
+                "style": "Italic"
+              }
+            ],
+            "key": "56mml",
+            "text": "[1] – I fear these SMBs will not be “venture-addressable” but many founders and investors will be led astray by thinking they are. I think the successful ones will look more like Substacks where the founder or a small team just owns and operates the entire business.",
+            "type": "unstyled"
+          }
+        ],
+        "entityMap": [
+          {
+            "key": "8",
+            "value": {
+              "data": {
+                "url": "https://lovable.dev/"
+              },
+              "mutability": "Mutable",
+              "type": "LINK"
+            }
+          },
+          {
+            "key": "4",
+            "value": {
+              "data": {
+                "url": "https://www.desmoinesregister.com/https://www.desmoinesregister.com/"
+              },
+              "mutability": "Mutable",
+              "type": "LINK"
+            }
+          },
+          {
+            "key": "5",
+            "value": {
+              "data": {
+                "markdown": "| Newspaper | 2002 Print Circulation | Current Subscribers (Est.) | Change |\n|---|---|---|---|\n| The New York Times | 1,113,000 | ~13.4 million (2026) | +1,104% |\n| The Washington Post | 746,724 | ~2.5 million | +235% |\n| Los Angeles Times | 965,633 | ~243,000 (2025) | -75% |\n| Chicago Tribune | 613,429 | ~149,000 | -76% |\n| San Francisco Chronicle | 512,129 | ~138,000 | -73% |\n| The Dallas Morning News | 521,956 | ~61,000 (Q1 2025) | -88% |\n| Newsday | 578,809 | ~50,000+ (~2022) | -91% |\n\n*Current subscribers courtesy of Claude*\n"
+              },
+              "mutability": "Mutable",
+              "type": "MARKDOWN"
+            }
+          },
+          {
+            "key": "6",
+            "value": {
+              "data": {
+                "url": "https://www.lennysnewsletter.com/"
+              },
+              "mutability": "Mutable",
+              "type": "LINK"
+            }
+          },
+          {
+            "key": "1",
+            "value": {
+              "data": {
+                "url": "https://stratechery.com/2016/the-it-era-and-the-internet-revolution/"
+              },
+              "mutability": "Mutable",
+              "type": "LINK"
+            }
+          },
+          {
+            "key": "0",
+            "value": {
+              "data": {
+                "url": "https://stratechery.com/"
+              },
+              "mutability": "Mutable",
+              "type": "LINK"
+            }
+          },
+          {
+            "key": "2",
+            "value": {
+              "data": {
+                "url": "https://en.wikipedia.org/wiki/List_of_newspapers_formerly_owned_by_Berkshire_Hathaway"
+              },
+              "mutability": "Mutable",
+              "type": "LINK"
+            }
+          },
+          {
+            "key": "7",
+            "value": {
+              "data": {
+                "url": "https://www.rippling.com/"
+              },
+              "mutability": "Mutable",
+              "type": "LINK"
+            }
+          },
+          {
+            "key": "3",
+            "value": {
+              "data": {
+                "url": "https://www.nytimes.com/"
+              },
+              "mutability": "Mutable",
+              "type": "LINK"
+            }
+          }
+        ]
+      },
+      "cover_media": {
+        "id": "QXBpTWVkaWE6DAAFCgABHSRKS+CbkAAKAAIAAAAAANoowwAA",
+        "media_id": "2099885016012787712",
+        "media_info": {
+          "__typename": "ApiImage",
+          "color_info": {
+            "palette": [
+              {
+                "percentage": 99.59,
+                "rgb": {
+                  "blue": 249,
+                  "green": 253,
+                  "red": 254
+                }
+              },
+              {
+                "percentage": 0.41,
+                "rgb": {
+                  "blue": 139,
+                  "green": 141,
+                  "red": 142
+                }
+              }
+            ]
+          },
+          "original_img_height": 793,
+          "original_img_url": "https://pbs.twimg.com/media/HSRKS-CbkAAKn8M.jpg",
+          "original_img_width": 1983
+        },
+        "media_key": "3_2099885016012787712"
+      },
+      "id": "QXJ0aWNsZUVudGl0eToyMDk5ODgxMDk2Njc0NzIxNzkz",
+      "lifecycle_state": {
+        "modified_at_secs": 1789486604
+      },
+      "media_entities": [],
+      "metadata": {
+        "first_published_at_secs": 1789486604
+      },
+      "plain_text": "One of Ben Thompson’s favorite analogies is about the newspaper industry in the 1990s. Before the Internet, newspapers were pretty good businesses. They were regional monopolies that had captive attention via limited competition. Warren Buffett loved them.\nTheir monopolies were rooted in their distribution infrastructure – it was (relatively) hard to get the New York Times in Des Moines. It was easier to just get the Des Moines Register.\nWhen the Internet arrived and the cost of distribution went to zero, the market re-organized. The end state (or the current state) became more of a barbell:\n \nBy comparison, @lennysan has >1.2M subscribers to Lenny’s Newsletter (and likely tens of thousands of paying subscribers).\nIf you’re reading this, you probably get your news through some combination of the New York Times, X and various Substacks.\nFor the newspaper industry, the middle disappeared. You’re either one of the top newspapers in the world or you’re a solopreneur/SMB.\nSoftware & Moats\nToday, the idea of competing with Amazon sounds exhausting. Their moats just feel so deep and multi-faceted – dozens of aircraft, hundreds of AWS services, tens of thousands of trucks.\nBut if you go back to the beginning though, Amazon feels like the least-defensible initial premise of the major tech companies. They were just selling books on the Internet! They just bought books in bulk from the publishers, repackaged them in smaller boxes and then shipped them out. Anyone could do that.\nHow did they go from the least-defensible to the most-defensible major tech company in ~30 years? Relentless execution and reinvestment. Their moat is 7,500+ days of building things, taking the profits, and building more things.\nMost software companies have their moats rooted in three pillars:\nThe cost and complexity of replicating what they had already built\nThe switching costs of migrating off the system once adopted\nThe network effects that come from an ecosystem of software connections and human experts and system integrators\nWhat happens as the cost of software engineering asymptotically approaches zero? I think historical moats are eroded:\nSoftware becomes much faster and cheaper to replicate\nSoftware migrations can be increasingly automated\nIntegrations can be automated; the AI is a better expert than your p95 human\nWhat should software companies do?\nOne way to think of Amazon’s moat is in terms of planes, trucks and data centers.\nAnother way to think about it is just relentless reinvestment. Amazon was easy to compete with on day 1. They were still probably easy to compete with by year 2. By year 10, you probably had to replicate most of the prior nine years of work because they never took the foot off the gas.\nIf the amount of software you can build in a given day increases by 1,000x, and you build that amount of software every day for 10 years, you probably still have a moat in the age of AI. It still probably takes years and billions of dollars to replicate that new, AI-powered work. It probably still exhausts your competitors to think about competing with you.\nIn general, I suspect the relative power of Helmer’s 7 Powers shifts for software companies – switching costs and network effects become less important, but scale economies and branding become more important.\nAt the risk of sounding glib, I think the dominant software strategy in the future will be scale-based – create an unimaginable amount of software every single day and re-invest the profits to create even more over time. Your moat will – in part – be the extreme cost to replicate the software you have already built.\nThe Barbell-ification of Software\nLong term, I think the evolution of the software industry might mirror what happened to newspapers in the 1990s.\nThere will be a smaller number of very large software companies. In the enterprise, I think there will be one AI-native system per buying center (Sales, Marketing, Finance, HR, IT). For smaller and mid-sized companies, I think there will primarily be one all-in-one system like Rippling.\nI also think there will be one large software company by industry (e.g., Legal, Finance, Medicine), similar to how there’s often one dominant trade magazine by industry.\nThose companies will win both through their sheer amount of product they build and the strength of their GTM. They just need to serve their buying center better than any competitor.\nI think most mid-sized point solutions will likely be consolidated or die off. The optimal strategy for the winner will be to do it all.\nLastly, I think there will be an explosion of “small” software. Most of this will be people building software for themselves or their own companies, but I think there might also be an explosion of small software businesses that make niche software, similar to the D2C explosion of the 2010s (powered by Shopify and Meta Ads). If people make 100M apps via tools like Lovable, there will surely be a power-law to those apps and a handful of them will become thriving SMBs [1].\nIf you are building a venture-backed software company, I think the answer is once again “do it all.” Just build the whole thing – your moat is the totality of what you’ve built and completely owning the buying center. I fear there is no safety in the middle.\nI don’t yet know what the Substack for the software era is (or how the market plays out). But I think it’s super interesting. I think similar to D2C commerce, there will likely be both an aggregator (e.g., Meta) and a platform (e.g., Shopify, Substack). There are many interesting early attempts like @Lovable, @boltdotnew, @wabi and more. If you have thoughts on this side of the barbell, let me know.\n[1] – I fear these SMBs will not be “venture-addressable” but many founders and investors will be led astray by thinking they are. I think the successful ones will look more like Substacks where the founder or a small team just owns and operates the entire business.",
+      "preview_text": "One of Ben Thompson’s favorite analogies is about the newspaper industry in the 1990s. Before the Internet, newspapers were pretty good businesses. They were regional monopolies that had captive",
+      "rest_id": "2099881096674721793",
+      "title": "Moats & the Barbell-ification of Software "
+    }
+  }
+}

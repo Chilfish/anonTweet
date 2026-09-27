@@ -30,4 +30,10 @@ export default antfu({
     'test/no-conditional-expect': 'error',
     'test/no-standalone-expect': 'error',
   },
+}, {
+  // 上游文章抓取内容原样冻结为 fixture，含 NBSP 等不可见字符（真实数据，不做清洗）
+  files: ['**/test/fixtures/**'],
+  rules: {
+    'no-irregular-whitespace': 'off',
+  },
 })

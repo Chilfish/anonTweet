@@ -1,0 +1,1333 @@
+{
+  "article_results": {
+    "result": {
+      "content_state": {
+        "blocks": [
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "2u4tn",
+            "text": "One of the best parts of our newest Claude models is how they respond to effort without breaking the prompt cache in Claude Code, but I’ve received a lot of questions on this from users. What is effort really and when do you use which effort level? Why do we need effort at all?",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "dve55",
+            "text": "To answer this, I decided to do a deep dive into the evals and do my own tests of effort across normal work.",
+            "type": "unstyled"
+          },
+          {
+            "data": {
+              "urls": [
+                {
+                  "fromIndex": 76,
+                  "text": "https://claude.dev/blog/spending-your-effort/",
+                  "toIndex": 121
+                }
+              ]
+            },
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 123,
+                "offset": 0,
+                "style": "Italic"
+              }
+            ],
+            "key": "m9vi",
+            "text": "note: you can see more interactive diagrams and explainers for this post on https://claude.dev/blog/spending-your-effort/  ",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "crdpn",
+            "text": "At a high level, I found that effort was a great way of changing how much verification and edgecase testing Claude did and how much of its own judgement it used. ",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "5kgpo",
+            "text": "Extra effort gave better results in areas where verification and edgecase testing was more useful like hardware, code review, and security.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "130q2",
+            "text": "But low and medium effort was perfect for getting things done quickly and staying in the loop with Claude.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "3gqh7",
+            "text": "For normal software engineering, I’m now running a loop of getting the model to interview me then implementing on low/medium effort, reviewing what it built, and then running verification on high effort.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "14bfn",
+            "text": "What is effort?",
+            "type": "header-one"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "6q3ri",
+            "text": "At a high level, effort gives the model an approximation of how much compute you want it to spend on the task. It’s somewhat related to your modeling of the difficulty of the task.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "7n7v6",
+            "text": "Think of it this way, if someone asked you to do something in 12 hours straight, you might assume they just want you to do it and try very hard. If someone asked you to do the same task in 1 hour, you’d try to get them the best version that meets their task and then expect to iterate from there.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 5,
+                "offset": 53,
+                "style": "Italic"
+              }
+            ],
+            "key": "a163o",
+            "text": "Or, you might push back and say the task requires at least 3 hours and then work for 3 hours to deliver it.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "213b6",
+            "text": "You should think of effort in the same way. Claude will always try and do your task reasonably, but higher effort will involve Claude taking more independent action for judgement and verification.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "9a8c7",
+            "text": "Effort curves",
+            "type": "header-one"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "7lm1c",
+            "text": "Fable 5.1 and Opus 5.5’s effort curves are our best yet, at each level if there is an uptick in benchmark scores and tokens consumed. Below is a graph of Terminal Bench 3.0 scores by effort, measured during my eval runs for this post.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 0,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "486v0",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "70cce",
+            "text": "But what does this mean in practice? To evaluate this, I tried several tasks at different effort levels and poured over the benchmarks. ",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "1vsno",
+            "text": "Building with effort",
+            "type": "header-one"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "dkg18",
+            "text": "The best way to understand how models work is to run experiments. I tried doing the same tasks at several different effort levels on Opus 5.5 understand the work it would do. I did this on a wide variety of work, but am illustrating this with a few toy examples.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "c0sh8",
+            "text": "Underspecified build task",
+            "type": "header-two"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "6eo73",
+            "text": "If I ask Claude to “build a personal fitness and workout tracker app,” effort changes dramatically how fleshed out the app is, but also results in Claude making more choices along the way. At low effort, the fitness app is just a log and a simple graph. At higher effort levels the app is more complex with additional detail. At max effort there’s a heat chart.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 1,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "391vm",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "fibs2",
+            "text": "If I wanted a simple base to iterate from, low effort would get it done. Max effort would be if I wanted Claude’s best one shot.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "3pk40",
+            "text": "Lightly specified design task",
+            "type": "header-two"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "6re41",
+            "text": "What if I have a task that is fairly specified already but I want some exploration with Claude? As an example I tried to ask it to redesign the /config menu in Claude Code. Every pass had roughly the same idea, to use submenus and better search.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "3rgqe",
+            "text": "At low effort (which took 1 minute), I got an interactive sketch that conveyed the idea but didn't look very much like Claude Code.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "419dp",
+            "text": "At max effort (which took 28 minutes), I got a mockup that looked very much like Claude Code, along with a bunch of walkthroughs for different flows.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "45nq6",
+            "text": "If my goal was to iterate and give feedback, low effort would get there much faster. But max effort gives me something much more polished right off the bat. For this particular task, I think I prefer using low effort to understand Claude’s vision.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 2,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "6nnki",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "5d13t",
+            "text": "Highly specified build task",
+            "type": "header-two"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "7rodh",
+            "text": "What if I gave Claude lots of details? I tried asking Claude to interview me in-depth about the fitness app and then gave that spec to be implemented by different models at different effort levels.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "akicg",
+            "text": "I found that given this spec, the models behaved much more similarly. I got designs that looked fairly similar and had similar implementations but with different details, at max effort Claude took some time to simplify a few of the details. ",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 3,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "971ss",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "2pbq4",
+            "text": "Takeaways",
+            "type": "header-two"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "bmvns",
+            "text": "For regular software engineering, particularly new feature work, the effort level depends a lot on how in the loop I want to be. Low effort allows Claude to respond quickly with a starting point, higher effort levels will get more work done but Claude will also make more assumptions on my behalf.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "ej5q0",
+            "text": "A particularly fruitful loop for feature development I’ve been using is:",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "ednb0",
+            "text": "Give Claude a spec and ask it to interview me about any details I’m missing",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "dptfg",
+            "text": "Implement it on low effort",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "9i617",
+            "text": "Review to make sure it got the gist of it correct, iterate on low effort as needed",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "3qm6",
+            "text": "Verify and test on high effort",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "41lc3",
+            "text": "How effort levels impact output on difficult tasks",
+            "type": "header-one"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "enfo",
+            "text": "But these are obviously toy examples, where Claude is well able to complete them. What about when the difference is between Claude completing the task or not completing the task?",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "2mj0q",
+            "text": "To find these difficult problems, you have to go to the benchmarks so I dove into one I like: Terminal Bench 3, a community sourced benchmark.",
+            "type": "unstyled"
+          },
+          {
+            "data": {
+              "urls": [
+                {
+                  "fromIndex": 179,
+                  "text": "https://github.com/harbor-framework/terminal-bench/releases/tag/v3.0.0",
+                  "toIndex": 249
+                }
+              ]
+            },
+            "entityRanges": [
+              {
+                "key": 4,
+                "length": 70,
+                "offset": 179
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "cohbs",
+            "text": "Terminal-Bench 3.0 problems can broadly be separated into categories like security, hardware, ML,  science, software, operations and media.  You can see all of the problems here: https://github.com/harbor-framework/terminal-bench/releases/tag/v3.0.0, they’re sourced from the community so anyone can contribute.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "1e3mn",
+            "text": "It’s worth reading to get a sense of the type of problems these models face. I found I was surprised by the scope and ambition of a lot of these tasks. The are much more complicated than the average task I’d face.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "25l04",
+            "text": "For example, some of the tasks included:",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 8,
+                "offset": 0,
+                "style": "Bold"
+              }
+            ],
+            "key": "4vofc",
+            "text": "Hardware (retro-console-soc): build an 8-bit game console in Verilog that fits a small FPGA and renders a test ROM.",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 7,
+                "offset": 0,
+                "style": "Bold"
+              }
+            ],
+            "key": "b7cku",
+            "text": "Science (takens-embedding-lean): formally prove Takens’ embedding theorem in Lean 4.",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 2,
+                "offset": 0,
+                "style": "Bold"
+              }
+            ],
+            "key": "9mu6c",
+            "text": "ML (mp-checkpoint-consolidation): merge 16 shards of a mixture-of-experts checkpoint into one file that reproduces the reference logits.",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 10,
+                "offset": 0,
+                "style": "Bold"
+              }
+            ],
+            "key": "1b0kb",
+            "text": "Operations (intrastat-meldung): run a company’s month-end EU trade-statistics filing end to end.",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 5,
+                "offset": 0,
+                "style": "Bold"
+              }
+            ],
+            "key": "bl8is",
+            "text": "Media (layout-config-recreation): rebuild a poster image as an editable layout file.",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "62pvd",
+            "text": "Higher effort levels help when there are many edge cases",
+            "type": "header-two"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 63,
+                "offset": 68,
+                "style": "Bold"
+              }
+            ],
+            "key": "1sgbl",
+            "text": "My main takeaway from reading the Terminal Bench 3 results was that higher effort is best for tasks with lots of hidden edge cases.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "2ebcr",
+            "text": "A clean example is html-js-filter, a Terminal-Bench 3.0 task that asks for an HTML sanitizer that strips every way of smuggling JavaScript into a page. Fable 5.1 went from 1/5 at low to 5/5 at xhigh.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "3stcc",
+            "text": "A typical attempt at low effort takes about 2 minutes. Each of these attempts wrote a filter in roughly one pass, then tested it against a single hand-written page.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "fnns3",
+            "text": "A high effort run finishes in about 33 minutes. In the run I traced, it adversarially reviewed its first draft, then read the installed parser’s source to check for bugs, ran many clean test cases until they gave the same output as the input, ran a standard XSS test suite, and finally, wrote a random-document fuzzer.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "2i5np",
+            "text": "For something as edge-cased as a HTML sanitizer, this extra effort is well worth it. Spending more tokens for thoroughness also makes sense for complex tasks with high production requirements such as performance optimization or security review.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "93afs",
+            "text": "But you don’t need this level of effort for every task.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "br98b",
+            "text": "The diagram below shows every Terminal-Bench 3.0 result and how it failed, across different models and effort levels. Overall, increasing effort tends to reduce failures due to missing edgecases (purple blocks), but does not fix when the model has the wrong approach (blue blocks).",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 5,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "akbc",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "1r5fh",
+            "text": "Problem areas where effort helps",
+            "type": "header-two"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "40cb7",
+            "text": "One of the most interesting takeaways for me from evaluating these models on TerminalBench was that there were some problem areas that benefited from effort more than others. You can see a breakdown in the following diagram:",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 6,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "31fe0",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "6r2qn",
+            "text": "To illustrate this, I chose a few problems from different areas from Terminal Bench 3.0 where Opus 5.5 failed at low effort but succeeded at high effort–mostly because it tested and accounted for edge cases:",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 20,
+                "offset": 0,
+                "style": "Bold"
+              }
+            ],
+            "key": "8lmlk",
+            "text": "mvcc-lsm-compaction: a Terminal-Bench 3.0 task that asks for a fix to a storage-engine bug from its crash report, without breaking compaction. Opus 5.5 went from 0/5 at low to 4/5 at xhigh.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "3m0r6",
+            "text": "At low (about a minute per attempt), Claude would edit the code before building it or running the reproducer, and did not check that its new test would have caught the original bug.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "cfl7t",
+            "text": "At xhigh (about 11 minutes), Claude reproduced the crash first, wrote a randomized test against a reference that never compacts, and checked that its tests failed on half-finished fixes.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 15,
+                "offset": 0,
+                "style": "Bold"
+              }
+            ],
+            "key": "62k3f",
+            "text": "cli-2ph-simple: is a Terminal-Bench 3.0 task that asks for a CLI linear-program solver written in Python. Opus 5.5 went from 0/5 at low to 5/5 at high.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "f46gd",
+            "text": "The low attempts wrote a solver in one pass, checked it with a few small problems and stopped around 10k tokens. In the final message, Claude warned it might be slow on big problems, but did not check.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "d71t9",
+            "text": "During the high attempts Claude tested its solver on random problems against a separate brute-force solver, then timed bigger ones, hit cases that ran far too long or crashed, and reworked its search.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 15,
+                "offset": 0,
+                "style": "Bold"
+              }
+            ],
+            "key": "bbga4",
+            "text": "gsea-proteomics: a Terminal-Bench 3.0 task that asks for a gene set enrichment analysis (GSEA) on proteomics data to find which of eight treatments resemble a target tissue. Opus 5.5 went from 0/5 at low to 4/5 at high.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "932sa",
+            "text": "At low effort, Claude picked a reasonable-sounding way to prep the data, ran the analysis that one way, and reported the result.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "5ut0n",
+            "text": "At high Claude tried two ways of prepping the data, it noticed that the list of significant treatments changed, and dug into why before choosing the correct one.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "bq7k9",
+            "text": "If a user were in the loop, Claude may have asked the user about the way to setup the problem, but without a user in the loop high effort does better.",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "b1mr4",
+            "text": "When to use different effort levels in Claude Code",
+            "type": "header-two"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "9ud70",
+            "text": "Here’s my rule of thumb on when to use which effort level:",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 3,
+                "offset": 0,
+                "style": "Bold"
+              }
+            ],
+            "key": "309q1",
+            "text": "Low: for when I want quick responses that are in the loop, e.g. brainstorming, sketching, easy changes",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 6,
+                "offset": 0,
+                "style": "Bold"
+              }
+            ],
+            "key": "dsm13",
+            "text": "Medium: for most of my regular software engineering work, e.g. new feature implementation.",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 4,
+                "offset": 0,
+                "style": "Bold"
+              }
+            ],
+            "key": "2b3r5",
+            "text": "High: for work where verification is important or there are edge cases, e.g. fixing a bug in a brownfield codebase.",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 3,
+                "offset": 0,
+                "style": "Bold"
+              }
+            ],
+            "key": "e2pvc",
+            "text": "Max: When I want Claude to operate fully autonomously to solve difficult problems, e.g. end to end building and verification of an app, finding security vulnerabilities in critical software.",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 7,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "dfpia",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "bm6o7",
+            "text": "Try varying effort for Opus 5.5 and Fable 5.1 based on your task or even mid-conversation by using /effort in Claude Code and let me know if this matches your intuition.",
+            "type": "unstyled"
+          }
+        ],
+        "entityMap": [
+          {
+            "key": "4",
+            "value": {
+              "data": {
+                "entityKey": "dcaf872d-125e-4ade-b78d-7bb578c0a10d",
+                "url": "https://github.com/harbor-framework/terminal-bench/releases/tag/v3.0.0"
+              },
+              "mutability": "Mutable",
+              "type": "LINK"
+            }
+          },
+          {
+            "key": "5",
+            "value": {
+              "data": {
+                "entityKey": "dcfd3a20-42af-4c12-b68e-0aa600381f96",
+                "mediaItems": [
+                  {
+                    "localMediaId": "10",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2103540176408756224"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "6",
+            "value": {
+              "data": {
+                "entityKey": "34bff0e1-ea6a-4121-9579-5a0f94ad80c4",
+                "mediaItems": [
+                  {
+                    "localMediaId": "12",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2103540452477779968"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "1",
+            "value": {
+              "data": {
+                "entityKey": "84739de4-a4bc-4547-b4ae-d40321f3ac68",
+                "mediaItems": [
+                  {
+                    "localMediaId": "4",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2103539842336636928"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "0",
+            "value": {
+              "data": {
+                "entityKey": "0818f461-8acc-433c-8860-8c4a1b6b9e43",
+                "mediaItems": [
+                  {
+                    "localMediaId": "2",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2103539501989847040"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "2",
+            "value": {
+              "data": {
+                "entityKey": "be4ac598-2df1-4023-b3a3-7f1184c7b336",
+                "mediaItems": [
+                  {
+                    "localMediaId": "6",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2103539933621440512"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "7",
+            "value": {
+              "data": {
+                "entityKey": "091db715-ef0a-43fe-902d-ee8e0fd19091",
+                "mediaItems": [
+                  {
+                    "localMediaId": "14",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2103541323752144896"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "3",
+            "value": {
+              "data": {
+                "entityKey": "8601dfff-917c-4db6-9518-e7bef5fa0679",
+                "mediaItems": [
+                  {
+                    "localMediaId": "8",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2103540000096940032"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          }
+        ]
+      },
+      "cover_media": {
+        "id": "QXBpTWVkaWE6DAAFCgABHTFFnvJaYAAKAAIAAAAAFQdmZgAA",
+        "media_id": "2103539049931890688",
+        "media_info": {
+          "__typename": "ApiImage",
+          "color_info": {
+            "palette": [
+              {
+                "percentage": 96.91,
+                "rgb": {
+                  "blue": 245,
+                  "green": 249,
+                  "red": 250
+                }
+              },
+              {
+                "percentage": 1.96,
+                "rgb": {
+                  "blue": 113,
+                  "green": 117,
+                  "red": 118
+                }
+              },
+              {
+                "percentage": 1.06,
+                "rgb": {
+                  "blue": 59,
+                  "green": 64,
+                  "red": 66
+                }
+              },
+              {
+                "percentage": 0.61,
+                "rgb": {
+                  "blue": 92,
+                  "green": 123,
+                  "red": 219
+                }
+              }
+            ]
+          },
+          "original_img_height": 960,
+          "original_img_url": "https://pbs.twimg.com/media/HTFFnvJaYAAoPxz.jpg",
+          "original_img_width": 2400
+        },
+        "media_key": "3_2103539049931890688"
+      },
+      "id": "QXJ0aWNsZUVudGl0eToyMTAzNTM1MTg3NDI2NzA5NTA0",
+      "lifecycle_state": {
+        "modified_at_secs": 1790366658
+      },
+      "media_entities": [
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTFGpTmbQAAKAAIAAAAAFQdmZgAA",
+          "media_id": "2103540176408756224",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 76.77,
+                  "rgb": {
+                    "blue": 245,
+                    "green": 249,
+                    "red": 250
+                  }
+                },
+                {
+                  "percentage": 10.28,
+                  "rgb": {
+                    "blue": 184,
+                    "green": 152,
+                    "red": 138
+                  }
+                },
+                {
+                  "percentage": 6.13,
+                  "rgb": {
+                    "blue": 104,
+                    "green": 148,
+                    "red": 130
+                  }
+                },
+                {
+                  "percentage": 3,
+                  "rgb": {
+                    "blue": 110,
+                    "green": 80,
+                    "red": 60
+                  }
+                },
+                {
+                  "percentage": 2.22,
+                  "rgb": {
+                    "blue": 110,
+                    "green": 75,
+                    "red": 118
+                  }
+                }
+              ]
+            },
+            "original_img_height": 1138,
+            "original_img_url": "https://pbs.twimg.com/media/HTFGpTmbQAAxG-P.png",
+            "original_img_width": 1364
+          },
+          "media_key": "3_2103540176408756224"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTFGV3FbQAAKAAIAAAAAFQdmZgAA",
+          "media_id": "2103539842336636928",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 95.25,
+                  "rgb": {
+                    "blue": 244,
+                    "green": 247,
+                    "red": 247
+                  }
+                },
+                {
+                  "percentage": 1.51,
+                  "rgb": {
+                    "blue": 36,
+                    "green": 33,
+                    "red": 32
+                  }
+                },
+                {
+                  "percentage": 0.57,
+                  "rgb": {
+                    "blue": 149,
+                    "green": 160,
+                    "red": 82
+                  }
+                },
+                {
+                  "percentage": 0.48,
+                  "rgb": {
+                    "blue": 191,
+                    "green": 189,
+                    "red": 234
+                  }
+                },
+                {
+                  "percentage": 0.37,
+                  "rgb": {
+                    "blue": 126,
+                    "green": 207,
+                    "red": 230
+                  }
+                }
+              ]
+            },
+            "original_img_height": 876,
+            "original_img_url": "https://pbs.twimg.com/media/HTFGV3FbQAAUutY.jpg",
+            "original_img_width": 2400
+          },
+          "media_key": "3_2103539842336636928"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTFGbLJa0AAKAAIAAAAAFQdmZgAA",
+          "media_id": "2103539933621440512",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 54.09,
+                  "rgb": {
+                    "blue": 24,
+                    "green": 26,
+                    "red": 27
+                  }
+                },
+                {
+                  "percentage": 40.72,
+                  "rgb": {
+                    "blue": 245,
+                    "green": 249,
+                    "red": 250
+                  }
+                },
+                {
+                  "percentage": 4.27,
+                  "rgb": {
+                    "blue": 110,
+                    "green": 113,
+                    "red": 114
+                  }
+                }
+              ]
+            },
+            "original_img_height": 640,
+            "original_img_url": "https://pbs.twimg.com/media/HTFGbLJa0AAbBfu.jpg",
+            "original_img_width": 2400
+          },
+          "media_key": "3_2103539933621440512"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTFG5YCaQAAKAAIAAAAAFQdmZgAA",
+          "media_id": "2103540452477779968",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 99.63,
+                  "rgb": {
+                    "blue": 245,
+                    "green": 249,
+                    "red": 250
+                  }
+                },
+                {
+                  "percentage": 0.22,
+                  "rgb": {
+                    "blue": 140,
+                    "green": 143,
+                    "red": 144
+                  }
+                },
+                {
+                  "percentage": 0.16,
+                  "rgb": {
+                    "blue": 108,
+                    "green": 135,
+                    "red": 207
+                  }
+                }
+              ]
+            },
+            "original_img_height": 1164,
+            "original_img_url": "https://pbs.twimg.com/media/HTFG5YCaQAAPEim.jpg",
+            "original_img_width": 1364
+          },
+          "media_key": "3_2103540452477779968"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTFGfCyacAAKAAIAAAAAFQdmZgAA",
+          "media_id": "2103540000096940032",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 59.83,
+                  "rgb": {
+                    "blue": 32,
+                    "green": 28,
+                    "red": 22
+                  }
+                },
+                {
+                  "percentage": 25.59,
+                  "rgb": {
+                    "blue": 245,
+                    "green": 249,
+                    "red": 250
+                  }
+                },
+                {
+                  "percentage": 4.53,
+                  "rgb": {
+                    "blue": 106,
+                    "green": 179,
+                    "red": 57
+                  }
+                },
+                {
+                  "percentage": 1.82,
+                  "rgb": {
+                    "blue": 67,
+                    "green": 108,
+                    "red": 39
+                  }
+                },
+                {
+                  "percentage": 0.4,
+                  "rgb": {
+                    "blue": 56,
+                    "green": 195,
+                    "red": 248
+                  }
+                }
+              ]
+            },
+            "original_img_height": 1308,
+            "original_img_url": "https://pbs.twimg.com/media/HTFGfCyacAAd6B_.jpg",
+            "original_img_width": 2400
+          },
+          "media_key": "3_2103540000096940032"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTFHsFyaAAAKAAIAAAAAFQdmZgAA",
+          "media_id": "2103541323752144896",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 90.54,
+                  "rgb": {
+                    "blue": 245,
+                    "green": 249,
+                    "red": 250
+                  }
+                },
+                {
+                  "percentage": 4.1,
+                  "rgb": {
+                    "blue": 38,
+                    "green": 42,
+                    "red": 43
+                  }
+                },
+                {
+                  "percentage": 4,
+                  "rgb": {
+                    "blue": 87,
+                    "green": 119,
+                    "red": 218
+                  }
+                },
+                {
+                  "percentage": 0.28,
+                  "rgb": {
+                    "blue": 114,
+                    "green": 131,
+                    "red": 153
+                  }
+                }
+              ]
+            },
+            "original_img_height": 1056,
+            "original_img_url": "https://pbs.twimg.com/media/HTFHsFyaAAA7ojq.jpg",
+            "original_img_width": 1200
+          },
+          "media_key": "3_2103541323752144896"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTFGCDMbYAAKAAIAAAAAFQdmZgAA",
+          "media_id": "2103539501989847040",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 99.5,
+                  "rgb": {
+                    "blue": 237,
+                    "green": 245,
+                    "red": 245
+                  }
+                },
+                {
+                  "percentage": 0.24,
+                  "rgb": {
+                    "blue": 136,
+                    "green": 142,
+                    "red": 142
+                  }
+                },
+                {
+                  "percentage": 0.22,
+                  "rgb": {
+                    "blue": 191,
+                    "green": 206,
+                    "red": 236
+                  }
+                }
+              ]
+            },
+            "original_img_height": 1208,
+            "original_img_url": "https://pbs.twimg.com/media/HTFGCDMbYAACmRU.jpg",
+            "original_img_width": 1432
+          },
+          "media_key": "3_2103539501989847040"
+        }
+      ],
+      "metadata": {
+        "first_published_at_secs": 1790366658
+      },
+      "plain_text": "One of the best parts of our newest Claude models is how they respond to effort without breaking the prompt cache in Claude Code, but I’ve received a lot of questions on this from users. What is effort really and when do you use which effort level? Why do we need effort at all?\nTo answer this, I decided to do a deep dive into the evals and do my own tests of effort across normal work.\nnote: you can see more interactive diagrams and explainers for this post on https://claude.dev/blog/spending-your-effort/  \nAt a high level, I found that effort was a great way of changing how much verification and edgecase testing Claude did and how much of its own judgement it used. \nExtra effort gave better results in areas where verification and edgecase testing was more useful like hardware, code review, and security.\nBut low and medium effort was perfect for getting things done quickly and staying in the loop with Claude.\nFor normal software engineering, I’m now running a loop of getting the model to interview me then implementing on low/medium effort, reviewing what it built, and then running verification on high effort.\nWhat is effort?\nAt a high level, effort gives the model an approximation of how much compute you want it to spend on the task. It’s somewhat related to your modeling of the difficulty of the task.\nThink of it this way, if someone asked you to do something in 12 hours straight, you might assume they just want you to do it and try very hard. If someone asked you to do the same task in 1 hour, you’d try to get them the best version that meets their task and then expect to iterate from there.\nOr, you might push back and say the task requires at least 3 hours and then work for 3 hours to deliver it.\nYou should think of effort in the same way. Claude will always try and do your task reasonably, but higher effort will involve Claude taking more independent action for judgement and verification.\nEffort curves\nFable 5.1 and Opus 5.5’s effort curves are our best yet, at each level if there is an uptick in benchmark scores and tokens consumed. Below is a graph of Terminal Bench 3.0 scores by effort, measured during my eval runs for this post.\n \nBut what does this mean in practice? To evaluate this, I tried several tasks at different effort levels and poured over the benchmarks. \nBuilding with effort\nThe best way to understand how models work is to run experiments. I tried doing the same tasks at several different effort levels on Opus 5.5 understand the work it would do. I did this on a wide variety of work, but am illustrating this with a few toy examples.\nUnderspecified build task\nIf I ask Claude to “build a personal fitness and workout tracker app,” effort changes dramatically how fleshed out the app is, but also results in Claude making more choices along the way. At low effort, the fitness app is just a log and a simple graph. At higher effort levels the app is more complex with additional detail. At max effort there’s a heat chart.\n \nIf I wanted a simple base to iterate from, low effort would get it done. Max effort would be if I wanted Claude’s best one shot.\nLightly specified design task\nWhat if I have a task that is fairly specified already but I want some exploration with Claude? As an example I tried to ask it to redesign the /config menu in Claude Code. Every pass had roughly the same idea, to use submenus and better search.\nAt low effort (which took 1 minute), I got an interactive sketch that conveyed the idea but didn't look very much like Claude Code.\nAt max effort (which took 28 minutes), I got a mockup that looked very much like Claude Code, along with a bunch of walkthroughs for different flows.\nIf my goal was to iterate and give feedback, low effort would get there much faster. But max effort gives me something much more polished right off the bat. For this particular task, I think I prefer using low effort to understand Claude’s vision.\n \nHighly specified build task\nWhat if I gave Claude lots of details? I tried asking Claude to interview me in-depth about the fitness app and then gave that spec to be implemented by different models at different effort levels.\nI found that given this spec, the models behaved much more similarly. I got designs that looked fairly similar and had similar implementations but with different details, at max effort Claude took some time to simplify a few of the details. \n \nTakeaways\nFor regular software engineering, particularly new feature work, the effort level depends a lot on how in the loop I want to be. Low effort allows Claude to respond quickly with a starting point, higher effort levels will get more work done but Claude will also make more assumptions on my behalf.\nA particularly fruitful loop for feature development I’ve been using is:\nGive Claude a spec and ask it to interview me about any details I’m missing\nImplement it on low effort\nReview to make sure it got the gist of it correct, iterate on low effort as needed\nVerify and test on high effort\nHow effort levels impact output on difficult tasks\nBut these are obviously toy examples, where Claude is well able to complete them. What about when the difference is between Claude completing the task or not completing the task?\nTo find these difficult problems, you have to go to the benchmarks so I dove into one I like: Terminal Bench 3, a community sourced benchmark.\nTerminal-Bench 3.0 problems can broadly be separated into categories like security, hardware, ML,  science, software, operations and media.  You can see all of the problems here: https://github.com/harbor-framework/terminal-bench/releases/tag/v3.0.0, they’re sourced from the community so anyone can contribute.\nIt’s worth reading to get a sense of the type of problems these models face. I found I was surprised by the scope and ambition of a lot of these tasks. The are much more complicated than the average task I’d face.\nFor example, some of the tasks included:\nHardware (retro-console-soc): build an 8-bit game console in Verilog that fits a small FPGA and renders a test ROM.\nScience (takens-embedding-lean): formally prove Takens’ embedding theorem in Lean 4.\nML (mp-checkpoint-consolidation): merge 16 shards of a mixture-of-experts checkpoint into one file that reproduces the reference logits.\nOperations (intrastat-meldung): run a company’s month-end EU trade-statistics filing end to end.\nMedia (layout-config-recreation): rebuild a poster image as an editable layout file.\nHigher effort levels help when there are many edge cases\nMy main takeaway from reading the Terminal Bench 3 results was that higher effort is best for tasks with lots of hidden edge cases.\nA clean example is html-js-filter, a Terminal-Bench 3.0 task that asks for an HTML sanitizer that strips every way of smuggling JavaScript into a page. Fable 5.1 went from 1/5 at low to 5/5 at xhigh.\nA typical attempt at low effort takes about 2 minutes. Each of these attempts wrote a filter in roughly one pass, then tested it against a single hand-written page.\nA high effort run finishes in about 33 minutes. In the run I traced, it adversarially reviewed its first draft, then read the installed parser’s source to check for bugs, ran many clean test cases until they gave the same output as the input, ran a standard XSS test suite, and finally, wrote a random-document fuzzer.\nFor something as edge-cased as a HTML sanitizer, this extra effort is well worth it. Spending more tokens for thoroughness also makes sense for complex tasks with high production requirements such as performance optimization or security review.\nBut you don’t need this level of effort for every task.\nThe diagram below shows every Terminal-Bench 3.0 result and how it failed, across different models and effort levels. Overall, increasing effort tends to reduce failures due to missing edgecases (purple blocks), but does not fix when the model has the wrong approach (blue blocks).\n \nProblem areas where effort helps\nOne of the most interesting takeaways for me from evaluating these models on TerminalBench was that there were some problem areas that benefited from effort more than others. You can see a breakdown in the following diagram:\n \nTo illustrate this, I chose a few problems from different areas from Terminal Bench 3.0 where Opus 5.5 failed at low effort but succeeded at high effort–mostly because it tested and accounted for edge cases:\nmvcc-lsm-compaction: a Terminal-Bench 3.0 task that asks for a fix to a storage-engine bug from its crash report, without breaking compaction. Opus 5.5 went from 0/5 at low to 4/5 at xhigh.\nAt low (about a minute per attempt), Claude would edit the code before building it or running the reproducer, and did not check that its new test would have caught the original bug.\nAt xhigh (about 11 minutes), Claude reproduced the crash first, wrote a randomized test against a reference that never compacts, and checked that its tests failed on half-finished fixes.\ncli-2ph-simple: is a Terminal-Bench 3.0 task that asks for a CLI linear-program solver written in Python. Opus 5.5 went from 0/5 at low to 5/5 at high.\nThe low attempts wrote a solver in one pass, checked it with a few small problems and stopped around 10k tokens. In the final message, Claude warned it might be slow on big problems, but did not check.\nDuring the high attempts Claude tested its solver on random problems against a separate brute-force solver, then timed bigger ones, hit cases that ran far too long or crashed, and reworked its search.\ngsea-proteomics: a Terminal-Bench 3.0 task that asks for a gene set enrichment analysis (GSEA) on proteomics data to find which of eight treatments resemble a target tissue. Opus 5.5 went from 0/5 at low to 4/5 at high.\nAt low effort, Claude picked a reasonable-sounding way to prep the data, ran the analysis that one way, and reported the result.\nAt high Claude tried two ways of prepping the data, it noticed that the list of significant treatments changed, and dug into why before choosing the correct one.\nIf a user were in the loop, Claude may have asked the user about the way to setup the problem, but without a user in the loop high effort does better.\nWhen to use different effort levels in Claude Code\nHere’s my rule of thumb on when to use which effort level:\nLow: for when I want quick responses that are in the loop, e.g. brainstorming, sketching, easy changes\nMedium: for most of my regular software engineering work, e.g. new feature implementation.\nHigh: for work where verification is important or there are edge cases, e.g. fixing a bug in a brownfield codebase.\nMax: When I want Claude to operate fully autonomously to solve difficult problems, e.g. end to end building and verification of an app, finding security vulnerabilities in critical software.\n \nTry varying effort for Opus 5.5 and Fable 5.1 based on your task or even mid-conversation by using /effort in Claude Code and let me know if this matches your intuition.",
+      "preview_text": "One of the best parts of our newest Claude models is how they respond to effort without breaking the prompt cache in Claude Code, but I’ve received a lot of questions on this from users. What is",
+      "rest_id": "2103535187426709504",
+      "title": "Using Claude Code: Spending your effort "
+    }
+  }
+}

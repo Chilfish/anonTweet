@@ -1,4 +1,4 @@
-import type { EnrichedTweet } from '~/types'
+import type { EnrichedTweet, Entity } from '~/types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 /**
@@ -16,6 +16,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const getLocalCache = vi.fn()
 const setLocalCache = vi.fn()
 const resolveSpaceById = vi.fn()
+const getEnrichedTweet = vi.fn()
 
 vi.mock('~/lib/localCache', () => ({
   getLocalCache: (...args: unknown[]) => getLocalCache(...args),
@@ -23,7 +24,7 @@ vi.mock('~/lib/localCache', () => ({
 }))
 
 vi.mock('~/lib/react-tweet/utils/get-tweet', () => ({
-  getEnrichedTweet: vi.fn(),
+  getEnrichedTweet: (...args: unknown[]) => getEnrichedTweet(...args),
   resolveSpaceById: (...args: unknown[]) => resolveSpaceById(...args),
 }))
 
@@ -156,5 +157,65 @@ describe('AC-SPACE-011: backfills space for tweets cached before the field exist
 
     expect(await getLocalTweet('1')).toBeNull()
     expect(resolveSpaceById).not.toHaveBeenCalled()
+  })
+})
+
+/**
+ * AC-TWEET-015 —— 旧 flat 文章缓存升级为富文本块文档。
+ *
+ * `format` 判别是后加的：改动前落地的缓存里 `article` 只有 `plainText`，
+ * 而 `if (tweet.article) return` 会把它误当最新 → 块文档永不可见。故按 `format`
+ * 结构化判别并在读出口重抓一次。
+ */
+const articleUrlEntity: Entity = {
+  type: 'url',
+  index: 0,
+  text: 'x.com/i/article/2104…',
+  display_url: 'x.com/i/article/2104…',
+  url: 'https://t.co/EhcNsbMwRz',
+  expanded_url: 'https://x.com/i/article/2104009234858024962',
+  href: 'https://x.com/i/article/2104009234858024962',
+} as Entity
+
+const flatArticle = {
+  id: '2104009234858024962',
+  url: 'https://x.com/i/article/2104009234858024962',
+  title: '初のイベント延期のご案内',
+  plainText: 'body',
+  format: 'plain' as const,
+}
+
+describe('AC-TWEET-015: upgrades flat cached articles to the rich block document', () => {
+  it('AC-TWEET-015: re-fetches and persists the rich article for a flat cache entry', async () => {
+    getLocalCache.mockResolvedValue(cachedSpaceTweet({ id_str: '2104058634452005231', entities: [articleUrlEntity], article: flatArticle }))
+    getEnrichedTweet.mockResolvedValue(cachedSpaceTweet({
+      id_str: '2104058634452005231',
+      entities: [articleUrlEntity],
+      article: { ...flatArticle, format: 'rich', blocks: [{ key: 'a', type: 'paragraph', runs: [{ type: 'text', text: 'body' }] }] },
+    }))
+
+    const tweet = await getLocalTweet('2104058634452005231')
+
+    expect(getEnrichedTweet).toHaveBeenCalledWith('2104058634452005231')
+    expect(tweet?.article?.format).toBe('rich')
+    expect(tweet?.article?.blocks).toHaveLength(1)
+    expect(setLocalCache).toHaveBeenCalledWith(expect.objectContaining({
+      id: '2104058634452005231',
+      type: 'tweet',
+      value: expect.objectContaining({ article: expect.objectContaining({ format: 'rich' }) }),
+    }))
+  })
+
+  it('AC-TWEET-015: leaves a tweet that already has a rich article untouched', async () => {
+    getLocalCache.mockResolvedValue(cachedSpaceTweet({
+      entities: [articleUrlEntity],
+      article: { ...flatArticle, format: 'rich', blocks: [] },
+    }))
+
+    const tweet = await getLocalTweet('2104058634452005231')
+
+    expect(getEnrichedTweet).not.toHaveBeenCalled()
+    expect(setLocalCache).not.toHaveBeenCalled()
+    expect(tweet?.article?.format).toBe('rich')
   })
 })
