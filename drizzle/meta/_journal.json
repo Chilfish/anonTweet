@@ -15,6 +15,13 @@
       "when": 1780217894218,
       "tag": "0001_fluffy_amphibian",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790485940323,
+      "tag": "0002_greedy_omega_red",
+      "breakpoints": true
     }
   ]
 }

@@ -1,5 +1,6 @@
 import type { EnrichedTweet } from '~/types'
 import { cn } from '~/lib/utils'
+import { isArticleUrl } from '../utils/article'
 import { isSpaceUrl } from '../utils/space'
 import { TweetLink } from './tweet-link'
 
@@ -27,6 +28,10 @@ export function TweetBody({ tweet, isTranslated, lang, className }: TweetBodyPro
             // Space 卡片（TweetSpaceCard）已承载同一跳转，官方前端同样不重复展示该链接。
             // 仅在卡片数据确实渲染出来时才跳过——元数据获取失败时链接照常显示（优雅降级）。
             if (tweet.space && isSpaceUrl(item.href))
+              return null
+            // Article 卡片（TweetArticleCard）已承载文章入口，避免重复一条裸链接。
+            // 卡片在 `TweetNode` 里对「有文章链接」的推文必定渲染，故此处可直接去重。
+            if (isArticleUrl(item.href))
               return null
             return (
               <TweetLink key={item.index} href={item.href}>

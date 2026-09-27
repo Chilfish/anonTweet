@@ -1,9 +1,11 @@
 import type { Route } from './+types/ai-translation'
+import type { ThinkingLevel } from '~/lib/stores/appConfig'
 import type { AITranslationSchema } from '~/lib/validations/tweet'
 import { data } from 'react-router'
 import { isAllowedAIBaseUrl } from '~/lib/ai-base-url'
 import { normalizeAIError } from '~/lib/ai-error'
 import { autoTranslateTweet } from '~/lib/AITranslation'
+import { autoTranslateArticle } from '~/lib/article/translate'
 import { models } from '~/lib/constants'
 import { setLocalCache } from '~/lib/localCache'
 import { getProviderStrategy } from '~/lib/providers'
@@ -16,6 +18,7 @@ import { translateIGCaption } from '~/lib/translateIGCaption'
  * 统一 AI 翻译端点，通过 `type` 区分：
  * - `twitter` (默认): 翻译推文实体
  * - `ins`: 翻译 Instagram caption
+ * - `article`: 按块翻译 X Article 长文
  */
 export async function action({ request }: Route.ActionArgs) {
   const jsonData: AITranslationSchema = await request.json()
@@ -25,8 +28,69 @@ export async function action({ request }: Route.ActionArgs) {
     return handleIGTranslation(jsonData)
   }
 
+  // ─── Article 分支 ───────────────────────────────
+  if (jsonData.type === 'article') {
+    return handleArticleTranslation(jsonData)
+  }
+
   // ─── Twitter 分支（原逻辑） ────────────────────
   return handleTweetTranslation(jsonData)
+}
+
+/**
+ * X Article 按块 AI 翻译
+ */
+async function handleArticleTranslation(args: Extract<AITranslationSchema, { type: 'article' }>) {
+  const { article, apiKey, model, provider, baseUrl, thinkingLevel, translationGlossary } = args
+
+  if (!article || (!article.blocks?.length && !article.title)) {
+    return data({ success: false, error: 'Article not found or empty', status: 404 })
+  }
+
+  if (!apiKey || !model) {
+    return data({ success: false, error: 'Missing apiKey or model', status: 400 })
+  }
+
+  // AC-SEC-001：baseUrl 白名单校验
+  if (!isAllowedAIBaseUrl(baseUrl)) {
+    return data({
+      success: false,
+      error: 'baseUrl not allowed',
+      status: 400,
+      message: 'baseUrl 不在白名单内：仅支持官方提供商域名或 ALLOWED_AI_BASE_URL_HOSTS 扩展域名（AC-SEC-001，ENABLE_AI_BASE_URL_WHITELIST=true）',
+    })
+  }
+
+  try {
+    const modelConfig = models.find(m => m.name === model)
+    const resolvedProvider = provider || modelConfig?.provider || 'google'
+
+    const strategy = getProviderStrategy(resolvedProvider)
+    const sdkProvider = strategy.createSDKProvider(apiKey, baseUrl)
+    const modelInstance = sdkProvider.languageModel(model)
+
+    const translation = await autoTranslateArticle(article, {
+      modelInstance,
+      modelName: model,
+      thinkingLevel: thinkingLevel as ThinkingLevel | undefined,
+      translationGlossary,
+    })
+
+    return data({
+      success: true,
+      data: { articleId: article.id, translation },
+    })
+  }
+  catch (error: unknown) {
+    console.error('[AI-Trans Article] Failed:', error)
+    return data({
+      success: false,
+      error: 'Translation failed',
+      status: 500,
+      message: error instanceof Error ? error.message : '未知错误',
+      aiError: normalizeAIError(error),
+    })
+  }
 }
 
 /**

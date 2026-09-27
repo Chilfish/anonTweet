@@ -5,6 +5,7 @@ import { TranslationEditor } from '~/components/translation/TranslationEditor'
 import { Button } from '~/components/ui/button'
 import { useVisionLogic } from '~/hooks/use-vision-logic'
 import { TweetHeader, TweetMedia } from '~/lib/react-tweet'
+import { resolveArticleLink } from '~/lib/react-tweet/utils/article'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 import {
   useScreenshoting,
@@ -13,6 +14,7 @@ import {
 } from '~/lib/stores/hooks'
 import { cn } from '~/lib/utils'
 import { AIVisionBlock } from './AIVisionBlock'
+import { TweetArticleCard } from './TweetArticleCard'
 import { TweetLinkCard } from './TweetCard'
 import { TweetMediaAlt } from './TweetMediaAlt'
 import { TweetSpaceCard } from './TweetSpaceCard'
@@ -106,6 +108,12 @@ export const TweetNode = forwardRef<HTMLDivElement, TweetNodeProps>(({
   // 编辑器状态上提：翻译按钮旁的图片描述入口与 AIVisionBlock 内入口共用同一弹窗
   const visionEditor = useVisionLogic(tweet)
 
+  // 文章入口：优先完整 article 节点；search/list 等不取富文本的路径退化为「仅链接」卡片
+  const article = useMemo(
+    () => tweet.article ?? resolveArticleLink(tweet.entities) ?? undefined,
+    [tweet],
+  )
+
   // 样式映射表，替代混乱的 cn
   const styles = useMemo(() => ({
     container: cn('relative', {
@@ -132,6 +140,8 @@ export const TweetNode = forwardRef<HTMLDivElement, TweetNodeProps>(({
 
       <div className={styles.body}>
         <TweetTextBody tweet={tweet} />
+
+        {article && <TweetArticleCard article={article} tweetId={tweet.id_str} />}
 
         <TweetMediaSection tweet={tweet} />
 

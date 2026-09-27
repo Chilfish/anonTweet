@@ -147,13 +147,14 @@ export class TweetRequests {
           responsive_web_grok_imagine_annotation_enabled: false,
           responsive_web_profile_redirect_enabled: true,
         }),
+        fieldToggles: JSON.stringify({ withArticleRichContentState: true, withArticlePlainText: true }),
       },
       paramsSerializer: { encode: encodeURIComponent },
     }
   }
 
   /**
-   * @param id - The id of the tweet to be liked.
+   * @param id - The ID of the tweet to be liked.
    */
   public static like(id: string): AxiosRequestConfig {
     return {

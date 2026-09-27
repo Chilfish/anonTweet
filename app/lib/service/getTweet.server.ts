@@ -1,8 +1,10 @@
+import type { ArticleTranslation } from '~/lib/article/translate'
 import type { EnrichedTweet, TranslationEntity } from '~/types'
 import type { AIVisionInfo } from '~/types/vision'
 import { eq } from 'drizzle-orm'
 import { getDbClient, isDbAvailable } from '~/lib/database/db.server'
-import { tweet, tweetEntities } from '~/lib/database/schema'
+import { tweet, tweetArticleTranslations, tweetEntities } from '~/lib/database/schema'
+import { isArticleUrl } from '~/lib/react-tweet/utils/article'
 import { getEnrichedTweet, resolveSpaceById } from '~/lib/react-tweet/utils/get-tweet'
 import { resolveSpaceId } from '~/lib/react-tweet/utils/space'
 import { getLocalCache, setLocalCache } from '../localCache'
@@ -43,9 +45,43 @@ async function backfillSpaceDetails(tweet: EnrichedTweet): Promise<EnrichedTweet
 }
 
 /**
+ * 为**已缓存**的文章型推文回填 `article` 字段。
+ *
+ * `article` 是后加字段：改动前落地的缓存没有它（或只有 flat 的 `plainText`），
+ * 命中缓存时不再走 `getEnrichedTweet`，于是文章只渲染正文里那条裸链接。旧缓存不保留
+ * 原始 `article` 节点，但文章链接始终存在于实体里，故据此探测并重抓一次上游；
+ * 结果 best-effort 写回两层缓存，取数失败（如 429）保持原样返回。
+ *
+ * 判别用 `format === 'rich'`（结构化）而非「有没有 article」——否则 flat 缓存会被
+ * 误当成最新，DB 行将永不升级为块文档。
+ */
+async function backfillArticleDetails(tweet: EnrichedTweet): Promise<EnrichedTweet> {
+  if (tweet.article?.format === 'rich')
+    return tweet
+
+  const hasArticleLink = tweet.entities.some(e => isArticleUrl((e as { href?: string }).href))
+  if (!hasArticleLink)
+    return tweet
+
+  const fresh = await getEnrichedTweet(tweet.id_str)
+  if (!fresh?.article)
+    return tweet
+
+  const patched: EnrichedTweet = { ...tweet, article: fresh.article }
+
+  await Promise.allSettled([
+    setLocalCache({ id: tweet.id_str, type: 'tweet', value: patched }),
+    insertToTweetDB([patched]),
+  ])
+
+  return patched
+}
+
+/**
  * 读单条推文：localCache → DB → 上游。
  *
- * 出口统一做一次 Space 回填（见 `backfillSpaceDetails`），使旧缓存与新抓取走同一呈现路径。
+ * 出口依次做 Space / Article 回填（见 `backfillSpaceDetails`、`backfillArticleDetails`），
+ * 使旧缓存与新抓取走同一呈现路径。
  */
 export async function getLocalTweet(tweetId: string): Promise<EnrichedTweet | null> {
   const tweet = await getLocalCache({
@@ -57,7 +93,7 @@ export async function getLocalTweet(tweetId: string): Promise<EnrichedTweet | nu
   if (!tweet)
     return tweet
 
-  return backfillSpaceDetails(tweet)
+  return backfillArticleDetails(await backfillSpaceDetails(tweet))
 }
 
 export function mergeTranslationEntities(enrichedTweet: EnrichedTweet, entities: TranslationEntity[]) {
@@ -172,6 +208,65 @@ export async function updateTweetVisionInfo(
   catch {
     // localCache 更新 best-effort
   }
+}
+
+/**
+ * 读取某条文章推文的按块译文。
+ *
+ * 两级：localCache（`article-translation`，本地 FS/内存）→ DB（`tweet_article_translations`）。
+ * 与 `tweet.jsonContent` 无关——后者会被上游结果整条 upsert 覆盖，译文放进去会丢。
+ * 无 DB / 查询失败时返回 null（页面据此回退为原文，不伪造译文）。
+ */
+export async function getArticleTranslation(tweetId: string): Promise<ArticleTranslation | null> {
+  const fromDb = async (): Promise<ArticleTranslation | null> => {
+    if (!isDbAvailable())
+      return null
+    try {
+      const row = await getDbClient().query.tweetArticleTranslations.findFirst({
+        where: eq(tweetArticleTranslations.tweetId, tweetId),
+      })
+      return row?.translations ?? null
+    }
+    catch (error) {
+      console.warn('[ArticleTrans] read failed:', error)
+      return null
+    }
+  }
+
+  // localCache 未命中时回源 DB，并顺带写回本地层，避免每次浏览都打库
+  return getLocalCache<ArticleTranslation | null>({
+    id: tweetId,
+    type: 'article-translation',
+    getter: fromDb,
+  })
+}
+
+/**
+ * 持久化某条文章推文的按块译文（best-effort，同时写本地缓存 + DB）。
+ */
+export async function updateArticleTranslation(
+  tweetId: string,
+  translation: ArticleTranslation,
+): Promise<void> {
+  await Promise.allSettled([
+    setLocalCache({ id: tweetId, type: 'article-translation', value: translation }),
+    (async () => {
+      if (!isDbAvailable())
+        return
+      try {
+        await getDbClient()
+          .insert(tweetArticleTranslations)
+          .values({ tweetId, translations: translation })
+          .onConflictDoUpdate({
+            target: tweetArticleTranslations.tweetId,
+            set: { translations: translation, updatedAt: new Date() },
+          })
+      }
+      catch (error) {
+        console.error('[ArticleTrans] write failed:', error)
+      }
+    })(),
+  ])
 }
 
 export async function getDBTweet(tweetId: string): Promise<EnrichedTweet | null> {

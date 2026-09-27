@@ -1,0 +1,2517 @@
+{
+  "article_results": {
+    "result": {
+      "content_state": {
+        "blocks": [
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "45iof",
+            "text": "关注我的大部分朋友都是程序员，这个 skill 就是给你们，更准确是给我们写的。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 18,
+                "offset": 9,
+                "style": "Bold"
+              }
+            ],
+            "key": "3b19o",
+            "text": "维护代码仓库的人，手里都有一部现成的 Git 纪录片：第一次提交，第一个版本，最忙的那一天，半夜的回滚，改名，搬家，几万颗星。可这些都躺在 git log 里，新来的人只看 README。",
+            "type": "blockquote"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 0,
+                "length": 5,
+                "offset": 20
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "dh75g",
+            "text": "git-story-film 是一个给 raven 做宣传视频时产出的创意 skill。你给它一个 GitHub 链接，Opus 5.5 就当导演：从几千次提交里挑出能讲故事的事实，给项目找一个主角，定一种画风，最后交给你一部两分钟左右的手绘动画短片。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "bbia4",
+            "text": "你最后拿到的是：",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "evugh",
+            "text": "一个 4K、60 帧的 MP4，配乐由代码实时合成；",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "f4th0",
+            "text": "一键生成，一镜到底，但也保留了源码可修改的空间，绝对不是那种快闪式的 AI Slop",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "463je",
+            "text": "主角第一人称的字幕，讲给第一次听说这个项目的人；",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "6oe8n",
+            "text": "画面上真实的日期、commit hash 和提交次数，一次提交就是画面上的一颗珠子、一盏灯或一片叶子；",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "511mu",
+            "text": "一个能在浏览器里拖着看的 Studio 页面，以及整部片的源代码。",
+            "type": "unordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "c2rr4",
+            "text": "这个 skill 不仅能帮你一键生成，也能让你扮演一个真正的导演，帮你提前订好提纲、分镜、脚本，每走一步都停下来给你看一样东西，你点头了才往下走。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 1,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "2tr07",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "crt63",
+            "text": "先看成片：四个仓库，四种长法",
+            "type": "header-one"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "4gfrs",
+            "text": "同一套方法，四部片子长得完全不一样。导演先读懂产品，再决定你的项目“成长”在画面上是什么样子。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "20a0c",
+            "text": "Raven：一路往右飞",
+            "type": "header-two"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 2,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "4uh54",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "bs3ep",
+            "text": "Raven 因为是一只鸟，所以我设计了从纸上的一颗蛋里破壳，沿着一根时间枝只往右走，全片一镜到底。每次提交是枝上一颗亮晶晶的珠子；走过重要的提交，画风就换一次：铅笔、墨、Riso 印刷、丝网、蓝图。128 秒，中英双语。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "6hg15",
+            "text": "视频见",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 3,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "5be3p",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "jupp",
+            "text": "CC Switch：一面越长越大的总机墙",
+            "type": "header-two"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 4,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "5fsdu",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "fv976",
+            "text": "CC Switch  的设计是 一面老式电话总机墙从左往右长：一次提交亮一盏灯，一个版本钉一块铜铭牌。主角小火花从官方图标的星芒里长出来，每接入一个 AI 编程工具就多一道光。正式版发布那天天一亮，整面墙从纸上立成 3D。2 分 7 秒。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 5,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "fl1me",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "d4uia",
+            "text": "Cherry Studio：一棵从地下往上长的树",
+            "type": "header-two"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 6,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "bpr7u",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "dfksl",
+            "text": "",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "6057r",
+            "text": "Cherry Studio 也是我的 AI 启蒙老师之一, 设计的思路是樱桃树，镜头只往上走。一次提交一片叶，一个新功能一朵花，一个正式版一颗樱桃，每来一位新贡献者就飞来一只蜜蜂。数据底座重写了 373 天，画面上就是在地下“换根”。2 分 13 秒。 ",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 7,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "4211h",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "ssso",
+            "text": "LobeHub：一个在原地长大的脑洞",
+            "type": "header-two"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 8,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "d9gia",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "5esru",
+            "text": "lobehub 我最喜欢的是它的脑洞设计(logo意义的脑洞), 主角 Lobe 待在原地，头顶的“脑洞”越长越大，镜头只往后退。一次提交是一粒飞进脑洞的火星，一次回滚是一个泡泡破掉，一个 GitHub 星标就是一颗星，一共 82,834 颗。2 分 5 秒。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 9,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "472mm",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "4ojqn",
+            "text": "七步视频法：以 Raven 为例",
+            "type": "header-one"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "fqtda",
+            "text": "我把视频拆成了七部, 这七步不是凭空设计的, 是因为曹植七步成诗(并不)。2026年9月24日做 Raven 那天，还没有这套流程：先出整片，边看边改。第一次 4K 渲染在上午 11 点，带字的分镜到下午 3 点才有。一天里开了 13 次 4K 渲染，5 次半路叫停或崩溃。做完之后，我系统整理了一下, 整理成了七部 SOP，每一步都停下来给你看。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 10,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "7amq2",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "9lqki",
+            "text": "第 1 步 · 提纲：先定讲什么故事",
+            "type": "header-two"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "5o3k",
+            "text": "首先打开 claude code 或者 raven,  把你的代码地址丢进去, 并且使用这个skill, 这里需要注意的是, 如果你使用了 claude code, 务必需要使用 /effort max",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "5bejr",
+            "text": "「使用 git-story-film skill,  读取 xxxxx , 帮我设计一份影片」",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "25rn2",
+            "text": "你会看到一份 OUTLINE.md：一句话讲完整部片，用什么形式讲、为什么，主角是谁、字幕用谁的口吻，起承转合四句话，观众看完该记住哪几件事，还有片子依据的真实数字。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "12heg",
+            "text": "Raven 的第一版是夜空里一条累计提交的折线，数据都对，但没有故事。我要的是“一只黑色渡鸦的视角”，还要 “卡通形象，最好大眼睛”、“从破壳到都是遵循一个从左往右的前进路线”。于是提纲里写下了全片的铁律：一镜到底，只往右走。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 11,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "7ibhk",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "9r4sq",
+            "text": "第 2 步 · 主角：表情和动作",
+            "type": "header-two"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "311q9",
+            "text": "你会看到一张角色设定表：6 到 12 个表情，走、跳、飞这些动作的关键姿势，每种画风下的样子，还有缩小以后还认不认得出来。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "cemag",
+            "text": "Raven 的设定表里，铅笔画的雏鸟有好奇、亮晶晶、怀疑、晕；上了墨的成鸟有吃惊、得意、专注、张开翅膀。主角在这一步定下来，后面每个镜头都用同一套代码画它。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 12,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "3u9ri",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "105ee",
+            "text": "第 3 步 · 全片提纲：每一拍对上一个真实提交",
+            "type": "header-two"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "3dvvh",
+            "text": "你会看到约两分钟的完整提纲：分几幕、每幕什么画风、为什么；每一拍的时间、画面、功能和对应的提交；结尾；还有要再核对的说法。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "d4bnp",
+            "text": "Raven 视频在这一步改得最多。我会补充很多细节上的调整：“得介绍功能点啊，不然别人也不知道 raven 能给别人带来什么。” 于是右上角的日期换成了功能卡，片长从 90 秒改成 2 分钟，后半程用一个具体的委托串起四个内置 Agent：“帮我调研三家竞品，写个脚本抓数据，夜里盯着，最后做成一份 PPT。” 顺手核了事实：Raven 的预设里没有 ChatGPT，有的是 Codex；自进化的分数只标成“示意”。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 13,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "cnd3e",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "9nvuu",
+            "text": "第 4 步 · 分镜：先看前 30 秒",
+            "type": "header-two"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "bddlh",
+            "text": "接着预览分镜：前 30 秒每个镜头一张关键帧，关键帧用片子自己的角色和场景代码画出来，旁边写着时间、字幕和对应的提交。这 30 秒定下口吻、节奏和画风，后面照着走。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 14,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "6lmao",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "873m1",
+            "text": "第 5 步 · 详细编写：整部片动起来",
+            "type": "header-two"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "cdf44",
+            "text": "写完剩下的镜头，把整部片做成动画，配乐也在这一步用代码合成。我很惊讶的是 opus 5.5 在音效和简单的配乐上做的这么好, 并且遇到新表情、新动作，先补进设定表给你看。做完先自己检查：把全片抽成一张帧网格，一眼看完节奏和构图。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "d6ru",
+            "text": "这里我还用到了“两个时钟”策略, 默认 claude 会用 24帧来写, 但实际上在画面移动速度稍快的场景下, 很多细节会看不清楚, 于是我改了引擎的代码, 镜头、背景和文字按 60 帧走，角色的姿势照样一秒换 12 到 24 张，顺滑和手绘感分开处理。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 15,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "5l26j",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "149bi",
+            "text": "第 6 步 · Studio：在浏览器里看完整部片",
+            "type": "header-two"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "a1h20",
+            "text": "在正式渲染钱, 打开片子开始预览。上面是画面；下面一条拖动条，每一幕一段色带，每个镜头一个编号格子，拖到哪停到哪，带着配乐从任意位置播放；再往下是每个镜头的分镜图，从当前代码实时画出来。这一步不走 4k 60fps 渲染。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "di1a7",
+            "text": "如果你觉得 AI 这块需要注入自己的 taste, 需要针对细节作调整, 那么你一定很爱这个 skill 给你保留的灵活的空间. ",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "28pq",
+            "text": "下图是 LobeHub 那部片的 Studio。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 16,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "ejbhh",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "27qce",
+            "text": "第 7 步 · 成片：4K60",
+            "type": "header-two"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "2b6fn",
+            "text": "当你确。可以渲染之后, 直接告诉 Claude Code / Raven 可以渲染了。Agent 会打开浏览器一边画，一边把帧直接送进 ffmpeg，4 路并行，不在硬盘上堆上百 GB 的图。交付时导演会报告时长、分辨率和文件大小，完整解码一遍，再抽几帧亲眼看。片尾卡默认也写成第 0 帧，播放器和信息流会拿它当封面，这个细节也是 Raven 的用户提出来的。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "5nprr",
+            "text": "背后的设计思想",
+            "type": "header-two"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "1if5d",
+            "text": "七个步骤只是表面。真正让片子“像这个仓库”的，是下面八条规矩。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 13,
+                "offset": 0,
+                "style": "Bold"
+              }
+            ],
+            "key": "akh2j",
+            "text": "1. 是导演，不是生成器。 Claude 自己拿主意的有三件事：用哪些数据、讲什么故事、用什么画风。你只需要看、点头、提意见。每一步结束，你手里都有一样看得见的东西。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 18,
+                "offset": 0,
+                "style": "Bold"
+              }
+            ],
+            "key": "s1i0",
+            "text": "2. 纸上改最便宜，4K 上改最贵。 改一句提纲几秒钟，重渲一部 4K 要几分钟。所以 Studio 点头之前不出 MP4。就算你说“一直做完”，导演也会停在 Studio 等你看过再渲染。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 17,
+                "offset": 0,
+                "style": "Bold"
+              }
+            ],
+            "key": "eopuv",
+            "text": "3. 一一对应：一次提交就是一格。 画面上的东西和 git 里的事一一对应：一次提交一颗珠子，一个版本一块铭牌，一次回滚一次挫折。每天挂几颗，就是那天真实的提交数。一个符号只代表一种数据：LobeHub 里星星就是星标，提交就只能画成火星。这样拍出来的才是这个仓库的故事，而不是换了名字的模板。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 17,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "5f5c6",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "8braq",
+            "text": "Raven 最忙的一天：137 次提交，画面上就落下 137 颗珠子。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 15,
+                "offset": 0,
+                "style": "Bold"
+              }
+            ],
+            "key": "ak24t",
+            "text": "4. 一部片只守一种镜头语法。 旅程只往右走，从不切镜；生长待在原地，镜头往后退；Cherry Studio 的树只往上长，镜头也只往上。守住这一条，片子才是一个连贯的故事，而不是一串幻灯片。约束还会逼出好点子：镜头下不去，地下的重写就靠一面“地下放大镜”和一条往上追的新根线来讲，追上树梢那一刻就是全片最高点。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 24,
+                "offset": 0,
+                "style": "Bold"
+              }
+            ],
+            "key": "arpta",
+            "text": "5. 主角从官方图里长出来，最后变回 logo。 CC Switch 的小火花先量了官方图标，发现是 13 道光而不是 10 道，剧本跟着改。Cherry Studio 的小樱桃，叶和梗张成 logo 上那个 ✓。招牌表情要省着用：Lobe 吐舌头，只留给它变回 logo 的那一刻。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 8,
+                "offset": 0,
+                "style": "Bold"
+              }
+            ],
+            "key": "aavfc",
+            "text": "6. 只说真话。 画面上的哈希、日期、次数都来自仓库，估算的数字标明“估算”。LobeHub 的星标日期是按公开网站估的，脚本和原始数据都留在片子文件夹里。产品没有的能力不写：LobeHub 没有 Slack 集成，片子里就不出现 Slack。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 8,
+                "offset": 0,
+                "style": "Bold"
+              }
+            ],
+            "key": "1q19l",
+            "text": "7. 两个时钟。 位置每一帧都重新算，60 帧一帧不落；角色的姿势每秒只换 12 到 24 张，像手绘动画那样一张画停一两拍。动作顺，又有手绘味，60 帧下也不抖。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 22,
+                "offset": 0,
+                "style": "Bold"
+              }
+            ],
+            "key": "c5cpc",
+            "text": "8. 你的每一句反馈，都会变成下一部的规则。 一次性的要求会写进长期记忆：片尾三行署名、每个日期都带年份、按项目真实的成长来讲、主角从官方图重画、招牌表情只在 logo 时刻用、星标日期按公开网站估。下一部片子的第一版就照着做了。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "10mdb",
+            "text": "翻车和惊喜",
+            "type": "header-one"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "fmrkj",
+            "text": "比如我在制作视频的过程中遇到的 opus 5.5 把舌头绘制到嘴巴外面。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 18,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "a0ppj",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "afio8",
+            "text": "吐舌头是官方图标上的招牌表情。第一版把它当成了默认嘴型，设定表、分镜、成片里到处都在吐舌头。改完之后，Lobe 平时闭嘴微笑，只在片尾变回官方图标的那一刻吐一次。招牌要省着用，用一次才有分量。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "11abe",
+            "text": "有个插曲：本来我想给 cindy 也做一个版本的，结果 opus 5.5 画的我都不敢发出来了。担心被 cindy 的开发拉黑哈哈哈哈。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 19,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "7529t",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "f8e8f",
+            "text": "比如 cherry studio 上来就用了猫的形象，我做了一定调整 “我觉得主角应该是一只卡通版本的樱桃”",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 20,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "f4hit",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "aoc7l",
+            "text": "提纲第一版的主角是一只园丁猫，致敬作者的网名“亢奋猫”。我改成樱桃， 十几分钟后，小樱桃的三页设定表就画好了：叶短梗长，张成 logo 上那个 ✓；梗能勾住树枝，所以它能跟着树一路往上。片尾三颗樱桃挂在 ✓ 下面，正好是官方图标。角色之争放在第 2 步用画来定，是最便宜的时候。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "32fpq",
+            "text": "还有一些细枝末节的修改， 比如跨年的项目最好还是得加上年份，得益于提前做了预览 studio， 改完立马预览到了。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 21,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "6js1p",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "feo4l",
+            "text": "甚至还有一些修改，是我临时想出来的，比如做 CC Switch：“这块是不是可以考虑有一个 2d 转 3d 的转场”，没想到整个转场做的意外的丝滑，要知道以前我做视频的时候真的就很想做这种效果，但是成本和时间都来不及。 ",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 22,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "cm2bt",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "5fen6",
+            "text": "我把转场挂在一个真实的日子上：v3.9.0 正式发布那天的天亮。字幕是“天一亮，我从纸上走了出来”，形式的变化本身成了剧情。这段 3D 是用 2D 引擎模拟透视画出来的，没有用 WebGL。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "8umlu",
+            "text": "同一轮反馈里，用户还要“利好用户的视角”的文案。片子的签名从“拨一下，就换好”改成“你专心写代码，线我来接”；故障转移那张卡从“熔断 + 健康检查”改成“一家挂了，自动换下一家”。功能卡写你能得到什么，不写功能名。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "q9gu",
+            "text": "怎么开始",
+            "type": "header-one"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "2ss6d",
+            "text": "三步就能开拍：",
+            "type": "unstyled"
+          },
+          {
+            "data": {
+              "urls": [
+                {
+                  "fromIndex": 39,
+                  "text": "github.com/EverMind-AI/Raven/tree/main/skills/git-story-film",
+                  "toIndex": 99
+                }
+              ]
+            },
+            "entityRanges": [
+              {
+                "key": 23,
+                "length": 60,
+                "offset": 39
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "6n6td",
+            "text": "安装：把下面的链接复制过去，粘贴到你的 claude code 中 帮我安装 github.com/EverMind-AI/Raven/tree/main/skills/git-story-film ",
+            "type": "ordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "5um51",
+            "text": "开口：/git-story-film 帮我给做一个视频，先构思一下",
+            "type": "ordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "1k7hf",
+            "text": "跟着七步走：每一步看一样东西，点头或者提意见。你不用会画画，也不用会剪辑。",
+            "type": "ordered-list-item"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "4ciqo",
+            "text": "需要的环境：Node 22 以上、Google Chrome、ffmpeg、Python 3.8 以上，如果你遇到任何环境问题都不是大问题，让 claude code 帮你解决。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "2di59",
+            "text": "要多久：最近三部片子，从给出链接到拿到 4K 成片都在三小时以内。CC Switch 约 2 小时，只渲染了一次；Cherry Studio 约 2 小时 45 分，多渲染了两次；LobeHub 不到 3 小时。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 24,
+                "length": 27,
+                "offset": 30
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "au0p9",
+            "text": "致谢：绘图和动画引擎改编自 Alexey Fateev 的 hand-drawn-canvas-animation（MIT 许可）。",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [
+              {
+                "length": 42,
+                "offset": 0,
+                "style": "Bold"
+              }
+            ],
+            "key": "1e6a2",
+            "text": "第一次提交那天，谁也不知道它会长成什么样。现在，把你的代码历史讲给第一次听说它的人。",
+            "type": "unstyled"
+          },
+          {
+            "data": {
+              "urls": [
+                {
+                  "fromIndex": 10,
+                  "text": "https://github.com/EverMind-AI/Raven/blob/main/skills/git-story-film/README.zh-CN.md",
+                  "toIndex": 94
+                }
+              ]
+            },
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "bphne",
+            "text": "skill 地址见 https://github.com/EverMind-AI/Raven/blob/main/skills/git-story-film/README.zh-CN.md ",
+            "type": "unstyled"
+          },
+          {
+            "data": {
+              "mentions": [
+                {
+                  "fromIndex": 8,
+                  "text": "evermind",
+                  "toIndex": 17
+                }
+              ]
+            },
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "aefp",
+            "text": "Made By @evermind Team",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "barea",
+            "text": "如有帮助，请点赞转发！感激不尽！",
+            "type": "unstyled"
+          },
+          {
+            "data": {},
+            "entityRanges": [
+              {
+                "key": 25,
+                "length": 1,
+                "offset": 0
+              }
+            ],
+            "inlineStyleRanges": [],
+            "key": "hl9g",
+            "text": " ",
+            "type": "atomic"
+          },
+          {
+            "data": {},
+            "entityRanges": [],
+            "inlineStyleRanges": [],
+            "key": "1ajma",
+            "text": "",
+            "type": "unstyled"
+          }
+        ],
+        "entityMap": [
+          {
+            "key": "12",
+            "value": {
+              "data": {
+                "entityKey": "1fb32acd-6c4a-4cd8-a8ea-ad83245f005d",
+                "mediaItems": [
+                  {
+                    "localMediaId": "16",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2104050188470091776"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "8",
+            "value": {
+              "data": {
+                "entityKey": "be204705-de60-4836-89d6-8da08e2eadfd",
+                "mediaItems": [
+                  {
+                    "localMediaId": "10",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2104049540701814784"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "19",
+            "value": {
+              "data": {
+                "entityKey": "caf78eb8-3ba0-44c1-9380-26efa14a1e78",
+                "mediaItems": [
+                  {
+                    "localMediaId": "20",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2104068833535516672"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "23",
+            "value": {
+              "data": {
+                "entityKey": "016428b6-f15d-466a-8151-951d0d9d90e6",
+                "url": "https://github.com/EverMind-AI/Raven/tree/main/skills/git-story-film"
+              },
+              "mutability": "Mutable",
+              "type": "LINK"
+            }
+          },
+          {
+            "key": "4",
+            "value": {
+              "data": {
+                "entityKey": "c8e03567-4bfd-4b40-aebc-7c824313d3d1",
+                "mediaItems": [
+                  {
+                    "localMediaId": "6",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2104048962844127232"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "15",
+            "value": {
+              "data": {
+                "entityKey": "7d0d0a27-b46c-47bf-ab8b-e72a591b99a4",
+                "mediaItems": [
+                  {
+                    "localMediaId": "22",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2104050334549278720"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "11",
+            "value": {
+              "data": {
+                "entityKey": "98e570e0-cbe1-4ddf-8e27-31f732f962af",
+                "mediaItems": [
+                  {
+                    "localMediaId": "14",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2104050098301001728"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "9",
+            "value": {
+              "data": {
+                "entityKey": "fb25b33e-87a9-4382-a4ce-8a0a997e45b9",
+                "tweetId": "2103868710561911209"
+              },
+              "mutability": "Immutable",
+              "type": "TWEET"
+            }
+          },
+          {
+            "key": "22",
+            "value": {
+              "data": {
+                "entityKey": "886b4ed3-f532-4009-a3b0-9f2ce2025d63",
+                "mediaItems": [
+                  {
+                    "localMediaId": "36",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2104051310811398144"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "13",
+            "value": {
+              "data": {
+                "entityKey": "f4c1e1cb-00d7-490f-91a4-68d7259bc3a0",
+                "mediaItems": [
+                  {
+                    "localMediaId": "18",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2104050221424812032"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "24",
+            "value": {
+              "data": {
+                "entityKey": "64f62e40-4e58-4af1-9796-c2f68f9bfd91",
+                "url": "https://github.com/alesha-pro/tools/tree/main/skills/hand-drawn-canvas-animation"
+              },
+              "mutability": "Mutable",
+              "type": "LINK"
+            }
+          },
+          {
+            "key": "16",
+            "value": {
+              "data": {
+                "entityKey": "d169370d-a75c-47c3-a1d5-f61f1831d73f",
+                "mediaItems": [
+                  {
+                    "localMediaId": "24",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2104050568889315328"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "5",
+            "value": {
+              "data": {
+                "entityKey": "13c288fe-6fb2-467b-b738-fc25be0d12db",
+                "tweetId": "2103768558429958335"
+              },
+              "mutability": "Immutable",
+              "type": "TWEET"
+            }
+          },
+          {
+            "key": "10",
+            "value": {
+              "data": {
+                "entityKey": "c639aa91-1972-42e6-b243-e2893cb56bc6",
+                "mediaItems": [
+                  {
+                    "localMediaId": "12",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2104049815705567232"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "21",
+            "value": {
+              "data": {
+                "entityKey": "937abbb8-374d-4822-a3cd-02e285220a8c",
+                "mediaItems": [
+                  {
+                    "localMediaId": "34",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2104051231069245440"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "6",
+            "value": {
+              "data": {
+                "entityKey": "2872b765-3d50-430e-8c63-500facf8a370",
+                "mediaItems": [
+                  {
+                    "localMediaId": "8",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2104049069517832193"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "1",
+            "value": {
+              "data": {
+                "entityKey": "487e7eb8-7a7e-44c3-811c-cb703b7ce066",
+                "mediaItems": [
+                  {
+                    "localMediaId": "19",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2104057194115383296"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "17",
+            "value": {
+              "data": {
+                "entityKey": "a094a35b-7971-46f6-97cd-6df98bea9573",
+                "mediaItems": [
+                  {
+                    "localMediaId": "28",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2104050951527215104"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "25",
+            "value": {
+              "data": {
+                "entityKey": "b4f0aba9-2b9a-4012-a6bc-520b22aba027",
+                "mediaItems": [
+                  {
+                    "localMediaId": "38",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2104051385901940736"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "14",
+            "value": {
+              "data": {
+                "entityKey": "3d1a0df9-08e9-4ce8-8e73-e1da1b864aae",
+                "mediaItems": [
+                  {
+                    "localMediaId": "20",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2104050303725400064"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "0",
+            "value": {
+              "data": {
+                "entityKey": "b3b19868-4297-4a5a-a498-c598cef6cfa7",
+                "url": "https://github.com/EverMind-AI/Raven"
+              },
+              "mutability": "Mutable",
+              "type": "LINK"
+            }
+          },
+          {
+            "key": "20",
+            "value": {
+              "data": {
+                "entityKey": "047b5419-9a21-4375-ac87-2e9b6a4fa487",
+                "mediaItems": [
+                  {
+                    "localMediaId": "32",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2104051153302687744"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "2",
+            "value": {
+              "data": {
+                "entityKey": "4e37032e-ff1b-4b68-806c-5c438e4517eb",
+                "mediaItems": [
+                  {
+                    "localMediaId": "2",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2104047596096692224"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "18",
+            "value": {
+              "data": {
+                "entityKey": "c0d64e14-4c5f-40d5-bc98-cba8406e0858",
+                "mediaItems": [
+                  {
+                    "localMediaId": "30",
+                    "mediaCategory": "DraftTweetImage",
+                    "mediaId": "2104051070272155648"
+                  }
+                ]
+              },
+              "mutability": "Immutable",
+              "type": "MEDIA"
+            }
+          },
+          {
+            "key": "7",
+            "value": {
+              "data": {
+                "entityKey": "083c2346-3313-4566-a916-640fd62b1d24",
+                "tweetId": "2104037017873162442"
+              },
+              "mutability": "Immutable",
+              "type": "TWEET"
+            }
+          },
+          {
+            "key": "3",
+            "value": {
+              "data": {
+                "entityKey": "84d88320-7dd7-424d-92bd-da6a2a248b62",
+                "tweetId": "2103032879496540640"
+              },
+              "mutability": "Immutable",
+              "type": "TWEET"
+            }
+          }
+        ]
+      },
+      "cover_media": {
+        "id": "QXBpTWVkaWE6DAAFCgABHTMZw6aaoAEKAAIAAAAAGugzLQAA",
+        "media_id": "2104053779016622081",
+        "media_info": {
+          "__typename": "ApiImage",
+          "color_info": {
+            "palette": [
+              {
+                "percentage": 93.63,
+                "rgb": {
+                  "blue": 233,
+                  "green": 242,
+                  "red": 246
+                }
+              },
+              {
+                "percentage": 2.96,
+                "rgb": {
+                  "blue": 54,
+                  "green": 58,
+                  "red": 63
+                }
+              },
+              {
+                "percentage": 1.49,
+                "rgb": {
+                  "blue": 171,
+                  "green": 215,
+                  "red": 164
+                }
+              },
+              {
+                "percentage": 0.51,
+                "rgb": {
+                  "blue": 175,
+                  "green": 224,
+                  "red": 245
+                }
+              },
+              {
+                "percentage": 0.2,
+                "rgb": {
+                  "blue": 221,
+                  "green": 202,
+                  "red": 177
+                }
+              }
+            ]
+          },
+          "original_img_height": 1200,
+          "original_img_url": "https://pbs.twimg.com/media/HTMZw6aaoAE05G9.jpg",
+          "original_img_width": 3000
+        },
+        "media_key": "3_2104053779016622081"
+      },
+      "id": "QXJ0aWNsZUVudGl0eToyMTA0MDQ1NDMxNjc2MTcwMjQw",
+      "lifecycle_state": {
+        "modified_at_secs": 1790485926
+      },
+      "media_entities": [
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTMVYkxacAAKAAIAAAAAGugzLQAA",
+          "media_id": "2104048962844127232",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 88.17,
+                  "rgb": {
+                    "blue": 196,
+                    "green": 219,
+                    "red": 227
+                  }
+                },
+                {
+                  "percentage": 8.7,
+                  "rgb": {
+                    "blue": 75,
+                    "green": 75,
+                    "red": 46
+                  }
+                },
+                {
+                  "percentage": 1.61,
+                  "rgb": {
+                    "blue": 93,
+                    "green": 157,
+                    "red": 188
+                  }
+                },
+                {
+                  "percentage": 0.99,
+                  "rgb": {
+                    "blue": 78,
+                    "green": 130,
+                    "red": 215
+                  }
+                },
+                {
+                  "percentage": 0.18,
+                  "rgb": {
+                    "blue": 58,
+                    "green": 163,
+                    "red": 217
+                  }
+                }
+              ]
+            },
+            "original_img_height": 1080,
+            "original_img_url": "https://pbs.twimg.com/media/HTMVYkxacAAHu75.jpg",
+            "original_img_width": 1920
+          },
+          "media_key": "3_2104048962844127232"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTMWf6lagAAKAAIAAAAAGugzLQAA",
+          "media_id": "2104050188470091776",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 88.68,
+                  "rgb": {
+                    "blue": 227,
+                    "green": 239,
+                    "red": 243
+                  }
+                },
+                {
+                  "percentage": 10.3,
+                  "rgb": {
+                    "blue": 41,
+                    "green": 36,
+                    "red": 37
+                  }
+                },
+                {
+                  "percentage": 1,
+                  "rgb": {
+                    "blue": 122,
+                    "green": 122,
+                    "red": 124
+                  }
+                },
+                {
+                  "percentage": 0.26,
+                  "rgb": {
+                    "blue": 129,
+                    "green": 133,
+                    "red": 135
+                  }
+                }
+              ]
+            },
+            "original_img_height": 1080,
+            "original_img_url": "https://pbs.twimg.com/media/HTMWf6lagAADfnl.jpg",
+            "original_img_width": 1920
+          },
+          "media_key": "3_2104050188470091776"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTMXMVMaMAAKAAIAAAAAGugzLQAA",
+          "media_id": "2104050951527215104",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 79.41,
+                  "rgb": {
+                    "blue": 91,
+                    "green": 49,
+                    "red": 26
+                  }
+                },
+                {
+                  "percentage": 15.78,
+                  "rgb": {
+                    "blue": 225,
+                    "green": 237,
+                    "red": 241
+                  }
+                },
+                {
+                  "percentage": 2.44,
+                  "rgb": {
+                    "blue": 200,
+                    "green": 158,
+                    "red": 244
+                  }
+                },
+                {
+                  "percentage": 1.37,
+                  "rgb": {
+                    "blue": 95,
+                    "green": 98,
+                    "red": 93
+                  }
+                },
+                {
+                  "percentage": 0.2,
+                  "rgb": {
+                    "blue": 201,
+                    "green": 221,
+                    "red": 228
+                  }
+                }
+              ]
+            },
+            "original_img_height": 1080,
+            "original_img_url": "https://pbs.twimg.com/media/HTMXMVMaMAAow2O.jpg",
+            "original_img_width": 1920
+          },
+          "media_key": "3_2104050951527215104"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTMWmn8a8AAKAAIAAAAAGugzLQAA",
+          "media_id": "2104050303725400064",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 99.79,
+                  "rgb": {
+                    "blue": 227,
+                    "green": 239,
+                    "red": 243
+                  }
+                },
+                {
+                  "percentage": 0.21,
+                  "rgb": {
+                    "blue": 119,
+                    "green": 127,
+                    "red": 131
+                  }
+                }
+              ]
+            },
+            "original_img_height": 1086,
+            "original_img_url": "https://pbs.twimg.com/media/HTMWmn8a8AA_bpC.jpg",
+            "original_img_width": 1800
+          },
+          "media_key": "3_2104050303725400064"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTMXhPobwAAKAAIAAAAAGugzLQAA",
+          "media_id": "2104051310811398144",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 50.49,
+                  "rgb": {
+                    "blue": 51,
+                    "green": 34,
+                    "red": 25
+                  }
+                },
+                {
+                  "percentage": 44.02,
+                  "rgb": {
+                    "blue": 212,
+                    "green": 231,
+                    "red": 238
+                  }
+                },
+                {
+                  "percentage": 0.99,
+                  "rgb": {
+                    "blue": 186,
+                    "green": 176,
+                    "red": 164
+                  }
+                },
+                {
+                  "percentage": 0.66,
+                  "rgb": {
+                    "blue": 90,
+                    "green": 153,
+                    "red": 185
+                  }
+                },
+                {
+                  "percentage": 0.55,
+                  "rgb": {
+                    "blue": 105,
+                    "green": 65,
+                    "red": 51
+                  }
+                }
+              ]
+            },
+            "original_img_height": 1740,
+            "original_img_url": "https://pbs.twimg.com/media/HTMXhPobwAABTO5.jpg",
+            "original_img_width": 1600
+          },
+          "media_key": "3_2104051310811398144"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTMV6NdbAAAKAAIAAAAAGugzLQAA",
+          "media_id": "2104049540701814784",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 93.22,
+                  "rgb": {
+                    "blue": 85,
+                    "green": 56,
+                    "red": 49
+                  }
+                },
+                {
+                  "percentage": 2.15,
+                  "rgb": {
+                    "blue": 154,
+                    "green": 126,
+                    "red": 114
+                  }
+                },
+                {
+                  "percentage": 2.06,
+                  "rgb": {
+                    "blue": 36,
+                    "green": 38,
+                    "red": 46
+                  }
+                },
+                {
+                  "percentage": 0.76,
+                  "rgb": {
+                    "blue": 110,
+                    "green": 92,
+                    "red": 63
+                  }
+                },
+                {
+                  "percentage": 0.26,
+                  "rgb": {
+                    "blue": 180,
+                    "green": 184,
+                    "red": 188
+                  }
+                }
+              ]
+            },
+            "original_img_height": 1080,
+            "original_img_url": "https://pbs.twimg.com/media/HTMV6NdbAAA974B.jpg",
+            "original_img_width": 1920
+          },
+          "media_key": "3_2104049540701814784"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTMW2DwbMAAKAAIAAAAAGugzLQAA",
+          "media_id": "2104050568889315328",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 74.21,
+                  "rgb": {
+                    "blue": 229,
+                    "green": 237,
+                    "red": 240
+                  }
+                },
+                {
+                  "percentage": 19.56,
+                  "rgb": {
+                    "blue": 28,
+                    "green": 23,
+                    "red": 24
+                  }
+                },
+                {
+                  "percentage": 4.65,
+                  "rgb": {
+                    "blue": 102,
+                    "green": 111,
+                    "red": 118
+                  }
+                },
+                {
+                  "percentage": 0.69,
+                  "rgb": {
+                    "blue": 147,
+                    "green": 183,
+                    "red": 226
+                  }
+                },
+                {
+                  "percentage": 0.35,
+                  "rgb": {
+                    "blue": 65,
+                    "green": 136,
+                    "red": 231
+                  }
+                }
+              ]
+            },
+            "original_img_height": 1533,
+            "original_img_url": "https://pbs.twimg.com/media/HTMW2DwbMAArNlv.jpg",
+            "original_img_width": 2000
+          },
+          "media_key": "3_2104050568889315328"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTMWoaxaAAAKAAIAAAAAGugzLQAA",
+          "media_id": "2104050334549278720",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 71.7,
+                  "rgb": {
+                    "blue": 221,
+                    "green": 231,
+                    "red": 237
+                  }
+                },
+                {
+                  "percentage": 11.08,
+                  "rgb": {
+                    "blue": 65,
+                    "green": 62,
+                    "red": 63
+                  }
+                },
+                {
+                  "percentage": 7.39,
+                  "rgb": {
+                    "blue": 100,
+                    "green": 56,
+                    "red": 38
+                  }
+                },
+                {
+                  "percentage": 1.94,
+                  "rgb": {
+                    "blue": 208,
+                    "green": 165,
+                    "red": 135
+                  }
+                },
+                {
+                  "percentage": 0.68,
+                  "rgb": {
+                    "blue": 174,
+                    "green": 207,
+                    "red": 222
+                  }
+                }
+              ]
+            },
+            "original_img_height": 1530,
+            "original_img_url": "https://pbs.twimg.com/media/HTMWoaxaAAA-fug.jpg",
+            "original_img_width": 1440
+          },
+          "media_key": "3_2104050334549278720"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTMWh1WboAAKAAIAAAAAGugzLQAA",
+          "media_id": "2104050221424812032",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 97.22,
+                  "rgb": {
+                    "blue": 223,
+                    "green": 238,
+                    "red": 241
+                  }
+                },
+                {
+                  "percentage": 0.62,
+                  "rgb": {
+                    "blue": 67,
+                    "green": 63,
+                    "red": 65
+                  }
+                },
+                {
+                  "percentage": 0.48,
+                  "rgb": {
+                    "blue": 165,
+                    "green": 94,
+                    "red": 241
+                  }
+                },
+                {
+                  "percentage": 0.45,
+                  "rgb": {
+                    "blue": 186,
+                    "green": 144,
+                    "red": 240
+                  }
+                },
+                {
+                  "percentage": 0.24,
+                  "rgb": {
+                    "blue": 141,
+                    "green": 186,
+                    "red": 125
+                  }
+                }
+              ]
+            },
+            "original_img_height": 1040,
+            "original_img_url": "https://pbs.twimg.com/media/HTMWh1WboAAhhd6.jpg",
+            "original_img_width": 1600
+          },
+          "media_key": "3_2104050221424812032"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTMWaqrbYAAKAAIAAAAAGugzLQAA",
+          "media_id": "2104050098301001728",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 56.91,
+                  "rgb": {
+                    "blue": 225,
+                    "green": 237,
+                    "red": 241
+                  }
+                },
+                {
+                  "percentage": 41.68,
+                  "rgb": {
+                    "blue": 30,
+                    "green": 21,
+                    "red": 12
+                  }
+                },
+                {
+                  "percentage": 0.83,
+                  "rgb": {
+                    "blue": 62,
+                    "green": 85,
+                    "red": 177
+                  }
+                },
+                {
+                  "percentage": 0.2,
+                  "rgb": {
+                    "blue": 115,
+                    "green": 124,
+                    "red": 129
+                  }
+                },
+                {
+                  "percentage": 0.19,
+                  "rgb": {
+                    "blue": 135,
+                    "green": 156,
+                    "red": 222
+                  }
+                }
+              ]
+            },
+            "original_img_height": 1740,
+            "original_img_url": "https://pbs.twimg.com/media/HTMWaqrbYAAiEPU.jpg",
+            "original_img_width": 1600
+          },
+          "media_key": "3_2104050098301001728"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTMXlnXagAAKAAIAAAAAGugzLQAA",
+          "media_id": "2104051385901940736",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 87.44,
+                  "rgb": {
+                    "blue": 233,
+                    "green": 242,
+                    "red": 246
+                  }
+                },
+                {
+                  "percentage": 5.66,
+                  "rgb": {
+                    "blue": 54,
+                    "green": 58,
+                    "red": 63
+                  }
+                },
+                {
+                  "percentage": 2.48,
+                  "rgb": {
+                    "blue": 166,
+                    "green": 212,
+                    "red": 158
+                  }
+                },
+                {
+                  "percentage": 0.97,
+                  "rgb": {
+                    "blue": 221,
+                    "green": 203,
+                    "red": 179
+                  }
+                },
+                {
+                  "percentage": 0.76,
+                  "rgb": {
+                    "blue": 180,
+                    "green": 226,
+                    "red": 244
+                  }
+                }
+              ]
+            },
+            "original_img_height": 1800,
+            "original_img_url": "https://pbs.twimg.com/media/HTMXlnXagAA5NnG.jpg",
+            "original_img_width": 2400
+          },
+          "media_key": "3_2104051385901940736"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTMWKN7bQAAKAAIAAAAAGugzLQAA",
+          "media_id": "2104049815705567232",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 94.06,
+                  "rgb": {
+                    "blue": 233,
+                    "green": 242,
+                    "red": 245
+                  }
+                },
+                {
+                  "percentage": 2.96,
+                  "rgb": {
+                    "blue": 120,
+                    "green": 129,
+                    "red": 137
+                  }
+                },
+                {
+                  "percentage": 0.93,
+                  "rgb": {
+                    "blue": 201,
+                    "green": 130,
+                    "red": 53
+                  }
+                },
+                {
+                  "percentage": 0.4,
+                  "rgb": {
+                    "blue": 150,
+                    "green": 190,
+                    "red": 137
+                  }
+                },
+                {
+                  "percentage": 0.35,
+                  "rgb": {
+                    "blue": 36,
+                    "green": 165,
+                    "red": 225
+                  }
+                }
+              ]
+            },
+            "original_img_height": 2026,
+            "original_img_url": "https://pbs.twimg.com/media/HTMWKN7bQAAt_Yh.jpg",
+            "original_img_width": 1620
+          },
+          "media_key": "3_2104049815705567232"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTMXYE3bkAAKAAIAAAAAGugzLQAA",
+          "media_id": "2104051153302687744",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 92.03,
+                  "rgb": {
+                    "blue": 226,
+                    "green": 240,
+                    "red": 244
+                  }
+                },
+                {
+                  "percentage": 3.62,
+                  "rgb": {
+                    "blue": 93,
+                    "green": 96,
+                    "red": 232
+                  }
+                },
+                {
+                  "percentage": 1.88,
+                  "rgb": {
+                    "blue": 143,
+                    "green": 149,
+                    "red": 215
+                  }
+                },
+                {
+                  "percentage": 1.19,
+                  "rgb": {
+                    "blue": 116,
+                    "green": 124,
+                    "red": 134
+                  }
+                },
+                {
+                  "percentage": 0.31,
+                  "rgb": {
+                    "blue": 93,
+                    "green": 96,
+                    "red": 254
+                  }
+                }
+              ]
+            },
+            "original_img_height": 1560,
+            "original_img_url": "https://pbs.twimg.com/media/HTMXYE3bkAAtvfm.jpg",
+            "original_img_width": 1600
+          },
+          "media_key": "3_2104051153302687744"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTMndM3a4AAKAAIAAAAAGugzLQAA",
+          "media_id": "2104068833535516672",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 85.58,
+                  "rgb": {
+                    "blue": 230,
+                    "green": 242,
+                    "red": 243
+                  }
+                },
+                {
+                  "percentage": 9.17,
+                  "rgb": {
+                    "blue": 43,
+                    "green": 31,
+                    "red": 26
+                  }
+                },
+                {
+                  "percentage": 0.79,
+                  "rgb": {
+                    "blue": 183,
+                    "green": 201,
+                    "red": 239
+                  }
+                },
+                {
+                  "percentage": 0.74,
+                  "rgb": {
+                    "blue": 96,
+                    "green": 54,
+                    "red": 37
+                  }
+                },
+                {
+                  "percentage": 0.52,
+                  "rgb": {
+                    "blue": 59,
+                    "green": 58,
+                    "red": 75
+                  }
+                }
+              ]
+            },
+            "original_img_height": 1844,
+            "original_img_url": "https://pbs.twimg.com/media/HTMndM3a4AAkP7q.jpg",
+            "original_img_width": 2062
+          },
+          "media_key": "3_2104068833535516672"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTMVeyKaAAEKAAIAAAAAGugzLQAA",
+          "media_id": "2104049069517832193",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 98.89,
+                  "rgb": {
+                    "blue": 220,
+                    "green": 231,
+                    "red": 235
+                  }
+                },
+                {
+                  "percentage": 0.78,
+                  "rgb": {
+                    "blue": 137,
+                    "green": 140,
+                    "red": 224
+                  }
+                },
+                {
+                  "percentage": 0.2,
+                  "rgb": {
+                    "blue": 104,
+                    "green": 107,
+                    "red": 236
+                  }
+                }
+              ]
+            },
+            "original_img_height": 1080,
+            "original_img_url": "https://pbs.twimg.com/media/HTMVeyKaAAEdudm.jpg",
+            "original_img_width": 1920
+          },
+          "media_key": "3_2104049069517832193"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTMXTPjaMAAKAAIAAAAAGugzLQAA",
+          "media_id": "2104051070272155648",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 89.42,
+                  "rgb": {
+                    "blue": 229,
+                    "green": 240,
+                    "red": 243
+                  }
+                },
+                {
+                  "percentage": 3.46,
+                  "rgb": {
+                    "blue": 64,
+                    "green": 137,
+                    "red": 237
+                  }
+                },
+                {
+                  "percentage": 1.92,
+                  "rgb": {
+                    "blue": 135,
+                    "green": 178,
+                    "red": 226
+                  }
+                },
+                {
+                  "percentage": 0.77,
+                  "rgb": {
+                    "blue": 168,
+                    "green": 166,
+                    "red": 228
+                  }
+                },
+                {
+                  "percentage": 0.57,
+                  "rgb": {
+                    "blue": 104,
+                    "green": 93,
+                    "red": 222
+                  }
+                }
+              ]
+            },
+            "original_img_height": 1560,
+            "original_img_url": "https://pbs.twimg.com/media/HTMXTPjaMAA7ZDo.jpg",
+            "original_img_width": 1600
+          },
+          "media_key": "3_2104051070272155648"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTMUJBPboAAKAAIAAAAAGugzLQAA",
+          "media_id": "2104047596096692224",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 90.2,
+                  "rgb": {
+                    "blue": 225,
+                    "green": 237,
+                    "red": 241
+                  }
+                },
+                {
+                  "percentage": 2.54,
+                  "rgb": {
+                    "blue": 43,
+                    "green": 35,
+                    "red": 38
+                  }
+                },
+                {
+                  "percentage": 1.62,
+                  "rgb": {
+                    "blue": 163,
+                    "green": 192,
+                    "red": 205
+                  }
+                },
+                {
+                  "percentage": 0.98,
+                  "rgb": {
+                    "blue": 85,
+                    "green": 94,
+                    "red": 218
+                  }
+                },
+                {
+                  "percentage": 0.88,
+                  "rgb": {
+                    "blue": 46,
+                    "green": 152,
+                    "red": 209
+                  }
+                }
+              ]
+            },
+            "original_img_height": 1080,
+            "original_img_url": "https://pbs.twimg.com/media/HTMUJBPboAAhmRw.jpg",
+            "original_img_width": 1920
+          },
+          "media_key": "3_2104047596096692224"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTMXcmkbEAAKAAIAAAAAGugzLQAA",
+          "media_id": "2104051231069245440",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 98.77,
+                  "rgb": {
+                    "blue": 230,
+                    "green": 240,
+                    "red": 242
+                  }
+                },
+                {
+                  "percentage": 0.47,
+                  "rgb": {
+                    "blue": 120,
+                    "green": 130,
+                    "red": 134
+                  }
+                },
+                {
+                  "percentage": 0.34,
+                  "rgb": {
+                    "blue": 145,
+                    "green": 188,
+                    "red": 128
+                  }
+                },
+                {
+                  "percentage": 0.27,
+                  "rgb": {
+                    "blue": 91,
+                    "green": 118,
+                    "red": 210
+                  }
+                },
+                {
+                  "percentage": 0.1,
+                  "rgb": {
+                    "blue": 157,
+                    "green": 174,
+                    "red": 228
+                  }
+                }
+              ]
+            },
+            "original_img_height": 1420,
+            "original_img_url": "https://pbs.twimg.com/media/HTMXcmkbEAA5v6T.jpg",
+            "original_img_width": 1600
+          },
+          "media_key": "3_2104051231069245440"
+        },
+        {
+          "id": "QXBpTWVkaWE6DAAFCgABHTMc3spaQAAKAAIAAAAAGugzLQAA",
+          "media_id": "2104057194115383296",
+          "media_info": {
+            "__typename": "ApiImage",
+            "color_info": {
+              "palette": [
+                {
+                  "percentage": 99.75,
+                  "rgb": {
+                    "blue": 228,
+                    "green": 239,
+                    "red": 243
+                  }
+                },
+                {
+                  "percentage": 0.24,
+                  "rgb": {
+                    "blue": 119,
+                    "green": 125,
+                    "red": 130
+                  }
+                }
+              ]
+            },
+            "original_img_height": 1766,
+            "original_img_url": "https://pbs.twimg.com/media/HTMc3spaQAAS9db.jpg",
+            "original_img_width": 2626
+          },
+          "media_key": "3_2104057194115383296"
+        }
+      ],
+      "metadata": {
+        "first_published_at_secs": 1790485852
+      },
+      "plain_text": "关注我的大部分朋友都是程序员，这个 skill 就是给你们，更准确是给我们写的。\n维护代码仓库的人，手里都有一部现成的 Git 纪录片：第一次提交，第一个版本，最忙的那一天，半夜的回滚，改名，搬家，几万颗星。可这些都躺在 git log 里，新来的人只看 README。\ngit-story-film 是一个给 raven 做宣传视频时产出的创意 skill。你给它一个 GitHub 链接，Opus 5.5 就当导演：从几千次提交里挑出能讲故事的事实，给项目找一个主角，定一种画风，最后交给你一部两分钟左右的手绘动画短片。\n你最后拿到的是：\n一个 4K、60 帧的 MP4，配乐由代码实时合成；\n一键生成，一镜到底，但也保留了源码可修改的空间，绝对不是那种快闪式的 AI Slop\n主角第一人称的字幕，讲给第一次听说这个项目的人；\n画面上真实的日期、commit hash 和提交次数，一次提交就是画面上的一颗珠子、一盏灯或一片叶子；\n一个能在浏览器里拖着看的 Studio 页面，以及整部片的源代码。\n这个 skill 不仅能帮你一键生成，也能让你扮演一个真正的导演，帮你提前订好提纲、分镜、脚本，每走一步都停下来给你看一样东西，你点头了才往下走。\n \n先看成片：四个仓库，四种长法\n同一套方法，四部片子长得完全不一样。导演先读懂产品，再决定你的项目“成长”在画面上是什么样子。\nRaven：一路往右飞\n \nRaven 因为是一只鸟，所以我设计了从纸上的一颗蛋里破壳，沿着一根时间枝只往右走，全片一镜到底。每次提交是枝上一颗亮晶晶的珠子；走过重要的提交，画风就换一次：铅笔、墨、Riso 印刷、丝网、蓝图。128 秒，中英双语。\n视频见\n \nCC Switch：一面越长越大的总机墙\n \nCC Switch  的设计是 一面老式电话总机墙从左往右长：一次提交亮一盏灯，一个版本钉一块铜铭牌。主角小火花从官方图标的星芒里长出来，每接入一个 AI 编程工具就多一道光。正式版发布那天天一亮，整面墙从纸上立成 3D。2 分 7 秒。\n \nCherry Studio：一棵从地下往上长的树\n \n\nCherry Studio 也是我的 AI 启蒙老师之一, 设计的思路是樱桃树，镜头只往上走。一次提交一片叶，一个新功能一朵花，一个正式版一颗樱桃，每来一位新贡献者就飞来一只蜜蜂。数据底座重写了 373 天，画面上就是在地下“换根”。2 分 13 秒。 \n \nLobeHub：一个在原地长大的脑洞\n \nlobehub 我最喜欢的是它的脑洞设计(logo意义的脑洞), 主角 Lobe 待在原地，头顶的“脑洞”越长越大，镜头只往后退。一次提交是一粒飞进脑洞的火星，一次回滚是一个泡泡破掉，一个 GitHub 星标就是一颗星，一共 82,834 颗。2 分 5 秒。\n \n七步视频法：以 Raven 为例\n我把视频拆成了七部, 这七步不是凭空设计的, 是因为曹植七步成诗(并不)。2026年9月24日做 Raven 那天，还没有这套流程：先出整片，边看边改。第一次 4K 渲染在上午 11 点，带字的分镜到下午 3 点才有。一天里开了 13 次 4K 渲染，5 次半路叫停或崩溃。做完之后，我系统整理了一下, 整理成了七部 SOP，每一步都停下来给你看。\n \n第 1 步 · 提纲：先定讲什么故事\n首先打开 claude code 或者 raven,  把你的代码地址丢进去, 并且使用这个skill, 这里需要注意的是, 如果你使用了 claude code, 务必需要使用 /effort max\n「使用 git-story-film skill,  读取 xxxxx , 帮我设计一份影片」\n你会看到一份 OUTLINE.md：一句话讲完整部片，用什么形式讲、为什么，主角是谁、字幕用谁的口吻，起承转合四句话，观众看完该记住哪几件事，还有片子依据的真实数字。\nRaven 的第一版是夜空里一条累计提交的折线，数据都对，但没有故事。我要的是“一只黑色渡鸦的视角”，还要 “卡通形象，最好大眼睛”、“从破壳到都是遵循一个从左往右的前进路线”。于是提纲里写下了全片的铁律：一镜到底，只往右走。\n \n第 2 步 · 主角：表情和动作\n你会看到一张角色设定表：6 到 12 个表情，走、跳、飞这些动作的关键姿势，每种画风下的样子，还有缩小以后还认不认得出来。\nRaven 的设定表里，铅笔画的雏鸟有好奇、亮晶晶、怀疑、晕；上了墨的成鸟有吃惊、得意、专注、张开翅膀。主角在这一步定下来，后面每个镜头都用同一套代码画它。\n \n第 3 步 · 全片提纲：每一拍对上一个真实提交\n你会看到约两分钟的完整提纲：分几幕、每幕什么画风、为什么；每一拍的时间、画面、功能和对应的提交；结尾；还有要再核对的说法。\nRaven 视频在这一步改得最多。我会补充很多细节上的调整：“得介绍功能点啊，不然别人也不知道 raven 能给别人带来什么。” 于是右上角的日期换成了功能卡，片长从 90 秒改成 2 分钟，后半程用一个具体的委托串起四个内置 Agent：“帮我调研三家竞品，写个脚本抓数据，夜里盯着，最后做成一份 PPT。” 顺手核了事实：Raven 的预设里没有 ChatGPT，有的是 Codex；自进化的分数只标成“示意”。\n \n第 4 步 · 分镜：先看前 30 秒\n接着预览分镜：前 30 秒每个镜头一张关键帧，关键帧用片子自己的角色和场景代码画出来，旁边写着时间、字幕和对应的提交。这 30 秒定下口吻、节奏和画风，后面照着走。\n \n第 5 步 · 详细编写：整部片动起来\n写完剩下的镜头，把整部片做成动画，配乐也在这一步用代码合成。我很惊讶的是 opus 5.5 在音效和简单的配乐上做的这么好, 并且遇到新表情、新动作，先补进设定表给你看。做完先自己检查：把全片抽成一张帧网格，一眼看完节奏和构图。\n这里我还用到了“两个时钟”策略, 默认 claude 会用 24帧来写, 但实际上在画面移动速度稍快的场景下, 很多细节会看不清楚, 于是我改了引擎的代码, 镜头、背景和文字按 60 帧走，角色的姿势照样一秒换 12 到 24 张，顺滑和手绘感分开处理。\n \n第 6 步 · Studio：在浏览器里看完整部片\n在正式渲染钱, 打开片子开始预览。上面是画面；下面一条拖动条，每一幕一段色带，每个镜头一个编号格子，拖到哪停到哪，带着配乐从任意位置播放；再往下是每个镜头的分镜图，从当前代码实时画出来。这一步不走 4k 60fps 渲染。\n如果你觉得 AI 这块需要注入自己的 taste, 需要针对细节作调整, 那么你一定很爱这个 skill 给你保留的灵活的空间. \n下图是 LobeHub 那部片的 Studio。\n \n第 7 步 · 成片：4K60\n当你确。可以渲染之后, 直接告诉 Claude Code / Raven 可以渲染了。Agent 会打开浏览器一边画，一边把帧直接送进 ffmpeg，4 路并行，不在硬盘上堆上百 GB 的图。交付时导演会报告时长、分辨率和文件大小，完整解码一遍，再抽几帧亲眼看。片尾卡默认也写成第 0 帧，播放器和信息流会拿它当封面，这个细节也是 Raven 的用户提出来的。\n背后的设计思想\n七个步骤只是表面。真正让片子“像这个仓库”的，是下面八条规矩。\n1. 是导演，不是生成器。 Claude 自己拿主意的有三件事：用哪些数据、讲什么故事、用什么画风。你只需要看、点头、提意见。每一步结束，你手里都有一样看得见的东西。\n2. 纸上改最便宜，4K 上改最贵。 改一句提纲几秒钟，重渲一部 4K 要几分钟。所以 Studio 点头之前不出 MP4。就算你说“一直做完”，导演也会停在 Studio 等你看过再渲染。\n3. 一一对应：一次提交就是一格。 画面上的东西和 git 里的事一一对应：一次提交一颗珠子，一个版本一块铭牌，一次回滚一次挫折。每天挂几颗，就是那天真实的提交数。一个符号只代表一种数据：LobeHub 里星星就是星标，提交就只能画成火星。这样拍出来的才是这个仓库的故事，而不是换了名字的模板。\n \nRaven 最忙的一天：137 次提交，画面上就落下 137 颗珠子。\n4. 一部片只守一种镜头语法。 旅程只往右走，从不切镜；生长待在原地，镜头往后退；Cherry Studio 的树只往上长，镜头也只往上。守住这一条，片子才是一个连贯的故事，而不是一串幻灯片。约束还会逼出好点子：镜头下不去，地下的重写就靠一面“地下放大镜”和一条往上追的新根线来讲，追上树梢那一刻就是全片最高点。\n5. 主角从官方图里长出来，最后变回 logo。 CC Switch 的小火花先量了官方图标，发现是 13 道光而不是 10 道，剧本跟着改。Cherry Studio 的小樱桃，叶和梗张成 logo 上那个 ✓。招牌表情要省着用：Lobe 吐舌头，只留给它变回 logo 的那一刻。\n6. 只说真话。 画面上的哈希、日期、次数都来自仓库，估算的数字标明“估算”。LobeHub 的星标日期是按公开网站估的，脚本和原始数据都留在片子文件夹里。产品没有的能力不写：LobeHub 没有 Slack 集成，片子里就不出现 Slack。\n7. 两个时钟。 位置每一帧都重新算，60 帧一帧不落；角色的姿势每秒只换 12 到 24 张，像手绘动画那样一张画停一两拍。动作顺，又有手绘味，60 帧下也不抖。\n8. 你的每一句反馈，都会变成下一部的规则。 一次性的要求会写进长期记忆：片尾三行署名、每个日期都带年份、按项目真实的成长来讲、主角从官方图重画、招牌表情只在 logo 时刻用、星标日期按公开网站估。下一部片子的第一版就照着做了。\n翻车和惊喜\n比如我在制作视频的过程中遇到的 opus 5.5 把舌头绘制到嘴巴外面。\n \n吐舌头是官方图标上的招牌表情。第一版把它当成了默认嘴型，设定表、分镜、成片里到处都在吐舌头。改完之后，Lobe 平时闭嘴微笑，只在片尾变回官方图标的那一刻吐一次。招牌要省着用，用一次才有分量。\n有个插曲：本来我想给 cindy 也做一个版本的，结果 opus 5.5 画的我都不敢发出来了。担心被 cindy 的开发拉黑哈哈哈哈。\n \n比如 cherry studio 上来就用了猫的形象，我做了一定调整 “我觉得主角应该是一只卡通版本的樱桃”\n \n提纲第一版的主角是一只园丁猫，致敬作者的网名“亢奋猫”。我改成樱桃， 十几分钟后，小樱桃的三页设定表就画好了：叶短梗长，张成 logo 上那个 ✓；梗能勾住树枝，所以它能跟着树一路往上。片尾三颗樱桃挂在 ✓ 下面，正好是官方图标。角色之争放在第 2 步用画来定，是最便宜的时候。\n还有一些细枝末节的修改， 比如跨年的项目最好还是得加上年份，得益于提前做了预览 studio， 改完立马预览到了。\n \n甚至还有一些修改，是我临时想出来的，比如做 CC Switch：“这块是不是可以考虑有一个 2d 转 3d 的转场”，没想到整个转场做的意外的丝滑，要知道以前我做视频的时候真的就很想做这种效果，但是成本和时间都来不及。 \n \n我把转场挂在一个真实的日子上：v3.9.0 正式发布那天的天亮。字幕是“天一亮，我从纸上走了出来”，形式的变化本身成了剧情。这段 3D 是用 2D 引擎模拟透视画出来的，没有用 WebGL。\n同一轮反馈里，用户还要“利好用户的视角”的文案。片子的签名从“拨一下，就换好”改成“你专心写代码，线我来接”；故障转移那张卡从“熔断 + 健康检查”改成“一家挂了，自动换下一家”。功能卡写你能得到什么，不写功能名。\n怎么开始\n三步就能开拍：\n安装：把下面的链接复制过去，粘贴到你的 claude code 中 帮我安装 github.com/EverMind-AI/Raven/tree/main/skills/git-story-film \n开口：/git-story-film 帮我给做一个视频，先构思一下\n跟着七步走：每一步看一样东西，点头或者提意见。你不用会画画，也不用会剪辑。\n需要的环境：Node 22 以上、Google Chrome、ffmpeg、Python 3.8 以上，如果你遇到任何环境问题都不是大问题，让 claude code 帮你解决。\n要多久：最近三部片子，从给出链接到拿到 4K 成片都在三小时以内。CC Switch 约 2 小时，只渲染了一次；Cherry Studio 约 2 小时 45 分，多渲染了两次；LobeHub 不到 3 小时。\n致谢：绘图和动画引擎改编自 Alexey Fateev 的 hand-drawn-canvas-animation（MIT 许可）。\n第一次提交那天，谁也不知道它会长成什么样。现在，把你的代码历史讲给第一次听说它的人。\nskill 地址见 https://github.com/EverMind-AI/Raven/blob/main/skills/git-story-film/README.zh-CN.md \n如有帮助，请点赞转发！感激不尽！\n \n",
+      "preview_text": "关注我的大部分朋友都是程序员，这个 skill 就是给你们，更准确是给我们写的。\n维护代码仓库的人，手里都有一部现成的 Git",
+      "rest_id": "2104045431676170240",
+      "title": "把你的代码历史拍个属于你的短片 - git-story-film skill"
+    }
+  }
+}

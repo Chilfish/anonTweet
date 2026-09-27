@@ -1,4 +1,5 @@
 import type { StateCreator } from 'zustand'
+import type { ArticleTranslation } from '~/lib/article/translate'
 import type { SeparatorTemplate } from '~/lib/constants'
 import type { EnrichedTweet, Entity, TweetData } from '~/types'
 import { create } from 'zustand'
@@ -7,6 +8,9 @@ import { DEFAULT_TEMPLATES } from '~/lib/constants'
 import { checkTextContent, extractTranslationsFromEntities, stripTranslationsFromTweets } from './logic'
 
 export type TranslationMode = 'bilingual' | 'original' | 'translation'
+
+/** X Article 按块翻译的加载态 */
+export type ArticleTranslationStatus = 'idle' | 'loading' | 'done' | 'error'
 
 const DEFAULT_VISIBILITY = { body: true, alt: true }
 
@@ -128,6 +132,9 @@ interface DataSlice {
   translationMode: TranslationMode
   /** 逐推文图片描述可见性覆盖（会话级，不进 persist）：true=强制展示 / false=强制隐藏 */
   visionVisibility: Record<string, boolean>
+  /** X Article 按块译文（会话级；持久化由 DB + loader 回填） */
+  articleTranslations: Record<string, ArticleTranslation>
+  articleTranslationStatus: Record<string, ArticleTranslationStatus>
 
   // Data Actions
   setAllTweets: (data: TweetData, mainTweetId: string) => void
@@ -144,6 +151,8 @@ interface DataSlice {
   getTweetTranslationMode: (tweetId: string) => TranslationMode
   setTranslationMode: (mode: TranslationMode) => void
   setVisionVisibility: (tweetId: string, show: boolean) => void
+  setArticleTranslation: (tweetId: string, translation: ArticleTranslation) => void
+  setArticleTranslationStatus: (tweetId: string, status: ArticleTranslationStatus) => void
 
   // Utils
   hasTextContent: (text?: string) => boolean
@@ -164,6 +173,8 @@ const createDataSlice: StateCreator<
   tweetTranslationModes: {},
   translationMode: 'bilingual',
   visionVisibility: {},
+  articleTranslations: {},
+  articleTranslationStatus: {},
 
   // --- Actions ---
   setCommentIds: ids => set({ commentIds: ids }),
@@ -272,6 +283,16 @@ const createDataSlice: StateCreator<
   setVisionVisibility: (tweetId, show) =>
     set(state => ({
       visionVisibility: { ...state.visionVisibility, [tweetId]: show },
+    })),
+
+  setArticleTranslation: (tweetId, translation) =>
+    set(state => ({
+      articleTranslations: { ...state.articleTranslations, [tweetId]: translation },
+    })),
+
+  setArticleTranslationStatus: (tweetId, status) =>
+    set(state => ({
+      articleTranslationStatus: { ...state.articleTranslationStatus, [tweetId]: status },
     })),
 
   hasTextContent: checkTextContent,

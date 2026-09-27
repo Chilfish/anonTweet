@@ -2,6 +2,7 @@ import type { MediaAnimatedGif, MediaDetails, MediaVideo } from '~/types'
 import { normalizeMediaUrl } from '~/lib/media-url'
 import { useProxyMedia } from '~/lib/stores/appConfig'
 
+export * from './article'
 export * from './date-utils'
 export * from './entitytParser'
 // export * from './get-tweet'

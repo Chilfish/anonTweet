@@ -63,6 +63,21 @@ const INS_COMPONENTS = [
   'PlainIGPost',
 ] as const
 
+// article 目录全部组件（index.ts 为 barrel 不算组件；由 ArticleBody / ArticleToolbar story 渲染覆盖）
+const ARTICLE_COMPONENTS = [
+  'ArticleBody',
+  'ArticleEmbedTweet',
+  'ArticleEmbeddedTweet',
+  'ArticleImage',
+  'ArticleMarkdown',
+  'ArticleOptionsMenu',
+  'ArticleReader',
+  'ArticleRuns',
+  'ArticleToolbar',
+  'ArticleTranslateToggle',
+  'ArticleTranslatedText',
+] as const
+
 // translation 在用目录（AltEditorComponents / EditorComponents 是内部部件，由
 // TranslationEditor / AltTranslationEditor story 透出，不单独计）
 const TRANSLATION_IN_USE = [
@@ -165,6 +180,10 @@ describe('AC-UI-VISION-001: every used component has a story (P1-2)', () => {
 
   it('every ins component is covered by a story (file or rendered in a bundle)', () => {
     expectCovered(INS_COMPONENTS, 'ins')
+  })
+
+  it('every article component is covered by a story (file or rendered in a bundle)', () => {
+    expectCovered(ARTICLE_COMPONENTS, 'article')
   })
 
   it('every in-use translation component is covered by a story', () => {

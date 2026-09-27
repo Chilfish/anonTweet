@@ -2,7 +2,7 @@ import type { Route } from './+types/set'
 import type { EnrichedTweet } from '~/types'
 import { data } from 'react-router'
 import { getLocalCache, setLocalCache } from '~/lib/localCache'
-import { mergeTranslationEntities } from '~/lib/service/getTweet.server'
+import { mergeTranslationEntities, updateArticleTranslation } from '~/lib/service/getTweet.server'
 import { updateEntities } from '~/lib/service/setTweet'
 import { tweetSchema } from '~/lib/validations/tweet'
 
@@ -43,6 +43,12 @@ export async function action({ request }: Route.ActionArgs) {
           // localCache 刷新 best-effort，不阻断保存
         }
       }))
+      break
+
+    case 'updateArticleTranslations':
+      await Promise.all(
+        submission.data.data.map(item => updateArticleTranslation(item.tweetId, item.translation)),
+      )
       break
   }
 

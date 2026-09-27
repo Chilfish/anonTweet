@@ -1,3 +1,4 @@
+import type { ArticleTranslation } from '~/lib/article/translate'
 import type { EnrichedTweet, IGPost, RawUser, TranslationEntity } from '~/types'
 import {
   index,
@@ -29,6 +30,25 @@ export const tweetEntities = pgTable(
   },
   table => [
     index('tweet_entities_tweetId_idx').on(table.tweetId),
+  ],
+)
+
+/**
+ * X Article（长文）按块译文缓存表。
+ *
+ * 与 `tweetEntities` 分开：文章译文以块 key 索引（非实体 index），且 `tweet.jsonContent`
+ * 会被上游结果整条 upsert 覆盖，译文不能放进 jsonContent。
+ */
+export const tweetArticleTranslations = pgTable(
+  'tweet_article_translations',
+  {
+    id: serial('id').primaryKey(),
+    tweetId: text('tweetId').notNull().unique(),
+    translations: json('translations').$type<ArticleTranslation>().notNull(),
+    updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+  },
+  table => [
+    index('tweet_article_translations_tweetId_idx').on(table.tweetId),
   ],
 )
 

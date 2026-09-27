@@ -91,3 +91,28 @@
 - **决策**: 抽 `createMediaUrl(originalUrl, config)` 纯函数统一代理逻辑，所有 React/非 React 路径走同一函数
 - **背景**: 代理/视频/截图四套重复 URL 转换 → 双代理、漏代理、漏下载
 - **后果**: 截图等待用 `document.fonts.ready` 而非固定 delay；S7 Media Proxy Verifier 待实施
+
+## ADR-009: X Article 块文档 + 独立阅读页 + 按块翻译
+
+- **日期**: 2026-09-27
+- **决策**: 文章型推文（`x.com/<user>/article/<id>`）从「裸链接」升级为**结构化块文档**，
+  在**独立阅读页 `/article/:id`** 渲染，翻译**按块**进行并与推文实体翻译解耦
+- **背景**:
+  - 文章正文不在 `legacy.full_text`/`note_tweet`，只在 `article.article_results.result`；
+    富文本需 `fieldToggles.withArticleRichContentState`（且必须是 JSON **字符串**，对象写法被 X 静默忽略）
+  - 线上格式是 Draft.js `content_state`（`blocks[]` + `entityMap[]`）；表格/代码是 `MARKDOWN` 实体里的 GFM
+  - 现有实体翻译管线假设「单块文本 + 占位符精确相等 + 位置游标回填」，无法承载长文
+- **设计**:
+  - **数据模型**：`TweetArticle { format: 'rich'|'plain', blocks?: ArticleBlock[] , coverImage, publishedAt, ... }`；
+    `ArticleBlock` 为可判别联合（段落/标题/列表/引用/markdown/分隔线/图片/嵌入帖/链接/未知）
+  - **解析纯函数**：`parseContentState`（`app/lib/article/parse.ts`）——两种 entityMap 形态兼容、未知块降级为段落
+  - **渲染**：`ArticleBody` 组合块组件；`MARKDOWN` 走 react-markdown + remark-gfm；推文内为紧凑 `TweetArticleCard`
+  - **翻译**：`autoTranslateArticle` 以**块 key** 为对齐键分批翻译，块内 link/mention/hashtag 用
+    `<<__LINK_n__>>` 占位符保护、**逐块**校验；译文按块存（`tweet_article_translations`，不复用 `tweet_entities`）
+  - **取数范围**：仅 `get` + `replies` 取富文本；search/list/timeline 只给仅链接卡片入口
+  - **缓存**：`article.format` 作为结构判别，旧 flat 缓存在 `getLocalTweet` 出口读时自愈升级
+- **后果**:
+  - 新增运行时依赖 `react-markdown` + `remark-gfm`
+  - 新增 DB 表 `tweet_article_translations`（需 migration）
+  - 三态开关（原文/译文/双语）复用现有 `translationMode`，截图选「仅译文」控长
+  - 详见 `docs/features/tweet/article.md`

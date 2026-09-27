@@ -32,6 +32,16 @@ interface Result {
   in_reply_to_status_id_str?: string
   quoted_status_result?: TweetResult
   card?: any
+  /**
+   * X Article（长文）附件。`withArticleRichContentState` field toggle 开启时
+   * `article_results.result.content_state` 带 Draft.js 块文档；`withArticlePlainText`
+   * 只带 `plain_text` 纯文本。两者都取可互为兜底。
+   */
+  article?: {
+    article_results?: {
+      result?: RawArticleResult
+    }
+  }
   /** JetFuel 附件（responsive_web_jetfuel_frame 开启时返回）：官方渲染卡全量数据 */
   jetfuel_attachment?: {
     height: number
@@ -327,4 +337,94 @@ export interface Variant {
   content_type: 'video/mp4' | 'application/x-mpegURL'
   url: string
   bitrate?: number
+}
+
+// ─── X Article（长文）原始节点 ────────────────────────────────
+
+/** 文章内嵌媒体（`media_entities[]` / `cover_media`），字段随上游可选 */
+export interface RawArticleMedia {
+  id?: string
+  media_id?: string
+  media_key?: string
+  media_info?: {
+    __typename?: string
+    original_img_url?: string
+    original_img_width?: number
+    original_img_height?: number
+  }
+}
+
+/** Draft.js 行内样式区间（`style` 实测为 `Bold` / `Italic` / `Strikethrough`） */
+export interface RawArticleInlineStyleRange {
+  offset: number
+  length: number
+  style?: string
+}
+
+/** Draft.js 实体引用区间（`key` 指向 `entityMap`） */
+export interface RawArticleEntityRange {
+  key: number | string
+  offset: number
+  length: number
+}
+
+/** 块级 `data` 里的 @mention / #hashtag span（越过 entityMap 直接给偏移） */
+export interface RawArticleSpan {
+  fromIndex?: number
+  toIndex?: number
+  text?: string
+}
+
+export interface RawArticleBlock {
+  key?: string
+  text?: string
+  type?: string
+  data?: {
+    mentions?: RawArticleSpan[]
+    hashtags?: RawArticleSpan[]
+    [key: string]: unknown
+  }
+  entityRanges?: RawArticleEntityRange[]
+  inlineStyleRanges?: RawArticleInlineStyleRange[]
+}
+
+export interface RawArticleEntityValue {
+  type?: string
+  mutability?: string
+  data?: {
+    url?: string
+    markdown?: string
+    tweetId?: string
+    /** 写入用 snake_case 与读取用 camelCase 都可能出现 */
+    mediaItems?: Array<{ mediaId?: string, localMediaId?: string, mediaCategory?: string }>
+    media_items?: Array<{ media_id?: string, local_media_id?: string, media_category?: string }>
+    caption?: string
+    [key: string]: unknown
+  }
+}
+
+export interface RawArticleEntity {
+  key?: string | number
+  value?: RawArticleEntityValue
+}
+
+export interface RawArticleContentState {
+  /** 数组形态；也见过以 key 为键的 Record 形态 */
+  entityMap?: RawArticleEntity[] | Record<string, RawArticleEntityValue>
+  blocks?: RawArticleBlock[]
+}
+
+export interface RawArticleResult {
+  id?: string
+  rest_id?: string
+  title?: string
+  preview_text?: string
+  plain_text?: string
+  cover_media?: RawArticleMedia
+  media_entities?: RawArticleMedia[]
+  content_state?: RawArticleContentState
+  metadata?: {
+    first_published_at_secs?: number
+    [key: string]: unknown
+  }
 }

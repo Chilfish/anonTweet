@@ -401,7 +401,7 @@
           "Tweet"
         ],
         "operationId": "tweetSet",
-        "summary": "保存推文实体编辑",
+        "summary": "保存推文实体编辑或文章按块译文",
         "requestBody": {
           "required": true,
           "content": {
@@ -415,16 +415,18 @@
                 "properties": {
                   "intent": {
                     "type": "string",
-                    "const": "updateEntities"
+                    "enum": [
+                      "updateEntities",
+                      "updateArticleTranslations"
+                    ]
                   },
                   "data": {
                     "type": "array",
-                    "description": "每项包含 tweetId 与 entities（TranslationEntity[]）",
+                    "description": "updateEntities：每项 { tweetId, entities }；updateArticleTranslations：每项 { tweetId, translation }",
                     "items": {
                       "type": "object",
                       "required": [
-                        "tweetId",
-                        "entities"
+                        "tweetId"
                       ],
                       "properties": {
                         "tweetId": {
@@ -434,7 +436,12 @@
                           "type": "array",
                           "items": {
                             "$ref": "#/components/schemas/TranslationEntity"
-                          }
+                          },
+                          "description": "intent=updateEntities 时必填"
+                        },
+                        "translation": {
+                          "$ref": "#/components/schemas/ArticleTranslation",
+                          "description": "intent=updateArticleTranslations 时必填"
                         }
                       }
                     }
@@ -952,7 +959,7 @@
         ],
         "operationId": "aiTranslation",
         "summary": "统一 AI 翻译端点",
-        "description": "type=twitter（默认）翻译推文实体；type=ins 翻译 IG caption。baseUrl 走 ENABLE_AI_BASE_URL_WHITELIST 可选白名单（AC-SEC-001）。",
+        "description": "type=twitter（默认）翻译推文实体；type=ins 翻译 IG caption；type=article 按块翻译 X 长文。baseUrl 走 ENABLE_AI_BASE_URL_WHITELIST 可选白名单（AC-SEC-001）。",
         "requestBody": {
           "required": true,
           "content": {
@@ -964,7 +971,8 @@
                     "type": "string",
                     "enum": [
                       "twitter",
-                      "ins"
+                      "ins",
+                      "article"
                     ],
                     "default": "twitter"
                   },
@@ -975,6 +983,10 @@
                   "igPost": {
                     "$ref": "#/components/schemas/IGPost",
                     "description": "type=ins 时必填"
+                  },
+                  "article": {
+                    "$ref": "#/components/schemas/TweetArticle",
+                    "description": "type=article 时必填"
                   },
                   "enableAITranslation": {
                     "type": "boolean",
@@ -1049,6 +1061,14 @@
                         "captionTranslation": {
                           "type": "string",
                           "description": "ins 分支"
+                        },
+                        "articleId": {
+                          "type": "string",
+                          "description": "article 分支"
+                        },
+                        "translation": {
+                          "$ref": "#/components/schemas/ArticleTranslation",
+                          "description": "article 分支：按块 key 的译文"
                         }
                       }
                     }
@@ -1068,7 +1088,7 @@
             }
           },
           "404": {
-            "description": "tweet/igPost 缺失",
+            "description": "tweet / igPost / article 缺失",
             "content": {
               "application/json": {
                 "schema": {
@@ -1696,6 +1716,10 @@
             "type": "object",
             "description": "X Space 卡片（SpaceDetails，见 app/types/space.ts；仅 Space 推文有）"
           },
+          "article": {
+            "$ref": "#/components/schemas/TweetArticle",
+            "description": "X 长文卡片与块文档（app/types/article.ts；仅文章推文有）"
+          },
           "comments": {
             "type": "array",
             "items": {
@@ -1718,6 +1742,206 @@
           }
         },
         "additionalProperties": true
+      },
+      "TweetArticle": {
+        "type": "object",
+        "description": "X 长文（Article）数据（app/types/article.ts TweetArticle），挂在 EnrichedTweet.article",
+        "required": [
+          "id",
+          "url",
+          "title",
+          "format"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "文章 rest_id（与推文 id 不同）"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "文章永久链接"
+          },
+          "title": {
+            "type": "string"
+          },
+          "previewText": {
+            "type": "string",
+            "description": "摘要"
+          },
+          "plainText": {
+            "type": "string",
+            "description": "纯文本全文（content_state 缺失时的兜底）"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "rich",
+              "plain"
+            ],
+            "description": "rich 表示 blocks 可用；plain 仅纯文本"
+          },
+          "coverImage": {
+            "$ref": "#/components/schemas/ArticleMedia"
+          },
+          "publishedAt": {
+            "type": "integer",
+            "description": "首次发布时间（epoch ms）"
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArticleBlock"
+            },
+            "description": "块文档（format=rich 时存在）"
+          }
+        },
+        "additionalProperties": true
+      },
+      "ArticleMedia": {
+        "type": "object",
+        "description": "文章内嵌媒体（图片）",
+        "required": [
+          "id",
+          "url"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "width": {
+            "type": "integer"
+          },
+          "height": {
+            "type": "integer"
+          },
+          "alt": {
+            "type": "string"
+          }
+        }
+      },
+      "ArticleBlock": {
+        "type": "object",
+        "description": "文章块（Draft.js block 语义化，app/types/article.ts ArticleBlock）。type 判别：段落类带 runs；markdown 带 text；image 带 media；embed-tweet 带 tweetId。",
+        "required": [
+          "key",
+          "type"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "稳定块 ID（按块翻译与渲染对齐用）"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "paragraph",
+              "heading",
+              "list-item",
+              "quote",
+              "markdown",
+              "divider",
+              "image",
+              "embed-tweet",
+              "link",
+              "unknown"
+            ]
+          },
+          "runs": {
+            "type": "array",
+            "description": "段落的行内片段（文本 / link / mention / hashtag，带样式）",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "text",
+                    "link",
+                    "mention",
+                    "hashtag"
+                  ]
+                },
+                "text": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string",
+                  "description": "type=link"
+                },
+                "href": {
+                  "type": "string",
+                  "description": "type=mention / hashtag"
+                },
+                "styles": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "bold",
+                      "italic",
+                      "strikethrough"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "level": {
+            "type": "integer",
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "description": "heading 级别"
+          },
+          "ordered": {
+            "type": "boolean",
+            "description": "list-item 是否有序"
+          },
+          "text": {
+            "type": "string",
+            "description": "markdown 块的原始 GFM"
+          },
+          "media": {
+            "$ref": "#/components/schemas/ArticleMedia",
+            "description": "image 块"
+          },
+          "caption": {
+            "type": "string",
+            "description": "image 块说明"
+          },
+          "tweetId": {
+            "type": "string",
+            "description": "embed-tweet 块的推文 id"
+          },
+          "url": {
+            "type": "string",
+            "description": "link 块 URL"
+          }
+        },
+        "additionalProperties": true
+      },
+      "ArticleTranslation": {
+        "type": "object",
+        "description": "文章按块译文（app/lib/article/translate.ts ArticleTranslation）：title + 块 key → 译文",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "blocks": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "块 key → 译文（link / mention / hashtag 以 <<__LINK_n__>> 占位符锚定）"
+          }
+        }
       },
       "IGAudio": {
         "type": "object",

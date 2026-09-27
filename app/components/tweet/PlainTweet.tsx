@@ -11,6 +11,7 @@ import {
 import { resolveTranslationView } from '~/lib/translation/resolveTranslationView'
 import { cn } from '~/lib/utils'
 import { AIVisionBlock } from './AIVisionBlock'
+import { TweetArticleCard } from './TweetArticleCard'
 import { TweetLinkCard } from './TweetCard'
 import { TweetMediaAlt } from './TweetMediaAlt'
 import { TweetSpaceCard } from './TweetSpaceCard'
@@ -110,6 +111,8 @@ function UnifiedTweet({ tweet, variant, enableTranslation }: UnifiedTweetProps) 
         <TweetMediaAlt tweet={tweet} />
 
         <AIVisionBlock tweet={tweet} hideChrome />
+
+        {tweet.article && <TweetArticleCard article={tweet.article} tweetId={tweet.id_str} />}
 
         {tweet.card && <TweetLinkCard tweet={tweet} />}
         {tweet.space && <TweetSpaceCard tweet={tweet} />}
