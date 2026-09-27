@@ -1,3 +1,4 @@
+import type { ArticleTranslation } from '~/lib/article/translate'
 import type { EnrichedTweet } from '~/types'
 import { useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
@@ -98,6 +99,8 @@ export function useTranslationActions() {
       setTweetTranslationMode: state.setTweetTranslationMode,
       setTranslationMode: state.setTranslationMode,
       setVisionVisibility: state.setVisionVisibility,
+      setArticleTranslation: state.setArticleTranslation,
+      setArticleTranslationStatus: state.setArticleTranslationStatus,
       hasTextContent: state.hasTextContent,
     })),
   )
@@ -258,4 +261,14 @@ export function useGlobalTranslationMode() {
 
 export function useTranslations() {
   return useTranslationStore(useShallow(state => state.translations))
+}
+
+/** 读取某篇文章的按块译文（无则 undefined） */
+export function useArticleTranslation(tweetId: string): ArticleTranslation | undefined {
+  return useTranslationStore(state => state.articleTranslations[tweetId])
+}
+
+/** 读取某篇文章翻译的加载态 */
+export function useArticleTranslationStatus(tweetId: string) {
+  return useTranslationStore(state => state.articleTranslationStatus[tweetId] ?? 'idle')
 }

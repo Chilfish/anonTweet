@@ -1,5 +1,5 @@
 import type { AIProviderName } from '~/lib/constants'
-import type { EnrichedTweet, IGPost, TranslationEntity } from '~/types'
+import type { EnrichedTweet, IGPost, TranslationEntity, TweetArticle } from '~/types'
 import { z } from 'zod'
 
 export const tweetSchema = z.discriminatedUnion('intent', [
@@ -16,6 +16,16 @@ export const tweetSchema = z.discriminatedUnion('intent', [
     data: z.object({
       entities: z.custom<TranslationEntity[]>(),
       tweetId: z.string(),
+    }).array(),
+  }),
+  z.object({
+    intent: z.literal('updateArticleTranslations'),
+    data: z.object({
+      tweetId: z.string(),
+      translation: z.object({
+        title: z.string().optional(),
+        blocks: z.record(z.string(), z.string()),
+      }),
     }).array(),
   }),
 ])
@@ -50,6 +60,17 @@ export type AITranslationSchema = (Omit<GetTweetSchema, 'tweetId'> & {
   type: 'ins'
   igPost: IGPost
   enableAITranslation: boolean
+  apiKey: string
+  model: string
+  provider?: AIProviderName
+  baseUrl?: string
+  thinkingLevel?: string
+  translationGlossary?: string
+  force?: boolean
+} | {
+  /** X Article 按块 AI 翻译 */
+  type: 'article'
+  article: TweetArticle
   apiKey: string
   model: string
   provider?: AIProviderName

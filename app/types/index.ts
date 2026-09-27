@@ -1,3 +1,4 @@
+import type { TweetArticle } from './article'
 import type { LinkPreviewCard } from './card'
 import type { Entity } from './entities'
 import type { SpaceDetails } from './space'
@@ -6,6 +7,7 @@ import type { AIVisionInfo } from './vision'
 import type { IUser } from '~/lib/rettiwt-api'
 import type { ITweetDetailsResponse } from '~/lib/rettiwt-api/types/raw/tweet/Details'
 
+export type * from './article'
 export type * from './card'
 export type * from './entities'
 // Instagram 类型
@@ -30,6 +32,7 @@ export type EnrichedTweet = Omit<Tweet, OmitTypes> & {
   quoted_tweet_id?: string
   quotedTweet?: EnrichedTweet
   card?: LinkPreviewCard
+  article?: TweetArticle
   space?: SpaceDetails
   retweetedOrignalId?: string
   isInlineMeida?: boolean

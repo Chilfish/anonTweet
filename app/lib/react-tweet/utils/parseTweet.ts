@@ -7,6 +7,7 @@ import type {
 } from '~/types'
 import { obsLog } from '~/lib/obs-log'
 import { parseTrendingCard } from '~/lib/rettiwt-api/parsers/jetfuel'
+import { mapArticle } from './article'
 import { getEntities } from './entitytParser'
 
 /**
@@ -31,6 +32,7 @@ export function enrichTweet(sourceData: RawTweet, retweetedOrignalId?: string): 
   const tweetUrl = `https://twitter.com/${userScreenName}/status/${tweetId}`
 
   const text = tweet.note_tweet?.note_tweet_results?.result?.text || tweet.legacy.full_text
+  const entities = getEntities(tweet, text)
 
   return {
     id_str: tweet.rest_id,
@@ -41,9 +43,10 @@ export function enrichTweet(sourceData: RawTweet, retweetedOrignalId?: string): 
     text,
     user,
     in_reply_to_status_id_str: tweet.legacy.in_reply_to_status_id_str,
-    entities: getEntities(tweet, text),
+    entities,
     quoted_tweet_id: tweet.quoted_status_result?.result?.rest_id,
     card: mapTwitterCard(tweet.card, (tweet as any).jetfuel_attachment),
+    article: mapArticle(tweet, entities) ?? undefined,
     mediaDetails: mapMediaDetails(tweet),
     retweetedOrignalId,
     isInlineMeida: !!tweet.note_tweet?.note_tweet_results?.result?.media?.inline_media?.length,

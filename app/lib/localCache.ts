@@ -1,7 +1,7 @@
 import { env } from './env.server'
 import { obsLog, suffix } from './obs-log'
 
-export type CacheType = 'tweet' | 'user' | 'replies' | 'ig-post'
+export type CacheType = 'tweet' | 'user' | 'replies' | 'ig-post' | 'article-translation'
 
 /**
  * 缓存数据包装结构，用于存储过期时间

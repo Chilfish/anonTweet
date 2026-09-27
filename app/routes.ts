@@ -14,6 +14,7 @@ export default [
     index('routes/home.tsx'),
     route('/list/:id', 'routes/list.tsx'),
     route('/tweets/:id', 'routes/tweet.tsx'),
+    route('/article/:id', 'routes/article.tsx'),
     route('/ins/:id', 'routes/ins.tsx'),
     route('/bili', 'routes/bili.tsx'),
     route('/search', 'routes/search.tsx'),
