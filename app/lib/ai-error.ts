@@ -1,4 +1,5 @@
 import { AISDKError, APICallError } from '@ai-sdk/provider'
+import { NoObjectGeneratedError } from 'ai'
 
 /**
  * 结构化的 AI 传输错误，随 BFF 响应返回给前端。
@@ -16,7 +17,17 @@ export interface AITransportError {
   isRetryable?: boolean
   /** 从 responseBody 中解析出的服务端错误信息（如 "Invalid API key."） */
   providerMessage?: string
+  /**
+   * 结构化输出未能解析时模型实际生成的文本（AI_NoObjectGeneratedError）。
+   * 截断保留，用于定位「模型吐了什么」。
+   */
+  generatedText?: string
+  /** 模型结束原因（length 表示被 max_tokens 截断，stop 表示正常结束） */
+  finishReason?: string
 }
+
+/** 保留的模型原始输出上限，避免把整段响应塞进错误对象 */
+const GENERATED_TEXT_LIMIT = 2000
 
 function extractProviderMessage(responseBody: string | undefined): string | undefined {
   if (!responseBody)
@@ -48,6 +59,16 @@ export function normalizeAIError(error: unknown): AITransportError {
       responseBody: error.responseBody,
       isRetryable: error.isRetryable,
       providerMessage: extractProviderMessage(error.responseBody),
+    }
+  }
+  if (NoObjectGeneratedError.isInstance(error)) {
+    return {
+      type: 'NoObjectGeneratedError',
+      message: error.message,
+      // 旧版只回 { type, message }，把模型原文/结束原因全丢了，
+      // 线上只能看到一句泛化报错、无法定位（AC-TWEET-020）。
+      generatedText: error.text ? error.text.slice(0, GENERATED_TEXT_LIMIT) : undefined,
+      finishReason: error.finishReason,
     }
   }
   if (AISDKError.isInstance(error)) {

@@ -1,4 +1,5 @@
 import { AISDKError, APICallError } from '@ai-sdk/provider'
+import { NoObjectGeneratedError } from 'ai'
 import { describe, expect, it } from 'vitest'
 import { normalizeAIError } from '~/lib/ai-error'
 
@@ -36,6 +37,29 @@ describe('normalizeAIError', () => {
       message: 'no status code',
       url: 'https://example.com/v1/chat/completions',
       isRetryable: false,
+    })
+  })
+
+  it('keeps the raw text and finish reason for NoObjectGeneratedError', () => {
+    const err = new NoObjectGeneratedError({
+      message: 'No object generated: could not parse the response.',
+      text: '{"blocks":{"b1":"译文一"},"b2":"译文二"}}',
+      response: { id: 'r1', timestamp: new Date(0), modelId: 'deepseek-flash' },
+      usage: {
+        inputTokens: undefined,
+        inputTokenDetails: { noCacheTokens: undefined, cacheReadTokens: undefined, cacheWriteTokens: undefined },
+        outputTokens: undefined,
+        outputTokenDetails: { textTokens: undefined, reasoningTokens: undefined },
+        totalTokens: undefined,
+      },
+      finishReason: 'stop',
+    })
+
+    expect(normalizeAIError(err)).toEqual({
+      type: 'NoObjectGeneratedError',
+      message: 'No object generated: could not parse the response.',
+      generatedText: '{"blocks":{"b1":"译文一"},"b2":"译文二"}}',
+      finishReason: 'stop',
     })
   })
 

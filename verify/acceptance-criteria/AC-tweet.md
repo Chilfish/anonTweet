@@ -1,6 +1,6 @@
 # Tweet API 验收标准
 
-> 版本：1.6 | 日期：2026-09-27（新增 AC-TWEET-019 内嵌推文真实渲染；1.5 为 AC-TWEET-017/018）
+> 版本：1.7 | 日期：2026-09-27（新增 AC-TWEET-020 文章翻译解析失败重试/降级；1.6 为 AC-TWEET-019 内嵌推文真实渲染）
 > 对应 Postmortem：001 (Tweet Parsing), 005 (Media)
 > 关联 Verifier：`verify/modules/tweet.verifier.ts`
 > 执行命令：`bun verify --module tweet [--ac AC-TWEET-NNN]`
@@ -265,7 +265,24 @@
 
 ---
 
-## 总计：19 条 AC
+## AC-TWEET-020：文章翻译解析失败的重试与降级（离线）
+
+- **输入**：两个日文段落块的文章；`ai` 的 `generateText` 边界打桩，复现线上失败模式——
+  模型输出里 `blocks` 逐块多打一个 `}`（`{"blocks":{"b1":"…"},"b2":"…"}}`），
+  SDK 抛 `NoObjectGeneratedError`（无法解析）
+- **预期输出**：单次解析失败重试一次而不是整篇失败；部分块校验通过时保留成功块；
+  所有尝试都失败时显式报错（不返回空译文）；送入模型的输入是 `{ 块key: 原文 }` 对象
+- **验证方法**：`bun run verify/index.ts --ac AC-TWEET-020`
+- **前置条件**：无（`generateText` 打桩，离线；不调 LLM）
+- **Pass 条件**：
+  - 第一次 `generateText` 抛 `NoObjectGeneratedError`、第二次返回合法块 → 调用两次且拿到全部译文
+  - 批次只返回可校验的子集块 → 结果只含该子集，不抛错
+  - 两次尝试都抛错 → `rejects.toThrow('no block could be translated')`
+  - `prompt` 含 `{"b1":"…","b2":"…"}` 对象、不含 `"key"`；`system` 含单对象契约
+
+---
+
+## 总计：20 条 AC
 
 | AC           | 分类                  | 依赖外部 API | 依赖 AI |
 | ------------ | --------------------- | ------------ | ------- |
@@ -288,5 +305,6 @@
 | AC-TWEET-017 | 纯函数/离线           | 否           | 否      |
 | AC-TWEET-018 | 行为断言（渲染/离线） | 否           | 否      |
 | AC-TWEET-019 | 纯函数 + 渲染（离线） | 否           | 否      |
+| AC-TWEET-020 | 行为断言（mock/离线） | 否           | 否      |
 
 > 离线 AC 可通过 fixture 直接验证，无需网络；集成 AC 需要 `TWEET_KEYS` 环境变量。
