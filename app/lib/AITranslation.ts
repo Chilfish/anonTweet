@@ -69,6 +69,17 @@ interface TranslatePayload {
 
 const PLACEHOLDER_REGEX = /<<__[A-Z]+_\d+__>>/g
 
+/**
+ * `generateText` 解析失败（模型输出非法 JSON）后的重试反馈。
+ * 关键约束：JSON 字符串内的换行必须写成转义序列 `\n`——真实换行是 JSON 非法控制字符，
+ * 会让 SDK 直接抛 NoObjectGeneratedError（线上 deepseek-flash 的真实失败形态）。
+ */
+const PARSE_RETRY_FEEDBACK = [
+  '你的上一次输出不是合法 JSON，无法解析。请只输出一个 JSON 对象：{"translation":"...","entityText":{...}}（不需要的 key 就不要写）。',
+  'JSON 字符串内的换行必须写成转义序列 \\n（反斜杠 + n），绝对不要出现真实换行，否则 JSON 非法。',
+  '保留所有占位符，完全一致（包括大小写与下划线）。entityText 只允许写 hashtag/symbol 的占位符。',
+].join('\n')
+
 function uniqueStrings(list: string[]) {
   return Array.from(new Set(list))
 }
@@ -187,7 +198,7 @@ You may provide translated display text for HASHTAG/SYMBOL placeholders via the 
 
 # 4. Newline Preservation (Preferred)
 If the source text contains newline characters, keep line breaks where it makes sense for readability.
-If you output newlines in JSON, output real newline characters (not the two-character sequence "\\n").
+Inside JSON strings, encode newlines as the escape sequence \\n (a backslash followed by "n"). Never write a literal line break inside a JSON string — that is an illegal control character and makes the whole response unparseable.
 
 # 5. Universal Domain Adaptation
 Analyze the [Author] and [Context] to adapt your style:
@@ -264,18 +275,34 @@ ${maskedText}
 
     for (let attempt = 0; attempt < 2; attempt++) {
       attempts += 1
-      const response = await generateText({
-        model,
-        system: systemPrompt,
-        messages,
-        output,
-        temperature: 0.5,
-        // AC-DECOUPLE-002：服务端 AI 调用必须带超时，避免 Serverless 无限挂起
-        abortSignal: createAITranslationAbortSignal(),
-        providerOptions: strategy && modelConfig
-          ? strategy.buildProviderOptions(thinkingConfig, modelConfig)
-          : {},
-      })
+
+      let response
+      try {
+        response = await generateText({
+          model,
+          system: systemPrompt,
+          messages,
+          output,
+          temperature: 0.5,
+          // AC-DECOUPLE-002：服务端 AI 调用必须带超时，避免 Serverless 无限挂起
+          abortSignal: createAITranslationAbortSignal(),
+          providerOptions: strategy && modelConfig
+            ? strategy.buildProviderOptions(thinkingConfig, modelConfig)
+            : {},
+        })
+      }
+      catch (error) {
+        // 模型吐出无法解析的 JSON（NoObjectGeneratedError）等：直接冒泡会把整条翻译打断，
+        // 线上只剩一句泛化报错。带反馈重试一次（对齐 article 路径），第二次仍失败才抛原始错误。
+        if (attempt === 0) {
+          messages = [
+            ...baseMessages,
+            { role: 'user', content: PARSE_RETRY_FEEDBACK },
+          ]
+          continue
+        }
+        throw error
+      }
 
       const translated = normalizeNewlineEscapes(response.output.translation, expectedNewlineCount).trim()
       lastValidation = validatePlaceholders(translated, placeholders)
@@ -314,7 +341,7 @@ ${maskedText}
             '2) 不要新增或改写任何占位符。',
             '3) 仅输出 JSON：{"translation":"...","entityText":{...}}（不需要的 key 就不要写）。',
             '4) entityText 只允许写 hashtag/symbol 的占位符；@mention（人名/用户名）绝对不要翻译。',
-            '5) 如果原文有换行，请尽量保留换行（不要把全部内容挤成一行；不要输出 "\\n"，要输出真实换行）。',
+            '5) 如果原文有换行，请尽量保留换行（不要把全部内容挤成一行）；JSON 字符串内的换行必须写成转义序列 \\n（反斜杠+n），不要出现真实换行，否则 JSON 非法。',
           ].join('\n'),
         },
       ]

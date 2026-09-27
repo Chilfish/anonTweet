@@ -1,6 +1,6 @@
 # Tweet API 验收标准
 
-> 版本：1.7 | 日期：2026-09-27（新增 AC-TWEET-020 文章翻译解析失败重试/降级；1.6 为 AC-TWEET-019 内嵌推文真实渲染）
+> 版本：1.8 | 日期：2026-09-27（新增 AC-TWEET-021 推文翻译解析失败重试；1.7 为 AC-TWEET-020 文章翻译解析失败重试/降级）
 > 对应 Postmortem：001 (Tweet Parsing), 005 (Media)
 > 关联 Verifier：`verify/modules/tweet.verifier.ts`
 > 执行命令：`bun verify --module tweet [--ac AC-TWEET-NNN]`
@@ -282,7 +282,26 @@
 
 ---
 
-## 总计：20 条 AC
+## AC-TWEET-021：推文翻译解析失败的重试（离线）
+
+- **输入**：`translateText`（`app/lib/AITranslation.ts`）用 `ai/test` 的 `MockLanguageModelV4`
+  驱动真实 `generateText` + `Output.object`，复现线上失败模式——模型把 JSON 字符串里的换行
+  写成**真实换行**（`{"translation":"一行目<真实换行>二行目"}`）。真实换行是 JSON 非法控制字符，
+  `JSON.parse` 失败 → SDK 抛 `NoObjectGeneratedError`（`could not parse the response`）
+- **预期输出**：解析失败不再直接冒泡中断翻译（旧实现把 `generateText` 的异常抛出重试循环，
+  线上只剩一句泛化 500），而是带反馈重试一次；两次都失败才抛原始解析错误；
+  system prompt 要求 JSON 字符串内的换行写转义序列 `\n`（而非真实换行）
+- **验证方法**：`bun run verify/index.ts --ac AC-TWEET-021`
+- **前置条件**：无（`generateText` 打桩，离线；不调 LLM）
+- **Pass 条件**：
+  - 第一次输出非法 JSON、第二次合法 → 调用两次并拿到译文（转义序列还原为真实换行）
+  - 两次都非法 → `rejects`（`NoObjectGeneratedError`），且确实重试了两轮
+  - 送入模型的 `system` 含「JSON 字符串内换行写转义序列 `\n`」约束，不再要求真实换行
+  - 解析失败后的重试消息同样重申该换行约束（否则模型会持续吐非法 JSON）
+
+---
+
+## 总计：21 条 AC
 
 | AC           | 分类                  | 依赖外部 API | 依赖 AI |
 | ------------ | --------------------- | ------------ | ------- |
@@ -306,5 +325,6 @@
 | AC-TWEET-018 | 行为断言（渲染/离线） | 否           | 否      |
 | AC-TWEET-019 | 纯函数 + 渲染（离线） | 否           | 否      |
 | AC-TWEET-020 | 行为断言（mock/离线） | 否           | 否      |
+| AC-TWEET-021 | 行为断言（mock/离线） | 否           | 否      |
 
 > 离线 AC 可通过 fixture 直接验证，无需网络；集成 AC 需要 `TWEET_KEYS` 环境变量。
