@@ -61,7 +61,7 @@ export const apiEndpoints: ApiEndpointLink[] = [
   { method: 'GET', path: '/api/tweet/list/{id}', label: 'GET /api/tweet/list/{id}', href: `/api/tweet/list/${LLMS_EXAMPLES.listId}`, description: '拉取 List 时间线推文（EnrichedTweet 数组）' },
   { method: 'GET', path: '/api/tweet/replies/{id}', label: 'GET /api/tweet/replies/{id}', href: `/api/tweet/replies/${LLMS_EXAMPLES.tweetId}`, description: '拉取推文回复（{ tweets, nextCursor }，cursor 分页）' },
   { method: 'GET', path: '/api/tweet/search', label: 'GET /api/tweet/search', href: '/api/tweet/search?q=twitter', description: '推文搜索（q 必填，type/cursor/count 可选，支持 X 高级语法）' },
-  { method: 'POST', path: '/api/tweet/set', label: 'POST /api/tweet/set', href: '/api/tweet/set', description: '保存推文实体编辑（intent: updateEntities，同步 localCache）' },
+  { method: 'POST', path: '/api/tweet/set', label: 'POST /api/tweet/set', href: '/api/tweet/set', description: '保存推文实体编辑或文章按块译文（intent: updateEntities / updateArticleTranslations）' },
   // ── Instagram ──────────────────────────────────────────
   { method: 'GET', path: '/api/ig/get/{id}', label: 'GET /api/ig/get/{id}', href: `/api/ig/get/${LLMS_EXAMPLES.igShortcode}`, description: '拉取 IG 帖子（简化版，不触发 AI 翻译）' },
   { method: 'POST', path: '/api/ig/get/{id}', label: 'POST /api/ig/get/{id}', href: `/api/ig/get/${LLMS_EXAMPLES.igShortcode}`, description: '拉取 IG 帖子（可启用 AI caption 翻译）' },
@@ -71,7 +71,7 @@ export const apiEndpoints: ApiEndpointLink[] = [
   { method: 'GET', path: '/api/user/timeline/{username}', label: 'GET /api/user/timeline/{username}', href: `/api/user/timeline/${LLMS_EXAMPLES.username}`, description: '用户时间线（EnrichedTweet 数组）' },
   // ── AI ─────────────────────────────────────────────────
   { method: 'POST', path: '/api/ai-test', label: 'POST /api/ai-test', href: '/api/ai-test', description: 'AI 提供商连通性测试（apiKey + model）' },
-  { method: 'POST', path: '/api/ai-translation', label: 'POST /api/ai-translation', href: '/api/ai-translation', description: '统一 AI 翻译端点（type: twitter 或 ins）' },
+  { method: 'POST', path: '/api/ai-translation', label: 'POST /api/ai-translation', href: '/api/ai-translation', description: '统一 AI 翻译端点（type: twitter / ins / article）' },
   { method: 'POST', path: '/api/ai-vision', label: 'POST /api/ai-vision', href: '/api/ai-vision', description: 'AI 视觉描述生成 / OCR 翻译 / 保存（三种严格互斥请求形态）' },
   // ── Proxy / Misc ───────────────────────────────────────
   { method: 'GET', path: '/api/proxy/image', label: 'GET /api/proxy/image', href: '/api/proxy/image?url=https%3A%2F%2Fscontent.cdninstagram.com%2Fv%2Ft51.2885-15%2Fphoto.jpg', description: '图片代理（解决 IG CDN CORS/CORP，url 白名单校验）' },
@@ -94,6 +94,7 @@ export function buildLlmsTxt(): string {
 - [/search](/search): 推文搜索 — 高级语法快捷插入 + 热门/最新切换 + 分页加载
 - [/tweets/{id}](/tweets/${LLMS_EXAMPLES.tweetId}): 推文详情（AI 翻译 / 截图导出）
 - [/ins/{id}](/ins/${LLMS_EXAMPLES.igShortcode}): Instagram 帖子详情（AI 翻译 / 截图导出）
+- [/article/{id}](/article/${LLMS_EXAMPLES.tweetId}): X 长文（Article）阅读页 — 块文档渲染 + 按块 AI 翻译（原文 / 双语 / 仅译文）
 - [/bili](/bili): Bili 动态发布（隐藏自用入口）
 
 ## Backend API
@@ -106,9 +107,11 @@ ${apiBullets}
 
 后端主要接口（搜索 / 获取推文）的出参是 EnrichedTweet 数组，字段对齐 react-tweet：
 
-- EnrichedTweet: id_str（推文 ID）、text（推文文本）、url（完整链接）、lang（语言码）、created_at（ISO 8601 创建时间）、user（作者 TweetUser）、entities（实体 Entity[]）、visionInfo（可选，AI 视觉描述）、quotedTweet（可选，引用推文）、card（可选，预览卡片）、space（可选，X Space 卡片：标题/主播/收听人数/时长）
+- EnrichedTweet: id_str（推文 ID）、text（推文文本）、url（完整链接）、lang（语言码）、created_at（ISO 8601 创建时间）、user（作者 TweetUser）、entities（实体 Entity[]）、visionInfo（可选，AI 视觉描述）、quotedTweet（可选，引用推文）、card（可选，预览卡片）、space（可选，X Space 卡片：标题/主播/收听人数/时长）、article（可选，X 长文卡片与块文档）
 - TweetUser: id_str、name、screen_name、profile_image_url_https（头像）、verified、is_blue_verified
 - Entity: type（text / hashtag / mention / url / media / symbol / media_alt / separator）、text、index（文本偏移）、href（多数类型带链接）、translation（手动翻译）、aiTranslation（AI 翻译）
+- TweetArticle: id（文章 ID）、url、title、previewText（摘要）、plainText（纯文本兜底）、format（rich 表示带 blocks，plain 仅纯文本）、coverImage（封面）、publishedAt（epoch ms）、blocks（ArticleBlock[]，仅 rich）
+- ArticleBlock: type（paragraph / heading / list-item / quote / markdown / divider / image / embed-tweet / link / unknown）、key（稳定块 ID）、runs（行内片段：文本 / 链接 / mention / hashtag，带回读偏移与样式）、text（markdown 块）、media（image 块）、tweetId（embed-tweet）、level / ordered（heading / 列表）
 - SearchResponse / RepliesResponse: { tweets: EnrichedTweet[], nextCursor }（nextCursor 为 string 或 null，null 表示没有更多）
 
 关键接口入参：
@@ -276,7 +279,7 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
         post: {
           tags: ['Tweet'],
           operationId: 'tweetSet',
-          summary: '保存推文实体编辑',
+          summary: '保存推文实体编辑或文章按块译文',
           requestBody: {
             required: true,
             content: {
@@ -285,16 +288,17 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
                   type: 'object',
                   required: ['intent', 'data'],
                   properties: {
-                    intent: { type: 'string', const: 'updateEntities' },
+                    intent: { type: 'string', enum: ['updateEntities', 'updateArticleTranslations'] },
                     data: {
                       type: 'array',
-                      description: '每项包含 tweetId 与 entities（TranslationEntity[]）',
+                      description: 'updateEntities：每项 { tweetId, entities }；updateArticleTranslations：每项 { tweetId, translation }',
                       items: {
                         type: 'object',
-                        required: ['tweetId', 'entities'],
+                        required: ['tweetId'],
                         properties: {
                           tweetId: { type: 'string' },
-                          entities: { type: 'array', items: { $ref: '#/components/schemas/TranslationEntity' } },
+                          entities: { type: 'array', items: { $ref: '#/components/schemas/TranslationEntity' }, description: 'intent=updateEntities 时必填' },
+                          translation: { $ref: '#/components/schemas/ArticleTranslation', description: 'intent=updateArticleTranslations 时必填' },
                         },
                       },
                     },
@@ -478,7 +482,7 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
           tags: ['AI'],
           operationId: 'aiTranslation',
           summary: '统一 AI 翻译端点',
-          description: 'type=twitter（默认）翻译推文实体；type=ins 翻译 IG caption。baseUrl 走 ENABLE_AI_BASE_URL_WHITELIST 可选白名单（AC-SEC-001）。',
+          description: 'type=twitter（默认）翻译推文实体；type=ins 翻译 IG caption；type=article 按块翻译 X 长文。baseUrl 走 ENABLE_AI_BASE_URL_WHITELIST 可选白名单（AC-SEC-001）。',
           requestBody: {
             required: true,
             content: {
@@ -486,9 +490,10 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
                 schema: {
                   type: 'object',
                   properties: {
-                    type: { type: 'string', enum: ['twitter', 'ins'], default: 'twitter' },
+                    type: { type: 'string', enum: ['twitter', 'ins', 'article'], default: 'twitter' },
                     tweet: { $ref: '#/components/schemas/EnrichedTweet', description: 'type=twitter 时必填' },
                     igPost: { $ref: '#/components/schemas/IGPost', description: 'type=ins 时必填' },
+                    article: { $ref: '#/components/schemas/TweetArticle', description: 'type=article 时必填' },
                     enableAITranslation: { type: 'boolean', description: 'twitter 分支守卫' },
                     force: { type: 'boolean', description: '强制重新翻译' },
                     apiKey: { type: 'string' },
@@ -514,12 +519,14 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
                     tweetId: { type: 'string' },
                     entities: { type: 'array', items: { $ref: '#/components/schemas/TranslationEntity' } },
                     captionTranslation: { type: 'string', description: 'ins 分支' },
+                    articleId: { type: 'string', description: 'article 分支' },
+                    translation: { $ref: '#/components/schemas/ArticleTranslation', description: 'article 分支：按块 key 的译文' },
                   },
                 },
               },
             }),
             400: errorJson('缺少参数 / baseUrl 不在白名单'),
-            404: errorJson('tweet/igPost 缺失'),
+            404: errorJson('tweet / igPost / article 缺失'),
             500: errorJson('翻译失败（含 aiError）'),
           },
         },
@@ -730,12 +737,86 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
             quotedTweet: { $ref: '#/components/schemas/EnrichedTweet', description: '引用推文（递归）' },
             card: { type: 'object', description: '预览卡片（LinkPreviewCard）' },
             space: { type: 'object', description: 'X Space 卡片（SpaceDetails，见 app/types/space.ts；仅 Space 推文有）' },
+            article: { $ref: '#/components/schemas/TweetArticle', description: 'X 长文卡片与块文档（app/types/article.ts；仅文章推文有）' },
             comments: { type: 'array', items: { $ref: '#/components/schemas/EnrichedTweet' }, description: '内联评论线程' },
             in_reply_to_status_id_str: { type: 'string' },
             mediaDetails: { type: 'array', items: { type: 'object', description: '媒体详情（图片/视频，见 app/types/media.ts）' } },
             possibly_sensitive: { type: 'boolean' },
           },
           additionalProperties: true,
+        },
+        // ── X Article 相关 ───────────────────────────────────
+        TweetArticle: {
+          type: 'object',
+          description: 'X 长文（Article）数据（app/types/article.ts TweetArticle），挂在 EnrichedTweet.article',
+          required: ['id', 'url', 'title', 'format'],
+          properties: {
+            id: { type: 'string', description: '文章 rest_id（与推文 id 不同）' },
+            url: { type: 'string', format: 'uri', description: '文章永久链接' },
+            title: { type: 'string' },
+            previewText: { type: 'string', description: '摘要' },
+            plainText: { type: 'string', description: '纯文本全文（content_state 缺失时的兜底）' },
+            format: { type: 'string', enum: ['rich', 'plain'], description: 'rich 表示 blocks 可用；plain 仅纯文本' },
+            coverImage: { $ref: '#/components/schemas/ArticleMedia' },
+            publishedAt: { type: 'integer', description: '首次发布时间（epoch ms）' },
+            blocks: { type: 'array', items: { $ref: '#/components/schemas/ArticleBlock' }, description: '块文档（format=rich 时存在）' },
+          },
+          additionalProperties: true,
+        },
+        ArticleMedia: {
+          type: 'object',
+          description: '文章内嵌媒体（图片）',
+          required: ['id', 'url'],
+          properties: {
+            id: { type: 'string' },
+            url: { type: 'string', format: 'uri' },
+            width: { type: 'integer' },
+            height: { type: 'integer' },
+            alt: { type: 'string' },
+          },
+        },
+        ArticleBlock: {
+          type: 'object',
+          description: '文章块（Draft.js block 语义化，app/types/article.ts ArticleBlock）。type 判别：段落类带 runs；markdown 带 text；image 带 media；embed-tweet 带 tweetId。',
+          required: ['key', 'type'],
+          properties: {
+            key: { type: 'string', description: '稳定块 ID（按块翻译与渲染对齐用）' },
+            type: { type: 'string', enum: ['paragraph', 'heading', 'list-item', 'quote', 'markdown', 'divider', 'image', 'embed-tweet', 'link', 'unknown'] },
+            runs: {
+              type: 'array',
+              description: '段落的行内片段（文本 / link / mention / hashtag，带样式）',
+              items: {
+                type: 'object',
+                properties: {
+                  type: { type: 'string', enum: ['text', 'link', 'mention', 'hashtag'] },
+                  text: { type: 'string' },
+                  url: { type: 'string', description: 'type=link' },
+                  href: { type: 'string', description: 'type=mention / hashtag' },
+                  styles: { type: 'array', items: { type: 'string', enum: ['bold', 'italic', 'strikethrough'] } },
+                },
+              },
+            },
+            level: { type: 'integer', enum: [1, 2, 3], description: 'heading 级别' },
+            ordered: { type: 'boolean', description: 'list-item 是否有序' },
+            text: { type: 'string', description: 'markdown 块的原始 GFM' },
+            media: { $ref: '#/components/schemas/ArticleMedia', description: 'image 块' },
+            caption: { type: 'string', description: 'image 块说明' },
+            tweetId: { type: 'string', description: 'embed-tweet 块的推文 id' },
+            url: { type: 'string', description: 'link 块 URL' },
+          },
+          additionalProperties: true,
+        },
+        ArticleTranslation: {
+          type: 'object',
+          description: '文章按块译文（app/lib/article/translate.ts ArticleTranslation）：title + 块 key → 译文',
+          properties: {
+            title: { type: 'string' },
+            blocks: {
+              type: 'object',
+              additionalProperties: { type: 'string' },
+              description: '块 key → 译文（link / mention / hashtag 以 <<__LINK_n__>> 占位符锚定）',
+            },
+          },
         },
         // ── Instagram 相关 ───────────────────────────────────
         IGAudio: {
