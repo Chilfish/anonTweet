@@ -1,13 +1,10 @@
 import type { Route } from './+types/article'
 import type { ArticleBlock, EnrichedTweet } from '~/types'
 import { useRef } from 'react'
-import { ArticleBody, ArticleEmbeddedTweet, ArticleImage, ArticleToolbar } from '~/components/article'
-import { Separator } from '~/components/ui/separator'
+import { ArticleEmbeddedTweet, ArticleReader, ArticleToolbar } from '~/components/article'
 import { useAutoTranslateArticle } from '~/hooks/use-auto-translate-article'
 import { collectEmbeddedTweetIds } from '~/lib/article'
 import { TweetNotFound } from '~/lib/react-tweet'
-import { isArticleUrl } from '~/lib/react-tweet/utils/article'
-import { formatDate } from '~/lib/react-tweet/utils/date-utils'
 import { getTweets } from '~/lib/service/getTweet'
 import { getArticleTranslation, getLocalTweet } from '~/lib/service/getTweet.server'
 import {
@@ -82,12 +79,6 @@ export function meta({ loaderData }: Route.MetaArgs) {
   return tags
 }
 
-/** 推文正文是否只有一条文章链接（这类推文不重复展示正文） */
-function isArticleOnlyText(tweet: NonNullable<Route.ComponentProps['loaderData']['tweet']>): boolean {
-  const entities = tweet.entities ?? []
-  return entities.length > 0 && entities.every(entity => entity.type === 'url' && isArticleUrl(entity.href))
-}
-
 export default function ArticlePage({ loaderData }: Route.ComponentProps) {
   const { tweet, tweetId, translation: persisted, embeds } = loaderData
   const article = tweet?.article
@@ -113,11 +104,6 @@ export default function ArticlePage({ loaderData }: Route.ComponentProps) {
   }
 
   const translation = stored ?? persisted ?? undefined
-  const translatedTitle = translation?.title
-  const showTranslatedTitle = Boolean(translatedTitle) && mode !== 'original'
-
-  const publishTime = article.publishedAt ?? tweet.created_at
-  const showCommentary = tweet.text?.trim() && !isArticleOnlyText(tweet)
 
   // 内嵌推文：取到数据即用真实推文组件渲染；未取到（删除/受限/失败）回退链接卡
   const renderEmbed = (embedId: string) => {
@@ -139,71 +125,15 @@ export default function ArticlePage({ loaderData }: Route.ComponentProps) {
         onRetry={() => void translate(true)}
       />
 
-      <article ref={articleRef} className="rounded-2xl border border-border/60 bg-card p-4 sm:p-6">
-        <header className="space-y-4">
-          <div>
-            <h1 className="text-2xl font-bold leading-tight text-foreground">
-              {mode === 'translation' && translatedTitle ? translatedTitle : article.title || 'X 长文'}
-            </h1>
-            {mode === 'bilingual' && showTranslatedTitle && (
-              <p className="mt-2 border-l-2 border-border/70 pl-2.5 text-lg font-semibold text-muted-foreground">
-                {translatedTitle}
-              </p>
-            )}
-          </div>
-
-          <div className="flex items-center gap-3">
-            {tweet.user?.profile_image_url_https && (
-              <img
-                src={tweet.user.profile_image_url_https}
-                alt={tweet.user.name}
-                className="size-10 shrink-0 rounded-full object-cover"
-                loading="lazy"
-              />
-            )}
-            <div className="min-w-0">
-              <div className="truncate text-sm font-semibold text-foreground">{tweet.user?.name}</div>
-              <div className="truncate text-xs text-muted-foreground">
-                @
-                {tweet.user?.screen_name}
-                {' · '}
-                {formatDate(publishTime, 'yyyy年MM月dd日')}
-              </div>
-            </div>
-            <a
-              href={`https://x.com/i/article/${article.id}`}
-              target="_blank"
-              rel="noopener noreferrer nofollow"
-              className="ml-auto shrink-0 text-xs font-medium text-primary hover:underline"
-            >
-              在 X 查看 →
-            </a>
-          </div>
-
-          {showCommentary && (
-            <p className="text-[15px] leading-7 whitespace-pre-wrap text-foreground/80">{tweet.text}</p>
-          )}
-
-          {article.coverImage && <ArticleImage media={article.coverImage} />}
-        </header>
-
-        <Separator className="my-6" />
-
-        {article.blocks?.length
-          ? (
-              <ArticleBody
-                blocks={article.blocks}
-                translations={translation?.blocks}
-                mode={mode}
-                renderEmbed={renderEmbed}
-              />
-            )
-          : (
-              <p className="text-[15px] leading-7 whitespace-pre-wrap text-foreground/90">
-                {article.plainText ?? article.previewText ?? ''}
-              </p>
-            )}
-      </article>
+      <ArticleReader
+        tweet={tweet}
+        article={article}
+        mode={mode}
+        translations={translation?.blocks}
+        translatedTitle={translation?.title}
+        renderEmbed={renderEmbed}
+        captureRef={articleRef}
+      />
     </div>
   )
 }

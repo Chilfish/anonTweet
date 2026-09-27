@@ -7,6 +7,10 @@ import { createAITranslationAbortSignal } from '~/lib/ai-timeout'
 import { models } from '~/lib/constants'
 import { obsLog } from '~/lib/obs-log'
 import { getProviderStrategy, getThinkingConfig } from '~/lib/providers'
+import { serializeArticleBlock } from './serialize'
+
+// 序列化是纯逻辑，拆到 `./serialize` 供客户端/Storybook 复用；此处再导出保持原 API
+export { serializeArticleBlock }
 
 /**
  * X Article 的**按块**翻译管线。
@@ -45,22 +49,6 @@ interface BatchItem {
   key: string
   text: string
   placeholders: string[]
-}
-
-/** 块 → 送入 LLM 的文本（非文本 run → per-block 占位符） */
-export function serializeArticleBlock(block: Extract<ArticleBlock, { runs: ArticleRun[] }>): { text: string, placeholders: string[] } {
-  const placeholders: string[] = []
-  let counter = 0
-  const text = block.runs
-    .map((run) => {
-      if (run.type === 'text')
-        return run.text
-      const placeholder = `<<__LINK_${counter++}__>>`
-      placeholders.push(placeholder)
-      return placeholder
-    })
-    .join('')
-  return { text, placeholders }
 }
 
 function isTranslatable(block: ArticleBlock): block is Extract<ArticleBlock, { runs: ArticleRun[] }> {
