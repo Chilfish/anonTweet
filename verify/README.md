@@ -90,7 +90,7 @@ AC-DEV-001（dev server 健康）、AC-IG-009（缺 cookies → 500）、AC-MEDI
 | [AC-resolver.md](acceptance-criteria/AC-resolver.md)       | AC-RESOLVER-001（决策链收敛）                         |
 | [AC-decouple.md](acceptance-criteria/AC-decouple.md)       | AC-DECOUPLE-001~002（GET 解耦 + AI 超时）             |
 | [AC-sec.md](acceptance-criteria/AC-sec.md)                 | AC-SEC-001（baseUrl 白名单，可选加固）                |
-| [AC-obs.md](acceptance-criteria/AC-obs.md)                 | AC-OBS-001（可观测性结构化日志）                      |
+| [AC-obs.md](acceptance-criteria/AC-obs.md)                 | AC-OBS-001~002（结构化日志 / AI 失败上下文）          |
 | [AC-pwa.md](acceptance-criteria/AC-pwa.md)                 | AC-PWA-001~008（PWA 安装壳 + Web Share）              |
 | [AC-ui.md](acceptance-criteria/AC-ui.md)                   | AC-UI-VISION-001 / AC-UI-A11Y-001（Storybook）        |
 

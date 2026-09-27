@@ -3,7 +3,7 @@ import type { EnrichedTweet } from '~/types'
 import { data } from 'react-router'
 import { z } from 'zod'
 import { isAllowedAIBaseUrl } from '~/lib/ai-base-url'
-import { normalizeAIError } from '~/lib/ai-error'
+import { buildAIFailure } from '~/lib/ai-error'
 import { models } from '~/lib/constants'
 import { getProviderStrategy } from '~/lib/providers'
 import { updateTweetVisionInfo } from '~/lib/service/getTweet.server'
@@ -131,6 +131,8 @@ async function handleGenerate(args: z.infer<typeof generateSchema>) {
     thinkingLevel,
     translationGlossary,
   } = args
+  const resolvedProvider = provider ?? 'google'
+
   try {
     // AC-SEC-001：baseUrl 白名单校验（SSRF/滥用面）
     if (!isAllowedAIBaseUrl(baseUrl)) {
@@ -139,6 +141,8 @@ async function handleGenerate(args: z.infer<typeof generateSchema>) {
         error: 'baseUrl not allowed',
         status: 400,
         message: 'baseUrl 不在白名单内：仅支持官方提供商域名或 ALLOWED_AI_BASE_URL_HOSTS 扩展域名（AC-SEC-001，ENABLE_AI_BASE_URL_WHITELIST=true）',
+        targetId: tweet.id_str,
+        targetType: 'tweet',
       })
     }
     const visionInfo = await runImageVision({
@@ -150,7 +154,7 @@ async function handleGenerate(args: z.infer<typeof generateSchema>) {
       translationGlossary,
       apiKey,
       model,
-      provider: provider ?? 'google',
+      provider: resolvedProvider,
       baseUrl,
       thinkingLevel,
     })
@@ -163,19 +167,17 @@ async function handleGenerate(args: z.infer<typeof generateSchema>) {
     try {
       await updateTweetVisionInfo(tweet.id_str, merged, tweet as EnrichedTweet)
     }
-    catch {}
+    catch (persistError: unknown) {
+      console.warn(`[Vision] persist failed for ${tweet.id_str}:`, persistError)
+    }
 
     return data({ success: true, data: { visionInfo } })
   }
   catch (error: unknown) {
-    console.error('[Vision] Failed:', error)
-    return data({
-      success: false,
-      error: 'Vision generation failed',
-      status: 500,
-      message: error instanceof Error ? error.message : '未知错误',
-      aiError: normalizeAIError(error),
-    })
+    return data(buildAIFailure(error, {
+      errorCode: 'Vision generation failed',
+      context: { targetType: 'tweet', targetId: tweet.id_str, model, provider: resolvedProvider },
+    }))
   }
 }
 
@@ -187,13 +189,10 @@ async function handleSave(args: z.infer<typeof saveSchema>) {
     return data({ success: true })
   }
   catch (error: unknown) {
-    console.error('[Vision Save] Failed:', error)
-    return data({
-      success: false,
-      error: 'Vision save failed',
-      status: 500,
-      message: error instanceof Error ? error.message : '未知错误',
-    })
+    return data(buildAIFailure(error, {
+      errorCode: 'Vision save failed',
+      context: { targetType: 'tweet', targetId: tweet.id_str },
+    }))
   }
 }
 
@@ -208,6 +207,9 @@ async function handleTranslate(args: z.infer<typeof translateSchema>) {
     thinkingLevel,
     translationGlossary,
   } = args
+  const modelConfig = models.find(m => m.name === model)
+  const resolvedProvider = provider || modelConfig?.provider || 'google'
+
   try {
     // AC-SEC-001：baseUrl 白名单校验
     if (!isAllowedAIBaseUrl(baseUrl)) {
@@ -216,10 +218,10 @@ async function handleTranslate(args: z.infer<typeof translateSchema>) {
         error: 'baseUrl not allowed',
         status: 400,
         message: 'baseUrl 不在白名单内：仅支持官方提供商域名或 ALLOWED_AI_BASE_URL_HOSTS 扩展域名（AC-SEC-001，ENABLE_AI_BASE_URL_WHITELIST=true）',
+        targetId: tweet.id_str,
+        targetType: 'tweet',
       })
     }
-    const modelConfig = models.find(m => m.name === model)
-    const resolvedProvider = provider || modelConfig?.provider || 'google'
     const strategy = getProviderStrategy(resolvedProvider)
     const modelInstance = strategy.createSDKProvider(apiKey, baseUrl)(model)
 
@@ -233,13 +235,9 @@ async function handleTranslate(args: z.infer<typeof translateSchema>) {
     return data({ success: true, data: { translations } })
   }
   catch (error: unknown) {
-    console.error('[Vision Translate] Failed:', error)
-    return data({
-      success: false,
-      error: 'Vision OCR translation failed',
-      status: 500,
-      message: error instanceof Error ? error.message : '未知错误',
-      aiError: normalizeAIError(error),
-    })
+    return data(buildAIFailure(error, {
+      errorCode: 'Vision OCR translation failed',
+      context: { targetType: 'tweet', targetId: tweet.id_str, model, provider: resolvedProvider },
+    }))
   }
 }

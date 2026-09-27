@@ -33,6 +33,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     })
 
     if (!resp.ok) {
+      console.error(`[Proxy] upstream ${resp.status} for ${url}`)
       return new Response(`Upstream fetch failed: ${resp.status}`, { status: resp.status })
     }
 
@@ -51,7 +52,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     })
   }
   catch (error: any) {
-    console.error('[Proxy] Failed:', error.message)
+    console.error(`[Proxy] Failed for ${url}:`, error.message)
     return new Response(`Proxy error: ${error.message}`, { status: 502 })
   }
 }

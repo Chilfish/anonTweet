@@ -48,6 +48,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     const status = error instanceof Error && 'status' in error
       ? Number((error as { status: unknown }).status) || 500
       : 500
+    // 之前这条失败路径没有任何日志，线上搜索失败无从排查
+    console.error(`[Search] q="${parsed.data.q}" type=${parsed.data.type} cursor=${parsed.data.cursor ?? '-'} failed:`, error)
     return data({
       error: 'Failed to search tweets',
       message: `搜索失败，${message}`,

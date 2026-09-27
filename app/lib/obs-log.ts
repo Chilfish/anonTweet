@@ -10,7 +10,8 @@
 export type ObsEvent
   = | 'ai.translate' // 推文翻译（AITranslation.translateText）：ms / attempts / ok / model / provider
     | 'ai.translate.ig' // IG caption 翻译（translateIGCaption）：ms / ok
-    | 'ai.translate.article.batch' // X Article 按块翻译的一批（autoTranslateArticle）：blocks / translated / ms
+    | 'ai.translate.article.batch' // X Article 按块翻译的一批（autoTranslateArticle）：blocks / translated / ms / error / targetId
+    | 'ai.fail' // AI 路由失败（buildAIFailure）：code / status / targetType / targetId / model / provider / aiErrorType / reason
     | 'cache.get' // 本地缓存读取：type / keySuffix / hit / adapter
     | 'pool.rotate' // RettiwtPool 冷却轮换：keySuffix / failStreak / cooldownMs / reason
     | 'pool.exhaust' // RettiwtPool 全部 Key 耗尽：attempts / states

@@ -3,7 +3,7 @@ import type { ThinkingLevel } from '~/lib/stores/appConfig'
 import type { AITranslationSchema } from '~/lib/validations/tweet'
 import { data } from 'react-router'
 import { isAllowedAIBaseUrl } from '~/lib/ai-base-url'
-import { normalizeAIError } from '~/lib/ai-error'
+import { buildAIFailure } from '~/lib/ai-error'
 import { autoTranslateTweet } from '~/lib/AITranslation'
 import { autoTranslateArticle } from '~/lib/article/translate'
 import { models } from '~/lib/constants'
@@ -44,11 +44,11 @@ async function handleArticleTranslation(args: Extract<AITranslationSchema, { typ
   const { article, apiKey, model, provider, baseUrl, thinkingLevel, translationGlossary } = args
 
   if (!article || (!article.blocks?.length && !article.title)) {
-    return data({ success: false, error: 'Article not found or empty', status: 404 })
+    return data({ success: false, error: 'Article not found or empty', status: 404, targetType: 'article', targetId: article?.id })
   }
 
   if (!apiKey || !model) {
-    return data({ success: false, error: 'Missing apiKey or model', status: 400 })
+    return data({ success: false, error: 'Missing apiKey or model', status: 400, targetType: 'article', targetId: article.id })
   }
 
   // AC-SEC-001：baseUrl 白名单校验
@@ -58,13 +58,15 @@ async function handleArticleTranslation(args: Extract<AITranslationSchema, { typ
       error: 'baseUrl not allowed',
       status: 400,
       message: 'baseUrl 不在白名单内：仅支持官方提供商域名或 ALLOWED_AI_BASE_URL_HOSTS 扩展域名（AC-SEC-001，ENABLE_AI_BASE_URL_WHITELIST=true）',
+      targetType: 'article',
+      targetId: article.id,
     })
   }
 
-  try {
-    const modelConfig = models.find(m => m.name === model)
-    const resolvedProvider = provider || modelConfig?.provider || 'google'
+  const modelConfig = models.find(m => m.name === model)
+  const resolvedProvider = provider || modelConfig?.provider || 'google'
 
+  try {
     const strategy = getProviderStrategy(resolvedProvider)
     const sdkProvider = strategy.createSDKProvider(apiKey, baseUrl)
     const modelInstance = sdkProvider.languageModel(model)
@@ -74,6 +76,7 @@ async function handleArticleTranslation(args: Extract<AITranslationSchema, { typ
       modelName: model,
       thinkingLevel: thinkingLevel as ThinkingLevel | undefined,
       translationGlossary,
+      targetId: article.id,
     })
 
     return data({
@@ -82,14 +85,10 @@ async function handleArticleTranslation(args: Extract<AITranslationSchema, { typ
     })
   }
   catch (error: unknown) {
-    console.error('[AI-Trans Article] Failed:', error)
-    return data({
-      success: false,
-      error: 'Translation failed',
-      status: 500,
-      message: error instanceof Error ? error.message : '未知错误',
-      aiError: normalizeAIError(error),
-    })
+    return data(buildAIFailure(error, {
+      errorCode: 'Translation failed',
+      context: { targetType: 'article', targetId: article.id, model, provider: resolvedProvider },
+    }))
   }
 }
 
@@ -114,6 +113,8 @@ async function handleIGTranslation(args: Extract<AITranslationSchema, { type: 'i
       success: false,
       error: 'Post not found or has no caption',
       status: 404,
+      targetId: igPost?.id,
+      targetType: 'ig',
     })
   }
 
@@ -131,6 +132,8 @@ async function handleIGTranslation(args: Extract<AITranslationSchema, { type: 'i
       success: false,
       error: 'Missing apiKey or model',
       status: 400,
+      targetId: igPost.id,
+      targetType: 'ig',
     })
   }
 
@@ -141,13 +144,15 @@ async function handleIGTranslation(args: Extract<AITranslationSchema, { type: 'i
       error: 'baseUrl not allowed',
       status: 400,
       message: 'baseUrl 不在白名单内：仅支持官方提供商域名或 ALLOWED_AI_BASE_URL_HOSTS 扩展域名（AC-SEC-001，ENABLE_AI_BASE_URL_WHITELIST=true）',
+      targetId: igPost.id,
+      targetType: 'ig',
     })
   }
 
-  try {
-    const modelConfig = models.find(m => m.name === model)
-    const resolvedProvider = provider || modelConfig?.provider || 'google'
+  const modelConfig = models.find(m => m.name === model)
+  const resolvedProvider = provider || modelConfig?.provider || 'google'
 
+  try {
     const strategy = getProviderStrategy(resolvedProvider)
     const sdkProvider = strategy.createSDKProvider(apiKey, baseUrl)
     const modelInstance = sdkProvider.languageModel(model)
@@ -164,6 +169,10 @@ async function handleIGTranslation(args: Extract<AITranslationSchema, { type: 'i
         success: false,
         error: 'Translation returned empty',
         status: 500,
+        targetId: igPost.id,
+        targetType: 'ig',
+        model,
+        provider: resolvedProvider,
       })
     }
 
@@ -176,14 +185,10 @@ async function handleIGTranslation(args: Extract<AITranslationSchema, { type: 'i
     })
   }
   catch (error: unknown) {
-    console.error('[AI-Trans IG] Failed:', error)
-    return data({
-      success: false,
-      error: 'Translation failed',
-      status: 500,
-      message: error instanceof Error ? error.message : '未知错误',
-      aiError: normalizeAIError(error),
-    })
+    return data(buildAIFailure(error, {
+      errorCode: 'Translation failed',
+      context: { targetType: 'ig', targetId: igPost.id, model, provider: resolvedProvider },
+    }))
   }
 }
 
@@ -202,6 +207,9 @@ async function handleTweetTranslation(args: Extract<AITranslationSchema, { type?
     translationGlossary,
     force,
   } = args
+
+  const modelConfig = models.find(m => m.name === model)
+  const resolvedProvider = provider || modelConfig?.provider || 'google'
 
   try {
     if (!tweet) {
@@ -235,6 +243,8 @@ async function handleTweetTranslation(args: Extract<AITranslationSchema, { type?
         error: 'Invalid request',
         status: 400,
         message: 'Invalid request data: API key or model is missing',
+        targetId: tweet.id_str,
+        targetType: 'tweet',
       })
     }
 
@@ -245,11 +255,10 @@ async function handleTweetTranslation(args: Extract<AITranslationSchema, { type?
         error: 'baseUrl not allowed',
         status: 400,
         message: 'baseUrl 不在白名单内：仅支持官方提供商域名或 ALLOWED_AI_BASE_URL_HOSTS 扩展域名（AC-SEC-001，ENABLE_AI_BASE_URL_WHITELIST=true）',
+        targetId: tweet.id_str,
+        targetType: 'tweet',
       })
     }
-
-    const modelConfig = models.find(m => m.name === model)
-    const resolvedProvider = provider || modelConfig?.provider || 'google'
 
     const mergedEntities = await autoTranslateTweet({
       tweet,
@@ -285,14 +294,10 @@ async function handleTweetTranslation(args: Extract<AITranslationSchema, { type?
     })
   }
   catch (error: unknown) {
-    console.error('Failed to translate tweet:', error)
-    return data({
-      success: false,
-      error: 'Failed to generate text',
-      status: 500,
+    return data(buildAIFailure(error, {
+      errorCode: 'Failed to generate text',
       message: '翻译推文失败',
-      cause: error instanceof Error ? error.message : '未知错误',
-      aiError: normalizeAIError(error),
-    })
+      context: { targetType: 'tweet', targetId: tweet?.id_str, model, provider: resolvedProvider },
+    }))
   }
 }

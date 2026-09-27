@@ -5,7 +5,7 @@ import { generateText, Output, zodSchema } from 'ai'
 import { z } from 'zod'
 import { createAITranslationAbortSignal } from '~/lib/ai-timeout'
 import { models } from '~/lib/constants'
-import { obsLog } from '~/lib/obs-log'
+import { obsLog, suffix } from '~/lib/obs-log'
 import { getProviderStrategy, getThinkingConfig } from '~/lib/providers'
 import { serializeArticleBlock } from './serialize'
 
@@ -114,9 +114,13 @@ You are a professional localization expert. Translate the given documents into n
 3. Never translate a block into anything other than Simplified Chinese.
 
 # Output
-Return a single JSON object: {"title":"...","blocks":{"<blockKey>":"<translated text>"}}
+Return a single JSON object of exactly this shape:
+{"title":"...","blocks":{"<blockKey>":"<translated text>"}}
+- "blocks" is ONE object holding EVERY input key, in the same order as the input.
+- Do NOT wrap each block in its own object, and do NOT close "blocks" before the last key.
+- Only include "title" when a title is supplied; otherwise omit it.
 - Copy the block keys EXACTLY as given.
-- Every input block key MUST appear in "blocks".
+Two blocks example: {"title":"标题","blocks":{"abc":"第一段译文","def":"第二段译文"}}
 `.trim()
 
 function buildOutputSchema() {
@@ -135,6 +139,8 @@ export interface AutoTranslateArticleOptions {
   modelName: string
   thinkingLevel?: ThinkingLevel
   translationGlossary?: string
+  /** 日志归属：文章 id，透传到 `ai.translate.article.batch` 事件，便于线上定位 */
+  targetId?: string
 }
 
 /**
@@ -157,23 +163,36 @@ export async function autoTranslateArticle(
   const output = buildOutputSchema()
 
   const translateBatch = async (items: BatchItem[]): Promise<Record<string, string>> => {
-    const payload = JSON.stringify(items.map(item => ({ key: item.key, text: item.text })), null, 0)
+    // 以「块 key → 原文」的对象喂入，与要求模型返回的 blocks 对象同构。
+    // 早前用的是 `[{ key, text }]` 数组，模型会把每个元素当成独立对象，
+    // 输出里逐块多打一个 `}`，导致整段 JSON 无法解析（见 AC-TWEET-020）。
+    const payload = JSON.stringify(Object.fromEntries(items.map(item => [item.key, item.text])), null, 0)
     const userContent = `${options.translationGlossary ? `<Glossary>\n${options.translationGlossary}\n</Glossary>\n\n` : ''}Translate these blocks:\n${payload}`
 
     const startedAt = Date.now()
     let lastRaw: Record<string, string> = {}
+    let lastError: unknown
     for (let attempt = 0; attempt < 2; attempt++) {
-      const response = await generateText({
-        model: options.modelInstance,
-        system: SYSTEM_PROMPT,
-        prompt: userContent,
-        output,
-        temperature: 0.4,
-        abortSignal: createAITranslationAbortSignal(),
-        providerOptions: strategy && modelConfig
-          ? strategy.buildProviderOptions(thinkingConfig, modelConfig)
-          : {},
-      })
+      let response
+      try {
+        response = await generateText({
+          model: options.modelInstance,
+          system: SYSTEM_PROMPT,
+          prompt: userContent,
+          output,
+          temperature: 0.4,
+          abortSignal: createAITranslationAbortSignal(),
+          providerOptions: strategy && modelConfig
+            ? strategy.buildProviderOptions(thinkingConfig, modelConfig)
+            : {},
+        })
+      }
+      catch (error) {
+        // 模型偶尔吐出无法解析的 JSON（AI_NoObjectGeneratedError）；重试一次，
+        // 而不是让它直接把整篇翻译打断（旧实现会把异常抛出重试循环）。
+        lastError = error
+        continue
+      }
 
       const returned = response.output.blocks ?? {}
       const accepted: Record<string, string> = {}
@@ -183,6 +202,7 @@ export async function autoTranslateArticle(
           accepted[item.key] = translated
       }
       lastRaw = accepted
+      lastError = undefined
       if (Object.keys(accepted).length === items.length)
         break
     }
@@ -191,22 +211,37 @@ export async function autoTranslateArticle(
       blocks: items.length,
       translated: Object.keys(lastRaw).length,
       ms: Date.now() - startedAt,
+      targetId: suffix(options.targetId),
+      error: lastError instanceof Error ? lastError.message : undefined,
     })
     return lastRaw
   }
 
+  let attempted = 0
+  let translated = 0
+
   // 标题单独一批（预算小、优先保证）
   if (title && !looksLikeChinese(title)) {
+    attempted += 1
     const titleResult = await translateBatch([{ key: '__title__', text: title, placeholders: [] }])
-    if (titleResult.__title__)
+    if (titleResult.__title__) {
       result.title = titleResult.__title__
+      translated += 1
+    }
   }
 
   const pending = blocks.filter(block => !looksLikeChinese(block.text))
   for (const batch of chunkBlocks(pending)) {
-    const translated = await translateBatch(batch.map(block => ({ key: block.key, text: block.text, placeholders: block.placeholders })))
-    Object.assign(result.blocks, translated)
+    attempted += batch.length
+    const batchResult = await translateBatch(batch.map(block => ({ key: block.key, text: block.text, placeholders: block.placeholders })))
+    translated += Object.keys(batchResult).length
+    Object.assign(result.blocks, batchResult)
   }
+
+  // 单批失败可容忍（保留已翻译成功的块），但整篇一块都没翻出来必须显式报错，
+  // 避免以 success 返回空译文、让前端把「失败」当成「已翻译」。
+  if (attempted > 0 && translated === 0)
+    throw new Error('Article translation failed: no block could be translated')
 
   return result
 }

@@ -4,7 +4,7 @@ import { generateText } from 'ai'
 import { data } from 'react-router'
 import z from 'zod'
 import { isAllowedAIBaseUrl } from '~/lib/ai-base-url'
-import { normalizeAIError } from '~/lib/ai-error'
+import { buildAIFailure } from '~/lib/ai-error'
 import { models } from '~/lib/constants'
 import { getProviderStrategy, getThinkingConfig } from '~/lib/providers'
 import { getTweetSchema } from '~/lib/validations/tweet'
@@ -87,14 +87,9 @@ export async function action({ request }: Route.ActionArgs) {
     })
   }
   catch (error: unknown) {
-    console.error('AI Test Connection Failed:', error)
-    return data({
-      success: false,
-      error: 'Failed to generate text',
-      status: 500,
-      message: 'Failed to generate text',
-      cause: error instanceof Error ? error.message : '未知错误',
-      aiError: normalizeAIError(error),
-    })
+    return data(buildAIFailure(error, {
+      errorCode: 'Failed to generate text',
+      context: { model, provider: resolvedProvider },
+    }))
   }
 }

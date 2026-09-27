@@ -1,7 +1,7 @@
 # X Article（长文）解析 · 渲染 · 分块翻译 — 实施追踪
 
-> 状态：🚧 进行中（2026-09-27）— §A 纯文本修复 ✅ / §B 富文本块文档 + 阅读页 ✅ / §C 分块翻译 ✅ 端到端已接线
-> AC：[`verify/acceptance-criteria/AC-tweet.md`](../../../verify/acceptance-criteria/AC-tweet.md)（AC-TWEET-012~019）
+> 状态：🚧 进行中（2026-09-27）— §A 纯文本修复 ✅ / §B 富文本块文档 + 阅读页 ✅ / §C 分块翻译 ✅ 端到端已接线 + 真机解析失败修复
+> AC：[`verify/acceptance-criteria/AC-tweet.md`](../../../verify/acceptance-criteria/AC-tweet.md)（AC-TWEET-012~020）
 > 关联：`docs/development-log/2026-09-27.md`（调查链）、`docs/planning/backlog.md`（未决条目）、ADR-009
 > Fixtures：`test/fixtures/articles/*.json`（真实上游抓取）
 
@@ -132,9 +132,17 @@ autoTranslateArticle(article, { modelInstance, modelName, thinkingLevel, transla
   2. 块内 link/mention/hashtag → 占位符 <<__LINK_n__>>（n = 该块内非文本 run 序号，从 0 起）
   3. 按字符预算（~2600）分批；每批一次 generateText（Output.object）
        schema: { title?: string, blocks: Record<blockKey, string> }
+       输入以 { 块key: 原文 } **对象**喂入，与输出同构（数组输入会让模型把每个元素当独立对象，
+       逐块多打一个 `}`，整段 JSON 无法解析）
   4. 逐块校验占位符集合是否精确相等；不通过 → 仅重试该批（≤2 次），仍失败则丢弃该块（不写脏数据）
+       generateText 抛错（AI_NoObjectGeneratedError）同样走重试，不再中断整篇
   5. 跳过已是中文的块（含 CJK 且无假名）；返回 { title?, blocks }
+       整篇一块都没翻出来时抛错，不以 success 返回空译文
 ```
+
+**为什么结构只能靠 prompt 约束**：`@ai-sdk/openai-compatible` 的 `supportsStructuredOutputs` 默认
+`false`，SDK 只发 `response_format: {"type":"json_object"}` 并告警，zod schema **不会下发给模型**。
+因此 prompt 里把「一个 `blocks` 对象含全部 key、禁止中途闭合」写成硬约束，输入也改成与输出同构的对象。
 
 **渲染还原**：`ArticleBody` 按原 run 顺序把译文里的 `<<__LINK_n__>>` 还原为第 n 个非文本 run 的
 可点击元素（链接/mention/hashtag），译文空格与标点原样保留。
@@ -156,10 +164,11 @@ autoTranslateArticle(article, { modelInstance, modelName, thinkingLevel, transla
 
 ## 8. 验收标准（AC）
 
-`AC-tweet.md` v1.6：AC-TWEET-012（文章解析/URL 判别）、013（`details()` fieldToggles 序列化，JSON 字符串不变量）、
+`AC-tweet.md` v1.7：AC-TWEET-012（文章解析/URL 判别）、013（`details()` fieldToggles 序列化，JSON 字符串不变量）、
 014（`content_state` → 块文档）、015（flat→rich 回填）、016（`ArticleBody` 真实渲染）、
 017（分块翻译离线契约：占位符序列化 + 中文跳过 + 落库 intent 校验）、018（三态渲染 + 占位符还原）、
-019（内嵌推文 id 收集 + 阅读页注入真实推文渲染 / 回退链接卡）。
+019（内嵌推文 id 收集 + 阅读页注入真实推文渲染 / 回退链接卡）、
+020（解析失败重试/降级 + 送入模型的输入形态）。
 
 ## 9. 当前状态与未完成（诚实清单）
 
@@ -190,7 +199,8 @@ autoTranslateArticle(article, { modelInstance, modelName, thinkingLevel, transla
 1. **DB migration 未执行**：`drizzle/0002_*` 已生成，但**未对线上库 `db:migrate`**（需 owner 在部署环境执行）。
 2. **可选**：文章页截图路由 `plain-article/:id`（若需对阅读页无头截图）。
 3. **未提交**：全部改动仍在工作区，未 commit（建议按 §11 拆分）。
-4. **LLM 端到端**未在沙箱验证（无 apiKey）；AC-017 只锁喂给模型的输入形态与落库契约，实际分批翻译调用需真机验证。
+4. **LLM 端到端**：真实 DeepSeek 端点已复现并修复「模型输出非法 JSON → 整篇 500」（2026-09-27，见开发日志）；
+   日常回归走 `ai/test` 假模型驱动真实 `generateText`（AC-TWEET-020），不触网、无需 apiKey。
 5. **旧缓存残留**：已缓存的 rich 文章仍带旧 `plainText` 直到缓存过期；新抓取即瘦身。
 
 ## 10. 已知限制 / 风险
@@ -209,7 +219,8 @@ autoTranslateArticle(article, { modelInstance, modelName, thinkingLevel, transla
 2. `feat(article): parse Draft.js content_state into a block document`（解析器 + 模型 + fixture + 单测 + AC-014）
 3. `feat(article): render articles on a dedicated reader page`（组件 + `/article/:id` + 紧凑卡 + 截图补齐 + AC-015/016）
 4. `feat(article): block-level bilingual translation`（migration + intent + 阅读页三态接线 + 组件整理 + AC-017/018）
-5. `docs(article): sync llms/OpenAPI/skill + feature doc + dev log`
+5. `fix(article): retry and degrade on unparseable translation output`（输入改对象 + prompt 硬约束 + 解析失败重试/降级 + `normalizeAIError` 补 generatedText/finishReason + AC-020）
+6. `docs(article): sync llms/OpenAPI/skill + feature doc + dev log`
 
 ## 12. 变更文件清单
 
@@ -224,9 +235,9 @@ autoTranslateArticle(article, { modelInstance, modelName, thinkingLevel, transla
 `app/lib/react-tweet/twitter-theme/tweet-body.tsx` ·
 `app/components/tweet/{TweetArticleCard,index,TweetNode,PlainTweet}.tsx` · `app/routes.ts` ·
 `app/routes/api/{ai/ai-translation,tweet/set}.ts` · `app/lib/validations/tweet.ts` · `app/lib/stores/{translation,hooks}.ts` ·
-`app/lib/database/schema.ts` · `app/lib/obs-log.ts` · `app/lib/llms.ts` · `eslint.config.mjs` · `package.json` · `bun.lock` ·
+`app/lib/database/schema.ts` · `app/lib/obs-log.ts` · `app/lib/ai-error.ts` · `app/lib/llms.ts` · `eslint.config.mjs` · `package.json` · `bun.lock` ·
 `.agents/skills/anon-tweet/{SKILL.md,references/anon-tweet-openapi.json}` ·
-`test/unit/{article,getLocalTweet}.spec.ts` · `verify/acceptance-criteria/AC-tweet.md` · `docs/development-log/2026-09-27.md`。
+`test/unit/{article,getLocalTweet,ai-error}.spec.ts` · `verify/acceptance-criteria/AC-tweet.md` · `docs/development-log/2026-09-27.md`。
 
 **不改**：`app/lib/AITranslation.ts`（高危，保持零改动）、`app/lib/localCache.ts` 核心机制、DB `tweet.jsonContent` 结构、
 `routes/api/tweet/{get,search,replies,list}.ts` 响应形态（`article` 自然透传）。

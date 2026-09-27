@@ -30,7 +30,9 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     const mainTweet = tweets[0] || null
     return { tweet: mainTweet, tweetId, baseUrl }
   }
-  catch {
+  catch (error: unknown) {
+    // 之前是裸 catch：线上推文页打不开时，日志里连 tweetId 都没有
+    console.error(`[tweet] load ${tweetId} failed:`, error)
     return { tweet: null, tweetId, baseUrl }
   }
 }
