@@ -11,7 +11,8 @@ import { waitForRenderReady } from '~/lib/utils'
 interface UseIGScreenshotActionProps {
   post: IGPost | null
   /**
-   * 捕获节点覆写：列表/多卡场景传列表容器（导出整列）。
+   * 捕获节点覆写：可传列表容器或卡片根节点；捕获时优先取其中的 `article`
+   * （帖子卡本体），避免带上父级容器的多余留白。
    * 不传则用内部 `containerRef`（单卡，绑在 `InstagramPostCard` 上）。
    */
   captureRef?: RefObject<HTMLDivElement | null>
@@ -27,10 +28,11 @@ export function useIGScreenshotAction({ post, captureRef }: UseIGScreenshotActio
   const containerRef = useRef<HTMLDivElement | null>(null)
   const { screenshotFormat } = useAppConfigStore()
 
-  const resolveNode = useCallback(
-    () => captureRef?.current ?? containerRef.current,
-    [captureRef],
-  )
+  const resolveNode = useCallback(() => {
+    const root = captureRef?.current ?? containerRef.current
+    // 帖子卡本体是 article：取它而非父级容器，避免导出时带上容器两侧/顶部的空白
+    return root?.querySelector<HTMLElement>('article') ?? root
+  }, [captureRef])
 
   const performCapture = useCallback(async (node: HTMLElement) => {
     const filter = (n: Node) => {
