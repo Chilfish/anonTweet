@@ -129,6 +129,7 @@ const MediaImage = forwardRef<HTMLImageElement, MediaImageProps>(
             isSuccess ? 'opacity-100' : 'opacity-0',
             className,
           )}
+          referrerPolicy="no-referrer"
           {...props}
         />
 

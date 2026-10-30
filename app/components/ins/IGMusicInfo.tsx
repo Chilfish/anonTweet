@@ -27,6 +27,7 @@ export function IGMusicInfo({ audio, className }: IGMusicInfoProps) {
             <img
               src={cover_artwork_thumbnail_uri}
               alt=""
+              referrerPolicy="no-referrer"
               className="size-7 rounded object-cover shrink-0"
             />
           )

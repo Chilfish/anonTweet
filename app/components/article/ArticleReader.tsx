@@ -58,7 +58,9 @@ export function ArticleReader({
       <header className="space-y-4">
         <div>
           <h1 className="text-2xl font-bold leading-tight text-foreground">
-            {mode === 'translation' && translatedTitle ? translatedTitle : article.title || 'X 长文'}
+            {mode === 'translation' && translatedTitle
+              ? translatedTitle
+              : article.title || 'X 长文'}
           </h1>
           {mode === 'bilingual' && showTranslatedTitle && (
             <p className="mt-2 border-l-2 border-border/70 pl-2.5 text-lg font-semibold text-muted-foreground">
@@ -74,6 +76,7 @@ export function ArticleReader({
               alt={tweet.user.name}
               className="size-10 shrink-0 rounded-full object-cover"
               loading="lazy"
+              referrerPolicy="no-referrer"
             />
           )}
           <div className="min-w-0">

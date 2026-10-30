@@ -19,7 +19,9 @@ function getSkeletonStyle(media: MediaDetails, itemCount: number) {
     paddingBottom = paddingBottom * 2
 
   return {
-    width: media.type === 'photo' ? undefined : 'unset',
+    width: media.type === 'photo'
+      ? undefined
+      : 'unset',
     paddingBottom: `${paddingBottom}%`,
   }
 }
@@ -85,6 +87,7 @@ export function TweetMedia({ tweet, quoted, onMediaClick }: Props) {
                       // AC-PERF-001：长链/大量媒体不 eager 加载全量图（截图等待只等视口内图片）
                       loading="lazy"
                       decoding="async"
+                      referrerPolicy="no-referrer"
                       className={cn(
                         'm-0 object-cover object-center w-full h-full',
                         isInlineMedia ? 'relative' : 'absolute inset-0',

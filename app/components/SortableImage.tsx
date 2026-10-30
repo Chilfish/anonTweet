@@ -65,6 +65,7 @@ function SortableImage({
         src={item.preview}
         alt="preview"
         className="h-full w-full object-cover transition-transform group-hover:scale-105"
+        referrerPolicy="no-referrer"
       />
       <button
         type="button"
@@ -97,7 +98,9 @@ export function ImageUploader({ value, onChange, maxCount = 9 }: ImageUploaderPr
   }
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
 
@@ -134,7 +137,10 @@ export function ImageUploader({ value, onChange, maxCount = 9 }: ImageUploaderPr
       preview: URL.createObjectURL(file),
     }))
 
-    const nextItems = [...items, ...newItems]
+    const nextItems = [
+      ...items,
+      ...newItems,
+    ]
     setItems(nextItems)
     onChange(nextItems.map(i => i.file))
 

@@ -49,6 +49,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
     >
       <head>
         <meta charSet="utf-8" />
+        {/* 全站不发送 Referer：X/Twitter 图片 CDN 对非白名单 Referer 返回 351（等同 403）防盗链，
+            会导致 pbs.twimg.com / video.twimg.com 的图片、视频、fetch 全部失败 */}
+        <meta name="referrer" content="no-referrer" />
         <link rel="icon" type="image/jpeg" href="/icon.webp" />
         {/* iOS PWA 外壳：Safari 忽略多数 manifest 字段，靠这些 head 声明进入全屏 App 形态（AC-PWA-004） */}
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
@@ -118,7 +121,9 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   let stack: string | undefined
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? 'Page Not Found' : 'An Error Occurred'
+    message = error.status === 404
+      ? 'Page Not Found'
+      : 'An Error Occurred'
     details
       = error.status === 404
         ? 'The page you\'re looking for doesn\'t exist.'

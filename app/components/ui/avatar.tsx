@@ -26,6 +26,7 @@ export function AvatarImage({
     <AvatarPrimitive.Image
       className={cn('size-full object-cover', className)}
       data-slot="avatar-image"
+      referrerPolicy="no-referrer"
       {...props}
     />
   )
