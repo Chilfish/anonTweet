@@ -9,7 +9,14 @@ const article: TweetArticle = {
   previewText: '摘要',
   format: 'rich',
   blocks: [
-    { key: 'h', type: 'heading', level: 1, runs: [{ type: 'text', text: '小标题' }] },
+    {
+      key: 'h',
+      type: 'heading',
+      level: 1,
+      runs: [
+        { type: 'text', text: '小标题' },
+      ],
+    },
     {
       key: 'p',
       type: 'paragraph',
@@ -20,11 +27,30 @@ const article: TweetArticle = {
         { type: 'mention', text: '@foo', href: 'https://x.com/foo' },
       ],
     },
-    { key: 'l1', type: 'list-item', ordered: false, runs: [{ type: 'text', text: '项目一' }] },
-    { key: 'l2', type: 'list-item', ordered: false, runs: [{ type: 'text', text: '项目二' }] },
+    {
+      key: 'l1',
+      type: 'list-item',
+      ordered: false,
+      runs: [
+        { type: 'text', text: '项目一' },
+      ],
+    },
+    {
+      key: 'l2',
+      type: 'list-item',
+      ordered: false,
+      runs: [
+        { type: 'text', text: '项目二' },
+      ],
+    },
     { key: 'md', type: 'markdown', text: '| a | b |\n| - | - |\n| 1 | 2 |' },
     { key: 'd', type: 'divider' },
-    { key: 'i', type: 'image', media: { id: 'm', url: 'https://pbs.twimg.com/media/x.jpg' }, caption: '图注' },
+    {
+      key: 'i',
+      type: 'image',
+      media: { id: 'm', url: 'https://pbs.twimg.com/media/x.jpg' },
+      caption: '图注',
+    },
     { key: 'e', type: 'embed-tweet', tweetId: '2104058634452005231' },
   ],
 }

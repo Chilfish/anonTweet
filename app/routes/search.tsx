@@ -141,7 +141,9 @@ export default function SearchPage() {
           return
         setTweets([])
         setNextCursor(null)
-        setError(err instanceof Error ? err.message : '搜索失败')
+        setError(err instanceof Error
+          ? err.message
+          : '搜索失败')
       })
       .finally(() => {
         if (!cancelled)
@@ -160,9 +162,17 @@ export default function SearchPage() {
     setIsLoadingMore(true)
     try {
       const { data } = await fetcher.get<SearchResponse>('/api/tweet/search', {
-        params: { q, type, cursor: nextCursor, count: 20 },
+        params: {
+          q,
+          type,
+          cursor: nextCursor,
+          count: 20,
+        },
       })
-      setTweets(prev => dedupeTweets([...prev, ...data.tweets]))
+      setTweets(prev => dedupeTweets([
+        ...prev,
+        ...data.tweets,
+      ]))
       setNextCursor(data.nextCursor)
     }
     catch (err: unknown) {
@@ -184,14 +194,18 @@ export default function SearchPage() {
   const insertOperator = (insert: string) => {
     setInput((prev) => {
       const next = prev.trimEnd()
-      return next ? `${next} ${insert}` : insert
+      return next
+        ? `${next} ${insert}`
+        : insert
     })
   }
 
   const switchType = (nextType: 'top' | 'latest') => {
     if (nextType === type)
       return
-    navigate(q ? `/search?q=${encodeURIComponent(q)}&type=${nextType}` : '/search')
+    navigate(q
+      ? `/search?q=${encodeURIComponent(q)}&type=${nextType}`
+      : '/search')
   }
 
   return (
@@ -267,7 +281,9 @@ export default function SearchPage() {
                 variant="outline"
                 size="xs"
                 className="font-mono"
-                title={op.hint ?? `${op.insert}${op.label.includes('@') ? '用户名' : '…'}`}
+                title={op.hint ?? `${op.insert}${op.label.includes('@')
+                  ? '用户名'
+                  : '…'}`}
                 onClick={() => insertOperator(op.insert)}
               >
                 {op.label}

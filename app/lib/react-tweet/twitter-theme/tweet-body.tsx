@@ -19,7 +19,9 @@ export function TweetBody({ tweet, isTranslated, lang, className }: TweetBodyPro
       dir="auto"
     >
       {tweet.entities.map((item) => {
-        const text = isTranslated ? (item.translation || item.aiTranslation || item.text) : item.text
+        const text = isTranslated
+          ? (item.translation || item.aiTranslation || item.text)
+          : item.text
         if (!isTranslated && item.index < 0)
           return null
 
@@ -35,7 +37,9 @@ export function TweetBody({ tweet, isTranslated, lang, className }: TweetBodyPro
               return null
             return (
               <TweetLink key={item.index} href={item.href}>
-                {text.length > 36 ? item.display_url : text}
+                {text.length > 36
+                  ? item.display_url
+                  : text}
               </TweetLink>
             )
 

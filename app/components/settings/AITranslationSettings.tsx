@@ -199,7 +199,9 @@ export function AITranslationSettings() {
       let label = ''
       switch (level) {
         case 'minimal':
-          label = aiProvider === 'deepseek' ? '不开启 (None)' : '最低 (Minimal)'
+          label = aiProvider === 'deepseek'
+            ? '不开启 (None)'
+            : '最低 (Minimal)'
           break
         case 'low':
           label = '较低 (Low)'
@@ -208,10 +210,14 @@ export function AITranslationSettings() {
           label = '中等 (Medium)'
           break
         case 'high':
-          label = aiProvider === 'deepseek' ? '标准 (High)' : '高 (High)'
+          label = aiProvider === 'deepseek'
+            ? '标准 (High)'
+            : '高 (High)'
           break
         case 'max':
-          label = aiProvider === 'deepseek' ? '深度 (Max)' : '最高 (Max)'
+          label = aiProvider === 'deepseek'
+            ? '深度 (Max)'
+            : '最高 (Max)'
           break
       }
       return { label, value: level }
@@ -411,7 +417,9 @@ export function AITranslationSettings() {
             {currentModelConfig?.thinkingType !== 'none' && (
               <SettingsRow
                 label="思考强度"
-                description={aiProvider === 'deepseek' ? 'DeepSeek 思考模式下的推理强度' : '控制翻译时的思考预算或深度'}
+                description={aiProvider === 'deepseek'
+                  ? 'DeepSeek 思考模式下的推理强度'
+                  : '控制翻译时的思考预算或深度'}
               >
                 <div className="flex-1 flex justify-end">
                   <Select
@@ -449,14 +457,16 @@ export function AITranslationSettings() {
                 disabled={isTesting}
                 className="h-8 transition-all active:scale-95 border-none"
               >
-                {isTesting ? (
-                  <>
-                    <Loader2 className="mr-2 size-3 animate-spin" />
-                    验证中
-                  </>
-                ) : (
-                  '立即测试'
-                )}
+                {isTesting
+                  ? (
+                      <>
+                        <Loader2 className="mr-2 size-3 animate-spin" />
+                        验证中
+                      </>
+                    )
+                  : (
+                      '立即测试'
+                    )}
               </Button>
             </SettingsRow>
           </SettingsGroup>

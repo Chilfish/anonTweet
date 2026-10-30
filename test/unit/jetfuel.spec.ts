@@ -98,7 +98,12 @@ describe('parseTrendingCard', () => {
 
   it('returns null when critical fields (title/image) are missing', () => {
     // 构造只有随机字符串的假 payload：字符串里没有 media URL 与 CJK 标题
-    const bogus = Buffer.from([0x05, ...Buffer.from('hello'), 0x04, ...Buffer.from('world')]).toString('base64')
+    const bogus = Buffer.from([
+      0x05,
+      ...Buffer.from('hello'),
+      0x04,
+      ...Buffer.from('world'),
+    ]).toString('base64')
     expect(parseTrendingCard(bogus)).toBeNull()
   })
 })

@@ -8,12 +8,21 @@ import { Textarea } from '~/components/ui/textarea'
 
 // 辅助函数保持在模块作用域
 function shouldSkipEntity(entity: Entity, originalTweet?: EnrichedTweet) {
-  if (['mention', 'media', 'url', 'separator', 'media_alt'].includes(entity.type))
+  if ([
+    'mention',
+    'media',
+    'url',
+    'separator',
+    'media_alt',
+  ].includes(entity.type)) {
     return true
+  }
   if (entity.type === 'text') {
     // 只有当原文也是空白时才跳过，防止用户清空翻译后无法找回
     const originalText = originalTweet?.entities?.[entity.index]?.text
-    return originalText ? !originalText.trim() : true
+    return originalText
+      ? !originalText.trim()
+      : true
   }
   return false
 }
@@ -71,21 +80,23 @@ export const EntityList: React.FC<{
                   {entity.type}
                 </Label>
               </div>
-              {isText ? (
-                <Textarea
-                  value={displayValue}
-                  onChange={e => onUpdate(entity.index, e.target.value)}
-                  className="min-h-8 border-none shadow-none rounded-none bg-transparent resize-none text-sm leading-relaxed"
-                />
-              ) : (
-                <div className="p-2">
-                  <Input
-                    value={displayValue}
-                    onChange={e => onUpdate(entity.index, e.target.value)}
-                    className="border-none shadow-none focus-visible:ring-0 bg-muted/30 h-9"
-                  />
-                </div>
-              )}
+              {isText
+                ? (
+                    <Textarea
+                      value={displayValue}
+                      onChange={e => onUpdate(entity.index, e.target.value)}
+                      className="min-h-8 border-none shadow-none rounded-none bg-transparent resize-none text-sm leading-relaxed"
+                    />
+                  )
+                : (
+                    <div className="p-2">
+                      <Input
+                        value={displayValue}
+                        onChange={e => onUpdate(entity.index, e.target.value)}
+                        className="border-none shadow-none focus-visible:ring-0 bg-muted/30 h-9"
+                      />
+                    </div>
+                  )}
             </div>
           )
         })}

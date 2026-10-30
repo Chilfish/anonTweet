@@ -86,7 +86,12 @@ export function useTranslationEditorLogic(originalTweet: EnrichedTweet) {
     setPrependText(prepend)
     setEnablePrepend(hasPrepend)
     setIsOpen(true)
-  }, [tweetId, originalTweet, getTranslation, dictionaryEntries])
+  }, [
+    tweetId,
+    originalTweet,
+    getTranslation,
+    dictionaryEntries,
+  ])
 
   // 更新单个实体的翻译
   const updateEntityTranslation = useCallback((index: number, value: string) => {
@@ -140,7 +145,15 @@ export function useTranslationEditorLogic(originalTweet: EnrichedTweet) {
       tweetId,
       entities: finalTranslations,
     })
-  }, [editingEntities, enablePrepend, prependText, setTranslation, setTranslationVisibility, tweetId, originalTweet])
+  }, [
+    editingEntities,
+    enablePrepend,
+    prependText,
+    setTranslation,
+    setTranslationVisibility,
+    tweetId,
+    originalTweet,
+  ])
 
   // AI 翻译逻辑
   const requestAITranslation = useCallback(async () => {
@@ -153,7 +166,10 @@ export function useTranslationEditorLogic(originalTweet: EnrichedTweet) {
 
     setIsAITranslating(true)
     try {
-      const combinedGlossary = [dictEntries(), translationGlossary].filter(Boolean).join('\n')
+      const combinedGlossary = [
+        dictEntries(),
+        translationGlossary,
+      ].filter(Boolean).join('\n')
       const { data } = await fetcher.post('/api/ai-translation', {
         tweet: originalTweet,
         enableAITranslation: true,
@@ -178,8 +194,12 @@ export function useTranslationEditorLogic(originalTweet: EnrichedTweet) {
         // 回填到编辑器中：优先使用新生成的 aiTranslation
         setEditingEntities(prev => prev.map((entity) => {
           const found = aiEntities.find(e => e.index === entity.index)
-          const translation = found?.aiTranslation || (found && found.text !== entity.text ? found.text : undefined)
-          return found ? { ...entity, translation: translation || entity.translation } : entity
+          const translation = found?.aiTranslation || (found && found.text !== entity.text
+            ? found.text
+            : undefined)
+          return found
+            ? { ...entity, translation: translation || entity.translation }
+            : entity
         }))
 
         const isStream = shouldRenderTranslatedEntitiesDirectly(originalTweet.entities || [], aiEntities)

@@ -11,32 +11,118 @@ import { highlightPost, storyPost } from './ig.fixtures'
 // ─── Mock Data ──────────────────────────────────────────────────────
 
 const samplePhotos: IGPost['media'] = [
-  { num: 1, media_id: '1', display_url: 'https://picsum.photos/seed/ig1/640/640', width: 640, height: 640, type: 'photo' },
-  { num: 2, media_id: '2', display_url: 'https://picsum.photos/seed/ig2/640/640', width: 640, height: 640, type: 'photo' },
-  { num: 3, media_id: '3', display_url: 'https://picsum.photos/seed/ig3/640/800', width: 640, height: 800, type: 'photo' },
-  { num: 4, media_id: '4', display_url: 'https://picsum.photos/seed/ig4/640/640', width: 640, height: 640, type: 'photo' },
-  { num: 5, media_id: '5', display_url: 'https://picsum.photos/seed/ig5/800/640', width: 800, height: 640, type: 'photo' },
-  { num: 6, media_id: '6', display_url: 'https://picsum.photos/seed/ig6/640/640', width: 640, height: 640, type: 'photo' },
-  { num: 7, media_id: '7', display_url: 'https://picsum.photos/seed/ig7/640/640', width: 640, height: 640, type: 'photo' },
-  { num: 8, media_id: '8', display_url: 'https://picsum.photos/seed/ig8/640/640', width: 640, height: 640, type: 'photo' },
-  { num: 9, media_id: '9', display_url: 'https://picsum.photos/seed/ig9/640/640', width: 640, height: 640, type: 'photo' },
-  { num: 10, media_id: '10', display_url: 'https://picsum.photos/seed/ig10/640/640', width: 640, height: 640, type: 'photo' },
-  { num: 11, media_id: '11', display_url: 'https://picsum.photos/seed/ig11/640/640', width: 640, height: 640, type: 'photo' },
-  { num: 12, media_id: '12', display_url: 'https://picsum.photos/seed/ig12/640/640', width: 640, height: 640, type: 'photo' },
+  {
+    num: 1,
+    media_id: '1',
+    display_url: 'https://picsum.photos/seed/ig1/640/640',
+    width: 640,
+    height: 640,
+    type: 'photo',
+  },
+  {
+    num: 2,
+    media_id: '2',
+    display_url: 'https://picsum.photos/seed/ig2/640/640',
+    width: 640,
+    height: 640,
+    type: 'photo',
+  },
+  {
+    num: 3,
+    media_id: '3',
+    display_url: 'https://picsum.photos/seed/ig3/640/800',
+    width: 640,
+    height: 800,
+    type: 'photo',
+  },
+  {
+    num: 4,
+    media_id: '4',
+    display_url: 'https://picsum.photos/seed/ig4/640/640',
+    width: 640,
+    height: 640,
+    type: 'photo',
+  },
+  {
+    num: 5,
+    media_id: '5',
+    display_url: 'https://picsum.photos/seed/ig5/800/640',
+    width: 800,
+    height: 640,
+    type: 'photo',
+  },
+  {
+    num: 6,
+    media_id: '6',
+    display_url: 'https://picsum.photos/seed/ig6/640/640',
+    width: 640,
+    height: 640,
+    type: 'photo',
+  },
+  {
+    num: 7,
+    media_id: '7',
+    display_url: 'https://picsum.photos/seed/ig7/640/640',
+    width: 640,
+    height: 640,
+    type: 'photo',
+  },
+  {
+    num: 8,
+    media_id: '8',
+    display_url: 'https://picsum.photos/seed/ig8/640/640',
+    width: 640,
+    height: 640,
+    type: 'photo',
+  },
+  {
+    num: 9,
+    media_id: '9',
+    display_url: 'https://picsum.photos/seed/ig9/640/640',
+    width: 640,
+    height: 640,
+    type: 'photo',
+  },
+  {
+    num: 10,
+    media_id: '10',
+    display_url: 'https://picsum.photos/seed/ig10/640/640',
+    width: 640,
+    height: 640,
+    type: 'photo',
+  },
+  {
+    num: 11,
+    media_id: '11',
+    display_url: 'https://picsum.photos/seed/ig11/640/640',
+    width: 640,
+    height: 640,
+    type: 'photo',
+  },
+  {
+    num: 12,
+    media_id: '12',
+    display_url: 'https://picsum.photos/seed/ig12/640/640',
+    width: 640,
+    height: 640,
+    type: 'photo',
+  },
 ]
 
 /** 带音乐数据的媒体项（模拟 Reel） */
-const musicMedia: IGPost['media'] = [{
-  num: 1,
-  media_id: 'reel1',
-  shortcode: 'DReel01',
-  display_url: 'https://picsum.photos/seed/reel/640/640',
-  video_url: null,
-  width: 640,
-  height: 640,
-  type: 'video' as const,
-  tagged_users: [],
-}]
+const musicMedia: IGPost['media'] = [
+  {
+    num: 1,
+    media_id: 'reel1',
+    shortcode: 'DReel01',
+    display_url: 'https://picsum.photos/seed/reel/640/640',
+    video_url: null,
+    width: 640,
+    height: 640,
+    type: 'video' as const,
+    tagged_users: [],
+  },
+]
 
 function makePost(overrides: Partial<IGPost>): IGPost {
   return {
@@ -121,40 +207,58 @@ export const LongNickname: Story = {
 
 export const TwoImageGrid: Story = {
   render: () => (
-    <InstagramPostCard post={makePost({ media: [samplePhotos[0]!, samplePhotos[1]!] })} />
+    <InstagramPostCard post={makePost({
+      media: [samplePhotos[0]!, samplePhotos[1]!],
+    })}
+    />
   ),
 }
 
 export const ThreeImageGrid: Story = {
   render: () => (
-    <InstagramPostCard post={makePost({ media: [samplePhotos[0]!, samplePhotos[1]!, samplePhotos[2]!] })} />
+    <InstagramPostCard post={makePost({
+      media: [samplePhotos[0]!, samplePhotos[1]!, samplePhotos[2]!],
+    })}
+    />
   ),
 }
 
 export const NineGrid: Story = {
   render: () => (
-    <InstagramPostCard post={makePost({ media: samplePhotos.slice(0, 9) })} />
+    <InstagramPostCard post={makePost({
+      media: samplePhotos.slice(0, 9),
+    })}
+    />
   ),
 }
 
 /** 4 张 — 2×2，对称无悬空 */
 export const FourImages: Story = {
   render: () => (
-    <InstagramPostCard post={makePost({ media: samplePhotos.slice(0, 4) })} />
+    <InstagramPostCard post={makePost({
+      media: samplePhotos.slice(0, 4),
+    })}
+    />
   ),
 }
 
 /** 5 张 — [3, 2] 分布，彻底消除 3+1+1 悬空 */
 export const FiveImages: Story = {
   render: () => (
-    <InstagramPostCard post={makePost({ media: samplePhotos.slice(0, 5) })} />
+    <InstagramPostCard post={makePost({
+      media: samplePhotos.slice(0, 5),
+    })}
+    />
   ),
 }
 
 /** 7 张 — [3, 2, 2] 分布，杜绝末行单图 */
 export const SevenImages: Story = {
   render: () => (
-    <InstagramPostCard post={makePost({ media: samplePhotos.slice(0, 7) })} />
+    <InstagramPostCard post={makePost({
+      media: samplePhotos.slice(0, 7),
+    })}
+    />
   ),
 }
 
@@ -192,13 +296,22 @@ export const TwentyImagesCompact: Story = {
 
 export const NoCaption: Story = {
   render: () => (
-    <InstagramPostCard post={makePost({ media: [samplePhotos[0]!], description: '', tags: undefined })} />
+    <InstagramPostCard post={makePost({
+      media: [samplePhotos[0]!],
+      description: '',
+      tags: undefined,
+    })}
+    />
   ),
 }
 
 export const NoAvatar: Story = {
   render: () => (
-    <InstagramPostCard post={makePost({ media: [samplePhotos[0]!], avatar_url: undefined })} />
+    <InstagramPostCard post={makePost({
+      media: [samplePhotos[0]!],
+      avatar_url: undefined,
+    })}
+    />
   ),
 }
 

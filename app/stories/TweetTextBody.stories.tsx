@@ -28,7 +28,9 @@ function seedMode(mode: 'original' | 'translation' | 'bilingual') {
   return () =>
     seedTranslation({
       translationMode: mode,
-      translationVisibility: { [tweetEnglish.id_str]: { body: true, alt: true } },
+      translationVisibility: {
+        [tweetEnglish.id_str]: { body: true, alt: true },
+      },
     })
 }
 
@@ -62,14 +64,18 @@ export const ManualTranslation: Story = {
     <WithStoreState seed={() => {
       seedTranslation({
         translationMode: 'bilingual',
-        translationVisibility: { [tweetEnglish.id_str]: { body: true, alt: true } },
+        translationVisibility: {
+          [tweetEnglish.id_str]: { body: true, alt: true },
+        },
         translations: {
-          [tweetEnglish.id_str]: [{
-            type: 'text',
-            text: 'Just shipped the new design 🚀 The team worked hard on this one — check it out and let us know what you think!',
-            index: 0,
-            translation: '手动翻译：刚发布了新设计（人工校订版）🚀',
-          }],
+          [tweetEnglish.id_str]: [
+            {
+              type: 'text',
+              text: 'Just shipped the new design 🚀 The team worked hard on this one — check it out and let us know what you think!',
+              index: 0,
+              translation: '手动翻译：刚发布了新设计（人工校订版）🚀',
+            },
+          ],
         },
       })
     }}

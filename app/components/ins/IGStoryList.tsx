@@ -114,7 +114,10 @@ export function IGStoryList({ posts, className }: IGStoryListProps) {
                   size="sm"
                   onClick={() => dispatchSelected(allSelected
                     ? { type: 'clear' }
-                    : { type: 'set', ids: posts.map(p => p.id) })}
+                    : {
+                        type: 'set',
+                        ids: posts.map(p => p.id),
+                      })}
                 >
                   {allSelected ? '取消全选' : '全选'}
                 </Button>

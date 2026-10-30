@@ -60,7 +60,9 @@ export async function downloadFile(
     onComplete?.(filename)
   }
   catch (error) {
-    const err = error instanceof Error ? error : new Error('下载失败')
+    const err = error instanceof Error
+      ? error
+      : new Error('下载失败')
     onError?.(err, filename)
     throw err
   }

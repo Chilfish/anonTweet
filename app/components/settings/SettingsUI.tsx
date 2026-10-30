@@ -121,15 +121,19 @@ const SettingsItem = React.forwardRef<HTMLDivElement, SettingsItemProps>(
         )}
         data-disabled={disabled}
         aria-disabled={disabled}
-        {...(onClick ? {
-          role: props.role ?? 'button',
-          tabIndex: disabled ? undefined : 0,
-          onClick: disabled ? undefined : onClick,
-          onKeyDown: disabled ? undefined : (e: React.KeyboardEvent) => {
-            if (e.key === 'Enter' || e.key === ' ')
-              onClick(e as any)
-          },
-        } : {})}
+        {...(onClick
+          ? {
+              role: props.role ?? 'button',
+              tabIndex: disabled ? undefined : 0,
+              onClick: disabled ? undefined : onClick,
+              onKeyDown: disabled
+                ? undefined
+                : (e: React.KeyboardEvent) => {
+                    if (e.key === 'Enter' || e.key === ' ')
+                      onClick(e as any)
+                  },
+            }
+          : {})}
         {...props}
       >
         <div className="flex items-center gap-3 min-w-0 flex-1">

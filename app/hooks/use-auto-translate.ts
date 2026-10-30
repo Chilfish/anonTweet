@@ -44,7 +44,10 @@ export function useAutoTranslateTweets(
       return
     firedForRef.current = anchor
 
-    const combinedGlossary = [dictEntries(), translationGlossary].filter(Boolean).join('\n')
+    const combinedGlossary = [
+      dictEntries(),
+      translationGlossary,
+    ].filter(Boolean).join('\n')
 
     void (async () => {
       const chain = new Set<string>()
@@ -96,5 +99,13 @@ export function useAutoTranslateTweets(
         }
       }
     })()
-  }, [tweets, enableAITranslation, aiConfig, translationGlossary, dictEntries, updateTweet, onTranslated])
+  }, [
+    tweets,
+    enableAITranslation,
+    aiConfig,
+    translationGlossary,
+    dictEntries,
+    updateTweet,
+    onTranslated,
+  ])
 }

@@ -122,7 +122,9 @@ export function TweetLinkCard({ tweet, className }: TweetLinkCardProps) {
       || card.type === 'summary_large_image'
     )
 
-    const displayDomain = card.domain || (card.url ? getDomainFromUrl(card.url) : null)
+    const displayDomain = card.domain || (card.url
+      ? getDomainFromUrl(card.url)
+      : null)
 
     return {
       url: card.url,
@@ -159,21 +161,25 @@ export function TweetLinkCard({ tweet, className }: TweetLinkCardProps) {
         className,
       )}
     >
-      {isLargeImageCard ? (
-        <>
-          <CardImage imageUrl={imageUrl!} altText={title || 'Link preview'} isLarge />
-          <CardContent domain={domain} title={title} description={description} />
-        </>
-      ) : hasImage ? (
-        <div className="flex">
-          <CardImage imageUrl={imageUrl!} altText={title || 'Link preview'} />
-          <div className="flex min-w-0 flex-1 flex-col justify-center">
-            <CardContent domain={domain} title={title} description={description} compact />
-          </div>
-        </div>
-      ) : (
-        <CardContent domain={domain} title={title} description={description} />
-      )}
+      {isLargeImageCard
+        ? (
+            <>
+              <CardImage imageUrl={imageUrl!} altText={title || 'Link preview'} isLarge />
+              <CardContent domain={domain} title={title} description={description} />
+            </>
+          )
+        : hasImage
+          ? (
+              <div className="flex">
+                <CardImage imageUrl={imageUrl!} altText={title || 'Link preview'} />
+                <div className="flex min-w-0 flex-1 flex-col justify-center">
+                  <CardContent domain={domain} title={title} description={description} compact />
+                </div>
+              </div>
+            )
+          : (
+              <CardContent domain={domain} title={title} description={description} />
+            )}
     </a>
   )
 }

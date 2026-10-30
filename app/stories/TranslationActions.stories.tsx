@@ -49,7 +49,10 @@ export const SaveScreenshot: Story = {
 
 export const DownloadMediaButton: Story = {
   render: () => (
-    <WithStoreState seed={() => seedTranslation({ tweets: [tweetWithPhotos] })}>
+    <WithStoreState seed={() => seedTranslation({
+      tweets: [tweetWithPhotos],
+    })}
+    >
       <DownloadMedia />
     </WithStoreState>
   ),
@@ -64,7 +67,9 @@ export const ErrorDetail: Story = {
           message: '请求失败',
           url: 'https://api.openrouter.ai/api/v1/chat/completions',
           statusCode: 401,
-          responseBody: JSON.stringify({ error: { message: 'Invalid API key.' } }),
+          responseBody: JSON.stringify({
+            error: { message: 'Invalid API key.' },
+          }),
           providerMessage: 'Invalid API key.',
           isRetryable: false,
         } satisfies AITransportError}

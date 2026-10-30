@@ -36,11 +36,13 @@ export function FilterUnrelatedToggle() {
               : 'text-muted-foreground border-muted-foreground/30 hover:border-muted-foreground/60',
           )}
         >
-          {filterUnrelated ? (
-            <Filter className="size-4 animate-in zoom-in-50 duration-300" />
-          ) : (
-            <FilterX className="size-4 animate-in zoom-in-50 duration-300" />
-          )}
+          {filterUnrelated
+            ? (
+                <Filter className="size-4 animate-in zoom-in-50 duration-300" />
+              )
+            : (
+                <FilterX className="size-4 animate-in zoom-in-50 duration-300" />
+              )}
           <span className="hidden sm:inline">
             {filterUnrelated ? '仅相关性' : '全部评论'}
           </span>

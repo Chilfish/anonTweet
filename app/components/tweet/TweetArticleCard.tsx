@@ -34,7 +34,11 @@ export function TweetArticleCard({ article, tweetId, className }: TweetArticleCa
       {cover && (
         <div
           className="overflow-hidden bg-muted/20"
-          style={{ aspectRatio: cover.width && cover.height ? `${cover.width} / ${cover.height}` : '16 / 9' }}
+          style={{
+            aspectRatio: cover.width && cover.height
+              ? `${cover.width} / ${cover.height}`
+              : '16 / 9',
+          }}
         >
           <MediaImage
             src={proxyMedia(normalizeMediaUrl(cover.url))}

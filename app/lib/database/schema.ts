@@ -18,7 +18,9 @@ export const tweet = pgTable(
     tweetId: text('tweetId').notNull().unique(),
     createdAt: timestamp('createdAt').notNull().defaultNow(),
   },
-  table => [index('tweet_ownerId_idx').on(table.tweetOwnerId)],
+  table => [
+    index('tweet_ownerId_idx').on(table.tweetOwnerId),
+  ],
 )
 
 export const tweetEntities = pgTable(
@@ -76,7 +78,9 @@ export const igPost = pgTable(
     jsonContent: json('jsonContent').$type<IGPost>().notNull(),
     createdAt: timestamp('createdAt').notNull().defaultNow(),
   },
-  table => [index('ig_post_username_idx').on(table.username)],
+  table => [
+    index('ig_post_username_idx').on(table.username),
+  ],
 )
 
 export type SelectTweet = typeof tweet.$inferSelect

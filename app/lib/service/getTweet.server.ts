@@ -178,12 +178,16 @@ export async function updateTweetVisionInfo(
       })
       if (cached) {
         await db.update(tweet)
-          .set({ jsonContent: { ...cached.jsonContent, visionInfo } })
+          .set({
+            jsonContent: { ...cached.jsonContent, visionInfo },
+          })
           .where(eq(tweet.tweetId, tweetId))
       }
       else if (baseTweet?.user?.screen_name) {
         // 兜底整行插入：仅当 baseTweet 是完整推文（含 user）时才插入，避免残缺快照污染 DB
-        await insertToTweetDB([{ ...baseTweet, visionInfo }])
+        await insertToTweetDB([
+          { ...baseTweet, visionInfo },
+        ])
       }
     }
     catch (error) {
@@ -199,10 +203,18 @@ export async function updateTweetVisionInfo(
       getter: async () => null,
     })
     if (cached) {
-      await setLocalCache({ id: tweetId, type: 'tweet', value: { ...cached, visionInfo } })
+      await setLocalCache({
+        id: tweetId,
+        type: 'tweet',
+        value: { ...cached, visionInfo },
+      })
     }
     else if (baseTweet) {
-      await setLocalCache({ id: tweetId, type: 'tweet', value: { ...baseTweet, visionInfo } })
+      await setLocalCache({
+        id: tweetId,
+        type: 'tweet',
+        value: { ...baseTweet, visionInfo },
+      })
     }
   }
   catch {
@@ -259,7 +271,10 @@ export async function updateArticleTranslation(
           .values({ tweetId, translations: translation })
           .onConflictDoUpdate({
             target: tweetArticleTranslations.tweetId,
-            set: { translations: translation, updatedAt: new Date() },
+            set: {
+              translations: translation,
+              updatedAt: new Date(),
+            },
           })
       }
       catch (error) {

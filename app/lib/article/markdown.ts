@@ -11,7 +11,9 @@ function runsToMarkdown(runs: ArticleRun[]): string {
     .map((run) => {
       let out = run.type === 'link'
         ? `[${run.text}](${run.url})`
-        : (run.type === 'text' ? run.text : `[${run.text}](${run.href})`)
+        : (run.type === 'text'
+            ? run.text
+            : `[${run.text}](${run.href})`)
 
       if (run.styles?.includes('bold'))
         out = `**${out}**`
@@ -38,7 +40,9 @@ function blockToMarkdown(block: Exclude<ArticleBlock, { type: 'list-item' }>): s
     case 'divider':
       return '---'
     case 'image':
-      return `![${block.caption ?? 'Image'}](${block.media.url})${block.caption ? `\n\n*${block.caption}*` : ''}`
+      return `![${block.caption ?? 'Image'}](${block.media.url})${block.caption
+        ? `\n\n*${block.caption}*`
+        : ''}`
     case 'embed-tweet':
       return `https://x.com/i/status/${block.tweetId}`
     case 'link':
@@ -64,7 +68,9 @@ export function articleBlocksToMarkdown(blocks: ArticleBlock[]): string {
         const current = blocks[cursor]!
         if (current.type !== 'list-item' || current.ordered !== ordered)
           break
-        lines.push(`${ordered ? `${index++}.` : '-'} ${runsToMarkdown(current.runs)}`)
+        lines.push(`${ordered
+          ? `${index++}.`
+          : '-'} ${runsToMarkdown(current.runs)}`)
         cursor++
       }
       i = cursor - 1
@@ -86,7 +92,9 @@ export function articleToMarkdown(article: TweetArticle): string {
   const body = article.blocks?.length
     ? articleBlocksToMarkdown(article.blocks)
     : (article.plainText ?? article.previewText ?? '')
-  return body ? `${header.join('\n\n')}\n\n${body}` : header.join('\n\n')
+  return body
+    ? `${header.join('\n\n')}\n\n${body}`
+    : header.join('\n\n')
 }
 
 /** 文章 → 纯文本（标题 + 正文 + 链接），用于分享 / 复制正文 */

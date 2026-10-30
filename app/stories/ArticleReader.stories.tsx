@@ -37,15 +37,17 @@ type Story = StoryObj<typeof meta>
 const articleOnlyTweet = {
   ...tweetEnglish,
   text: 'https://t.co/artcl',
-  entities: [{
-    type: 'url',
-    index: 0,
-    text: 'https://t.co/artcl',
-    display_url: 'x.com/i/article/…',
-    url: 'https://t.co/artcl',
-    expanded_url: 'https://x.com/i/article/2103576349499855160',
-    href: 'https://x.com/i/article/2103576349499855160',
-  }] as typeof tweetEnglish.entities,
+  entities: [
+    {
+      type: 'url',
+      index: 0,
+      text: 'https://t.co/artcl',
+      display_url: 'x.com/i/article/…',
+      url: 'https://t.co/artcl',
+      expanded_url: 'https://x.com/i/article/2103576349499855160',
+      href: 'https://x.com/i/article/2103576349499855160',
+    },
+  ] as typeof tweetEnglish.entities,
 }
 
 const richTranslations = demoTranslations(articleRich)

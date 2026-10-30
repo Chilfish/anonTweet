@@ -48,7 +48,9 @@ export function demoTranslations(article: TweetArticle): { title?: string, block
     }
   }
   return {
-    title: article.title ? `【译文】${article.title}` : undefined,
+    title: article.title
+      ? `【译文】${article.title}`
+      : undefined,
     blocks,
   }
 }

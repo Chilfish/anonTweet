@@ -96,7 +96,9 @@ function stylesInRange(
     if (range.start <= start && range.end >= end && !styles.includes(range.style))
       styles.push(range.style)
   }
-  return styles.length > 0 ? styles : undefined
+  return styles.length > 0
+    ? styles
+    : undefined
 }
 
 /**
@@ -121,7 +123,15 @@ function buildRuns(block: RawArticleBlock, entityMap: Map<string, RawArticleEnti
     const end = Math.min(text.length, range.offset + range.length)
     if (end <= start)
       continue
-    spans.push({ start, end, run: { type: 'link', text: text.slice(start, end), url: value.data.url } })
+    spans.push({
+      start,
+      end,
+      run: {
+        type: 'link',
+        text: text.slice(start, end),
+        url: value.data.url,
+      },
+    })
   }
 
   for (const mention of block.data?.mentions ?? []) {
@@ -132,7 +142,15 @@ function buildRuns(block: RawArticleBlock, entityMap: Map<string, RawArticleEnti
     if (end <= start)
       continue
     const spanText = text.slice(start, end)
-    spans.push({ start, end, run: { type: 'mention', text: spanText, href: MENTION_HREF(spanText) } })
+    spans.push({
+      start,
+      end,
+      run: {
+        type: 'mention',
+        text: spanText,
+        href: MENTION_HREF(spanText),
+      },
+    })
   }
 
   for (const hashtag of block.data?.hashtags ?? []) {
@@ -143,7 +161,15 @@ function buildRuns(block: RawArticleBlock, entityMap: Map<string, RawArticleEnti
     if (end <= start)
       continue
     const spanText = text.slice(start, end)
-    spans.push({ start, end, run: { type: 'hashtag', text: spanText, href: HASHTAG_HREF(spanText) } })
+    spans.push({
+      start,
+      end,
+      run: {
+        type: 'hashtag',
+        text: spanText,
+        href: HASHTAG_HREF(spanText),
+      },
+    })
   }
 
   const styleRanges = (block.inlineStyleRanges ?? [])
@@ -193,14 +219,24 @@ function parseAtomicBlock(
   mediaIndex: Map<string, ArticleMedia>,
 ): ArticleBlock {
   const range = block.entityRanges?.[0]
-  const value = range ? entityMap.get(String(range.key)) : undefined
+  const value = range
+    ? entityMap.get(String(range.key))
+    : undefined
 
   switch (value?.type) {
     case 'MEDIA': {
       const mediaId = mediaIdFromEntity(value)
-      const media = mediaId ? mediaIndex.get(mediaId) : undefined
-      if (media)
-        return { key, type: 'image', media, caption: value.data?.caption }
+      const media = mediaId
+        ? mediaIndex.get(mediaId)
+        : undefined
+      if (media) {
+        return {
+          key,
+          type: 'image',
+          media,
+          caption: value.data?.caption,
+        }
+      }
       return { key, type: 'unknown', text: block.text?.trim() || undefined }
     }
     case 'MARKDOWN':
@@ -208,7 +244,11 @@ function parseAtomicBlock(
     case 'DIVIDER':
       return { key, type: 'divider' }
     case 'TWEET':
-      return { key, type: 'embed-tweet', tweetId: String(value.data?.tweetId ?? '') }
+      return {
+        key,
+        type: 'embed-tweet',
+        tweetId: String(value.data?.tweetId ?? ''),
+      }
     case 'LINK':
       return { key, type: 'link', url: value.data?.url ?? '' }
     default:
@@ -240,9 +280,19 @@ function parseBlock(
     case 'header-three':
       return { key, type: 'heading', level: 3, runs }
     case 'unordered-list-item':
-      return { key, type: 'list-item', ordered: false, runs }
+      return {
+        key,
+        type: 'list-item',
+        ordered: false,
+        runs,
+      }
     case 'ordered-list-item':
-      return { key, type: 'list-item', ordered: true, runs }
+      return {
+        key,
+        type: 'list-item',
+        ordered: true,
+        runs,
+      }
     case 'blockquote':
       return { key, type: 'quote', runs }
     // unstyled 及未知块类型统一按段落渲染，保证不丢内容

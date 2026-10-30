@@ -28,7 +28,9 @@ export async function startPixelServer(): Promise<{ url: string, stop: () => Pro
   })
 
   const address = server.address()
-  const port = typeof address === 'object' && address ? address.port : 0
+  const port = typeof address === 'object' && address
+    ? address.port
+    : 0
 
   return {
     url: `http://localhost:${port}`,

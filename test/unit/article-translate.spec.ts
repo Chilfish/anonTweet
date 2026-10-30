@@ -44,16 +44,28 @@ describe('AC-TWEET-017: article block translation contract', () => {
   it('AC-TWEET-017: accepts the article-translation persistence intent', () => {
     const valid = tweetSchema.safeParse({
       intent: 'updateArticleTranslations',
-      data: [{
-        tweetId: '2103576349499855160',
-        translation: { title: '标题', blocks: { b1: '译文' } },
-      }],
+      data: [
+        {
+          tweetId: '2103576349499855160',
+          translation: {
+            title: '标题',
+            blocks: { b1: '译文' },
+          },
+        },
+      ],
     })
     expect(valid.success).toBe(true)
 
     const invalid = tweetSchema.safeParse({
       intent: 'updateArticleTranslations',
-      data: [{ tweetId: '1', translation: { blocks: { b1: 123 } } }],
+      data: [
+        {
+          tweetId: '1',
+          translation: {
+            blocks: { b1: 123 },
+          },
+        },
+      ],
     })
     expect(invalid.success).toBe(false)
   })
@@ -66,17 +78,36 @@ const article: TweetArticle = {
   title: '标题',
   format: 'rich',
   blocks: [
-    { key: 'b1', type: 'paragraph', runs: [{ type: 'text', text: 'これは一つ目の段落です。' }] },
-    { key: 'b2', type: 'paragraph', runs: [{ type: 'text', text: 'これは二つ目の段落です。' }] },
+    {
+      key: 'b1',
+      type: 'paragraph',
+      runs: [
+        { type: 'text', text: 'これは一つ目の段落です。' },
+      ],
+    },
+    {
+      key: 'b2',
+      type: 'paragraph',
+      runs: [
+        { type: 'text', text: 'これは二つ目の段落です。' },
+      ],
+    },
   ],
 }
 
 function modelOutput(text: string): LanguageModelV4GenerateResult {
   return {
-    content: [{ type: 'text', text }],
+    content: [
+      { type: 'text', text },
+    ],
     finishReason: { unified: 'stop', raw: 'stop' },
     usage: {
-      inputTokens: { total: 0, noCache: 0, cacheRead: 0, cacheWrite: 0 },
+      inputTokens: {
+        total: 0,
+        noCache: 0,
+        cacheRead: 0,
+        cacheWrite: 0,
+      },
       outputTokens: { total: 0, text: 0, reasoning: 0 },
     },
     warnings: [],
@@ -93,7 +124,9 @@ function promptText(prompt: LanguageModelV4Prompt): string {
     .map((message) => {
       if (typeof message.content === 'string')
         return message.content
-      return message.content.map(part => (part.type === 'text' ? part.text : '')).join('')
+      return message.content.map(part => (part.type === 'text'
+        ? part.text
+        : '')).join('')
     })
     .join('\n')
 }
@@ -105,7 +138,10 @@ function translateWith(model: MockLanguageModelV4) {
 describe('AC-TWEET-020: article translation parse-failure retry', () => {
   it('AC-TWEET-020: retries once on unparseable output instead of failing the whole article', async () => {
     const model = new MockLanguageModelV4({
-      doGenerate: [modelOutput(MALFORMED), modelOutput(VALID_FULL)],
+      doGenerate: [
+        modelOutput(MALFORMED),
+        modelOutput(VALID_FULL),
+      ],
     })
 
     const result = await translateWith(model)
@@ -116,7 +152,9 @@ describe('AC-TWEET-020: article translation parse-failure retry', () => {
   })
 
   it('AC-TWEET-020: keeps the blocks that did validate when a batch is only partially usable', async () => {
-    const model = new MockLanguageModelV4({ doGenerate: modelOutput(VALID_PARTIAL) })
+    const model = new MockLanguageModelV4({
+      doGenerate: modelOutput(VALID_PARTIAL),
+    })
 
     const result = await translateWith(model)
 
@@ -124,14 +162,18 @@ describe('AC-TWEET-020: article translation parse-failure retry', () => {
   })
 
   it('AC-TWEET-020: rejects loudly when every attempt fails, never returns an empty success', async () => {
-    const model = new MockLanguageModelV4({ doGenerate: modelOutput(MALFORMED) })
+    const model = new MockLanguageModelV4({
+      doGenerate: modelOutput(MALFORMED),
+    })
 
     await expect(translateWith(model)).rejects.toThrow('no block could be translated')
     expect(model.doGenerateCalls).toHaveLength(2)
   })
 
   it('AC-TWEET-020: feeds a { key: text } object and the single-blocks contract', async () => {
-    const model = new MockLanguageModelV4({ doGenerate: modelOutput(VALID_FULL) })
+    const model = new MockLanguageModelV4({
+      doGenerate: modelOutput(VALID_FULL),
+    })
 
     await translateWith(model)
 

@@ -85,7 +85,9 @@ function buildStoryItem(meta: DirectoryMeta, m: ParsedMedia): IGPost {
     tags: meta.tags,
     likes: 0,
     type: meta.type,
-    media: [toMedia(m, m.num ?? 1)],
+    media: [
+      toMedia(m, m.num ?? 1),
+    ],
     created_at: m.date ?? meta.post_date,
     avatar_url: meta.user?.profile_pic_url,
     audio: toAudio(m),
@@ -156,7 +158,9 @@ export function normalizeIGPosts(messages: Message[]): IGPost[] {
   if (meta.type === 'story' || meta.type === 'highlight')
     return mediaMeta.map(m => buildStoryItem(meta, m))
 
-  return [buildSinglePost(meta, mediaMeta)]
+  return [
+    buildSinglePost(meta, mediaMeta),
+  ]
 }
 
 /** 单张 post 的便捷包装（= 列表首项），供只关心单帖的调用点使用。 */

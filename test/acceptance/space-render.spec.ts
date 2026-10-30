@@ -96,15 +96,17 @@ describe('AC-SPACE-007: body does not duplicate the space link', () => {
   it('AC-SPACE-007: leaves other url entities untouched', () => {
     const tweet: EnrichedTweet = {
       ...baseTweet,
-      entities: [{
-        type: 'url',
-        index: 0,
-        url: 'https://t.co/other',
-        text: 'https://t.co/other',
-        display_url: 'example.com/a',
-        expanded_url: 'https://example.com/a',
-        href: 'https://example.com/a',
-      }],
+      entities: [
+        {
+          type: 'url',
+          index: 0,
+          url: 'https://t.co/other',
+          text: 'https://t.co/other',
+          display_url: 'example.com/a',
+          expanded_url: 'https://example.com/a',
+          href: 'https://example.com/a',
+        },
+      ],
     }
 
     expect(renderToString(createElement(TweetBody, { tweet, isTranslated: false })))

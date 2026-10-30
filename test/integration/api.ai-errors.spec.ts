@@ -27,7 +27,15 @@ const article = {
   url: 'https://x.com/i/article/2104009234858024962',
   title: 'タイトル',
   format: 'rich',
-  blocks: [{ key: 'b1', type: 'paragraph', runs: [{ type: 'text', text: 'これはテストです。' }] }],
+  blocks: [
+    {
+      key: 'b1',
+      type: 'paragraph',
+      runs: [
+        { type: 'text', text: 'これはテストです。' },
+      ],
+    },
+  ],
 }
 
 describe.skipIf(!testEnv.hasServer)('AC-OBS-002 AI failure context', () => {

@@ -15,7 +15,9 @@ export function extractIGDownloadItems(post: IGPost): DownloadItem[] {
     const isVideo = m.type === 'video'
     const url = isVideo ? m.video_url! : m.display_url
     const ext = isVideo ? 'mp4' : 'jpg'
-    const suffix = post.media.length > 1 ? `-${i + 1}` : ''
+    const suffix = post.media.length > 1
+      ? `-${i + 1}`
+      : ''
     const filename = `ig-${post.username}-${post.id}${suffix}.${ext}`
 
     return { url, filename }
@@ -38,7 +40,9 @@ export function extractIGStoryDownloadItems(posts: IGPost[]): DownloadItem[] {
 
       const ext = isVideo ? 'mp4' : 'jpg'
       const key = m.shortcode || m.media_id
-      return [{ url, filename: `ig-${post.username}-story-${key}.${ext}` }]
+      return [
+        { url, filename: `ig-${post.username}-story-${key}.${ext}` },
+      ]
     }),
   )
 }

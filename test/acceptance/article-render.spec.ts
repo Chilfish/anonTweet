@@ -69,7 +69,14 @@ describe('AC-TWEET-016: ArticleBody real render', () => {
  */
 describe('AC-TWEET-018: block translation three-state rendering', () => {
   const blocks: ArticleBlock[] = [
-    { key: 'h', type: 'heading', level: 1, runs: [{ type: 'text', text: 'Title EN' }] },
+    {
+      key: 'h',
+      type: 'heading',
+      level: 1,
+      runs: [
+        { type: 'text', text: 'Title EN' },
+      ],
+    },
     {
       key: 'p',
       type: 'paragraph',
@@ -120,7 +127,9 @@ describe('AC-TWEET-018: block translation three-state rendering', () => {
  * 未注入或取数失败时回退轻量链接卡。
  */
 describe('AC-TWEET-019: embedded tweet rendering', () => {
-  const blocks: ArticleBlock[] = [{ key: 'e', type: 'embed-tweet', tweetId: '2103032879496540640' }]
+  const blocks: ArticleBlock[] = [
+    { key: 'e', type: 'embed-tweet', tweetId: '2103032879496540640' },
+  ]
 
   it('AC-TWEET-019: delegates embed-tweet blocks to the injected renderer', () => {
     const html = renderToString(createElement(ArticleBody, {

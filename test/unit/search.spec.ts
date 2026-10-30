@@ -46,7 +46,9 @@ describe('parseSearchTimeline', () => {
         search_by_raw_query: {
           search_timeline: {
             timeline: {
-              instructions: [{ type: 'TimelineTerminateTimeline' }],
+              instructions: [
+                { type: 'TimelineTerminateTimeline' },
+              ],
             },
           },
         },
@@ -107,12 +109,17 @@ describe('parseSearchTimeline', () => {
 describe('tweetFilter advanced search syntax passthrough', () => {
   it('keeps X-style advanced operator query verbatim as rawQuery', () => {
     const raw = '(from:7KoWa) until:2025-12-20'
-    expect(new TweetFilter({ includeWords: [raw] }).toString()).toBe(raw)
+    expect(new TweetFilter({
+      includeWords: [raw],
+    }).toString()).toBe(raw)
   })
 
   it('joins multiple include words with spaces without mangling operators', () => {
     expect(
-      new TweetFilter({ includeWords: ['hello', 'from:user1'], minLikes: 20 }).toString(),
+      new TweetFilter({
+        includeWords: ['hello', 'from:user1'],
+        minLikes: 20,
+      }).toString(),
     ).toBe('hello from:user1 min_faves:20')
   })
 })

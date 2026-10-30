@@ -22,8 +22,12 @@ export function mergeTranslationsToField(
     if (!found)
       return original
     // 优先取目标字段，如果没有则尝试从 text 差异中获取
-    const translation = found[field] || (found.text !== original.text ? (found.aiTranslation || found.translation || found.text) : undefined)
-    return translation ? { ...original, [field]: translation } : original
+    const translation = found[field] || (found.text !== original.text
+      ? (found.aiTranslation || found.translation || found.text)
+      : undefined)
+    return translation
+      ? { ...original, [field]: translation }
+      : original
   })
 
   // 收集 base 中没有对应 index 的额外实体（如句首补充 index: -1），
@@ -37,7 +41,11 @@ export function mergeTranslationsToField(
   const prepends = extras.filter(e => e.index < 0).sort((a, b) => a.index - b.index)
   const tails = extras.filter(e => e.index >= 0).sort((a, b) => a.index - b.index)
 
-  return [...prepends, ...merged, ...tails]
+  return [
+    ...prepends,
+    ...merged,
+    ...tails,
+  ]
 }
 
 /**
@@ -120,6 +128,8 @@ export function deriveManualTranslation(
 
     const legacyMatch = legacyIndex.get(entity.index)
     const legacyText = legacyMatch?.translation || legacyMatch?.aiTranslation || legacyMatch?.text
-    return legacyText ? { ...entity, translation: legacyText } : entity
+    return legacyText
+      ? { ...entity, translation: legacyText }
+      : entity
   })
 }

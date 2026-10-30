@@ -145,56 +145,58 @@ export function AIVisionBlock({
             </header>
           )}
 
-          {hasContent ? (
-            <div className="divide-y divide-border/50">
-              {photos.map(({ i }) => {
-                const aiInfo = visionInfo.find(v => v.index === i)
-                const view = resolveVisionView(aiInfo, {
-                  translatedOnly: visionShowTranslatedOnly,
-                })
-                if (!view.hasView && aiInfo?.status !== 'error')
-                  return null
-                return (
-                  <div key={i} className="px-3.5 py-2.5">
-                    {aiInfo?.status === 'error' && (
-                      <p className="text-[13px] leading-relaxed wrap-break-word whitespace-pre-wrap text-destructive">
-                        {aiInfo.error}
-                      </p>
-                    )}
-                    {view.originalText
-                      && view.displayText !== view.originalText && (
-                      <p className="text-xs leading-relaxed wrap-break-word whitespace-pre-wrap text-muted-foreground/80">
-                        {view.originalText}
-                      </p>
-                    )}
-                    {view.displayText && (
-                      <p
-                        className={cn(
-                          'text-[13px] leading-relaxed wrap-break-word whitespace-pre-wrap',
-                          view.originalText
-                          && view.displayText !== view.originalText
-                          && 'mt-1 font-medium',
+          {hasContent
+            ? (
+                <div className="divide-y divide-border/50">
+                  {photos.map(({ i }) => {
+                    const aiInfo = visionInfo.find(v => v.index === i)
+                    const view = resolveVisionView(aiInfo, {
+                      translatedOnly: visionShowTranslatedOnly,
+                    })
+                    if (!view.hasView && aiInfo?.status !== 'error')
+                      return null
+                    return (
+                      <div key={i} className="px-3.5 py-2.5">
+                        {aiInfo?.status === 'error' && (
+                          <p className="text-[13px] leading-relaxed wrap-break-word whitespace-pre-wrap text-destructive">
+                            {aiInfo.error}
+                          </p>
                         )}
-                      >
-                        {view.displayText}
-                      </p>
-                    )}
-                  </div>
+                        {view.originalText
+                          && view.displayText !== view.originalText && (
+                          <p className="text-xs leading-relaxed wrap-break-word whitespace-pre-wrap text-muted-foreground/80">
+                            {view.originalText}
+                          </p>
+                        )}
+                        {view.displayText && (
+                          <p
+                            className={cn(
+                              'text-[13px] leading-relaxed wrap-break-word whitespace-pre-wrap',
+                              view.originalText
+                              && view.displayText !== view.originalText
+                              && 'mt-1 font-medium',
+                            )}
+                          >
+                            {view.displayText}
+                          </p>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            : (
+                !chromeHidden && (
+                  <button
+                    type="button"
+                    onClick={editor.initializeEditor}
+                    className="flex w-full items-center justify-center gap-1.5 px-3.5 py-3 text-[13px] text-muted-foreground/70 transition-colors hover:bg-background/40 hover:text-foreground"
+                  >
+                    <Sparkles className="size-3.5" />
+                    为配图生成 AI 描述
+                  </button>
                 )
-              })}
-            </div>
-          ) : (
-            !chromeHidden && (
-              <button
-                type="button"
-                onClick={editor.initializeEditor}
-                className="flex w-full items-center justify-center gap-1.5 px-3.5 py-3 text-[13px] text-muted-foreground/70 transition-colors hover:bg-background/40 hover:text-foreground"
-              >
-                <Sparkles className="size-3.5" />
-                为配图生成 AI 描述
-              </button>
-            )
-          )}
+              )}
         </section>
       )}
 

@@ -27,7 +27,10 @@ export async function loader({ params }: Route.LoaderArgs): Promise<{
     }
 
     const posts = normalizeIGPosts(messages)
-    return { post: posts.length ? posts : null, igId }
+    return {
+      post: posts.length ? posts : null,
+      igId,
+    }
   }
   catch (error) {
     console.error(`[plain-ig] Failed:`, error)

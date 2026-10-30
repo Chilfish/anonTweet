@@ -33,7 +33,10 @@ async function parseImportedExcel(result: ArrayBuffer): Promise<ImportOutcome> {
     if (Array.isArray(parsed) && parsed.length === 0) {
       return { type: 'empty' }
     }
-    return { type: 'error', error: new Error('Invalid format') }
+    return {
+      type: 'error',
+      error: new Error('Invalid format'),
+    }
   }
   catch (error) {
     return { type: 'error', error }
@@ -56,7 +59,10 @@ function DictionaryAddSection() {
   const handleAdd = () => {
     if (!newOriginal.trim() || !newTranslated.trim())
       return
-    addEntry({ original: newOriginal.trim(), translated: newTranslated.trim() })
+    addEntry({
+      original: newOriginal.trim(),
+      translated: newTranslated.trim(),
+    })
     setNewOriginal('')
     setNewTranslated('')
     toastManager.add({ title: '已添加', type: 'success' })
@@ -138,7 +144,9 @@ function DictionaryAddSection() {
           label="添加新词汇"
         >
           <Button size="icon" variant="ghost" className="h-6 w-6 pointer-events-none">
-            {showAddForm ? <X className="size-4" /> : <Plus className="size-4" />}
+            {showAddForm
+              ? <X className="size-4" />
+              : <Plus className="size-4" />}
           </Button>
         </SettingsRow>
 
@@ -277,7 +285,10 @@ function DictionaryEditDialog({
 
   const handleSave = () => {
     if (entry && editOriginal.trim() && editTranslated.trim()) {
-      updateEntry(entry.id, { original: editOriginal.trim(), translated: editTranslated.trim() })
+      updateEntry(entry.id, {
+        original: editOriginal.trim(),
+        translated: editTranslated.trim(),
+      })
       onClose()
     }
   }

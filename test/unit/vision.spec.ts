@@ -16,7 +16,9 @@ const EXPECTED_COUNT_MISMATCH_RE = /expected 2, got 1/
 describe('vision AC-VISION-001: AIVisionInfo 结构完整', () => {
   it('describe 结果含 description，不含 ocr 字段', () => {
     const info = parseVisionResult(VISION_PROMPT_PRESETS.describe, {
-      descriptions: [{ index: 0, description: '一只猫蹲在窗台上' }],
+      descriptions: [
+        { index: 0, description: '一只猫蹲在窗台上' },
+      ],
     })[0]!
 
     expect(info.index).toBe(0)
@@ -34,7 +36,9 @@ describe('vision AC-VISION-001: AIVisionInfo 结构完整', () => {
 
   it('ocr 结果含 originalText（纯 OCR，不含 translatedText）', () => {
     const info = parseVisionResult(VISION_PROMPT_PRESETS.ocr, {
-      texts: [{ index: 0, originalText: 'こんにちは' }],
+      texts: [
+        { index: 0, originalText: 'こんにちは' },
+      ],
     })[0]!
 
     expect(info.index).toBe(0)
@@ -47,7 +51,9 @@ describe('vision AC-VISION-001: AIVisionInfo 结构完整', () => {
 
   it('enrichedTweet.visionInfo 为独立可选数组，不写入 Entity', () => {
     const info = parseVisionResult(VISION_PROMPT_PRESETS.describe, {
-      descriptions: [{ index: 0, description: '描述' }],
+      descriptions: [
+        { index: 0, description: '描述' },
+      ],
     })[0]!
     const tweet: EnrichedTweet = {
       __typename: 'Tweet',
@@ -77,7 +83,11 @@ describe('vision AC-VISION-001: AIVisionInfo 结构完整', () => {
 })
 
 describe('vision AC-VISION-002: describe 结构化 schema 校验', () => {
-  const valid = { descriptions: [{ index: 0, description: '描述' }] }
+  const valid = {
+    descriptions: [
+      { index: 0, description: '描述' },
+    ],
+  }
 
   it('合法输入解析为 AIVisionInfo', () => {
     const out = parseVisionResult(VISION_PROMPT_PRESETS.describe, valid)
@@ -86,39 +96,70 @@ describe('vision AC-VISION-002: describe 结构化 schema 校验', () => {
   })
 
   it('缺 description → 校验失败', () => {
-    expect(() => parseVisionResult(VISION_PROMPT_PRESETS.describe, { descriptions: [{ index: 0 }] }))
+    expect(() => parseVisionResult(VISION_PROMPT_PRESETS.describe, {
+      descriptions: [
+        { index: 0 },
+      ],
+    }))
       .toThrow(SCHEMA_VALIDATION_FAILED_RE)
   })
 
   it('多余键被 schema 拒绝', () => {
-    expect(() => parseVisionResult(VISION_PROMPT_PRESETS.describe, { descriptions: [{ index: 0, description: 'x', extra: 1 }] }))
+    expect(() => parseVisionResult(VISION_PROMPT_PRESETS.describe, {
+      descriptions: [
+        { index: 0, description: 'x', extra: 1 },
+      ],
+    }))
       .toThrow(SCHEMA_VALIDATION_FAILED_RE)
-    expect(() => parseVisionResult(VISION_PROMPT_PRESETS.describe, { descriptions: [{ index: 0, description: 'x' }], extra: 1 }))
+    expect(() => parseVisionResult(VISION_PROMPT_PRESETS.describe, {
+      descriptions: [
+        { index: 0, description: 'x' },
+      ],
+      extra: 1,
+    }))
       .toThrow(SCHEMA_VALIDATION_FAILED_RE)
   })
 
   it('index 非数字 → 校验失败', () => {
-    expect(() => parseVisionResult(VISION_PROMPT_PRESETS.describe, { descriptions: [{ index: '0', description: 'x' }] }))
+    expect(() => parseVisionResult(VISION_PROMPT_PRESETS.describe, {
+      descriptions: [
+        { index: '0', description: 'x' },
+      ],
+    }))
       .toThrow(SCHEMA_VALIDATION_FAILED_RE)
   })
 
   it('空字符串 / 纯空白 description → 校验失败（模型不得输出空描述）', () => {
-    expect(() => parseVisionResult(VISION_PROMPT_PRESETS.describe, { descriptions: [{ index: 0, description: '' }] }))
+    expect(() => parseVisionResult(VISION_PROMPT_PRESETS.describe, {
+      descriptions: [
+        { index: 0, description: '' },
+      ],
+    }))
       .toThrow(SCHEMA_VALIDATION_FAILED_RE)
-    expect(() => parseVisionResult(VISION_PROMPT_PRESETS.describe, { descriptions: [{ index: 0, description: '   ' }] }))
+    expect(() => parseVisionResult(VISION_PROMPT_PRESETS.describe, {
+      descriptions: [
+        { index: 0, description: '   ' },
+      ],
+    }))
       .toThrow(SCHEMA_VALIDATION_FAILED_RE)
   })
 
   it('带首尾空白的 description 被 trim 后通过', () => {
     const out = parseVisionResult(VISION_PROMPT_PRESETS.describe, {
-      descriptions: [{ index: 0, description: '  一只猫  ' }],
+      descriptions: [
+        { index: 0, description: '  一只猫  ' },
+      ],
     })
     expect(out[0]!.description).toBe('一只猫')
   })
 })
 
 describe('vision AC-VISION-003: ocr 纯 OCR schema 校验', () => {
-  const valid = { texts: [{ index: 0, originalText: 'こんにちは' }] }
+  const valid = {
+    texts: [
+      { index: 0, originalText: 'こんにちは' },
+    ],
+  }
 
   it('合法输入解析为 AIVisionInfo', () => {
     const out = parseVisionResult(VISION_PROMPT_PRESETS.ocr, valid)
@@ -127,12 +168,20 @@ describe('vision AC-VISION-003: ocr 纯 OCR schema 校验', () => {
   })
 
   it('缺 originalText → 校验失败', () => {
-    expect(() => parseVisionResult(VISION_PROMPT_PRESETS.ocr, { texts: [{ index: 0 }] }))
+    expect(() => parseVisionResult(VISION_PROMPT_PRESETS.ocr, {
+      texts: [
+        { index: 0 },
+      ],
+    }))
       .toThrow(SCHEMA_VALIDATION_FAILED_RE)
   })
 
   it('多余键 translatedText 被 strict 拒绝（翻译走独立翻译步）', () => {
-    expect(() => parseVisionResult(VISION_PROMPT_PRESETS.ocr, { texts: [{ index: 0, originalText: 'x', translatedText: '你好' }] }))
+    expect(() => parseVisionResult(VISION_PROMPT_PRESETS.ocr, {
+      texts: [
+        { index: 0, originalText: 'x', translatedText: '你好' },
+      ],
+    }))
       .toThrow(SCHEMA_VALIDATION_FAILED_RE)
   })
 
@@ -142,7 +191,9 @@ describe('vision AC-VISION-003: ocr 纯 OCR schema 校验', () => {
 
   it('ocr 单图应为一个条目（多行文字合并进 originalText，含换行）', () => {
     const out = parseVisionResult(VISION_PROMPT_PRESETS.ocr, {
-      texts: [{ index: 0, originalText: '第一行\n第二行' }],
+      texts: [
+        { index: 0, originalText: '第一行\n第二行' },
+      ],
     })
     expect(out).toHaveLength(1)
     expect(out[0]!.originalText).toContain('\n')
@@ -151,13 +202,26 @@ describe('vision AC-VISION-003: ocr 纯 OCR schema 校验', () => {
 
 describe('vision translate: parseOcrTranslation 宽容解析翻译结果', () => {
   it('形态 1：{ translations: [{ index, translatedText }] }', () => {
-    const out = parseOcrTranslation({ translations: [{ index: 0, translatedText: '你好' }] })
-    expect(out).toEqual([{ index: 0, translatedText: '你好' }])
+    const out = parseOcrTranslation({
+      translations: [
+        { index: 0, translatedText: '你好' },
+      ],
+    })
+    expect(out).toEqual([
+      { index: 0, translatedText: '你好' },
+    ])
   })
 
   it('形态 1 容忍多余键（多余键被剥离，不因严格校验失败）', () => {
-    const out = parseOcrTranslation({ translations: [{ index: 0, translatedText: '你好', extra: 1 }], extra2: 2 })
-    expect(out).toEqual([{ index: 0, translatedText: '你好' }])
+    const out = parseOcrTranslation({
+      translations: [
+        { index: 0, translatedText: '你好', extra: 1 },
+      ],
+      extra2: 2,
+    })
+    expect(out).toEqual([
+      { index: 0, translatedText: '你好' },
+    ])
   })
 
   it('形态 2：keyed-object { "0": "译文" }（DeepSeek 等无结构化输出模型形态）', () => {
@@ -169,22 +233,34 @@ describe('vision translate: parseOcrTranslation 宽容解析翻译结果', () =>
   })
 
   it('形态 3：裸数组 [{ index, translatedText }]', () => {
-    const out = parseOcrTranslation([{ index: 0, translatedText: '你好' }])
-    expect(out).toEqual([{ index: 0, translatedText: '你好' }])
+    const out = parseOcrTranslation([
+      { index: 0, translatedText: '你好' },
+    ])
+    expect(out).toEqual([
+      { index: 0, translatedText: '你好' },
+    ])
   })
 
   it('缺 translatedText → 校验失败', () => {
-    expect(() => parseOcrTranslation({ translations: [{ index: 0 }] }))
+    expect(() => parseOcrTranslation({
+      translations: [
+        { index: 0 },
+      ],
+    }))
       .toThrow(SCHEMA_VALIDATION_FAILED_RE)
   })
 })
 
 describe('vision AC-VISION-004: resolveVisionView 决策链', () => {
   const describeInfo = parseVisionResult(VISION_PROMPT_PRESETS.describe, {
-    descriptions: [{ index: 0, description: 'AI 描述' }],
+    descriptions: [
+      { index: 0, description: 'AI 描述' },
+    ],
   })[0]!
   const ocrInfo = parseVisionResult(VISION_PROMPT_PRESETS.ocr, {
-    texts: [{ index: 0, originalText: 'こんにちは' }],
+    texts: [
+      { index: 0, originalText: 'こんにちは' },
+    ],
   })[0]!
 
   it('describe → 显示 description', () => {
@@ -261,7 +337,9 @@ describe('vision AC-VISION-005: mediaIndex → mediaDetails 映射', () => {
   it('custom 预设回退 describe schema，按 description 清洗', () => {
     const preset = getVisionPreset('custom', '用英文描述')
     const out = parseVisionResult(preset, {
-      descriptions: [{ index: 1, description: 'custom desc' }],
+      descriptions: [
+        { index: 1, description: 'custom desc' },
+      ],
     })
     expect(out[0]!.mode).toBe('custom')
     expect(out[0]!.promptId).toBe('custom')
@@ -339,7 +417,9 @@ describe('vision AC-VISION-006: 无 photo 返回空，不发起模型请求', ()
 })
 
 describe('vision AC-VISION-007: withContext 注入推文上下文', () => {
-  const images = [{ index: 0, dataUri: DATA_URI }]
+  const images = [
+    { index: 0, dataUri: DATA_URI },
+  ]
   const textOf = (messages: ReturnType<typeof buildVisionMessages>) =>
     (messages[1]!.content as Array<{ type: string, text?: string }>)
       .filter(p => p.type === 'text')
@@ -371,14 +451,46 @@ describe('vision AC-VISION-007: withContext 注入推文上下文', () => {
 
 describe('vision Phase 4: mergeVisionInfo 合并 AI 生成结果', () => {
   const base = [
-    { index: 0, mode: 'describe' as const, promptId: 'describe', provider: '', model: '', description: '旧描述 0', status: 'done' as const, createdAt: 1 },
-    { index: 1, mode: 'describe' as const, promptId: 'describe', provider: '', model: '', description: '旧描述 1', status: 'done' as const, createdAt: 1 },
+    {
+      index: 0,
+      mode: 'describe' as const,
+      promptId: 'describe',
+      provider: '',
+      model: '',
+      description: '旧描述 0',
+      status: 'done' as const,
+      createdAt: 1,
+    },
+    {
+      index: 1,
+      mode: 'describe' as const,
+      promptId: 'describe',
+      provider: '',
+      model: '',
+      description: '旧描述 1',
+      status: 'done' as const,
+      createdAt: 1,
+    },
   ]
 
   it('incoming 命中 index 时整体替换（直接编辑模型，无手动覆盖层）', () => {
     const merged = mergeVisionInfo(
-      [{ ...base[0]!, description: '旧 0' }, base[1]!],
-      [{ index: 0, mode: 'describe', promptId: 'describe', provider: 'openrouter', model: 'm', description: '新 0', status: 'done', createdAt: 2 }],
+      [
+        { ...base[0]!, description: '旧 0' },
+        base[1]!,
+      ],
+      [
+        {
+          index: 0,
+          mode: 'describe',
+          promptId: 'describe',
+          provider: 'openrouter',
+          model: 'm',
+          description: '新 0',
+          status: 'done',
+          createdAt: 2,
+        },
+      ],
     )
     const hit = merged.find(v => v.index === 0)!
     expect(hit.description).toBe('新 0')
@@ -388,7 +500,16 @@ describe('vision Phase 4: mergeVisionInfo 合并 AI 生成结果', () => {
 
   it('未命中的 index 保留，结果按 index 排序', () => {
     const merged = mergeVisionInfo(base, [
-      { index: 0, mode: 'describe', promptId: 'describe', provider: '', model: '', description: '新 0', status: 'done', createdAt: 2 },
+      {
+        index: 0,
+        mode: 'describe',
+        promptId: 'describe',
+        provider: '',
+        model: '',
+        description: '新 0',
+        status: 'done',
+        createdAt: 2,
+      },
     ])
     expect(merged.map(v => v.index)).toEqual([0, 1])
     expect(merged[1]!.description).toBe('旧描述 1')
@@ -397,12 +518,32 @@ describe('vision Phase 4: mergeVisionInfo 合并 AI 生成结果', () => {
 
 describe('vision Phase 4: applyVisionEdits 直接编辑草稿保存', () => {
   const base = [
-    { index: 0, mode: 'describe' as const, promptId: 'describe', provider: '', model: '', description: 'AI 0', status: 'done' as const, createdAt: 1 },
-    { index: 1, mode: 'describe' as const, promptId: 'describe', provider: '', model: '', description: 'AI 1', status: 'done' as const, createdAt: 1 },
+    {
+      index: 0,
+      mode: 'describe' as const,
+      promptId: 'describe',
+      provider: '',
+      model: '',
+      description: 'AI 0',
+      status: 'done' as const,
+      createdAt: 1,
+    },
+    {
+      index: 1,
+      mode: 'describe' as const,
+      promptId: 'describe',
+      provider: '',
+      model: '',
+      description: 'AI 1',
+      status: 'done' as const,
+      createdAt: 1,
+    },
   ]
 
   it('describe 草稿 → 写 description；无草稿的图保留 AI 结果', () => {
-    const out = applyVisionEdits(base, { 0: { description: '手动改写 0' } }, [0, 1])
+    const out = applyVisionEdits(base, {
+      0: { description: '手动改写 0' },
+    }, [0, 1])
     expect(out.find(v => v.index === 0)!.description).toBe('手动改写 0')
     expect(out.find(v => v.index === 1)!.description).toBe('AI 1')
   })
@@ -414,7 +555,9 @@ describe('vision Phase 4: applyVisionEdits 直接编辑草稿保存', () => {
   })
 
   it('无 AI 条目的图 + ocr 草稿 → 创建手动 ocr 条目（原文+译文）', () => {
-    const out = applyVisionEdits(base, { 2: { originalText: '原文', translatedText: '译文' } }, [0, 1, 2])
+    const out = applyVisionEdits(base, {
+      2: { originalText: '原文', translatedText: '译文' },
+    }, [0, 1, 2])
     const manual = out.find(v => v.index === 2)!
     expect(manual.mode).toBe('ocr')
     expect(manual.originalText).toBe('原文')
@@ -424,9 +567,21 @@ describe('vision Phase 4: applyVisionEdits 直接编辑草稿保存', () => {
 
   it('ocr 条目清空译文 → translatedText 被清掉，原文保留', () => {
     const ocrBase = [
-      { index: 0, mode: 'ocr' as const, promptId: 'ocr', provider: '', model: '', originalText: '原文', translatedText: '旧译文', status: 'done' as const, createdAt: 1 },
+      {
+        index: 0,
+        mode: 'ocr' as const,
+        promptId: 'ocr',
+        provider: '',
+        model: '',
+        originalText: '原文',
+        translatedText: '旧译文',
+        status: 'done' as const,
+        createdAt: 1,
+      },
     ]
-    const out = applyVisionEdits(ocrBase, { 0: { originalText: '原文', translatedText: '' } }, [0])
+    const out = applyVisionEdits(ocrBase, {
+      0: { originalText: '原文', translatedText: '' },
+    }, [0])
     expect(out[0]!.originalText).toBe('原文')
     expect(out[0]!.translatedText).toBe('')
   })
@@ -446,20 +601,27 @@ describe('vision fix: alignVisionIndexes 结果索引对齐请求', () => {
 
   it('结果数与请求一致 → 按序强制对齐请求索引（模型自造 index 不命中）', () => {
     // 曾出现单图（mediaIndexes [0]）返回 index 1，数量一致时按序重映射
-    const out = alignVisionIndexes([info(1)], [0])
+    const out = alignVisionIndexes([
+      info(1),
+    ], [0])
     expect(out).toHaveLength(1)
     expect(out[0]!.index).toBe(0)
     expect(out[0]!.description).toBe('描述 1')
   })
 
   it('多图按序对齐到请求索引', () => {
-    const out = alignVisionIndexes([info(0), info(1)], [0, 2])
+    const out = alignVisionIndexes([
+      info(0),
+      info(1),
+    ], [0, 2])
     expect(out.map(v => v.index)).toEqual([0, 2])
     expect(out[1]!.description).toBe('描述 1')
   })
 
   it('结果数不一致 → 不强制对齐，保留模型索引', () => {
-    const out = alignVisionIndexes([info(0)], [0, 2])
+    const out = alignVisionIndexes([
+      info(0),
+    ], [0, 2])
     expect(out).toHaveLength(1)
     expect(out[0]!.index).toBe(0)
   })
@@ -477,9 +639,24 @@ describe('vision AC-VISION-010: resolveVisionBlockState 可见性门控（默认
   })
 
   it('逐推文覆盖优先于全局：全局关 + override true → content；全局开 + override false → 折叠/隐藏', () => {
-    expect(resolveVisionBlockState({ hasContent: true, enableAIVision: false, override: true, chromeHidden: false })).toBe('content')
-    expect(resolveVisionBlockState({ hasContent: true, enableAIVision: true, override: false, chromeHidden: false })).toBe('collapsed')
-    expect(resolveVisionBlockState({ hasContent: true, enableAIVision: true, override: false, chromeHidden: true })).toBe('hidden')
+    expect(resolveVisionBlockState({
+      hasContent: true,
+      enableAIVision: false,
+      override: true,
+      chromeHidden: false,
+    })).toBe('content')
+    expect(resolveVisionBlockState({
+      hasContent: true,
+      enableAIVision: true,
+      override: false,
+      chromeHidden: false,
+    })).toBe('collapsed')
+    expect(resolveVisionBlockState({
+      hasContent: true,
+      enableAIVision: true,
+      override: false,
+      chromeHidden: true,
+    })).toBe('hidden')
   })
 
   it('无内容：仅全局开 + 交互 → cta（空态生成入口）；其余 → hidden', () => {
@@ -527,17 +704,28 @@ describe('vision 落盘校验: visionInfoArraySchema（防未认证缓存污染�
   })
 
   it('index 越界（>= 20000 与 media_alt 冲突 / 负数）被拒绝', () => {
-    expect(visionInfoArraySchema.safeParse([{ ...validItem, index: 20000 }]).success).toBe(false)
-    expect(visionInfoArraySchema.safeParse([{ ...validItem, index: -1 }]).success).toBe(false)
+    expect(visionInfoArraySchema.safeParse([
+      { ...validItem, index: 20000 },
+    ]).success).toBe(false)
+    expect(visionInfoArraySchema.safeParse([
+      { ...validItem, index: -1 },
+    ]).success).toBe(false)
   })
 
   it('重复 index 被拒绝', () => {
-    expect(visionInfoArraySchema.safeParse([validItem, { ...validItem }]).success).toBe(false)
+    expect(visionInfoArraySchema.safeParse([
+      validItem,
+      { ...validItem },
+    ]).success).toBe(false)
   })
 
   it('非法 status / 多余键被拒绝', () => {
-    expect(visionInfoArraySchema.safeParse([{ ...validItem, status: 'pending' }]).success).toBe(false)
-    expect(visionInfoArraySchema.safeParse([{ ...validItem, hacked: true }]).success).toBe(false)
+    expect(visionInfoArraySchema.safeParse([
+      { ...validItem, status: 'pending' },
+    ]).success).toBe(false)
+    expect(visionInfoArraySchema.safeParse([
+      { ...validItem, hacked: true },
+    ]).success).toBe(false)
   })
 })
 
@@ -550,14 +738,18 @@ describe('vision AC-VISION-011: 反幻觉内容防线（空描述拒绝 + 结果
 
   it('结果数量与请求图片数一致 → 不抛错', () => {
     const info = parseVisionResult(VISION_PROMPT_PRESETS.describe, {
-      descriptions: [{ index: 0, description: '图 A' }],
+      descriptions: [
+        { index: 0, description: '图 A' },
+      ],
     })
     expect(() => assertVisionResultCount(info, 1)).not.toThrow()
   })
 
   it('结果数量不符（模型跳过/合并图片）→ 抛 VisionContentError，带数量信息', () => {
     const info = parseVisionResult(VISION_PROMPT_PRESETS.describe, {
-      descriptions: [{ index: 0, description: '图 A' }],
+      descriptions: [
+        { index: 0, description: '图 A' },
+      ],
     })
     expect(() => assertVisionResultCount(info, 2)).toThrow(VisionContentError)
     expect(() => assertVisionResultCount(info, 2)).toThrow(EXPECTED_COUNT_MISMATCH_RE)
@@ -565,7 +757,9 @@ describe('vision AC-VISION-011: 反幻觉内容防线（空描述拒绝 + 结果
 })
 
 describe('vision AC-VISION-012: 上下文丰富注入（作者/时间/实体参考/官方 alt/术语表）', () => {
-  const images = [{ index: 0, dataUri: DATA_URI }]
+  const images = [
+    { index: 0, dataUri: DATA_URI },
+  ]
   const textOf = (messages: ReturnType<typeof buildVisionMessages>) =>
     (messages[1]!.content as Array<{ type: string, text?: string }>)
       .filter(p => p.type === 'text')

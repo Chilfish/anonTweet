@@ -13,10 +13,14 @@ export function Slider({
 }: SliderPrimitive.Root.Props): React.ReactElement {
   const _values = React.useMemo(() => {
     if (value !== undefined) {
-      return Array.isArray(value) ? value : [value]
+      return Array.isArray(value)
+        ? value
+        : [value]
     }
     if (defaultValue !== undefined) {
-      return Array.isArray(defaultValue) ? defaultValue : [defaultValue]
+      return Array.isArray(defaultValue)
+        ? defaultValue
+        : [defaultValue]
     }
     return [min]
   }, [value, defaultValue, min])

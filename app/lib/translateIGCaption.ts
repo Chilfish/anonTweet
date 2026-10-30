@@ -30,13 +30,23 @@ export async function translateIGCaption(args: TranslateIGCaptionArgs): Promise<
 
   const text = post.description
   if (!text) {
-    obsLog('ai.translate.ig', { ok: true, skipped: 'no-text', ms: Date.now() - startedAt, postId: suffix(post.id) })
+    obsLog('ai.translate.ig', {
+      ok: true,
+      skipped: 'no-text',
+      ms: Date.now() - startedAt,
+      postId: suffix(post.id),
+    })
     return ''
   }
 
   // 检测中文 — 如果 50%+ 是中文，跳过翻译（返回空，由调用方保持原文显示）
   if (isChinese(text)) {
-    obsLog('ai.translate.ig', { ok: true, skipped: 'chinese', ms: Date.now() - startedAt, postId: suffix(post.id) })
+    obsLog('ai.translate.ig', {
+      ok: true,
+      skipped: 'chinese',
+      ms: Date.now() - startedAt,
+      postId: suffix(post.id),
+    })
     return ''
   }
 
@@ -81,8 +91,12 @@ Analyze the caption's vibe and adapt accordingly:
 
 ${glossarySection}
 
-**Author**: @${post.username}${post.fullname ? ` (${post.fullname})` : ''}
-**Post Type**: ${post.type}${post.created_at ? `\n**Posted**: ${post.created_at}` : ''}
+**Author**: @${post.username}${post.fullname
+  ? ` (${post.fullname})`
+  : ''}
+**Post Type**: ${post.type}${post.created_at
+  ? `\n**Posted**: ${post.created_at}`
+  : ''}
 
 # Source Caption
 ${text}`
@@ -140,7 +154,9 @@ ${text}`
       ms: Date.now() - startedAt,
       attempts,
       postId: suffix(post.id),
-      reason: error instanceof Error ? error.message : 'unknown',
+      reason: error instanceof Error
+        ? error.message
+        : 'unknown',
     })
     console.error('[IG Translation] Failed:', error)
     throw error
@@ -154,5 +170,7 @@ export function isChinese(text: string): boolean {
   if (!text)
     return false
   const chineseChars = text.match(/[\u4E00-\u9FFF]/g)
-  return chineseChars ? chineseChars.length / text.length > 0.5 : false
+  return chineseChars
+    ? chineseChars.length / text.length > 0.5
+    : false
 }

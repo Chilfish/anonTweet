@@ -90,7 +90,9 @@ function makeTweet(opts: MakeTweetOptions = {}): EnrichedTweet {
     user: user.name === opts.name
       ? user
       : { ...user, name: opts.name ?? user.name, screen_name: opts.screenName ?? user.screen_name },
-    entities: opts.entities ?? [{ type: 'text', text: '『#渡瀬結月 の #６げんめっ！』#15', index: 0 }],
+    entities: opts.entities ?? [
+      { type: 'text', text: '『#渡瀬結月 の #６げんめっ！』#15', index: 0 },
+    ],
     card: opts.card,
     space: opts.space,
     mediaDetails: opts.mediaDetails,
@@ -109,12 +111,20 @@ export const tweetWithCard = makeTweet({
 export const tweetWithTrendingCard = makeTweet({
   id: '2089577916694942006',
   text: 'WOW…！むっぴょうれぴー！⸜🌷︎⸝✨️\n嬉しいからポストして残しとこう\nhttps://t.co/2cFszADge0',
-  card: { ...summaryCard, type: 'unified_card', url: 'https://t.co/2cFszADge0', trending: { ...trendingInfo } },
+  card: {
+    ...summaryCard,
+    type: 'unified_card',
+    url: 'https://t.co/2cFszADge0',
+    trending: { ...trendingInfo },
+  },
 })
 
 /** trending 主图缺失（回退不塌陷场景） */
 export const tweetTrendingNoImage = makeTweet({
-  card: { ...summaryCard, trending: { ...trendingInfo, imageUrl: '' } },
+  card: {
+    ...summaryCard,
+    trending: { ...trendingInfo, imageUrl: '' },
+  },
 })
 
 /** 宽幅大图卡（summary_large_image，1.91:1） */
@@ -167,15 +177,17 @@ export const tweetWithSpace = makeTweet({
   name: '夢限大みゅーたいぷ',
   screenName: 'BDP_yumemita',
   createdAt: 'Wed Sep 17 14:00:21 +0000 2025',
-  entities: [{
-    type: 'url',
-    index: 0,
-    url: 'https://t.co/gOS5Qc3DS4',
-    text: 'https://t.co/gOS5Qc3DS4',
-    display_url: 'x.com/i/spaces/1yoKM…',
-    expanded_url: 'https://x.com/i/spaces/1yoKMPnjEbOxQ',
-    href: 'https://x.com/i/spaces/1yoKMPnjEbOxQ',
-  }],
+  entities: [
+    {
+      type: 'url',
+      index: 0,
+      url: 'https://t.co/gOS5Qc3DS4',
+      text: 'https://t.co/gOS5Qc3DS4',
+      display_url: 'x.com/i/spaces/1yoKM…',
+      expanded_url: 'https://x.com/i/spaces/1yoKMPnjEbOxQ',
+      href: 'https://x.com/i/spaces/1yoKMPnjEbOxQ',
+    },
+  ],
   space: spaceDetails,
 })
 
@@ -257,7 +269,12 @@ export const tweetWithPhotos = makeTweet({
   id: '9000000000000000001',
   text: 'スクリーンショットを添付します https://t.co/vision',
   entities: [
-    { type: 'text', text: 'スクリーンショットを添付します ', index: 0, aiTranslation: '附上截图 ' },
+    {
+      type: 'text',
+      text: 'スクリーンショットを添付します ',
+      index: 0,
+      aiTranslation: '附上截图 ',
+    },
     {
       type: 'media_alt',
       text: '冬の街並みのスクリーンショット。雪が積もっている。',
@@ -400,12 +417,14 @@ export const tweetEnglish = makeTweet({
   text: 'Just shipped the new design 🚀 The team worked hard on this one — check it out and let us know what you think!',
   name: 'Chil Fish',
   screenName: 'chilfish',
-  entities: [{
-    type: 'text',
-    text: 'Just shipped the new design 🚀 The team worked hard on this one — check it out and let us know what you think!',
-    index: 0,
-    aiTranslation: '刚发布了新设计 🚀 团队在这上面下了很大功夫——快来看看，告诉我们你的想法！',
-  }],
+  entities: [
+    {
+      type: 'text',
+      text: 'Just shipped the new design 🚀 The team worked hard on this one — check it out and let us know what you think!',
+      index: 0,
+      aiTranslation: '刚发布了新设计 🚀 团队在这上面下了很大功夫——快来看看，告诉我们你的想法！',
+    },
+  ],
 })
 
 /** 评论分支：主推 + 2 条回复 */

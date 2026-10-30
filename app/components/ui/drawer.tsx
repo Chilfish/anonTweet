@@ -247,7 +247,9 @@ export function DrawerHeader({
   return useRender({
     defaultTagName: 'div',
     props: mergeProps<'div'>(defaultProps, props),
-    render: allowSelection ? <DrawerContent render={render} /> : render,
+    render: allowSelection
+      ? <DrawerContent render={render} />
+      : render,
   })
 }
 
@@ -277,7 +279,9 @@ export function DrawerFooter({
   return useRender({
     defaultTagName: 'div',
     props: mergeProps<'div'>(defaultProps, props),
-    render: allowSelection ? <DrawerContent render={render} /> : render,
+    render: allowSelection
+      ? <DrawerContent render={render} />
+      : render,
   })
 }
 
@@ -334,7 +338,9 @@ export function DrawerPanel({
   const content = useRender({
     defaultTagName: 'div',
     props: mergeProps<'div'>(defaultProps, props),
-    render: allowSelection ? <DrawerContent render={render} /> : render,
+    render: allowSelection
+      ? <DrawerContent render={render} />
+      : render,
   })
 
   if (scrollable) {
@@ -531,36 +537,38 @@ export function DrawerMenuCheckboxItem({
       render={render}
       {...props}
     >
-      {variant === 'switch' ? (
-        <>
-          <span className="col-start-1">{children}</span>
-          <CheckboxPrimitive.Indicator
-            className="inset-shadow-[0_1px_--theme(--color-black/4%)] col-start-2 inline-flex h-[calc(var(--thumb-size)+2px)] w-[calc(var(--thumb-size)*2-2px)] shrink-0 items-center rounded-full p-px outline-none transition-[background-color,box-shadow] duration-200 [--thumb-size:--spacing(4)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background data-checked:bg-primary data-unchecked:bg-input data-disabled:opacity-64 sm:[--thumb-size:--spacing(3)]"
-            keepMounted
-          >
-            <span className="pointer-events-none block aspect-square h-full in-[[data-slot=drawer-menu-checkbox-item][data-checked]]:origin-[var(--thumb-size)_50%] origin-left in-[[data-slot=drawer-menu-checkbox-item][data-checked]]:translate-x-[calc(var(--thumb-size)-4px)] in-[[data-slot=drawer-menu-checkbox-item]:active]:not-data-disabled:scale-x-110 in-[[data-slot=drawer-menu-checkbox-item]:active]:rounded-[var(--thumb-size)/calc(var(--thumb-size)*1.10)] rounded-(--thumb-size) bg-background shadow-sm/5 will-change-transform [transition:translate_.15s,border-radius_.15s,scale_.1s_.1s,transform-origin_.15s]" />
-          </CheckboxPrimitive.Indicator>
-        </>
-      ) : (
-        <>
-          <CheckboxPrimitive.Indicator className="col-start-1">
-            <svg
-              fill="none"
-              height="24"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M5.252 12.7 10.2 18.63 18.748 5.37" />
-            </svg>
-          </CheckboxPrimitive.Indicator>
-          <span className="col-start-2">{children}</span>
-        </>
-      )}
+      {variant === 'switch'
+        ? (
+            <>
+              <span className="col-start-1">{children}</span>
+              <CheckboxPrimitive.Indicator
+                className="inset-shadow-[0_1px_--theme(--color-black/4%)] col-start-2 inline-flex h-[calc(var(--thumb-size)+2px)] w-[calc(var(--thumb-size)*2-2px)] shrink-0 items-center rounded-full p-px outline-none transition-[background-color,box-shadow] duration-200 [--thumb-size:--spacing(4)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background data-checked:bg-primary data-unchecked:bg-input data-disabled:opacity-64 sm:[--thumb-size:--spacing(3)]"
+                keepMounted
+              >
+                <span className="pointer-events-none block aspect-square h-full in-[[data-slot=drawer-menu-checkbox-item][data-checked]]:origin-[var(--thumb-size)_50%] origin-left in-[[data-slot=drawer-menu-checkbox-item][data-checked]]:translate-x-[calc(var(--thumb-size)-4px)] in-[[data-slot=drawer-menu-checkbox-item]:active]:not-data-disabled:scale-x-110 in-[[data-slot=drawer-menu-checkbox-item]:active]:rounded-[var(--thumb-size)/calc(var(--thumb-size)*1.10)] rounded-(--thumb-size) bg-background shadow-sm/5 will-change-transform [transition:translate_.15s,border-radius_.15s,scale_.1s_.1s,transform-origin_.15s]" />
+              </CheckboxPrimitive.Indicator>
+            </>
+          )
+        : (
+            <>
+              <CheckboxPrimitive.Indicator className="col-start-1">
+                <svg
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M5.252 12.7 10.2 18.63 18.748 5.37" />
+                </svg>
+              </CheckboxPrimitive.Indicator>
+              <span className="col-start-2">{children}</span>
+            </>
+          )}
     </CheckboxPrimitive.Root>
   )
 }

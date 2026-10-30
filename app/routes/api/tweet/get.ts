@@ -50,7 +50,9 @@ export async function action({ request }: Route.ActionArgs) {
       success: false,
       error: 'Tweet not found',
       status: 404,
-      message: error instanceof Error ? error.message : 'Unknown error',
+      message: error instanceof Error
+        ? error.message
+        : 'Unknown error',
     })
   }
 }
@@ -69,7 +71,9 @@ export async function loader({
   }
   catch (error: unknown) {
     console.log(`Error fetching tweets for ${tweetId}:`, error)
-    const message = error instanceof Error ? error.message : 'Unknown error'
+    const message = error instanceof Error
+      ? error.message
+      : 'Unknown error'
     const status = error instanceof Error && 'status' in error
       ? Number((error as { status: unknown }).status) || 500
       : 500

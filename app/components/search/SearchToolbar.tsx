@@ -76,7 +76,9 @@ function SearchOptionsMenu({ tweets }: { tweets: EnrichedTweet[] }) {
           </DropdownMenuItem>
 
           <DropdownMenuCheckboxItem checked={isInlineMedia} onCheckedChange={setIsInlineMedia} className="menu-item-class">
-            {isInlineMedia ? <LayoutGrid className="h-4 w-4 mr-2" /> : <Rows4Icon className="h-4 w-4 mr-2" />}
+            {isInlineMedia
+              ? <LayoutGrid className="h-4 w-4 mr-2" />
+              : <Rows4Icon className="h-4 w-4 mr-2" />}
             <span>
               媒体按
               {isInlineMedia ? '宫格' : '竖向'}
@@ -142,52 +144,56 @@ export function SearchToolbar({ tweets, listRef }: SearchToolbarProps) {
       <ToggleTransButton size="sm" />
 
       <div className="flex items-center gap-1.5">
-        {isSelectionMode ? (
-          <>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={toggleSelectAll}
-              disabled={isCapturing}
-            >
-              {isAllSelected ? '全不选' : '全选'}
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => toggleSelectionMode(false)}
-              disabled={isCapturing}
-            >
-              取消
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => handleScreenshot(true)}
-              disabled={isCapturing}
-            >
-              {isCapturing ? '处理中...' : `截图 (${selectedCount})`}
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => handleScreenshot(false)}
-              disabled={isCapturing}
-            >
-              {isCapturing ? '处理中...' : '截图全部'}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => toggleSelectionMode(true)}
-              disabled={isCapturing}
-            >
-              选择推文截图
-            </Button>
-          </>
-        )}
+        {isSelectionMode
+          ? (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={toggleSelectAll}
+                  disabled={isCapturing}
+                >
+                  {isAllSelected ? '全不选' : '全选'}
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => toggleSelectionMode(false)}
+                  disabled={isCapturing}
+                >
+                  取消
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleScreenshot(true)}
+                  disabled={isCapturing}
+                >
+                  {isCapturing
+                    ? '处理中...'
+                    : `截图 (${selectedCount})`}
+                </Button>
+              </>
+            )
+          : (
+              <>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => handleScreenshot(false)}
+                  disabled={isCapturing}
+                >
+                  {isCapturing ? '处理中...' : '截图全部'}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => toggleSelectionMode(true)}
+                  disabled={isCapturing}
+                >
+                  选择推文截图
+                </Button>
+              </>
+            )}
 
         <SearchOptionsMenu tweets={tweets} />
       </div>

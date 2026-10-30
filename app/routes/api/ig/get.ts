@@ -45,7 +45,9 @@ async function loadIGPosts(igId: string): Promise<IGPost[]> {
     return getIGPostList(() => fetchIGPostListFromSDK(sourceUrl))
 
   const post = await getCachedIGPost(igId, () => fetchIGPostFromSDK(sourceUrl))
-  return post ? [post] : []
+  return post
+    ? [post]
+    : []
 }
 
 export async function action({ request, params }: Route.ActionArgs) {

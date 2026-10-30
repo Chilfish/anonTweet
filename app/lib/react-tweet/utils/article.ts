@@ -52,7 +52,9 @@ function toArticleUrl(id: string): string {
 }
 
 function articleFromRawResult(result: RawArticleResult, id: string): TweetArticle | null {
-  const title = typeof result.title === 'string' ? result.title.trim() : ''
+  const title = typeof result.title === 'string'
+    ? result.title.trim()
+    : ''
   const previewText = typeof result.preview_text === 'string' && result.preview_text.trim()
     ? result.preview_text
     : undefined
@@ -74,10 +76,16 @@ function articleFromRawResult(result: RawArticleResult, id: string): TweetArticl
     title,
     previewText,
     plainText,
-    format: blocks.length > 0 ? 'rich' : 'plain',
+    format: blocks.length > 0
+      ? 'rich'
+      : 'plain',
     coverImage: mediaFromRaw(result.cover_media) ?? undefined,
-    publishedAt: typeof publishedSecs === 'number' && publishedSecs > 0 ? publishedSecs * 1000 : undefined,
-    blocks: blocks.length > 0 ? blocks : undefined,
+    publishedAt: typeof publishedSecs === 'number' && publishedSecs > 0
+      ? publishedSecs * 1000
+      : undefined,
+    blocks: blocks.length > 0
+      ? blocks
+      : undefined,
   }
 }
 
@@ -114,5 +122,10 @@ export function resolveArticleLink(entities?: ReadonlyArray<unknown> | null): Tw
   const id = resolveArticleId(entities)
   if (!id)
     return null
-  return { id, url: toArticleUrl(id), title: '', format: 'plain' }
+  return {
+    id,
+    url: toArticleUrl(id),
+    title: '',
+    format: 'plain',
+  }
 }

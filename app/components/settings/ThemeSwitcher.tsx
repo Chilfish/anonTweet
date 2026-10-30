@@ -29,7 +29,9 @@ export function ThemeSelector() {
       {THEME_OPTIONS.map(({ value, label, Icon }) => (
         <Button
           key={value}
-          variant={theme === value ? 'default' : 'outline'}
+          variant={theme === value
+            ? 'default'
+            : 'outline'}
           size="sm"
           onClick={() => setTheme(value)}
           className="flex items-center gap-2"

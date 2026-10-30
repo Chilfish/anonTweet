@@ -41,12 +41,18 @@ export function ComboboxChipsInput({
     <ComboboxPrimitive.Input
       className={cn(
         'min-w-12 flex-1 text-base outline-none sm:text-sm [[data-slot=combobox-chip]+&]:ps-0.5',
-        sizeValue === 'sm' ? 'ps-1.5' : 'ps-2',
+        sizeValue === 'sm'
+          ? 'ps-1.5'
+          : 'ps-2',
         className,
       )}
-      data-size={typeof sizeValue === 'string' ? sizeValue : undefined}
+      data-size={typeof sizeValue === 'string'
+        ? sizeValue
+        : undefined}
       data-slot="combobox-chips-input"
-      size={typeof sizeValue === 'number' ? sizeValue : undefined}
+      size={typeof sizeValue === 'number'
+        ? sizeValue
+        : undefined}
       {...props}
     />
   )
@@ -109,7 +115,9 @@ export function ComboboxInput({
         <ComboboxTrigger
           className={cn(
             'absolute top-1/2 inline-flex size-8 shrink-0 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md border border-transparent opacity-80 outline-none transition-opacity pointer-coarse:after:absolute pointer-coarse:after:min-h-11 pointer-coarse:after:min-w-11 hover:opacity-100 has-[+[data-slot=combobox-clear]]:hidden sm:size-7 [&_svg:not([class*=\'size-\'])]:size-4.5 sm:[&_svg:not([class*=\'size-\'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0',
-            sizeValue === 'sm' ? 'end-0' : 'end-0.5',
+            sizeValue === 'sm'
+              ? 'end-0'
+              : 'end-0.5',
           )}
           {...triggerProps}
         >
@@ -122,7 +130,9 @@ export function ComboboxInput({
         <ComboboxClear
           className={cn(
             'absolute top-1/2 inline-flex size-8 shrink-0 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md border border-transparent opacity-80 outline-none transition-opacity pointer-coarse:after:absolute pointer-coarse:after:min-h-11 pointer-coarse:after:min-w-11 hover:opacity-100 has-[+[data-slot=combobox-clear]]:hidden sm:size-7 [&_svg:not([class*=\'size-\'])]:size-4.5 sm:[&_svg:not([class*=\'size-\'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0',
-            sizeValue === 'sm' ? 'end-0' : 'end-0.5',
+            sizeValue === 'sm'
+              ? 'end-0'
+              : 'end-0.5',
           )}
           {...clearProps}
         >

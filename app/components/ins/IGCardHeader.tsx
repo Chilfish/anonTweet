@@ -34,7 +34,9 @@ export function IGCardHeader({
   verified,
   className,
 }: IGCardHeaderProps) {
-  const displayName = fullname && fullname !== username ? fullname : username
+  const displayName = fullname && fullname !== username
+    ? fullname
+    : username
 
   return (
     <div className={cn('flex items-center gap-2', className)}>

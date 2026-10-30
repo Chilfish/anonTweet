@@ -16,12 +16,22 @@ for (const id of ids) {
   await writeFile(`test/fixtures/articles/${id}.json`, JSON.stringify(article, null, 2), 'utf8')
 
   console.log('=====', id)
-  console.log('article keys:', article ? Object.keys(article) : article)
+  console.log('article keys:', article
+    ? Object.keys(article)
+    : article)
   const r = article?.article_results?.result
-  console.log('result keys:', r ? Object.keys(r) : r)
-  console.log('content_state keys:', r?.content_state ? Object.keys(r.content_state) : r?.content_state)
-  console.log('blocks:', r?.content_state?.blocks?.length, '| media_entities:', r?.media_entities ? Object.keys(r.media_entities).length : r?.media_entities)
-  console.log('block types:', [...new Set((r?.content_state?.blocks ?? []).map((b: any) => b.type))].join(','))
+  console.log('result keys:', r
+    ? Object.keys(r)
+    : r)
+  console.log('content_state keys:', r?.content_state
+    ? Object.keys(r.content_state)
+    : r?.content_state)
+  console.log('blocks:', r?.content_state?.blocks?.length, '| media_entities:', r?.media_entities
+    ? Object.keys(r.media_entities).length
+    : r?.media_entities)
+  console.log('block types:', [
+    ...new Set((r?.content_state?.blocks ?? []).map((b: any) => b.type)),
+  ].join(','))
   console.log('entity types:', JSON.stringify(
     (r?.content_state?.entityMap ?? r?.content_state?.entities ?? []).map((e: any) => e?.value?.type ?? e?.type),
   ))

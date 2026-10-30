@@ -26,7 +26,9 @@ describe('AC-BUILD babel pipeline integrity', () => {
       babelrc: false,
       configFile: false,
       presets: ['@babel/preset-typescript'],
-      plugins: [['babel-plugin-react-compiler', {}]],
+      plugins: [
+        ['babel-plugin-react-compiler', {}],
+      ],
     })
 
     expect(result?.code).toBeTruthy()

@@ -24,7 +24,9 @@ export function formatDate(
   date: Date | string,
   formatString = 'yyyy-MM-dd',
 ): string {
-  const dateObj = typeof date === 'string' ? parseISO(date) : date
+  const dateObj = typeof date === 'string'
+    ? parseISO(date)
+    : date
   return format(dateObj, formatString)
 }
 

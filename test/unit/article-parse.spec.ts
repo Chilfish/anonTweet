@@ -33,7 +33,9 @@ function blocksOf(fixture: unknown): ArticleBlock[] {
 }
 
 function allRuns(blocks: ArticleBlock[]): ArticleRun[] {
-  return blocks.flatMap(block => ('runs' in block ? block.runs : []))
+  return blocks.flatMap(block => ('runs' in block
+    ? block.runs
+    : []))
 }
 
 describe('AC-TWEET-014: parseContentState', () => {
@@ -112,7 +114,13 @@ describe('AC-TWEET-014: parseContentState', () => {
 
     const duplicated: ArticleBlock[] = [
       { key: 'a', type: 'embed-tweet', tweetId: '111' },
-      { key: 'b', type: 'paragraph', runs: [{ type: 'text', text: 'x' }] },
+      {
+        key: 'b',
+        type: 'paragraph',
+        runs: [
+          { type: 'text', text: 'x' },
+        ],
+      },
       { key: 'c', type: 'embed-tweet', tweetId: '222' },
       { key: 'd', type: 'embed-tweet', tweetId: '111' },
     ]

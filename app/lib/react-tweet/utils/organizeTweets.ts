@@ -31,12 +31,20 @@ export function organizeTweets(
   } = options
 
   const tweetMap = new Map<string, EnrichedTweet>(
-    tweets.map(t => [t.id_str, { ...t, comments: [] }]),
+    tweets.map(t => [
+      t.id_str,
+      { ...t, comments: [] },
+    ]),
   )
 
   const mainTweet = tweetMap.get(mainTweetId)
   if (!mainTweet) {
-    return { mainTweet: null, ancestors: [], commentThreads: [], allowedAuthors: [] }
+    return {
+      mainTweet: null,
+      ancestors: [],
+      commentThreads: [],
+      allowedAuthors: [],
+    }
   }
 
   // Determine allowed authors for filtering (default to main tweet author)
@@ -90,12 +98,20 @@ export function organizeTweets(
   }
 
   if (!showComments) {
-    return { mainTweet, ancestors, commentThreads: [], allowedAuthors: Array.from(allowedAuthors) }
+    return {
+      mainTweet,
+      ancestors,
+      commentThreads: [],
+      allowedAuthors: Array.from(allowedAuthors),
+    }
   }
 
   // 2. Build Comment Tree
   const repliesByParent = new Map<string, EnrichedTweet[]>()
-  const threadIds = new Set([mainTweetId, ...ancestors.map(a => a.id_str)])
+  const threadIds = new Set([
+    mainTweetId,
+    ...ancestors.map(a => a.id_str),
+  ])
 
   tweets.forEach((t) => {
     // Skip if it's part of the main thread or ancestor chain (already handled)

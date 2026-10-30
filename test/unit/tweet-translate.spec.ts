@@ -35,10 +35,17 @@ const BASE_ARGS = {
 
 function modelOutput(text: string): LanguageModelV4GenerateResult {
   return {
-    content: [{ type: 'text', text }],
+    content: [
+      { type: 'text', text },
+    ],
     finishReason: { unified: 'stop', raw: 'stop' },
     usage: {
-      inputTokens: { total: 0, noCache: 0, cacheRead: 0, cacheWrite: 0 },
+      inputTokens: {
+        total: 0,
+        noCache: 0,
+        cacheRead: 0,
+        cacheWrite: 0,
+      },
       outputTokens: { total: 0, text: 0, reasoning: 0 },
     },
     warnings: [],
@@ -55,7 +62,9 @@ function promptText(prompt: LanguageModelV4Prompt): string {
     .map((message) => {
       if (typeof message.content === 'string')
         return message.content
-      return message.content.map(part => (part.type === 'text' ? part.text : '')).join('')
+      return message.content.map(part => (part.type === 'text'
+        ? part.text
+        : '')).join('')
     })
     .join('\n')
 }
@@ -63,7 +72,10 @@ function promptText(prompt: LanguageModelV4Prompt): string {
 describe('AC-TWEET-021: tweet translation parse-failure retry', () => {
   it('AC-TWEET-021: retries once when the model emits invalid JSON, then succeeds', async () => {
     const model = new MockLanguageModelV4({
-      doGenerate: [modelOutput(RAW_NEWLINE), modelOutput(ESCAPED_NEWLINE)],
+      doGenerate: [
+        modelOutput(RAW_NEWLINE),
+        modelOutput(ESCAPED_NEWLINE),
+      ],
     })
 
     const result = await translateText({ ...BASE_ARGS, model })
@@ -75,7 +87,9 @@ describe('AC-TWEET-021: tweet translation parse-failure retry', () => {
   })
 
   it('AC-TWEET-021: rejects with the parse error when every attempt is unparseable', async () => {
-    const model = new MockLanguageModelV4({ doGenerate: modelOutput(RAW_NEWLINE) })
+    const model = new MockLanguageModelV4({
+      doGenerate: modelOutput(RAW_NEWLINE),
+    })
 
     await expect(translateText({ ...BASE_ARGS, model })).rejects.toThrow('could not parse')
     // 两次尝试都真的发出去了，不是第一次失败就放弃
@@ -84,7 +98,10 @@ describe('AC-TWEET-021: tweet translation parse-failure retry', () => {
 
   it('AC-TWEET-021: system prompt and retry feedback demand escaped \\n, never a literal newline', async () => {
     const model = new MockLanguageModelV4({
-      doGenerate: [modelOutput(RAW_NEWLINE), modelOutput(ESCAPED_NEWLINE)],
+      doGenerate: [
+        modelOutput(RAW_NEWLINE),
+        modelOutput(ESCAPED_NEWLINE),
+      ],
     })
 
     await translateText({ ...BASE_ARGS, model })

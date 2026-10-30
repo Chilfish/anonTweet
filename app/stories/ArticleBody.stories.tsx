@@ -94,12 +94,20 @@ export const EmbedFallback: Story = {
 }
 
 const inlineRuns: ArticleRun[] = [
-  { type: 'text', text: '粗体 ', styles: ['bold'] },
+  {
+    type: 'text',
+    text: '粗体 ',
+    styles: ['bold'],
+  },
   { type: 'link', text: '链接', url: 'https://example.com/post' },
   { type: 'text', text: ' 与 ' },
   { type: 'mention', text: '@chilfish', href: 'https://x.com/chilfish' },
   { type: 'text', text: ' · ' },
-  { type: 'text', text: '斜体', styles: ['italic'] },
+  {
+    type: 'text',
+    text: '斜体',
+    styles: ['italic'],
+  },
 ]
 
 export const InlineRuns: Story = {
@@ -128,7 +136,12 @@ export const MarkdownOnly: Story = {
 export const ImageBlock: Story = {
   render: () => (
     <ArticleImage
-      media={{ id: 'demo', url: 'https://picsum.photos/seed/article/1200/800', width: 1200, height: 800 }}
+      media={{
+        id: 'demo',
+        url: 'https://picsum.photos/seed/article/1200/800',
+        width: 1200,
+        height: 800,
+      }}
       caption="示例图注（caption 可选）"
     />
   ),

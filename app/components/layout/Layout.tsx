@@ -47,8 +47,12 @@ function FooterLink({ to, className, children, emoji }: LinkProps) {
 }
 
 function GitInfo() {
-  const hash = typeof __GIT_HASH__ !== 'undefined' ? __GIT_HASH__ : 'DEV'
-  const dateStr = typeof __GIT_DATE__ !== 'undefined' ? __GIT_DATE__ : new Date()
+  const hash = typeof __GIT_HASH__ !== 'undefined'
+    ? __GIT_HASH__
+    : 'DEV'
+  const dateStr = typeof __GIT_DATE__ !== 'undefined'
+    ? __GIT_DATE__
+    : new Date()
 
   return (
     <div className="flex items-center justify-center gap-2 text-[10px] text-muted-foreground/50 font-mono mt-3 select-all">
@@ -134,11 +138,13 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
           className="rounded-full h-8 w-8 p-0 text-muted-foreground/40 hover:text-(--primary-brand) hover:bg-transparent transition-all hover:scale-110"
           aria-label={showFooter ? '隐藏信息' : '显示信息'}
         >
-          {showFooter ? (
-            <XIcon className="size-4" />
-          ) : (
-            <InfoIcon className="size-4" />
-          )}
+          {showFooter
+            ? (
+                <XIcon className="size-4" />
+              )
+            : (
+                <InfoIcon className="size-4" />
+              )}
         </Button>
       </div>
     </div>

@@ -61,7 +61,10 @@ function parseKeyedTranslations(
   for (const [key, value] of entries) {
     if (!NUMERIC_KEY_RE.test(key) || typeof value !== 'string')
       return null
-    out.push({ index: Number(key), translatedText: value })
+    out.push({
+      index: Number(key),
+      translatedText: value,
+    })
   }
   return out.sort((a, b) => a.index - b.index)
 }
@@ -94,7 +97,9 @@ export function parseOcrTranslation(
   }
 
   throw new VisionParseError(
-    `Vision OCR translation schema validation failed: ${typeof json === 'string' ? json.slice(0, 120) : JSON.stringify(json)?.slice(0, 120)}`,
+    `Vision OCR translation schema validation failed: ${typeof json === 'string'
+      ? json.slice(0, 120)
+      : JSON.stringify(json)?.slice(0, 120)}`,
   )
 }
 
@@ -163,7 +168,9 @@ export async function translateVisionOCR(
   const glossarySection = translationGlossary
     ? `\n<Glossary>\n(Priority Level: HIGH. Use these exact translations.)\n${translationGlossary}\n</Glossary>\n`
     : ''
-  const contextSection = tweetText ? `\n# 推文上下文\n${tweetText}\n` : ''
+  const contextSection = tweetText
+    ? `\n# 推文上下文\n${tweetText}\n`
+    : ''
 
   const baseUserContent = `# 翻译请求
 ${glossarySection}
@@ -177,7 +184,16 @@ ${toTranslate.map(item => `${item.index}: ${item.originalText}`).join('\n')}`
       const response = await generateText({
         model: modelInstance,
         system: SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: attempt === 0 ? baseUserContent : `${baseUserContent}\n\n上一次输出不符合要求：${lastError instanceof Error ? lastError.message : String(lastError)}\n请重新输出严格 JSON。` }],
+        messages: [
+          {
+            role: 'user',
+            content: attempt === 0
+              ? baseUserContent
+              : `${baseUserContent}\n\n上一次输出不符合要求：${lastError instanceof Error
+                ? lastError.message
+                : String(lastError)}\n请重新输出严格 JSON。`,
+          },
+        ],
         temperature: 0.5,
       })
 

@@ -45,7 +45,10 @@ export function IGTranslateDialog({ post, onTranslated }: IGTranslateDialogProps
 
     setIsTranslating(true)
     try {
-      const combinedGlossary = [dictEntries(), aiConfig.translationGlossary].filter(Boolean).join('\n')
+      const combinedGlossary = [
+        dictEntries(),
+        aiConfig.translationGlossary,
+      ].filter(Boolean).join('\n')
 
       const { data } = await fetcher.post('/api/ai-translation', {
         type: 'ins',

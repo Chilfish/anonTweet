@@ -23,10 +23,22 @@ function makeTweet(entities: Entity[]): EnrichedTweet {
 
 describe('markdown export', () => {
   it('includes the prepend entity (index -1) in translated text but not in the original', () => {
-    const original: Entity[] = [{ type: 'text', text: 'hello', index: 0 }]
+    const original: Entity[] = [
+      { type: 'text', text: 'hello', index: 0 },
+    ]
     const manual: Entity[] = [
-      { type: 'text', text: '（补充）', index: -1, translation: '（补充）' },
-      { type: 'text', text: 'hello', index: 0, translation: '你好' },
+      {
+        type: 'text',
+        text: '（补充）',
+        index: -1,
+        translation: '（补充）',
+      },
+      {
+        type: 'text',
+        text: 'hello',
+        index: 0,
+        translation: '你好',
+      },
     ]
     const tweet = materializeTweetWithManualTranslations(makeTweet(original), manual)
 

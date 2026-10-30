@@ -18,8 +18,10 @@ export function generateText(tweet: EnrichedTweet): string {
 
     if (entity.type === 'text' || entity.type === 'media_alt') {
       const translation = entity.translation || entity.aiTranslation || ''
-      const altPrefix = entity.type === 'media_alt' ? `
-图${entity.index - 20000 + 1} Alt：` : ''
+      const altPrefix = entity.type === 'media_alt'
+        ? `
+图${entity.index - 20000 + 1} Alt：`
+        : ''
       return altPrefix + translation
     }
     return null
@@ -182,18 +184,22 @@ function generateMediaMarkdown(media: MediaDetails[], altTranslationEntities: En
     // 媒体链接统一为 <slug>.<ext> 形态（与界面渲染同一套归一化）
     const src = normalizeMediaUrl(item.media_url_https)
     if (item.type === 'photo') {
-      const alt = item.ext_alt_text ? `
+      const alt = item.ext_alt_text
+        ? `
 
-Alt(${idx + 1} of ${media.length}): ${item.ext_alt_text}` : ''
+Alt(${idx + 1} of ${media.length}): ${item.ext_alt_text}`
+        : ''
       // 获取该图片的翻译：优先取 manual translation，其次取 aiTranslation
       const altEntity = altTranslationEntities.find(e =>
         (e as any).mediaIndex === idx || e.index === 20000 + idx,
       )
       const autoAlt = altEntity?.translation || altEntity?.aiTranslation
 
-      return `![Image(${idx + 1} of ${media.length})](${src})${alt}${autoAlt ? `
+      return `![Image(${idx + 1} of ${media.length})](${src})${alt}${autoAlt
+        ? `
 
-**Alt Translation:** ${autoAlt}` : ''}`
+**Alt Translation:** ${autoAlt}`
+        : ''}`
     }
     else if (item.type === 'video' || item.type === 'animated_gif') {
       const bestVariant = item.video_info?.variants

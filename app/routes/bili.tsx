@@ -34,7 +34,12 @@ async function submitBiliPost(formData: FormData): Promise<{ postId: string | nu
       return { postId: null, error: response.data.error }
     }
     const dynId = response.data.dyn_id_str
-    return { postId: dynId !== undefined ? dynId : 'N/A', error: null }
+    return {
+      postId: dynId !== undefined
+        ? dynId
+        : 'N/A',
+      error: null,
+    }
   }
   catch (err: any) {
     let errorMessage = '发生未知错误'
@@ -212,14 +217,16 @@ export default function PublishDynamicForm() {
             className="ml-auto"
             disabled={isLoading}
           >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                发布中...
-              </>
-            ) : (
-              '立即发布'
-            )}
+            {isLoading
+              ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    发布中...
+                  </>
+                )
+              : (
+                  '立即发布'
+                )}
           </Button>
         </CardFooter>
       </form>

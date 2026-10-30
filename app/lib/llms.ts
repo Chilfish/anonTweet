@@ -56,26 +56,122 @@ export interface ApiEndpointLink {
  */
 export const apiEndpoints: ApiEndpointLink[] = [
   // ── Tweet ──────────────────────────────────────────────
-  { method: 'GET', path: '/api/tweet/get/{id}', label: 'GET /api/tweet/get/{id}', href: `/api/tweet/get/${LLMS_EXAMPLES.tweetId}`, description: '拉取单条推文（DB 缓存 → Twitter 原文）' },
-  { method: 'POST', path: '/api/tweet/get/{id}', label: 'POST /api/tweet/get/{id}', href: `/api/tweet/get/${LLMS_EXAMPLES.tweetId}`, description: '旧式拉取推文（兼容旧客户端，内部不再内联 AI 翻译）' },
-  { method: 'GET', path: '/api/tweet/list/{id}', label: 'GET /api/tweet/list/{id}', href: `/api/tweet/list/${LLMS_EXAMPLES.listId}`, description: '拉取 List 时间线推文（EnrichedTweet 数组）' },
-  { method: 'GET', path: '/api/tweet/replies/{id}', label: 'GET /api/tweet/replies/{id}', href: `/api/tweet/replies/${LLMS_EXAMPLES.tweetId}`, description: '拉取推文回复（{ tweets, nextCursor }，cursor 分页）' },
-  { method: 'GET', path: '/api/tweet/search', label: 'GET /api/tweet/search', href: '/api/tweet/search?q=twitter', description: '推文搜索（q 必填，type/cursor/count 可选，支持 X 高级语法）' },
-  { method: 'POST', path: '/api/tweet/set', label: 'POST /api/tweet/set', href: '/api/tweet/set', description: '保存推文实体编辑或文章按块译文（intent: updateEntities / updateArticleTranslations）' },
+  {
+    method: 'GET',
+    path: '/api/tweet/get/{id}',
+    label: 'GET /api/tweet/get/{id}',
+    href: `/api/tweet/get/${LLMS_EXAMPLES.tweetId}`,
+    description: '拉取单条推文（DB 缓存 → Twitter 原文）',
+  },
+  {
+    method: 'POST',
+    path: '/api/tweet/get/{id}',
+    label: 'POST /api/tweet/get/{id}',
+    href: `/api/tweet/get/${LLMS_EXAMPLES.tweetId}`,
+    description: '旧式拉取推文（兼容旧客户端，内部不再内联 AI 翻译）',
+  },
+  {
+    method: 'GET',
+    path: '/api/tweet/list/{id}',
+    label: 'GET /api/tweet/list/{id}',
+    href: `/api/tweet/list/${LLMS_EXAMPLES.listId}`,
+    description: '拉取 List 时间线推文（EnrichedTweet 数组）',
+  },
+  {
+    method: 'GET',
+    path: '/api/tweet/replies/{id}',
+    label: 'GET /api/tweet/replies/{id}',
+    href: `/api/tweet/replies/${LLMS_EXAMPLES.tweetId}`,
+    description: '拉取推文回复（{ tweets, nextCursor }，cursor 分页）',
+  },
+  {
+    method: 'GET',
+    path: '/api/tweet/search',
+    label: 'GET /api/tweet/search',
+    href: '/api/tweet/search?q=twitter',
+    description: '推文搜索（q 必填，type/cursor/count 可选，支持 X 高级语法）',
+  },
+  {
+    method: 'POST',
+    path: '/api/tweet/set',
+    label: 'POST /api/tweet/set',
+    href: '/api/tweet/set',
+    description: '保存推文实体编辑或文章按块译文（intent: updateEntities / updateArticleTranslations）',
+  },
   // ── Instagram ──────────────────────────────────────────
-  { method: 'GET', path: '/api/ig/get/{id}', label: 'GET /api/ig/get/{id}', href: `/api/ig/get/${LLMS_EXAMPLES.igShortcode}`, description: '拉取 IG 帖子（简化版，不触发 AI 翻译）' },
-  { method: 'POST', path: '/api/ig/get/{id}', label: 'POST /api/ig/get/{id}', href: `/api/ig/get/${LLMS_EXAMPLES.igShortcode}`, description: '拉取 IG 帖子（可启用 AI caption 翻译）' },
-  { method: 'POST', path: '/api/ig/translate/{id}', label: 'POST /api/ig/translate/{id}', href: `/api/ig/translate/${LLMS_EXAMPLES.igShortcode}`, description: 'IG caption AI 翻译或手动翻译（manualTranslation 直接写入）' },
+  {
+    method: 'GET',
+    path: '/api/ig/get/{id}',
+    label: 'GET /api/ig/get/{id}',
+    href: `/api/ig/get/${LLMS_EXAMPLES.igShortcode}`,
+    description: '拉取 IG 帖子（简化版，不触发 AI 翻译）',
+  },
+  {
+    method: 'POST',
+    path: '/api/ig/get/{id}',
+    label: 'POST /api/ig/get/{id}',
+    href: `/api/ig/get/${LLMS_EXAMPLES.igShortcode}`,
+    description: '拉取 IG 帖子（可启用 AI caption 翻译）',
+  },
+  {
+    method: 'POST',
+    path: '/api/ig/translate/{id}',
+    label: 'POST /api/ig/translate/{id}',
+    href: `/api/ig/translate/${LLMS_EXAMPLES.igShortcode}`,
+    description: 'IG caption AI 翻译或手动翻译（manualTranslation 直接写入）',
+  },
   // ── User ───────────────────────────────────────────────
-  { method: 'GET', path: '/api/user/get/{username}', label: 'GET /api/user/get/{username}', href: `/api/user/get/${LLMS_EXAMPLES.username}`, description: '查询用户资料（DB 缓存）' },
-  { method: 'GET', path: '/api/user/timeline/{username}', label: 'GET /api/user/timeline/{username}', href: `/api/user/timeline/${LLMS_EXAMPLES.username}`, description: '用户时间线（EnrichedTweet 数组）' },
+  {
+    method: 'GET',
+    path: '/api/user/get/{username}',
+    label: 'GET /api/user/get/{username}',
+    href: `/api/user/get/${LLMS_EXAMPLES.username}`,
+    description: '查询用户资料（DB 缓存）',
+  },
+  {
+    method: 'GET',
+    path: '/api/user/timeline/{username}',
+    label: 'GET /api/user/timeline/{username}',
+    href: `/api/user/timeline/${LLMS_EXAMPLES.username}`,
+    description: '用户时间线（EnrichedTweet 数组）',
+  },
   // ── AI ─────────────────────────────────────────────────
-  { method: 'POST', path: '/api/ai-test', label: 'POST /api/ai-test', href: '/api/ai-test', description: 'AI 提供商连通性测试（apiKey + model）' },
-  { method: 'POST', path: '/api/ai-translation', label: 'POST /api/ai-translation', href: '/api/ai-translation', description: '统一 AI 翻译端点（type: twitter / ins / article）' },
-  { method: 'POST', path: '/api/ai-vision', label: 'POST /api/ai-vision', href: '/api/ai-vision', description: 'AI 视觉描述生成 / OCR 翻译 / 保存（三种严格互斥请求形态）' },
+  {
+    method: 'POST',
+    path: '/api/ai-test',
+    label: 'POST /api/ai-test',
+    href: '/api/ai-test',
+    description: 'AI 提供商连通性测试（apiKey + model）',
+  },
+  {
+    method: 'POST',
+    path: '/api/ai-translation',
+    label: 'POST /api/ai-translation',
+    href: '/api/ai-translation',
+    description: '统一 AI 翻译端点（type: twitter / ins / article）',
+  },
+  {
+    method: 'POST',
+    path: '/api/ai-vision',
+    label: 'POST /api/ai-vision',
+    href: '/api/ai-vision',
+    description: 'AI 视觉描述生成 / OCR 翻译 / 保存（三种严格互斥请求形态）',
+  },
   // ── Proxy / Misc ───────────────────────────────────────
-  { method: 'GET', path: '/api/proxy/image', label: 'GET /api/proxy/image', href: '/api/proxy/image?url=https%3A%2F%2Fscontent.cdninstagram.com%2Fv%2Ft51.2885-15%2Fphoto.jpg', description: '图片代理（解决 IG CDN CORS/CORP，url 白名单校验）' },
-  { method: 'POST', path: '/api/bili-post', label: 'POST /api/bili-post', href: '/api/bili-post', description: 'Bili 动态发布（隐藏自用入口，ENABLE_BILI 控制，需 Bili Cookie）' },
+  {
+    method: 'GET',
+    path: '/api/proxy/image',
+    label: 'GET /api/proxy/image',
+    href: '/api/proxy/image?url=https%3A%2F%2Fscontent.cdninstagram.com%2Fv%2Ft51.2885-15%2Fphoto.jpg',
+    description: '图片代理（解决 IG CDN CORS/CORP，url 白名单校验）',
+  },
+  {
+    method: 'POST',
+    path: '/api/bili-post',
+    label: 'POST /api/bili-post',
+    href: '/api/bili-post',
+    description: 'Bili 动态发布（隐藏自用入口，ENABLE_BILI 控制，需 Bili Cookie）',
+  },
 ]
 
 /** llms.txt markdown 构建（相对链接，任意部署域名可用） */
@@ -134,13 +230,17 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
   // 200 JSON 响应体（供各操作 responses 复用）
   const jsonOk = (description: string, schema: Record<string, unknown>) => ({
     description,
-    content: { 'application/json': { schema } },
+    content: {
+      'application/json': { schema },
+    },
   })
 
   const errorRef = { $ref: '#/components/schemas/ErrorResponse' }
   const errorJson = (description: string) => ({
     description,
-    content: { 'application/json': { schema: errorRef } },
+    content: {
+      'application/json': { schema: errorRef },
+    },
   })
 
   const pathParam = (name: string, description: string) => ({
@@ -177,7 +277,9 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
           operationId: 'tweetGet',
           summary: '拉取单条推文',
           description: '三层缓存（Memory → FS → DB → Twitter API）拉取推文并 enrich；不再内联 AI 翻译（AC-DECOUPLE-001）。',
-          parameters: [pathParam('id', '推文 ID')],
+          parameters: [
+            pathParam('id', '推文 ID'),
+          ],
           responses: {
             200: jsonOk('EnrichedTweet 数组（与 react-tweet 结构对齐）', {
               type: 'array',
@@ -193,7 +295,9 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
           operationId: 'tweetGetAction',
           summary: '旧式拉取推文（兼容旧客户端）',
           description: '与 GET 同链路；请求体 AI 字段为旧客户端兼容保留，路由不再读取。',
-          parameters: [pathParam('id', '推文 ID')],
+          parameters: [
+            pathParam('id', '推文 ID'),
+          ],
           requestBody: {
             required: true,
             content: {
@@ -206,9 +310,23 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
                     enableAITranslation: { type: 'boolean', description: '兼容字段，不再读取' },
                     apiKey: { type: 'string', description: '兼容字段，不再读取' },
                     model: { type: 'string', description: '兼容字段，不再读取' },
-                    provider: { type: 'string', enum: ['google', 'deepseek', 'openrouter'], description: '兼容字段，不再读取' },
+                    provider: {
+                      type: 'string',
+                      enum: ['google', 'deepseek', 'openrouter'],
+                      description: '兼容字段，不再读取',
+                    },
                     baseUrl: { type: 'string', description: '兼容字段，不再读取' },
-                    thinkingLevel: { type: 'string', enum: ['minimal', 'low', 'medium', 'high', 'max'], description: '兼容字段，不再读取' },
+                    thinkingLevel: {
+                      type: 'string',
+                      enum: [
+                        'minimal',
+                        'low',
+                        'medium',
+                        'high',
+                        'max',
+                      ],
+                      description: '兼容字段，不再读取',
+                    },
                     translationGlossary: { type: 'string', description: '兼容字段，不再读取' },
                     force: { type: 'boolean', description: '兼容字段，不再读取' },
                   },
@@ -231,7 +349,9 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
           tags: ['Tweet'],
           operationId: 'tweetList',
           summary: '拉取 List 时间线',
-          parameters: [pathParam('id', 'List ID')],
+          parameters: [
+            pathParam('id', 'List ID'),
+          ],
           responses: {
             200: jsonOk('EnrichedTweet 数组', {
               type: 'array',
@@ -248,7 +368,13 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
           summary: '拉取推文回复',
           parameters: [
             pathParam('id', '推文 ID'),
-            { name: 'cursor', in: 'query', required: false, description: '分页游标（base62）', schema: { type: 'string' } },
+            {
+              name: 'cursor',
+              in: 'query',
+              required: false,
+              description: '分页游标（base62）',
+              schema: { type: 'string' },
+            },
           ],
           responses: {
             200: jsonOk('回复列表 + 下一页游标', { $ref: '#/components/schemas/RepliesResponse' }),
@@ -263,10 +389,38 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
           summary: '推文搜索',
           description: 'X 高级搜索语法直接可用（如 (from:user) until:2025-12-20）；q 缺省或超长返回 400 + 空结果。',
           parameters: [
-            { name: 'q', in: 'query', required: true, description: '搜索关键词（≤500 字符）', schema: { type: 'string', maxLength: 500 } },
-            { name: 'type', in: 'query', required: false, description: '排序方式', schema: { type: 'string', enum: ['latest', 'top'], default: 'latest' } },
-            { name: 'cursor', in: 'query', required: false, description: '分页游标', schema: { type: 'string' } },
-            { name: 'count', in: 'query', required: false, description: '每页数量', schema: { type: 'integer', default: 20 } },
+            {
+              name: 'q',
+              in: 'query',
+              required: true,
+              description: '搜索关键词（≤500 字符）',
+              schema: { type: 'string', maxLength: 500 },
+            },
+            {
+              name: 'type',
+              in: 'query',
+              required: false,
+              description: '排序方式',
+              schema: {
+                type: 'string',
+                enum: ['latest', 'top'],
+                default: 'latest',
+              },
+            },
+            {
+              name: 'cursor',
+              in: 'query',
+              required: false,
+              description: '分页游标',
+              schema: { type: 'string' },
+            },
+            {
+              name: 'count',
+              in: 'query',
+              required: false,
+              description: '每页数量',
+              schema: { type: 'integer', default: 20 },
+            },
           ],
           responses: {
             200: jsonOk('搜索推文列表 + 下一页游标', { $ref: '#/components/schemas/SearchResponse' }),
@@ -288,7 +442,10 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
                   type: 'object',
                   required: ['intent', 'data'],
                   properties: {
-                    intent: { type: 'string', enum: ['updateEntities', 'updateArticleTranslations'] },
+                    intent: {
+                      type: 'string',
+                      enum: ['updateEntities', 'updateArticleTranslations'],
+                    },
                     data: {
                       type: 'array',
                       description: 'updateEntities：每项 { tweetId, entities }；updateArticleTranslations：每项 { tweetId, translation }',
@@ -297,7 +454,11 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
                         required: ['tweetId'],
                         properties: {
                           tweetId: { type: 'string' },
-                          entities: { type: 'array', items: { $ref: '#/components/schemas/TranslationEntity' }, description: 'intent=updateEntities 时必填' },
+                          entities: {
+                            type: 'array',
+                            items: { $ref: '#/components/schemas/TranslationEntity' },
+                            description: 'intent=updateEntities 时必填',
+                          },
                           translation: { $ref: '#/components/schemas/ArticleTranslation', description: 'intent=updateArticleTranslations 时必填' },
                         },
                       },
@@ -310,7 +471,10 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
           responses: {
             200: jsonOk('保存结果', {
               type: 'object',
-              properties: { success: { type: 'boolean' }, message: { type: 'string' } },
+              properties: {
+                success: { type: 'boolean' },
+                message: { type: 'string' },
+              },
             }),
             400: errorJson('校验失败'),
           },
@@ -323,7 +487,9 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
           operationId: 'igGet',
           summary: '拉取 IG 帖子（简化版）',
           description: 'SDK 抓取并标准化为 IGPost；不触发 AI 翻译。未配置 INS_COOKIES 时返回空数组。',
-          parameters: [pathParam('id', 'shortcode 或 stories 段（username/story_id）')],
+          parameters: [
+            pathParam('id', 'shortcode 或 stories 段（username/story_id）'),
+          ],
           responses: {
             200: jsonOk('IGPost 数组（可能为空）', {
               type: 'array',
@@ -336,7 +502,9 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
           tags: ['Instagram'],
           operationId: 'igGetAction',
           summary: '拉取 IG 帖子（可启用 AI 翻译）',
-          parameters: [pathParam('id', 'shortcode 或 stories 段（username/story_id）')],
+          parameters: [
+            pathParam('id', 'shortcode 或 stories 段（username/story_id）'),
+          ],
           requestBody: {
             required: false,
             content: {
@@ -347,8 +515,21 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
                     enableAITranslation: { type: 'boolean', default: false },
                     apiKey: { type: 'string', description: '启用翻译时必填' },
                     model: { type: 'string', description: '启用翻译时必填' },
-                    provider: { type: 'string', enum: ['google', 'deepseek', 'openrouter'], default: 'google' },
-                    thinkingLevel: { type: 'string', enum: ['minimal', 'low', 'medium', 'high', 'max'] },
+                    provider: {
+                      type: 'string',
+                      enum: ['google', 'deepseek', 'openrouter'],
+                      default: 'google',
+                    },
+                    thinkingLevel: {
+                      type: 'string',
+                      enum: [
+                        'minimal',
+                        'low',
+                        'medium',
+                        'high',
+                        'max',
+                      ],
+                    },
                     translationGlossary: { type: 'string' },
                   },
                 },
@@ -372,7 +553,9 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
           operationId: 'igTranslate',
           summary: 'IG caption AI / 手动翻译',
           description: 'manualTranslation 直接写入跳过 AI；否则需 apiKey + model。结果写回 DB + localCache。',
-          parameters: [pathParam('id', 'IG shortcode')],
+          parameters: [
+            pathParam('id', 'IG shortcode'),
+          ],
           requestBody: {
             required: true,
             content: {
@@ -382,8 +565,21 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
                   properties: {
                     apiKey: { type: 'string' },
                     model: { type: 'string' },
-                    provider: { type: 'string', enum: ['google', 'deepseek', 'openrouter'], default: 'google' },
-                    thinkingLevel: { type: 'string', enum: ['minimal', 'low', 'medium', 'high', 'max'] },
+                    provider: {
+                      type: 'string',
+                      enum: ['google', 'deepseek', 'openrouter'],
+                      default: 'google',
+                    },
+                    thinkingLevel: {
+                      type: 'string',
+                      enum: [
+                        'minimal',
+                        'low',
+                        'medium',
+                        'high',
+                        'max',
+                      ],
+                    },
                     translationGlossary: { type: 'string' },
                     manualTranslation: { type: 'string', description: '手动翻译文本，提供则跳过 AI' },
                   },
@@ -394,7 +590,9 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
           responses: {
             200: jsonOk('翻译结果', {
               type: 'object',
-              properties: { captionTranslation: { type: 'string' } },
+              properties: {
+                captionTranslation: { type: 'string' },
+              },
             }),
             400: errorJson('缺少 API Key/Model 或非法 JSON'),
             404: errorJson('帖子未找到或无 caption'),
@@ -409,7 +607,9 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
           operationId: 'userGet',
           summary: '查询用户资料',
           description: '从 DB 缓存读取用户；无记录返回 null。',
-          parameters: [pathParam('username', '用户名（screen_name）')],
+          parameters: [
+            pathParam('username', '用户名（screen_name）'),
+          ],
           responses: {
             200: jsonOk('RawUser 或 null', {
               oneOf: [
@@ -426,7 +626,9 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
           operationId: 'userTimeline',
           summary: '用户时间线',
           description: '获取指定用户的推文时间线，经 enrichTweet 清洗后返回 EnrichedTweet 数组。',
-          parameters: [pathParam('username', '用户名')],
+          parameters: [
+            pathParam('username', '用户名'),
+          ],
           responses: {
             200: jsonOk('EnrichedTweet 数组', {
               type: 'array',
@@ -453,9 +655,22 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
                   properties: {
                     apiKey: { type: 'string' },
                     model: { type: 'string', description: '模型名（app/lib/constants.ts 的 models 列表）' },
-                    provider: { type: 'string', enum: ['google', 'deepseek', 'openrouter'], description: '默认按模型推断' },
+                    provider: {
+                      type: 'string',
+                      enum: ['google', 'deepseek', 'openrouter'],
+                      description: '默认按模型推断',
+                    },
                     baseUrl: { type: 'string', description: '自定义 OpenAI 兼容 baseUrl' },
-                    thinkingLevel: { type: 'string', enum: ['minimal', 'low', 'medium', 'high', 'max'] },
+                    thinkingLevel: {
+                      type: 'string',
+                      enum: [
+                        'minimal',
+                        'low',
+                        'medium',
+                        'high',
+                        'max',
+                      ],
+                    },
                   },
                 },
               },
@@ -468,7 +683,11 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
                 success: { type: 'boolean' },
                 data: {
                   type: 'object',
-                  properties: { text: { type: 'string' }, model: { type: 'string' }, thinkingConfig: { type: 'object' } },
+                  properties: {
+                    text: { type: 'string' },
+                    model: { type: 'string' },
+                    thinkingConfig: { type: 'object' },
+                  },
                 },
               },
             }),
@@ -490,7 +709,11 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
                 schema: {
                   type: 'object',
                   properties: {
-                    type: { type: 'string', enum: ['twitter', 'ins', 'article'], default: 'twitter' },
+                    type: {
+                      type: 'string',
+                      enum: ['twitter', 'ins', 'article'],
+                      default: 'twitter',
+                    },
                     tweet: { $ref: '#/components/schemas/EnrichedTweet', description: 'type=twitter 时必填' },
                     igPost: { $ref: '#/components/schemas/IGPost', description: 'type=ins 时必填' },
                     article: { $ref: '#/components/schemas/TweetArticle', description: 'type=article 时必填' },
@@ -498,9 +721,21 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
                     force: { type: 'boolean', description: '强制重新翻译' },
                     apiKey: { type: 'string' },
                     model: { type: 'string' },
-                    provider: { type: 'string', enum: ['google', 'deepseek', 'openrouter'] },
+                    provider: {
+                      type: 'string',
+                      enum: ['google', 'deepseek', 'openrouter'],
+                    },
                     baseUrl: { type: 'string' },
-                    thinkingLevel: { type: 'string', enum: ['minimal', 'low', 'medium', 'high', 'max'] },
+                    thinkingLevel: {
+                      type: 'string',
+                      enum: [
+                        'minimal',
+                        'low',
+                        'medium',
+                        'high',
+                        'max',
+                      ],
+                    },
                     translationGlossary: { type: 'string', maxLength: 4000 },
                   },
                 },
@@ -517,7 +752,10 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
                   type: 'object',
                   properties: {
                     tweetId: { type: 'string' },
-                    entities: { type: 'array', items: { $ref: '#/components/schemas/TranslationEntity' } },
+                    entities: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/TranslationEntity' },
+                    },
                     captionTranslation: { type: 'string', description: 'ins 分支' },
                     articleId: { type: 'string', description: 'article 分支' },
                     translation: { $ref: '#/components/schemas/ArticleTranslation', description: 'article 分支：按块 key 的译文' },
@@ -545,21 +783,49 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
                   type: 'object',
                   description: '触发形态由字段组合严格互斥（详见路由内 zod strict 校验）',
                   properties: {
-                    action: { type: 'string', enum: ['translate', 'save'], description: 'translate/save 形态必填；generate 不带' },
+                    action: {
+                      type: 'string',
+                      enum: ['translate', 'save'],
+                      description: 'translate/save 形态必填；generate 不带',
+                    },
                     tweet: {
                       $ref: '#/components/schemas/EnrichedTweet',
                       description: '客户端可携带 visionInfo（generate 合并用）',
                     },
-                    mediaIndexes: { type: 'array', items: { type: 'integer', minimum: 0 }, description: 'generate 形态必填' },
-                    mode: { type: 'string', enum: ['describe', 'ocr', 'custom'], description: 'generate 形态必填' },
+                    mediaIndexes: {
+                      type: 'array',
+                      items: { type: 'integer', minimum: 0 },
+                      description: 'generate 形态必填',
+                    },
+                    mode: {
+                      type: 'string',
+                      enum: ['describe', 'ocr', 'custom'],
+                      description: 'generate 形态必填',
+                    },
                     customPrompt: { type: 'string', maxLength: 2000 },
                     withContext: { type: 'boolean' },
-                    items: { type: 'array', description: 'translate 形态：{ index, originalText }[]', items: { type: 'object' } },
+                    items: {
+                      type: 'array',
+                      description: 'translate 形态：{ index, originalText }[]',
+                      items: { type: 'object' },
+                    },
                     apiKey: { type: 'string' },
                     model: { type: 'string' },
-                    provider: { type: 'string', enum: ['google', 'deepseek', 'openrouter'] },
+                    provider: {
+                      type: 'string',
+                      enum: ['google', 'deepseek', 'openrouter'],
+                    },
                     baseUrl: { type: 'string' },
-                    thinkingLevel: { type: 'string', enum: ['minimal', 'low', 'medium', 'high', 'max'] },
+                    thinkingLevel: {
+                      type: 'string',
+                      enum: [
+                        'minimal',
+                        'low',
+                        'medium',
+                        'high',
+                        'max',
+                      ],
+                    },
                     translationGlossary: { type: 'string', maxLength: 4000 },
                   },
                 },
@@ -574,8 +840,14 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
                 data: {
                   type: 'object',
                   properties: {
-                    visionInfo: { type: 'array', items: { $ref: '#/components/schemas/AIVisionInfo' } },
-                    translations: { type: 'array', items: { type: 'object' } },
+                    visionInfo: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/AIVisionInfo' },
+                    },
+                    translations: {
+                      type: 'array',
+                      items: { type: 'object' },
+                    },
                   },
                 },
               },
@@ -593,7 +865,13 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
           summary: '图片代理',
           description: '解决 Instagram CDN CORS/CORP 拦截；仅允许图片扩展名或 cdninstagram.com / fbcdn.net 域名（防 SSRF）。',
           parameters: [
-            { name: 'url', in: 'query', required: true, description: '图片 URL（同源响应返回，带缓存头）', schema: { type: 'string' } },
+            {
+              name: 'url',
+              in: 'query',
+              required: true,
+              description: '图片 URL（同源响应返回，带缓存头）',
+              schema: { type: 'string' },
+            },
           ],
           responses: {
             200: jsonOk('图片二进制（Content-Type 透传上游）', { type: 'string', format: 'binary' }),
@@ -621,7 +899,11 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
                     content: { type: 'string', description: '动态正文' },
                     title: { type: 'string' },
                     cookie: { type: 'string', description: 'Bili Cookie（需含 bili_jct 与 DedeUserID）' },
-                    images: { type: 'array', items: { type: 'string', format: 'binary' }, description: '可选图片文件' },
+                    images: {
+                      type: 'array',
+                      items: { type: 'string', format: 'binary' },
+                      description: '可选图片文件',
+                    },
                   },
                 },
               },
@@ -630,7 +912,10 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
           responses: {
             200: jsonOk('发布结果（CreateDynResult）', {
               type: 'object',
-              properties: { dyn_id_str: { type: 'string' }, error: { type: 'string', description: '失败时' } },
+              properties: {
+                dyn_id_str: { type: 'string' },
+                error: { type: 'string', description: '失败时' },
+              },
             }),
             404: errorJson('ENABLE_BILI=false 未启用'),
             500: errorJson('发布失败'),
@@ -650,7 +935,11 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
             status: { type: 'integer', description: '失败分类（400 输入/参数、404 目标缺失、500 网关/上游失败）；HTTP status 固定 200' },
             cause: {},
             targetId: { type: 'string', description: 'AI 端点：请求作用的实体 id（tweetId / articleId / igPostId）' },
-            targetType: { type: 'string', enum: ['tweet', 'article', 'ig'], description: 'AI 端点：实体类型' },
+            targetType: {
+              type: 'string',
+              enum: ['tweet', 'article', 'ig'],
+              description: 'AI 端点：实体类型',
+            },
             model: { type: 'string', description: 'AI 端点：请求使用的模型' },
             provider: { type: 'string', description: 'AI 端点：实际解析出的 provider' },
             aiError: { description: 'AI 提供商归一化错误（可选）' },
@@ -660,15 +949,30 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
         TweetUser: {
           type: 'object',
           description: '推文作者（app/types/user.ts TweetUser）',
-          required: ['id_str', 'name', 'profile_image_url_https', 'profile_image_shape', 'screen_name', 'verified', 'is_blue_verified'],
+          required: [
+            'id_str',
+            'name',
+            'profile_image_url_https',
+            'profile_image_shape',
+            'screen_name',
+            'verified',
+            'is_blue_verified',
+          ],
           properties: {
             id_str: { type: 'string' },
             name: { type: 'string' },
             profile_image_url_https: { type: 'string', format: 'uri', description: '头像 URL' },
-            profile_image_shape: { type: 'string', enum: ['Circle', 'Square', 'Hexagon'] },
+            profile_image_shape: {
+              type: 'string',
+              enum: ['Circle', 'Square', 'Hexagon'],
+            },
             screen_name: { type: 'string' },
             verified: { type: 'boolean' },
-            verified_type: { type: 'string', enum: ['Business', 'Government'], description: '可选' },
+            verified_type: {
+              type: 'string',
+              enum: ['Business', 'Government'],
+              description: '可选',
+            },
             is_blue_verified: { type: 'boolean' },
           },
         },
@@ -681,7 +985,16 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
             index: { type: 'integer', description: '实体的文本偏移索引' },
             type: {
               type: 'string',
-              enum: ['text', 'hashtag', 'mention', 'url', 'media', 'symbol', 'media_alt', 'separator'],
+              enum: [
+                'text',
+                'hashtag',
+                'mention',
+                'url',
+                'media',
+                'symbol',
+                'media_alt',
+                'separator',
+              ],
             },
             href: { type: 'string', description: '除 text/media_alt/separator 外的类型带链接' },
             translation: { type: 'string', description: '手动翻译' },
@@ -697,7 +1010,15 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
           properties: {
             text: { type: 'string' },
             index: { type: 'integer' },
-            type: { type: 'string', enum: ['text', 'hashtag', 'media_alt', 'separator'] },
+            type: {
+              type: 'string',
+              enum: [
+                'text',
+                'hashtag',
+                'media_alt',
+                'separator',
+              ],
+            },
             href: { type: 'string' },
             translation: { type: 'string' },
             aiTranslation: { type: 'string' },
@@ -707,17 +1028,31 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
         AIVisionInfo: {
           type: 'object',
           description: 'AI 视觉描述条目（app/types/vision.ts AIVisionInfo），挂在 EnrichedTweet.visionInfo[]',
-          required: ['index', 'mode', 'promptId', 'provider', 'model', 'status', 'createdAt'],
+          required: [
+            'index',
+            'mode',
+            'promptId',
+            'provider',
+            'model',
+            'status',
+            'createdAt',
+          ],
           properties: {
             index: { type: 'integer', description: '对应 mediaDetails 数组索引（0-based）' },
-            mode: { type: 'string', enum: ['describe', 'ocr', 'custom'] },
+            mode: {
+              type: 'string',
+              enum: ['describe', 'ocr', 'custom'],
+            },
             promptId: { type: 'string' },
             provider: { type: 'string', description: '实际使用的 provider' },
             model: { type: 'string', description: '实际使用的模型 slug' },
             description: { type: 'string', description: 'describe/custom 模式：看图说话描述' },
             originalText: { type: 'string', description: 'ocr 模式：图片原文' },
             translatedText: { type: 'string', description: 'ocr 模式：简体中文翻译' },
-            status: { type: 'string', enum: ['done', 'error'] },
+            status: {
+              type: 'string',
+              enum: ['done', 'error'],
+            },
             error: { type: 'string', description: 'status=error 时' },
             createdAt: { type: 'integer', description: 'epoch ms' },
           },
@@ -725,26 +1060,55 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
         EnrichedTweet: {
           type: 'object',
           description: 'enrich 后的推文（app/types/index.ts EnrichedTweet），字段类型与媒体验证为 open schema。',
-          required: ['lang', 'created_at', 'entities', 'id_str', 'text', 'user', 'url'],
+          required: [
+            'lang',
+            'created_at',
+            'entities',
+            'id_str',
+            'text',
+            'user',
+            'url',
+          ],
           properties: {
-            __typename: { type: 'string', enum: ['Tweet'] },
+            __typename: {
+              type: 'string',
+              enum: ['Tweet'],
+            },
             lang: { type: 'string', description: '语言代码，如 en/ja' },
             created_at: { type: 'string', format: 'date-time', description: 'ISO 8601' },
             id_str: { type: 'string', description: '推文唯一 ID' },
             text: { type: 'string' },
             url: { type: 'string', format: 'uri', description: '推文完整 URL' },
             user: { $ref: '#/components/schemas/TweetUser' },
-            entities: { type: 'array', items: { $ref: '#/components/schemas/Entity' } },
-            autoTranslationEntities: { type: 'array', items: { $ref: '#/components/schemas/Entity' }, description: '旧版自动翻译实体' },
-            visionInfo: { type: 'array', items: { $ref: '#/components/schemas/AIVisionInfo' }, description: 'AI 视觉描述结果' },
+            entities: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/Entity' },
+            },
+            autoTranslationEntities: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/Entity' },
+              description: '旧版自动翻译实体',
+            },
+            visionInfo: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/AIVisionInfo' },
+              description: 'AI 视觉描述结果',
+            },
             quoted_tweet_id: { type: 'string', description: '引用推文 ID' },
             quotedTweet: { $ref: '#/components/schemas/EnrichedTweet', description: '引用推文（递归）' },
             card: { type: 'object', description: '预览卡片（LinkPreviewCard）' },
             space: { type: 'object', description: 'X Space 卡片（SpaceDetails，见 app/types/space.ts；仅 Space 推文有）' },
             article: { $ref: '#/components/schemas/TweetArticle', description: 'X 长文卡片与块文档（app/types/article.ts；仅文章推文有）' },
-            comments: { type: 'array', items: { $ref: '#/components/schemas/EnrichedTweet' }, description: '内联评论线程' },
+            comments: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/EnrichedTweet' },
+              description: '内联评论线程',
+            },
             in_reply_to_status_id_str: { type: 'string' },
-            mediaDetails: { type: 'array', items: { type: 'object', description: '媒体详情（图片/视频，见 app/types/media.ts）' } },
+            mediaDetails: {
+              type: 'array',
+              items: { type: 'object', description: '媒体详情（图片/视频，见 app/types/media.ts）' },
+            },
             possibly_sensitive: { type: 'boolean' },
           },
           additionalProperties: true,
@@ -760,10 +1124,18 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
             title: { type: 'string' },
             previewText: { type: 'string', description: '摘要' },
             plainText: { type: 'string', description: '纯文本全文（content_state 缺失时的兜底）' },
-            format: { type: 'string', enum: ['rich', 'plain'], description: 'rich 表示 blocks 可用；plain 仅纯文本' },
+            format: {
+              type: 'string',
+              enum: ['rich', 'plain'],
+              description: 'rich 表示 blocks 可用；plain 仅纯文本',
+            },
             coverImage: { $ref: '#/components/schemas/ArticleMedia' },
             publishedAt: { type: 'integer', description: '首次发布时间（epoch ms）' },
-            blocks: { type: 'array', items: { $ref: '#/components/schemas/ArticleBlock' }, description: '块文档（format=rich 时存在）' },
+            blocks: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/ArticleBlock' },
+              description: '块文档（format=rich 时存在）',
+            },
           },
           additionalProperties: true,
         },
@@ -785,22 +1157,49 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
           required: ['key', 'type'],
           properties: {
             key: { type: 'string', description: '稳定块 ID（按块翻译与渲染对齐用）' },
-            type: { type: 'string', enum: ['paragraph', 'heading', 'list-item', 'quote', 'markdown', 'divider', 'image', 'embed-tweet', 'link', 'unknown'] },
+            type: {
+              type: 'string',
+              enum: [
+                'paragraph',
+                'heading',
+                'list-item',
+                'quote',
+                'markdown',
+                'divider',
+                'image',
+                'embed-tweet',
+                'link',
+                'unknown',
+              ],
+            },
             runs: {
               type: 'array',
               description: '段落的行内片段（文本 / link / mention / hashtag，带样式）',
               items: {
                 type: 'object',
                 properties: {
-                  type: { type: 'string', enum: ['text', 'link', 'mention', 'hashtag'] },
+                  type: {
+                    type: 'string',
+                    enum: ['text', 'link', 'mention', 'hashtag'],
+                  },
                   text: { type: 'string' },
                   url: { type: 'string', description: 'type=link' },
                   href: { type: 'string', description: 'type=mention / hashtag' },
-                  styles: { type: 'array', items: { type: 'string', enum: ['bold', 'italic', 'strikethrough'] } },
+                  styles: {
+                    type: 'array',
+                    items: {
+                      type: 'string',
+                      enum: ['bold', 'italic', 'strikethrough'],
+                    },
+                  },
                 },
               },
             },
-            level: { type: 'integer', enum: [1, 2, 3], description: 'heading 级别' },
+            level: {
+              type: 'integer',
+              enum: [1, 2, 3],
+              description: 'heading 级别',
+            },
             ordered: { type: 'boolean', description: 'list-item 是否有序' },
             text: { type: 'string', description: 'markdown 块的原始 GFM' },
             media: { $ref: '#/components/schemas/ArticleMedia', description: 'image 块' },
@@ -840,23 +1239,41 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
         IGMedia: {
           type: 'object',
           description: 'IG 媒体项（app/types/ins.ts IGMedia）',
-          required: ['num', 'media_id', 'display_url', 'width', 'height', 'type'],
+          required: [
+            'num',
+            'media_id',
+            'display_url',
+            'width',
+            'height',
+            'type',
+          ],
           properties: {
             num: { type: 'integer', description: '帖内序号' },
             media_id: { type: 'string' },
             shortcode: { type: 'string', description: '媒体级短码' },
             display_url: { type: 'string', format: 'uri' },
-            video_url: { type: ['string', 'null'], format: 'uri', description: '视频 CDN URL（图片为 null）' },
+            video_url: {
+              type: ['string', 'null'],
+              format: 'uri',
+              description: '视频 CDN URL（图片为 null）',
+            },
             width: { type: 'integer' },
             height: { type: 'integer' },
             width_original: { type: 'integer' },
             height_original: { type: 'integer' },
-            type: { type: 'string', enum: ['photo', 'video'] },
+            type: {
+              type: 'string',
+              enum: ['photo', 'video'],
+            },
             tagged_users: {
               type: 'array',
               items: {
                 type: 'object',
-                properties: { id: { type: 'string' }, username: { type: 'string' }, full_name: { type: 'string' } },
+                properties: {
+                  id: { type: 'string' },
+                  username: { type: 'string' },
+                  full_name: { type: 'string' },
+                },
               },
             },
           },
@@ -864,7 +1281,17 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
         IGPost: {
           type: 'object',
           description: 'IG 帖子标准化结构（app/types/ins.ts IGPost）',
-          required: ['id', 'post_id', 'url', 'username', 'fullname', 'description', 'likes', 'type', 'media'],
+          required: [
+            'id',
+            'post_id',
+            'url',
+            'username',
+            'fullname',
+            'description',
+            'likes',
+            'type',
+            'media',
+          ],
           properties: {
             id: { type: 'string', description: 'URL shortcode，路由主键' },
             post_id: { type: 'string', description: '帖子数字 ID' },
@@ -872,16 +1299,32 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
             username: { type: 'string' },
             fullname: { type: 'string' },
             description: { type: 'string', description: 'caption，翻译目标文本' },
-            tags: { type: 'array', items: { type: 'string' }, description: '#hashtag 列表' },
+            tags: {
+              type: 'array',
+              items: { type: 'string' },
+              description: '#hashtag 列表',
+            },
             likes: { type: 'integer' },
-            type: { type: 'string', enum: ['post', 'reel', 'story', 'highlight'] },
-            media: { type: 'array', items: { $ref: '#/components/schemas/IGMedia' } },
+            type: {
+              type: 'string',
+              enum: ['post', 'reel', 'story', 'highlight'],
+            },
+            media: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/IGMedia' },
+            },
             avatar_url: { type: 'string', format: 'uri' },
             created_at: { type: 'string', format: 'date-time', description: 'ISO 字符串' },
             location_name: { type: 'string' },
             coauthors: {
               type: 'array',
-              items: { type: 'object', properties: { username: { type: 'string' }, fullname: { type: 'string' } } },
+              items: {
+                type: 'object',
+                properties: {
+                  username: { type: 'string' },
+                  fullname: { type: 'string' },
+                },
+              },
             },
             verified: { type: 'boolean' },
             audio: { $ref: '#/components/schemas/IGAudio' },
@@ -892,7 +1335,18 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
         RawUser: {
           type: 'object',
           description: '用户资料（app/lib/rettiwt-api/types/data/User.ts IUser）',
-          required: ['createdAt', 'followersCount', 'followingsCount', 'fullName', 'id', 'isVerified', 'likeCount', 'profileImage', 'statusesCount', 'userName'],
+          required: [
+            'createdAt',
+            'followersCount',
+            'followingsCount',
+            'fullName',
+            'id',
+            'isVerified',
+            'likeCount',
+            'profileImage',
+            'statusesCount',
+            'userName',
+          ],
           properties: {
             createdAt: { type: 'string', description: '账号创建时间' },
             description: { type: 'string', description: '用户简介' },
@@ -916,16 +1370,26 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
           type: 'object',
           required: ['tweets', 'nextCursor'],
           properties: {
-            tweets: { type: 'array', items: { $ref: '#/components/schemas/EnrichedTweet' } },
-            nextCursor: { type: ['string', 'null'] },
+            tweets: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/EnrichedTweet' },
+            },
+            nextCursor: {
+              type: ['string', 'null'],
+            },
           },
         },
         SearchResponse: {
           type: 'object',
           required: ['tweets', 'nextCursor'],
           properties: {
-            tweets: { type: 'array', items: { $ref: '#/components/schemas/EnrichedTweet' } },
-            nextCursor: { type: ['string', 'null'] },
+            tweets: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/EnrichedTweet' },
+            },
+            nextCursor: {
+              type: ['string', 'null'],
+            },
           },
         },
       },

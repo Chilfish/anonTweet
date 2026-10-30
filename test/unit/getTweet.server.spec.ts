@@ -9,13 +9,28 @@ describe('mergeTranslationEntities', () => {
       user: { screen_name: 'u' },
       entities: [
         { type: 'text', text: 'Hello', index: 0 },
-        { type: 'hashtag', text: 'Tag', href: 'https://twitter.com/hashtag/Tag', index: 1 },
+        {
+          type: 'hashtag',
+          text: 'Tag',
+          href: 'https://twitter.com/hashtag/Tag',
+          index: 1,
+        },
       ],
     } as any as EnrichedTweet
 
     const entities: TranslationEntity[] = [
-      { type: 'text', text: 'Hello', translation: '你好', index: 0 },
-      { type: 'media_alt', text: 'A CAT', translation: '一只猫', index: 20000 } as any,
+      {
+        type: 'text',
+        text: 'Hello',
+        translation: '你好',
+        index: 0,
+      },
+      {
+        type: 'media_alt',
+        text: 'A CAT',
+        translation: '一只猫',
+        index: 20000,
+      } as any,
     ]
 
     mergeTranslationEntities(tweet, entities)
@@ -34,15 +49,36 @@ describe('mergeTranslationEntities', () => {
       id_str: '1',
       user: { screen_name: 'u' },
       entities: [
-        { type: 'hashtag', text: '#Tag', href: 'https://twitter.com/hashtag/Tag', index: 0 },
+        {
+          type: 'hashtag',
+          text: '#Tag',
+          href: 'https://twitter.com/hashtag/Tag',
+          index: 0,
+        },
         { type: 'text', text: 'Hello', index: 1 },
       ],
     } as any as EnrichedTweet
 
     const entities: TranslationEntity[] = [
-      { type: 'text', text: '（补充）', index: -1, translation: '（补充）' },
-      { type: 'hashtag', text: '#Tag', href: 'https://twitter.com/hashtag/Tag', index: 0, translation: '#标签' } as any,
-      { type: 'text', text: 'Hello', index: 1, translation: '你好' },
+      {
+        type: 'text',
+        text: '（补充）',
+        index: -1,
+        translation: '（补充）',
+      },
+      {
+        type: 'hashtag',
+        text: '#Tag',
+        href: 'https://twitter.com/hashtag/Tag',
+        index: 0,
+        translation: '#标签',
+      } as any,
+      {
+        type: 'text',
+        text: 'Hello',
+        index: 1,
+        translation: '你好',
+      },
     ]
 
     mergeTranslationEntities(tweet, entities)
@@ -63,8 +99,18 @@ describe('mergeTranslationEntities', () => {
     } as any as EnrichedTweet
 
     const entities: TranslationEntity[] = [
-      { type: 'text', text: 'Hello', translation: '你好', index: 0 },
-      { type: 'media_alt', text: 'A CAT', translation: '一只猫', index: 20000 } as any,
+      {
+        type: 'text',
+        text: 'Hello',
+        translation: '你好',
+        index: 0,
+      },
+      {
+        type: 'media_alt',
+        text: 'A CAT',
+        translation: '一只猫',
+        index: 20000,
+      } as any,
     ]
 
     mergeTranslationEntities(tweet, entities)

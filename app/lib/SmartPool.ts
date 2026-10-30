@@ -81,7 +81,9 @@ export class RettiwtPool {
   constructor(keys: string[], options: RettiwtPoolOptions = {}) {
     const sanitized = keys.map(k => k.trim()).filter(Boolean)
     this.hasApiKeys = sanitized.length > 0
-    this.keys = this.hasApiKeys ? sanitized : [undefined]
+    this.keys = this.hasApiKeys
+      ? sanitized
+      : [undefined]
     this.opts = {
       cooldownMs: options.cooldownMs ?? 30_000,
       backoffMs: options.backoffMs ?? 1_000,
@@ -147,8 +149,12 @@ export class RettiwtPool {
     for (let i = 0; i < this.keys.length; i++) {
       const idx = (this.currentIndex + i) % this.keys.length
       const key = this.keys[idx]!
-      if (this.getState(key).cooldownUntil <= now)
-        candidates.push({ key, state: this.getState(key) })
+      if (this.getState(key).cooldownUntil <= now) {
+        candidates.push({
+          key,
+          state: this.getState(key),
+        })
+      }
     }
 
     let chosen: { key: string | undefined, state: KeyState }
@@ -158,12 +164,18 @@ export class RettiwtPool {
     else {
       // 全部在冷却：选最早解除冷却的 Key，调用方 sleep 到解除时刻
       chosen = this.keys
-        .map(key => ({ key, state: this.getState(key) }))
+        .map(key => ({
+          key,
+          state: this.getState(key),
+        }))
         .sort((a, b) => a.state.cooldownUntil - b.state.cooldownUntil)[0]!
     }
 
     this.currentIndex = (this.keys.indexOf(chosen.key) + 1) % this.keys.length
-    return { key: chosen.key, fetcher: this.getOrCreateFetcher(chosen.key) }
+    return {
+      key: chosen.key,
+      fetcher: this.getOrCreateFetcher(chosen.key),
+    }
   }
 
   /** 距下一个可用 Key 的最短等待：仍有可用 Key 则 0；全部冷却则等最早解除者 */
@@ -176,7 +188,9 @@ export class RettiwtPool {
       (min, k) => Math.min(min, this.getState(k).cooldownUntil),
       Number.POSITIVE_INFINITY,
     )
-    return earliest === Number.POSITIVE_INFINITY ? 0 : earliest - now
+    return earliest === Number.POSITIVE_INFINITY
+      ? 0
+      : earliest - now
   }
 
   private getState(key: string | undefined): KeyState {
@@ -201,11 +215,15 @@ export class RettiwtPool {
   }
 
   private toDecision(d: RetryDecision | boolean): RetryDecision {
-    return typeof d === 'boolean' ? { retryable: d, cooldown: d } : d
+    return typeof d === 'boolean'
+      ? { retryable: d, cooldown: d }
+      : d
   }
 
   private warnRotation(key: string | undefined, error: unknown): void {
-    const message = error instanceof Error ? error.message : String(error)
+    const message = error instanceof Error
+      ? error.message
+      : String(error)
     const state = this.getState(key)
     obsLog('pool.rotate', {
       keySuffix: suffix(key, 10),
@@ -218,12 +236,16 @@ export class RettiwtPool {
   private buildExhaustedError(attempt: number, lastError: unknown): Error {
     const summary = this.keys.map((k) => {
       const s = this.getState(k)
-      const label = k ? `...${k.slice(-6)}` : 'NO_KEY'
+      const label = k
+        ? `...${k.slice(-6)}`
+        : 'NO_KEY'
       const cooldownLeft = Math.max(0, s.cooldownUntil - Date.now())
       return `${label}: streak=${s.failStreak}, cooldownLeft=${cooldownLeft}ms`
     }).join('; ')
     obsLog('pool.exhaust', { attempts: attempt + 1, states: summary })
-    const message = lastError instanceof Error ? lastError.message : String(lastError)
+    const message = lastError instanceof Error
+      ? lastError.message
+      : String(lastError)
     return new Error(`[RettiwtPool] All keys exhausted after ${attempt + 1} attempts. Last error: ${message}. States: ${summary}`)
   }
 }

@@ -18,7 +18,9 @@ export function ArticleRuns({ runs }: { runs: ArticleRun[] }) {
         if (run.type === 'text')
           return <span key={index} className={runStyleClass(run.styles)}>{run.text}</span>
 
-        const href = run.type === 'link' ? run.url : run.href
+        const href = run.type === 'link'
+          ? run.url
+          : run.href
         return (
           <TweetLink key={index} href={href} className={runStyleClass(run.styles)}>
             {run.text}

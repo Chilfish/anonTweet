@@ -68,7 +68,9 @@ export function normalizeAIError(error: unknown): AITransportError {
       message: error.message,
       // 旧版只回 { type, message }，把模型原文/结束原因全丢了，
       // 线上只能看到一句泛化报错、无法定位（AC-TWEET-020）。
-      generatedText: error.text ? error.text.slice(0, GENERATED_TEXT_LIMIT) : undefined,
+      generatedText: error.text
+        ? error.text.slice(0, GENERATED_TEXT_LIMIT)
+        : undefined,
       finishReason: error.finishReason,
     }
   }
@@ -78,7 +80,10 @@ export function normalizeAIError(error: unknown): AITransportError {
   if (error instanceof Error) {
     return { type: 'Error', message: error.message }
   }
-  return { type: 'UnknownError', message: String(error) }
+  return {
+    type: 'UnknownError',
+    message: String(error),
+  }
 }
 
 /**
@@ -133,7 +138,13 @@ export function buildAIFailure(
   const aiError = normalizeAIError(error)
   const { targetId, targetType, model, provider } = context ?? {}
 
-  console.error(`[AI] ${errorCode} failed:`, { targetType, targetId, model, provider, status }, error)
+  console.error(`[AI] ${errorCode} failed:`, {
+    targetType,
+    targetId,
+    model,
+    provider,
+    status,
+  }, error)
   obsLog('ai.fail', {
     code: errorCode,
     status,

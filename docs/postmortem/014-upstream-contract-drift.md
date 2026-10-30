@@ -18,15 +18,15 @@
 
 ## 时间线
 
-| 日期 | commit | 事件 |
-| ---- | ------ | ---- |
-| 2026-06-23 | `d603cd1` | 修正 X-Client-Transaction-ID 的处理 |
-| 2026-08-19 | `2cec41d` | 解析 `jetfuel_attachment` 得到 trending card 信息 |
-| 2026-08-19 | `265cb6d` | 渲染官方风格的 trending card |
-| 2026-08-19 | `175b081` | `unified_card` 补 `topic_detail` 布局（此前只认 `details_1`） |
+| 日期       | commit    | 事件                                                                |
+| ---------- | --------- | ------------------------------------------------------------------- |
+| 2026-06-23 | `d603cd1` | 修正 X-Client-Transaction-ID 的处理                                 |
+| 2026-08-19 | `2cec41d` | 解析 `jetfuel_attachment` 得到 trending card 信息                   |
+| 2026-08-19 | `265cb6d` | 渲染官方风格的 trending card                                        |
+| 2026-08-19 | `175b081` | `unified_card` 补 `topic_detail` 布局（此前只认 `details_1`）       |
 | 2026-08-31 | `2027ea0` | 为 tweet search 开放 guest 认证，此前缺 `TWEET_SEARCH` 导致整组被拒 |
-| 2026-09-13 | `11d78c6` | 新增 DeepSeek 通道并对齐官方模型 slug |
-| 2026-09-17 | `75ed543` | Space 卡片；`creator_results` 精简对象缺认证字段 |
+| 2026-09-13 | `11d78c6` | 新增 DeepSeek 通道并对齐官方模型 slug                               |
+| 2026-09-17 | `75ed543` | Space 卡片；`creator_results` 精简对象缺认证字段                    |
 
 ## 根因分析
 

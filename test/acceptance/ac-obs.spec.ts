@@ -34,7 +34,13 @@ describe('AC-OBS-001: structured JSON observability logs', () => {
     expect(src).toMatch(OBS_LOG_EXPORT_RE)
     expect(src).toMatch(OBS_EVENT_TYPE_RE)
     expect(src).toMatch(SUFFIX_EXPORT_RE)
-    for (const event of ['ai.translate', 'ai.translate.ig', 'cache.get', 'pool.rotate', 'pool.exhaust']) {
+    for (const event of [
+      'ai.translate',
+      'ai.translate.ig',
+      'cache.get',
+      'pool.rotate',
+      'pool.exhaust',
+    ]) {
       expect(src).toContain(event)
     }
   })

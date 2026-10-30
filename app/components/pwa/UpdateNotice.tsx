@@ -17,7 +17,9 @@ export function UpdateNotice() {
       return
 
     // 单页面会话探测一次；横幅「稍后」仅隐藏本次，关闭去重由 watcher once 承担
-    const stop = startUpdateWatcher({ onUpdateReady: () => setShow(true) })
+    const stop = startUpdateWatcher({
+      onUpdateReady: () => setShow(true),
+    })
     return stop
   }, [])
 

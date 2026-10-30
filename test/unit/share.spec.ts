@@ -28,7 +28,9 @@ function mkTweet(overrides: Record<string, unknown> = {}): EnrichedTweet {
     url: 'https://x.com/elonmusk/status/1234567890',
     text: 'Hello world',
     user: { name: 'Elon Musk', screen_name: 'elonmusk' },
-    entities: [{ type: 'text', index: 0, text: 'Hello world' }],
+    entities: [
+      { type: 'text', index: 0, text: 'Hello world' },
+    ],
     ...overrides,
   } as unknown as EnrichedTweet
 }
@@ -111,7 +113,10 @@ describe('AC-PWA-003: share target receive decision', () => {
     })
 
     it('空串/纯空白 → 提示输入', () => {
-      expect(resolveShareTarget('')).toEqual({ ok: false, error: expect.stringContaining('请输入') })
+      expect(resolveShareTarget('')).toEqual({
+        ok: false,
+        error: expect.stringContaining('请输入'),
+      })
     })
 
     it('不可识别文本 → ok:false 留框报错（不自动跳转）', () => {
@@ -120,7 +125,10 @@ describe('AC-PWA-003: share target receive decision', () => {
     })
 
     it('明显非 URL 的普通文本不误判为推文 id', () => {
-      expect(resolveShareTarget('abc def')).toEqual({ ok: false, error: expect.any(String) })
+      expect(resolveShareTarget('abc def')).toEqual({
+        ok: false,
+        error: expect.any(String),
+      })
     })
   })
 })
@@ -143,7 +151,12 @@ describe('AC-PWA-006: share-out payload（Web Share 出向）', () => {
     it('entities 含翻译时 text 译文优先（原文不翻译段仍保留）', () => {
       const p = buildTweetSharePayload(mkTweet({
         entities: [
-          { type: 'text', index: 0, text: 'Hello', translation: '你好' },
+          {
+            type: 'text',
+            index: 0,
+            text: 'Hello',
+            translation: '你好',
+          },
           { type: 'text', index: 1, text: ' world' },
         ],
       }))
@@ -151,7 +164,11 @@ describe('AC-PWA-006: share-out payload（Web Share 出向）', () => {
     })
 
     it('无任何翻译时 text 为原文', () => {
-      const p = buildTweetSharePayload(mkTweet({ entities: [{ type: 'text', index: 0, text: 'Hello world' }] }))
+      const p = buildTweetSharePayload(mkTweet({
+        entities: [
+          { type: 'text', index: 0, text: 'Hello world' },
+        ],
+      }))
       expect(p.text).toBe('Hello world')
     })
   })

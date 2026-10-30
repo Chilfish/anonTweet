@@ -122,7 +122,12 @@ export const TweetNode = forwardRef<HTMLDivElement, TweetNodeProps>(({
     }),
     body: cn({ 'pl-12': isThreadContext }),
     header: cn({ 'pb-1': variant === 'thread' }),
-  }), [isQuoted, hasParent, isThreadContext, variant])
+  }), [
+    isQuoted,
+    hasParent,
+    isThreadContext,
+    variant,
+  ])
 
   return (
     <div ref={ref} className={styles.container}>

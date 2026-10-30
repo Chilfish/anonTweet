@@ -166,11 +166,13 @@ export function AIVisionEditorDialog({
               disabled={editor.isTranslating}
               className="text-muted-foreground hover:text-foreground"
             >
-              {editor.isTranslating ? (
-                <Loader2 className="size-3.5 animate-spin" />
-              ) : (
-                <Languages className="size-3.5" />
-              )}
+              {editor.isTranslating
+                ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  )
+                : (
+                    <Languages className="size-3.5" />
+                  )}
               <span className="hidden sm:inline-block">翻译</span>
             </Button>
           )}
@@ -181,11 +183,13 @@ export function AIVisionEditorDialog({
             disabled={editor.isGenerating}
             className="text-muted-foreground hover:text-foreground"
           >
-            {editor.isGenerating ? (
-              <Loader2 className="size-3.5 animate-spin" />
-            ) : (
-              <Sparkles className="size-3.5" />
-            )}
+            {editor.isGenerating
+              ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                )
+              : (
+                  <Sparkles className="size-3.5" />
+                )}
             <span className="hidden sm:inline-block">生成</span>
           </Button>
           <Button size="sm" onClick={editor.save}>

@@ -93,7 +93,12 @@ export async function action({ request }: ActionFunctionArgs) {
 
     const payload = {
       dyn_req: {
-        content: { contents: [{ raw_text: content, type: 1, biz_id: '' }], title },
+        content: {
+          contents: [
+            { raw_text: content, type: 1, biz_id: '' },
+          ],
+          title,
+        },
         pics: uploadedImages.map(img => ({
           img_src: img.image_url,
           img_width: img.image_width,
@@ -102,8 +107,15 @@ export async function action({ request }: ActionFunctionArgs) {
         })),
         scene: 2,
         upload_id: uploadId,
-        meta: { app_meta: { from: 'create.dynamic.web', mobi_app: 'web' } },
-        option: { aigc: 0, pic_mode: 0, up_choose_comment: 0, close_comment: 0 },
+        meta: {
+          app_meta: { from: 'create.dynamic.web', mobi_app: 'web' },
+        },
+        option: {
+          aigc: 0,
+          pic_mode: 0,
+          up_choose_comment: 0,
+          close_comment: 0,
+        },
       },
     }
 
@@ -119,6 +131,10 @@ export async function action({ request }: ActionFunctionArgs) {
   }
   catch (error: unknown) {
     console.error('Publish Failed:', error)
-    return { error: error instanceof Error ? error.message : 'Service Error' }
+    return {
+      error: error instanceof Error
+        ? error.message
+        : 'Service Error',
+    }
   }
 }

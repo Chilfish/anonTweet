@@ -53,9 +53,16 @@ const createSettingsSlice: StateCreator<
   separatorTemplates: DEFAULT_TEMPLATES,
 
   updateSettings: newSettings =>
-    set(state => ({ settings: { ...state.settings, ...newSettings } })),
+    set(state => ({
+      settings: {
+        ...state.settings,
+        ...newSettings,
+      },
+    })),
 
-  resetSettings: () => set({ settings: { ...DEFAULT_SETTINGS } }),
+  resetSettings: () => set({
+    settings: { ...DEFAULT_SETTINGS },
+  }),
 
   selectTemplate: templateId =>
     set((state) => {
@@ -82,7 +89,10 @@ const createSettingsSlice: StateCreator<
     set(state => ({
       settings: {
         ...state.settings,
-        customTemplates: [...state.settings.customTemplates, { ...template, id: newId }],
+        customTemplates: [
+          ...state.settings.customTemplates,
+          { ...template, id: newId },
+        ],
       },
     }))
     return newId
@@ -93,7 +103,12 @@ const createSettingsSlice: StateCreator<
       settings: {
         ...state.settings,
         customTemplates: state.settings.customTemplates.map(t =>
-          t.id === templateId ? { ...t, ...updates } : t,
+          t.id === templateId
+            ? {
+                ...t,
+                ...updates,
+              }
+            : t,
         ),
       },
     })),
@@ -185,7 +200,10 @@ const createDataSlice: StateCreator<
     set(state => ({
       tweets: cleaned,
       mainTweet: cleaned.find(t => t.id_str === mainTweetId) || null,
-      translations: { ...state.translations, ...extracted },
+      translations: {
+        ...state.translations,
+        ...extracted,
+      },
     }))
   },
 
@@ -200,19 +218,33 @@ const createDataSlice: StateCreator<
     const extracted = extractTranslationsFromEntities(newTweets)
     const cleaned = stripTranslationsFromTweets(newTweets)
     set(state => ({
-      tweets: [...state.tweets, ...cleaned],
-      translations: { ...state.translations, ...extracted },
+      tweets: [
+        ...state.tweets,
+        ...cleaned,
+      ],
+      translations: {
+        ...state.translations,
+        ...extracted,
+      },
     }))
   },
 
   updateTweet: (tweetId, updates) => {
     set((state) => {
       const updateList = (list: EnrichedTweet[]) =>
-        list.map(t => (t.id_str === tweetId ? { ...t, ...updates } : t))
+        list.map(t => (t.id_str === tweetId
+          ? {
+              ...t,
+              ...updates,
+            }
+          : t))
 
       const newTweets = updateList(state.tweets)
       const newMainTweet = state.mainTweet?.id_str === tweetId
-        ? { ...state.mainTweet, ...updates }
+        ? {
+            ...state.mainTweet,
+            ...updates,
+          }
         : state.mainTweet
 
       return {
@@ -225,12 +257,17 @@ const createDataSlice: StateCreator<
   setTranslation: (tweetId, content) =>
     set((state) => {
       if (content === null) {
-        return { translations: { ...state.translations, [tweetId]: null } }
+        return {
+          translations: { ...state.translations, [tweetId]: null },
+        }
       }
 
       return {
         // Store manual translations separately; keep `tweet.entities` as a stable original stream.
-        translations: { ...state.translations, [tweetId]: structuredClone(content) },
+        translations: {
+          ...state.translations,
+          [tweetId]: structuredClone(content),
+        },
       }
     }),
 
@@ -245,7 +282,10 @@ const createDataSlice: StateCreator<
       return {
         translationVisibility: {
           ...state.translationVisibility,
-          [tweetId]: { ...current, ...visibility },
+          [tweetId]: {
+            ...current,
+            ...visibility,
+          },
         },
       }
     }),

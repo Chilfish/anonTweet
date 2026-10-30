@@ -38,7 +38,10 @@ const tweet = loadFixture<EnrichedTweet>('tweets/with-space-ja.json')
 /** 以真实 metadata 为底派生待测场次：只翻转被考察的字段，保留真实结构 */
 function derived(over: Record<string, unknown>): Record<string, any> {
   return {
-    metadata: { ...audioSpace.metadata, ...over },
+    metadata: {
+      ...audioSpace.metadata,
+      ...over,
+    },
   }
 }
 
@@ -50,14 +53,34 @@ describe('AC-SPACE-001: audiospace card detection', () => {
   it('AC-SPACE-001: returns null for anything that is not an audiospace card', () => {
     expect(extractAudiospaceId(undefined)).toBeNull()
     expect(extractAudiospaceId({})).toBeNull()
-    expect(extractAudiospaceId({ legacy: { name: 'summary_large_image', binding_values: [] } })).toBeNull()
+    expect(extractAudiospaceId({
+      legacy: { name: 'summary_large_image', binding_values: [] },
+    })).toBeNull()
     // 名称像 audiospace 但没有 id binding / 没有 binding_values
     expect(extractAudiospaceId({
-      legacy: { name: '3691233323:audiospace', binding_values: [{ key: 'card_url', value: { string_value: 'x' } }] },
+      legacy: {
+        name: '3691233323:audiospace',
+        binding_values: [
+          {
+            key: 'card_url',
+            value: { string_value: 'x' },
+          },
+        ],
+      },
     })).toBeNull()
-    expect(extractAudiospaceId({ legacy: { name: '3691233323:audiospace' } })).toBeNull()
+    expect(extractAudiospaceId({
+      legacy: { name: '3691233323:audiospace' },
+    })).toBeNull()
     // 也支持已是 legacy 层的直接传入（无 legacy 包裹）
-    expect(extractAudiospaceId({ name: '3691233323:audiospace', binding_values: [{ key: 'id', value: { string_value: 'abc' } }] })).toBe('abc')
+    expect(extractAudiospaceId({
+      name: '3691233323:audiospace',
+      binding_values: [
+        {
+          key: 'id',
+          value: { string_value: 'abc' },
+        },
+      ],
+    })).toBe('abc')
   })
 })
 
@@ -246,7 +269,9 @@ describe('AC-SPACE-009: deleted / inaccessible space becomes a tombstone', () =>
     expect(resolveSpaceId(card, entities)).toBe(SPACE_ID)
 
     // 既无卡片也无 Space 链接 → null
-    expect(resolveSpaceId(null, [{ href: 'https://example.com/a' }])).toBeNull()
+    expect(resolveSpaceId(null, [
+      { href: 'https://example.com/a' },
+    ])).toBeNull()
     expect(resolveSpaceId(null, [])).toBeNull()
     expect(resolveSpaceId(undefined, undefined)).toBeNull()
 

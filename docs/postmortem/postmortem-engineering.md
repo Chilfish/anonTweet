@@ -18,12 +18,12 @@ postmortem 是一份关于事故的书面记录，含事故本身、影响、处
 
 容易混淆的几个概念：
 
-| 概念 | 关注点 | 与 postmortem 的区别 |
-| ---- | ------ | -------------------- |
-| RCA（根因分析） | 为什么发生 | 只回答原因，不含影响、时间线、行动项闭环 |
-| 事后复盘 / retrospective | 团队协作与流程 | 通常面向迭代过程，不一定针对一次事故 |
-| Bug report | 单个缺陷 | 面向单个缺陷，不做系统条件分析 |
-| Postmortem | 一次事故的全貌与预防 | 覆盖触发、检测、处置、根因、行动项，并要求评审与沉淀 |
+| 概念                     | 关注点               | 与 postmortem 的区别                                 |
+| ------------------------ | -------------------- | ---------------------------------------------------- |
+| RCA（根因分析）          | 为什么发生           | 只回答原因，不含影响、时间线、行动项闭环             |
+| 事后复盘 / retrospective | 团队协作与流程       | 通常面向迭代过程，不一定针对一次事故                 |
+| Bug report               | 单个缺陷             | 面向单个缺陷，不做系统条件分析                       |
+| Postmortem               | 一次事故的全貌与预防 | 覆盖触发、检测、处置、根因、行动项，并要求评审与沉淀 |
 
 postmortem 与 RCA 的关键差异是系统思维：RCA 传统上倾向找「单一失效点」，postmortem 承认多贡献因素（multiple contributing causes），关注「什么系统条件允许它发生」。
 
@@ -31,10 +31,10 @@ postmortem 与 RCA 的关键差异是系统思维：RCA 传统上倾向找「单
 
 ### 2.1 人因与安全科学
 
-- **Sidney Dekker** 提出的「新视角」（new view）反对把事故归因于「人为错误」这个终点。他的书 *The Field Guide to Understanding "Human Error"* 论证：错误是系统的产物，把因果停在「人失误」等于停止调查 [5][4]。
-- **Just Culture**（公正文化）来自医疗与航空，主张区分「人为疏忽」「危险行为」「鲁莽行为」，在追责与学习之间取得平衡；Boysen 在 *Ochsner Journal* 上把它系统介绍给医疗界 [6]。
+- **Sidney Dekker** 提出的「新视角」（new view）反对把事故归因于「人为错误」这个终点。他的书 _The Field Guide to Understanding "Human Error"_ 论证：错误是系统的产物，把因果停在「人失误」等于停止调查 [5][4]。
+- **Just Culture**（公正文化）来自医疗与航空，主张区分「人为疏忽」「危险行为」「鲁莽行为」，在追责与学习之间取得平衡；Boysen 在 _Ochsner Journal_ 上把它系统介绍给医疗界 [6]。
 - **Richard Cook** 的《How Complex Systems Fail》用 18 条断言说明复杂系统为何必然失效，其中多条直接支撑 blameless：「复杂系统靠多重防御运行」「操作者是系统韧性的主要来源」「事后很难还原当时的信息与约束」[3]。
-- **Charles Perrow** 的 *Normal Accidents* 提出「正常事故」理论：在紧耦合、强交互的复杂系统里，事故是系统性特征而非异常 [7]。
+- **Charles Perrow** 的 _Normal Accidents_ 提出「正常事故」理论：在紧耦合、强交互的复杂系统里，事故是系统性特征而非异常 [7]。
 - **Lisanne Bainbridge** 的《Ironies of Automation》（1983）指出自动化越多，人越难在异常时接管，为「不指责操作者」提供了工程解释 [8]。
 
 ### 2.2 制造业与根因分析方法
@@ -45,7 +45,7 @@ postmortem 与 RCA 的关键差异是系统思维：RCA 传统上倾向找「单
 ### 2.3 引入互联网运维
 
 - **John Allspaw** 的博文《Blameless PostMortems and a Just Culture》（Etsy，2012）是分水岭。他把医疗与航空的公正文化翻译成运维语言，明确「人不是根因，系统条件才是」[1]。
-- 同一时期，**John Loomis** 的《How to Make Failure Beautiful: The Art and Science of Postmortems》与 Allspaw、Robbins 的 *Web Operations* 一起，把 postmortem 从个人习惯变成团队实践 [11]。
+- 同一时期，**John Loomis** 的《How to Make Failure Beautiful: The Art and Science of Postmortems》与 Allspaw、Robbins 的 _Web Operations_ 一起，把 postmortem 从个人习惯变成团队实践 [11]。
 - Allspaw 后来的硕士论文《Trade-Offs Under Pressure》用观察研究分析真实故障中工程师的启发式决策，是这一领域少见的实证工作 [2]。
 
 ### 2.4 韧性工程与 Safety-II
@@ -70,26 +70,26 @@ PagerDuty 把事故响应流程开源（incident response 文档），其中 pos
 
 - **航空**：事故调查制度化最早，且有自愿报告系统（如 ASRS），把「主动上报」与「追责」分离。这是 blameless 的制度原型。
 - **核电**：IAEA 的安全设计标准与运行经验反馈体系，把「事件报告—根因—纠正措施—验证」写成闭环 [13]。本仓库 postmortem 的「预防动作 + 完成判据」结构与之同构。
-- **医疗**：MorbiDity & Mortality 会议是常规化的同行评审；Gawande 的 *The Checklist Manifesto* 把「清单」引入高风险操作，与本仓库「高频雷区自查清单」是同一思路 [12]。
+- **医疗**：MorbiDity & Mortality 会议是常规化的同行评审；Gawande 的 _The Checklist Manifesto_ 把「清单」引入高风险操作，与本仓库「高频雷区自查清单」是同一思路 [12]。
 
 一个值得软件业借鉴的公开案例是 **Knight Capital**：2013 年 SEC 的处罚文件还原了一次部署失误如何在 45 分钟内造成 4.6 亿美元损失，是「变更部署规划不成熟」这类根因的经典样本 [14]。
 
 ## 四、模板要素对比
 
-| 要素 | Google SRE | 业界通用 | 本仓库 TEMPLATE |
-| ---- | ---------- | -------- | --------------- |
-| 摘要 | 有 | 有 | 有 摘要 |
-| 影响（含量化） | 有 | 有 | 有 影响 |
-| 时间线 | 有 | 有 | 有 时间线 |
-| 根因 / 贡献因素 | 有 | 有 | 有 根因分析 |
-| 触发条件 | 有（独立字段） | 常合并进根因 | 有 触发条件 |
-| 检测 | 有 | 有时缺 | 有 检测 |
-| 处置 | 有 | 有 | 有 处置 |
-| 行动项 + 类型 | 有，且挂工单号 | 多数只写动作 | 有，分缓解/预防，带负责人与判据 |
-| 负责人 / 截止 | 有 | 常缺 | 负责人有，截止无 |
-| 做得好 / 幸运 | 有 | 常缺 | 有 做得对的地方 |
-| 评审记录 | 有 强制 | 常缺 | 无 |
-| 支持材料（日志/看板链接） | 有 | 有时缺 | 无 |
+| 要素                      | Google SRE     | 业界通用     | 本仓库 TEMPLATE                 |
+| ------------------------- | -------------- | ------------ | ------------------------------- |
+| 摘要                      | 有             | 有           | 有 摘要                         |
+| 影响（含量化）            | 有             | 有           | 有 影响                         |
+| 时间线                    | 有             | 有           | 有 时间线                       |
+| 根因 / 贡献因素           | 有             | 有           | 有 根因分析                     |
+| 触发条件                  | 有（独立字段） | 常合并进根因 | 有 触发条件                     |
+| 检测                      | 有             | 有时缺       | 有 检测                         |
+| 处置                      | 有             | 有           | 有 处置                         |
+| 行动项 + 类型             | 有，且挂工单号 | 多数只写动作 | 有，分缓解/预防，带负责人与判据 |
+| 负责人 / 截止             | 有             | 常缺         | 负责人有，截止无                |
+| 做得好 / 幸运             | 有             | 常缺         | 有 做得对的地方                 |
+| 评审记录                  | 有 强制        | 常缺         | 无                              |
+| 支持材料（日志/看板链接） | 有             | 有时缺       | 无                              |
 
 结论：本仓库模板在字段覆盖上已接近 Google 水平，缺的是流程侧的两项——**评审环节**与**支持材料链接**，以及度量侧的**趋势聚合**。
 
@@ -99,42 +99,42 @@ Google 用统一模板对近七年、数千份 postmortem 做过统计分析 [17
 
 事故触发条件（2010–2017）：
 
-| 触发 | 占比 |
-| ---- | ---- |
-| 二进制发布 | 37% |
-| 配置发布 | 31% |
-| 用户行为变化 | 9% |
-| 处理管线 | 6% |
-| 服务提供方变更 | 5% |
-| 性能衰退 | 5% |
-| 容量管理 | 5% |
-| 硬件 | 2% |
+| 触发           | 占比 |
+| -------------- | ---- |
+| 二进制发布     | 37%  |
+| 配置发布       | 31%  |
+| 用户行为变化   | 9%   |
+| 处理管线       | 6%   |
+| 服务提供方变更 | 5%   |
+| 性能衰退       | 5%   |
+| 容量管理       | 5%   |
+| 硬件           | 2%   |
 
 根因类别：
 
-| 类别 | 占比 |
-| ---- | ---- |
-| 软件缺陷 | 41.35% |
+| 类别         | 占比   |
+| ------------ | ------ |
+| 软件缺陷     | 41.35% |
 | 开发流程失效 | 20.23% |
 | 复杂系统行为 | 16.90% |
-| 部署规划 | 6.74% |
-| 网络故障 | 2.75% |
+| 部署规划     | 6.74%  |
+| 网络故障     | 2.75%  |
 
 可迁移的判断：**变更类触发占近七成**（发布 + 配置），**流程类根因约占两成**。也就是说，多数事故与「改了什么」有关，而非「跑久了自然坏」。这与本仓库多个报告的结论一致（#004 构建、#010 依赖、#011 门禁都属于变更与流程）。
 
 ## 六、常见反模式
 
-| 反模式 | 表现 | 后果 |
-| ------ | ---- | ---- |
-| 归因人 | 「谁写的」「谁推的」 | 心理安全崩塌，问题被隐藏 |
-| 单一根因 | 硬凑一句根因 | 遗漏贡献因素，同类问题复发 |
-| 行动项无主 | 只有动作，无负责人与截止 | 永远不关闭 |
-| 行动项过重 | 「重写整个模块」 | 成本高到无法执行，等于没提 |
-| 只写不读 | 无人评审，不进索引 | 报告等于不存在 |
-| 无触发条件 | 随机决定写不写 | 覆盖不稳定，趋势分析失真 |
-| 把 RCA 当 postmortem | 只有根因，无影响/时间线/行动项 | 无法复盘处置，无法度量 |
-| 无聚合字段 | 每份格式各异 | 无法做趋势分析，改进无优先级 |
-| 事后追认式 | 从 git 历史补写，无实时数据 | 时间线粗、检测与处置细节缺失 |
+| 反模式               | 表现                           | 后果                         |
+| -------------------- | ------------------------------ | ---------------------------- |
+| 归因人               | 「谁写的」「谁推的」           | 心理安全崩塌，问题被隐藏     |
+| 单一根因             | 硬凑一句根因                   | 遗漏贡献因素，同类问题复发   |
+| 行动项无主           | 只有动作，无负责人与截止       | 永远不关闭                   |
+| 行动项过重           | 「重写整个模块」               | 成本高到无法执行，等于没提   |
+| 只写不读             | 无人评审，不进索引             | 报告等于不存在               |
+| 无触发条件           | 随机决定写不写                 | 覆盖不稳定，趋势分析失真     |
+| 把 RCA 当 postmortem | 只有根因，无影响/时间线/行动项 | 无法复盘处置，无法度量       |
+| 无聚合字段           | 每份格式各异                   | 无法做趋势分析，改进无优先级 |
+| 事后追认式           | 从 git 历史补写，无实时数据    | 时间线粗、检测与处置细节缺失 |
 
 ## 七、度量与趋势分析
 
@@ -162,35 +162,35 @@ Google 的做法是把这些做成「按根因类型排序的改进清单」，�
 
 ## 参考文献
 
-1. J. Allspaw, *Blameless PostMortems and a Just Culture*, Etsy Code as Craft, 2012. https://codeascraft.com/2012/05/22/blameless-postmortems/
-2. J. Allspaw, *Trade-Offs Under Pressure: Heuristics and Observations of Teams Resolving Internet Service Outages*, MSc thesis, Lund University, 2015. https://lup.lub.lu.se/student-papers/record/8084520/file/8084521.pdf
-3. R. I. Cook, *How Complex Systems Fail*, 2000. https://web.mit.edu/2.75/resources/random/How%20Complex%20Systems%20Fail.pdf
-4. S. Dekker, *Reconstructing human contributions to accidents: the new view on error and performance*, Journal of Safety Research, 2002. https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.411.4985&rep=rep1&type=pdf
-5. S. Dekker, *The Field Guide to Understanding "Human Error"*, 3rd ed., Ashgate, 2014.
-6. P. G. Boysen, *Just Culture: A Foundation for Balanced Accountability and Patient Safety*, The Ochsner Journal, 2013. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3776518/
-7. C. Perrow, *Normal Accidents: Living with High-Risk Technologies*, Princeton University Press, 1999.
-8. L. Bainbridge, *Ironies of Automation*, Automatica, 1983. https://dx.doi.org/10.1016/0005-1098(83)90046-8
-9. T. Ohno, *Toyota Production System: Beyond Large-Scale Production*, Productivity Press, 1988.
-10. J. J. Rooney, L. N. Vanden Heuvel, *Root Cause Analysis for Beginners*, Quality Progress, 2004. https://asq.org/quality-progress/2004/07/quality-tools/root-cause-analysis-for-beginners.html
-11. J. Loomis, *How to Make Failure Beautiful: The Art and Science of Postmortems*, in *Web Operations*, O'Reilly, 2010.
-12. A. Gawande, *The Checklist Manifesto*, Henry Holt, 2009.
-13. IAEA, *Safety of Nuclear Power Plants: Design (SSR-2/1)*, 2012. https://www-pub.iaea.org/MTCD/publications/PDF/Pub1534_web.pdf
-14. U.S. SEC, *Order In the Matter of Knight Capital Americas LLC*, 2013. https://www.sec.gov/litigation/admin/2013/34-70694.pdf
-15. B. Beyer et al., *Site Reliability Engineering*, ch.15 "Postmortem Culture: Learning from Failure", O'Reilly, 2016. https://sre.google/sre-book/postmortem-culture/
-16. B. Beyer et al., *Site Reliability Engineering*, Appendix D "Example Postmortem". https://sre.google/sre-book/example-postmortem/
-17. B. Beyer et al., *The Site Reliability Workbook*, Appendix C "Results of Postmortem Analysis". https://sre.google/workbook/postmortem-analysis/
-18. Etsy, *Morgue*（postmortem 管理工具）. https://github.com/etsy/morgue
-19. PagerDuty, *Incident Response Documentation*. https://response.pagerduty.com/
-20. Atlassian, *Incident Postmortem 指南*. https://www.atlassian.com/incident-management/postmortem
-21. K. Krishan, *Weathering The Unexpected*, Communications of the ACM, 2012.
-22. B. Maurer, *Fail at Scale*, ACM Queue, 2015.
-23. D. Kahneman, *Thinking, Fast and Slow*, Farrar, Straus and Giroux, 2011.
-24. D. Meadows, *Thinking in Systems*, Chelsea Green, 2008.
-25. M. Bland, *Goto Fail, Heartbleed, and Unit Testing Culture*, 2014. https://martinfowler.com/articles/testing-culture.html
+1. J. Allspaw, _Blameless PostMortems and a Just Culture_, Etsy Code as Craft, 2012. https://codeascraft.com/2012/05/22/blameless-postmortems/
+2. J. Allspaw, _Trade-Offs Under Pressure: Heuristics and Observations of Teams Resolving Internet Service Outages_, MSc thesis, Lund University, 2015. https://lup.lub.lu.se/student-papers/record/8084520/file/8084521.pdf
+3. R. I. Cook, _How Complex Systems Fail_, 2000. https://web.mit.edu/2.75/resources/random/How%20Complex%20Systems%20Fail.pdf
+4. S. Dekker, _Reconstructing human contributions to accidents: the new view on error and performance_, Journal of Safety Research, 2002. https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.411.4985&rep=rep1&type=pdf
+5. S. Dekker, _The Field Guide to Understanding "Human Error"_, 3rd ed., Ashgate, 2014.
+6. P. G. Boysen, _Just Culture: A Foundation for Balanced Accountability and Patient Safety_, The Ochsner Journal, 2013. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3776518/
+7. C. Perrow, _Normal Accidents: Living with High-Risk Technologies_, Princeton University Press, 1999.
+8. L. Bainbridge, _Ironies of Automation_, Automatica, 1983. https://dx.doi.org/10.1016/0005-1098(83)90046-8
+9. T. Ohno, _Toyota Production System: Beyond Large-Scale Production_, Productivity Press, 1988.
+10. J. J. Rooney, L. N. Vanden Heuvel, _Root Cause Analysis for Beginners_, Quality Progress, 2004. https://asq.org/quality-progress/2004/07/quality-tools/root-cause-analysis-for-beginners.html
+11. J. Loomis, _How to Make Failure Beautiful: The Art and Science of Postmortems_, in _Web Operations_, O'Reilly, 2010.
+12. A. Gawande, _The Checklist Manifesto_, Henry Holt, 2009.
+13. IAEA, _Safety of Nuclear Power Plants: Design (SSR-2/1)_, 2012. https://www-pub.iaea.org/MTCD/publications/PDF/Pub1534_web.pdf
+14. U.S. SEC, _Order In the Matter of Knight Capital Americas LLC_, 2013. https://www.sec.gov/litigation/admin/2013/34-70694.pdf
+15. B. Beyer et al., _Site Reliability Engineering_, ch.15 "Postmortem Culture: Learning from Failure", O'Reilly, 2016. https://sre.google/sre-book/postmortem-culture/
+16. B. Beyer et al., _Site Reliability Engineering_, Appendix D "Example Postmortem". https://sre.google/sre-book/example-postmortem/
+17. B. Beyer et al., _The Site Reliability Workbook_, Appendix C "Results of Postmortem Analysis". https://sre.google/workbook/postmortem-analysis/
+18. Etsy, _Morgue_（postmortem 管理工具）. https://github.com/etsy/morgue
+19. PagerDuty, _Incident Response Documentation_. https://response.pagerduty.com/
+20. Atlassian, _Incident Postmortem 指南_. https://www.atlassian.com/incident-management/postmortem
+21. K. Krishan, _Weathering The Unexpected_, Communications of the ACM, 2012.
+22. B. Maurer, _Fail at Scale_, ACM Queue, 2015.
+23. D. Kahneman, _Thinking, Fast and Slow_, Farrar, Straus and Giroux, 2011.
+24. D. Meadows, _Thinking in Systems_, Chelsea Green, 2008.
+25. M. Bland, _Goto Fail, Heartbleed, and Unit Testing Culture_, 2014. https://martinfowler.com/articles/testing-culture.html
 
 ## 附录 A. Google SRE《Postmortem Culture: Learning from Failure》中文导读
 
-> 原文：John Lunney、Sue Lueder 撰写，Gary O'Connor 编辑，出自 *Site Reliability Engineering* 第 15 章。
+> 原文：John Lunney、Sue Lueder 撰写，Gary O'Connor 编辑，出自 _Site Reliability Engineering_ 第 15 章。
 > 链接：https://sre.google/sre-book/postmortem-culture/
 > 许可：CC BY-NC-ND 4.0（署名—非商业—禁止演绎）。
 > 本附录是原创中文导读，按原文结构转述其论点，不是逐句翻译。原因是翻译构成演绎作品，与原文的「禁止演绎」条款冲突，而本仓库是 MIT（允许商用），直接收录译文会产生许可问题。需要原文表述请访问上方链接。

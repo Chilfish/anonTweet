@@ -225,13 +225,15 @@ ${translationGlossary || ''}
 
 **Post Time**: ${tweet.created_at}
 
-${tweet.quotedTweet ? `
+${tweet.quotedTweet
+  ? `
 **Reference Context (Quoted Tweet)**:
 (The author is reacting to this. Use this to clarify pronouns like "sore" or "kare".)
 """
 ${tweet.quotedTweet.text}
 """
-` : ''}
+`
+  : ''}
 
 # Entity Reference (Type Identification)
 (Use this to identify if a placeholder is a Person, Group, or Abstract Concept)
@@ -249,7 +251,9 @@ ${maskedText}
   ]
 
   const modelConfig = models.find(m => m.name === modelName)
-  const strategy = modelConfig ? getProviderStrategy(modelConfig.provider) : null
+  const strategy = modelConfig
+    ? getProviderStrategy(modelConfig.provider)
+    : null
 
   const thinkingConfig = getThinkingConfig(modelName, thinkingLevel)
   const expectedNewlineCount = countNewlines(maskedText)
@@ -331,10 +335,18 @@ ${maskedText}
           role: 'user',
           content: [
             '你的上一次输出违反了占位符规则：',
-            lastValidation.missing.length ? `- 缺失占位符: ${lastValidation.missing.join(', ')}` : '- 缺失占位符: 无',
-            lastValidation.extra.length ? `- 多余/未知占位符: ${lastValidation.extra.join(', ')}` : '- 多余/未知占位符: 无',
-            lastOverrideValidation.ok ? '- entityText 校验: 通过' : `- entityText 校验失败: ${lastOverrideValidation.errors.join(', ')}`,
-            expectedNewlineCount > 0 && countNewlines(translated) === 0 ? '- 换行提示: 你的输出把换行全部压成一行了，请尽量保留换行以提升可读性。' : '- 换行提示: 无',
+            lastValidation.missing.length
+              ? `- 缺失占位符: ${lastValidation.missing.join(', ')}`
+              : '- 缺失占位符: 无',
+            lastValidation.extra.length
+              ? `- 多余/未知占位符: ${lastValidation.extra.join(', ')}`
+              : '- 多余/未知占位符: 无',
+            lastOverrideValidation.ok
+              ? '- entityText 校验: 通过'
+              : `- entityText 校验失败: ${lastOverrideValidation.errors.join(', ')}`,
+            expectedNewlineCount > 0 && countNewlines(translated) === 0
+              ? '- 换行提示: 你的输出把换行全部压成一行了，请尽量保留换行以提升可读性。'
+              : '- 换行提示: 无',
             '',
             '请重新输出，并且：',
             '1) 保留所有占位符，完全一致（包括大小写与下划线）。',
@@ -357,7 +369,9 @@ ${maskedText}
       model: modelName,
       provider: strategy?.name ?? 'unknown',
       tweetId: suffix(tweet.id_str),
-      reason: error instanceof Error ? error.message : 'unknown',
+      reason: error instanceof Error
+        ? error.message
+        : 'unknown',
     })
     console.error('AI Translation Failed:', error)
     throw error

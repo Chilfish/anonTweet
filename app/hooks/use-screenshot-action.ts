@@ -139,7 +139,9 @@ export function useScreenshotAction({
           second: '2-digit',
         }).replace(/[/\s:]/g, '-') // 稍微清洗下文件名
 
-        const ext = screenshotFormat === 'png' ? 'png' : 'jpg'
+        const ext = screenshotFormat === 'png'
+          ? 'png'
+          : 'jpg'
         const fileName = `${mainForFile.user.screen_name}-${mainForFile.id_str}-${now}.${ext}`
 
         if (mode === 'share') {
@@ -188,7 +190,21 @@ export function useScreenshotAction({
       }
       setIsCapturing(false)
     }
-  }, [captureNode, mainForFile, selectedTweetIds, performCapture, screenshotFormat, tweets, setScreenshoting, setShowTranslationButton, setIsCapturingSelected, translationMode, toggleSelectionMode, syncTranslations, translations])
+  }, [
+    captureNode,
+    mainForFile,
+    selectedTweetIds,
+    performCapture,
+    screenshotFormat,
+    tweets,
+    setScreenshoting,
+    setShowTranslationButton,
+    setIsCapturingSelected,
+    translationMode,
+    toggleSelectionMode,
+    syncTranslations,
+    translations,
+  ])
 
   /** 默认行为：截图后下载保存。 */
   const handleScreenshot = useCallback(

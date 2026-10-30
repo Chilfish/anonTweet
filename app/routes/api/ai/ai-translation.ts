@@ -44,11 +44,23 @@ async function handleArticleTranslation(args: Extract<AITranslationSchema, { typ
   const { article, apiKey, model, provider, baseUrl, thinkingLevel, translationGlossary } = args
 
   if (!article || (!article.blocks?.length && !article.title)) {
-    return data({ success: false, error: 'Article not found or empty', status: 404, targetType: 'article', targetId: article?.id })
+    return data({
+      success: false,
+      error: 'Article not found or empty',
+      status: 404,
+      targetType: 'article',
+      targetId: article?.id,
+    })
   }
 
   if (!apiKey || !model) {
-    return data({ success: false, error: 'Missing apiKey or model', status: 400, targetType: 'article', targetId: article.id })
+    return data({
+      success: false,
+      error: 'Missing apiKey or model',
+      status: 400,
+      targetType: 'article',
+      targetId: article.id,
+    })
   }
 
   // AC-SEC-001：baseUrl 白名单校验
@@ -87,7 +99,12 @@ async function handleArticleTranslation(args: Extract<AITranslationSchema, { typ
   catch (error: unknown) {
     return data(buildAIFailure(error, {
       errorCode: 'Translation failed',
-      context: { targetType: 'article', targetId: article.id, model, provider: resolvedProvider },
+      context: {
+        targetType: 'article',
+        targetId: article.id,
+        model,
+        provider: resolvedProvider,
+      },
     }))
   }
 }
@@ -187,7 +204,12 @@ async function handleIGTranslation(args: Extract<AITranslationSchema, { type: 'i
   catch (error: unknown) {
     return data(buildAIFailure(error, {
       errorCode: 'Translation failed',
-      context: { targetType: 'ig', targetId: igPost.id, model, provider: resolvedProvider },
+      context: {
+        targetType: 'ig',
+        targetId: igPost.id,
+        model,
+        provider: resolvedProvider,
+      },
     }))
   }
 }
@@ -297,7 +319,12 @@ async function handleTweetTranslation(args: Extract<AITranslationSchema, { type?
     return data(buildAIFailure(error, {
       errorCode: 'Failed to generate text',
       message: '翻译推文失败',
-      context: { targetType: 'tweet', targetId: tweet?.id_str, model, provider: resolvedProvider },
+      context: {
+        targetType: 'tweet',
+        targetId: tweet?.id_str,
+        model,
+        provider: resolvedProvider,
+      },
     }))
   }
 }

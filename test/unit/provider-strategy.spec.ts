@@ -173,7 +173,9 @@ describe('openrouterStrategy', () => {
     it('wraps thinkingConfig under openrouter.reasoning', () => {
       const config = makeModelConfig({ provider: 'openrouter' })
       expect(openrouterStrategy.buildProviderOptions({ enabled: true, effort: 'high' }, config)).toEqual({
-        openrouter: { reasoning: { enabled: true, effort: 'high' } },
+        openrouter: {
+          reasoning: { enabled: true, effort: 'high' },
+        },
       })
     })
   })

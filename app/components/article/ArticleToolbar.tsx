@@ -83,7 +83,9 @@ export function ArticleToolbar({
           onClick={() => handleScreenshot(false)}
           disabled={isCapturing}
         >
-          {isCapturing ? <Spinner className="size-4" /> : <CameraIcon className="size-4" />}
+          {isCapturing
+            ? <Spinner className="size-4" />
+            : <CameraIcon className="size-4" />}
           <span className="hidden sm:inline">{isCapturing ? '截图中' : '截图'}</span>
         </Button>
 

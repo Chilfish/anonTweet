@@ -35,7 +35,13 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   const baseUrl = new URL(request.url).origin
 
   if (!tweetId) {
-    return { tweet: null, tweetId: null, baseUrl, translation: null, embeds: {} as Record<string, EnrichedTweet | null> }
+    return {
+      tweet: null,
+      tweetId: null,
+      baseUrl,
+      translation: null,
+      embeds: {} as Record<string, EnrichedTweet | null>,
+    }
   }
 
   try {
@@ -44,13 +50,27 @@ export async function loader({ params, request }: Route.LoaderArgs) {
       getArticleTranslation(tweetId),
     ])
     const tweet = tweets.find(t => t.id_str === tweetId) ?? tweets[0] ?? null
-    const embeds = tweet?.article?.blocks ? await loadEmbeddedTweets(tweet.article.blocks) : {}
-    return { tweet, tweetId, baseUrl, translation, embeds }
+    const embeds = tweet?.article?.blocks
+      ? await loadEmbeddedTweets(tweet.article.blocks)
+      : {}
+    return {
+      tweet,
+      tweetId,
+      baseUrl,
+      translation,
+      embeds,
+    }
   }
   catch (error: unknown) {
     // 之前是裸 catch：线上文章页打不开时，日志里连 tweetId 都没有
     console.error(`[article] load ${tweetId} failed:`, error)
-    return { tweet: null, tweetId, baseUrl, translation: null, embeds: {} as Record<string, EnrichedTweet | null> }
+    return {
+      tweet: null,
+      tweetId,
+      baseUrl,
+      translation: null,
+      embeds: {} as Record<string, EnrichedTweet | null>,
+    }
   }
 }
 
@@ -61,7 +81,9 @@ export function meta({ loaderData }: Route.MetaArgs) {
 
   const title = article?.title || 'X 长文'
   const description = article?.previewText || ''
-  const canonicalUrl = loaderData?.tweetId ? `${baseUrl}/article/${loaderData.tweetId}` : baseUrl
+  const canonicalUrl = loaderData?.tweetId
+    ? `${baseUrl}/article/${loaderData.tweetId}`
+    : baseUrl
 
   const tags = [
     { title: `${title} | Anon Tweet` },
@@ -70,7 +92,10 @@ export function meta({ loaderData }: Route.MetaArgs) {
     { property: 'og:description', content: description },
     { property: 'og:type', content: 'article' },
     { property: 'og:url', content: canonicalUrl },
-    { name: 'twitter:card', content: article?.coverImage ? 'summary_large_image' : 'summary' },
+    {
+      name: 'twitter:card',
+      content: article?.coverImage ? 'summary_large_image' : 'summary',
+    },
     { tagName: 'link', rel: 'canonical', href: canonicalUrl },
   ]
 
@@ -111,7 +136,9 @@ export default function ArticlePage({ loaderData }: Route.ComponentProps) {
   // 内嵌推文：取到数据即用真实推文组件渲染；未取到（删除/受限/失败）回退链接卡
   const renderEmbed = (embedId: string) => {
     const embedded = embeds?.[embedId]
-    return embedded ? <ArticleEmbeddedTweet tweet={embedded} /> : undefined
+    return embedded
+      ? <ArticleEmbeddedTweet tweet={embedded} />
+      : undefined
   }
 
   return (

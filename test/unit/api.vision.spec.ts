@@ -12,7 +12,13 @@ describe('/api/ai-vision', () => {
   it('rejects invalid payload (missing apiKey)', async () => {
     const { action } = await import('~/routes/api/ai/vision')
 
-    const res = await action({ request: jsonRequest({ tweet: { id_str: '1', text: 'x' }, mediaIndexes: [0], mode: 'describe' }) } as any)
+    const res = await action({
+      request: jsonRequest({
+        tweet: { id_str: '1', text: 'x' },
+        mediaIndexes: [0],
+        mode: 'describe',
+      }),
+    } as any)
     const payload = (res as any)?.data ?? res
     expect(payload).toMatchObject({ success: false, status: 400 })
   })
@@ -33,14 +39,16 @@ describe('/api/ai-vision', () => {
   it('no-photo tweet → success with empty visionInfo (offline, no model call)', async () => {
     const { action } = await import('~/routes/api/ai/vision')
 
-    const res = await action({ request: jsonRequest({
-      tweet: { id_str: '1', text: 'no photo', mediaDetails: [] },
-      mediaIndexes: [0],
-      mode: 'describe',
-      apiKey: 'bogus-key',
-      model: 'xiaomi/mimo-v2.5',
-      provider: 'openrouter',
-    }) } as any)
+    const res = await action({
+      request: jsonRequest({
+        tweet: { id_str: '1', text: 'no photo', mediaDetails: [] },
+        mediaIndexes: [0],
+        mode: 'describe',
+        apiKey: 'bogus-key',
+        model: 'xiaomi/mimo-v2.5',
+        provider: 'openrouter',
+      }),
+    } as any)
     const payload = (res as any)?.data ?? res
     expect(payload.success).toBe(true)
     expect(payload.data.visionInfo).toEqual([])

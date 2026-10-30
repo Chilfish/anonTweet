@@ -97,7 +97,9 @@ export function TweetOptionsMenu({ disableActions }: TweetOptionsMenuProps) {
           </DropdownMenuItem>
 
           <DropdownMenuCheckboxItem checked={isInlineMedia} onCheckedChange={setIsInlineMedia} className="menu-item-class">
-            {isInlineMedia ? <LayoutGrid className="h-4 w-4 mr-2" /> : <Rows4Icon className="h-4 w-4 mr-2" />}
+            {isInlineMedia
+              ? <LayoutGrid className="h-4 w-4 mr-2" />
+              : <Rows4Icon className="h-4 w-4 mr-2" />}
             <span>
               媒体按
               {isInlineMedia ? '宫格' : '竖向'}
@@ -116,7 +118,9 @@ export function TweetOptionsMenu({ disableActions }: TweetOptionsMenuProps) {
           </DropdownMenuItem>
 
           <DropdownMenuCheckboxItem checked={!showTranslationButton} onCheckedChange={c => setShowTranslationButton(!c)} className="menu-item-class">
-            {showTranslationButton ? <EyeIcon className="h-4 w-4 mr-2" /> : <EyeOff className="h-4 w-4 mr-2" />}
+            {showTranslationButton
+              ? <EyeIcon className="h-4 w-4 mr-2" />
+              : <EyeOff className="h-4 w-4 mr-2" />}
             <span>
               {showTranslationButton ? '隐藏' : '显示'}
               翻译按钮

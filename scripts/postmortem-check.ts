@@ -27,15 +27,51 @@ const POSTMORTEM_DIR = path.join(PROJECT_ROOT, 'docs', 'postmortem')
 
 /** Hot-fix file table from docs/postmortem/README.md (pattern, fix count, reports). */
 const HOT_FILES: Array<{ pattern: string, fixes: number, reports: string[] }> = [
-  { pattern: 'app/lib/react-tweet/api-v2/parseTweet.ts', fixes: 10, reports: ['001', '005'] },
-  { pattern: 'app/components/tweet/Tweet.tsx', fixes: 13, reports: ['001', '003', '005'] },
-  { pattern: 'app/components/translation/TranslationEditor.tsx', fixes: 10, reports: ['002', '003'] },
-  { pattern: 'app/lib/stores/', fixes: 6, reports: ['002', '006'] },
-  { pattern: 'app/components/tweet/TweetTextBody.tsx', fixes: 5, reports: ['001'] },
-  { pattern: 'app/lib/translation/resolveEntities.ts', fixes: 2, reports: ['002', '009'] },
-  { pattern: 'app/lib/service/getTweet.server.ts', fixes: 1, reports: ['009', '013'] },
-  { pattern: 'app/lib/localCache.ts', fixes: 1, reports: ['013'] },
-  { pattern: 'app/lib/vision/', fixes: 6, reports: ['015'] },
+  {
+    pattern: 'app/lib/react-tweet/api-v2/parseTweet.ts',
+    fixes: 10,
+    reports: ['001', '005'],
+  },
+  {
+    pattern: 'app/components/tweet/Tweet.tsx',
+    fixes: 13,
+    reports: ['001', '003', '005'],
+  },
+  {
+    pattern: 'app/components/translation/TranslationEditor.tsx',
+    fixes: 10,
+    reports: ['002', '003'],
+  },
+  {
+    pattern: 'app/lib/stores/',
+    fixes: 6,
+    reports: ['002', '006'],
+  },
+  {
+    pattern: 'app/components/tweet/TweetTextBody.tsx',
+    fixes: 5,
+    reports: ['001'],
+  },
+  {
+    pattern: 'app/lib/translation/resolveEntities.ts',
+    fixes: 2,
+    reports: ['002', '009'],
+  },
+  {
+    pattern: 'app/lib/service/getTweet.server.ts',
+    fixes: 1,
+    reports: ['009', '013'],
+  },
+  {
+    pattern: 'app/lib/localCache.ts',
+    fixes: 1,
+    reports: ['013'],
+  },
+  {
+    pattern: 'app/lib/vision/',
+    fixes: 6,
+    reports: ['015'],
+  },
 ]
 
 const REPORT_FILE_RE = /^\d{3}-.+\.md$/
@@ -133,8 +169,11 @@ function getChangedFiles(base: string, head: string): string[] {
     return execGitDiff(base, head)
   }
   catch (err) {
-    if (base !== 'main')
-      throw err instanceof Error ? err : new Error(String(err))
+    if (base !== 'main') {
+      throw err instanceof Error
+        ? err
+        : new Error(String(err))
+    }
     console.log('  (main ref not found — falling back to HEAD~1..HEAD)')
     try {
       return execGitDiff('HEAD~1', head)
@@ -158,7 +197,9 @@ try {
   changed = getChangedFiles(base, head)
 }
 catch (err) {
-  console.error(`  FAIL: cannot diff ${base}..${head}: ${err instanceof Error ? err.message : String(err)}`)
+  console.error(`  FAIL: cannot diff ${base}..${head}: ${err instanceof Error
+    ? err.message
+    : String(err)}`)
   console.error('RESULT: FAIL (0 WARN / 1 FAIL)')
   process.exit(1)
 }
@@ -203,8 +244,12 @@ for (const hot of HOT_FILES) {
 }
 
 console.log('')
-console.log(`RESULT: ${fails > 0 ? 'FAIL' : 'PASS'} (${warns} WARN / ${fails} FAIL)`)
+console.log(`RESULT: ${fails > 0
+  ? 'FAIL'
+  : 'PASS'} (${warns} WARN / ${fails} FAIL)`)
 console.log(overlappedAny
   ? '  ⚠ 改动命中历史雷区 —— 请对照对应 postmortem 的「行动项」，确认预防措施已落实'
   : '  ✓ 未命中历史雷区')
-process.exit(fails > 0 ? 1 : 0)
+process.exit(fails > 0
+  ? 1
+  : 0)

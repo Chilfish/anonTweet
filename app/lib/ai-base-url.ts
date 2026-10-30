@@ -38,7 +38,10 @@ export function getAIBaseUrlWhitelistHosts(extra = env.ALLOWED_AI_BASE_URL_HOSTS
     .split(',')
     .map(s => s.trim().toLowerCase())
     .filter(Boolean)
-  return new Set([...ALLOWED_AI_BASE_URL_HOSTS, ...extraHosts])
+  return new Set([
+    ...ALLOWED_AI_BASE_URL_HOSTS,
+    ...extraHosts,
+  ])
 }
 
 /**

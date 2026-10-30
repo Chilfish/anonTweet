@@ -124,7 +124,9 @@ const SettingsItem = React.forwardRef<HTMLDivElement, SettingsItemProps>(
             className,
           }),
         )}
-        onClick={!disabled ? onClick : undefined}
+        onClick={!disabled
+          ? onClick
+          : undefined}
         data-disabled={disabled}
         aria-disabled={disabled}
         {...props}

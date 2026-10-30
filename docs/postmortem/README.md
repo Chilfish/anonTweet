@@ -8,12 +8,12 @@
 
 ## 严重级别
 
-| 级别 | 判据 |
-| ---- | ---- |
-| SEV-0 | 不可逆数据丢失；或生产/构建完全不可用且当天无绕行 |
+| 级别  | 判据                                                                                     |
+| ----- | ---------------------------------------------------------------------------------------- |
+| SEV-0 | 不可逆数据丢失；或生产/构建完全不可用且当天无绕行                                        |
 | SEV-1 | 用户可见核心功能失效或数据损坏；错误结论被当作事实采用（如门禁假绿）；同一问题复发 ≥3 次 |
-| SEV-2 | 用户可见功能降级但可绕行；阻塞部分开发流程；中等规模返工 |
-| SEV-3 | 局部或体验层问题，影响可控，但暴露系统性缺口 |
+| SEV-2 | 用户可见功能降级但可绕行；阻塞部分开发流程；中等规模返工                                 |
+| SEV-3 | 局部或体验层问题，影响可控，但暴露系统性缺口                                             |
 
 ## 状态
 
@@ -22,40 +22,40 @@
 
 ## 索引
 
-| # | 主题 | 级别 | 分类 | 状态 | 根因（一句话） |
-| - | ---- | ---- | ---- | ---- | -------------- |
-| [001](001-twitter-content-parsing.md) | Twitter 推文解析 | SEV-1 | 架构 | Active | parseTweet.ts 无分层、测试不足，每次改动风险外溢 |
-| [002](002-translation-system.md) | 翻译系统 | SEV-1 | 架构 | Active | 翻译逻辑耦合在组件内，store 迁移静默丢字段 |
-| [003](003-ui-styling-layout.md) | UI 样式与布局 | SEV-3 | 缺陷 | Active | 缺 design token 与视觉回归，靠手工逐处补 CSS |
-| [004](004-build-configuration.md) | 构建配置 | SEV-2 | 依赖 | Mitigated | 客户端/服务端边界不清，且当时无构建门禁 |
-| [005](005-media-handling.md) | 媒体管线 | SEV-2 | 架构 | Mitigated | 代理/视频/截图各写一套 URL 转换 |
-| [006](006-state-management.md) | 状态管理 | SEV-2 | 缺陷 | Mitigated | 整 store 订阅 + 无类型迁移，字段静默丢失 |
-| [007](007-instagram-integration.md) | Instagram 集成 | SEV-3 | 变更 | Active | 新功能缺验收清单与 fixture，边界情况留到线上 |
-| [008](008-fonts-and-rendering.md) | 字体与渲染 | SEV-2 | 依赖 | Mitigated | 字体栈与加载时序未覆盖 headless 截图 |
-| [009](009-prepend-persistence.md) | 句首补充丢失 | SEV-2 | 架构 | Active | index 对齐合并四处漂移，base 外实体被静默丢弃 |
-| [010](010-babel-major-drift.md) | Babel 主版本漂移 | SEV-2 | 依赖 | Mitigated | 门禁不跑生产构建，preset 越过 core 主版本 |
-| [011](011-verification-honesty.md) | 验证名实不符 | SEV-1 | 流程 | Active | 空跑报绿、静态扫描冒充行为断言，门禁不携带信号 |
-| [012](012-mobile-adaptation-and-scroll-lock-ownership.md) | 移动端适配 | SEV-3 | 流程 | Active | 断点列表冒充触屏行为清单；手写滚动锁与浮层原语抢归属 |
-| [013](013-cache-persistence-silent-failure.md) | 缓存/持久化静默失效 | SEV-1 | 架构 | Active | 缓存缺身份、版本与失败信号，写没写进去都表现为无声异常 |
-| [014](014-upstream-contract-drift.md) | 上游契约与模型漂移 | SEV-2 | 依赖 | Active | 逆向私有接口与模型 slug 无预警变化，缺漂移检测 |
-| [015](015-llm-structured-output.md) | LLM 输出不可靠 | SEV-2 | 架构 | Mitigated | 模型会自造索引、多给条目、幻觉，需确定性校验兜底 |
-| [016](016-gate-infra-instability.md) | 门禁基建不稳定 | SEV-1 | 流程 | Active | 被接受的红色基线，加上配置、命令面与环境残留制造噪声 |
+| #                                                         | 主题                | 级别  | 分类 | 状态      | 根因（一句话）                                         |
+| --------------------------------------------------------- | ------------------- | ----- | ---- | --------- | ------------------------------------------------------ |
+| [001](001-twitter-content-parsing.md)                     | Twitter 推文解析    | SEV-1 | 架构 | Active    | parseTweet.ts 无分层、测试不足，每次改动风险外溢       |
+| [002](002-translation-system.md)                          | 翻译系统            | SEV-1 | 架构 | Active    | 翻译逻辑耦合在组件内，store 迁移静默丢字段             |
+| [003](003-ui-styling-layout.md)                           | UI 样式与布局       | SEV-3 | 缺陷 | Active    | 缺 design token 与视觉回归，靠手工逐处补 CSS           |
+| [004](004-build-configuration.md)                         | 构建配置            | SEV-2 | 依赖 | Mitigated | 客户端/服务端边界不清，且当时无构建门禁                |
+| [005](005-media-handling.md)                              | 媒体管线            | SEV-2 | 架构 | Mitigated | 代理/视频/截图各写一套 URL 转换                        |
+| [006](006-state-management.md)                            | 状态管理            | SEV-2 | 缺陷 | Mitigated | 整 store 订阅 + 无类型迁移，字段静默丢失               |
+| [007](007-instagram-integration.md)                       | Instagram 集成      | SEV-3 | 变更 | Active    | 新功能缺验收清单与 fixture，边界情况留到线上           |
+| [008](008-fonts-and-rendering.md)                         | 字体与渲染          | SEV-2 | 依赖 | Mitigated | 字体栈与加载时序未覆盖 headless 截图                   |
+| [009](009-prepend-persistence.md)                         | 句首补充丢失        | SEV-2 | 架构 | Active    | index 对齐合并四处漂移，base 外实体被静默丢弃          |
+| [010](010-babel-major-drift.md)                           | Babel 主版本漂移    | SEV-2 | 依赖 | Mitigated | 门禁不跑生产构建，preset 越过 core 主版本              |
+| [011](011-verification-honesty.md)                        | 验证名实不符        | SEV-1 | 流程 | Active    | 空跑报绿、静态扫描冒充行为断言，门禁不携带信号         |
+| [012](012-mobile-adaptation-and-scroll-lock-ownership.md) | 移动端适配          | SEV-3 | 流程 | Active    | 断点列表冒充触屏行为清单；手写滚动锁与浮层原语抢归属   |
+| [013](013-cache-persistence-silent-failure.md)            | 缓存/持久化静默失效 | SEV-1 | 架构 | Active    | 缓存缺身份、版本与失败信号，写没写进去都表现为无声异常 |
+| [014](014-upstream-contract-drift.md)                     | 上游契约与模型漂移  | SEV-2 | 依赖 | Active    | 逆向私有接口与模型 slug 无预警变化，缺漂移检测         |
+| [015](015-llm-structured-output.md)                       | LLM 输出不可靠      | SEV-2 | 架构 | Mitigated | 模型会自造索引、多给条目、幻觉，需确定性校验兜底       |
+| [016](016-gate-infra-instability.md)                      | 门禁基建不稳定      | SEV-1 | 流程 | Active    | 被接受的红色基线，加上配置、命令面与环境残留制造噪声   |
 
 ## 高危文件
 
 改动前先读对应报告并补测试。
 
-| 文件 | 出现于 | fix 次数 |
-| ---- | ------ | -------- |
-| `app/lib/react-tweet/api-v2/parseTweet.ts` | #001 #005 | 10 |
-| `app/components/tweet/Tweet.tsx` | #001 #003 #005 | 13 |
-| `app/components/translation/TranslationEditor.tsx` | #002 #003 | 10 |
-| `app/lib/stores/` | #002 #006 | 6 |
-| `app/components/tweet/TweetTextBody.tsx` | #001 | 5 |
-| `app/lib/translation/resolveEntities.ts` | #002 #009 | 2 |
-| `app/lib/service/getTweet.server.ts` | #009 #013 | 1 |
-| `app/lib/localCache.ts` | #013 | 1 |
-| `app/lib/vision/` | #015 | 6 |
+| 文件                                               | 出现于         | fix 次数 |
+| -------------------------------------------------- | -------------- | -------- |
+| `app/lib/react-tweet/api-v2/parseTweet.ts`         | #001 #005      | 10       |
+| `app/components/tweet/Tweet.tsx`                   | #001 #003 #005 | 13       |
+| `app/components/translation/TranslationEditor.tsx` | #002 #003      | 10       |
+| `app/lib/stores/`                                  | #002 #006      | 6        |
+| `app/components/tweet/TweetTextBody.tsx`           | #001           | 5        |
+| `app/lib/translation/resolveEntities.ts`           | #002 #009      | 2        |
+| `app/lib/service/getTweet.server.ts`               | #009 #013      | 1        |
+| `app/lib/localCache.ts`                            | #013           | 1        |
+| `app/lib/vision/`                                  | #015           | 6        |
 
 ## 高频雷区
 
@@ -99,8 +99,7 @@ jetfuel 是无公开 schema 的私有格式，guest 认证、模型 slug、上�
 模型会自造索引、多给条目、对图外内容瞎猜。接入新模型或新模式时，输出必须过确定性校验（数量、索引、非空），并让失败可观测；只靠 prompt 约束不够。
 
 **14. 门禁失败必须可归因（#016）**
-不允许把「既有红灯」当基线合入——那是给门禁打洞。失败集每次漂移通常是基建问题（冷加载超时、命令面、环境残留），不是被测逻辑。文档、lefthook、CI 只允许一个测试入口。
-11. 单点依赖上游页面结构 / 上游格式漂移（#013）
+不允许把「既有红灯」当基线合入——那是给门禁打洞。失败集每次漂移通常是基建问题（冷加载超时、命令面、环境残留），不是被测逻辑。文档、lefthook、CI 只允许一个测试入口。11. 单点依赖上游页面结构 / 上游格式漂移（#013）
 
 `x-client-transaction-id` 只从**一个**页面（`/home`）解析 webpack chunk map（`NNN:"ondemand.s"`）；
 X 把首页换成 Rolldown/Vite 后该 pattern 不再存在，初始化即抛错，**所有 X API 调用**在发请求前
@@ -108,7 +107,6 @@ X 把首页换成 Rolldown/Vite 后该 pattern 不再存在，初始化即抛错
 明确降级」**，不能把某个 URL 当稳定单点；`isUsableXDocument`（verification meta + `ondemand.s`）
 这类纯函数判定要可导出、可单测；「上游库是最新版」≠「上游已适配」；此类运行时漂移 typecheck/lint/test
 覆盖不到，关键外部依赖要有**真实调用冒烟**验证。详见 [013](013-upstream-frontend-drift.md)。
-
 
 ## Pre-Release 检查
 

@@ -4,7 +4,12 @@ import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('~/lib/service/getTweet', () => ({
   getTweets: vi.fn(async () => ([
-    { id_str: '1', lang: 'en', entities: [], user: { screen_name: 'u' } },
+    {
+      id_str: '1',
+      lang: 'en',
+      entities: [],
+      user: { screen_name: 'u' },
+    },
   ])),
 }))
 
@@ -73,7 +78,9 @@ describe('/api/tweet/get/:id 入口统一走缓存链', () => {
     const { getTweets } = await import('~/lib/service/getTweet')
     const { getLocalTweet } = await import('~/lib/service/getTweet.server')
 
-    await loader({ params: { id: '1' } } as any)
+    await loader({
+      params: { id: '1' },
+    } as any)
 
     expect(getTweets).toHaveBeenCalledWith('1', getLocalTweet)
   })

@@ -83,7 +83,9 @@ describe('AC-TWEET tweet parsing (fixture → real pipeline)', () => {
   it('AC-TWEET-004: entity text segments reconstruct the display range (prefix invariant)', () => {
     const tweet = loadFixture<EnrichedTweet>('tweets/normal-ja.json')
     const text = tweet.text ?? ''
-    const ordered = [...(tweet.entities ?? [])].sort((a, b) => a.index - b.index)
+    const ordered = [
+      ...(tweet.entities ?? []),
+    ].sort((a, b) => a.index - b.index)
     const joined = ordered.map(e => e.text ?? '').join('')
 
     expect(text.length).toBeGreaterThan(0)
@@ -100,7 +102,9 @@ describe('AC-TWEET tweet parsing (fixture → real pipeline)', () => {
       const tweet = loadFixture<TweetWithAI>(file)
       const base = tweet.entities ?? []
       const ai = tweet.autoTranslationEntities ?? []
-      const merged = ai.length > 0 ? mergeEntityTranslationsByIndex(base, ai) : base
+      const merged = ai.length > 0
+        ? mergeEntityTranslationsByIndex(base, ai)
+        : base
       if (hasDuplicateEntities(merged))
         failures.push(file)
     }

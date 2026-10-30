@@ -54,7 +54,9 @@ function cloneWithId(id: string, extraMedia: number): EnrichedTweet {
 
 /** 合成长链线程（15 条，含多图/引推），对齐 AC 文档语义 */
 function buildThread(): EnrichedTweet[] {
-  return Array.from({ length: 15 }, (_, i) => cloneWithId(`perf-${i}`, i % 3 === 0 ? 4 : 1))
+  return Array.from({ length: 15 }, (_, i) => cloneWithId(`perf-${i}`, i % 3 === 0
+    ? 4
+    : 1))
 }
 
 function medianMs(fn: () => string): number {

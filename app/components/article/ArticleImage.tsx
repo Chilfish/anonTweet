@@ -6,7 +6,9 @@ import { useProxyMedia } from '~/lib/stores/appConfig'
 /** 文章内嵌图片：代理加载、按原始比例展示，可选 caption */
 export function ArticleImage({ media, caption }: { media: ArticleMedia, caption?: string }) {
   const proxyMedia = useProxyMedia()
-  const ratio = media.width && media.height ? `${media.width} / ${media.height}` : '16 / 9'
+  const ratio = media.width && media.height
+    ? `${media.width} / ${media.height}`
+    : '16 / 9'
 
   return (
     <figure className="my-4">

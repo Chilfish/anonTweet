@@ -38,7 +38,9 @@ export async function loader({
     console.error(`Error fetching user timeline for ${username}:`, error)
     return data({
       error: 'Failed to fetch user timeline',
-      message: error instanceof Error ? error.message : String(error),
+      message: error instanceof Error
+        ? error.message
+        : String(error),
     }, {
       status: 500,
     })

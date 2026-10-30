@@ -52,7 +52,9 @@ export function toastAIError(error: unknown, options: ToastAIErrorOptions = {}):
   const aiError = extractAIError(error)
 
   if (aiError) {
-    const status = aiError.statusCode != null ? ` · HTTP ${aiError.statusCode}` : ''
+    const status = aiError.statusCode != null
+      ? ` · HTTP ${aiError.statusCode}`
+      : ''
     toastManager.add({
       title: `${options.providerName || 'AI'} 连接失败${status}`,
       description: <AIErrorDetail error={aiError} />,

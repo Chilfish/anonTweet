@@ -40,33 +40,35 @@ export function DictionaryViewer() {
       </InputGroup>
 
       <ScrollArea className="flex-1">
-        {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full py-8 text-muted-foreground space-y-1">
-            <span className="text-sm">{search ? '无匹配结果' : '暂无词条'}</span>
-            {!search && <span className="text-xs opacity-70">可在设置中添加</span>}
-          </div>
-        ) : (
-          <SettingsGroup className="border-border/50 shadow-none">
-            {filtered.map(entry => (
-              <SettingsRow
-                key={entry.id}
-                className="min-h-12 py-2 px-3 gap-2"
-                label={entry.translated}
-                description={entry.original}
-              >
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 shrink-0 text-muted-foreground hover:text-foreground"
-                  onClick={() => copyToClipboard(entry.translated)}
-                  title="复制译文"
-                >
-                  <Copy className="size-3.5" />
-                </Button>
-              </SettingsRow>
-            ))}
-          </SettingsGroup>
-        )}
+        {filtered.length === 0
+          ? (
+              <div className="flex flex-col items-center justify-center h-full py-8 text-muted-foreground space-y-1">
+                <span className="text-sm">{search ? '无匹配结果' : '暂无词条'}</span>
+                {!search && <span className="text-xs opacity-70">可在设置中添加</span>}
+              </div>
+            )
+          : (
+              <SettingsGroup className="border-border/50 shadow-none">
+                {filtered.map(entry => (
+                  <SettingsRow
+                    key={entry.id}
+                    className="min-h-12 py-2 px-3 gap-2"
+                    label={entry.translated}
+                    description={entry.original}
+                  >
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 shrink-0 text-muted-foreground hover:text-foreground"
+                      onClick={() => copyToClipboard(entry.translated)}
+                      title="复制译文"
+                    >
+                      <Copy className="size-3.5" />
+                    </Button>
+                  </SettingsRow>
+                ))}
+              </SettingsGroup>
+            )}
       </ScrollArea>
     </div>
   )

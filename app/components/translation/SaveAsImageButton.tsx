@@ -54,11 +54,13 @@ function DropdownActions({
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger render={<Button {...buttonProps} disabled={disabled} />}>
         截图
-        {open ? (
-          <ChevronUpIcon className="size-4" />
-        ) : (
-          <ChevronDownIcon className="size-4" />
-        )}
+        {open
+          ? (
+              <ChevronUpIcon className="size-4" />
+            )
+          : (
+              <ChevronDownIcon className="size-4" />
+            )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={onFullScreenshot}>
@@ -123,7 +125,9 @@ export function SaveAsImageButton(props: ComponentProps<typeof Button>) {
       disabled={isCapturing}
       onClick={() => handleScreenshot(false)}
     >
-      {isCapturing ? '处理中...' : (props.children ?? '截图')}
+      {isCapturing
+        ? '处理中...'
+        : (props.children ?? '截图')}
     </Button>
   )
 }

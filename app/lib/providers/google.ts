@@ -20,7 +20,11 @@ export const googleStrategy: ProviderStrategy = {
   createSDKProvider(apiKey, baseUrl) {
     return createGoogleGenerativeAI({
       apiKey,
-      ...(baseUrl?.trim() ? { baseURL: baseUrl.trim() } : {}),
+      ...(baseUrl?.trim()
+        ? {
+            baseURL: baseUrl.trim(),
+          }
+        : {}),
     })
   },
 

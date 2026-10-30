@@ -45,7 +45,13 @@ export const getTweetSchema = z.object({
   model: z.string().optional(),
   provider: z.enum(['google', 'deepseek', 'openrouter']).optional(),
   baseUrl: z.string().optional(),
-  thinkingLevel: z.enum(['minimal', 'low', 'medium', 'high', 'max']).optional(),
+  thinkingLevel: z.enum([
+    'minimal',
+    'low',
+    'medium',
+    'high',
+    'max',
+  ]).optional(),
   translationGlossary: z.string().optional(),
   force: z.boolean().optional(),
 })

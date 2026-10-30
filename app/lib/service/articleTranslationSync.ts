@@ -10,7 +10,9 @@ import axios from 'axios'
 export async function syncArticleTranslation(tweetId: string, translation: ArticleTranslation) {
   try {
     await axios.post('/api/tweet/set', {
-      data: [{ tweetId, translation }],
+      data: [
+        { tweetId, translation },
+      ],
       intent: 'updateArticleTranslations',
     })
   }

@@ -44,7 +44,11 @@ describe('normalizeAIError', () => {
     const err = new NoObjectGeneratedError({
       message: 'No object generated: could not parse the response.',
       text: '{"blocks":{"b1":"译文一"},"b2":"译文二"}}',
-      response: { id: 'r1', timestamp: new Date(0), modelId: 'deepseek-flash' },
+      response: {
+        id: 'r1',
+        timestamp: new Date(0),
+        modelId: 'deepseek-flash',
+      },
       usage: {
         inputTokens: undefined,
         inputTokenDetails: { noCacheTokens: undefined, cacheReadTokens: undefined, cacheWriteTokens: undefined },
@@ -132,7 +136,12 @@ describe('AC-OBS-002: AI failure payload carries the request context', () => {
     try {
       buildAIFailure(new Error('boom'), {
         errorCode: 'Translation failed',
-        context: { targetType: 'tweet', targetId: '1234567890abcdef', model: 'deepseek-flash', provider: 'deepseek' },
+        context: {
+          targetType: 'tweet',
+          targetId: '1234567890abcdef',
+          model: 'deepseek-flash',
+          provider: 'deepseek',
+        },
       })
     }
     finally {

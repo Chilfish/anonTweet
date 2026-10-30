@@ -31,7 +31,13 @@ const aiConfigFields = {
   model: z.string().min(1),
   provider: z.enum(['google', 'deepseek', 'openrouter']).optional(),
   baseUrl: z.string().optional(),
-  thinkingLevel: z.enum(['minimal', 'low', 'medium', 'high', 'max']).optional(),
+  thinkingLevel: z.enum([
+    'minimal',
+    'low',
+    'medium',
+    'high',
+    'max',
+  ]).optional(),
   // 术语表（词典 + 自定义，HIGH 优先级）：generate 防描述瞎猜图中名称，translate 保证译名
   translationGlossary: z.string().max(4000).optional(),
 } as const
@@ -171,12 +177,20 @@ async function handleGenerate(args: z.infer<typeof generateSchema>) {
       console.warn(`[Vision] persist failed for ${tweet.id_str}:`, persistError)
     }
 
-    return data({ success: true, data: { visionInfo } })
+    return data({
+      success: true,
+      data: { visionInfo },
+    })
   }
   catch (error: unknown) {
     return data(buildAIFailure(error, {
       errorCode: 'Vision generation failed',
-      context: { targetType: 'tweet', targetId: tweet.id_str, model, provider: resolvedProvider },
+      context: {
+        targetType: 'tweet',
+        targetId: tweet.id_str,
+        model,
+        provider: resolvedProvider,
+      },
     }))
   }
 }
@@ -232,12 +246,20 @@ async function handleTranslate(args: z.infer<typeof translateSchema>) {
       thinkingLevel,
       translationGlossary,
     })
-    return data({ success: true, data: { translations } })
+    return data({
+      success: true,
+      data: { translations },
+    })
   }
   catch (error: unknown) {
     return data(buildAIFailure(error, {
       errorCode: 'Vision OCR translation failed',
-      context: { targetType: 'tweet', targetId: tweet.id_str, model, provider: resolvedProvider },
+      context: {
+        targetType: 'tweet',
+        targetId: tweet.id_str,
+        model,
+        provider: resolvedProvider,
+      },
     }))
   }
 }

@@ -24,13 +24,18 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 function seedWithComments() {
-  return seedTranslation({ commentIds: ['9000000000000000201', '9000000000000000202'] })
+  return seedTranslation({
+    commentIds: ['9000000000000000201', '9000000000000000202'],
+  })
 }
 
 function seedWithCommentsFiltered() {
   return seedTranslation({
     commentIds: ['9000000000000000201', '9000000000000000202'],
-    settings: { ...useTranslationStore.getState().settings, filterUnrelated: true },
+    settings: {
+      ...useTranslationStore.getState().settings,
+      filterUnrelated: true,
+    },
   })
 }
 

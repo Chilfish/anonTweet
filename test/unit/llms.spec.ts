@@ -77,7 +77,9 @@ describe('AC-LLMS-001: llms.txt matches llmstxt.org spec shape and covers all en
     expect(txt).not.toContain('http://')
     expect(txt).not.toContain('https://')
     // 链接目标必须存在且以 / 开头
-    const hrefs = [...txt.matchAll(/\]\(([^)]+)\)/g)]
+    const hrefs = [
+      ...txt.matchAll(/\]\(([^)]+)\)/g),
+    ]
       .map(m => m[1])
       .filter((h): h is string => typeof h === 'string')
     expect(hrefs.length).toBeGreaterThan(5)
@@ -86,7 +88,9 @@ describe('AC-LLMS-001: llms.txt matches llmstxt.org spec shape and covers all en
   })
 
   it('lists every backend endpoint exactly once, plus the openapi.json entry', () => {
-    const bulletTexts = [...txt.matchAll(/^- \[([^\]]+)\]/gm)]
+    const bulletTexts = [
+      ...txt.matchAll(/^- \[([^\]]+)\]/gm),
+    ]
       .map(m => m[1])
       .filter((t): t is string => typeof t === 'string')
     const endpointLabels = apiEndpoints.map(e => e.label)
@@ -160,7 +164,9 @@ describe('AC-LLMS-002: openapi.json is a valid OpenAPI 3.1 doc covering all back
   })
 
   it('paths parity: apiEndpoints ↔ openapi paths ↔ expected list', () => {
-    const fromEndpoints = [...new Set(apiEndpoints.map(e => e.path))].sort()
+    const fromEndpoints = [
+      ...new Set(apiEndpoints.map(e => e.path)),
+    ].sort()
     const fromDoc = Object.keys(doc.paths).sort()
     const expected = [...EXPECTED_PATHS].sort()
 
@@ -242,12 +248,26 @@ describe('AC-LLMS-002: openapi.json is a valid OpenAPI 3.1 doc covering all back
 
       const visual = schemas.AIVisionInfo as { properties?: Record<string, unknown> }
       expect(Object.keys(visual?.properties ?? {})).toEqual(
-        expect.arrayContaining(['index', 'mode', 'promptId', 'provider', 'model', 'status', 'createdAt']),
+        expect.arrayContaining([
+          'index',
+          'mode',
+          'promptId',
+          'provider',
+          'model',
+          'status',
+          'createdAt',
+        ]),
       )
 
       const rawUser = schemas.RawUser as { properties?: Record<string, unknown> }
       expect(Object.keys(rawUser?.properties ?? {})).toEqual(
-        expect.arrayContaining(['id', 'userName', 'fullName', 'profileImage', 'followersCount']),
+        expect.arrayContaining([
+          'id',
+          'userName',
+          'fullName',
+          'profileImage',
+          'followersCount',
+        ]),
       )
     })
 

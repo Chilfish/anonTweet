@@ -29,7 +29,9 @@ function TweetTextBody({ tweet, enableTranslation }: { tweet: EnrichedTweet, ena
     part: 'body',
   })
 
-  const geminiModel = typeof __GEMINI_MODEL__ === 'undefined' ? 'models/gemini-3-flash-preview' : __GEMINI_MODEL__
+  const geminiModel = typeof __GEMINI_MODEL__ === 'undefined'
+    ? 'models/gemini-3-flash-preview'
+    : __GEMINI_MODEL__
   const separatorTemplate = view.source === 'ai'
     ? `<div style="margin-top: 4px; color: #3285FD;">
 <b style="font-weight: bold; font-size: small;">由 ${models.find(m => m.name === geminiModel)?.text || 'Gemini'} 翻译</b>
@@ -104,9 +106,11 @@ function UnifiedTweet({ tweet, variant, enableTranslation }: UnifiedTweetProps) 
           enableTranslation={enableTranslation}
         />
 
-        {tweet.mediaDetails?.length ? (
-          <TweetMedia tweet={tweet} showCoverOnly={true} />
-        ) : null}
+        {tweet.mediaDetails?.length
+          ? (
+              <TweetMedia tweet={tweet} showCoverOnly={true} />
+            )
+          : null}
 
         <TweetMediaAlt tweet={tweet} />
 
@@ -172,7 +176,9 @@ export function MyPlainTweet({ tweets, mainTweetId, enableTranslation }: MyTweet
 
           <div
             style={{
-              height: mainTweetHeight > 0 ? `calc(100% - ${mainTweetHeight}px)` : '100%',
+              height: mainTweetHeight > 0
+                ? `calc(100% - ${mainTweetHeight}px)`
+                : '100%',
             }}
             className="absolute z-0 left-[1.1rem] sm:left-[1.3rem] top-4 bottom-0 w-[2px] bg-[#cfd9de] dark:bg-[#333639]"
           />

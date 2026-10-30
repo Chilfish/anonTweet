@@ -71,7 +71,9 @@ function makeRawTweet(opts: RawTweetFactory = {}): RawTweet {
   return {
     __typename: typename,
     rest_id: restId,
-    core: { user_results: { result: user } },
+    core: {
+      user_results: { result: user },
+    },
     legacy: {
       lang,
       full_text: text,
@@ -84,14 +86,21 @@ function makeRawTweet(opts: RawTweetFactory = {}): RawTweet {
         symbols: entities.symbols ?? [],
         media: media ?? [],
       },
-      extended_entities: media ? { media } : undefined,
+      extended_entities: media
+        ? { media }
+        : undefined,
     },
     note_tweet: noteText
       ? {
           note_tweet_results: {
             result: {
               text: noteText,
-              entity_set: { hashtags: [], user_mentions: [], urls: [], symbols: [] },
+              entity_set: {
+                hashtags: [],
+                user_mentions: [],
+                urls: [],
+                symbols: [],
+              },
             },
           },
         }
@@ -162,7 +171,11 @@ describe('transformUserResponse', () => {
 
 function cardWith(bindings: Record<string, any>, name = 'summary', url?: string) {
   return {
-    legacy: { name, url, binding_values: Object.entries(bindings).map(([key, value]) => ({ key, value })) },
+    legacy: {
+      name,
+      url,
+      binding_values: Object.entries(bindings).map(([key, value]) => ({ key, value })),
+    },
   }
 }
 
@@ -173,7 +186,9 @@ describe('mapTwitterCard', () => {
       description: { string_value: 'A description' },
       domain: { string_value: 'example.com' },
       card_url: { string_value: 'https://example.com' },
-      thumbnail_image: { image_value: { url: 'https://example.com/img.jpg' } },
+      thumbnail_image: {
+        image_value: { url: 'https://example.com/img.jpg' },
+      },
     }))
     expect(card).toMatchObject({
       type: 'summary',
@@ -186,17 +201,36 @@ describe('mapTwitterCard', () => {
   })
 
   it('AC-TEST-006: maps player card to summary_large_image', () => {
-    const card = mapTwitterCard(cardWith({ title: { string_value: 'Video' } }, 'player'))
+    const card = mapTwitterCard(cardWith({
+      title: { string_value: 'Video' },
+    }, 'player'))
     expect(card!.type).toBe('summary_large_image')
   })
 
   it('AC-TEST-006: parses unified_card JSON payload', () => {
     const unified = JSON.stringify({
-      component_objects: { details_1: { data: { title: { content: 'YT Video' }, subtitle: { content: 'youtube.com' } } } },
-      destination_objects: { browser_1: { data: { url_data: { url: 'https://youtu.be/abc', vanity: 'youtube.com' } } } },
-      media_entities: { m1: { media_url_https: 'https://img.youtube.com/vi/abc/hqdefault.jpg' } },
+      component_objects: {
+        details_1: {
+          data: {
+            title: { content: 'YT Video' },
+            subtitle: { content: 'youtube.com' },
+          },
+        },
+      },
+      destination_objects: {
+        browser_1: {
+          data: {
+            url_data: { url: 'https://youtu.be/abc', vanity: 'youtube.com' },
+          },
+        },
+      },
+      media_entities: {
+        m1: { media_url_https: 'https://img.youtube.com/vi/abc/hqdefault.jpg' },
+      },
     })
-    const card = mapTwitterCard(cardWith({ unified_card: { string_value: unified } }, 'unified_card'))
+    const card = mapTwitterCard(cardWith({
+      unified_card: { string_value: unified },
+    }, 'unified_card'))
     expect(card).toMatchObject({
       type: 'unified_card',
       title: 'YT Video',
@@ -226,7 +260,9 @@ describe('mapTwitterCard', () => {
       destination_objects: {
         browser_1: {
           type: 'browser',
-          data: { url_data: { url: 'https://x.com/i/trending/2088645888549994981', vanity: 'x.com' } },
+          data: {
+            url_data: { url: 'https://x.com/i/trending/2088645888549994981', vanity: 'x.com' },
+          },
         },
       },
       media_entities: {
@@ -234,7 +270,9 @@ describe('mapTwitterCard', () => {
       },
       components: ['media_with_details_horizontal_1'],
     })
-    const card = mapTwitterCard(cardWith({ unified_card: { string_value: unified } }, 'unified_card'))
+    const card = mapTwitterCard(cardWith({
+      unified_card: { string_value: unified },
+    }, 'unified_card'))
     expect(card).toMatchObject({
       type: 'unified_card',
       title: '仲町あられの誕生日をファンと盛大に祝う',
@@ -247,10 +285,25 @@ describe('mapTwitterCard', () => {
 
   it('AC-TEST-006: unified_card falls back to legacy subtitle for domain when vanity missing', () => {
     const unified = JSON.stringify({
-      component_objects: { details_1: { data: { title: { content: 'T' }, subtitle: { content: 'legacy.example.com' } } } },
-      destination_objects: { browser_1: { data: { url_data: { url: 'https://legacy.example.com/x' } } } },
+      component_objects: {
+        details_1: {
+          data: {
+            title: { content: 'T' },
+            subtitle: { content: 'legacy.example.com' },
+          },
+        },
+      },
+      destination_objects: {
+        browser_1: {
+          data: {
+            url_data: { url: 'https://legacy.example.com/x' },
+          },
+        },
+      },
     })
-    const card = mapTwitterCard(cardWith({ unified_card: { string_value: unified } }, 'unified_card'))
+    const card = mapTwitterCard(cardWith({
+      unified_card: { string_value: unified },
+    }, 'unified_card'))
     expect(card!.domain).toBe('legacy.example.com')
     expect(card!.url).toBe('https://legacy.example.com/x')
   })
@@ -260,7 +313,9 @@ describe('mapTwitterCard', () => {
   })
 
   it('AC-TEST-006: falls back to URL hostname for domain', () => {
-    const card = mapTwitterCard(cardWith({ title: { string_value: 'T' } }, 'summary', 'https://github.com/foo'))
+    const card = mapTwitterCard(cardWith({
+      title: { string_value: 'T' },
+    }, 'summary', 'https://github.com/foo'))
     expect(card!.domain).toBe('github.com')
   })
 })
@@ -278,7 +333,9 @@ describe('mapMediaDetails', () => {
 
   it('AC-TEST-006: maps photo media with alt text', () => {
     const details = mapMediaDetails(makeRawTweet({
-      media: [baseMedia({ type: 'photo', ext_alt_text: 'A cat' })],
+      media: [
+        baseMedia({ type: 'photo', ext_alt_text: 'A cat' }),
+      ],
     }))
     expect(details).toEqual([
       {
@@ -293,31 +350,43 @@ describe('mapMediaDetails', () => {
 
   it('AC-TEST-006: maps animated_gif with video_info', () => {
     const details = mapMediaDetails(makeRawTweet({
-      media: [baseMedia({
-        type: 'animated_gif',
-        video_info: {
-          duration_millis: 1000,
-          aspect_ratio: [1, 1],
-          variants: [{ content_type: 'video/mp4', url: 'https://x.com/gif.mp4' }],
-        },
-      })],
+      media: [
+        baseMedia({
+          type: 'animated_gif',
+          video_info: {
+            duration_millis: 1000,
+            aspect_ratio: [1, 1],
+            variants: [
+              { content_type: 'video/mp4', url: 'https://x.com/gif.mp4' },
+            ],
+          },
+        }),
+      ],
     }))
-    expect(details![0]).toMatchObject({ type: 'animated_gif', video_info: { duration: 1000, aspect_ratio: [1, 1] } })
+    expect(details![0]).toMatchObject({
+      type: 'animated_gif',
+      video_info: {
+        duration: 1000,
+        aspect_ratio: [1, 1],
+      },
+    })
   })
 
   it('AC-TEST-006: maps video keeping only the last variant', () => {
     const details = mapMediaDetails(makeRawTweet({
-      media: [baseMedia({
-        type: 'video',
-        video_info: {
-          duration_millis: 2000,
-          aspect_ratio: [16, 9],
-          variants: [
-            { content_type: 'application/x-mpegURL', url: 'https://x.com/hls.m3u8' },
-            { content_type: 'video/mp4', url: 'https://x.com/720.mp4', bitrate: 832000 },
-          ],
-        },
-      })],
+      media: [
+        baseMedia({
+          type: 'video',
+          video_info: {
+            duration_millis: 2000,
+            aspect_ratio: [16, 9],
+            variants: [
+              { content_type: 'application/x-mpegURL', url: 'https://x.com/hls.m3u8' },
+              { content_type: 'video/mp4', url: 'https://x.com/720.mp4', bitrate: 832000 },
+            ],
+          },
+        }),
+      ],
     }))
     expect(details![0]).toMatchObject({ type: 'video' })
     const first = details![0]

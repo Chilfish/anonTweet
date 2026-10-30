@@ -45,10 +45,15 @@ describe('AC-IG-STORY-007: story viewer navigation and selection logic', () => {
     const back = storySelectionReducer(one, { type: 'toggle', id: 'a' })
     expect([...back]).toEqual([])
 
-    const all = storySelectionReducer(back, { type: 'set', ids: ['a', 'b', 'c'] })
+    const all = storySelectionReducer(back, {
+      type: 'set',
+      ids: ['a', 'b', 'c'],
+    })
     expect([...all].sort()).toEqual(['a', 'b', 'c'])
 
-    expect([...storySelectionReducer(all, { type: 'clear' })]).toEqual([])
+    expect([
+      ...storySelectionReducer(all, { type: 'clear' }),
+    ]).toEqual([])
   })
 
   it('AC-IG-STORY-007: selection reducer never mutates the incoming state', () => {

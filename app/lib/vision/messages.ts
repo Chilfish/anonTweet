@@ -124,7 +124,11 @@ export function buildVisionMessages(args: BuildVisionMessagesArgs): ModelMessage
   const parts: UserContentPart[] = []
   for (const img of images) {
     const { mediaType, base64 } = parseDataUri(img.dataUri)
-    parts.push({ type: 'file', data: { type: 'data', data: base64 }, mediaType })
+    parts.push({
+      type: 'file',
+      data: { type: 'data', data: base64 },
+      mediaType,
+    })
   }
   // 图片与 mediaDetails 索引的对应必须告诉模型，否则模型会自造 index
   // （describe 单图返回 index 1、ocr 把行号当 index），导致按图查找命中失败。
@@ -136,7 +140,13 @@ export function buildVisionMessages(args: BuildVisionMessagesArgs): ModelMessage
   if (withContext && hasTweetContext) {
     parts.push({
       type: 'text',
-      text: buildContextText({ tweetText, quotedText, authorName, createdAt, entityContext }),
+      text: buildContextText({
+        tweetText,
+        quotedText,
+        authorName,
+        createdAt,
+        entityContext,
+      }),
     })
   }
   const altSection = buildAltTextSection(mediaAltTexts ?? {})

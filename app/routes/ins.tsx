@@ -73,7 +73,9 @@ async function getIGPost(
 
 export default function IGPostPage() {
   const { id } = useParams()
-  const igId = id ? (extractIGId(id) ?? id) : null
+  const igId = id
+    ? (extractIGId(id) ?? id)
+    : null
   // 快拍族（单条 story / tray / 精选集列表）：请求发出前即可判定，决定骨架屏与 header 形态
   const storyLike = !!igId && isIGStoryLikeId(igId)
 
@@ -129,7 +131,9 @@ export default function IGPostPage() {
     // 该路由的列表可能含多张卡（tray / 精选集）：按 item id 匹配回写
     mutate(
       currentData => currentData?.map(p =>
-        p.id === postId ? { ...p, captionTranslation } : p,
+        p.id === postId
+          ? { ...p, captionTranslation }
+          : p,
       ),
       { revalidate: false },
     )

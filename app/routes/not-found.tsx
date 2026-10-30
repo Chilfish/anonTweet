@@ -2,7 +2,9 @@ import type { Route } from './+types/not-found'
 import { redirect } from 'react-router'
 import { ErrorDisplay } from '~/components/error-boundary'
 
-export const meta: Route.MetaFunction = () => [{ title: 'Not Found' }]
+export const meta: Route.MetaFunction = () => [
+  { title: 'Not Found' },
+]
 
 export async function loader({ params }: Route.LoaderArgs) {
   const path = params['*']

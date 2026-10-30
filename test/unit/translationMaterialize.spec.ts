@@ -11,9 +11,21 @@ describe('AC-TRANS-006: materialize 不修改原始 tweet', () => {
       url: 'u',
       created_at: 'd',
       text: 't',
-      user: { id_str: 'u1', name: 'n', screen_name: 's', is_blue_verified: false, profile_image_shape: 'Circle', profile_image_url_https: '' } as any,
+      user: {
+        id_str: 'u1',
+        name: 'n',
+        screen_name: 's',
+        is_blue_verified: false,
+        profile_image_shape: 'Circle',
+        profile_image_url_https: '',
+      } as any,
       entities: [
-        { type: 'text', text: 'a', index: 0, translation: 'A' },
+        {
+          type: 'text',
+          text: 'a',
+          index: 0,
+          translation: 'A',
+        },
       ],
     } as any
 
@@ -32,23 +44,55 @@ describe('AC-TRANS-006: materialize 不修改原始 tweet', () => {
       url: 'u',
       created_at: 'd',
       text: 't',
-      user: { id_str: 'u1', name: 'n', screen_name: 's', is_blue_verified: false, profile_image_shape: 'Circle', profile_image_url_https: '' } as any,
+      user: {
+        id_str: 'u1',
+        name: 'n',
+        screen_name: 's',
+        is_blue_verified: false,
+        profile_image_shape: 'Circle',
+        profile_image_url_https: '',
+      } as any,
       entities: [
         { type: 'text', text: 'hello', index: 0 },
-        { type: 'hashtag', text: '#A', index: 1, href: 'h' } as any,
+        {
+          type: 'hashtag',
+          text: '#A',
+          index: 1,
+          href: 'h',
+        } as any,
       ],
     } as any
 
     const manual: Entity[] = [
-      { type: 'text', text: 'hello', index: 0, translation: '你好' },
-      { type: 'hashtag', text: '#A', index: 1, translation: '#啊' } as any,
+      {
+        type: 'text',
+        text: 'hello',
+        index: 0,
+        translation: '你好',
+      },
+      {
+        type: 'hashtag',
+        text: '#A',
+        index: 1,
+        translation: '#啊',
+      } as any,
     ]
 
     const view = materializeTweetWithManualTranslations(tweet, manual)
 
     expect(view).not.toBe(tweet)
-    expect(view.entities[0]).toMatchObject({ type: 'text', text: 'hello', index: 0, translation: '你好' })
-    expect(view.entities[1]).toMatchObject({ type: 'hashtag', text: '#A', index: 1, translation: '#啊' })
+    expect(view.entities[0]).toMatchObject({
+      type: 'text',
+      text: 'hello',
+      index: 0,
+      translation: '你好',
+    })
+    expect(view.entities[1]).toMatchObject({
+      type: 'hashtag',
+      text: '#A',
+      index: 1,
+      translation: '#啊',
+    })
     expect((tweet.entities[0] as any).translation).toBeUndefined()
   })
 
@@ -59,21 +103,48 @@ describe('AC-TRANS-006: materialize 不修改原始 tweet', () => {
       url: 'u',
       created_at: 'd',
       text: 't',
-      user: { id_str: 'u1', name: 'n', screen_name: 's', is_blue_verified: false, profile_image_shape: 'Circle', profile_image_url_https: '' } as any,
+      user: {
+        id_str: 'u1',
+        name: 'n',
+        screen_name: 's',
+        is_blue_verified: false,
+        profile_image_shape: 'Circle',
+        profile_image_url_https: '',
+      } as any,
       entities: [
         { type: 'text', text: 'hello', index: 0 },
       ],
     } as any
 
     const manual: Entity[] = [
-      { type: 'text', text: '（补充）', index: -1, translation: '（补充）' },
-      { type: 'text', text: 'hello', index: 0, translation: '你好' },
+      {
+        type: 'text',
+        text: '（补充）',
+        index: -1,
+        translation: '（补充）',
+      },
+      {
+        type: 'text',
+        text: 'hello',
+        index: 0,
+        translation: '你好',
+      },
     ]
 
     const view = materializeTweetWithManualTranslations(tweet, manual)
 
-    expect(view.entities[0]).toMatchObject({ type: 'text', text: '（补充）', index: -1, translation: '（补充）' })
-    expect(view.entities[1]).toMatchObject({ type: 'text', text: 'hello', index: 0, translation: '你好' })
+    expect(view.entities[0]).toMatchObject({
+      type: 'text',
+      text: '（补充）',
+      index: -1,
+      translation: '（补充）',
+    })
+    expect(view.entities[1]).toMatchObject({
+      type: 'text',
+      text: 'hello',
+      index: 0,
+      translation: '你好',
+    })
     expect(view.entities).toHaveLength(2)
   })
 })

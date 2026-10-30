@@ -9,7 +9,12 @@ function makeTweet(partial: Partial<EnrichedTweet> & Pick<EnrichedTweet, 'id_str
     text: rest.text ?? '',
     lang: rest.lang ?? 'en',
     created_at: rest.created_at ?? '',
-    user: (rest.user ?? { screen_name: 'u', id_str: 'u', name: 'u', profile_image_url_https: '' }) as any,
+    user: (rest.user ?? {
+      screen_name: 'u',
+      id_str: 'u',
+      name: 'u',
+      profile_image_url_https: '',
+    }) as any,
     entities: (rest.entities ?? []) as any,
     ...rest,
   } as EnrichedTweet
@@ -18,7 +23,12 @@ function makeTweet(partial: Partial<EnrichedTweet> & Pick<EnrichedTweet, 'id_str
 describe('getTweets', () => {
   it('fetches parent chain and attaches quoted tweet', async () => {
     const t1 = makeTweet({ id_str: '0001', text: 'root' })
-    const t2 = makeTweet({ id_str: '0002', text: 'reply', in_reply_to_status_id_str: '0001', quoted_tweet_id: '0099' } as any)
+    const t2 = makeTweet({
+      id_str: '0002',
+      text: 'reply',
+      in_reply_to_status_id_str: '0001',
+      quoted_tweet_id: '0099',
+    } as any)
     const q = makeTweet({ id_str: '0099', text: 'quoted' })
 
     const getter = vi.fn(async (id: string) => {
@@ -48,7 +58,9 @@ describe('getTweets', () => {
 
   it('does not attach quotedTweet when quoted getter returns null', async () => {
     const t = makeTweet({ id_str: '0001', text: 'root', quoted_tweet_id: '0099' } as any)
-    const getter = vi.fn(async (id: string) => (id === '0001' ? t : null))
+    const getter = vi.fn(async (id: string) => (id === '0001'
+      ? t
+      : null))
 
     const tweets = await getTweets('0001', getter as any)
 
@@ -58,7 +70,9 @@ describe('getTweets', () => {
 
   it('returns only root when parent getter returns null', async () => {
     const t = makeTweet({ id_str: '0001', text: 'root', in_reply_to_status_id_str: '0000' } as any)
-    const getter = vi.fn(async (id: string) => (id === '0001' ? t : null))
+    const getter = vi.fn(async (id: string) => (id === '0001'
+      ? t
+      : null))
 
     const tweets = await getTweets('0001', getter as any)
 

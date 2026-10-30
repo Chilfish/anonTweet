@@ -70,7 +70,9 @@ export function useIGOperations(post: IGPost | null) {
 
       lines.push(
         `> ❤️ ${post.likes.toLocaleString()}  ·  🔗 [查看原文](${post.url})`,
-        `> ${post.created_at ? new Date(post.created_at).toLocaleString('zh-CN') : ''}`,
+        `> ${post.created_at
+          ? new Date(post.created_at).toLocaleString('zh-CN')
+          : ''}`,
       )
 
       await navigator.clipboard.writeText(lines.join('\n'))

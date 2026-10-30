@@ -39,19 +39,26 @@ describe('AC-TWEET-012: article url detection', () => {
   })
 
   it('AC-TWEET-012: resolves the article id from entities as a fallback', () => {
-    expect(resolveArticleId([{ type: 'text', index: 0 }, urlEntity('https://x.com/i/article/42')])).toBe('42')
+    expect(resolveArticleId([
+      { type: 'text', index: 0 },
+      urlEntity('https://x.com/i/article/42'),
+    ])).toBe('42')
     expect(resolveArticleId([])).toBeNull()
   })
 
   it('AC-TWEET-012: gives a minimal link-only entry when no article node is available', () => {
     // search/list 等路径不取富文本，卡片入口靠实体链接兜底（标题留空，进页面再补）
-    expect(resolveArticleLink([urlEntity('https://x.com/i/article/42')])).toEqual({
+    expect(resolveArticleLink([
+      urlEntity('https://x.com/i/article/42'),
+    ])).toEqual({
       id: '42',
       url: 'https://x.com/i/article/42',
       title: '',
       format: 'plain',
     })
-    expect(resolveArticleLink([{ type: 'text', index: 0 }])).toBeNull()
+    expect(resolveArticleLink([
+      { type: 'text', index: 0 },
+    ])).toBeNull()
   })
 })
 
@@ -84,7 +91,9 @@ describe('AC-TWEET-012: mapArticle', () => {
 
   it('AC-TWEET-012: returns null without metadata (falls back to the plain link)', () => {
     // 只有实体链接、没有 article 节点 → 不构造空卡片
-    expect(mapArticle({} as RawTweet, [urlEntity('https://x.com/i/article/42')])).toBeNull()
+    expect(mapArticle({} as RawTweet, [
+      urlEntity('https://x.com/i/article/42'),
+    ])).toBeNull()
     expect(mapArticle(null)).toBeNull()
   })
 
@@ -97,7 +106,11 @@ describe('AC-TWEET-012: mapArticle', () => {
             rest_id: '1',
             title: 'T',
             plain_text: '完整纯文本',
-            content_state: { blocks: [{ key: 'b1', text: 'hello', type: 'unstyled' }] },
+            content_state: {
+              blocks: [
+                { key: 'b1', text: 'hello', type: 'unstyled' },
+              ],
+            },
           },
         },
       },
@@ -133,12 +146,14 @@ describe('AC-TWEET-012: mapArticle', () => {
           hashtags: [],
           user_mentions: [],
           symbols: [],
-          urls: [{
-            url: 'https://t.co/EhcNsbMwRz',
-            expanded_url: 'https://x.com/i/article/2104009234858024962',
-            display_url: 'x.com/i/article/2104…',
-            indices: [0, 23],
-          }],
+          urls: [
+            {
+              url: 'https://t.co/EhcNsbMwRz',
+              expanded_url: 'https://x.com/i/article/2104009234858024962',
+              display_url: 'x.com/i/article/2104…',
+              indices: [0, 23],
+            },
+          ],
           media: [],
         },
       },

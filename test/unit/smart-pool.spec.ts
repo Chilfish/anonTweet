@@ -26,7 +26,9 @@ function httpError(status: number, message: string): Error {
 /** 构造一个按行为抛错/成功的 mock Fetcher */
 function mockFetcher(behavior: () => unknown): MockFetcher {
   // request 需满足 FetcherService.request 的双参签名（测试侧第二个参数无意义）
-  return { request: vi.fn((_a?: unknown, _b?: unknown) => behavior()) }
+  return {
+    request: vi.fn((_a?: unknown, _b?: unknown) => behavior()),
+  }
 }
 
 /** 构造一个恒失败（给定 status）的 mock Fetcher 工厂 */
@@ -45,7 +47,9 @@ const fetch = async (fetcher: FetcherService) => (fetcher as unknown as MockFetc
 describe('rettiwtPool', () => {
   it('runs the task with the single key and returns the result', async () => {
     const f = mockFetcher(() => 'ok')
-    const pool = new RettiwtPool(['key-1'], { createFetcher: () => f as unknown as FetcherService })
+    const pool = new RettiwtPool(['key-1'], {
+      createFetcher: () => f as unknown as FetcherService,
+    })
 
     await expect(pool.run(fetch)).resolves.toBe('ok')
     expect(f.request).toHaveBeenCalledTimes(1)
@@ -76,7 +80,9 @@ describe('rettiwtPool', () => {
     const pool = new RettiwtPool(['bad', 'good'], {
       cooldownMs: 1_000_000, // 冷却期足够长（backoffMs 同步放大，避免 min() 被基数裁短），第二次 run 不会再用 bad
       backoffMs: 1_000_000,
-      createFetcher: key => (key === 'bad' ? always429 : good) as unknown as FetcherService,
+      createFetcher: key => (key === 'bad'
+        ? always429
+        : good) as unknown as FetcherService,
     })
 
     await expect(pool.run(fetch)).resolves.toBe('ok') // bad 429 → 轮换到 good

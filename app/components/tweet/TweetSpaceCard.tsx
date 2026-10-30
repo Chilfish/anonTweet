@@ -28,10 +28,30 @@ const ACTION_BY_AVAILABILITY: Record<
   Exclude<SpaceAvailability, 'unavailable'>,
   { label: string, aria: string, primary: boolean, icon: 'play' | 'mic-off' | null }
 > = {
-  'replayable': { label: '播放录音', aria: '播放录音', primary: true, icon: 'play' },
-  'live': { label: '直播中', aria: '正在直播', primary: true, icon: null },
-  'upcoming': { label: '尚未开始', aria: '尚未开始', primary: false, icon: null },
-  'no-replay': { label: '录音不可回放', aria: '录音不可回放', primary: false, icon: 'mic-off' },
+  'replayable': {
+    label: '播放录音',
+    aria: '播放录音',
+    primary: true,
+    icon: 'play',
+  },
+  'live': {
+    label: '直播中',
+    aria: '正在直播',
+    primary: true,
+    icon: null,
+  },
+  'upcoming': {
+    label: '尚未开始',
+    aria: '尚未开始',
+    primary: false,
+    icon: null,
+  },
+  'no-replay': {
+    label: '录音不可回放',
+    aria: '录音不可回放',
+    primary: false,
+    icon: 'mic-off',
+  },
 }
 
 /**
@@ -64,7 +84,9 @@ export function TweetSpaceCard({ tweet, className }: TweetSpaceCardProps) {
       duration: formatSpaceDuration(space.durationMs),
       listeners: `${formatSpaceListeners(space.listenersCount)} 人收听/回放`,
       date: formatSpaceDate(space.createdAt),
-      avatarSrc: avatarUrl ? proxyMedia(normalizeMediaUrl(avatarUrl)) : '',
+      avatarSrc: avatarUrl
+        ? proxyMedia(normalizeMediaUrl(avatarUrl))
+        : '',
     }
   }, [space, proxyMedia])
 

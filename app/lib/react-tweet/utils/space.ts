@@ -41,7 +41,9 @@ export function extractAudiospaceId(cardData: unknown): string | null {
     ?.value
     ?.string_value
 
-  return typeof id === 'string' && id ? id : null
+  return typeof id === 'string' && id
+    ? id
+    : null
 }
 
 /** 该 URL 是否指向 X Space 页面（正文据此避免与卡片重复展示同一个跳转） */
@@ -89,11 +91,15 @@ function toMillis(value: unknown): number | null {
   const n = Number(value)
   if (!Number.isFinite(n) || n <= 0)
     return null
-  return n < 1e12 ? Math.round(n * 1000) : n
+  return n < 1e12
+    ? Math.round(n * 1000)
+    : n
 }
 
 function asRecord(value: unknown): Record<string, any> | undefined {
-  return value && typeof value === 'object' ? value as Record<string, any> : undefined
+  return value && typeof value === 'object'
+    ? value as Record<string, any>
+    : undefined
 }
 
 /**
@@ -163,15 +169,23 @@ export function mapSpaceDetails(
     }
   }
 
-  const title = typeof metadata.title === 'string' ? metadata.title.trim() : ''
+  const title = typeof metadata.title === 'string'
+    ? metadata.title.trim()
+    : ''
 
   const creator = asRecord(asRecord(metadata.creator_results)?.result)
   const creatorLegacy = asRecord(creator?.legacy)
 
   const host: SpaceHost = {
-    id_str: typeof creator?.rest_id === 'string' ? creator.rest_id : '',
-    name: typeof creatorLegacy?.name === 'string' ? creatorLegacy.name : '',
-    screen_name: typeof creatorLegacy?.screen_name === 'string' ? creatorLegacy.screen_name : '',
+    id_str: typeof creator?.rest_id === 'string'
+      ? creator.rest_id
+      : '',
+    name: typeof creatorLegacy?.name === 'string'
+      ? creatorLegacy.name
+      : '',
+    screen_name: typeof creatorLegacy?.screen_name === 'string'
+      ? creatorLegacy.screen_name
+      : '',
     profile_image_url_https: typeof creatorLegacy?.profile_image_url_https === 'string'
       ? creatorLegacy.profile_image_url_https
       : '',
@@ -193,7 +207,9 @@ export function mapSpaceDetails(
   const liveListenersCount = Number(metadata.total_live_listeners) || 0
   const replayCount = Number(metadata.total_replay_watched) || 0
   const isReplayAvailable = metadata.is_space_available_for_replay === true
-  const state = typeof metadata.state === 'string' ? metadata.state : ''
+  const state = typeof metadata.state === 'string'
+    ? metadata.state
+    : ''
 
   return {
     id: spaceId,

@@ -13,7 +13,9 @@ function getLocalReplies(tweetId: string, cursor?: string) {
   return getLocalCache({
     // cursor 为 base62 字符串，直接作为 key 使用即可
     // Windows 文件名不允许 ':'，使用 '_' 分隔即可
-    id: cursor ? `${tweetId}_${cursor}` : tweetId,
+    id: cursor
+      ? `${tweetId}_${cursor}`
+      : tweetId,
     type: 'replies',
     getter: () => fetchReplies(tweetId, cursor).then(({ tweets, nextCursor }) => ({
       tweets: tweets.map(t => enrichTweet(t)).filter(tweet => !!tweet),

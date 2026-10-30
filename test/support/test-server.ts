@@ -44,7 +44,12 @@ export interface TestServerConfig {
 }
 
 /** Keys handed to the dev server; emptied under isolation so `.env` never fills them. */
-export const EXTERNAL_KEYS = ['INS_COOKIES', 'TWEET_KEYS', 'GEMINI_API_KEY', 'DEEPSEEK_API_KEY'] as const
+export const EXTERNAL_KEYS = [
+  'INS_COOKIES',
+  'TWEET_KEYS',
+  'GEMINI_API_KEY',
+  'DEEPSEEK_API_KEY',
+] as const
 
 export class TestServer {
   private process: ChildProcess | null = null
@@ -158,7 +163,9 @@ export class TestServer {
 
     while (Date.now() - start < timeout) {
       try {
-        const res = await fetch(this._url, { signal: AbortSignal.timeout(3000) })
+        const res = await fetch(this._url, {
+          signal: AbortSignal.timeout(3000),
+        })
         if (res.ok) {
           console.log(`[TestServer] Ready at ${this._url} (${Date.now() - start}ms)`)
           return true
@@ -199,7 +206,9 @@ export class TestServer {
   /** Probe whether an HTTP server is already answering on the target port. */
   private async probe(): Promise<boolean> {
     try {
-      const res = await fetch(this._url, { signal: AbortSignal.timeout(1500) })
+      const res = await fetch(this._url, {
+        signal: AbortSignal.timeout(1500),
+      })
       return res.ok
     }
     catch {
@@ -215,7 +224,12 @@ export class TestServer {
   private killTree(child: ChildProcess): void {
     try {
       if (process.platform === 'win32') {
-        spawnSync('taskkill', ['/PID', String(child.pid), '/T', '/F'], { stdio: 'ignore' })
+        spawnSync('taskkill', [
+          '/PID',
+          String(child.pid),
+          '/T',
+          '/F',
+        ], { stdio: 'ignore' })
       }
       else {
         child.kill('SIGTERM')

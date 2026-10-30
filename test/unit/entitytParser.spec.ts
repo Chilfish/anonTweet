@@ -17,7 +17,12 @@ describe('entitytParser', () => {
         index: 1,
       },
       { type: 'text', text: ' see ', index: 2 },
-      { type: 'separator', text: ' | ', mediaIndex: 0, index: 30000 } as any,
+      {
+        type: 'separator',
+        text: ' | ',
+        mediaIndex: 0,
+        index: 30000,
+      } as any,
       { type: 'media_alt', text: 'A CAT', index: 20000 } as any,
     ]
 
@@ -33,10 +38,25 @@ describe('entitytParser', () => {
     const restored = restoreEntities(translatedText, entityMap, originalEntities)
 
     expect(restored).toEqual([
-      { type: 'text', text: 'Hello ', index: 0, aiTranslation: '你好 ' },
+      {
+        type: 'text',
+        text: 'Hello ',
+        index: 0,
+        aiTranslation: '你好 ',
+      },
       { ...originalEntities[1]!, index: 1 },
-      { type: 'text', text: ' see ', index: 2, aiTranslation: ' 看 ' },
-      { type: 'media_alt', text: 'A CAT', aiTranslation: ' 一只猫', index: 20000 },
+      {
+        type: 'text',
+        text: ' see ',
+        index: 2,
+        aiTranslation: ' 看 ',
+      },
+      {
+        type: 'media_alt',
+        text: 'A CAT',
+        aiTranslation: ' 一只猫',
+        index: 20000,
+      },
     ])
   })
 
@@ -86,7 +106,12 @@ describe('entitytParser', () => {
 
   it('applyAITranslations keeps the full stream when the AI result is not index-aligned (no fragment loss)', () => {
     const base: Entity[] = [
-      { type: 'hashtag', text: '#めるサマー反田', index: 0, href: 'https://twitter.com/hashtag/x' } as any,
+      {
+        type: 'hashtag',
+        text: '#めるサマー反田',
+        index: 0,
+        href: 'https://twitter.com/hashtag/x',
+      } as any,
       { type: 'text', text: ' で渡瀬の名前が出たと聞き...嬉しいねᕕ😄ᕗ', index: 1 },
     ]
     const { entityMap } = serializeForAI(base)
@@ -107,7 +132,12 @@ describe('entitytParser', () => {
       { type: 'text', text: 'hello', index: 0 },
     ]
     const ai: Entity[] = [
-      { type: 'text', text: 'hello', index: 0, aiTranslation: '你好' },
+      {
+        type: 'text',
+        text: 'hello',
+        index: 0,
+        aiTranslation: '你好',
+      },
     ]
 
     expect(applyAITranslations(base, ai)).toEqual([

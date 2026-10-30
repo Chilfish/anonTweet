@@ -2,7 +2,12 @@ import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('~/lib/AITranslation', () => ({
   autoTranslateTweet: vi.fn(async () => ([
-    { type: 'text', text: 'x', index: 0, aiTranslation: 'y' },
+    {
+      type: 'text',
+      text: 'x',
+      index: 0,
+      aiTranslation: 'y',
+    },
   ])),
 }))
 
@@ -51,7 +56,12 @@ describe('/api/ai/ai-translation', () => {
     const req = new Request('http://localhost/api/ai/ai-translation', {
       method: 'POST',
       body: JSON.stringify({
-        tweet: { id_str: '1', lang: 'en', text: 'a', entities: [] },
+        tweet: {
+          id_str: '1',
+          lang: 'en',
+          text: 'a',
+          entities: [],
+        },
         enableAITranslation: true,
         apiKey: 'k',
         model: 'm',

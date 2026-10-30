@@ -43,7 +43,9 @@ export function parseVisionResult(
   // describe / custom：schema 回退 describeSchema，读 descriptions
   return (data.descriptions ?? []).map(d => ({
     index: d.index,
-    mode: (preset.mode === 'custom' ? 'custom' : 'describe') as VisionMode,
+    mode: (preset.mode === 'custom'
+      ? 'custom'
+      : 'describe') as VisionMode,
     promptId: preset.id,
     provider: '',
     model: '',
@@ -105,7 +107,9 @@ export function mergeVisionInfo(
   for (const item of incoming) {
     map.set(item.index, item)
   }
-  return [...map.values()].sort((a, b) => a.index - b.index)
+  return [
+    ...map.values(),
+  ].sort((a, b) => a.index - b.index)
 }
 
 /** 逐图编辑草稿：ocr 模式写原文/译文，describe/custom 写描述 */
@@ -144,9 +148,15 @@ export function applyVisionEdits(
       const isOcr = existing.mode === 'ocr'
       next.push({
         ...existing,
-        originalText: isOcr ? draft.originalText ?? existing.originalText : existing.originalText,
-        translatedText: isOcr ? draft.translatedText ?? existing.translatedText : existing.translatedText,
-        description: isOcr ? existing.description : draft.description ?? existing.description,
+        originalText: isOcr
+          ? draft.originalText ?? existing.originalText
+          : existing.originalText,
+        translatedText: isOcr
+          ? draft.translatedText ?? existing.translatedText
+          : existing.translatedText,
+        description: isOcr
+          ? existing.description
+          : draft.description ?? existing.description,
       })
     }
     else {

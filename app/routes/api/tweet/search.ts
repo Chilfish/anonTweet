@@ -44,7 +44,9 @@ export async function loader({ request }: Route.LoaderArgs) {
     return enrichResult(result)
   }
   catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error'
+    const message = error instanceof Error
+      ? error.message
+      : 'Unknown error'
     const status = error instanceof Error && 'status' in error
       ? Number((error as { status: unknown }).status) || 500
       : 500

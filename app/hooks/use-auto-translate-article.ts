@@ -45,7 +45,12 @@ export function useAutoTranslateArticle(
   useEffect(() => {
     if (existing && tweetId && !translation)
       setArticleTranslation(tweetId, existing)
-  }, [existing, tweetId, translation, setArticleTranslation])
+  }, [
+    existing,
+    tweetId,
+    translation,
+    setArticleTranslation,
+  ])
 
   const translate = useCallback(async (force = false) => {
     if (!article || !tweetId)
@@ -109,7 +114,17 @@ export function useAutoTranslateArticle(
 
     firedForRef.current = tweetId
     void translate()
-  }, [article, tweetId, enableAITranslation, ai.apiKey, ai.model, translation, existing, status, translate])
+  }, [
+    article,
+    tweetId,
+    enableAITranslation,
+    ai.apiKey,
+    ai.model,
+    translation,
+    existing,
+    status,
+    translate,
+  ])
 
   return { status, translate }
 }

@@ -55,7 +55,12 @@ export const useTranslationDictionaryStore = create<TranslationDictionaryState>(
 
       updateEntry: (id, updates) => set(state => ({
         entries: state.entries.map(e =>
-          e.id === id ? { ...e, ...updates } : e,
+          e.id === id
+            ? {
+                ...e,
+                ...updates,
+              }
+            : e,
         ),
       })),
 
@@ -73,7 +78,12 @@ export const useTranslationDictionaryStore = create<TranslationDictionaryState>(
           }))
 
         if (uniqueNew.length > 0) {
-          set({ entries: [...uniqueNew, ...currentEntries] })
+          set({
+            entries: [
+              ...uniqueNew,
+              ...currentEntries,
+            ],
+          })
         }
 
         return {

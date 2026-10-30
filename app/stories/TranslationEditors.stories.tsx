@@ -34,7 +34,9 @@ export const Display: Story = {
     <WithStoreState
       seed={() => seedTranslation({
         translationMode: 'bilingual',
-        translationVisibility: { [tweetEnglish.id_str]: { body: true, alt: true } },
+        translationVisibility: {
+          [tweetEnglish.id_str]: { body: true, alt: true },
+        },
       })}
     >
       <TranslationDisplay tweetId={tweetEnglish.id_str} originalTweet={tweetEnglish} />

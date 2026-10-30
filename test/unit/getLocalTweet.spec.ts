@@ -48,15 +48,17 @@ function cachedSpaceTweet(overrides: Partial<EnrichedTweet> = {}): EnrichedTweet
       verified: false,
       is_blue_verified: false,
     },
-    entities: [{
-      type: 'url',
-      index: 0,
-      url: 'https://t.co/ELCNFX5yGy',
-      text: 'x.com/i/spaces/1djGX…',
-      display_url: 'x.com/i/spaces/1djGX…',
-      expanded_url: 'https://x.com/i/spaces/1djGXroNWDExZ',
-      href: 'https://x.com/i/spaces/1djGXroNWDExZ',
-    }],
+    entities: [
+      {
+        type: 'url',
+        index: 0,
+        url: 'https://t.co/ELCNFX5yGy',
+        text: 'x.com/i/spaces/1djGX…',
+        display_url: 'x.com/i/spaces/1djGX…',
+        expanded_url: 'https://x.com/i/spaces/1djGXroNWDExZ',
+        href: 'https://x.com/i/spaces/1djGXroNWDExZ',
+      },
+    ],
     ...overrides,
   } as EnrichedTweet
 }
@@ -103,7 +105,9 @@ describe('AC-SPACE-011: backfills space for tweets cached before the field exist
     expect(setLocalCache).toHaveBeenCalledWith(expect.objectContaining({
       id: '1871586443388420240',
       type: 'tweet',
-      value: expect.objectContaining({ space: expect.objectContaining({ id: '1djGXroNWDExZ' }) }),
+      value: expect.objectContaining({
+        space: expect.objectContaining({ id: '1djGXroNWDExZ' }),
+      }),
     }))
   })
 
@@ -132,7 +136,9 @@ describe('AC-SPACE-011: backfills space for tweets cached before the field exist
 
   it('AC-SPACE-011: ignores tweets without any space link', async () => {
     getLocalCache.mockResolvedValue(cachedSpaceTweet({
-      entities: [{ type: 'text', index: 0, text: 'hello' }],
+      entities: [
+        { type: 'text', index: 0, text: 'hello' },
+      ],
     }))
 
     const tweet = await getLocalTweet('1')
@@ -187,11 +193,27 @@ const flatArticle = {
 
 describe('AC-TWEET-015: upgrades flat cached articles to the rich block document', () => {
   it('AC-TWEET-015: re-fetches and persists the rich article for a flat cache entry', async () => {
-    getLocalCache.mockResolvedValue(cachedSpaceTweet({ id_str: '2104058634452005231', entities: [articleUrlEntity], article: flatArticle }))
+    getLocalCache.mockResolvedValue(cachedSpaceTweet({
+      id_str: '2104058634452005231',
+      entities: [articleUrlEntity],
+      article: flatArticle,
+    }))
     getEnrichedTweet.mockResolvedValue(cachedSpaceTweet({
       id_str: '2104058634452005231',
       entities: [articleUrlEntity],
-      article: { ...flatArticle, format: 'rich', blocks: [{ key: 'a', type: 'paragraph', runs: [{ type: 'text', text: 'body' }] }] },
+      article: {
+        ...flatArticle,
+        format: 'rich',
+        blocks: [
+          {
+            key: 'a',
+            type: 'paragraph',
+            runs: [
+              { type: 'text', text: 'body' },
+            ],
+          },
+        ],
+      },
     }))
 
     const tweet = await getLocalTweet('2104058634452005231')
@@ -202,7 +224,9 @@ describe('AC-TWEET-015: upgrades flat cached articles to the rich block document
     expect(setLocalCache).toHaveBeenCalledWith(expect.objectContaining({
       id: '2104058634452005231',
       type: 'tweet',
-      value: expect.objectContaining({ article: expect.objectContaining({ format: 'rich' }) }),
+      value: expect.objectContaining({
+        article: expect.objectContaining({ format: 'rich' }),
+      }),
     }))
   })
 

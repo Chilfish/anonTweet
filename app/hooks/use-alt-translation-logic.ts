@@ -32,11 +32,16 @@ export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
     const mergedEntities = deriveManualTranslation(
       baseEntities,
       { manual, legacyAI: originalTweet.autoTranslationEntities },
-      { types: ['media_alt'] },
+      {
+        types: ['media_alt'],
+      },
     ).map((entity) => {
       // 解码实体，防止 HTML 字符被再次编码
       if (entity.translation) {
-        return { ...entity, translation: decodeHtmlEntities(entity.translation) }
+        return {
+          ...entity,
+          translation: decodeHtmlEntities(entity.translation),
+        }
       }
       return entity
     })
@@ -56,7 +61,10 @@ export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
 
     setIsAITranslating(true)
     try {
-      const combinedGlossary = [dictEntries(), translationGlossary].filter(Boolean).join('\n')
+      const combinedGlossary = [
+        dictEntries(),
+        translationGlossary,
+      ].filter(Boolean).join('\n')
       const { data } = await fetcher.post('/api/ai-translation', {
         tweet: originalTweet,
         enableAITranslation: true,
@@ -83,8 +91,12 @@ export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
           if (entity.type !== 'media_alt')
             return entity
           const found = aiEntities.find(e => e.index === entity.index)
-          const translation = found?.aiTranslation || (found && found.text !== entity.text ? found.text : undefined)
-          return found ? { ...entity, translation: translation || entity.translation } : entity
+          const translation = found?.aiTranslation || (found && found.text !== entity.text
+            ? found.text
+            : undefined)
+          return found
+            ? { ...entity, translation: translation || entity.translation }
+            : entity
         }))
 
         toast.success('AI 翻译完成')
@@ -111,7 +123,9 @@ export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
 
   // 更新单个 Alt 文本
   const updateAltTranslation = useCallback((index: number, value: string) => {
-    setEditingEntities(prev => prev.map(e => e.index === index ? { ...e, translation: value } : e))
+    setEditingEntities(prev => prev.map(e => e.index === index
+      ? { ...e, translation: value }
+      : e))
   }, [])
 
   // 保存
@@ -121,7 +135,13 @@ export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
     setIsOpen(false)
     // 持久化到服务端（DB tweetEntities + localCache 刷新），刷新页面后仍可恢复
     syncTranslationData([originalTweet], { [tweetId]: editingEntities })
-  }, [tweetId, editingEntities, setTranslation, setTranslationVisibility, originalTweet])
+  }, [
+    tweetId,
+    editingEntities,
+    setTranslation,
+    setTranslationVisibility,
+    originalTweet,
+  ])
 
   // 隐藏/删除显示
   const hideTranslations = useCallback(() => {

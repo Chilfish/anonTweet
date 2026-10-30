@@ -67,10 +67,14 @@ export function IGStoryGrid({
             aria-label={selectable
               ? `${isSelected ? '取消选择' : '选择'}第 ${position} 条快拍`
               : `查看第 ${position} 条快拍`}
-            onClick={() => (selectable ? onToggle?.(post.id) : onOpen?.(index))}
+            onClick={() => (selectable
+              ? onToggle?.(post.id)
+              : onOpen?.(index))}
             className="group relative aspect-square overflow-hidden bg-muted/10 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background"
           >
-            {media ? <StoryThumb media={media} /> : <span className="absolute inset-0 bg-muted/20" />}
+            {media
+              ? <StoryThumb media={media} />
+              : <span className="absolute inset-0 bg-muted/20" />}
 
             {/* 浏览态：hover 轻微压暗，暗示可点开 */}
             {!selectable && (

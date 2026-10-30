@@ -44,7 +44,9 @@ describe('gET /api/tweet/search', () => {
   it('returns 400 + empty results when q is missing', async () => {
     const { loader } = await import('~/routes/api/tweet/search')
 
-    const res = await loader({ request: makeSearchRequest('type=latest') } as any)
+    const res = await loader({
+      request: makeSearchRequest('type=latest'),
+    } as any)
 
     expect(fetchSearchTweetsMock).not.toHaveBeenCalled()
     expect((res as any)?.data ?? res).toMatchObject({ tweets: [], nextCursor: null })
@@ -53,7 +55,9 @@ describe('gET /api/tweet/search', () => {
   it('fetches with q / type / count defaults and returns tweets + nextCursor', async () => {
     const { loader } = await import('~/routes/api/tweet/search')
 
-    const res = await loader({ request: makeSearchRequest('q=twitter') } as any)
+    const res = await loader({
+      request: makeSearchRequest('q=twitter'),
+    } as any)
 
     expect(fetchSearchTweetsMock).toHaveBeenCalledWith('twitter', {
       type: 'latest',
@@ -61,7 +65,9 @@ describe('gET /api/tweet/search', () => {
       cursor: undefined,
     })
     expect(res).toMatchObject({
-      tweets: [{ id_str: '1' }],
+      tweets: [
+        { id_str: '1' },
+      ],
       nextCursor: 'cursor-B',
     })
   })
@@ -83,8 +89,14 @@ describe('gET /api/tweet/search', () => {
   it('rejects blank / overlong queries with 400', async () => {
     const { loader } = await import('~/routes/api/tweet/search')
 
-    for (const badQ of ['', '   ', 'x'.repeat(501)]) {
-      const res = await loader({ request: makeSearchRequest(`q=${encodeURIComponent(badQ)}`) } as any)
+    for (const badQ of [
+      '',
+      '   ',
+      'x'.repeat(501),
+    ]) {
+      const res = await loader({
+        request: makeSearchRequest(`q=${encodeURIComponent(badQ)}`),
+      } as any)
       expect(fetchSearchTweetsMock).not.toHaveBeenCalled()
       expect((res as any)?.data ?? res).toMatchObject({ tweets: [], nextCursor: null })
     }
@@ -95,7 +107,9 @@ describe('gET /api/tweet/search', () => {
 
     const { loader } = await import('~/routes/api/tweet/search')
 
-    const res = await loader({ request: makeSearchRequest('q=twitter') } as any)
+    const res = await loader({
+      request: makeSearchRequest('q=twitter'),
+    } as any)
 
     expect((res as any)?.data ?? res).toMatchObject({ error: 'Failed to search tweets' })
   })

@@ -28,7 +28,9 @@ export const AltEntityList: React.FC<AltEntityListProps> = ({
       {altEntities.map((entity) => {
         // 计算图片序号，通常 index 大于 20000 用于媒体
         // 保持原逻辑的视觉提示
-        const imgNumber = entity.index > 20000 ? entity.index - 20000 + 1 : '1'
+        const imgNumber = entity.index > 20000
+          ? entity.index - 20000 + 1
+          : '1'
 
         return (
           <div

@@ -57,7 +57,15 @@ function TemplateEditor({
     }, 300)
 
     return () => clearTimeout(timer)
-  }, [name, html, id, isReadOnly, onUpdate, initialName, initialHtml])
+  }, [
+    name,
+    html,
+    id,
+    isReadOnly,
+    onUpdate,
+    initialName,
+    initialHtml,
+  ])
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -137,7 +145,10 @@ export function SeparatorTemplateManager() {
   const [newTemplate, setNewTemplate] = useState({ name: '', html: '<hr class="my-4" />' })
 
   const allTemplates = useMemo(() =>
-    [...separatorTemplates, ...settings.customTemplates], [separatorTemplates, settings.customTemplates])
+    [
+      ...separatorTemplates,
+      ...settings.customTemplates,
+    ], [separatorTemplates, settings.customTemplates])
 
   const selectedTemplate = useMemo(() =>
     allTemplates.find(t => t.id === settings.selectedTemplateId) || allTemplates[0], [allTemplates, settings.selectedTemplateId])
@@ -162,7 +173,12 @@ export function SeparatorTemplateManager() {
       selectTemplate(allTemplates[0]!.id)
     }
     deleteCustomTemplate(id)
-  }, [settings.selectedTemplateId, allTemplates, selectTemplate, deleteCustomTemplate])
+  }, [
+    settings.selectedTemplateId,
+    allTemplates,
+    selectTemplate,
+    deleteCustomTemplate,
+  ])
 
   return (
     <div className="space-y-6 p-1">

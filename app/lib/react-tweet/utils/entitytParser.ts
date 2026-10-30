@@ -73,16 +73,36 @@ function createFinalEntity(base: any, text: string, index: number): Entity {
 
   switch (base.type) {
     case 'hashtag':
-      return { ...cleanBase, ...common, href: `https://twitter.com/hashtag/${base.text}` }
+      return {
+        ...cleanBase,
+        ...common,
+        href: `https://twitter.com/hashtag/${base.text}`,
+      }
     case 'mention':
-      return { ...cleanBase, ...common, href: `https://twitter.com/${base.screen_name}` }
+      return {
+        ...cleanBase,
+        ...common,
+        href: `https://twitter.com/${base.screen_name}`,
+      }
     case 'url':
     case 'media':
-      return { ...cleanBase, ...common, href: base.expanded_url, text: base.display_url || text }
+      return {
+        ...cleanBase,
+        ...common,
+        href: base.expanded_url,
+        text: base.display_url || text,
+      }
     case 'symbol':
-      return { ...cleanBase, ...common, href: `https://twitter.com/search?q=%24${base.text}` }
+      return {
+        ...cleanBase,
+        ...common,
+        href: `https://twitter.com/search?q=%24${base.text}`,
+      }
     default:
-      return { ...cleanBase, ...common }
+      return {
+        ...cleanBase,
+        ...common,
+      }
   }
 }
 
@@ -173,7 +193,10 @@ export function getEntities(tweet: RawTweet, rawText: string): Entity[] {
     }
   })
 
-  return [...standardEntities, ...altEntities]
+  return [
+    ...standardEntities,
+    ...altEntities,
+  ]
 }
 
 export function getMediaAltEntities(tweet: RawTweet): Entity[] {
@@ -327,7 +350,9 @@ export function applyAITranslations(base: Entity[], ai: Entity[]): Entity[] {
       return original
 
     // 只有当 AI 结果中有翻译内容，且与原文不同时，才更新 aiTranslation
-    const aiVal = found.aiTranslation || (found.text !== original.text ? found.text : undefined)
+    const aiVal = found.aiTranslation || (found.text !== original.text
+      ? found.text
+      : undefined)
 
     if (aiVal) {
       return { ...original, aiTranslation: aiVal }

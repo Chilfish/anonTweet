@@ -41,7 +41,9 @@ function getBestVideoVariant(media: MediaDetails): string | null {
     return null
 
   const url = mp4Variants.reduce((prev, curr) =>
-    curr.bitrate > prev.bitrate ? curr : prev,
+    curr.bitrate > prev.bitrate
+      ? curr
+      : prev,
   ).url
 
   return `https://proxy.chilfish.top/${url}`
@@ -62,11 +64,17 @@ function createDownloadItem(
   const username = tweet.user.screen_name ?? 'unknown-user'
 
   // 使用 tweet 原始时间，若无则回退，但不建议使用 Date.now() 混淆历史数据
-  const tweetDate = tweet.created_at ? new Date(tweet.created_at) : new Date()
+  const tweetDate = tweet.created_at
+    ? new Date(tweet.created_at)
+    : new Date()
   const formattedDate = formatDate(tweetDate, 'yyyymmdd_hhmmss')
 
-  const suffix = index > 0 ? `-${index}` : ''
-  const ext = type === 'photo' ? 'jpg' : 'mp4'
+  const suffix = index > 0
+    ? `-${index}`
+    : ''
+  const ext = type === 'photo'
+    ? 'jpg'
+    : 'mp4'
 
   const filename = `${username}-${id}-${formattedDate}${suffix}.${ext}`
 
@@ -87,7 +95,9 @@ function createDownloadItem(
  * 展平 Quoted Tweet 结构并聚合所有媒体
  */
 export function extractDownloadItemsFromTweets(tweets: EnrichedTweet[]): DownloadItem[] {
-  const allTweets = tweets.flatMap(t => t.quotedTweet ? [t.quotedTweet, t] : [t])
+  const allTweets = tweets.flatMap(t => t.quotedTweet
+    ? [t.quotedTweet, t]
+    : [t])
 
   return allTweets.flatMap((tweet) => {
     if (!tweet.mediaDetails?.length)
@@ -156,7 +166,9 @@ export function DownloadMedia() {
     catch (globalError) {
       console.error('[MediaDownloader] Critical Failure', globalError)
       toast.error('批量下载进程异常终止', {
-        description: globalError instanceof Error ? globalError.message : '网络或权限错误',
+        description: globalError instanceof Error
+          ? globalError.message
+          : '网络或权限错误',
       })
     }
     setIsDownloading(false)
@@ -174,11 +186,13 @@ export function DownloadMedia() {
         />
       )}
       >
-        {isDownloading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <DownloadIcon className="h-4 w-4" />
-        )}
+        {isDownloading
+          ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            )
+          : (
+              <DownloadIcon className="h-4 w-4" />
+            )}
       </TooltipTrigger>
       <TooltipContent side="bottom">
         <p>下载本页所有推文媒体</p>

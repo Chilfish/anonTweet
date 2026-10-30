@@ -46,7 +46,9 @@ export const useTranslationUIStore = create<UIState & UIActions>()((set, get) =>
       const nextMode = enabled ?? !state.isSelectionMode
       return {
         isSelectionMode: nextMode,
-        selectedTweetIds: nextMode ? state.selectedTweetIds : [],
+        selectedTweetIds: nextMode
+          ? state.selectedTweetIds
+          : [],
         isCapturingSelected: false,
       }
     }),
@@ -60,7 +62,9 @@ export const useTranslationUIStore = create<UIState & UIActions>()((set, get) =>
 
     // 构建所有可用推文的扁平列表
     const allTweets = [
-      ...(mainTweet ? [mainTweet] : []),
+      ...(mainTweet
+        ? [mainTweet]
+        : []),
       ...tweets,
     ]
 
@@ -70,7 +74,10 @@ export const useTranslationUIStore = create<UIState & UIActions>()((set, get) =>
     // 保持原有逻辑：非主推文则递归选中后代
     if (!isMainTweet) {
       const descendantIds = findDescendantIds(allTweets, tweetId)
-      targetIds = [...targetIds, ...descendantIds]
+      targetIds = [
+        ...targetIds,
+        ...descendantIds,
+      ]
     }
 
     let newSelectedIds = [...state.selectedTweetIds]
@@ -94,7 +101,9 @@ export const useTranslationUIStore = create<UIState & UIActions>()((set, get) =>
 
     const { mainTweet, tweets } = useTranslationStore.getState()
     const allIds = [
-      ...(mainTweet ? [mainTweet.id_str] : []),
+      ...(mainTweet
+        ? [mainTweet.id_str]
+        : []),
       ...tweets.map(t => t.id_str),
     ]
     set({ selectedTweetIds: allIds })

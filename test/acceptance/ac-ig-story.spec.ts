@@ -51,11 +51,17 @@ vi.mock('~/lib/localCache', () => ({
 vi.mock('~/lib/database/db.server', () => ({
   isDbAvailable: () => true,
   getDbClient: () => ({
-    query: { igPost: { findFirst: async () => null } },
+    query: {
+      igPost: {
+        findFirst: async () => null,
+      },
+    },
     insert: () => ({
       values: (v: { postShortcode: string, username: string, jsonContent: IGPost }) => {
         mocks.inserts.push(v)
-        return { onConflictDoUpdate: async () => {} }
+        return {
+          onConflictDoUpdate: async () => {},
+        }
       },
     }),
   }),
@@ -227,7 +233,10 @@ describe('AC-IG-STORY-006: story grid, skeleton structure and story-like id dete
 
 describe('AC-IG-STORY-003: DB cache key consistency for story requests', () => {
   it('AC-IG-STORY-003: writes a fetched post under the request key it was read with', async () => {
-    const story: IGPost = { ...normalizeIGPost(storyMessages())!, id: 'DQ1a2b3c4dE' }
+    const story: IGPost = {
+      ...normalizeIGPost(storyMessages())!,
+      id: 'DQ1a2b3c4dE',
+    }
 
     const returned = await getCachedIGPost('chilfish/3901234567890123456', async () => story)
     expect(returned).toBe(story)
@@ -257,7 +266,9 @@ describe('AC-IG-STORY-003: DB cache key consistency for story requests', () => {
       'story~chilfish~3984520955544149999',
     ])
     // 每项独立落入 localCache（per-card 翻译端点可解析）
-    expect([...mocks.cache.keys()].sort()).toEqual([
+    expect([
+      ...mocks.cache.keys(),
+    ].sort()).toEqual([
       'ig-post-story~chilfish~3984520955544140029',
       'ig-post-story~chilfish~3984520955544149999',
     ])
@@ -325,7 +336,9 @@ describe('AC-IG-STORY-005: story download item extraction', () => {
     const posts = normalizeIGPosts(trayMessages())
     const broken: IGPost = {
       ...posts[0]!,
-      media: [{ ...posts[0]!.media[0]!, type: 'video', video_url: null }],
+      media: [
+        { ...posts[0]!.media[0]!, type: 'video', video_url: null },
+      ],
     }
 
     expect(extractIGStoryDownloadItems([broken])).toEqual([])

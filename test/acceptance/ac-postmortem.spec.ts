@@ -14,7 +14,24 @@ const LINE_BREAK_RE = /\r?\n/
 
 const POSTMORTEM_DIR_REL = path.join('docs', 'postmortem')
 const SCRIPT_REL = path.join('scripts', 'postmortem-check.ts')
-const REPORT_IDS = ['001', '002', '003', '004', '005', '006', '007', '008', '009', '010', '011', '012', '013', '014', '015', '016']
+const REPORT_IDS = [
+  '001',
+  '002',
+  '003',
+  '004',
+  '005',
+  '006',
+  '007',
+  '008',
+  '009',
+  '010',
+  '011',
+  '012',
+  '013',
+  '014',
+  '015',
+  '016',
+]
 const REPORT_FILE_RE = /^\d{3}-.+\.md$/
 const STATUS_RE = /\*\*状态\*\*:\s*(?:Active|Mitigated)/
 const HOT_FILE_REF_RE = /#\d{3}/g
@@ -70,7 +87,9 @@ describe('AC-PM postmortem pre-release integrity', () => {
   it('AC-PM-002: every report has a status field (Active | Mitigated)', () => {
     const bad = listReports().filter((f) => {
       const content = readProjectFile(path.join(POSTMORTEM_DIR_REL, f))
-      return content ? !STATUS_RE.test(content) : true
+      return content
+        ? !STATUS_RE.test(content)
+        : true
     })
     expect(bad).toEqual([])
   })
@@ -78,7 +97,9 @@ describe('AC-PM postmortem pre-release integrity', () => {
   it('AC-PM-003: every report has a parseable Changed Files block', () => {
     const bad = listReports().filter((f) => {
       const content = readProjectFile(path.join(POSTMORTEM_DIR_REL, f))
-      return content ? parseChangedFiles(content).length === 0 : true
+      return content
+        ? parseChangedFiles(content).length === 0
+        : true
     })
     expect(bad).toEqual([])
   })
@@ -91,7 +112,9 @@ describe('AC-PM postmortem pre-release integrity', () => {
 
   it('AC-PM-005: hot-fix table references valid report ids', () => {
     const readme = readProjectFile(path.join(POSTMORTEM_DIR_REL, 'README.md')) ?? ''
-    const refs = [...new Set((readme.match(HOT_FILE_REF_RE) ?? []).map(m => m.slice(1)))]
+    const refs = [
+      ...new Set((readme.match(HOT_FILE_REF_RE) ?? []).map(m => m.slice(1))),
+    ]
     const bad = refs.filter(id => !REPORT_IDS.includes(id))
     expect(bad).toEqual([])
   })

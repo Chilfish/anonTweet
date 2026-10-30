@@ -27,7 +27,9 @@ function seedMode(mode: 'original' | 'translation' | 'bilingual') {
   return () =>
     seedTranslation({
       translationMode: mode,
-      translationVisibility: { [tweetWithPhotos.id_str]: { body: true, alt: true } },
+      translationVisibility: {
+        [tweetWithPhotos.id_str]: { body: true, alt: true },
+      },
     })
 }
 

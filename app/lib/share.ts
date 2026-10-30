@@ -133,8 +133,12 @@ export async function shareOut(payload: SharePayload): Promise<'shared' | 'abort
 /** dataURL（`data:image/png;base64,…`）→ File；正确处理负载里的 `,`，供系统分享图片。 */
 export function dataUrlToFile(dataUrl: string, filename: string): File {
   const comma = dataUrl.indexOf(',')
-  const meta = comma >= 0 ? dataUrl.slice(0, comma) : ''
-  const payload = comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl
+  const meta = comma >= 0
+    ? dataUrl.slice(0, comma)
+    : ''
+  const payload = comma >= 0
+    ? dataUrl.slice(comma + 1)
+    : dataUrl
   const mime = DATA_URL_MIME_RE.exec(meta)?.[1] || 'image/png'
 
   const binary = atob(payload)
@@ -150,7 +154,9 @@ export function canShareFiles(file: File): boolean {
   return (
     typeof navigator !== 'undefined'
     && typeof navigator.canShare === 'function'
-    && navigator.canShare({ files: [file] })
+    && navigator.canShare({
+      files: [file],
+    })
   )
 }
 
@@ -169,7 +175,11 @@ export async function shareImageOut(
     return 'unsupported'
 
   try {
-    await navigator.share({ files: [file], title, text })
+    await navigator.share({
+      files: [file],
+      title,
+      text,
+    })
     return 'shared'
   }
   catch (error) {
@@ -208,7 +218,9 @@ export function buildTweetSharePayload(tweet: EnrichedTweet): SharePayload {
   const entities = tweet.entities ?? []
   const hasTranslation = entities.some(e => !!e.translation || !!e.aiTranslation)
   const useLegacy = !hasTranslation && !!tweet.autoTranslationEntities?.length
-  const list = hasTranslation || !useLegacy ? entities : (tweet.autoTranslationEntities ?? [])
+  const list = hasTranslation || !useLegacy
+    ? entities
+    : (tweet.autoTranslationEntities ?? [])
   const preferTranslation = hasTranslation || useLegacy
 
   const handle = tweet.user?.screen_name?.trim() || ''
@@ -220,7 +232,9 @@ export function buildTweetSharePayload(tweet: EnrichedTweet): SharePayload {
     : `https://x.com/i/web/status/${tweet.id_str}`)
 
   return {
-    title: `${name}${handle ? ` (@${handle})` : ''} 的推文`,
+    title: `${name}${handle
+      ? ` (@${handle})`
+      : ''} 的推文`,
     text: rawText,
     url,
   }

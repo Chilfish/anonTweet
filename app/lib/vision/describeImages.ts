@@ -71,7 +71,9 @@ function buildVisionRetryFeedback(err: unknown, imageCount: number): string {
   if (err instanceof VisionContentError) {
     return `上一次输出结果数量与图片数量不一致（共 ${imageCount} 张图片）。请为每张图片且仅每张图片输出一个对象，index 使用用户消息中给出的图片索引，不要合并或跳过任何图片。`
   }
-  return `上一次输出未通过 schema 校验：${err instanceof Error ? err.message : String(err)}\n请重新输出严格符合 schema 的 JSON。`
+  return `上一次输出未通过 schema 校验：${err instanceof Error
+    ? err.message
+    : String(err)}\n请重新输出严格符合 schema 的 JSON。`
 }
 
 export async function runImageVision({

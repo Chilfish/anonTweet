@@ -47,7 +47,10 @@ export const openrouterStrategy: ProviderStrategy = {
     if (modelConfig.thinkingType === 'none' || level === 'minimal') {
       return { enabled: false }
     }
-    return { enabled: true, effort: mapLevelToEffort(level) }
+    return {
+      enabled: true,
+      effort: mapLevelToEffort(level),
+    }
   },
 
   buildProviderOptions(thinkingConfig, _modelConfig) {

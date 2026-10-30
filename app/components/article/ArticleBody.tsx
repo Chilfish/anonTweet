@@ -116,7 +116,12 @@ function groupBlocks(blocks: ArticleBlock[]): BlockGroup[] {
       last.items.push(block)
       continue
     }
-    groups.push({ kind: 'list', key: block.key, ordered: block.ordered, items: [block] })
+    groups.push({
+      kind: 'list',
+      key: block.key,
+      ordered: block.ordered,
+      items: [block],
+    })
   }
 
   return groups

@@ -18,7 +18,9 @@ import { loadFixture } from '../helpers/load-fixture'
 // 在 LLM 边界打桩：被测的是 translateIGCaption 的控制流与不可变性，不是模型本身
 vi.mock('ai', () => ({
   generateText: vi.fn(async () => ({ text: '这是翻译结果' })),
-  Output: { text: () => ({}) },
+  Output: {
+    text: () => ({}),
+  },
 }))
 
 type IGPostWithTranslation = IGPost & { captionTranslation?: string }

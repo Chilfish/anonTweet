@@ -23,39 +23,41 @@ export function Checkbox({
           state: CheckboxPrimitive.Indicator.State,
         ) => (
           <span {...props}>
-            {state.indeterminate ? (
-              <svg
-                aria-hidden="true"
-                className="size-3.5 sm:size-3"
-                fill="none"
-                height="24"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="3"
-                viewBox="0 0 24 24"
-                width="24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M5.252 12h13.496" />
-              </svg>
-            ) : (
-              <svg
-                aria-hidden="true"
-                className="size-3.5 sm:size-3"
-                fill="none"
-                height="24"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="3"
-                viewBox="0 0 24 24"
-                width="24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M5.252 12.7 10.2 18.63 18.748 5.37" />
-              </svg>
-            )}
+            {state.indeterminate
+              ? (
+                  <svg
+                    aria-hidden="true"
+                    className="size-3.5 sm:size-3"
+                    fill="none"
+                    height="24"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="3"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M5.252 12h13.496" />
+                  </svg>
+                )
+              : (
+                  <svg
+                    aria-hidden="true"
+                    className="size-3.5 sm:size-3"
+                    fill="none"
+                    height="24"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="3"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M5.252 12.7 10.2 18.63 18.748 5.37" />
+                  </svg>
+                )}
           </span>
         )}
       />

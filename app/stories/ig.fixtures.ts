@@ -38,17 +38,19 @@ export const reelPost = makePost({
   post_id: '987654321',
   url: 'https://www.instagram.com/reel/CxReel01/',
   type: 'reel',
-  media: [{
-    num: 1,
-    media_id: 'reel1',
-    shortcode: 'DReel01',
-    display_url: 'https://picsum.photos/seed/reel/640/640',
-    video_url: null,
-    width: 640,
-    height: 640,
-    type: 'video',
-    tagged_users: [],
-  }],
+  media: [
+    {
+      num: 1,
+      media_id: 'reel1',
+      shortcode: 'DReel01',
+      display_url: 'https://picsum.photos/seed/reel/640/640',
+      video_url: null,
+      width: 640,
+      height: 640,
+      type: 'video',
+      tagged_users: [],
+    },
+  ],
   audio: {
     title: 'Blue Bird',
     subtitle: 'NARUTO OP 3 Cover',
@@ -69,17 +71,19 @@ export const storyPost = makePost({
   description: '',
   created_at: '2026-09-11T09:15:00.000Z',
   expires: '2026-09-12T09:15:00.000Z',
-  media: [{
-    num: 1,
-    media_id: 'story1',
-    shortcode: 'DQ1a2b3c4dE',
-    display_url: 'https://picsum.photos/seed/story/1080/1920',
-    video_url: null,
-    width: 1080,
-    height: 1920,
-    type: 'photo',
-    tagged_users: [],
-  }],
+  media: [
+    {
+      num: 1,
+      media_id: 'story1',
+      shortcode: 'DQ1a2b3c4dE',
+      display_url: 'https://picsum.photos/seed/story/1080/1920',
+      video_url: null,
+      width: 1080,
+      height: 1920,
+      type: 'photo',
+      tagged_users: [],
+    },
+  ],
   storyLink: {
     url: 'https://example.com/live',
     title: 'Live 配信はこちら',
@@ -98,17 +102,19 @@ export const highlightPost = makePost({
   created_at: '2026-08-30T18:05:00.000Z',
   highlight_title: '佐世保遠征',
   resharedFrom: { username: 'sasebo_live', fullname: 'Sasebo Live' },
-  media: [{
-    num: 1,
-    media_id: 'highlight1',
-    shortcode: 'DQ9z8y7x6wV',
-    display_url: 'https://picsum.photos/seed/highlight/1080/1920',
-    video_url: 'https://example.com/highlight.mp4',
-    width: 1080,
-    height: 1920,
-    type: 'video',
-    tagged_users: [],
-  }],
+  media: [
+    {
+      num: 1,
+      media_id: 'highlight1',
+      shortcode: 'DQ9z8y7x6wV',
+      display_url: 'https://picsum.photos/seed/highlight/1080/1920',
+      video_url: 'https://example.com/highlight.mp4',
+      width: 1080,
+      height: 1920,
+      type: 'video',
+      tagged_users: [],
+    },
+  ],
 })
 
 /** 用户当前快拍 tray —— 每个 item 一张卡（IGStoryList 网格场景） */
@@ -119,17 +125,19 @@ export const trayPosts: IGPost[] = [
     post_id: '3984520955544140029',
     url: 'https://www.instagram.com/stories/chilfish/3984520955544140029/',
     created_at: '2026-09-12T10:02:00.000Z',
-    media: [{
-      num: 1,
-      media_id: '3984520955544140029',
-      shortcode: 'DdL3LK7Tvj9',
-      display_url: 'https://picsum.photos/seed/story-1/1080/1920',
-      video_url: null,
-      width: 1179,
-      height: 2096,
-      type: 'photo',
-      tagged_users: [],
-    }],
+    media: [
+      {
+        num: 1,
+        media_id: '3984520955544140029',
+        shortcode: 'DdL3LK7Tvj9',
+        display_url: 'https://picsum.photos/seed/story-1/1080/1920',
+        video_url: null,
+        width: 1179,
+        height: 2096,
+        type: 'photo',
+        tagged_users: [],
+      },
+    ],
   }),
   makePost({
     ...storyPost,
@@ -138,17 +146,19 @@ export const trayPosts: IGPost[] = [
     url: 'https://www.instagram.com/stories/chilfish/3984520955544149999/',
     created_at: '2026-09-12T11:18:00.000Z',
     storyLink: undefined,
-    media: [{
-      num: 1,
-      media_id: '3984520955544149999',
-      shortcode: 'DdL3LK7Tvj0',
-      display_url: 'https://picsum.photos/seed/story-2/1080/1920',
-      video_url: 'https://example.com/story-2.mp4',
-      width: 1080,
-      height: 1920,
-      type: 'video',
-      tagged_users: [],
-    }],
+    media: [
+      {
+        num: 1,
+        media_id: '3984520955544149999',
+        shortcode: 'DdL3LK7Tvj0',
+        display_url: 'https://picsum.photos/seed/story-2/1080/1920',
+        video_url: 'https://example.com/story-2.mp4',
+        width: 1080,
+        height: 1920,
+        type: 'video',
+        tagged_users: [],
+      },
+    ],
   }),
 ]
 
@@ -177,16 +187,20 @@ export const trayPostsMany: IGPost[] = Array.from({ length: 32 }, (_, i) => {
           type: 'web',
         }
       : undefined,
-    media: [{
-      num: 1,
-      media_id: mediaId,
-      shortcode: `DdL3LK7Tv${n}`,
-      display_url: `https://picsum.photos/seed/story-${n}/1080/1920`,
-      video_url: isVideo ? `https://example.com/story-${n}.mp4` : null,
-      width: 1080,
-      height: 1920,
-      type: isVideo ? 'video' : 'photo',
-      tagged_users: [],
-    }],
+    media: [
+      {
+        num: 1,
+        media_id: mediaId,
+        shortcode: `DdL3LK7Tv${n}`,
+        display_url: `https://picsum.photos/seed/story-${n}/1080/1920`,
+        video_url: isVideo
+          ? `https://example.com/story-${n}.mp4`
+          : null,
+        width: 1080,
+        height: 1920,
+        type: isVideo ? 'video' : 'photo',
+        tagged_users: [],
+      },
+    ],
   })
 })

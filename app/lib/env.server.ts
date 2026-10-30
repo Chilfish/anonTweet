@@ -66,7 +66,9 @@ export function createEnv(source: Record<string, string | undefined> = process.e
 
   if (!validatedData.HOSTNAME && validatedData.ENVIRONMENT === 'development') {
     const port = Number.parseInt(source.PORT || '9080')
-    validatedData.HOSTNAME = `http://localhost:${Number.isFinite(port) ? port : 9080}`
+    validatedData.HOSTNAME = `http://localhost:${Number.isFinite(port)
+      ? port
+      : 9080}`
   }
 
   if (!validatedData.TWEET_KEYS && validatedData.ENVIRONMENT === 'production') {

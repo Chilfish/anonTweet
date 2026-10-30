@@ -25,7 +25,9 @@ export function TweetMediaVideo({ media }: Props) {
 
   const duration = media.video_info.duration
   const isGif = media.type === 'animated_gif'
-  const badgeText = isGif ? 'GIF' : formatDuration(duration)
+  const badgeText = isGif
+    ? 'GIF'
+    : formatDuration(duration)
 
   return (
     <>

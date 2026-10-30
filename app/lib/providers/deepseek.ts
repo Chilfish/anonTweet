@@ -33,7 +33,10 @@ export const deepseekStrategy: ProviderStrategy = {
       apiKey,
       transformRequestBody(body) {
         if (body.reasoning_effort == null) {
-          return { ...body, thinking: { type: 'disabled' } }
+          return {
+            ...body,
+            thinking: { type: 'disabled' },
+          }
         }
         return body
       },

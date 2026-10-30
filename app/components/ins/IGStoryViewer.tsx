@@ -133,8 +133,11 @@ export function IGStoryViewer({
             const dx = touch.clientX - start.x
             const dy = touch.clientY - start.y
             // 只认明确的横向滑动，避免与页面纵向滚动抢手势
-            if (Math.abs(dx) > SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy))
-              step(dx < 0 ? 1 : -1)
+            if (Math.abs(dx) > SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy)) {
+              step(dx < 0
+                ? 1
+                : -1)
+            }
           }}
         >
           <DialogPrimitive.Title className="sr-only">快拍查看器</DialogPrimitive.Title>

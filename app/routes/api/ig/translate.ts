@@ -60,7 +60,12 @@ export async function action({ request, params }: Route.ActionArgs) {
   // ─── AI 翻译分支 ─────────────────────────
   if (!apiKey || !model) {
     return data(
-      { success: false, error: 'Missing apiKey or model', targetId: igId, targetType: 'ig' },
+      {
+        success: false,
+        error: 'Missing apiKey or model',
+        targetId: igId,
+        targetType: 'ig',
+      },
       { status: 400 },
     )
   }
@@ -85,7 +90,12 @@ export async function action({ request, params }: Route.ActionArgs) {
 
     if (!post || !post.description) {
       return data(
-        { success: false, error: 'Post not found or has no caption', targetId: igId, targetType: 'ig' },
+        {
+          success: false,
+          error: 'Post not found or has no caption',
+          targetId: igId,
+          targetType: 'ig',
+        },
         { status: 404 },
       )
     }
@@ -104,7 +114,14 @@ export async function action({ request, params }: Route.ActionArgs) {
 
     if (!translated) {
       return data(
-        { success: false, error: 'Translation returned empty', targetId: igId, targetType: 'ig', model, provider },
+        {
+          success: false,
+          error: 'Translation returned empty',
+          targetId: igId,
+          targetType: 'ig',
+          model,
+          provider,
+        },
         { status: 500 },
       )
     }
@@ -118,7 +135,12 @@ export async function action({ request, params }: Route.ActionArgs) {
     // 注：本路由原本就用真实 HTTP status（与 /api/ai-* 的「HTTP 200 + body.status」约定不同），此处保持原状
     return data(buildAIFailure(error, {
       errorCode: 'Translation failed',
-      context: { targetType: 'ig', targetId: igId, model, provider },
+      context: {
+        targetType: 'ig',
+        targetId: igId,
+        model,
+        provider,
+      },
     }), { status: 500 })
   }
 }

@@ -16,7 +16,9 @@ import { mapSpaceDetails, resolveSpaceId } from './space'
 // import { writeFile } from 'node:fs/promises'
 
 // config.ts
-const KEYS = (typeof process === 'undefined' ? '' : process.env.TWEET_KEYS || '').split(',').filter(Boolean)
+const KEYS = (typeof process === 'undefined'
+  ? ''
+  : process.env.TWEET_KEYS || '').split(',').filter(Boolean)
 
 // 初始化单例池
 export const twitterPool = new RettiwtPool(KEYS)
@@ -101,7 +103,10 @@ export async function fetchUserTweet(userId: string): Promise<RawTweet[]> {
           .map(({ item }) => item.itemContent.tweet_results.result as unknown as RawTweet))
         .filter(Boolean)
 
-      return [...tweets1, ...tweets2].sort((a, b) => b.rest_id.localeCompare(a.rest_id))
+      return [
+        ...tweets1,
+        ...tweets2,
+      ].sort((a, b) => b.rest_id.localeCompare(a.rest_id))
     },
     ),
   )
@@ -115,7 +120,9 @@ export interface FetchRepliesResult {
 function getBottomCursor(data: NonNullable<unknown>): string | null {
   const cursors = findByFilter<{ value?: string }>(data, 'cursorType', 'Bottom')
   const value = cursors.at(-1)?.value
-  return value ? String(value) : null
+  return value
+    ? String(value)
+    : null
 }
 
 export async function fetchReplies(tweetId: string, cursor?: string): Promise<FetchRepliesResult> {
@@ -148,7 +155,9 @@ export async function fetchReplies(tweetId: string, cursor?: string): Promise<Fe
       // 部分分页批次不一定包含 mainTweet，避免返回空对象导致 enrich 过程崩溃
       tweets: [
         ...comments as unknown as RawTweet[],
-        ...(mainTweet ? [mainTweet] : []),
+        ...(mainTweet
+          ? [mainTweet]
+          : []),
       ],
       nextCursor: getBottomCursor(response.data),
     }
@@ -259,7 +268,9 @@ export async function getEnrichedUserTweet(userId: string): Promise<EnrichedTwee
  * 取卡片宿主推文：转推时只有被转的原始推文带 `card`（与 enrichTweet 的展开规则一致）。
  */
 function unwrapCardSource(rawTweet: RawTweet): RawTweet {
-  const base = ('tweet' in rawTweet ? (rawTweet as { tweet?: RawTweet }).tweet : rawTweet) as RawTweet
+  const base = ('tweet' in rawTweet
+    ? (rawTweet as { tweet?: RawTweet }).tweet
+    : rawTweet) as RawTweet
   return base?.legacy?.retweeted_status_result?.result ?? base
 }
 
@@ -279,7 +290,9 @@ export async function resolveSpaceById(
   catch (error) {
     obsLog('space.fetch.failed', {
       spaceId,
-      reason: error instanceof Error ? error.message : String(error),
+      reason: error instanceof Error
+        ? error.message
+        : String(error),
     })
     return null
   }

@@ -96,12 +96,17 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
 
     setIsGenerating(true)
     try {
-      const combinedGlossary = [dictEntries(), translationGlossary].filter(Boolean).join('\n')
+      const combinedGlossary = [
+        dictEntries(),
+        translationGlossary,
+      ].filter(Boolean).join('\n')
       const { data } = await fetcher.post('/api/ai-vision', {
         tweet: originalTweet,
         mediaIndexes: photoIndexes,
         mode,
-        customPrompt: mode === 'custom' ? customPrompt : undefined,
+        customPrompt: mode === 'custom'
+          ? customPrompt
+          : undefined,
         withContext,
         translationGlossary: combinedGlossary || undefined,
         apiKey,
@@ -165,7 +170,10 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
 
     setIsTranslating(true)
     try {
-      const combinedGlossary = [dictEntries(), translationGlossary].filter(Boolean).join('\n')
+      const combinedGlossary = [
+        dictEntries(),
+        translationGlossary,
+      ].filter(Boolean).join('\n')
       const { data } = await fetcher.post('/api/ai-vision', {
         action: 'translate',
         tweet: { id_str: tweetId, text: originalTweet.text },
@@ -206,11 +214,25 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
     finally {
       setIsTranslating(false)
     }
-  }, [drafts, photoIndexes, translationConfig, originalTweet.text, tweetId, dictEntries, translationGlossary])
+  }, [
+    drafts,
+    photoIndexes,
+    translationConfig,
+    originalTweet.text,
+    tweetId,
+    dictEntries,
+    translationGlossary,
+  ])
 
   const updateDraft = useCallback(
     (index: number, patch: Partial<VisionDraft>) => {
-      setDrafts(prev => ({ ...prev, [index]: { ...prev[index], ...patch } }))
+      setDrafts(prev => ({
+        ...prev,
+        [index]: {
+          ...prev[index],
+          ...patch,
+        },
+      }))
     },
     [],
   )
@@ -226,7 +248,14 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
       })
       .catch(() => {})
     setIsOpen(false)
-  }, [tweetId, visionInfo, drafts, photoIndexes, updateTweet, originalTweet])
+  }, [
+    tweetId,
+    visionInfo,
+    drafts,
+    photoIndexes,
+    updateTweet,
+    originalTweet,
+  ])
 
   return {
     isOpen,

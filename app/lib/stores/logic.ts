@@ -22,7 +22,9 @@ export function checkTextContent(text?: string): boolean {
 
 /** 从 Entity 数组中提取翻译缓存 (纯函数) */
 export function extractTranslationsFromEntities(tweets: EnrichedTweet | EnrichedTweet[]): Record<string, Entity[]> {
-  const list = flatTweets(Array.isArray(tweets) ? tweets : [tweets])
+  const list = flatTweets(Array.isArray(tweets)
+    ? tweets
+    : [tweets])
   const extracted: Record<string, Entity[]> = {}
 
   for (const tweet of list) {
@@ -98,7 +100,10 @@ export function findDescendantIds(allTweets: EnrichedTweet[], parentId: string):
   let ids = children.map(t => t.id_str)
 
   children.forEach((child) => {
-    ids = [...ids, ...findDescendantIds(allTweets, child.id_str)]
+    ids = [
+      ...ids,
+      ...findDescendantIds(allTweets, child.id_str),
+    ]
   })
 
   return ids

@@ -50,9 +50,13 @@ export function meta({ loaderData }: Route.MetaArgs) {
   }
 
   const authorName = tweet.user?.name || 'Twitter User'
-  const authorHandle = tweet.user?.screen_name ? `@${tweet.user.screen_name}` : ''
+  const authorHandle = tweet.user?.screen_name
+    ? `@${tweet.user.screen_name}`
+    : ''
   const tweetText = decodeHtmlEntities(tweet.text || '').replace(/\n/g, ' ').trim()
-  const description = tweetText.length > 160 ? `${tweetText.slice(0, 157)}...` : tweetText
+  const description = tweetText.length > 160
+    ? `${tweetText.slice(0, 157)}...`
+    : tweetText
   const title = `${authorName} ${authorHandle} on X: "${description}" | Anon Tweet`
 
   const canonicalUrl = `${baseUrl}/tweets/${tweet.id_str}`
@@ -69,9 +73,17 @@ export function meta({ loaderData }: Route.MetaArgs) {
     { property: 'og:type', content: 'article' },
     { property: 'og:url', content: canonicalUrl },
     { property: 'og:site_name', content: siteName },
-    { property: 'og:locale', content: tweet.lang === 'zh' ? 'zh_CN' : 'en_US' },
+    {
+      property: 'og:locale',
+      content: tweet.lang === 'zh'
+        ? 'zh_CN'
+        : 'en_US',
+    },
     // Twitter Card
-    { name: 'twitter:card', content: mediaImage ? 'summary_large_image' : 'summary' },
+    {
+      name: 'twitter:card',
+      content: mediaImage ? 'summary_large_image' : 'summary',
+    },
     { name: 'twitter:title', content: title },
     { name: 'twitter:description', content: description },
     { name: 'twitter:site', content: '@anonTweet' },
@@ -102,16 +114,20 @@ function TweetStructuredData({ tweet }: { tweet: EnrichedTweet }) {
       'name': tweet.user?.name || '',
       'url': `https://x.com/${tweet.user?.screen_name || ''}`,
     },
-    'sharedContent': tweet.mediaDetails?.[0]?.media_url_https ? {
-      '@type': 'ImageObject',
-      'contentUrl': tweet.mediaDetails[0].media_url_https,
-    } : undefined,
+    'sharedContent': tweet.mediaDetails?.[0]?.media_url_https
+      ? {
+          '@type': 'ImageObject',
+          'contentUrl': tweet.mediaDetails[0].media_url_https,
+        }
+      : undefined,
   }
 
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify(jsonLd),
+      }}
     />
   )
 }
@@ -123,7 +139,9 @@ async function fetchTweetData(args: GetTweetSchema): Promise<TweetData> {
 
 export default function TweetPage({ loaderData }: Route.ComponentProps) {
   const { id } = useParams()
-  const tweetId = id ? extractTweetId(id) : null
+  const tweetId = id
+    ? extractTweetId(id)
+    : null
   const navigate = useNavigate()
   const { setAllTweets } = useTranslationActions()
   const storeTweets = useTweets()
@@ -136,7 +154,9 @@ export default function TweetPage({ loaderData }: Route.ComponentProps) {
 
   // GET 已解耦（AC-DECOUPLE-001）：只拉取缓存/原文，AI 翻译由 useAutoTranslateTweets 触发
   const { data: tweets, error, isLoading } = useSWR<TweetData>(
-    (tweetId && isStoreReady) ? tweetId : null,
+    (tweetId && isStoreReady)
+      ? tweetId
+      : null,
     () => fetchTweetData({ tweetId: tweetId! }),
     {
       revalidateIfStale: false,
@@ -161,7 +181,12 @@ export default function TweetPage({ loaderData }: Route.ComponentProps) {
         setCommentIds([])
       }
     }
-  }, [tweets, tweetId, navigate, setAllTweets])
+  }, [
+    tweets,
+    tweetId,
+    navigate,
+    setAllTweets,
+  ])
 
   // Check for retweet to show skeleton while redirecting
   const isRetweet = tweets?.[0]?.retweetedOrignalId && tweets[0].retweetedOrignalId !== tweets[0].id_str
@@ -177,7 +202,13 @@ export default function TweetPage({ loaderData }: Route.ComponentProps) {
     if (loaderData.tweet)
       return [loaderData.tweet]
     return undefined
-  }, [storeMainTweet?.id_str, tweetId, storeTweets, tweets, loaderData.tweet])
+  }, [
+    storeMainTweet?.id_str,
+    tweetId,
+    storeTweets,
+    tweets,
+    loaderData.tweet,
+  ])
 
   if (!tweetId) {
     return (

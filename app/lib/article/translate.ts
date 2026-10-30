@@ -27,7 +27,12 @@ const LINK_PLACEHOLDER_RE = /<<__LINK_\d+__>>/g
 const KANA_RE = /[\u3040-\u30FF]/
 const CJK_RE = /[\u4E00-\u9FFF]/
 
-const TRANSLATABLE_TYPES = new Set<ArticleBlock['type']>(['paragraph', 'heading', 'list-item', 'quote'])
+const TRANSLATABLE_TYPES = new Set<ArticleBlock['type']>([
+  'paragraph',
+  'heading',
+  'list-item',
+  'quote',
+])
 
 /** 每批送入 LLM 的字符预算（保守，避免单次超长） */
 const BATCH_CHAR_BUDGET = 2600
@@ -68,7 +73,12 @@ function collectTranslatable(article: TweetArticle): { title: string, blocks: Tr
     const { text, placeholders } = serializeArticleBlock(block)
     if (!text.trim())
       continue
-    blocks.push({ key: block.key, text, placeholders, runs: block.runs })
+    blocks.push({
+      key: block.key,
+      text,
+      placeholders,
+      runs: block.runs,
+    })
   }
   return { title: article.title?.trim() ?? '', blocks }
 }
@@ -158,7 +168,9 @@ export async function autoTranslateArticle(
     return result
 
   const modelConfig = models.find(m => m.name === options.modelName)
-  const strategy = modelConfig ? getProviderStrategy(modelConfig.provider) : null
+  const strategy = modelConfig
+    ? getProviderStrategy(modelConfig.provider)
+    : null
   const thinkingConfig = getThinkingConfig(options.modelName, options.thinkingLevel ?? 'minimal')
   const output = buildOutputSchema()
 
@@ -167,7 +179,9 @@ export async function autoTranslateArticle(
     // 早前用的是 `[{ key, text }]` 数组，模型会把每个元素当成独立对象，
     // 输出里逐块多打一个 `}`，导致整段 JSON 无法解析（见 AC-TWEET-020）。
     const payload = JSON.stringify(Object.fromEntries(items.map(item => [item.key, item.text])), null, 0)
-    const userContent = `${options.translationGlossary ? `<Glossary>\n${options.translationGlossary}\n</Glossary>\n\n` : ''}Translate these blocks:\n${payload}`
+    const userContent = `${options.translationGlossary
+      ? `<Glossary>\n${options.translationGlossary}\n</Glossary>\n\n`
+      : ''}Translate these blocks:\n${payload}`
 
     const startedAt = Date.now()
     let lastRaw: Record<string, string> = {}
@@ -212,7 +226,9 @@ export async function autoTranslateArticle(
       translated: Object.keys(lastRaw).length,
       ms: Date.now() - startedAt,
       targetId: suffix(options.targetId),
-      error: lastError instanceof Error ? lastError.message : undefined,
+      error: lastError instanceof Error
+        ? lastError.message
+        : undefined,
     })
     return lastRaw
   }
@@ -223,7 +239,9 @@ export async function autoTranslateArticle(
   // 标题单独一批（预算小、优先保证）
   if (title && !looksLikeChinese(title)) {
     attempted += 1
-    const titleResult = await translateBatch([{ key: '__title__', text: title, placeholders: [] }])
+    const titleResult = await translateBatch([
+      { key: '__title__', text: title, placeholders: [] },
+    ])
     if (titleResult.__title__) {
       result.title = titleResult.__title__
       translated += 1

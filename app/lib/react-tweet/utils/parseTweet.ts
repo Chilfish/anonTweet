@@ -21,7 +21,9 @@ export function enrichTweet(sourceData: RawTweet, retweetedOrignalId?: string): 
     return enrichTweet(sourceData.legacy.retweeted_status_result.result, sourceData.legacy.id_str)
   }
 
-  const tweet = ('tweet' in sourceData ? sourceData.tweet : sourceData) as RawTweet
+  const tweet = ('tweet' in sourceData
+    ? sourceData.tweet
+    : sourceData) as RawTweet
   const userBase = transformUserResponse(tweet)
   if (!userBase)
     return null
@@ -187,7 +189,9 @@ export function mapTwitterCard(
 
   // 3. 基础字段提取
   let card: LinkPreviewCard = {
-    type: name === 'player' ? 'summary_large_image' : name, // Player 统一视为大图卡片
+    type: name === 'player'
+      ? 'summary_large_image'
+      : name, // Player 统一视为大图卡片
     url: legacy.url || getStr(bindings, 'card_url') || '',
     title: getStr(bindings, 'title'),
     description: getStr(bindings, 'description'),
@@ -273,7 +277,9 @@ export function mapMediaDetails(tweet: RawTweet): MediaDetails[] | undefined {
 
   return mediaEntities.map((media, idx) => {
     const mediaNoteIdx = noteMedia.findIndex(m => m.media_id === media.id_str)
-    const mediaIdx = mediaNoteIdx === -1 ? idx : mediaNoteIdx
+    const mediaIdx = mediaNoteIdx === -1
+      ? idx
+      : mediaNoteIdx
 
     const baseMedia = {
       index: mediaIdx,
@@ -317,7 +323,9 @@ export function mapMediaDetails(tweet: RawTweet): MediaDetails[] | undefined {
             media.video_info.aspect_ratio[0] || 1,
             media.video_info.aspect_ratio[1] || 1,
           ] as [number, number],
-          variants: [media.video_info.variants.at(-1)!],
+          variants: [
+            media.video_info.variants.at(-1)!,
+          ],
         },
       }
     }

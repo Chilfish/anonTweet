@@ -19,7 +19,8 @@ export default function AuthenticatedLayout(_: Route.ComponentProps) {
       </header> */}
 
       {
-        showSkeleton ? <TweetSkeleton />
+        showSkeleton
+          ? <TweetSkeleton />
           : <Outlet />
       }
 

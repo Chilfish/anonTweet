@@ -101,7 +101,9 @@ export function useIGScreenshotAction({ post, captureRef }: UseIGScreenshotActio
           minute: '2-digit',
           second: '2-digit',
         }).replace(/[/\s:]/g, '-')
-        const ext = screenshotFormat === 'png' ? 'png' : 'jpg'
+        const ext = screenshotFormat === 'png'
+          ? 'png'
+          : 'jpg'
         const fileName = `ig-${post.username}-${post.id}-${now}.${ext}`
 
         if (mode === 'share') {
@@ -134,7 +136,12 @@ export function useIGScreenshotAction({ post, captureRef }: UseIGScreenshotActio
     finally {
       setIsCapturing(false)
     }
-  }, [post, performCapture, resolveNode, screenshotFormat])
+  }, [
+    post,
+    performCapture,
+    resolveNode,
+    screenshotFormat,
+  ])
 
   /** 截图后下载保存（默认行为）。 */
   const handleScreenshot = useCallback(() => runCapture('download'), [runCapture])

@@ -30,7 +30,9 @@ export function useTweetOperations(data?: TweetOperationsData) {
   const storeTweets = useTweets()
   const storeMainTweet = useMainTweet()
   const tweets = data?.tweets ?? storeTweets
-  const mainTweet = data?.mainTweet === undefined ? storeMainTweet : data.mainTweet
+  const mainTweet = data?.mainTweet === undefined
+    ? storeMainTweet
+    : data.mainTweet
   const commentIds = useCommentIds()
   const translations = useTranslations()
   const { appendTweets, setCommentIds } = useTranslationActions()
@@ -44,7 +46,9 @@ export function useTweetOperations(data?: TweetOperationsData) {
       return
 
     if (commentIds.length > 0) {
-      toast.info('评论已加载', repliesCursor ? { description: '可在评论区底部继续加载更多' } : undefined)
+      toast.info('评论已加载', repliesCursor
+        ? { description: '可在评论区底部继续加载更多' }
+        : undefined)
       return
     }
 
@@ -87,12 +91,17 @@ export function useTweetOperations(data?: TweetOperationsData) {
 
       const tweets = data?.tweets || []
       const next = data?.nextCursor || null
-      setRepliesCursor(next && next !== repliesCursor ? next : null)
+      setRepliesCursor(next && next !== repliesCursor
+        ? next
+        : null)
 
       if (tweets.length > 0) {
         appendTweets(tweets)
 
-        const merged = new Set([...commentIds, ...tweets.map(tweet => tweet.id_str)])
+        const merged = new Set([
+          ...commentIds,
+          ...tweets.map(tweet => tweet.id_str),
+        ])
         setCommentIds([...merged])
 
         toast.success(`已加载更多 ${tweets.length} 条评论`)

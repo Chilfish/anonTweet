@@ -40,7 +40,10 @@ export const SelectionMode: Story = {
 export const SelectionModeChecked: Story = {
   render: () => (
     <WithStoreState
-      seed={() => seedUI({ isSelectionMode: true, selectedTweetIds: [tweetWithCard.id_str] })}
+      seed={() => seedUI({
+        isSelectionMode: true,
+        selectedTweetIds: [tweetWithCard.id_str],
+      })}
     >
       <SelectableTweetWrapper tweetId={tweetWithCard.id_str}>{box}</SelectableTweetWrapper>
     </WithStoreState>

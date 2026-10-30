@@ -35,5 +35,7 @@ export function obsLog(event: ObsEvent, fields: ObsFields = {}): void {
 export function suffix(value: string | undefined | null, len = 10): string {
   if (!value)
     return 'none'
-  return value.length <= len ? value : `...${value.slice(-len)}`
+  return value.length <= len
+    ? value
+    : `...${value.slice(-len)}`
 }

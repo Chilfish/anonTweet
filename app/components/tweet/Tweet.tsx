@@ -80,7 +80,13 @@ export function MyTweet({
 
   const { mainTweet, ancestors, commentThreads } = useMemo(() => {
     return organizeTweets(tweets, mainTweetId, { showComments, filterUnrelated, excludeUsers })
-  }, [tweets, mainTweetId, showComments, filterUnrelated, excludeUsers])
+  }, [
+    tweets,
+    mainTweetId,
+    showComments,
+    filterUnrelated,
+    excludeUsers,
+  ])
 
   const mainTweetRef = useRef<HTMLDivElement>(null)
 
