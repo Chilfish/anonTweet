@@ -11,6 +11,7 @@
     },
     "resolveJsonModule": true,
     "types": ["vite/client", "bun"],
+    "allowImportingTsExtensions": true,
 
     "allowJs": true,
     "strict": true,

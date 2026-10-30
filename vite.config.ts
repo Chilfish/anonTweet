@@ -6,7 +6,7 @@ import { reactRouter } from '@react-router/dev/vite'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
 import babel from 'vite-plugin-babel'
-import { env } from './app/lib/env.server'
+import { env } from './app/lib/env.server.ts'
 
 /**
  * dev 静态服务 charset 修复：public 静态文件由 sirv 提供，.md 响应头

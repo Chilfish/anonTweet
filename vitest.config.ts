@@ -24,7 +24,7 @@ const sharedProjectConfig: TestProjectConfiguration = {
   ],
   resolve: {
     alias: {
-      '~': path.resolve(__dirname, './app'),
+      '~': path.resolve(import.meta.dirname, './app'),
     },
     tsconfigPaths: true,
   },
@@ -46,7 +46,7 @@ const sharedProjectTest = {
 // storybookTest() 需在配置加载期 await（返回 Promise<Plugin[]>）。
 // 依赖 @vitest/browser + @vitest/browser-playwright + playwright chromium（已装）。
 // 设置文件复用 .storybook/vitest.setup.ts（projectAnnotations + a11y addon）。
-const storybookConfigDir = path.resolve(__dirname, '.storybook').replace(/\\/g, '/')
+const storybookConfigDir = path.resolve(import.meta.dirname, '.storybook').replace(/\\/g, '/')
 const storybookPlugins = await storybookTest({ configDir: '.storybook' })
 
 export default defineConfig({
@@ -94,7 +94,9 @@ export default defineConfig({
           browser: {
             enabled: true,
             provider: playwright(),
-            instances: [{ browser: 'chromium', name: 'chromium' }],
+            instances: [
+              { browser: 'chromium', name: 'chromium' },
+            ],
             headless: true,
           },
           // 浏览器冷启动 + 全量 story 渲染较慢
