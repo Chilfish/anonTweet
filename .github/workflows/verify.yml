@@ -2,7 +2,7 @@ name: Verification Suite
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
     paths:
       - 'app/lib/**'
       - 'app/routes/**'
@@ -16,7 +16,7 @@ on:
       - react-router.config.ts
       - .github/workflows/verify.yml
   pull_request:
-    branches: [main]
+    branches: [ main ]
     paths:
       - 'app/lib/**'
       - 'app/routes/**'
@@ -35,10 +35,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
 
