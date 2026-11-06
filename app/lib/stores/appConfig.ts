@@ -4,12 +4,17 @@ import { persist } from 'zustand/middleware'
 
 export type Theme = 'light' | 'dark' | 'system'
 export type ScreenshotFormat = 'png' | 'jpeg'
+export type DownloadImageSize = 'large' | 'orig'
 export type ThinkingLevel = 'minimal' | 'low' | 'medium' | 'high' | 'max'
 export type AIProvider = 'google' | 'deepseek' | 'openrouter'
 
 export interface AppConfigs {
   theme: Theme
   screenshotFormat: ScreenshotFormat
+  /** 下载推文图片时请求的分辨率：large = 2048px JPG；orig = 原始最大分辨率 */
+  downloadImageSize: DownloadImageSize
+  /** 下载媒体时是否一并下载链接卡片的图片 */
+  downloadCardImages: boolean
   showActions: boolean
   enableMediaProxy: boolean
   mediaProxyUrl: string
@@ -44,6 +49,8 @@ interface AppConfigState extends AppConfigs {
 
   setTheme: (theme: Theme) => void
   setScreenshotFormat: (format: ScreenshotFormat) => void
+  setDownloadImageSize: (size: DownloadImageSize) => void
+  setDownloadCardImages: (include: boolean) => void
   setShowActions: (showActions: boolean) => void
 
   setEnableMediaProxy: (enableMediaProxy: boolean) => void
@@ -78,6 +85,8 @@ export const useAppConfigStore = create<AppConfigState>()(
 
       theme: 'light',
       screenshotFormat: 'jpeg',
+      downloadImageSize: 'orig',
+      downloadCardImages: true,
       showActions: false,
       enableMediaProxy: false,
       mediaProxyUrl: 'https://proxy.chilfish.top/',
@@ -108,6 +117,8 @@ export const useAppConfigStore = create<AppConfigState>()(
       setAIProvider: aiProvider => set({ aiProvider }),
       setTheme: theme => set({ theme }),
       setScreenshotFormat: screenshotFormat => set({ screenshotFormat }),
+      setDownloadImageSize: downloadImageSize => set({ downloadImageSize }),
+      setDownloadCardImages: downloadCardImages => set({ downloadCardImages }),
       setShowActions: showActions => set({ showActions }),
       setGeminiApiKey: geminiApiKey => set({ geminiApiKey }),
       setGeminiModel: geminiModel => set({ geminiModel }),

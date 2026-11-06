@@ -1,14 +1,31 @@
 import type { DownloadItem } from '~/lib/downloader'
+import type { DownloadImageSize } from '~/lib/stores/appConfig'
 import type { EnrichedTweet, MediaDetails } from '~/types'
 import { DownloadIcon, Loader2 } from 'lucide-react' // 使用 Loader2 替代 LoaderIcon (更现代的命名习惯)
 import { useCallback, useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
-import { downloadFiles } from '~/lib/downloader'
 
+import { downloadFiles } from '~/lib/downloader'
 import { formatDate } from '~/lib/react-tweet'
+import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { useTweets } from '~/lib/stores/hooks'
 import { toast } from '~/lib/utils'
+
+const IMAGE_EXT_RE = /\.(jpe?g|png|webp|gif|avif)$/i
+
+/** 从图片 URL 的路径扩展名（或 format 查询参数）推导真实格式，用于原图模式生成文件名 */
+function getImageExt(url: URL): string {
+  const match = url.pathname.match(IMAGE_EXT_RE)
+  const ext = match?.[1]?.toLowerCase()
+  if (ext) {
+    return ext === 'jpeg'
+      ? 'jpg'
+      : ext
+  }
+  const format = url.searchParams.get('format')?.toLowerCase()
+  return format ?? 'jpg'
+}
 
 type MediaType = 'photo' | 'video' | 'animated_gif'
 
@@ -58,6 +75,7 @@ function createDownloadItem(
   url: string,
   type: MediaType,
   index: number,
+  imageSize: DownloadImageSize,
 ): DownloadItem {
   // 防御性编程：如果没有 ID，说明数据源已损坏，这里做降级处理但记录警告
   const id = tweet.id_str ?? 'unknown-id'
@@ -72,17 +90,26 @@ function createDownloadItem(
   const suffix = index > 0
     ? `-${index}`
     : ''
-  const ext = type === 'photo'
-    ? 'jpg'
-    : 'mp4'
-
-  const filename = `${username}-${id}-${formattedDate}${suffix}.${ext}`
 
   const downloadUrl = new URL(url)
   if (type === 'photo') {
-    downloadUrl.searchParams.set('format', 'jpg') // 强制统一为 jpg
-    downloadUrl.searchParams.set('name', 'large') // 请求大图
+    if (imageSize === 'orig') {
+      // 原图：保留原始格式，仅请求原始分辨率（可能为非 jpg 的 png/webp）
+      downloadUrl.searchParams.set('name', 'orig')
+    }
+    else {
+      downloadUrl.searchParams.set('format', 'jpg') // 强制统一为 jpg
+      downloadUrl.searchParams.set('name', 'large') // 长边封顶 2048
+    }
   }
+
+  const ext = type !== 'photo'
+    ? 'mp4'
+    : imageSize === 'orig'
+      ? getImageExt(downloadUrl)
+      : 'jpg'
+
+  const filename = `${username}-${id}-${formattedDate}${suffix}.${ext}`
 
   return {
     filename,
@@ -94,52 +121,58 @@ function createDownloadItem(
  * 主提取逻辑
  * 展平 Quoted Tweet 结构并聚合所有媒体
  */
-export function extractDownloadItemsFromTweets(tweets: EnrichedTweet[]): DownloadItem[] {
+export function extractDownloadItemsFromTweets(
+  tweets: EnrichedTweet[],
+  imageSize: DownloadImageSize = 'large',
+  includeCardImages = true,
+): DownloadItem[] {
   const allTweets = tweets.flatMap(t => t.quotedTweet
     ? [t.quotedTweet, t]
     : [t])
 
   return allTweets.flatMap((tweet) => {
-    if (!tweet.mediaDetails?.length)
-      return []
+    const items: ExtractedMedia[] = []
 
-    return tweet.mediaDetails
-      .map((media, idx): ExtractedMedia | null => {
-        let url: string | null = null
+    tweet.mediaDetails?.forEach((media, idx) => {
+      let url: string | null = null
 
-        switch (media.type) {
-          case 'photo':
-            url = media.media_url_https
-            break
-          case 'animated_gif':
-            // GIF 在 Twitter API 中通常作为无音频的 MP4 变体存在
-            url = media.video_info?.variants[0]?.url ?? null
-            break
-          case 'video':
-            url = getBestVideoVariant(media)
-            break
-        }
+      switch (media.type) {
+        case 'photo':
+          url = media.media_url_https
+          break
+        case 'animated_gif':
+          // GIF 在 Twitter API 中通常作为无音频的 MP4 变体存在
+          url = media.video_info?.variants[0]?.url ?? null
+          break
+        case 'video':
+          url = getBestVideoVariant(media)
+          break
+      }
 
-        if (!url)
-          return null
+      if (url)
+        items.push({ url, type: media.type as MediaType, originalIndex: idx })
+    })
 
-        return {
-          url,
-          type: media.type as MediaType,
-          originalIndex: idx,
-        }
-      })
-      .filter((item): item is ExtractedMedia => item !== null)
-      .map(item => createDownloadItem(tweet, item.url, item.type, item.originalIndex))
+    // 链接卡片图片（普通卡片或 trending 卡片主图）
+    const cardImageUrl = tweet.card?.trending?.imageUrl || tweet.card?.imageUrl
+    if (includeCardImages && cardImageUrl) {
+      items.push({ url: cardImageUrl, type: 'photo', originalIndex: items.length })
+    }
+
+    return items.map(item =>
+      createDownloadItem(tweet, item.url, item.type, item.originalIndex, imageSize),
+    )
   })
 }
 
 export function DownloadMedia() {
   const tweets = useTweets()
+  const downloadImageSize = useAppConfigStore(s => s.downloadImageSize)
+  const downloadCardImages = useAppConfigStore(s => s.downloadCardImages)
   const [isDownloading, setIsDownloading] = useState(false)
 
   const handleDownload = useCallback(async () => {
-    const mediaItems = extractDownloadItemsFromTweets(tweets)
+    const mediaItems = extractDownloadItemsFromTweets(tweets, downloadImageSize, downloadCardImages)
 
     if (mediaItems.length === 0) {
       toast.info('未检测到可下载的媒体资源')
@@ -172,7 +205,7 @@ export function DownloadMedia() {
       })
     }
     setIsDownloading(false)
-  }, [tweets])
+  }, [tweets, downloadImageSize, downloadCardImages])
 
   return (
     <Tooltip>

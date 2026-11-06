@@ -1,3 +1,4 @@
+import type { DownloadImageSize } from '~/lib/stores/appConfig'
 import { useShallow } from 'zustand/react/shallow'
 import { Input } from '~/components/ui/input'
 import {
@@ -14,6 +15,11 @@ import { useTranslationActions, useTranslationSettings } from '~/lib/stores/hook
 import { SettingsGroup, SettingsRow } from './SettingsUI'
 import { ThemeSelector } from './ThemeSwitcher'
 
+const downloadImageSizeOptions: { label: string, value: DownloadImageSize }[] = [
+  { label: '默认 JPG', value: 'large' },
+  { label: '原图最大', value: 'orig' },
+]
+
 export function GeneralSettings() {
   const {
     enableMediaProxy,
@@ -22,6 +28,10 @@ export function GeneralSettings() {
     setMediaProxyUrl,
     screenshotFormat,
     setScreenshotFormat,
+    downloadImageSize,
+    setDownloadImageSize,
+    downloadCardImages,
+    setDownloadCardImages,
   } = useAppConfigStore(
     useShallow(state => ({
       enableMediaProxy: state.enableMediaProxy,
@@ -30,11 +40,19 @@ export function GeneralSettings() {
       setMediaProxyUrl: state.setMediaProxyUrl,
       screenshotFormat: state.screenshotFormat,
       setScreenshotFormat: state.setScreenshotFormat,
+      downloadImageSize: state.downloadImageSize,
+      setDownloadImageSize: state.setDownloadImageSize,
+      downloadCardImages: state.downloadCardImages,
+      setDownloadCardImages: state.setDownloadCardImages,
     })),
   )
 
   const { filterUnrelated } = useTranslationSettings()
   const { updateSettings } = useTranslationActions()
+
+  const currentDownloadImageSizeOption = downloadImageSizeOptions.find(
+    opt => opt.value === downloadImageSize,
+  )
 
   return (
     <div className="space-y-6 p-1">
@@ -104,6 +122,47 @@ export function GeneralSettings() {
               />
             </SettingsRow>
           )}
+        </SettingsGroup>
+      </div>
+
+      <div className="space-y-2">
+        <h4 className="px-1 text-sm font-medium text-muted-foreground">下载</h4>
+        <SettingsGroup>
+          <SettingsRow
+            label="图片分辨率"
+            description="原图保留最大分辨率，体积更大；默认 JPG 长边封顶 2048px"
+          >
+            <Select
+              value={currentDownloadImageSizeOption}
+              onValueChange={(opt) => {
+                if (!opt)
+                  return
+                setDownloadImageSize(opt.value)
+              }}
+            >
+              <SelectTrigger className="h-8 w-[110px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent alignItemWithTrigger={false}>
+                {downloadImageSizeOptions.map(opt => (
+                  <SelectItem key={opt.value} value={opt}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </SettingsRow>
+
+          <SettingsRow
+            label="下载链接卡片图片"
+            description="一并下载推文链接卡片（link card）中的图片"
+            id="download-card-images"
+          >
+            <Switch
+              checked={downloadCardImages}
+              onCheckedChange={setDownloadCardImages}
+            />
+          </SettingsRow>
         </SettingsGroup>
       </div>
     </div>

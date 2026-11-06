@@ -5,6 +5,7 @@ import { downloadFiles } from '~/lib/downloader'
 import { fetcher } from '~/lib/fetcher'
 import { generateMarkdownFromTweets, generateText } from '~/lib/markdown'
 import { buildTweetSharePayload, shareOut } from '~/lib/share'
+import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { useCommentIds, useMainTweet, useTranslationActions, useTranslations, useTweets } from '~/lib/stores/hooks'
 import { materializeTweetsWithManualTranslations } from '~/lib/translation/materialize'
 import { toast } from '~/lib/utils'
@@ -120,7 +121,8 @@ export function useTweetOperations(data?: TweetOperationsData) {
   }
 
   const downloadMedia = async () => {
-    const mediaItems = extractDownloadItemsFromTweets(tweets)
+    const { downloadImageSize, downloadCardImages } = useAppConfigStore.getState()
+    const mediaItems = extractDownloadItemsFromTweets(tweets, downloadImageSize, downloadCardImages)
     if (mediaItems.length === 0) {
       toast.info('未检测到可下载的媒体资源')
       return
