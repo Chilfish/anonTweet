@@ -1,3 +1,3 @@
-# Taste
+# 通用约定
 
-See [taste/taste.md](taste/taste.md)
+See [conventions/taste.md](./conventions/taste.md)
