@@ -1,7 +1,7 @@
 pre-commit:
   commands:
     check:
-      glob: '*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc,css}'
+      glob: '*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc,css,md}'
       run: bun run eslint {staged_files} --fix
       stage_fixed: true
 

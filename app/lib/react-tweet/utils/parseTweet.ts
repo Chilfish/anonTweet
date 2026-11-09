@@ -120,6 +120,8 @@ function getBestImage(map: Map<string, any>) {
 
 /** 零宽字符（官方空标题常用 \u200b 占位），清洗后为空视为无标题 */
 const INVISIBLE_CHARS_RE = /[\u200B-\u200D\uFEFF]/g
+/** media id 的 `3_` / `13_` 前缀（部分变体的 media_entities 键不带前缀） */
+const MEDIA_ID_PREFIX_RE = /^\d+_/
 
 function cleanCardText(value?: string): string | undefined {
   if (typeof value !== 'string')
@@ -179,7 +181,7 @@ function toCardImage(
   const id = typeof item === 'string'
     ? item
     : item?.id
-  const entity = (id && (entities[id] ?? entities[`3_${id}`] ?? entities[id.replace(/^\d+_/, '')]))
+  const entity = (id && (entities[id] ?? entities[`3_${id}`] ?? entities[id.replace(MEDIA_ID_PREFIX_RE, '')]))
     ?? (typeof item === 'object'
       ? item
       : undefined)

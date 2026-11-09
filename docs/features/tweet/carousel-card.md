@@ -2,10 +2,11 @@
 
 > 创建时间：2026-11-09
 > 样例推文：
+>
 > - `2118597337345859755`（@wstcg 广告推文，5 张竖图轮播 + 可跳转链接）
 > - `2118597530107904319`（同系列广告，单张竖图 `image_website`）
 > - `2113690418080563539`（@Starlink 视频广告，`video_website`，4:5 封面 6s）
-> 关联：`docs/features/tweet/trending-card.md`（同为 `unified_card` 的布局变体）
+>   关联：`docs/features/tweet/trending-card.md`（同为 `unified_card` 的布局变体）
 
 ## 目标
 
@@ -78,15 +79,15 @@
 
 可获取且值得用的信息：
 
-| 字段 | 用途 |
-| --- | --- |
-| `type` | 布局判别：`image_carousel_website`（还有 `image_carousel_app` 等变体，按前缀 `image_carousel_` 收口） |
-| `components` 顺序 | 决定媒体与详情区的上下顺序（官方此例媒体在上） |
-| `media_list[]` | **轮播顺序** + 每张图独立的 `destination`（可能是不同链接） |
-| `media_entities[id]` | 原图 URL、宽高、`sizes`、`focus_rects`、`ext.mediaColor.palette` |
-| `destination_objects[dest].data.url_data` | 跳转 URL（含 UTM）与展示域名 `vanity` |
-| `details_1.data.title/subtitle` | 标题/域名；本例 title 是零宽空格（需视为空） |
-| `experiment_signals.website_cta_card_label` | CTA 文案枚举（`learn_more` → 了解更多） |
+| 字段                                        | 用途                                                                                                  |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `type`                                      | 布局判别：`image_carousel_website`（还有 `image_carousel_app` 等变体，按前缀 `image_carousel_` 收口） |
+| `components` 顺序                           | 决定媒体与详情区的上下顺序（官方此例媒体在上）                                                        |
+| `media_list[]`                              | **轮播顺序** + 每张图独立的 `destination`（可能是不同链接）                                           |
+| `media_entities[id]`                        | 原图 URL、宽高、`sizes`、`focus_rects`、`ext.mediaColor.palette`                                      |
+| `destination_objects[dest].data.url_data`   | 跳转 URL（含 UTM）与展示域名 `vanity`                                                                 |
+| `details_1.data.title/subtitle`             | 标题/域名；本例 title 是零宽空格（需视为空）                                                          |
+| `experiment_signals.website_cta_card_label` | CTA 文案枚举（`learn_more` → 了解更多）                                                               |
 
 **没有**的信息：每张图的 alt 文本（`ext_alt_text` 缺失）、媒体 alt。
 （视频不是"没有"：封面、时长、mp4/hls 都在 `media_entities` 内。）
@@ -217,8 +218,8 @@ export interface LinkPreviewCard {
 2. 按 `components` 顺序遍历媒体组件：
    - 多图：`swipeable_media.data.media_list` 按顺序取 id；
    - 单图：`media_1.data.{id|media_id|media}`；
-   去 `media_entities[id]` 拿图。**允许 id 缺失**：跳过该张并继续。
-   同时支持 `media_list` 项直接内联图片对象（部分变体）；
+     去 `media_entities[id]` 拿图。**允许 id 缺失**：跳过该张并继续。
+     同时支持 `media_list` 项直接内联图片对象（部分变体）；
 3. `title` / `subtitle` 先去掉 `\u200b`/`\ufeff`/空白，空串视为 `undefined`；
 4. `href`：`media_list[i].destination` / `media_1.data.destination` →
    `destination_objects` → `url_data.url`，缺省回退卡片主链接；
@@ -278,11 +279,11 @@ export interface LinkPreviewCard {
 
 ### 两种形态
 
-| 形态 | 触发 | 表现 |
-| --- | --- | --- |
-| 轮播（默认，多图） | 常态 | 官方同款：单页按首图比例、横向滑动、箭头/圆点 |
-| 平铺 | 点击信息条右侧布局切换按钮；**或截图模式强制** | CSS grid（2 列；≥4 张 3 列），全部图片一次展示，无箭头 |
-| 单图 / 视频 | `layout === 'image_card' \| 'video_card'` | 单页原比例，无箭头/圆点/切换按钮 |
+| 形态               | 触发                                           | 表现                                                   |
+| ------------------ | ---------------------------------------------- | ------------------------------------------------------ |
+| 轮播（默认，多图） | 常态                                           | 官方同款：单页按首图比例、横向滑动、箭头/圆点          |
+| 平铺               | 点击信息条右侧布局切换按钮；**或截图模式强制** | CSS grid（2 列；≥4 张 3 列），全部图片一次展示，无箭头 |
+| 单图 / 视频        | `layout === 'image_card' \| 'video_card'`      | 单页原比例，无箭头/圆点/切换按钮                       |
 
 - 切换按钮：`LayoutGrid` / `GalleryHorizontalEnd` 图标，`aria-pressed`，状态仅存组件
   `useState`，不引入全局设置。
@@ -340,15 +341,15 @@ export interface LinkPreviewCard {
 
 ## 实施状态（2026-11-09）
 
-| 项 | 状态 | 验证 |
-| --- | --- | --- |
-| 类型：`CardCarouselImage`（photo/video）/ `layout` / `images` / `mediaFirst` / `ctaLabel` | ✅ | `bun run typecheck` |
-| 解析：多图 `media_list` 顺序、单图 `media_1`、视频变体、零宽标题清洗、CTA、主色 | ✅ | `test/unit/carousel-card.spec.ts`（8 例） |
-| 组件：轮播 / 平铺 / 单图原比例 / 视频封面+播放+时长 | ✅ | `test/acceptance/carousel-card-render.spec.ts`（6 例） |
-| 截图等待：DOM 时序、decode、data-status、opacity 淡入 | ✅ | `app/lib/utils.ts`（需浏览器手测导出效果） |
-| 缓存回填：旧 `unified_card` 缓存一次性补 `layout/images` | ✅ | 逻辑同 Space/Article 回填；无独立单测 |
-| Storybook：`Tweet/Card → CarouselCard / SingleImageCard / VideoCard` | ✅ | `bun run storybook` 手工查看 |
-| 全量单测 + 验收 | ✅ | 见提交流水（typecheck + test + verify card） |
+| 项                                                                                        | 状态 | 验证                                                   |
+| ----------------------------------------------------------------------------------------- | ---- | ------------------------------------------------------ |
+| 类型：`CardCarouselImage`（photo/video）/ `layout` / `images` / `mediaFirst` / `ctaLabel` | ✅   | `bun run typecheck`                                    |
+| 解析：多图 `media_list` 顺序、单图 `media_1`、视频变体、零宽标题清洗、CTA、主色           | ✅   | `test/unit/carousel-card.spec.ts`（8 例）              |
+| 组件：轮播 / 平铺 / 单图原比例 / 视频封面+播放+时长                                       | ✅   | `test/acceptance/carousel-card-render.spec.ts`（6 例） |
+| 截图等待：DOM 时序、decode、data-status、opacity 淡入                                     | ✅   | `app/lib/utils.ts`（需浏览器手测导出效果）             |
+| 缓存回填：旧 `unified_card` 缓存一次性补 `layout/images`                                  | ✅   | 逻辑同 Space/Article 回填；无独立单测                  |
+| Storybook：`Tweet/Card → CarouselCard / SingleImageCard / VideoCard`                      | ✅   | `bun run storybook` 手工查看                           |
+| 全量单测 + 验收                                                                           | ✅   | 见提交流水（typecheck + test + verify card）           |
 
 已知限制：
 
@@ -356,4 +357,3 @@ export interface LinkPreviewCard {
   已保留在 `card.images[].video`，下游下载可直接使用。
 - 截图层面的「平铺」只保证当前 5 图样本；超过 9 图时网格行数会变多，
   属预期行为。
-

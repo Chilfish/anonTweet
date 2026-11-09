@@ -70,6 +70,8 @@ const singleImageTweet: EnrichedTweet = { ...baseTweet, card: singleImageCard }
 const videoTweet: EnrichedTweet = { ...baseTweet, card: videoCard }
 
 const CAROUSEL_URL = 'https://ws-tcg.com/products/bdy_bp/?utm_source=X&amp;utm_medium=cpc&amp;utm_campaign=BDY'
+const IMG_TAG_RE = /<img/g
+const PORTRAIT_ASPECT_RE = /aspect-ratio:\s*0?\.8/
 
 function render(target: EnrichedTweet = tweet): string {
   return renderToString(createElement(TweetLinkCard, { tweet: target }))
@@ -85,9 +87,9 @@ describe('AC-CARD-011: carousel card rendering', () => {
 
     // 横向 scroll-snap 轨道 + 5 张图（每张独立 <a>）
     expect(html).toContain('snap-x')
-    expect((html.match(/<img/g) || []).length).toBe(5)
+    expect((html.match(IMG_TAG_RE) || []).length).toBe(5)
     // 首图比例 1440x1800 → 0.8
-    expect(html).toMatch(/aspect-ratio:\s*0?\.8/)
+    expect(html).toMatch(PORTRAIT_ASPECT_RE)
     // 官方结构的箭头、计数、CTA 与跳转
     expect(html).toContain('aria-label="上一张"')
     expect(html).toContain('aria-label="下一张"')
@@ -102,7 +104,7 @@ describe('AC-CARD-011: carousel card rendering', () => {
     const html = render()
 
     expect(html).toContain('grid-cols-3')
-    expect((html.match(/<img/g) || []).length).toBe(5)
+    expect((html.match(IMG_TAG_RE) || []).length).toBe(5)
     expect(html).not.toContain('snap-x')
     expect(html).not.toContain('aria-label="上一张"')
     expect(html).not.toContain('切换为轮播')
@@ -118,12 +120,12 @@ describe('AC-CARD-011: carousel card rendering', () => {
     const html = render(singleImageTweet)
 
     // 1440×1800 竖图按原比例，而不是 unified_card 的 1.91:1 横向裁切
-    expect(html).toMatch(/aspect-ratio:\s*0?\.8/)
+    expect(html).toMatch(PORTRAIT_ASPECT_RE)
     expect(html).not.toContain('aspect-[1.91/1]')
     expect(html).not.toContain('snap-x')
     expect(html).not.toContain('图片轮播')
     expect(html).not.toContain('aria-label="上一张"')
-    expect((html.match(/<img/g) || []).length).toBe(1)
+    expect((html.match(IMG_TAG_RE) || []).length).toBe(1)
     expect(html).toContain('了解更多')
     expect(html).toContain(`href="${CAROUSEL_URL}"`)
   })
@@ -133,12 +135,12 @@ describe('AC-CARD-011: carousel card rendering', () => {
 
     // 4:5 视频卡：封面 + 播放按钮 + 时长 badge，无 <video>、无 1.91:1 裁切
     expect(html).not.toContain('<video')
-    expect((html.match(/<img/g) || []).length).toBe(1)
+    expect((html.match(IMG_TAG_RE) || []).length).toBe(1)
     expect(html).toContain('src="https://pbs.twimg.com/amplify_video_thumb/2113687393765134336/img/fT6xAMDzjMYY3OvE.jpg"')
     expect(html).toContain('lucide-play')
     expect(html).toContain('0:06')
     expect(html).toContain('aria-label="视频链接：starlink.com"')
-    expect(html).toMatch(/aspect-ratio:\s*0?\.8/)
+    expect(html).toMatch(PORTRAIT_ASPECT_RE)
     expect(html).not.toContain('aspect-[1.91/1]')
     expect(html).not.toContain('snap-x')
     expect(html).toContain('今すぐ注文')
@@ -150,7 +152,7 @@ describe('AC-CARD-011: carousel card rendering', () => {
     const html = render(videoTweet)
 
     expect(html).not.toContain('<video')
-    expect((html.match(/<img/g) || []).length).toBe(1)
+    expect((html.match(IMG_TAG_RE) || []).length).toBe(1)
     expect(html).toContain('lucide-play')
     expect(html).toContain('0:06')
     expect(html).toContain('今すぐ注文')
