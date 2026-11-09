@@ -4,9 +4,12 @@ import {
   tweetNoCard,
   tweetTrendingNoImage,
   tweetWithCard,
+  tweetWithCarouselCard,
   tweetWithLargeImageCard,
+  tweetWithSingleImageCard,
   tweetWithTextOnlyCard,
   tweetWithTrendingCard,
+  tweetWithVideoCard,
 } from './tweet.fixtures'
 
 /**
@@ -36,6 +39,21 @@ export const SummaryCard: Story = {
 
 export const LargeImageCard: Story = {
   render: () => <TweetLinkCard tweet={tweetWithLargeImageCard} />,
+}
+
+/** 多图轮播卡（官方同款横向轮播；点击右下角图标可切平铺） */
+export const CarouselCard: Story = {
+  render: () => <TweetLinkCard tweet={tweetWithCarouselCard} />,
+}
+
+/** 单图图片卡（4:5 竖图按原比例展示，不再裁成 1.91:1） */
+export const SingleImageCard: Story = {
+  render: () => <TweetLinkCard tweet={tweetWithSingleImageCard} />,
+}
+
+/** 视频卡（封面 + 播放按钮 + 时长 badge，不做内嵌播放） */
+export const VideoCard: Story = {
+  render: () => <TweetLinkCard tweet={tweetWithVideoCard} />,
 }
 
 export const TextOnlyCard: Story = {

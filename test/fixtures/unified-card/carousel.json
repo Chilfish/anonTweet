@@ -1,0 +1,136 @@
+{
+  "type": "image_carousel_website",
+  "component_objects": {
+    "swipeable_media_1": {
+      "type": "swipeable_media",
+      "data": {
+        "media_list": [
+          { "id": "3_2118597116012765184", "destination": "browser_1" },
+          { "id": "3_2118597164788232192", "destination": "browser_1" },
+          { "id": "3_2118597197860364288", "destination": "browser_1" },
+          { "id": "3_2118597222527090688", "destination": "browser_1" },
+          { "id": "3_2118597247248269312", "destination": "browser_1" }
+        ]
+      }
+    },
+    "details_1": {
+      "type": "details",
+      "data": {
+        "title": { "content": "\u200b", "is_rtl": false },
+        "subtitle": { "content": "ws-tcg.com", "is_rtl": false },
+        "destination": "browser_1"
+      }
+    }
+  },
+  "destination_objects": {
+    "browser_1": {
+      "type": "browser",
+      "data": {
+        "url_data": {
+          "url": "https://ws-tcg.com/products/bdy_bp/?utm_source=X&utm_medium=cpc&utm_campaign=BDY",
+          "vanity": "ws-tcg.com"
+        }
+      }
+    }
+  },
+  "components": ["swipeable_media_1", "details_1"],
+  "media_entities": {
+    "3_2118597116012765184": {
+      "id": 2118597116012765184,
+      "id_str": "2118597116012765184",
+      "type": "photo",
+      "media_url_https": "https://pbs.twimg.com/media/HWbE2ioboAAwFUp.jpg",
+      "original_info": { "width": 1440, "height": 1800 },
+      "sizes": {
+        "thumb": { "w": 150, "h": 150, "resize": "crop" },
+        "small": { "w": 544, "h": 680, "resize": "fit" },
+        "medium": { "w": 960, "h": 1200, "resize": "fit" },
+        "large": { "w": 1440, "h": 1800, "resize": "fit" }
+      },
+      "ext": {
+        "mediaColor": {
+          "r": {
+            "ok": {
+              "palette": [
+                { "rgb": { "red": 255, "green": 235, "blue": 157 }, "percentage": 37.55 }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "3_2118597164788232192": {
+      "id": 2118597164788232192,
+      "id_str": "2118597164788232192",
+      "type": "photo",
+      "media_url_https": "https://pbs.twimg.com/media/HWbE5YVaMAAGH3d.jpg",
+      "original_info": { "width": 1440, "height": 1800 },
+      "ext": {
+        "mediaColor": {
+          "r": {
+            "ok": {
+              "palette": [
+                { "rgb": { "red": 246, "green": 197, "blue": 209 }, "percentage": 59.9 }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "3_2118597197860364288": {
+      "id": 2118597197860364288,
+      "id_str": "2118597197860364288",
+      "type": "photo",
+      "media_url_https": "https://pbs.twimg.com/media/HWbE7Tia4AA2SlD.jpg",
+      "original_info": { "width": 1440, "height": 1800 },
+      "ext": {
+        "mediaColor": {
+          "r": {
+            "ok": {
+              "palette": [
+                { "rgb": { "red": 190, "green": 228, "blue": 248 }, "percentage": 66.61 }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "3_2118597222527090688": {
+      "id": 2118597222527090688,
+      "id_str": "2118597222527090688",
+      "type": "photo",
+      "media_url_https": "https://pbs.twimg.com/media/HWbE8vbbQAAFcaN.jpg",
+      "original_info": { "width": 1440, "height": 1800 },
+      "ext": {
+        "mediaColor": {
+          "r": {
+            "ok": {
+              "palette": [
+                { "rgb": { "red": 224, "green": 210, "blue": 231 }, "percentage": 61.81 }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "3_2118597247248269312": {
+      "id": 2118597247248269312,
+      "id_str": "2118597247248269312",
+      "type": "photo",
+      "media_url_https": "https://pbs.twimg.com/media/HWbE-LhagAAuxy3.jpg",
+      "original_info": { "width": 1440, "height": 1800 },
+      "ext": {
+        "mediaColor": {
+          "r": {
+            "ok": {
+              "palette": [
+                { "rgb": { "red": 245, "green": 198, "blue": 208 }, "percentage": 56.08 }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "experiment_signals": { "website_cta_card_label": "learn_more" }
+}

@@ -4,6 +4,7 @@ import { MediaImage } from '~/components/ui/media'
 import { normalizeMediaUrl } from '~/lib/media-url'
 import { useProxyMedia } from '~/lib/stores/appConfig'
 import { cn } from '~/lib/utils'
+import { CarouselCardView } from './CarouselCard'
 import { TrendingCardView } from './TrendingCard'
 
 /**
@@ -141,6 +142,17 @@ export function TweetLinkCard({ tweet, className }: TweetLinkCardProps) {
   // 判断提到 cardData 早退之前：trending 非空即渲染，不依赖 title/description/image 合并不变量（P3-2）。
   if (card?.trending) {
     return <TrendingCardView trending={card.trending} className={className} />
+  }
+
+  // 官方媒体卡（image_website 单图 / image_carousel_* 多图 / video_website 视频）：
+  // 按原图比例展示；多图提供轮播 / 截图友好平铺两种形态。
+  if (
+    (card?.layout === 'image_card'
+      || card?.layout === 'image_carousel'
+      || card?.layout === 'video_card')
+    && card.images?.length
+  ) {
+    return <CarouselCardView card={card} className={className} />
   }
 
   // 无有效卡片数据：不渲染

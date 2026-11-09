@@ -23,6 +23,12 @@ describe('AC-SHOT screenshot static checks', () => {
     expect(utils).toContain('export async function waitForRenderReady')
     expect(tweetHook).toContain('waitForRenderReady')
     expect(igHook).toContain('waitForRenderReady')
+
+    // 回归（2026-11-09）：截图态会重排 DOM（轮播 → 平铺），必须等渲染提交后
+    // 再收集图片；并等 load/decode、MediaImage 的 data-status、opacity 淡入结束。
+    expect(utils).toContain('img.decode()')
+    expect(utils).toContain('img.dataset.status')
+    expect(utils).toContain('\'transitionend\'')
   })
 
   it('AC-SHOT-004: font rendering non-blocking (font-display: swap)', () => {

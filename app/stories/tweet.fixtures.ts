@@ -52,6 +52,100 @@ export const largeImageCard = {
   imageUrl: 'https://pbs.twimg.com/media/HQVvgGIbAAAWXed.jpg',
 }
 
+/** 多图轮播卡（真实广告推文 2118597337345859755 的 5 张竖图） */
+export const carouselCard: NonNullable<EnrichedTweet['card']> = {
+  type: 'unified_card',
+  layout: 'image_carousel',
+  url: 'https://ws-tcg.com/products/bdy_bp/?utm_source=X&utm_medium=cpc&utm_campaign=BDY',
+  title: '',
+  description: '',
+  domain: 'ws-tcg.com',
+  imageUrl: 'https://pbs.twimg.com/media/HWbE2ioboAAwFUp.jpg',
+  ctaLabel: '了解更多',
+  mediaFirst: true,
+  images: [
+    {
+      url: 'https://pbs.twimg.com/media/HWbE2ioboAAwFUp.jpg',
+      width: 1440,
+      height: 1800,
+      color: '#ffeb9d',
+      href: 'https://ws-tcg.com/products/bdy_bp/?utm_source=X&utm_medium=cpc&utm_campaign=BDY',
+    },
+    {
+      url: 'https://pbs.twimg.com/media/HWbE5YVaMAAGH3d.jpg',
+      width: 1440,
+      height: 1800,
+      color: '#f6c5d1',
+    },
+    {
+      url: 'https://pbs.twimg.com/media/HWbE7Tia4AA2SlD.jpg',
+      width: 1440,
+      height: 1800,
+      color: '#bee4f8',
+    },
+    {
+      url: 'https://pbs.twimg.com/media/HWbE8vbbQAAFcaN.jpg',
+      width: 1440,
+      height: 1800,
+      color: '#e0d2e7',
+    },
+    {
+      url: 'https://pbs.twimg.com/media/HWbE-LhagAAuxy3.jpg',
+      width: 1440,
+      height: 1800,
+      color: '#f5c6d0',
+    },
+  ],
+}
+
+/** 单图图片卡（真实广告推文 2118597530107904319 的 4:5 竖图） */
+export const singleImageCard: NonNullable<EnrichedTweet['card']> = {
+  type: 'unified_card',
+  layout: 'image_card',
+  url: 'https://ws-tcg.com/products/bdy_bp/?utm_source=X&utm_medium=cpc&utm_campaign=BDY',
+  title: '',
+  description: '',
+  domain: 'ws-tcg.com',
+  imageUrl: 'https://pbs.twimg.com/media/HWbFMdybkAAqTfE.jpg',
+  ctaLabel: '了解更多',
+  mediaFirst: true,
+  images: [
+    {
+      url: 'https://pbs.twimg.com/media/HWbFMdybkAAqTfE.jpg',
+      width: 1440,
+      height: 1800,
+      color: '#f8dce8',
+      href: 'https://ws-tcg.com/products/bdy_bp/?utm_source=X&utm_medium=cpc&utm_campaign=BDY',
+    },
+  ],
+}
+
+/** 视频卡（真实广告推文 2113690418080563539：4:5 封面 + 时长 6s） */
+export const videoCard: NonNullable<EnrichedTweet['card']> = {
+  type: 'unified_card',
+  layout: 'video_card',
+  url: 'https://www.starlink.com/jp/residential?referral=RC-481123-97289-21&utm_source=twitter&utm_medium=paid&utm_campaign=sls_jp_soc_twt_bro_dem&utm_content=sls_jp_soc_twt_bro_dem_res_tlp_v4s_vdo_ja-jp_egn-aurora-6s-test',
+  title: '今すぐ注文',
+  description: '',
+  domain: 'starlink.com',
+  imageUrl: 'https://pbs.twimg.com/amplify_video_thumb/2113687393765134336/img/fT6xAMDzjMYY3OvE.jpg',
+  mediaFirst: true,
+  images: [
+    {
+      url: 'https://pbs.twimg.com/amplify_video_thumb/2113687393765134336/img/fT6xAMDzjMYY3OvE.jpg',
+      width: 1440,
+      height: 1800,
+      color: '#212735',
+      type: 'video',
+      video: {
+        mp4: 'https://video.twimg.com/amplify_video/2113687393765134336/vid/avc1/720x900/aP59fMRNAqccTzts.mp4?tag=14',
+        hls: 'https://video.twimg.com/amplify_video/2113687393765134336/pl/XyEoRL2dA2Ttossx.m3u8?tag=14',
+        durationMs: 6006,
+      },
+    },
+  ],
+}
+
 export const longDescriptionCard = {
   type: 'summary' as const,
   url: 'https://example.com/long',
@@ -130,6 +224,21 @@ export const tweetTrendingNoImage = makeTweet({
 /** 宽幅大图卡（summary_large_image，1.91:1） */
 export const tweetWithLargeImageCard = makeTweet({
   card: { ...largeImageCard },
+})
+
+/** 多图轮播卡（5 张竖图，整卡可跳转） */
+export const tweetWithCarouselCard = makeTweet({
+  card: { ...carouselCard },
+})
+
+/** 单图图片卡（4:5 竖图，按原比例展示） */
+export const tweetWithSingleImageCard = makeTweet({
+  card: { ...singleImageCard },
+})
+
+/** 视频卡（封面 + 播放按钮 + 时长，不做内嵌播放） */
+export const tweetWithVideoCard = makeTweet({
+  card: { ...videoCard },
 })
 
 /** 无图文字卡 */

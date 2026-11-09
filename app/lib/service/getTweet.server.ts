@@ -78,10 +78,36 @@ async function backfillArticleDetails(tweet: EnrichedTweet): Promise<EnrichedTwe
 }
 
 /**
+ * 为**已缓存**的 unified_card 推文回填 `card.layout` / `card.images`。
+ *
+ * `images`（多图轮播）与 `layout` 是后加字段：改动前落地的缓存只有一张
+ * `card.imageUrl`，命中缓存时不再走 `getEnrichedTweet`，广告多图卡只显示单图。
+ * 旧缓存不保留原始 card，故探测到缺 `layout` 时重抓一次上游；成功后写回两层缓存。
+ * 非 unified_card 或已带 `layout` 的缓存不触发，不会反复打上游。
+ */
+async function backfillCardCarousel(tweet: EnrichedTweet): Promise<EnrichedTweet> {
+  if (!tweet.card || tweet.card.type !== 'unified_card' || tweet.card.layout)
+    return tweet
+
+  const fresh = await getEnrichedTweet(tweet.id_str)
+  if (!fresh?.card)
+    return tweet
+
+  const patched: EnrichedTweet = { ...tweet, card: fresh.card }
+
+  await Promise.allSettled([
+    setLocalCache({ id: tweet.id_str, type: 'tweet', value: patched }),
+    insertToTweetDB([patched]),
+  ])
+
+  return patched
+}
+
+/**
  * 读单条推文：localCache → DB → 上游。
  *
- * 出口依次做 Space / Article 回填（见 `backfillSpaceDetails`、`backfillArticleDetails`），
- * 使旧缓存与新抓取走同一呈现路径。
+ * 出口依次做 Space / Article / Card 回填（见 `backfillSpaceDetails`、
+ * `backfillArticleDetails`、`backfillCardCarousel`），使旧缓存与新抓取走同一呈现路径。
  */
 export async function getLocalTweet(tweetId: string): Promise<EnrichedTweet | null> {
   const tweet = await getLocalCache({
@@ -93,7 +119,9 @@ export async function getLocalTweet(tweetId: string): Promise<EnrichedTweet | nu
   if (!tweet)
     return tweet
 
-  return backfillArticleDetails(await backfillSpaceDetails(tweet))
+  return backfillCardCarousel(
+    await backfillArticleDetails(await backfillSpaceDetails(tweet)),
+  )
 }
 
 export function mergeTranslationEntities(enrichedTweet: EnrichedTweet, entities: TranslationEntity[]) {

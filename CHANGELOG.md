@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ### Added
 
+#### 媒体广告卡（2026-11-09）
+
+- `unified_card` 媒体卡解析与渲染：多图 `image_carousel_*` 按 `media_list` 顺序还原轮播（不再随机取单图），单图 `image_website` 按原图比例展示（不再裁成 1.91:1），`video_website` 展示封面 + 播放按钮 + 时长 badge（不内嵌播放，mp4/hls 保留给下游下载）
+- 两种形态：官方同款横向轮播（scroll-snap + 箭头 + 圆点）与截图友好平铺；截图模式自动强制平铺
+- 旧 `unified_card` 缓存首次访问一次性回填 `card.layout/images`，不反复重抓
+- `AC-CARD-010/011`（`verify/acceptance-criteria/AC-card.md`）+ `test/unit/carousel-card.spec.ts` / `test/acceptance/carousel-card-render.spec.ts`
+
 #### DeepSeek 视觉渠道（2026-09-12）
 
 - AI 图片描述新增 DeepSeek 渠道（`deepseek-flash` 支持图片输入；`deepseek-v4-pro` 为纯文本，设置页按 `supportsVision` 过滤并在切换 provider 时回退）

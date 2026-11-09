@@ -34,12 +34,17 @@
 
 ## AC-SHOT-003：截图组件使用 waitForRenderReady
 
-- **验证对象**：`app/hooks/use-screenshot-action.ts`（Tweet）和 `app/hooks/use-ig-screenshot-action.ts`（IG）源码扫描
+- **验证对象**：`app/lib/utils.ts`（`waitForRenderReady`）、
+  `app/hooks/use-screenshot-action.ts`（Tweet）和
+  `app/hooks/use-ig-screenshot-action.ts`（IG）源码扫描
 - **预期内容**：截图流程调用 `waitForRenderReady` 等渲染就绪信号
 - **Pass 条件**：
   - `waitForRenderReady` 在 `app/lib/utils.ts` 中定义
   - Tweet 截图 hook 使用 `waitForRenderReady`
   - IG 截图 hook 使用 `waitForRenderReady`
+  - 截图态重排 DOM 后（如媒体卡轮播 → 平铺）**先等渲染提交再收集图片**
+  - 等待图片 `load` + `decode()`、`MediaImage` 的 `data-status` 离开 loading，
+    并等 300ms opacity 淡入结束（否则导出骨架/半透明图）
 
 ---
 

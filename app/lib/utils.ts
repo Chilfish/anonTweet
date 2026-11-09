@@ -206,33 +206,82 @@ export async function parseExcel(data: ArrayBuffer): Promise<Omit<TranslationDic
 }
 
 /**
- * 确保 DOM 真正稳定并准备好截图
- * 结合了 React 调度、字体检测、图片解析与双重渲染帧同步
+ * 确保 DOM 真正稳定并准备好截图。
+ *
+ * 时序要点：调用方通常先 setState 切到截图态（如轮播 → 平铺网格），若立刻
+ * 收集 `img`，等到的是即将被卸载的旧节点，新布局里的图根本没被等待（导出后
+ * 仍是骨架/占位）。因此先等 React 提交 + 布局稳定，再收集并等待当前 DOM。
+ *
+ * 图片加载后再 `decode()`，并等 MediaImage 的 `data-status` 从 loading 变为
+ * success（其 onLoad 后才把 img 从 opacity-0 切到可见），最后双帧收尾。
  */
 export async function waitForRenderReady(container?: HTMLElement) {
-  // 1. 立即退出当前的宏任务/微任务队列，让 React 完成同步渲染
+  // 1. 让调用方的 setState 完成渲染（宏任务 + 双帧，覆盖布局与合成）
   await new Promise(resolve => setTimeout(resolve, 0))
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
 
   // 2. 等待字体就绪（防止截图时排版塌陷）
   if (typeof document !== 'undefined' && 'fonts' in document) {
     await document.fonts.ready
   }
 
-  // 3. 等待所有图片解码完成 (针对推文中的头像、媒体图)
+  // 3. 等待当前 DOM 中的图片加载并解码（用 addEventListener，避免覆盖 React 的 onLoad）
   const images = Array.from(container?.querySelectorAll('img') || document.images)
-  const imagePromises = images.map((img) => {
-    if (img.complete)
-      return Promise.resolve()
-    return new Promise((resolve) => {
-      img.onload = resolve
-      img.onerror = resolve // 即使报错也继续，防止阻塞
-    })
-  })
-  await Promise.all(imagePromises)
+  await Promise.all(images.map(async (img) => {
+    if (!img.complete) {
+      await new Promise<void>((resolve) => {
+        let settled = false
+        const done = () => {
+          if (settled)
+            return
+          settled = true
+          resolve()
+        }
+        // 先挂监听再复查 complete：避免「检查后刚好加载完成、事件已错过」的竞态
+        img.addEventListener('load', done, { once: true })
+        img.addEventListener('error', done, { once: true })
+        if (img.complete)
+          done()
+      })
+    }
+    if (typeof img.decode === 'function') {
+      try {
+        await img.decode()
+      }
+      catch {
+        // 坏图 / CORS 解码失败不阻塞截图，MediaImage 会渲染错误占位
+      }
+    }
+  }))
 
-  // 4. 双重 requestAnimationFrame
-  // 第一帧：浏览器收到重绘指令
-  // 第二帧：浏览器已完成布局计算和复杂的层叠合成
+  // 4. MediaImage 在 onLoad 后才移除骨架屏；等 React 把状态提交到 DOM
+  const statusImages = images.filter(img => img.dataset.status !== undefined)
+  const deadline = Date.now() + 1000
+  while (statusImages.some(img => img.dataset.status === 'loading') && Date.now() < deadline)
+    await new Promise(resolve => requestAnimationFrame(resolve))
+
+  // 5. MediaImage 用 300ms opacity 淡入；状态变 success 时动画才刚开始，
+  //    此时截图会得到半透明图片。等淡入结束（或超时兜底）再放行。
+  await new Promise(resolve => requestAnimationFrame(resolve))
+  if (typeof getComputedStyle === 'function') {
+    const fading = statusImages.filter((img) => {
+      const opacity = Number.parseFloat(getComputedStyle(img).opacity)
+      return Number.isFinite(opacity) && opacity < 1
+    })
+    await Promise.all(fading.map(img => new Promise<void>((resolve) => {
+      let settled = false
+      const done = () => {
+        if (settled)
+          return
+        settled = true
+        resolve()
+      }
+      img.addEventListener('transitionend', done, { once: true })
+      setTimeout(done, 500) // transition-duration 300ms 的兜底
+    })))
+  }
+
+  // 6. 双重 requestAnimationFrame：完成最终重绘与层叠合成
   return new Promise((resolve) => {
     requestAnimationFrame(() => {
       requestAnimationFrame(resolve)

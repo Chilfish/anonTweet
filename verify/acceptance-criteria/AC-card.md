@@ -1,8 +1,8 @@
-# Tweet 卡片（Trending / Jetfuel）验收标准
+# Tweet 卡片（Trending / Jetfuel / 多图轮播）验收标准
 
-> 版本：1.2 | 日期：2026-09-12
+> 版本：1.3 | 日期：2026-11-09
 > 对应 Postmortem：001 (Tweet Parsing)
-> 关联方案：`docs/features/tweet/trending-card.md`
+> 关联方案：`docs/features/tweet/trending-card.md`、`docs/features/tweet/carousel-card.md`
 > 执行命令：`bun run verify/index.ts --module card`
 > 2026-08-19 修订（review P1-1）：AC-CARD-005 v1.0 声称「Storybook / 快照驱动」，
 > 实为源码字符串扫描——验证方法名实不符。v1.1 改为 `renderToString` 真实渲染断言
@@ -10,6 +10,7 @@
 > 2026-09-12 修订（AC-CARD-006）：缩略卡原用固定 `h-20` 且外框 `overflow-visible`，
 > 文本高于 80px 时图片与卡片底边错位、图片直角溢出圆角边框；改为缩略图随卡片高度
 > 拉伸（`min-h-20` + `self-stretch`）+ 外框 `overflow-hidden` 裁剪。
+> 2026-11-09 新增 AC-CARD-010/011：`image_carousel_website` 多图广告卡解析与渲染。
 
 ---
 
@@ -126,7 +127,46 @@
 
 ---
 
-## 总计：9 条 AC
+## AC-CARD-010：媒体卡解析（多图 media_list / 单图 media / 视频变体 / CTA / 主色）
+
+- **输入**：
+  - `test/fixtures/unified-card/carousel.json`（真实广告推文 `2118597337345859755`）
+  - `test/fixtures/unified-card/single-image.json`（真实广告推文 `2118597530107904319`）
+  - `test/fixtures/unified-card/video.json`（真实广告推文 `2113690418080563539`）
+- **预期输出**：`mapTwitterCard()` 返回 `image_carousel` / `image_card` / `video_card`
+- **验证方法**：单测（`test/unit/carousel-card.spec.ts`）
+- **Pass 条件**：
+  - 多图：`images` 顺序与 `media_list` 一致（不是 `media_entities` 对象键顺序）
+  - 单图（`image_website`）：`layout === 'image_card'`、`images` 长度 1、
+    保留 1440×1800 原尺寸与主色
+  - 视频（`video_website`）：`layout === 'video_card'`、`images[0].type === 'video'`、
+    `video.mp4` 为最高码率 mp4、`video.hls` 与 `durationMs` 保留
+  - `imageUrl === images[0].url`（封面固定为第一张图 / 视频封面）
+  - 每张图带 `width/height`、主色 `color`、可用时带独立 `href`
+  - 零宽空格标题被清洗为 `undefined`；`ctaLabel === '了解更多'`；`mediaFirst === true`
+  - 媒体 id 在 `media_entities` 缺失时跳过，不抛错
+  - 无媒体 `type` 的 unified_card 保持 `layout: 'default'`
+
+---
+
+## AC-CARD-011：媒体卡真实渲染（轮播 / 截图平铺 / 单图原比例 / 视频静态态）
+
+- **输入**：AC-CARD-010 解析结果构造的 EnrichedTweet
+- **预期输出**：`TweetLinkCard` 渲染媒体卡变体；截图模式下自动切平铺
+- **验证方法**：`renderToString` + HTML 断言（`test/acceptance/carousel-card-render.spec.ts`）
+- **Pass 条件**：
+  - 默认渲染横向 scroll-snap 轨道（`snap-x`）+ 5 张图，单页比例取首图（1440×1800 → 0.8）
+  - 渲染上一张/下一张按钮（`aria-label`）、`第 1 张，共 5 张` 计数与 `了解更多` CTA
+  - 每张图与底部信息条均指向卡片 URL（支持每图独立 `href`）
+  - 截图模式（`screenshoting`）→ `grid-cols-3` 平铺、全部 5 张可见、无箭头/无切换按钮
+  - 非截图模式渲染平铺/轮播切换按钮（`aria-pressed`）
+  - 单图卡按 `aspect-ratio: 0.8` 渲染（不再使用 `aspect-[1.91/1]`），无箭头/轮播轨道
+  - 视频卡渲染封面 + 播放按钮 + `0:06` 时长 badge，**不渲染 `<video>`**；
+    截图模式同样只导出封面与覆盖层
+
+---
+
+## 总计：11 条 AC
 
 | AC          | 分类          | 依赖外部 API | 依赖 AI |
 | ----------- | ------------- | ------------ | ------- |
@@ -139,6 +179,10 @@
 | AC-CARD-007 | 组件/真实渲染 | 否           | 否      |
 | AC-CARD-008 | 组件/真实渲染 | 否           | 否      |
 | AC-CARD-009 | 源码扫描      | 否           | 否      |
+| AC-CARD-010 | 纯函数/离线   | 否           | 否      |
+| AC-CARD-011 | 组件/真实渲染 | 否           | 否      |
 
-> 离线 AC 依赖 fixture（`test/fixtures/jetfuel/trending.json`），验证时无需服务器。
-> AC-CARD-005~008 由真实渲染测试驱动（`card-render.spec.ts`），无外部依赖。
+> 离线 AC 依赖 fixture（`test/fixtures/jetfuel/trending.json`、
+> `test/fixtures/unified-card/carousel.json`），验证时无需服务器。
+> AC-CARD-005~008/011 由真实渲染测试驱动（`card-render.spec.ts`、
+> `carousel-card-render.spec.ts`），无外部依赖。

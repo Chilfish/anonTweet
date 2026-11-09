@@ -67,6 +67,28 @@ export interface TwitterCard {
   }
 }
 
+/** 图片/视频卡中的单个媒体 */
+export interface CardCarouselImage {
+  /** 图片 URL 或视频封面 URL（渲染时再走 normalizeMediaUrl / 代理） */
+  url: string
+  width: number
+  height: number
+  /** 该张图独立的目标链接；缺省回退卡片主链接 */
+  href?: string
+  /** 主色（mediaColor 调色板首色），用作加载占位背景 */
+  color?: string
+  /** 媒体类型（缺省按 photo 处理） */
+  type?: 'photo' | 'video'
+  /** 视频附加信息（type === 'video' 时存在；UI 只展示封面/时长，播放源留给下游下载） */
+  video?: {
+    /** 最高码率 mp4 */
+    mp4?: string
+    /** HLS 播放列表 */
+    hls?: string
+    durationMs?: number
+  }
+}
+
 export interface LinkPreviewCard {
   type: 'summary' | 'summary_large_image' | 'unified_card' | 'unknown' | 'player'
   /** 跳转链接 */
@@ -79,6 +101,14 @@ export interface LinkPreviewCard {
   domain: string
   /** 图片地址 */
   imageUrl: string
+  /** 布局判别；旧缓存无此字段，用于一次性回填 `images` */
+  layout?: 'default' | 'image_card' | 'image_carousel' | 'video_card' | 'trending'
+  /** 媒体列表（单图/单视频 1 项，多图按 media_list 顺序） */
+  images?: CardCarouselImage[]
+  /** 官方媒体组件是否排在详情区之前（components 顺序） */
+  mediaFirst?: boolean
+  /** 官方 CTA 文案（website_cta_card_label 本地化后） */
+  ctaLabel?: string
   /** jetfuel 增强信息（Trending/topic 等官方渲染卡，可选） */
   trending?: TrendingCardInfo
 }

@@ -1,0 +1,84 @@
+{
+  "type": "video_website",
+  "component_objects": {
+    "details_1": {
+      "type": "details",
+      "data": {
+        "title": { "content": "今すぐ注文", "is_rtl": false },
+        "subtitle": { "content": "starlink.com", "is_rtl": false },
+        "destination": "browser_with_docked_media_1"
+      }
+    },
+    "media_1": {
+      "type": "media",
+      "data": {
+        "id": "13_2113687393765134336",
+        "destination": "browser_with_docked_media_1"
+      }
+    }
+  },
+  "destination_objects": {
+    "browser_with_docked_media_1": {
+      "type": "browser_with_docked_media",
+      "data": {
+        "url_data": {
+          "url": "https://www.starlink.com/jp/residential?referral=RC-481123-97289-21&utm_source=twitter&utm_medium=paid&utm_campaign=sls_jp_soc_twt_bro_dem&utm_content=sls_jp_soc_twt_bro_dem_res_tlp_v4s_vdo_ja-jp_egn-aurora-6s-test",
+          "vanity": "starlink.com"
+        },
+        "media_id": "13_2113687393765134336"
+      }
+    }
+  },
+  "components": ["media_1", "details_1"],
+  "media_entities": {
+    "13_2113687393765134336": {
+      "id": 2113687393765134336,
+      "id_str": "2113687393765134336",
+      "type": "video",
+      "media_url_https": "https://pbs.twimg.com/amplify_video_thumb/2113687393765134336/img/fT6xAMDzjMYY3OvE.jpg",
+      "original_info": { "width": 1440, "height": 1800 },
+      "sizes": {
+        "thumb": { "w": 150, "h": 150, "resize": "crop" },
+        "small": { "w": 544, "h": 680, "resize": "fit" },
+        "medium": { "w": 960, "h": 1200, "resize": "fit" },
+        "large": { "w": 1440, "h": 1800, "resize": "fit" }
+      },
+      "video_info": {
+        "aspect_ratio": [4, 5],
+        "duration_millis": 6006,
+        "variants": [
+          {
+            "bitrate": 632000,
+            "content_type": "video/mp4",
+            "url": "https://video.twimg.com/amplify_video/2113687393765134336/vid/avc1/320x400/h61IhI6fbTt8Xz32.mp4?tag=14"
+          },
+          {
+            "bitrate": 2176000,
+            "content_type": "video/mp4",
+            "url": "https://video.twimg.com/amplify_video/2113687393765134336/vid/avc1/720x900/aP59fMRNAqccTzts.mp4?tag=14"
+          },
+          {
+            "bitrate": 950000,
+            "content_type": "video/mp4",
+            "url": "https://video.twimg.com/amplify_video/2113687393765134336/vid/avc1/480x600/jJ6dfPw2572gX4hs.mp4?tag=14"
+          },
+          {
+            "content_type": "application/x-mpegURL",
+            "url": "https://video.twimg.com/amplify_video/2113687393765134336/pl/XyEoRL2dA2Ttossx.m3u8?tag=14"
+          }
+        ]
+      },
+      "ext": {
+        "mediaColor": {
+          "r": {
+            "ok": {
+              "palette": [
+                { "rgb": { "red": 33, "green": 39, "blue": 53 }, "percentage": 90.47 }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

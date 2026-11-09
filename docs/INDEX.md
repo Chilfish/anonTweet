@@ -26,7 +26,7 @@ docs/
 ├── INDEX.md                    # 本文档（唯一入口）
 ├── features/                   # 功能文档，按子系统组织
 │   ├── translation/            #   翻译子系统（translation.md · deepseek-ai-sdk.md）
-│   ├── tweet/                  #   推文子系统（article.md · space-card.md · trending-card.md · search.md · transaction-id.md）
+│   ├── tweet/                  #   推文子系统（article.md · space-card.md · trending-card.md · carousel-card.md · search.md · transaction-id.md）
 │   ├── instagram/              #   Instagram 集成（instagram-integration.md · ig-actions-integration.md）
 │   ├── pwa/                    #   PWA（web-share-target.md · capability-audit.md）
 │   ├── ai-vision/              #   AI 视觉描述（ai-vision.md）
