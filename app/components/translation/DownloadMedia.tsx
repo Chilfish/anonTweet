@@ -13,6 +13,7 @@ import { useTweets } from '~/lib/stores/hooks'
 import { toast } from '~/lib/utils'
 
 const IMAGE_EXT_RE = /\.(jpe?g|png|webp|gif|avif)$/i
+const MEDIA_PROXY_PREFIX = 'https://proxy.chilfish.top/'
 
 /** 从图片 URL 的路径扩展名（或 format 查询参数）推导真实格式，用于原图模式生成文件名 */
 function getImageExt(url: URL): string {
@@ -63,7 +64,7 @@ function getBestVideoVariant(media: MediaDetails): string | null {
       : prev,
   ).url
 
-  return `https://proxy.chilfish.top/${url}`
+  return `${MEDIA_PROXY_PREFIX}${url}`
 }
 
 /**
@@ -153,10 +154,37 @@ export function extractDownloadItemsFromTweets(
         items.push({ url, type: media.type as MediaType, originalIndex: idx })
     })
 
-    // 链接卡片图片（普通卡片或 trending 卡片主图）
-    const cardImageUrl = tweet.card?.trending?.imageUrl || tweet.card?.imageUrl
-    if (includeCardImages && cardImageUrl) {
-      items.push({ url: cardImageUrl, type: 'photo', originalIndex: items.length })
+    // 链接卡片媒体：多图轮播 / 单图 / 视频（旧缓存只有 imageUrl，退化为单图）
+    if (includeCardImages && tweet.card) {
+      const { card } = tweet
+      const cardMedia: { url: string, type: MediaType }[] = card.images?.length
+        ? card.images
+            .filter(media => media.url)
+            .map((media) => {
+              const videoUrl = media.type === 'video'
+                ? media.video?.mp4
+                : undefined
+              return videoUrl
+                ? { url: `${MEDIA_PROXY_PREFIX}${videoUrl}`, type: 'video' as const }
+                : { url: media.url, type: 'photo' as const }
+            })
+        : (() => {
+            const fallbackUrl = card.trending?.imageUrl || card.imageUrl
+            return fallbackUrl
+              ? [
+                  { url: fallbackUrl, type: 'photo' as const },
+                ]
+              : []
+          })()
+
+      // 去重：card.imageUrl 可能是 images[0]，或与推文媒体重复
+      const seen = new Set(items.map(item => item.url))
+      for (const media of cardMedia) {
+        if (seen.has(media.url))
+          continue
+        seen.add(media.url)
+        items.push({ url: media.url, type: media.type, originalIndex: items.length })
+      }
     }
 
     return items.map(item =>

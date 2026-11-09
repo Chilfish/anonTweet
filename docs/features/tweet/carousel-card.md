@@ -300,6 +300,16 @@ export interface LinkPreviewCard {
 - 暗色模式使用语义 token（`bg-card` / `border-border` / `text-muted-foreground`），
   不出现硬编码白色底。
 
+## 批量下载
+
+`app/components/translation/DownloadMedia.tsx#extractDownloadItemsFromTweets`：
+
+- 卡片媒体优先取 `card.images`（全部图片 / 视频），不再只取 `card.imageUrl`；
+- 图片按下载设置追加 `?format=jpg&name=large` 或 `?name=orig`；
+- 视频卡下载代理后的最高码率 mp4（`https://proxy.chilfish.top/<mp4>`），
+  无 mp4 时回退封面图；
+- 按 URL 去重，文件名沿用 `username-id-date(-n).ext`，保证多图不覆盖。
+
 ## 验收标准
 
 - 解析（多图）：给定样例 payload，`images` 长度 5、顺序与 `media_list` 一致、
@@ -314,7 +324,9 @@ export interface LinkPreviewCard {
 - 截图等待：平铺重渲染后收集新 DOM、等图片 load/decode、等 `data-status=success`、
   等 300ms opacity 淡入结束（避免导出骨架/半透明图）；
 - 缓存：旧 unified_card 缓存首次访问会回填 `card.layout`，第二次不再重抓；
-- 门禁：`bun run typecheck && bun run lint && bun run test`。
+- 下载：3 图轮播提取 3 个下载项；视频卡取代理 mp4；无 mp4 回退封面；
+  `includeCardImages = false` 跳过；
+- 门禁：`bun run typecheck && bunx eslint . && bun run test && bun run build`。
 
 ## 变更文件（预期）
 
@@ -322,6 +334,7 @@ export interface LinkPreviewCard {
 新增:
   app/components/tweet/CarouselCard.tsx
   test/unit/carousel-card.spec.ts
+  test/unit/download-media.spec.ts
   test/acceptance/carousel-card-render.spec.ts
   test/fixtures/unified-card/carousel.json（多图真实 payload）
   test/fixtures/unified-card/single-image.json（单图真实 payload）
@@ -332,10 +345,12 @@ export interface LinkPreviewCard {
   app/lib/service/getTweet.server.ts     (backfillCardCarousel)
   app/lib/utils.ts                       (waitForRenderReady 截图时序 / 淡入等待)
   app/components/tweet/TweetCard.tsx     (分发到 CarouselCard)
+  app/components/translation/DownloadMedia.tsx (批量下载卡片全部媒体)
   app/stories/tweet.fixtures.ts          (媒体卡 story 数据)
   app/stories/TweetCard.stories.tsx      (CarouselCard / SingleImageCard / VideoCard story)
-  verify/acceptance-criteria/AC-card.md  (AC-CARD-010/011)
+  verify/acceptance-criteria/AC-card.md  (AC-CARD-010/011/012)
   verify/README.md                       (AC 索引)
+  lefthook.yml                           (pre-commit lint 纳入 md)
   docs/features/tweet/carousel-card.md   (本文)
 ```
 
@@ -348,6 +363,8 @@ export interface LinkPreviewCard {
 | 组件：轮播 / 平铺 / 单图原比例 / 视频封面+播放+时长                                       | ✅   | `test/acceptance/carousel-card-render.spec.ts`（6 例） |
 | 截图等待：DOM 时序、decode、data-status、opacity 淡入                                     | ✅   | `app/lib/utils.ts`（需浏览器手测导出效果）             |
 | 缓存回填：旧 `unified_card` 缓存一次性补 `layout/images`                                  | ✅   | 逻辑同 Space/Article 回填；无独立单测                  |
+| 批量下载：`card.images` 全部图片 / 代理 mp4 / 封面回退                                    | ✅   | `test/unit/download-media.spec.ts`（4 例）             |
+| CI 门禁：`bunx eslint .` 0 error                                                          | ✅   | 文档表格 prettier + `prefer-static-regex` 已修         |
 | Storybook：`Tweet/Card → CarouselCard / SingleImageCard / VideoCard`                      | ✅   | `bun run storybook` 手工查看                           |
 | 全量单测 + 验收                                                                           | ✅   | 见提交流水（typecheck + test + verify card）           |
 

@@ -166,7 +166,21 @@
 
 ---
 
-## 总计：11 条 AC
+## AC-CARD-012：媒体卡批量下载提取全部媒体
+
+- **输入**：构造的 `EnrichedTweet`，`card.images` 含 3 张图 / 1 个视频
+- **预期输出**：`extractDownloadItemsFromTweets()` 返回全部媒体项
+- **验证方法**：单测（`test/unit/download-media.spec.ts`）
+- **Pass 条件**：
+  - 多图轮播返回 3 个下载项（不再只下载 `card.imageUrl` 第一张）
+  - 文件名唯一（首图无后缀，后续 `-1` / `-2`）
+  - 视频卡下载代理后的最高码率 mp4（`https://proxy.chilfish.top/...`），扩展名 `.mp4`
+  - 视频缺 mp4 源时回退到封面图（`.jpg`）
+  - `includeCardImages = false` 时不产生卡片媒体项
+
+---
+
+## 总计：12 条 AC
 
 | AC          | 分类          | 依赖外部 API | 依赖 AI |
 | ----------- | ------------- | ------------ | ------- |
@@ -181,6 +195,7 @@
 | AC-CARD-009 | 源码扫描      | 否           | 否      |
 | AC-CARD-010 | 纯函数/离线   | 否           | 否      |
 | AC-CARD-011 | 组件/真实渲染 | 否           | 否      |
+| AC-CARD-012 | 纯函数/离线   | 否           | 否      |
 
 > 离线 AC 依赖 fixture（`test/fixtures/jetfuel/trending.json`、
 > `test/fixtures/unified-card/carousel.json`），验证时无需服务器。
