@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "anon-tweet",
+  "main": "./workers/app.ts",
+  "compatibility_date": "2026-11-10",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  "upload_source_maps": true,
+  // 非敏感的运行时配置。敏感值走 `wrangler secret put`：
+  // TWEET_KEYS / INS_COOKIES / DB_URL / GEMINI_API_KEY / DEEPSEEK_API_KEY。
+  // HOSTNAME 可留空：截图路由会回退到请求 origin；自定义域名固定后建议显式设置。
+  "vars": {
+    "ENVIRONMENT": "production",
+    "ENABLE_AI_TRANSLATION": "true",
+    "ENABLE_DB_CACHE": "true",
+    "ENABLE_LOCAL_CACHE": "false",
+    "ENABLE_TIMELINE": "false",
+    "ENABLE_BILI": "true"
+  }
+}

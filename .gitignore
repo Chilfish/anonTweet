@@ -4,7 +4,11 @@
 # React Router
 /.react-router/
 /build/
+.wrangler/
+.dev.vars
+!.dev.vars.example
 .env
+.env.*
 ./data/
 tmp/
 

@@ -1,0 +1,41 @@
+# 唯一的环境文件：复制为 .dev.vars（已 gitignore）后填真实值。
+# wrangler / react-router dev / 构建与部署脚本都读它。
+# 线上敏感值不写回这里，用 `wrangler secret put <NAME>` 设置。
+#
+#   cp .dev.vars.example .dev.vars
+
+ENVIRONMENT=development
+
+# 截图路由（/plain-tweet、/plain-ins）回调自身用的绝对地址。
+# 本地固定端口；线上留空时回退到请求 origin，固定自定义域名后再显式设置。
+HOSTNAME=http://localhost:9080
+
+# Twitter/X 用户凭证（微博客 cookie 的 Base64）。多个用逗号分隔；
+# 注意 Cloudflare 单个变量上限 5KB，多 Key 建议拆成独立 secret 或放 KV。
+TWEET_KEYS=
+
+# Instagram cookies；不填时 /api/ig/get 返回空数组。
+INS_COOKIES=
+
+# PostgreSQL / Neon。启用 DB 缓存时必须填。
+DB_URL=
+ENABLE_DB_CACHE=false
+
+# 本地缓存：开发/测试生效；Workers 上自动回退内存 LRU，持久化请用 DB。
+ENABLE_LOCAL_CACHE=true
+
+ENABLE_AI_TRANSLATION=true
+GEMINI_API_KEY=
+GEMINI_MODEL=models/gemini-3-flash-preview
+# DEEPSEEK_API_KEY=
+# AI_TRANSLATION_TIMEOUT_MS=120000
+
+# 公开部署加固：开启后仅允许官方 AI 域名 + ALLOWED_AI_BASE_URL_HOSTS。
+ENABLE_AI_BASE_URL_WHITELIST=false
+ALLOWED_AI_BASE_URL_HOSTS=
+
+# 用户时间线接口默认关闭（固定 429）；自用实例可设 true。
+ENABLE_TIMELINE=false
+
+# 隐藏自用入口（Bili 动态发布代理）。
+ENABLE_BILI=true

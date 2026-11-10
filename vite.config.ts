@@ -2,6 +2,7 @@ import type { Plugin } from 'vite'
 import { execSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
+import { cloudflare } from '@cloudflare/vite-plugin'
 import { reactRouter } from '@react-router/dev/vite'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
@@ -12,7 +13,7 @@ import { env } from './app/lib/env.server.ts'
  * dev 静态服务 charset 修复：public 静态文件由 sirv 提供，.md 响应头
  * `Content-Type: text/markdown` 缺 charset → 浏览器按系统默认编码（GBK/CP1252）
  * 渲染 UTF-8 中文产生乱码。sirv 的 send() 会尊重预设的 Content-Type，故在
- * 静态中间件之前设好即可；构建产物（Vercel）由 vercel.json headers 规则补齐。
+ * 静态中间件之前设好即可；构建产物由 public/_headers 补齐。
  */
 function skillsMarkdownCharset(): Plugin {
   return {
@@ -59,8 +60,11 @@ const gitInfo = getGitInfo()
 const babelInclude = /\.[jt]sx?$/
 const ReactCompilerConfig = { /* ... */ }
 
-export default defineConfig(({ isSsrBuild }) => ({
+export default defineConfig({
   plugins: [
+    cloudflare({
+      viteEnvironment: { name: 'ssr' },
+    }),
     tailwindcss(),
     reactRouter(),
     skillsMarkdownCharset(),
@@ -130,10 +134,4 @@ export default defineConfig(({ isSsrBuild }) => ({
     __GIT_DATE__: JSON.stringify(gitInfo.date),
     __GEMINI_MODEL__: JSON.stringify(env.GEMINI_MODEL),
   },
-  build: {
-    rollupOptions: {
-      input: isSsrBuild ? './server/app.ts' : undefined,
-      // input: isSsrBuild ? './server/express.ts' : undefined,
-    },
-  },
-}))
+})
