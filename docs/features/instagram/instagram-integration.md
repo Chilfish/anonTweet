@@ -32,7 +32,7 @@
 - [x] `app/lib/env.server.ts` — 新增 `INS_COOKIES` 环境变量
 - [x] `app/lib/localCache.ts` — CacheType 新增 `ig-post`
 - [x] 依赖安装：`@chilfish/gallery-dl-instagram@0.2.2`
-- [ ] `.env` 手动添加 `INS_COOKIES`（用户操作）
+- [ ] `.dev.vars` 手动添加 `INS_COOKIES`（用户操作）
 
 ## Phase 3 任务清单
 
@@ -72,7 +72,7 @@
   app/lib/utils.ts
   app/lib/env.server.ts
   app/components/tweet/TweetInputForm.tsx
-  .env.example
+  .dev.vars.example
 ```
 
 ## 日志

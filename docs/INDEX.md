@@ -56,7 +56,7 @@ docs/
 | **修改 AI Provider / DeepSeek 参数**           | `features/translation/deepseek-ai-sdk.md`                                                      | provider 级/模型级/callOptions 参数暴露策略                    |
 | **修改 Instagram 集成**                        | `features/instagram/instagram-integration.md` + `features/instagram/ig-actions-integration.md` | IG 5 阶段管线、操作区、DB 缓存、caption 翻译                   |
 | **修改 AI Vision（看图说话/OCR）**             | `features/ai-vision/ai-vision.md` + `archive/ai-vision-plan.md`                                | 需求与上下文、已完成行动计划 + DR、AC-VISION                   |
-| **部署 / 环境配置**                            | `features/deploy/deployment.md`                                                                | Vercel / 自托管、环境变量、缓存层                              |
+| **部署 / 环境配置**                            | `features/deploy/deployment.md`                                                                | Cloudflare Workers、`.dev.vars`、缓存层                        |
 | **修改 PWA / SW / manifest / 安装体验**        | `features/pwa/web-share-target.md` + `features/pwa/capability-audit.md`                        | share_target 方案 + 能力盘点（线上核查、场景裁决、候选优先级） |
 | **修改 UI 组件、页面**                         | `engineering/code-style.md` + `ui-design/README.md`                                            | 组件拆分、命名、导入顺序、原生优先原则                         |
 | **修改原子组件（Button/Input/Dialog 等）**     | `ui-design/GENERAL.md` + `ui-design/select-cossui.md`                                          | shadcn/coss 组件使用规范                                       |

@@ -10,13 +10,13 @@
 
 ## 1. 线上状态核查（2026-09-06 23:1x，直连 https://anon-tweet.chilfish.top/）
 
-| 检查项                      | 结果                                                                                                                                                                                                       |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET /sw.js`                | 200，993 B，与仓库 `public/sw.js` 同源（极简网络透传：install `skipWaiting` + activate `clients.claim` + 同源 GET `respondWith(fetch(request))`，无任何 Cache 写入）                                       |
-| `GET /manifest.webmanifest` | 200，`Content-Type: application/manifest+json`（`vercel.json` 规则生效）；内容含 `display: standalone` / `start_url`/`scope: "/"` / 192+512 any 图标 / `share_target`(GET `/`，url/text/title)，与仓库一致 |
-| `/` HTML `<head>`           | 有 `<link rel="manifest">` 与 `theme-color`；**缺** `apple-touch-icon` / `apple-mobile-web-app-*`（无 iOS meta）                                                                                           |
-| manifest                    | **缺** `maskable` 图标 / `screenshots` / `shortcuts` / `display_override`                                                                                                                                  |
-| SW 生命周期                 | 截图显示 #6900 activated & running，Update Cycle install→wait→activate 正常；网络透传 + `skipWaiting`+`clients.claim` ⇒ 部署更新无「旧 SW 滞留」风险                                                       |
+| 检查项                      | 结果                                                                                                                                                                                                           |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /sw.js`                | 200，993 B，与仓库 `public/sw.js` 同源（极简网络透传：install `skipWaiting` + activate `clients.claim` + 同源 GET `respondWith(fetch(request))`，无任何 Cache 写入）                                           |
+| `GET /manifest.webmanifest` | 200，`Content-Type: application/manifest+json`（`public/_headers` 规则生效）；内容含 `display: standalone` / `start_url`/`scope: "/"` / 192+512 any 图标 / `share_target`(GET `/`，url/text/title)，与仓库一致 |
+| `/` HTML `<head>`           | 有 `<link rel="manifest">` 与 `theme-color`；**缺** `apple-touch-icon` / `apple-mobile-web-app-*`（无 iOS meta）                                                                                               |
+| manifest                    | **缺** `maskable` 图标 / `screenshots` / `shortcuts` / `display_override`                                                                                                                                      |
+| SW 生命周期                 | 截图显示 #6900 activated & running，Update Cycle install→wait→activate 正常；网络透传 + `skipWaiting`+`clients.claim` ⇒ 部署更新无「旧 SW 滞留」风险                                                           |
 
 **结论**：线上部署与仓库同步、PWA 判定要素齐备、SW 健康。注册门禁 = `window.isSecureContext`
 （生产 https / localhost / 本地 Caddy https LAN 注册；明文 http 不注册，见 `app/lib/pwa/register.ts`）。

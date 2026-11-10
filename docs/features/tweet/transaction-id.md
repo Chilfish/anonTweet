@@ -26,7 +26,7 @@
 
 ### 2.1 决定性：登录态决定拿到哪个外壳（本机实测）
 
-同一 URL，仅切换 `Cookie` 头（cookie 来自本机 `.env` 的 `TWEET_KEYS`，`Buffer.from(key,'base64')`）：
+同一 URL，仅切换 `Cookie` 头（cookie 来自本机 `.dev.vars` 的 `TWEET_KEYS`，`Buffer.from(key,'base64')`）：
 
 | 模式      | URL         | 响应大小 | `ondemand.s` | meta | anim frames |
 | --------- | ----------- | -------- | ------------ | ---- | ----------- |
@@ -96,7 +96,7 @@ Lqm1：issue #17/#20 同一错误；历史修复为「改正则」(PR #18/#19) +
 
 ```bash
 # cookie 来自 TWEET_KEYS[0]（base64）
-KEY=$(grep -E '^\s*TWEET_KEYS\s*=' .env | cut -d= -f2- | cut -d, -f1 | tr -d ' ')
+KEY=$(grep -E '^\s*TWEET_KEYS\s*=' .dev.vars | cut -d= -f2- | cut -d, -f1 | tr -d ' ')
 COOKIE=$(node -e "process.stdout.write(Buffer.from(process.argv[1],'base64').toString())" "$KEY")
 
 UA='Mozilla/5.0 (X11; Linux x86_64; rv:144.0) Gecko/20100101 Firefox/144.0'

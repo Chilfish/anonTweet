@@ -38,7 +38,7 @@
 ## 技术栈
 
 - **框架**：React Router v8（SSR + CSR）
-- **运行时**：Bun 1.4、TypeScript
+- **运行时**：Bun 1.4、TypeScript、Cloudflare Workers（workerd）
 - **数据源**：Twitter/X 接口（内置 `rettiwt-api` 逆向适配）、Instagram（`@chilfish/gallery-dl-instagram`）
 - **AI**：Vercel AI SDK（Gemini / DeepSeek / OpenRouter）
 - **UI**：Tailwind CSS v4、shadcn/ui、coss、Lucide
@@ -58,26 +58,32 @@ bun install
 
 ### 配置
 
-把 `example.env` 复制成 `.env`，按需修改。
+把 `.dev.vars.example` 复制成 `.dev.vars`，按需修改。这是本地唯一的环境文件，`wrangler` / `react-router dev` / 构建与部署脚本都读它。
+
+```bash
+cp .dev.vars.example .dev.vars
+```
 
 ```env
-ENVIRONMENT="development"
-HOSTNAME="http://localhost:9080"   # 截图回调用的绝对地址，不填时开发环境自动推断
+ENVIRONMENT=development
+HOSTNAME=http://localhost:9080     # 截图回调用的绝对地址；线上留空时回退到请求 origin
 
-TWEET_KEYS=""        # 不填也能用，但会被上游限流；多个 Key 用逗号分隔
-INS_COOKIES=""       # Instagram cookies；不填时 /api/ig/get 返回空数组
+TWEET_KEYS=        # 不填也能用，但会被上游限流；多个 Key 用逗号分隔
+INS_COOKIES=       # Instagram cookies；不填时 /api/ig/get 返回空数组
 
-ENABLE_AI_TRANSLATION="true"
-GEMINI_API_KEY=""
-GEMINI_MODEL="models/gemini-3-flash-preview"
-# DEEPSEEK_API_KEY=""
+ENABLE_AI_TRANSLATION=true
+GEMINI_API_KEY=
+GEMINI_MODEL=models/gemini-3-flash-preview
+# DEEPSEEK_API_KEY=
 
-ENABLE_LOCAL_CACHE="true"
-ENABLE_DB_CACHE="false"
-# DB_URL="postgres://..."
+ENABLE_LOCAL_CACHE=true   # Workers 运行时自动回退内存 LRU
+ENABLE_DB_CACHE=false
+# DB_URL=postgres://...
 
-ENABLE_TIMELINE="false"   # 用户时间线接口，默认关闭（固定 429 防滥用）
+ENABLE_TIMELINE=false      # 用户时间线接口，默认关闭（固定 429 防滥用）
 ```
+
+> Workers 线上用 `wrangler` 的 vars / secrets，不读 `.dev.vars`；旧的 `.env` 不再使用。
 
 <details>
 <summary>TWEET_KEYS 怎么获取</summary>
@@ -87,7 +93,7 @@ ENABLE_TIMELINE="false"   # 用户时间线接口，默认关闭（固定 429 �
 1. 安装浏览器扩展：Chrome 用 [X Auth Helper](https://chromewebstore.google.com/detail/x-auth-helper/igpkhkjmpdecacocghpgkghdcmcmpfhp)，Firefox 用 [Rettiwt Auth Helper](https://addons.mozilla.org/en-US/firefox/addon/rettiwt-auth-helper)
 2. 建议在无痕窗口里登录 X 账号
 3. 打开扩展，点 `Get Key`，复制生成的字符串
-4. 填入 `.env` 的 `TWEET_KEYS`，多个用逗号分隔
+4. 填入 `.dev.vars` 的 `TWEET_KEYS`，多个用逗号分隔
 
 这个字符串是账号 Cookies 的 Base64 编码，权限等同于账号密码，不要外传。获取后不要手动点登出，直接关掉浏览器窗口，否则服务端会话会失效。
 
@@ -115,20 +121,17 @@ bun run dev
 
 ## 部署
 
-**Vercel**
-
-在项目设置里添加 `VERCEL=true` 以启用适配器，并配置 `TWEET_KEYS`、`GEMINI_API_KEY` 和 `HOSTNAME`。`HOSTNAME` 必须是生产域名，否则截图功能拿不到正确的回调地址。
-
-**自托管**
+**Cloudflare Workers**
 
 ```bash
-bun run build
-bun run start
+bun run deploy -- --no-deploy   # 只构建并校验
+bun run deploy                  # 构建 + wrangler deploy
+bun run preview                 # build + vite preview（workerd）
 ```
 
-`bun run start` 走 `server/express.js`，默认监听 9080，可用 `PORT` 覆盖。自托管可以用本地文件缓存，建议开 `ENABLE_LOCAL_CACHE=true`；Serverless 的文件系统只读，不能用。
+首次部署前用 `bunx wrangler secret put` 设置 `TWEET_KEYS`、`INS_COOKIES`、`DB_URL`、`GEMINI_API_KEY`、`DEEPSEEK_API_KEY`；非敏感开关在 `wrangler.jsonc` 的 `vars` 里。Workers 需要 Paid 套餐（免费版 CPU 10ms 不够 SSR），并且 `ENABLE_LOCAL_CACHE` 必须关闭、缓存走 DB。
 
-公开部署时还可以设 `ENABLE_AI_BASE_URL_WHITELIST=true`，配合 `ALLOWED_AI_BASE_URL_HOSTS` 限制 AI 请求的 baseUrl 目标。
+本地开发只用 `bun run dev`（workerd）；`bun run preview` 用于验证生产构建。公开部署时还可以设 `ENABLE_AI_BASE_URL_WHITELIST=true`，配合 `ALLOWED_AI_BASE_URL_HOSTS` 限制 AI 请求的 baseUrl 目标。完整部署与排障见 [`docs/features/deploy/deployment.md`](docs/features/deploy/deployment.md)。
 
 ## 接口
 
@@ -141,8 +144,10 @@ BFF 接口都在 `/api` 下，覆盖 tweet / ig / user / ai / proxy 几组，完
 ## 常用命令
 
 ```bash
-bun run dev                              # 开发服务器
+bun run dev                              # 开发服务器（workerd）
 bun run build                            # 生产构建
+bun run preview                          # workerd 预览生产构建
+bun run deploy                           # 构建并部署到 Cloudflare Workers
 bun run typecheck                        # 类型检查（typegen + tsc）
 bun run lint                             # ESLint（含自动修复）
 bun run test                             # 单元 + 验收测试

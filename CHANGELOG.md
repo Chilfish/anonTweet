@@ -46,6 +46,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ### Changed
 
+#### Cloudflare Workers 部署（2026-11-10）
+
+- 构建链从 `@vercel/react-router` preset 切到 `@cloudflare/vite-plugin` + `wrangler`，新增 `workers/app.ts` 与 `wrangler.jsonc`
+- 新增 `app/entry.server.tsx`（`renderToReadableStream`），修复 Workers 下默认 Node 入口调用 `renderToPipeableStream` 报 500
+- 环境文件统一为 `.dev.vars`（模板 `.dev.vars.example`），构建 / 部署 / dev 共用；旧 `.env` / `example.env` 删除
+- axios 服务端固定 fetch adapter；Workers 下本地缓存回退内存 LRU，避免只读 VFS 写入静默失败
+- 静态响应头迁移到 `public/_headers`；新增手动触发的 `.github/workflows/deploy.yml`
+
 #### DeepSeek 视觉渠道（2026-09-12）
 
 - DeepSeek 模型 slug 对齐官方文档：`deepseek-v4-flash` → `deepseek-flash`、`deepseek v4 pro` → `deepseek-v4-pro`（顺带修 review P1-5 模型名空格）；persist v6 迁移改写旧 slug

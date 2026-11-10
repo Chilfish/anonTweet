@@ -22,7 +22,7 @@
 - **理由**:
   - 单一仓库单一框架，路由即 API 层（`app/routes/api/*`）
   - SSR 渲染推文卡片 + 截图路由（`/plain`）天然支持
-  - Vercel Serverless 部署友好
+  - 部署到 Cloudflare Workers
 - **后果**: 客户端/服务端边界需严格区分（见 postmortem #004）；截图组件隔离在纯路由
 
 ## ADR-002: RettiwtPool 多 Key 轮询池

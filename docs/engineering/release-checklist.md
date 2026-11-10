@@ -1,7 +1,7 @@
 # Release Checklist
 
 > 目标：验证 release 包满足发布标准。
-> 执行环境：本地 `bun run build` + 生产环境冒烟 / Vercel 部署后验证。
+> 执行环境：本地 `bun run build` + 生产环境冒烟 / Cloudflare Workers 部署后验证。
 
 ## 版本纪律
 
@@ -30,9 +30,12 @@
 
 ## 构建与部署
 
-- [ ] `bun run build` 成功产出 `.react-router/` 产物
-- [ ] Vercel 部署成功（`VERCEL=true` 已设置）
-- [ ] 生产域名 `HOSTNAME` 配置正确（截图回调依赖）
+- [ ] `bun run build` 成功产出 `build/client` 与 `build/server`
+- [ ] `bun run deploy -- --no-deploy` 构建校验通过
+- [ ] `bun run deploy` 部署成功（使用 `build/server/wrangler.json`）
+- [ ] Worker secrets 已设置（`TWEET_KEYS` / `INS_COOKIES` / `DB_URL` / `GEMINI_API_KEY` / `DEEPSEEK_API_KEY`）
+- [ ] `ENABLE_LOCAL_CACHE=false`、`ENABLE_DB_CACHE=true`（Workers）
+- [ ] 生产域名 `HOSTNAME` 配置正确（或留空回退请求 origin；自定义域名就绪）
 
 ## 功能冒烟（生产环境）
 

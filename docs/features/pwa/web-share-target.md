@@ -10,7 +10,7 @@
 
 ## 2 非目标（明确不做）
 
-- **不做离线缓存 / 离线可用**：本应用是 SSR + Vercel serverless，页面与 `/api/*` 每次必须回源。
+- **不做离线缓存 / 离线可用**：本应用是 SSR + Cloudflare Workers，页面与 `/api/*` 每次必须回源。
   service worker 只用于满足 Chrome「可安装」判定，绝不缓存任何响应。
 - 不做 iOS Safari 专项适配（用户场景为 Chrome Android）。
 - 不做 `POST`/文件接收（本需求只需链接/文本，GET 足够且无需 SW 拦截）。
@@ -52,7 +52,7 @@
 | `public/sw.js`                                     | 极简 SW：同源 GET 网络透传、绝不写 Cache、`skipWaiting`/`clients.claim` |
 | `app/lib/pwa/register.ts`                          | 仅生产注册 `/sw.js`（`import.meta.env.PROD` + feature detect）          |
 | `app/root.tsx`                                     | `<link rel="manifest">` + `theme-color` meta + root 组件注册 SW         |
-| `vercel.json`                                      | 为 `/manifest.webmanifest` 补 `application/manifest+json` Content-Type  |
+| `public/_headers`                                  | 为 `/manifest.webmanifest` 补 `application/manifest+json` Content-Type  |
 
 ### 3.4 SW 为什么这样写
 

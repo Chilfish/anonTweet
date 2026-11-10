@@ -21,8 +21,10 @@ Anon Tweet — 匿名浏览 Twitter/X 推文与 Instagram 帖子，AI 翻译（G
 
 ```bash
 bun install              # 安装依赖
-bun run dev              # 开发服务器 (http://localhost:9080)
+bun run dev              # 开发服务器 (http://localhost:9080, workerd)
 bun run build            # 生产构建
+bun run preview          # workerd 预览生产构建
+bun run deploy           # 构建并部署到 Cloudflare Workers
 bun run typecheck        # 类型检查（react-router typegen + tsc）
 bun run lint             # ESLint（@antfu/eslint-config，autofix）
 bun run test             # Vitest 单元+验收测试（真实门禁）。裸 `bun test` 走 Bun 原生 runner（非 vitest），
@@ -95,7 +97,7 @@ docs/                    # 技术文档与规范（见 docs/INDEX.md：features/
 - **Barrel export**：3+ 文件的组件目录必须有 `index.ts`（参考 `app/components/ins/index.ts`）
 - **Screenshot 组件隔离**：用于截图的组件必须在独立路由 + 使用 `waitForRenderReady`
 - **catch 用 `unknown`**，窄化用 `instanceof Error`，禁用 `catch (error: any)`
-- **安全**：API Key / `TWEET_KEYS` / `INS_COOKIES` 只走 `.env` + `app/lib/env.server.ts`，绝不硬编码
+- **安全**：API Key / `TWEET_KEYS` / `INS_COOKIES` 只走 `.dev.vars` + `app/lib/env.server.ts`，绝不硬编码
 
 ### 🔴 强制规范（必须遵循）
 
@@ -133,7 +135,7 @@ gh pr merge <N> --merge --delete-branch   # Create a Merge Commit
 `lefthook.yml` 管理 git hooks：
 
 - `pre-commit`：ESLint autofix（staged files）
-- `pre-push`：真实 gate — `typecheck + lint + verify（unit+acceptance+integration）+ build-storybook`（`verify` 已包含单测，不再单独跑 `bun run test` 以免重复；Storybook 浏览器测试 `test:storybook` 为开发侧可视化基线，不进门禁/CI/Vercel，避免安装 chromium）
+- `pre-push`：真实 gate — `typecheck + lint + verify（unit+acceptance+integration）+ build-storybook`（`verify` 已包含单测，不再单独跑 `bun run test` 以免重复；Storybook 浏览器测试 `test:storybook` 为开发侧可视化基线，不进门禁/CI，避免安装 chromium）
 
 ## Project Skills
 
