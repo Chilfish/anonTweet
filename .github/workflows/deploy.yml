@@ -11,9 +11,9 @@ on:
       - 'verify/**'
       - '.agents/**'
       - '.commandcode/**'
-      - '.github/workflows/verify.yml'
-      - '.gitignore'
-      - 'lefthook.yml'
+      - .github/workflows/verify.yml
+      - .gitignore
+      - lefthook.yml
   workflow_dispatch:
 
 permissions:

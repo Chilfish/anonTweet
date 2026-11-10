@@ -7,7 +7,7 @@ const VALIDATOR_EXPORT_RE = /export function isAllowedAIBaseUrl/
 const TOGGLE_EXPORT_RE = /export function isAIBaseUrlWhitelistEnabled/
 const HOSTS_EXPORT_RE = /export function getAIBaseUrlWhitelistHosts/
 const ENABLE_VAR_DEFAULT_FALSE_RE = /ENABLE_AI_BASE_URL_WHITELIST:\s*z\.stringbool\(\)\.default\(false\)/
-const ALLOWED_HOSTS_VAR_RE = /ALLOWED_AI_BASE_URL_HOSTS:\s*z\.string\(\)\.optional\(\)/
+const ALLOWED_HOSTS_VAR_RE = /ALLOWED_AI_BASE_URL_HOSTS:\s*optionalEnv\(z\.string\(\)\.optional\(\)\)/
 const VALIDATOR_CALL_RE = /isAllowedAIBaseUrl\(/
 const SDK_PROVIDER_RE = /createSDKProvider/
 
