@@ -1,11 +1,10 @@
-import type { FormEvent } from 'react'
+import type { ComponentType, FormEvent } from 'react'
 import axios from 'axios'
 import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { ImageUploader } from '~/components/SortableImage'
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '~/components/ui/card'
@@ -25,6 +24,12 @@ interface ApiResponse {
   message?: string
   dyn_id_str?: string
   error?: string
+}
+
+interface ImageUploaderProps {
+  value: File[]
+  onChange: (files: File[]) => void
+  maxCount?: number
 }
 
 async function submitBiliPost(formData: FormData): Promise<{ postId: string | null, error: string | null }> {
@@ -75,6 +80,28 @@ export default function PublishDynamicForm() {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [images, setImages] = useState<File[]>([])
+  const [ImageUploader, setImageUploader] = useState<ComponentType<ImageUploaderProps> | null>(null)
+
+  // dnd-kit 只在浏览器拖拽排序时使用：SSR 阶段渲染占位，挂载后再加载，
+  // 避免把 @dnd-kit 打进 Worker bundle。
+  useEffect(() => {
+    if (import.meta.env.SSR)
+      return
+
+    let cancelled = false
+    import('~/components/SortableImage')
+      .then((mod) => {
+        if (!cancelled)
+          setImageUploader(() => mod.ImageUploader)
+      })
+      .catch((error) => {
+        console.error('[bili] 加载图片上传组件失败:', error)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const { cookie, setCookie } = useCookieStore()
   const [isLoading, setIsLoading] = useState(false)
@@ -195,12 +222,20 @@ export default function PublishDynamicForm() {
               {images.length}
               /18)
             </Label>
-            {/* 替换为新组件 */}
-            <ImageUploader
-              value={images}
-              onChange={setImages}
-              maxCount={18}
-            />
+            {/* dnd-kit 按需加载，挂载前显示占位 */}
+            {ImageUploader
+              ? (
+                  <ImageUploader
+                    value={images}
+                    onChange={setImages}
+                    maxCount={18}
+                  />
+                )
+              : (
+                  <div className="flex h-24 items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/50 text-xs text-muted-foreground">
+                    加载上传组件…
+                  </div>
+                )}
           </div>
         </CardContent>
 

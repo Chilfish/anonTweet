@@ -1,9 +1,9 @@
 import type { Options as ScreenshotOptions } from 'modern-screenshot'
 import type { RefObject } from 'react'
 import type { EnrichedTweet } from '~/types'
-import { domToJpeg, domToPng } from 'modern-screenshot'
 import { useCallback, useState } from 'react'
 import { toastManager } from '~/components/ui/toast'
+import { captureJpeg, capturePng } from '~/lib/dom-screenshot'
 import { syncTranslationData } from '~/lib/service/translationSync'
 import { dataUrlToFile, shareImageOut } from '~/lib/share'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
@@ -85,8 +85,8 @@ export function useScreenshotAction({
     }
 
     return screenshotFormat === 'png'
-      ? domToPng(node, { ...options, scale: 1.7 })
-      : domToJpeg(node, { ...options, scale: 2, backgroundColor: '#ffffff' })
+      ? capturePng(node, { ...options, scale: 1.7 })
+      : captureJpeg(node, { ...options, scale: 2, backgroundColor: '#ffffff' })
   }, [screenshotFormat])
 
   // 私有：下载文件

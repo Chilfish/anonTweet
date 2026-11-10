@@ -53,6 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 - 环境文件统一为 `.dev.vars`（模板 `.dev.vars.example`），构建 / 部署 / dev 共用；旧 `.env` / `example.env` 删除
 - axios 服务端固定 fetch adapter；Workers 下本地缓存回退内存 LRU，避免只读 VFS 写入静默失败
 - 静态响应头迁移到 `public/_headers`；新增手动触发的 `.github/workflows/deploy.yml`
+- 纯客户端交互（xlsx / modern-screenshot / @dnd-kit）通过 SSR 分支裁掉动态加载，Worker 上传体积 6887→6045 KiB
 
 #### DeepSeek 视觉渠道（2026-09-12）
 

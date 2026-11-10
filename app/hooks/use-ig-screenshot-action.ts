@@ -1,9 +1,9 @@
 import type { Options as ScreenshotOptions } from 'modern-screenshot'
 import type { RefObject } from 'react'
 import type { IGPost } from '~/types'
-import { domToJpeg, domToPng } from 'modern-screenshot'
 import { useCallback, useRef, useState } from 'react'
 import { toastManager } from '~/components/ui/toast'
+import { captureJpeg, capturePng } from '~/lib/dom-screenshot'
 import { dataUrlToFile, shareImageOut } from '~/lib/share'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { waitForRenderReady } from '~/lib/utils'
@@ -63,8 +63,8 @@ export function useIGScreenshotAction({ post, captureRef }: UseIGScreenshotActio
     }
 
     return screenshotFormat === 'png'
-      ? domToPng(node, { ...options, scale: 1.7 })
-      : domToJpeg(node, { ...options, scale: 2, backgroundColor: '#ffffff' })
+      ? capturePng(node, { ...options, scale: 1.7 })
+      : captureJpeg(node, { ...options, scale: 2, backgroundColor: '#ffffff' })
   }, [screenshotFormat])
 
   // 私有：下载文件
