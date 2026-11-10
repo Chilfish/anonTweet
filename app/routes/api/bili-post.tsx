@@ -1,8 +1,8 @@
 import type { ActionFunctionArgs } from 'react-router'
 // 假设类型定义依然保留在 types/bili 中，或者你可以直接写在这里
 import type { CreateDynResult, UploadImageResult } from '~/types/bili'
-import axios from 'axios'
 import { data } from 'react-router'
+import axios from '~/lib/axios.server'
 import { env } from '~/lib/env.server'
 
 // 基础配置

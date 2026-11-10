@@ -22,8 +22,10 @@
 
 import type { ChildProcess } from 'node:child_process'
 import { spawn, spawnSync } from 'node:child_process'
+import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { parseEnvContent } from '../../scripts/lib/env.ts'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..')
@@ -43,7 +45,7 @@ export interface TestServerConfig {
   isolateExternal?: boolean
 }
 
-/** Keys handed to the dev server; emptied under isolation so `.env` never fills them. */
+/** Keys handed to the dev server; emptied under isolation so `.dev.vars` never fills them. */
 export const EXTERNAL_KEYS = [
   'INS_COOKIES',
   'TWEET_KEYS',
@@ -56,6 +58,9 @@ export class TestServer {
   private managed = false
   private _url: string
   private config: Required<TestServerConfig>
+  private readonly devVarsPath = path.join(PROJECT_ROOT, '.dev.vars')
+  private devVarsBackup: string | null = null
+  private devVarsWritten = false
 
   constructor(config: TestServerConfig = {}) {
     this.config = {
@@ -107,7 +112,7 @@ export class TestServer {
 
     if (this.config.isolateExternal) {
       // Point DOTENV_CONFIG_PATH at a missing file so env.server's dotenv
-      // (override: true) cannot repopulate real credentials from .env.
+      // cannot repopulate real credentials from .dev.vars.
       childEnv.DOTENV_CONFIG_PATH = path.join(PROJECT_ROOT, '.env.verify-absent')
       childEnv.INS_COOKIES = ''
       childEnv.TWEET_KEYS = ''
@@ -118,6 +123,37 @@ export class TestServer {
     else {
       delete childEnv.DOTENV_CONFIG_PATH
     }
+
+    // Cloudflare Vite 插件在 workerd 里跑 SSR，宿主的 process.env 不会自动传进去；
+    // 把测试需要的值写进 .dev.vars（结束后恢复），wrangler 会原生读取。
+    const devVarsOverrides: Record<string, string | undefined> = {
+      PORT: String(this.config.port),
+      ENABLE_DB_CACHE: 'false',
+      ENABLE_LOCAL_CACHE: 'false',
+    }
+    if (this.config.isolateExternal) {
+      Object.assign(devVarsOverrides, {
+        INS_COOKIES: '',
+        TWEET_KEYS: '',
+        GEMINI_API_KEY: undefined,
+        DEEPSEEK_API_KEY: undefined,
+      })
+    }
+    else {
+      for (const key of [
+        'INS_COOKIES',
+        'TWEET_KEYS',
+        'GEMINI_API_KEY',
+        'DEEPSEEK_API_KEY',
+        'GEMINI_MODEL',
+        'ENABLE_AI_TRANSLATION',
+        'HOSTNAME',
+      ]) {
+        if (childEnv[key] !== undefined)
+          devVarsOverrides[key] = childEnv[key]
+      }
+    }
+    this.prepareDevVars(devVarsOverrides, !this.config.isolateExternal)
 
     this.process = spawn('bun', ['run', 'dev'], {
       cwd: PROJECT_ROOT,
@@ -146,11 +182,17 @@ export class TestServer {
     }
 
     // Best-effort cleanup if the verify process dies abruptly (crash / Ctrl+C).
-    process.on('exit', () => this.killProcessSync())
+    process.on('exit', () => {
+      this.killProcessSync()
+      this.restoreDevVars()
+    })
 
     const ready = await this.waitForReady()
-    if (!ready)
+    if (!ready) {
+      this.killProcessSync()
+      this.restoreDevVars()
       throw new Error(`TestServer failed to become ready at ${this._url}`)
+    }
   }
 
   /**
@@ -194,13 +236,57 @@ export class TestServer {
   async stop(): Promise<void> {
     const child = this.process
     this.process = null
-    if (!child || !this.managed)
+    if (!child || !this.managed) {
+      this.restoreDevVars()
       return
+    }
 
     console.log('[TestServer] Stopping...')
     this.killTree(child)
     this.managed = false
+    this.restoreDevVars()
     console.log('[TestServer] Stopped')
+  }
+
+  /**
+   * 合并写入测试用的 .dev.vars；undefined 表示从文件里删掉该键。
+   * mergeExisting=false 时只写显式覆盖值（隔离模式不继承本机真实凭据 / 域名）。
+   */
+  private prepareDevVars(overrides: Record<string, string | undefined>, mergeExisting: boolean): void {
+    this.devVarsBackup = existsSync(this.devVarsPath)
+      ? readFileSync(this.devVarsPath, 'utf8')
+      : null
+
+    const values = mergeExisting && this.devVarsBackup
+      ? parseEnvContent(this.devVarsBackup)
+      : {}
+
+    for (const [key, value] of Object.entries(overrides)) {
+      if (value === undefined)
+        delete values[key]
+      else
+        values[key] = value
+    }
+
+    const content = Object.entries(values)
+      .map(([key, value]) => `${key}=${value}`)
+      .join('\n')
+    writeFileSync(this.devVarsPath, `${content}\n`)
+    this.devVarsWritten = true
+  }
+
+  /** 恢复测试前的 .dev.vars；原本不存在时直接删除。 */
+  private restoreDevVars(): void {
+    if (!this.devVarsWritten)
+      return
+
+    if (this.devVarsBackup === null)
+      rmSync(this.devVarsPath, { force: true })
+    else
+      writeFileSync(this.devVarsPath, this.devVarsBackup)
+
+    this.devVarsWritten = false
+    this.devVarsBackup = null
   }
 
   /** Probe whether an HTTP server is already answering on the target port. */

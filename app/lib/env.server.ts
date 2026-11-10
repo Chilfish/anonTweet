@@ -1,8 +1,19 @@
 import dotenv from 'dotenv'
 import { z } from 'zod'
+import { isCloudflareWorker } from './runtime.ts'
 
-// 测试环境用 DOTENV_CONFIG_PATH 指向不存在的文件，避免加载真实 .env（否则 override 会覆盖测试注入的 env）
-dotenv.config({ override: true, path: process.env.DOTENV_CONFIG_PATH, quiet: true })
+// `.dev.vars` 是本地唯一的环境文件：wrangler / react-router dev / 构建脚本共用。
+// Workers 运行时由 wrangler 直接注入 process.env，不再读文件。
+// 测试用 DOTENV_CONFIG_PATH 指向不存在的文件，避免加载真实凭据。
+if (!isCloudflareWorker) {
+  dotenv.config({
+    path: process.env.DOTENV_CONFIG_PATH
+      ? [process.env.DOTENV_CONFIG_PATH]
+      : ['.dev.vars'],
+    override: false,
+    quiet: true,
+  })
+}
 
 /**
  * Server environment schema definition with validation rules
@@ -19,7 +30,6 @@ const serverEnvSchema = z.object({
   DB_URL: z.url().optional(),
   ENABLE_DB_CACHE: z.stringbool().default(false),
   ENABLE_LOCAL_CACHE: z.stringbool().default(false),
-  VERCEL: z.stringbool().default(false),
 
   // Optional: required only for server-side callbacks that need an absolute URL (e.g. screenshot/plain route).
   // In development, we'll default to http://localhost:<PORT> when absent.

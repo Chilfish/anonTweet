@@ -1,5 +1,6 @@
 import { env } from './env.server'
 import { obsLog, suffix } from './obs-log'
+import { isCloudflareWorker } from './runtime'
 
 export type CacheType = 'tweet' | 'user' | 'replies' | 'ig-post' | 'article-translation'
 
@@ -178,8 +179,10 @@ async function getAdapter(): Promise<ICacheAdapter> {
   if (adapterInstance)
     return adapterInstance
 
-  // 这里的检测逻辑可以根据你的实际部署环境微调
-  const isNodeRuntime = typeof process !== 'undefined'
+  // Workers 的 VFS 只有只读 /bundle 与按请求隔离的 /tmp，FS 缓存写入会静默失败，
+  // 必须显式排除，否则读永远 miss、写每次报错。
+  const isNodeRuntime = !isCloudflareWorker
+    && typeof process !== 'undefined'
     && process.versions != null
     && process.versions.node != null
 

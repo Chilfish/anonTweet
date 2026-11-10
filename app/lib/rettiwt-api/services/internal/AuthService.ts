@@ -1,7 +1,7 @@
 import type { AxiosResponse } from 'axios'
 import type { RettiwtConfig } from '../../models/RettiwtConfig'
 
-import axios from 'axios'
+import axios from '~/lib/axios.server'
 
 import { Cookie } from 'cookiejar'
 import { ApiErrors } from '../../enums/Api'
