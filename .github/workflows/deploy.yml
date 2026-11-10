@@ -26,8 +26,6 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      HOSTNAME: ${{ vars.HOSTNAME }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -66,7 +64,10 @@ jobs:
 
       - name: Smoke
         if: ${{ vars.HOSTNAME != '' }}
+        env:
+          # 不用 HOSTNAME：Linux runner 自带同名机器名变量
+          SITE_URL: ${{ vars.HOSTNAME }}
         run: |
           for path in / /openapi.json /llms.txt; do
-            curl -fsS "$HOSTNAME$path" > /dev/null
+            curl -fsS "$SITE_URL$path" > /dev/null
           done

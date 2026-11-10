@@ -17,6 +17,22 @@ describe('env.server createEnv', () => {
     expect(mod.HOSTNAME).toBe('http://localhost:1234')
   })
 
+  it('treats empty optional values as undefined (CI empty env)', () => {
+    const mod = createEnv({
+      ENVIRONMENT: 'development',
+      TWEET_KEYS: '',
+      HOSTNAME: '',
+      DB_URL: '',
+      GEMINI_API_KEY: '',
+      GEMINI_MODEL: '',
+    })
+
+    expect(mod.HOSTNAME).toBe('http://localhost:9080')
+    expect(mod.DB_URL).toBeUndefined()
+    expect(mod.GEMINI_API_KEY).toBeUndefined()
+    expect(mod.GEMINI_MODEL).toBe('models/gemini-3-flash-preview')
+  })
+
   it('parses string booleans', () => {
     const mod = createEnv({
       ENVIRONMENT: 'development',

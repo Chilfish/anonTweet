@@ -18,6 +18,19 @@ if (!isCloudflareWorker) {
 /**
  * Server environment schema definition with validation rules
  */
+
+/**
+ * CI 常把「未设置」的变量注入成空串（例如 `HOSTNAME=`）。统一按 undefined 处理，
+ * 让 `.optional()` / `.default()` 正常生效，而不是被空串触发校验失败。
+ */
+function optionalEnv<T extends z.ZodType>(schema: T) {
+  return z.preprocess((value) => {
+    if (typeof value === 'string' && value.trim() === '')
+      return undefined
+    return value
+  }, schema)
+}
+
 const serverEnvSchema = z.object({
   ENVIRONMENT: z.enum(['development', 'production']).default('development'),
 
@@ -25,19 +38,19 @@ const serverEnvSchema = z.object({
   TWEET_KEYS: z.string().optional().default(''),
 
   // Instagram — cookies for gallery-dl-instagram SDK
-  INS_COOKIES: z.string().optional(),
+  INS_COOKIES: optionalEnv(z.string().optional()),
 
-  DB_URL: z.url().optional(),
+  DB_URL: optionalEnv(z.url().optional()),
   ENABLE_DB_CACHE: z.stringbool().default(false),
   ENABLE_LOCAL_CACHE: z.stringbool().default(false),
 
   // Optional: required only for server-side callbacks that need an absolute URL (e.g. screenshot/plain route).
   // In development, we'll default to http://localhost:<PORT> when absent.
-  HOSTNAME: z.url().optional(),
+  HOSTNAME: optionalEnv(z.url().optional()),
 
-  DEEPSEEK_API_KEY: z.string().min(1).optional(),
-  GEMINI_API_KEY: z.string().min(1).optional(),
-  GEMINI_MODEL: z.string().min(1).optional().default('models/gemini-3-flash-preview'),
+  DEEPSEEK_API_KEY: optionalEnv(z.string().min(1).optional()),
+  GEMINI_API_KEY: optionalEnv(z.string().min(1).optional()),
+  GEMINI_MODEL: optionalEnv(z.string().min(1).default('models/gemini-3-flash-preview')),
   ENABLE_AI_TRANSLATION: z.stringbool().default(false),
   // 隐藏自用入口开关（Bili 动态发布代理）：默认开启（自用入口始终可用），不宣传、不扩展，
   // 见 docs/planning/project-architecture.md §2.5 已知限制
@@ -51,7 +64,7 @@ const serverEnvSchema = z.object({
   ENABLE_AI_BASE_URL_WHITELIST: z.stringbool().default(false),
   // 白名单额外域名（逗号分隔，仅当 ENABLE_AI_BASE_URL_WHITELIST=true 时生效；
   // 与内置官方域名合并校验）
-  ALLOWED_AI_BASE_URL_HOSTS: z.string().optional(),
+  ALLOWED_AI_BASE_URL_HOSTS: optionalEnv(z.string().optional()),
 })
 
 export type ServerEnv = z.infer<typeof serverEnvSchema> & { HOSTNAME?: string }

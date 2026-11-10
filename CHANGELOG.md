@@ -89,6 +89,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ### Fixed
 
+#### CI 部署（2026-11-10）
+
+- deploy workflow 不再向构建注入空的 `HOSTNAME`（未设置 repo variable 时不再触发 `z.url()` 校验失败）
+- `env.server` 统一把空串可选变量按未设置处理，避免 CI / 平台注入空 env 时启动失败
+
 #### X 前端迁移修复（2026-09-25）
 
 - X 迁移到 Rolldown/Vite 后不再内嵌 `ondemand.s` webpack chunk map，`x-client-transaction-id` 因此抛 `OnDemandFileUrlResolutionError`，所有走 rettiwt-api 的 X 数据接口失败。**真因是外壳请求漏带登录 cookie**（X 仅对登录态返回仍含该 chunk map 的旧外壳）：新增 `buildXShellHeaders`，配置 API Key 时附带解码后的 cookie，`_fetchXHomePage` 改为使用它
