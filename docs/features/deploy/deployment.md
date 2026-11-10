@@ -58,6 +58,18 @@ Workers 注意事项：
 - 文件系统是只读 `/bundle` + 按请求隔离的 `/tmp`，**不要开** `ENABLE_LOCAL_CACHE`；缓存用内存 LRU + `ENABLE_DB_CACHE`（Neon HTTP）。
 - 图片代理 / AI / IG SDK 都走原生 `fetch`；axios 在 Worker 入口被固定为 fetch adapter。
 
+#### CI/CD（GitHub Actions）
+
+```bash
+# 本地 .env 配好 CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID
+bun run secrets:sync
+```
+
+- 脚本经 stdin 写入 GitHub Secrets，不回显、不出现在进程参数里。
+- `.github/workflows/deploy.yml` 在 push 到 `main` 时自动部署；只有文档 / 测试 / verify / skill 等非运行时代码变更时跳过，也可手动 `workflow_dispatch`。
+- 部署步骤用 `build/server/wrangler.json`，与 `bun run deploy` 完全一致。
+- Worker 运行时 secrets（`TWEET_KEYS` 等）仍需 `wrangler secret put`；CI 只负责构建与上传。
+
 ### B. 本地开发
 
 - 开发：`bun run dev`（workerd，http://localhost:9080）

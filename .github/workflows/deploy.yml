@@ -1,7 +1,19 @@
 name: Deploy
 
-# 手动触发；Worker secrets 需提前用 `wrangler secret put` 设置。
+# 非纯文档 push 自动部署；也可手动触发。
 on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - 'test/**'
+      - 'verify/**'
+      - '.agents/**'
+      - '.commandcode/**'
+      - '.github/workflows/verify.yml'
+      - '.gitignore'
+      - 'lefthook.yml'
   workflow_dispatch:
 
 permissions:

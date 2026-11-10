@@ -9,6 +9,7 @@
     "dev": "cross-env NODE_ENV=development react-router dev",
     "preview": "bun run build && vite preview",
     "deploy": "bun scripts/deploy.ts",
+    "secrets:sync": "bun scripts/sync-github-secrets.ts",
     "typecheck": "react-router typegen && tsc",
     "test": "vitest run --project unit --project acceptance",
     "test:unit": "vitest run --project unit",

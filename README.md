@@ -131,6 +131,8 @@ bun run preview                 # build + vite preview（workerd）
 
 首次部署前用 `bunx wrangler secret put` 设置 `TWEET_KEYS`、`INS_COOKIES`、`DB_URL`、`GEMINI_API_KEY`、`DEEPSEEK_API_KEY`；非敏感开关在 `wrangler.jsonc` 的 `vars` 里。Workers 需要 Paid 套餐（免费版 CPU 10ms 不够 SSR），并且 `ENABLE_LOCAL_CACHE` 必须关闭、缓存走 DB。
 
+CI/CD：在本地 `.env` 配好 `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID`，执行 `bun run secrets:sync` 写入 GitHub Actions Secrets。之后 push 到 `main` 的非纯文档变更会自动触发 Deploy workflow（也可在 Actions 里手动触发）。
+
 本地开发只用 `bun run dev`（workerd）；`bun run preview` 用于验证生产构建。公开部署时还可以设 `ENABLE_AI_BASE_URL_WHITELIST=true`，配合 `ALLOWED_AI_BASE_URL_HOSTS` 限制 AI 请求的 baseUrl 目标。完整部署与排障见 [`docs/features/deploy/deployment.md`](docs/features/deploy/deployment.md)。
 
 ## 接口
