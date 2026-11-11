@@ -1097,6 +1097,7 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
             quoted_tweet_id: { type: 'string', description: '引用推文 ID' },
             quotedTweet: { $ref: '#/components/schemas/EnrichedTweet', description: '引用推文（递归）' },
             card: { type: 'object', description: '预览卡片（LinkPreviewCard）' },
+            poll: { type: 'object', description: '投票（TweetPoll，见 app/types/poll.ts；仅投票推文有）' },
             space: { type: 'object', description: 'X Space 卡片（SpaceDetails，见 app/types/space.ts；仅 Space 推文有）' },
             article: { $ref: '#/components/schemas/TweetArticle', description: 'X 长文卡片与块文档（app/types/article.ts；仅文章推文有）' },
             comments: {

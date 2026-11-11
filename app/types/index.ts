@@ -1,6 +1,7 @@
 import type { TweetArticle } from './article'
 import type { LinkPreviewCard } from './card'
 import type { Entity } from './entities'
+import type { TweetPoll } from './poll'
 import type { SpaceDetails } from './space'
 import type { Tweet } from './tweet'
 import type { AIVisionInfo } from './vision'
@@ -14,6 +15,7 @@ export type * from './entities'
 export type { IGAudio, IGMedia, IGPost, IGPostData, IGStoryLink } from './ins'
 export type * from './media'
 export type * from './photo'
+export type * from './poll'
 export type * from './space'
 export type * from './user'
 export type * from './video'
@@ -32,6 +34,7 @@ export type EnrichedTweet = Omit<Tweet, OmitTypes> & {
   quoted_tweet_id?: string
   quotedTweet?: EnrichedTweet
   card?: LinkPreviewCard
+  poll?: TweetPoll
   article?: TweetArticle
   space?: SpaceDetails
   retweetedOrignalId?: string

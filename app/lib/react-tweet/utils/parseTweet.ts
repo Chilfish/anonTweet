@@ -10,6 +10,7 @@ import { obsLog } from '~/lib/obs-log'
 import { parseTrendingCard } from '~/lib/rettiwt-api/parsers/jetfuel'
 import { mapArticle } from './article'
 import { getEntities } from './entitytParser'
+import { mapPollCard } from './poll'
 
 /**
  * Enriches a tweet with additional data used to more easily use the tweet in a UI.
@@ -49,6 +50,7 @@ export function enrichTweet(sourceData: RawTweet, retweetedOrignalId?: string): 
     entities,
     quoted_tweet_id: tweet.quoted_status_result?.result?.rest_id,
     card: mapTwitterCard(tweet.card, (tweet as any).jetfuel_attachment),
+    poll: mapPollCard(tweet.card),
     article: mapArticle(tweet, entities) ?? undefined,
     mediaDetails: mapMediaDetails(tweet),
     retweetedOrignalId,
