@@ -94,6 +94,41 @@ describe('AC-CARD-012: card media download extraction', () => {
     expect(items[0]!.filename.endsWith('.jpg')).toBe(true)
   })
 
+  it('AC-CARD-012: includes poll option images', () => {
+    const tweet = {
+      ...makeTweet(carouselCard),
+      card: undefined,
+      poll: {
+        totalVotes: 10,
+        countsAreFinal: true,
+        hasImages: true,
+        choices: [
+          {
+            label: 'A',
+            count: 6,
+            percentage: 60,
+            imageUrl: 'https://pbs.twimg.com/card_img/1/a?format=png&name=orig',
+          },
+          {
+            label: 'B',
+            count: 4,
+            percentage: 40,
+            imageUrl: 'https://pbs.twimg.com/card_img/2/b?format=png&name=orig',
+          },
+          { label: 'C', count: 0, percentage: 0 },
+        ],
+      },
+    } as EnrichedTweet
+
+    const items = extractDownloadItemsFromTweets([tweet], 'large', true)
+
+    expect(items.map(item => item.url)).toEqual([
+      'https://pbs.twimg.com/card_img/1/a?format=jpg&name=large',
+      'https://pbs.twimg.com/card_img/2/b?format=jpg&name=large',
+    ])
+    expect(new Set(items.map(item => item.filename)).size).toBe(2)
+  })
+
   it('AC-CARD-012: skips card media when the option is off', () => {
     const items = extractDownloadItemsFromTweets([
       makeTweet(carouselCard),

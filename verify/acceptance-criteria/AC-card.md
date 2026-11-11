@@ -1,6 +1,6 @@
 # Tweet 卡片（Trending / Jetfuel / 多图轮播）验收标准
 
-> 版本：1.3 | 日期：2026-11-09
+> 版本：1.4 | 日期：2026-11-11
 > 对应 Postmortem：001 (Tweet Parsing)
 > 关联方案：`docs/features/tweet/trending-card.md`、`docs/features/tweet/carousel-card.md`
 > 执行命令：`bun run verify/index.ts --module card`
@@ -11,6 +11,7 @@
 > 文本高于 80px 时图片与卡片底边错位、图片直角溢出圆角边框；改为缩略图随卡片高度
 > 拉伸（`min-h-20` + `self-stretch`）+ 外框 `overflow-hidden` 裁剪。
 > 2026-11-09 新增 AC-CARD-010/011：`image_carousel_website` 多图广告卡解析与渲染。
+> 2026-11-11 新增 AC-CARD-013/014：投票推文（文字 / 带图）解析与渲染。
 
 ---
 
@@ -180,7 +181,40 @@
 
 ---
 
-## 总计：12 条 AC
+## AC-CARD-013：投票卡解析（文字 / 带图）
+
+- **输入**：
+  - `test/fixtures/poll/text.json`（真实推文 `1604617643973124097` 的 poll card）
+  - `test/fixtures/poll/image.json`（真实推文 `2119549657009578137` 的 poll card）
+- **预期输出**：`mapPollCard()` 返回 `TweetPoll`，非投票卡返回 `undefined`
+- **验证方法**：单测（`test/unit/poll-card.spec.ts`）
+- **Pass 条件**：
+  - 判定以 `choice1_label` 为锚点，不依赖 `card.name`（兼容 `poll2choice_text_only`、
+    `poll4choice_image`、`{id}:poll_choice_images` 与 `legacy` 包装）
+  - 文字：2 选项、票数、`totalVotes`、整数百分比（57% / 43%）、`countsAreFinal === true`
+  - 带图：4 选项、`hasImages === true`、每项取 `_image_original`（含宽高）与主色
+  - `counts_are_final` 同时兼容 BOOLEAN 与字符串 `'true'`
+  - 结束时间两种格式均归一化为 ISO（`12/19/2022 11:20:32` / `2026-11-09T21:56:31Z`）
+  - 缺 `choice_count` 时按 label 遍历 1–4；有效选项少于 2 个返回 `undefined`
+  - 0 票时百分比为 0（不出现 NaN）
+
+---
+
+## AC-CARD-014：投票卡真实渲染（文字结果条 / 带图网格 / 状态）
+
+- **输入**：AC-CARD-013 解析结果构造的 `TweetPoll`
+- **预期输出**：`PollCardView` 渲染只读结果快照
+- **验证方法**：`renderToString` + HTML 断言（`test/acceptance/poll-card-render.spec.ts`）
+- **Pass 条件**：
+  - 文字投票渲染选项标签、顶部进度填充（宽度 = 百分比）、百分比与总票数（千分位）
+  - 带图投票渲染 2 列网格、4 张选项图（`alt` 为选项标签）、标签与百分比
+  - `countsAreFinal` 为 true 显示「最终结果」；否则显示固定 Asia/Shanghai 时区的截止时间，不出现「最终结果」
+  - 0 票渲染 `0%`、无 `NaN`；超长标签正常换行不溢出
+  - 纯展示、无投票交互
+
+---
+
+## 总计：14 条 AC
 
 | AC          | 分类          | 依赖外部 API | 依赖 AI |
 | ----------- | ------------- | ------------ | ------- |
@@ -196,6 +230,8 @@
 | AC-CARD-010 | 纯函数/离线   | 否           | 否      |
 | AC-CARD-011 | 组件/真实渲染 | 否           | 否      |
 | AC-CARD-012 | 纯函数/离线   | 否           | 否      |
+| AC-CARD-013 | 纯函数/离线   | 否           | 否      |
+| AC-CARD-014 | 组件/真实渲染 | 否           | 否      |
 
 > 离线 AC 依赖 fixture（`test/fixtures/jetfuel/trending.json`、
 > `test/fixtures/unified-card/carousel.json`），验证时无需服务器。

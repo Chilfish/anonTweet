@@ -82,7 +82,7 @@ AC-DEV-001（dev server 健康）、AC-IG-009（缺 cookies → 500）、AC-MEDI
 | [AC-postmortem.md](acceptance-criteria/AC-postmortem.md)   | AC-PM-001~007（预发布检查）                           |
 | [AC-ci.md](acceptance-criteria/AC-ci.md)                   | AC-CI-001~004（CI workflow，解析 run 步骤）           |
 | [AC-build.md](acceptance-criteria/AC-build.md)             | AC-BUILD-001~003（Babel/.tsx 构建管线）               |
-| [AC-card.md](acceptance-criteria/AC-card.md)               | AC-CARD-001~012（jetfuel/trending/媒体广告卡）        |
+| [AC-card.md](acceptance-criteria/AC-card.md)               | AC-CARD-001~014（jetfuel/trending/媒体广告卡/投票）   |
 | [AC-dev.md](acceptance-criteria/AC-dev.md)                 | AC-DEV-001~002（dev server 模式固定）                 |
 | [AC-test.md](acceptance-criteria/AC-test.md)               | AC-TEST-006（parseTweet 全变体）                      |
 | [AC-llms.md](acceptance-criteria/AC-llms.md)               | AC-LLMS-001~002（llms.txt / openapi.json）            |

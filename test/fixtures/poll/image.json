@@ -1,0 +1,28 @@
+{
+  "name": "1906814671912599552:poll_choice_images",
+  "binding_values": [
+    { "key": "choice_count", "value": { "type": "STRING", "string_value": "4" } },
+    { "key": "choice1_label", "value": { "type": "STRING", "string_value": "Cultured" } },
+    { "key": "choice1_count", "value": { "type": "STRING", "string_value": "28" } },
+    { "key": "choice1_image", "value": { "type": "IMAGE", "image_value": { "width": 280, "height": 280, "url": "https://pbs.twimg.com/card_img/2119548825979260928/oynHvSJh?format=png&name=280x280_2" } } },
+    { "key": "choice1_image_original", "value": { "type": "IMAGE", "image_value": { "width": 454, "height": 587, "url": "https://pbs.twimg.com/card_img/2119548825979260928/oynHvSJh?format=png&name=orig" } } },
+    { "key": "choice1_image_color", "value": { "type": "IMAGE_COLOR", "image_color_value": { "palette": [{ "percentage": 27.5, "rgb": { "red": 201, "green": 145, "blue": 113 } }] } } },
+    { "key": "choice2_label", "value": { "type": "STRING", "string_value": "Vogue Adria" } },
+    { "key": "choice2_count", "value": { "type": "STRING", "string_value": "54" } },
+    { "key": "choice2_image_original", "value": { "type": "IMAGE", "image_value": { "width": 517, "height": 644, "url": "https://pbs.twimg.com/card_img/2119548858669666304/qC7AvtKU?format=png&name=orig" } } },
+    { "key": "choice2_image_color", "value": { "type": "IMAGE_COLOR", "image_color_value": { "palette": [{ "percentage": 83.57, "rgb": { "red": 196, "green": 195, "blue": 193 } }] } } },
+    { "key": "choice3_label", "value": { "type": "STRING", "string_value": "Interview" } },
+    { "key": "choice3_count", "value": { "type": "STRING", "string_value": "25" } },
+    { "key": "choice3_image_original", "value": { "type": "IMAGE", "image_value": { "width": 414, "height": 623, "url": "https://pbs.twimg.com/card_img/2119548888524722176/6VluiKAJ?format=png&name=orig" } } },
+    { "key": "choice3_image_color", "value": { "type": "IMAGE_COLOR", "image_color_value": { "palette": [{ "percentage": 39.24, "rgb": { "red": 111, "green": 1, "blue": 5 } }] } } },
+    { "key": "choice4_label", "value": { "type": "STRING", "string_value": "Other, write under" } },
+    { "key": "choice4_count", "value": { "type": "STRING", "string_value": "3" } },
+    { "key": "choice4_image_original", "value": { "type": "IMAGE", "image_value": { "width": 415, "height": 449, "url": "https://pbs.twimg.com/card_img/2119549546338377728/P3WF6mI1?format=png&name=orig" } } },
+    { "key": "choice4_image_color", "value": { "type": "IMAGE_COLOR", "image_color_value": { "palette": [{ "percentage": 38.12, "rgb": { "red": 251, "green": 248, "blue": 153 } }] } } },
+    { "key": "counts_are_final", "value": { "type": "BOOLEAN", "boolean_value": true } },
+    { "key": "end_datetime_utc", "value": { "type": "STRING", "string_value": "2026-11-09T21:56:31Z" } },
+    { "key": "duration_minutes", "value": { "type": "STRING", "string_value": "1440" } },
+    { "key": "api", "value": { "type": "STRING", "string_value": "capi://passthrough/1" } },
+    { "key": "card_url", "value": { "type": "STRING", "string_value": "https://twitter.com" } }
+  ]
+}
