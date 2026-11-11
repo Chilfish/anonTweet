@@ -11,6 +11,7 @@ import {
 import { resolveTranslationView } from '~/lib/translation/resolveTranslationView'
 import { cn } from '~/lib/utils'
 import { AIVisionBlock } from './AIVisionBlock'
+import { PollCardView } from './PollCard'
 import { TweetArticleCard } from './TweetArticleCard'
 import { TweetLinkCard } from './TweetCard'
 import { TweetMediaAlt } from './TweetMediaAlt'
@@ -105,6 +106,8 @@ function UnifiedTweet({ tweet, variant, enableTranslation }: UnifiedTweetProps) 
           tweet={tweet}
           enableTranslation={enableTranslation}
         />
+
+        {tweet.poll && <PollCardView poll={tweet.poll} />}
 
         {tweet.mediaDetails?.length
           ? (

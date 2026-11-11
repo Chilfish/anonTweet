@@ -61,8 +61,9 @@ export function meta({ loaderData }: Route.MetaArgs) {
 
   const canonicalUrl = `${baseUrl}/tweets/${tweet.id_str}`
 
-  // Get first media image for og:image
+  // Get first media image for og:image（无普通媒体时回退到投票选项图）
   const mediaImage = tweet.mediaDetails?.[0]?.media_url_https
+    ?? tweet.poll?.choices.find(choice => choice.imageUrl)?.imageUrl
 
   const tags = [
     { title },
@@ -101,6 +102,8 @@ export function meta({ loaderData }: Route.MetaArgs) {
 
 function TweetStructuredData({ tweet }: { tweet: EnrichedTweet }) {
   const tweetUrl = `https://x.com/${tweet.user?.screen_name || 'i'}/status/${tweet.id_str}`
+  const sharedImage = tweet.mediaDetails?.[0]?.media_url_https
+    ?? tweet.poll?.choices.find(choice => choice.imageUrl)?.imageUrl
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'SocialMediaPosting',
@@ -114,10 +117,10 @@ function TweetStructuredData({ tweet }: { tweet: EnrichedTweet }) {
       'name': tweet.user?.name || '',
       'url': `https://x.com/${tweet.user?.screen_name || ''}`,
     },
-    'sharedContent': tweet.mediaDetails?.[0]?.media_url_https
+    'sharedContent': sharedImage
       ? {
           '@type': 'ImageObject',
-          'contentUrl': tweet.mediaDetails[0].media_url_https,
+          'contentUrl': sharedImage,
         }
       : undefined,
   }

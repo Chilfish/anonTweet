@@ -187,6 +187,17 @@ export function extractDownloadItemsFromTweets(
       }
     }
 
+    // 投票选项图：与卡片媒体同属「附加图片」，沿用 includeCardImages 开关
+    if (includeCardImages && tweet.poll) {
+      const seen = new Set(items.map(item => item.url))
+      for (const choice of tweet.poll.choices) {
+        if (!choice.imageUrl || seen.has(choice.imageUrl))
+          continue
+        seen.add(choice.imageUrl)
+        items.push({ url: choice.imageUrl, type: 'photo', originalIndex: items.length })
+      }
+    }
+
     return items.map(item =>
       createDownloadItem(tweet, item.url, item.type, item.originalIndex, imageSize),
     )

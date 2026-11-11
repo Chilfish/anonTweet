@@ -14,6 +14,7 @@ import {
 } from '~/lib/stores/hooks'
 import { cn } from '~/lib/utils'
 import { AIVisionBlock } from './AIVisionBlock'
+import { PollCardView } from './PollCard'
 import { TweetArticleCard } from './TweetArticleCard'
 import { TweetLinkCard } from './TweetCard'
 import { TweetMediaAlt } from './TweetMediaAlt'
@@ -145,6 +146,8 @@ export const TweetNode = forwardRef<HTMLDivElement, TweetNodeProps>(({
 
       <div className={styles.body}>
         <TweetTextBody tweet={tweet} />
+
+        {tweet.poll && <PollCardView poll={tweet.poll} />}
 
         {article && <TweetArticleCard article={article} tweetId={tweet.id_str} />}
 

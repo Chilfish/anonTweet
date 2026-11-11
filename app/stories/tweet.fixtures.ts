@@ -146,6 +146,66 @@ export const videoCard: NonNullable<EnrichedTweet['card']> = {
   ],
 }
 
+/** 纯文字投票（真实样本 1604617643973124097，最终结果） */
+export const textPoll: NonNullable<EnrichedTweet['poll']> = {
+  totalVotes: 17502391,
+  countsAreFinal: true,
+  endDatetime: '2022-12-19T11:20:32.000Z',
+  durationMinutes: 720,
+  hasImages: false,
+  choices: [
+    { label: 'Yes', count: 10063044, percentage: 57 },
+    { label: 'No', count: 7439347, percentage: 43 },
+  ],
+}
+
+/** 带图投票（真实样本 2119549657009578137，4 选项） */
+export const imagePoll: NonNullable<EnrichedTweet['poll']> = {
+  totalVotes: 110,
+  countsAreFinal: true,
+  endDatetime: '2026-11-09T21:56:31.000Z',
+  durationMinutes: 1440,
+  hasImages: true,
+  choices: [
+    {
+      label: 'Cultured',
+      count: 28,
+      percentage: 25,
+      imageUrl: 'https://pbs.twimg.com/card_img/2119548825979260928/oynHvSJh?format=png&name=orig',
+      imageWidth: 454,
+      imageHeight: 587,
+      color: '#c99171',
+    },
+    {
+      label: 'Vogue Adria',
+      count: 54,
+      percentage: 49,
+      imageUrl: 'https://pbs.twimg.com/card_img/2119548858669666304/qC7AvtKU?format=png&name=orig',
+      imageWidth: 517,
+      imageHeight: 644,
+      color: '#c4c3c1',
+    },
+    {
+      label: 'Interview',
+      count: 25,
+      percentage: 23,
+      imageUrl: 'https://pbs.twimg.com/card_img/2119548888524722176/6VluiKAJ?format=png&name=orig',
+      imageWidth: 414,
+      imageHeight: 623,
+      color: '#6f0105',
+    },
+    {
+      label: 'Other, write under',
+      count: 3,
+      percentage: 3,
+      imageUrl: 'https://pbs.twimg.com/card_img/2119549546338377728/P3WF6mI1?format=png&name=orig',
+      imageWidth: 415,
+      imageHeight: 449,
+      color: '#fbf899',
+    },
+  ],
+}
+
 export const longDescriptionCard = {
   type: 'summary' as const,
   url: 'https://example.com/long',
@@ -164,6 +224,7 @@ interface MakeTweetOptions {
   lang?: string
   entities?: EnrichedTweet['entities']
   card?: EnrichedTweet['card']
+  poll?: EnrichedTweet['poll']
   space?: EnrichedTweet['space']
   mediaDetails?: EnrichedTweet['mediaDetails']
   visionInfo?: AIVisionInfo[]
@@ -188,6 +249,7 @@ function makeTweet(opts: MakeTweetOptions = {}): EnrichedTweet {
       { type: 'text', text: '『#渡瀬結月 の #６げんめっ！』#15', index: 0 },
     ],
     card: opts.card,
+    poll: opts.poll,
     space: opts.space,
     mediaDetails: opts.mediaDetails,
     visionInfo: opts.visionInfo,
@@ -239,6 +301,16 @@ export const tweetWithSingleImageCard = makeTweet({
 /** 视频卡（封面 + 播放按钮 + 时长，不做内嵌播放） */
 export const tweetWithVideoCard = makeTweet({
   card: { ...videoCard },
+})
+
+/** 纯文字投票（结果快照） */
+export const tweetWithPoll = makeTweet({
+  poll: { ...textPoll },
+})
+
+/** 带图投票（2×2 图片网格） */
+export const tweetWithImagePoll = makeTweet({
+  poll: { ...imagePoll },
 })
 
 /** 无图文字卡 */
