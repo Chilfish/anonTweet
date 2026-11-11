@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ### Added
 
+#### 投票推文（2026-11-11）
+
+- 新增 `EnrichedTweet.poll`（`mapPollCard`），从 `card.binding_values` 解析纯文字 / 带图投票：选项、票数、整数百分比、`counts_are_final`、结束时间、选项图片与主色
+- 新增只读投票组件 `PollCardView`：文字结果条 / 带图 2×2 网格 / 最终结果与截止时间，接入 `TweetNode` 与 `PlainTweet`
+- 批量下载包含投票选项图；无普通媒体时分享预览回退到第一张选项图
+- `AC-CARD-013/014` + `test/unit/poll-card.spec.ts` / `test/acceptance/poll-card-render.spec.ts`；旧缓存不自动回填（等自然过期/重抓）
+
 #### 媒体广告卡（2026-11-09）
 
 - `unified_card` 媒体卡解析与渲染：多图 `image_carousel_*` 按 `media_list` 顺序还原轮播（不再随机取单图），单图 `image_website` 按原图比例展示（不再裁成 1.91:1），`video_website` 展示封面 + 播放按钮 + 时长 badge（不内嵌播放，mp4/hls 保留给下游下载）
