@@ -1,0 +1,141 @@
+{
+  "_meta": {
+    "source": "USER_DETAILS_BY_USERNAME /api/user/get/ukyomigi — legacy 缺少 pinned_tweet_ids_str（无置顶推文的账号）",
+    "exportedAt": "2026-11-12",
+    "schema": "IUserDetailsResponse"
+  },
+  "data": {
+    "data": {
+      "user": {
+        "result": {
+          "__typename": "User",
+          "affiliates_highlighted_label": {},
+          "avatar": {
+            "image_url": "https://pbs.twimg.com/profile_images/1675404091948937216/QkUcyDTv_normal.jpg"
+          },
+          "business_account": {},
+          "core": {
+            "created_at": "Tue Aug 25 14:24:58 +0000 2020",
+            "name": "右京｜デザイン",
+            "screen_name": "ukyomigi"
+          },
+          "creator_subscriptions_count": 0,
+          "dm_permissions": {
+            "can_dm": false
+          },
+          "follow_request_sent": false,
+          "has_graduated_access": true,
+          "has_hidden_subscriptions_on_profile": false,
+          "highlights_info": {
+            "can_highlight_tweets": false,
+            "highlighted_tweets": "0"
+          },
+          "id": "VXNlcjoxMjk4MjY1MDc4NjA5ODQ2Mjcz",
+          "is_blue_verified": false,
+          "is_profile_translatable": true,
+          "legacy": {
+            "default_profile": true,
+            "default_profile_image": false,
+            "description": "デザイナー web / graphic｜お笑い・映像・フライヤー・ロゴ｜\n過去に制作したもの▷ https://t.co/mrBbuj51zd",
+            "entities": {
+              "description": {
+                "urls": [
+                  {
+                    "display_url": "fori.io/ukyomigi",
+                    "expanded_url": "https://fori.io/ukyomigi",
+                    "indices": [
+                      48,
+                      71
+                    ],
+                    "url": "https://t.co/mrBbuj51zd"
+                  }
+                ]
+              },
+              "url": {
+                "urls": [
+                  {
+                    "display_url": "lit.link/ukyomigi",
+                    "expanded_url": "https://lit.link/ukyomigi",
+                    "indices": [
+                      0,
+                      23
+                    ],
+                    "url": "https://t.co/bT8XscHWht"
+                  }
+                ]
+              }
+            },
+            "fast_followers_count": 0,
+            "favourites_count": 240,
+            "follow_request_sent": false,
+            "followers_count": 90,
+            "friends_count": 32,
+            "has_custom_timelines": false,
+            "is_translator": false,
+            "listed_count": 0,
+            "media_count": 17,
+            "needs_phone_verification": false,
+            "normal_followers_count": 90,
+            "notifications": false,
+            "possibly_sensitive": false,
+            "profile_banner_url": "https://pbs.twimg.com/profile_banners/1298265078609846273/1667986983",
+            "profile_interstitial_type": "",
+            "statuses_count": 72,
+            "time_zone": "",
+            "translator_type": "none",
+            "url": "https://t.co/bT8XscHWht",
+            "utc_offset": 0,
+            "withheld_description": "",
+            "withheld_scope": ""
+          },
+          "legacy_extended_profile": {},
+          "location": {
+            "location": "お笑い・ラジオ・ゲームが好きです！"
+          },
+          "media_permissions": {
+            "can_media_tag": false
+          },
+          "parody_commentary_fan_label": "None",
+          "privacy": {
+            "protected": false
+          },
+          "profile_bio": {
+            "description": "デザイナー web / graphic｜お笑い・映像・フライヤー・ロゴ｜\n過去に制作したもの▷ https://t.co/mrBbuj51zd"
+          },
+          "profile_description_language": "ja",
+          "profile_image_shape": "Circle",
+          "relationship_perspectives": {
+            "blocked_by": false,
+            "blocking": false,
+            "followed_by": false,
+            "following": false,
+            "muting": false
+          },
+          "rest_id": "1298265078609846273",
+          "super_follow_eligible": false,
+          "super_followed_by": false,
+          "super_following": false,
+          "tipjar_settings": {
+            "bandcamp_handle": "",
+            "bitcoin_handle": "",
+            "cash_app_handle": "",
+            "ethereum_handle": "",
+            "gofundme_handle": "",
+            "is_enabled": false,
+            "patreon_handle": "",
+            "pay_pal_handle": "",
+            "venmo_handle": ""
+          },
+          "user_seed_tweet_count": 0,
+          "verification": {
+            "verified": false
+          },
+          "verification_info": {
+            "is_identity_verified": false
+          },
+          "verified_phone_status": false
+        }
+      }
+    }
+  }
+}

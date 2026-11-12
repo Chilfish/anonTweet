@@ -101,6 +101,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 - 升级 `@chilfish/gallery-dl-instagram` 0.2.4 → 0.2.5：stories 优先解析页面内嵌 payload，REST `reels_media` 返回 500 时仍能提取
 - 用户名解析失败不再统一报 `User not found`：错误信息带上每条策略的状态码与原因；修正 `web_profile_info` 的 `data.user` 层级与 `web` 策略的 `profilePage_<id>` 页面特征
 
+#### 用户详情（2026-11-12）
+
+- `/api/user/get/:username` 对无置顶推文的账号 500（`TypeError: Cannot read properties of undefined (reading '0')`）：上游整个省略 `legacy.pinned_tweet_ids_str`，`User` 反序列化改用可选链，`IUserLegacy.pinned_tweet_ids_str` 标记为可选
+- 补 `test/unit/user.spec.ts` + 真实响应 fixture（`test/fixtures/user/details-no-pinned.json`），锁定「省略字段 → `pinnedTweet` 为 `undefined`」与「提供字段 → 正常取值」（postmortem #014 同类上游契约漂移）
+
 #### CI 部署（2026-11-10）
 
 - deploy workflow 不再向构建注入空的 `HOSTNAME`（未设置 repo variable 时不再触发 `z.url()` 校验失败）
