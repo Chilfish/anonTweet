@@ -417,7 +417,8 @@ export function mapTwitterCard(
     url: legacy.url || getStr(bindings, 'card_url') || '',
     title: getStr(bindings, 'title'),
     description: getStr(bindings, 'description'),
-    domain: getStr(bindings, 'domain') || getStr(bindings, 'vanity_url'),
+    // 域名优先取官方展示用的 vanity_url（youtube.com），domain 会带 www 前缀
+    domain: getStr(bindings, 'vanity_url') || getStr(bindings, 'domain'),
     imageUrl: getBestImage(bindings),
     // 布局标记：非 unified_card 直接视为普通卡；旧缓存无此字段用于触发回填
     layout: 'default',

@@ -1,4 +1,5 @@
 import type { EnrichedTweet } from '~/types'
+import { ImageIcon } from 'lucide-react'
 import { useMemo } from 'react'
 import { MediaImage } from '~/components/ui/media'
 import { normalizeMediaUrl } from '~/lib/media-url'
@@ -109,6 +110,24 @@ interface TweetLinkCardProps {
   className?: string
 }
 
+/**
+ * 无图卡的占位媒体块（官方同款）。
+ *
+ * X 对声明了大图位却没有图片 binding 的卡片（如 youtu.be 的 App 卡：上游只给
+ * `app_name` / 评分，不给任何 thumbnail/photo binding）会在左侧渲染图标占位块，
+ * 而不是塌成纯文字卡。见推文 1995332387627291098。
+ */
+function CardImagePlaceholder() {
+  return (
+    <div
+      className="relative flex w-1/3 min-w-20 shrink-0 items-center justify-center self-stretch border-r border-border/60 bg-muted/50"
+      aria-hidden
+    >
+      <ImageIcon className="size-5 text-muted-foreground/50" />
+    </div>
+  )
+}
+
 export function TweetLinkCard({ tweet, className }: TweetLinkCardProps) {
   const { card } = tweet
 
@@ -127,10 +146,14 @@ export function TweetLinkCard({ tweet, className }: TweetLinkCardProps) {
       ? getDomainFromUrl(card.url)
       : null)
 
+    // 大图卡声明了媒体位却没有图片 → 官方渲染占位 icon 块（而非纯文字卡）
+    const showsImagePlaceholder = !hasImage && card.type === 'summary_large_image'
+
     return {
       url: card.url,
       imageUrl: card.imageUrl,
       hasImage,
+      showsImagePlaceholder,
       isLargeImageCard,
       domain: displayDomain,
       title: card.title ?? null,
@@ -160,7 +183,7 @@ export function TweetLinkCard({ tweet, className }: TweetLinkCardProps) {
     return null
   }
 
-  const { url, imageUrl, hasImage, isLargeImageCard, domain, title, description } = cardData
+  const { url, imageUrl, hasImage, showsImagePlaceholder, isLargeImageCard, domain, title, description } = cardData
 
   return (
     <a
@@ -189,9 +212,18 @@ export function TweetLinkCard({ tweet, className }: TweetLinkCardProps) {
                 </div>
               </div>
             )
-          : (
-              <CardContent domain={domain} title={title} description={description} />
-            )}
+          : showsImagePlaceholder
+            ? (
+                <div className="flex">
+                  <CardImagePlaceholder />
+                  <div className="flex min-w-0 flex-1 flex-col justify-center">
+                    <CardContent domain={domain} title={title} description={description} compact />
+                  </div>
+                </div>
+              )
+            : (
+                <CardContent domain={domain} title={title} description={description} />
+              )}
     </a>
   )
 }

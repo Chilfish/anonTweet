@@ -1,0 +1,229 @@
+{
+  "_meta": {
+    "source": "tweet-1995332387627291098.json",
+    "exportedAt": "2026-11-14T18:56:10.153Z",
+    "label": "summary_large_image card with App-Store bindings only (no image bindings)",
+    "schema": "TwitterCard"
+  },
+  "data": {
+    "legacy": {
+      "binding_values": [
+        {
+          "key": "app_star_rating",
+          "value": {
+            "string_value": "4.66376",
+            "type": "STRING"
+          }
+        },
+        {
+          "key": "description",
+          "value": {
+            "string_value": "Really nice Miku song ^^http://oneroom206.seesaa.net/Mp3 from On...",
+            "type": "STRING"
+          }
+        },
+        {
+          "key": "domain",
+          "value": {
+            "string_value": "www.youtube.com",
+            "type": "STRING"
+          }
+        },
+        {
+          "key": "app_is_free",
+          "value": {
+            "string_value": "true",
+            "type": "STRING"
+          }
+        },
+        {
+          "key": "site",
+          "value": {
+            "scribe_key": "publisher_id",
+            "type": "USER",
+            "user_value": {
+              "id_str": "10228272",
+              "path": []
+            }
+          }
+        },
+        {
+          "key": "app_num_ratings",
+          "value": {
+            "string_value": "49,869,697",
+            "type": "STRING"
+          }
+        },
+        {
+          "key": "app_price_amount",
+          "value": {
+            "string_value": "0.0",
+            "type": "STRING"
+          }
+        },
+        {
+          "key": "vanity_url",
+          "value": {
+            "scribe_key": "vanity_url",
+            "string_value": "youtube.com",
+            "type": "STRING"
+          }
+        },
+        {
+          "key": "app_name",
+          "value": {
+            "string_value": "YouTube",
+            "type": "STRING"
+          }
+        },
+        {
+          "key": "title",
+          "value": {
+            "string_value": "初音ミクオリジナル曲 「Starduster」",
+            "type": "STRING"
+          }
+        },
+        {
+          "key": "app_price_currency",
+          "value": {
+            "string_value": "USD",
+            "type": "STRING"
+          }
+        },
+        {
+          "key": "card_url",
+          "value": {
+            "scribe_key": "card_url",
+            "string_value": "https://t.co/UuHAlu1fyz",
+            "type": "STRING"
+          }
+        }
+      ],
+      "card_platform": {
+        "platform": {
+          "audience": {
+            "name": "production"
+          },
+          "device": {
+            "name": "Swift",
+            "version": "12"
+          }
+        }
+      },
+      "name": "summary_large_image",
+      "url": "https://t.co/UuHAlu1fyz",
+      "user_refs_results": [
+        {
+          "result": {
+            "__typename": "User",
+            "affiliates_highlighted_label": {},
+            "avatar": {
+              "image_url": "https://pbs.twimg.com/profile_images/1984471345854566400/5pd8GpgC_normal.jpg"
+            },
+            "core": {
+              "created_at": "Tue Nov 13 21:43:46 +0000 2007",
+              "name": "YouTube",
+              "screen_name": "YouTube"
+            },
+            "dm_permissions": {
+              "can_dm": false
+            },
+            "follow_request_sent": false,
+            "has_graduated_access": true,
+            "id": "VXNlcjoxMDIyODI3Mg==",
+            "is_blue_verified": true,
+            "legacy": {
+              "default_profile": false,
+              "default_profile_image": false,
+              "description": "like and subscribe",
+              "entities": {
+                "description": {},
+                "url": {
+                  "urls": [
+                    {
+                      "display_url": "youtube.com",
+                      "expanded_url": "http://youtube.com/",
+                      "indices": [
+                        0,
+                        23
+                      ],
+                      "url": "https://t.co/GIOK0JwagA"
+                    }
+                  ]
+                }
+              },
+              "fast_followers_count": 0,
+              "favourites_count": 6018,
+              "follow_request_sent": false,
+              "followers_count": 68714955,
+              "friends_count": 1139,
+              "has_custom_timelines": true,
+              "is_translator": false,
+              "listed_count": 73814,
+              "media_count": 16217,
+              "needs_phone_verification": false,
+              "normal_followers_count": 68714955,
+              "notifications": false,
+              "pinned_tweet_ids_str": [
+                "2102412606308757511"
+              ],
+              "possibly_sensitive": false,
+              "profile_banner_url": "https://pbs.twimg.com/profile_banners/10228272/1794339718",
+              "profile_interstitial_type": "",
+              "statuses_count": 61690,
+              "time_zone": "",
+              "translator_type": "regular",
+              "url": "https://t.co/GIOK0JwagA",
+              "utc_offset": 0,
+              "withheld_description": "",
+              "withheld_scope": ""
+            },
+            "location": {
+              "location": "San Bruno, CA"
+            },
+            "media_permissions": {
+              "can_media_tag": false
+            },
+            "parody_commentary_fan_label": "None",
+            "privacy": {
+              "protected": false
+            },
+            "profile_bio": {
+              "description": "like and subscribe"
+            },
+            "profile_description_language": "en",
+            "profile_image_shape": "Square",
+            "relationship_perspectives": {
+              "blocked_by": false,
+              "blocking": false,
+              "followed_by": false,
+              "following": false,
+              "muting": false
+            },
+            "rest_id": "10228272",
+            "super_follow_eligible": false,
+            "super_followed_by": false,
+            "super_following": false,
+            "tipjar_settings": {
+              "bandcamp_handle": "",
+              "bitcoin_handle": "",
+              "cash_app_handle": "",
+              "ethereum_handle": "",
+              "gofundme_handle": "",
+              "is_enabled": false,
+              "patreon_handle": "",
+              "pay_pal_handle": "",
+              "venmo_handle": ""
+            },
+            "verification": {
+              "verified": false,
+              "verified_type": "Business"
+            },
+            "verified_phone_status": false
+          }
+        }
+      ]
+    },
+    "rest_id": "https://t.co/UuHAlu1fyz"
+  }
+}

@@ -12,6 +12,8 @@
 > 拉伸（`min-h-20` + `self-stretch`）+ 外框 `overflow-hidden` 裁剪。
 > 2026-11-09 新增 AC-CARD-010/011：`image_carousel_website` 多图广告卡解析与渲染。
 > 2026-11-11 新增 AC-CARD-013/014：投票推文（文字 / 带图）解析与渲染。
+> 2026-11-14 新增 AC-CARD-015/016：无图片 binding 的 `summary_large_image` 卡（youtu.be App 卡）
+> 域名取 `vanity_url` + 官方同款占位 icon 渲染。
 
 ---
 
@@ -214,7 +216,35 @@
 
 ---
 
-## 总计：14 条 AC
+## AC-CARD-015：域名优先取官方展示的 `vanity_url`
+
+- **输入**：
+  - `test/fixtures/cards/no-image-app-card.json`（真实推文 `1995332387627291098` 的 card，
+    `domain = www.youtube.com`、`vanity_url = youtube.com`）
+  - 只有 `domain` 而无 `vanity_url` 的卡片
+- **预期输出**：`mapTwitterCard().domain` 为 `youtube.com`（官方卡片显示的域名）
+- **验证方法**：单测（`test/unit/parseTweet.spec.ts`）
+- **Pass 条件**：
+  - 同时存在时取 `vanity_url`，不取带 `www.` 的 `domain`
+  - `vanity_url` 缺失时回退 `domain`（不回归既有卡片）
+  - 两者都缺时仍按 `card.url` hostname 兜底
+
+---
+
+## AC-CARD-016：无图大图卡渲染官方占位块
+
+- **输入**：AC-CARD-015 fixture 解析出的 card（`type === 'summary_large_image'`、无 `imageUrl`）
+- **预期输出**：`TweetLinkCard` 渲染左侧图标占位块 + 右侧详情（不是纯文字卡）
+- **验证方法**：`renderToString` + HTML 断言（`test/acceptance/card-render.spec.ts`）
+- **Pass 条件**：
+  - 渲染占位块（`lucide-image` 图标）与右侧标题/描述/域名，文案不丢失
+  - 不渲染 `<img>`（没有可用的图片地址，不伪造请求）
+  - `summary` 纯文字卡保持原布局（无占位块），不回归
+  - 有图的 `summary_large_image` 仍走 1.91:1 大图布局
+
+---
+
+## 总计：16 条 AC
 
 | AC          | 分类          | 依赖外部 API | 依赖 AI |
 | ----------- | ------------- | ------------ | ------- |
@@ -232,6 +262,8 @@
 | AC-CARD-012 | 纯函数/离线   | 否           | 否      |
 | AC-CARD-013 | 纯函数/离线   | 否           | 否      |
 | AC-CARD-014 | 组件/真实渲染 | 否           | 否      |
+| AC-CARD-015 | 纯函数/离线   | 否           | 否      |
+| AC-CARD-016 | 组件/真实渲染 | 否           | 否      |
 
 > 离线 AC 依赖 fixture（`test/fixtures/jetfuel/trending.json`、
 > `test/fixtures/unified-card/carousel.json`），验证时无需服务器。

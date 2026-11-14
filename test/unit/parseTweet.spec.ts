@@ -16,6 +16,7 @@ import {
   mapTwitterCard,
   transformUserResponse,
 } from '~/lib/react-tweet/utils/parseTweet'
+import { loadFixture } from '../helpers/load-fixture'
 
 // ─── Factory: minimal RawTweet ───────────────────────────────
 
@@ -317,6 +318,23 @@ describe('mapTwitterCard', () => {
       title: { string_value: 'T' },
     }, 'summary', 'https://github.com/foo'))
     expect(card!.domain).toBe('github.com')
+  })
+
+  // 真实推文 1995332387627291098（youtu.be App 卡）：官方展示 vanity_url，
+  // 而 domain 带 www. 前缀；上游没有任何图片 binding。
+  it('AC-CARD-015: prefers vanity_url over domain for display', () => {
+    const card = mapTwitterCard(loadFixture('cards/no-image-app-card.json'))!
+    expect(card.domain).toBe('youtube.com')
+    expect(card.imageUrl).toBeUndefined()
+    expect(card.title).toBe('初音ミクオリジナル曲 「Starduster」')
+  })
+
+  it('AC-CARD-015: falls back to domain when vanity_url is missing', () => {
+    const card = mapTwitterCard(cardWith({
+      title: { string_value: 'T' },
+      domain: { string_value: 'www.example.com' },
+    }))
+    expect(card!.domain).toBe('www.example.com')
   })
 })
 

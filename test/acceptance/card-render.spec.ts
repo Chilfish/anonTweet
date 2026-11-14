@@ -3,6 +3,7 @@ import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { TweetLinkCard } from '~/components/tweet/TweetCard'
+import { mapTwitterCard } from '~/lib/react-tweet/utils/parseTweet'
 import { loadFixture } from '../helpers/load-fixture'
 
 /**
@@ -118,5 +119,29 @@ describe('AC-CARD-006/007/008: fallback render paths (P1-3)', () => {
   it('AC-CARD-008: no card data renders empty string', () => {
     const html = render({ ...baseWithCard, card: undefined })
     expect(html).toBe('')
+  })
+})
+
+describe('AC-CARD-016: large-image card without image bindings', () => {
+  // 真实推文 1995332387627291098（youtu.be）：上游只有 App-Store binding，
+  // 官方在左侧渲染图标占位块而非纯文字卡。
+  const noImageCard = mapTwitterCard(loadFixture('cards/no-image-app-card.json'))!
+  const tweet: EnrichedTweet = { ...baseWithCard, card: noImageCard }
+
+  it('AC-CARD-016: renders official placeholder block instead of text-only card', () => {
+    const html = render(tweet)
+
+    expect(html).toContain('lucide-image')
+    expect(html).toContain('初音ミクオリジナル曲 「Starduster」')
+    expect(html).toContain('youtube.com')
+    // 无可用图片地址，不发起伪造请求
+    expect(html).not.toContain('<img')
+  })
+
+  it('AC-CARD-016: summary text card keeps its text-only layout', () => {
+    const textCard = { ...noImageCard, type: 'summary' as const }
+    const html = render({ ...baseWithCard, card: textCard })
+
+    expect(html).not.toContain('lucide-image')
   })
 })
