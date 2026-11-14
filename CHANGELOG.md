@@ -96,6 +96,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ### Fixed
 
+#### Instagram 快拍提取（2026-11-14）
+
+- 升级 `@chilfish/gallery-dl-instagram` 0.2.4 → 0.2.5：stories 优先解析页面内嵌 payload，REST `reels_media` 返回 500 时仍能提取
+- 用户名解析失败不再统一报 `User not found`：错误信息带上每条策略的状态码与原因；修正 `web_profile_info` 的 `data.user` 层级与 `web` 策略的 `profilePage_<id>` 页面特征
+
 #### CI 部署（2026-11-10）
 
 - deploy workflow 不再向构建注入空的 `HOSTNAME`（未设置 repo variable 时不再触发 `z.url()` 校验失败）
