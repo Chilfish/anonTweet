@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ### Added
 
+#### 无图链接卡对齐官方（2026-11-14）
+
+- 上游 App 卡（如 youtu.be 音乐链接）没有任何图片 binding 时，卡片回退为官方同款的左侧图标占位块 + 右侧详情，不再塌成纯文字卡
+- 卡片域名优先取 `vanity_url`（`youtube.com`），不再显示带 `www.` 前缀的 `domain`
+- `AC-CARD-015/016` + `test/fixtures/cards/no-image-app-card.json` / `test/unit/parseTweet.spec.ts` / `test/acceptance/card-render.spec.ts`
+
 #### 投票推文（2026-11-11）
 
 - 新增 `EnrichedTweet.poll`（`mapPollCard`），从 `card.binding_values` 解析纯文字 / 带图投票：选项、票数、整数百分比、`counts_are_final`、结束时间、选项图片与主色
