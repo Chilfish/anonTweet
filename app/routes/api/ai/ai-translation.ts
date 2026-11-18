@@ -76,7 +76,7 @@ async function handleArticleTranslation(args: Extract<AITranslationSchema, { typ
   }
 
   const modelConfig = models.find(m => m.name === model)
-  const resolvedProvider = provider || modelConfig?.provider || 'google'
+  const resolvedProvider = provider || modelConfig?.provider || 'deepseek'
 
   try {
     const strategy = getProviderStrategy(resolvedProvider)
@@ -167,7 +167,7 @@ async function handleIGTranslation(args: Extract<AITranslationSchema, { type: 'i
   }
 
   const modelConfig = models.find(m => m.name === model)
-  const resolvedProvider = provider || modelConfig?.provider || 'google'
+  const resolvedProvider = provider || modelConfig?.provider || 'deepseek'
 
   try {
     const strategy = getProviderStrategy(resolvedProvider)
@@ -177,7 +177,8 @@ async function handleIGTranslation(args: Extract<AITranslationSchema, { type: 'i
     const translated = await translateIGCaption({
       post: igPost,
       modelInstance,
-      thinkingLevel,
+      modelName: model,
+      thinkingLevel: thinkingLevel as ThinkingLevel | undefined,
       translationGlossary,
     })
 
@@ -231,7 +232,7 @@ async function handleTweetTranslation(args: Extract<AITranslationSchema, { type?
   } = args
 
   const modelConfig = models.find(m => m.name === model)
-  const resolvedProvider = provider || modelConfig?.provider || 'google'
+  const resolvedProvider = provider || modelConfig?.provider || 'deepseek'
 
   try {
     if (!tweet) {

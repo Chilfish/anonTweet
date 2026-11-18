@@ -137,7 +137,8 @@ async function handleGenerate(args: z.infer<typeof generateSchema>) {
     thinkingLevel,
     translationGlossary,
   } = args
-  const resolvedProvider = provider ?? 'google'
+  const modelConfig = models.find(m => m.name === model)
+  const resolvedProvider = provider ?? modelConfig?.provider ?? 'deepseek'
 
   try {
     // AC-SEC-001：baseUrl 白名单校验（SSRF/滥用面）
@@ -222,7 +223,7 @@ async function handleTranslate(args: z.infer<typeof translateSchema>) {
     translationGlossary,
   } = args
   const modelConfig = models.find(m => m.name === model)
-  const resolvedProvider = provider || modelConfig?.provider || 'google'
+  const resolvedProvider = provider || modelConfig?.provider || 'deepseek'
 
   try {
     // AC-SEC-001：baseUrl 白名单校验
@@ -243,6 +244,7 @@ async function handleTranslate(args: z.infer<typeof translateSchema>) {
       items,
       tweetText: tweet.text,
       modelInstance,
+      modelName: model,
       thinkingLevel,
       translationGlossary,
     })

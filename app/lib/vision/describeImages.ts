@@ -4,6 +4,7 @@ import type { ThinkingLevel } from '~/lib/stores/appConfig'
 import type { EnrichedTweet } from '~/types'
 import type { AIVisionInfo, VisionMode } from '~/types/vision'
 import { generateText, NoObjectGeneratedError, Output, zodSchema } from 'ai'
+import { createAITranslationAbortSignal } from '~/lib/ai-timeout'
 import { generateEntityContext } from '~/lib/AITranslation'
 import { models } from '~/lib/constants'
 import { getProviderStrategy, getThinkingConfig } from '~/lib/providers'
@@ -159,6 +160,8 @@ export async function runImageVision({
         providerOptions: modelConfig
           ? strategy.buildProviderOptions(thinkingConfig, modelConfig)
           : {},
+        // AC-DECOUPLE-002：服务端 AI 调用必须带超时（重试重新计时）
+        abortSignal: createAITranslationAbortSignal(),
       })
 
       const parsed = parseVisionResult(preset, response.output)

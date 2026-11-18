@@ -2,6 +2,9 @@ import type { LanguageModel } from 'ai'
 import type { ThinkingLevel } from '~/lib/stores/appConfig'
 import { generateText } from 'ai'
 import { z } from 'zod'
+import { createAITranslationAbortSignal } from '~/lib/ai-timeout'
+import { models } from '~/lib/constants'
+import { getProviderStrategy, getThinkingConfig } from '~/lib/providers'
 import { isChinese } from '~/lib/translateIGCaption'
 import { VisionParseError } from './parse'
 
@@ -28,6 +31,8 @@ export interface TranslateVisionOCRArgs {
   /** 推文上下文（翻译用，帮助理解语境） */
   tweetText?: string
   modelInstance: LanguageModel
+  /** 模型名（注册表内时下发 provider 思考配置） */
+  modelName?: string
   thinkingLevel?: ThinkingLevel
   translationGlossary?: string
 }
@@ -153,7 +158,7 @@ const SYSTEM_PROMPT = `你是推文图片 OCR 文字的翻译助手。将每张�
 export async function translateVisionOCR(
   args: TranslateVisionOCRArgs,
 ): Promise<Array<{ index: number, translatedText: string }>> {
-  const { items, tweetText, modelInstance, translationGlossary } = args
+  const { items, tweetText, modelInstance, modelName, translationGlossary, thinkingLevel } = args
   if (items.length === 0)
     return []
 
@@ -178,6 +183,16 @@ ${contextSection}
 # OCR 原文（逐图）
 ${toTranslate.map(item => `${item.index}: ${item.originalText}`).join('\n')}`
 
+  const modelConfig = modelName
+    ? models.find(m => m.name === modelName)
+    : undefined
+  const providerOptions = modelConfig && modelName
+    ? getProviderStrategy(modelConfig.provider).buildProviderOptions(
+        getThinkingConfig(modelName, thinkingLevel ?? 'minimal'),
+        modelConfig,
+      )
+    : {}
+
   let lastError: unknown
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
@@ -195,6 +210,9 @@ ${toTranslate.map(item => `${item.index}: ${item.originalText}`).join('\n')}`
           },
         ],
         temperature: 0.5,
+        providerOptions,
+        // AC-DECOUPLE-002：服务端 AI 调用必须带超时（重试重新计时）
+        abortSignal: createAITranslationAbortSignal(),
       })
 
       const parsed = parseOcrTranslation(extractJson(response.text))

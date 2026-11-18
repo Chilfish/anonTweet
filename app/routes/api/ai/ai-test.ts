@@ -5,6 +5,7 @@ import { data } from 'react-router'
 import z from 'zod'
 import { isAllowedAIBaseUrl } from '~/lib/ai-base-url'
 import { buildAIFailure } from '~/lib/ai-error'
+import { createAITranslationAbortSignal } from '~/lib/ai-timeout'
 import { models } from '~/lib/constants'
 import { getProviderStrategy, getThinkingConfig } from '~/lib/providers'
 import { getTweetSchema } from '~/lib/validations/tweet'
@@ -51,7 +52,7 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   const modelConfig = models.find(m => m.name === model)
-  const resolvedProvider = provider || modelConfig?.provider || 'google'
+  const resolvedProvider = provider || modelConfig?.provider || 'deepseek'
 
   try {
     const strategy = getProviderStrategy(resolvedProvider)
@@ -70,6 +71,7 @@ export async function action({ request }: Route.ActionArgs) {
       providerOptions: modelConfig
         ? strategy.buildProviderOptions(thinkingConfig, modelConfig)
         : {},
+      abortSignal: createAITranslationAbortSignal(),
     })
 
     const text = response.text.trim()

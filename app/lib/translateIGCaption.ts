@@ -1,8 +1,11 @@
 import type { LanguageModel, ModelMessage } from 'ai'
+import type { ThinkingLevel } from '~/lib/stores/appConfig'
 import type { IGPost } from '~/types'
 import { generateText, Output } from 'ai'
 import { createAITranslationAbortSignal } from '~/lib/ai-timeout'
+import { models } from '~/lib/constants'
 import { obsLog, suffix } from '~/lib/obs-log'
+import { getProviderStrategy, getThinkingConfig } from '~/lib/providers'
 
 /**
  * IG Caption 翻译参数（精简版 — 只传真正需要的）
@@ -10,8 +13,14 @@ import { obsLog, suffix } from '~/lib/obs-log'
 export interface TranslateIGCaptionArgs {
   post: IGPost
   modelInstance: LanguageModel
+  /**
+   * 模型名（`app/lib/constants.ts` 的 models 列表）。
+   * 传入后按模型注册表解析 provider 策略并下发 thinking / reasoning_effort；
+   * 缺省时退回纯文本请求（自定义模型名的兼容路径）。
+   */
+  modelName?: string
   translationGlossary?: string
-  thinkingLevel?: string
+  thinkingLevel?: ThinkingLevel
 }
 
 /**
@@ -24,7 +33,7 @@ export interface TranslateIGCaptionArgs {
  * - 大量换行排版
  */
 export async function translateIGCaption(args: TranslateIGCaptionArgs): Promise<string> {
-  const { post, modelInstance, translationGlossary } = args
+  const { post, modelInstance, translationGlossary, modelName, thinkingLevel } = args
   const startedAt = Date.now()
   let attempts = 0
 
@@ -101,6 +110,17 @@ ${glossarySection}
 # Source Caption
 ${text}`
 
+  // 模型在注册表中时下发生效的 provider 选项（DeepSeek thinking / Gemini thinkingConfig 等）
+  const modelConfig = modelName
+    ? models.find(m => m.name === modelName)
+    : undefined
+  const providerOptions = modelConfig && modelName
+    ? getProviderStrategy(modelConfig.provider).buildProviderOptions(
+        getThinkingConfig(modelName, thinkingLevel ?? 'minimal'),
+        modelConfig,
+      )
+    : {}
+
   try {
     attempts += 1
     const messages: ModelMessage[] = [
@@ -113,6 +133,7 @@ ${text}`
       messages,
       temperature: 0.5,
       output: Output.text(),
+      providerOptions,
       // AC-DECOUPLE-002：服务端 AI 调用必须带超时
       abortSignal: createAITranslationAbortSignal(),
     })
@@ -134,6 +155,7 @@ ${text}`
         ],
         temperature: 0.6,
         output: Output.text(),
+        providerOptions,
         // AC-DECOUPLE-002：重试同样重新计时
         abortSignal: createAITranslationAbortSignal(),
       })
