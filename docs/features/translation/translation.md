@@ -262,7 +262,7 @@ v2.1 新增的纯函数模块，提供通用的翻译实体合并能力：
 - 纯函数实现：`app/lib/translation/materialize.ts`
 - 使用位置：
   - Markdown 导出：`useTweetOperations()`
-  - 截图后同步到 DB：`useScreenshotAction()` → `syncTranslationData(tweets, translations)`
+  - 截图后同步到 DB：`useScreenshotAction()` → `syncTranslationData(tweets, translations)`；同时 `flushSnapshot` 立即刷新本地 IndexedDB 快照
 
 ---
 

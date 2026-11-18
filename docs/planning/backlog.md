@@ -18,7 +18,7 @@
 
 > 阶段计划之外、按需推进的增量项，完成后勾选、移入归档。
 
-- [ ] [feat] **浏览历史页 `/history` + 详情快照缓存**（方案：`docs/planning/browse-history.md`；AC-HOME-004/005）— 删除「继续阅读」宽卡，首页改为 3 条最近查看 +「全部」入口；新增 `/history` 列表页（搜索 / 类型筛选走 URL、按今天/昨天/更早分组、单条移除、清空二次确认）；IndexedDB 升到 v3 新增 `snapshots` store，未过期的推文线程 / 译文 / IG 帖子直接命中本地，不再重复请求，摘要淘汰时同事务清理快照。（风险：快照体积与配额；`SNAPSHOT_TTL` 24h 内可能展示旧互动数）
+- [ ] [feat] **浏览历史页 `/history` + 详情快照缓存**（方案：`docs/planning/browse-history.md`；AC-HOME-001/003/004/005/006）— 删除「继续阅读」宽卡，首页改为 3 条最近查看 +「全部」入口；`/history` 重做为本地资料库 dashboard（全历史统计 + 日历热力图 + 常看作者/时段 + 作者筛选/日期或作者分组 + 列表/表格 + 20 条/页分页 + JSON 导出）；IndexedDB 升到 v4 新增 `visits` 事件 store（摘要 1000 / 事件 5000，v3 回填），`snapshots` 保留最近 100 条完整详情。详情页 `clientLoader` / SWR 本地优先，命中快照即不请求；截图与翻译保存 `flushSnapshot` 回写；search / list / timeline 不写缓存。✅ dashboard + 本地优先（2026-11-18）。（风险：本地优先会长期展示旧数据，依赖 `SNAPSHOT_LIMIT` 淘汰或用户清空）
 
 - [ ] [feat] **X Article（长文）解析 / 渲染 / 分块翻译**（方案：`docs/features/tweet/article.md`；ADR-009；AC-TWEET-012~019）— ✅ **功能完成（2026-09-27）**：纯文本修复 ✅ + 富文本块文档解析 ✅ + 独立阅读页 `/article/:id` + 紧凑卡 ✅ + 分块翻译端到端 ✅（migration `0002_*` + `/api/tweet/set` intent `updateArticleTranslations` + 阅读页自动翻译/三态开关 + loader 回填 + AC-017/018）+ `llms.ts`/OpenAPI 快照/SKILL.md 补 `article`；阅读页 UX 精修（工具栏：三态开关/重试/一键截图 + 更多菜单：设置/分享/复制/下载图片、`bg-card` 卡片、译文 localCache+DB 双层、rich 去冗余 `plainText`、行内样式按区间精确切分、内嵌推文真实渲染（并行取数/失败回退链接卡））。**剩余（非阻塞）**：① 线上库执行 `db:migrate`（owner 环境）；② 可选 `plain-article/:id` 截图路由。（LLM 分批翻译已对真实 DeepSeek 端点验证并修复「模型输出非法 JSON → 整篇 500」，见 AC-TWEET-020 / AC-OBS-002）。**风险**：`react-markdown` 新增依赖、`content_state` 上游演化。（工作量：约 2 人日 / DRI：— / 风险：中）
 

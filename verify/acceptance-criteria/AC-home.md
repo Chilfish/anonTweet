@@ -12,7 +12,7 @@
 - **输入**：`app/lib/visited.ts` 的纯函数、`RecentVisited` 组件
 - **预期输出**：按访问时间倒序、按类型去重的本地历史，首页最多展示 3 条并提供进入完整历史的入口
 - **Pass 条件**：
-  - `pushVisited`：新项置顶；同一 `type + id` 只保留一条并刷新时间戳；存储上限 `VISITED_LIMIT`（200）
+  - `pushVisited`：新项置顶；同一 `type + id` 只保留一条并刷新时间戳，同时累计 `visits`、保留 `firstTs`；存储上限 `VISITED_LIMIT`（1000）
   - `formatVisitedTime`：<1 分钟「刚刚」、<1 小时「N 分钟前」、<24 小时「N 小时前」、<7 天「N 天前」、更早「M月D日」
   - `visitedHref`：tweet → `/tweets/{id}`、ig → `/ins/{id}`、article → `/article/{id}`，id 做 URL 编码
   - `RecentVisited` 渲染为可点击链接，含类型图标、标题、摘要与相对时间；传入空列表时返回空串（不占位）
@@ -35,34 +35,55 @@
 - **输入**：`app/lib/storage/{db,visited,dictionary}.ts`
 - **预期输出**：按记录读写的 IndexedDB 存储，替代 localStorage 整表重写
 - **Pass 条件**：
-  - `recordVisited` 按 `type + id` 覆盖写入，`loadRecentVisited` / `loadVisitedHistory` 按时间倒序返回
-  - 记录数超过 `VISITED_STORAGE_LIMIT`（200）时按时间淘汰最旧记录
+  - `recordVisited` 按 `type + id` 覆盖写入，累计 `visits` 并保留 `firstTs`；同一事务写入一条 `visits` 访问事件
+  - `visits` store（DB v4）保存 `ts / type / targetId`，索引 `ts` 与 `typeId`；超过 `VISIT_EVENT_LIMIT`（5000）按时间淘汰
+  - 记录数超过 `VISITED_STORAGE_LIMIT`（1000）时按时间淘汰最旧记录；v3 → v4 升级把已有记录的 `ts` 回填成一条事件
+  - `loadRecentVisited` / `loadVisitedHistory` 按时间倒序返回；`loadVisitEvents` 按时间倒序返回访问事件
+  - 单条移除同时删除对应 snapshot 与该记录的访问事件；清空同时清空 `visited` / `snapshots` / `visits`
   - 词典按 `id` 单条增删改查，读取按 `createdAt` 倒序
   - 首次启动把 localStorage 中的 `visited-store` / `translation-dictionary-storage` 迁移进 IndexedDB，迁移成功后删除旧键
   - IndexedDB 不可用或打开失败时降级为内存态，不抛错打断渲染
 
 ## AC-HOME-004：浏览历史页 `/history`
 
-- **输入**：`app/routes/history.tsx`、`app/components/history/HistoryList.tsx`、`app/lib/visited.ts` 的 `filterVisited` / `groupVisitedByDay`
-- **预期输出**：本机全部浏览记录（上限 200）的列表页，支持搜索、类型筛选、按日期分组与单条移除
+- **输入**：`app/routes/history.tsx`、`app/components/history/{HistoryOverview,HistoryActivity,HistoryInsights,HistoryToolbar,HistoryList,HistoryTable,HistoryPagination}.tsx`、`app/lib/visited.ts`、`app/lib/visited-analytics.ts`
+- **预期输出**：本机全部浏览记录（上限 1000）的 dashboard：单层 grouped surface、全历史统计与热力图、作者洞察、列表/表格双视图、分页与导出
 - **Pass 条件**：
-  - 关键词匹配标题与摘要、忽略大小写；类型筛选支持 全部 / 推文 / 长文 / IG；两者可叠加
-  - 结果按 `今天 / 昨天 / 更早` 分组，空分组不渲染；组内保持访问时间倒序
-  - 每行是链接（复用 `visitedHref`），带类型图标、标题、摘要与相对时间；移除按钮独立于链接，`aria-label` 含记录标题
-  - 加载态用骨架；无记录与「筛选无结果」各自给空态与下一步；空列表组件返回空串
-  - 搜索与类型写入 URL（`?q=`、`?type=`），来源不写客户端状态之外的副本
-  - 清空需二次确认（`AlertDialog`），页面 `noindex`
+  - 整体只使用一层无阴影的内容 surface（`bg-card` + hairline border），区块之间用分隔线/留白，不给每个区块套卡片
+  - 总览：记录数 / 浏览次数 / 作者数 / 活跃天数；副行给出当前连续、最长连续、活跃日均与类型分布；统计基于全部历史，不受列表筛选影响
+  - 热力图：`buildVisitedHeatmap` 以本地周一为列、7 天为行，覆盖全部历史（最多 260 周），超出容器时横向滚动；今天高亮，空格子不占位
+  - 常看作者：按累计浏览次数取前 5，点击写入 `?author=`；时段分布给出 24 小时直方图
+  - 筛选：关键词匹配标题/摘要/作者；类型（全部/推文/长文/IG）、时间范围（全部/今天/近 7 天/近 30 天）、作者可叠加；筛选控件为轻量胶囊，移动端单行横向滚动
+  - 分组：列表视图按日期或作者分组（日期跨年补 `YYYY年`），作者组按浏览次数排序；表格视图提供内容/作者/类型/浏览/最近列
+  - 排序：最近浏览 / 浏览最多 / 最早浏览；列表视图切回时恢复最近浏览
+  - 分页：每页 20（可选 50/100），只在列表上方出现一次；`?page=`、`?per=` 写入 URL，筛选/排序变化重置页码
+  - 每行/表格行是链接（复用 `visitedHref`），移除按钮独立于链接；空态给「去首页 / 清除筛选」
+  - 导出 JSON v2（`version / exportedAt / items / events`）；清空需二次确认并同时清空记录、事件与快照；页面 `noindex`
+  - 移动端无横向溢出；统计 2×2、筛选 chips 横向滚动、分页在 390px 宽下完整可用
 
 ## AC-HOME-005：详情快照缓存
 
-- **输入**：`app/lib/snapshot.ts`、`app/lib/storage/snapshots.ts`、`app/lib/snapshot-restore.ts`、`app/hooks/use-persist-snapshot.ts`
-- **预期输出**：IndexedDB `snapshots` store 保存完整详情，未过期时详情页跳过重复请求
+- **输入**：`app/lib/snapshot.ts`、`app/lib/storage/snapshots.ts`、`app/lib/snapshot-restore.ts`、`app/lib/snapshot-flush.ts`、`app/hooks/use-persist-snapshot.ts`
+- **预期输出**：IndexedDB `snapshots` store 保存完整详情，详情页命中本地快照即跳过 API
 - **Pass 条件**：
-  - 主键与摘要一致（`${type}:${id}`），索引 `savedAt`；推文快照含 `tweets` + `translations`（+ 文章译文 / embeds），IG 快照含 `posts`
-  - `isSnapshotFresh`：`savedAt` 在 `SNAPSHOT_TTL`（24h）内视为命中，过期视为未命中
+  - 主键与摘要一致（`${type}:${id}`），索引 `savedAt`；推文快照含 `tweets` + `translations` + `commentIds`（+ 文章译文 / embeds），IG 快照含 `posts`
+  - 本地优先：`loadTweetSnapshot` / `loadIgSnapshot` 只判断数据是否完整，不再用 TTL 拒绝旧快照；`savedAt` 仅用于 `SNAPSHOT_LIMIT`（100）淘汰
   - 快照数量超过 `SNAPSHOT_LIMIT`（100）时按 `savedAt` 淘汰最旧
   - 摘要被淘汰、单条移除或清空时，同事务删除对应快照；`clearSnapshots` 不动摘要
-  - `/tweets/:id` 与 `/ins/:id` 的客户端取数先读快照，命中即返回；恢复推文快照时同时回填 `tweets`、逐条译文与文章译文
+  - `/tweets/:id`、`/article/:id` 的 `clientLoader` 与 `/ins/:id` 的客户端取数先读快照，命中即返回；恢复推文快照时同时回填 `tweets`、逐条译文、文章译文与评论 id
+  - 快照写入时刷新 `savedAt`；截图成功、手动翻译保存、文章翻译保存、IG caption 翻译保存后通过 `flushSnapshot(key)` 立即落盘
+
+## AC-HOME-006：本地优先读取与缓存边界
+
+- **输入**：`app/routes/{tweet,article,ins,search,list}.tsx`、`app/routes/api/{tweet/search,tweet/list,user/timeline}.ts`、截图与翻译保存 hooks
+- **预期输出**：详情页本地优先；search / list / timeline 只走请求，不写本地详情快照
+- **Pass 条件**：
+  - `/tweets/:id`、`/article/:id` 导出 `clientLoader`：先按 id 读 IndexedDB 快照，命中时直接返回并恢复 store，未命中才 `serverLoader()`
+  - `/ins/:id` 的 `getIGPost` 先 `loadIgSnapshot(id)`，未命中才请求 `/api/ig/get`
+  - `search.tsx` / `list.tsx` 不引用 `usePersistSnapshot`、`putSnapshot`、`recordVisited`
+  - `api/tweet/search`、`api/tweet/list`、`api/user/timeline` 不写 `insertToTweetDB` / `setLocalCache` / `putSnapshot` / `recordVisited`
+  - 截图（推文 / IG）与翻译保存（手动、文章、IG caption）调用 `flushSnapshot`，把当前完整数据同步回本地快照
+  - `snapshot-restore` 不依赖 `SNAPSHOT_TTL` / `isSnapshotFresh` 做命中判断
 
 ---
 
