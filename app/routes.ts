@@ -17,6 +17,7 @@ export default [
     route('/article/:id', 'routes/article.tsx'),
     route('/ins/:id', 'routes/ins.tsx'),
     route('/bili', 'routes/bili.tsx'),
+    route('/about', 'routes/about.tsx'),
     route('/search', 'routes/search.tsx'),
   ]),
 

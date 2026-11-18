@@ -1,10 +1,11 @@
-import { InfoIcon, SearchIcon, XIcon } from 'lucide-react'
+import { GitCommitHorizontal, InfoIcon, SearchIcon, Settings, XIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router'
+import { SettingsPanel } from '~/components/settings/SettingsPanel'
 import { Button } from '~/components/ui/button'
+import { formatDate } from '~/lib/react-tweet'
 import { cn } from '~/lib/utils'
 import { Dateline } from './Dateline'
-import { FloatingDock } from './FloatingDock'
 import { PageHeader } from './PageHeader'
 import { sectionLabel } from './section'
 
@@ -12,17 +13,6 @@ const THEME_COLOR = {
   '--primary-brand': 'oklch(0.6 0.18 260)',
   '--primary-fallback': '#1d9bf0',
 } as React.CSSProperties
-
-function MinimalBackground() {
-  return (
-    <div className="fixed inset-0 -z-50 pointer-events-none select-none bg-background">
-      <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[30vh] opacity-10 blur-[100px]"
-        style={{ background: 'var(--primary-brand, var(--primary-fallback))' }}
-      />
-    </div>
-  )
-}
 
 interface LinkProps {
   to: string
@@ -48,8 +38,55 @@ function FooterLink({ to, className, children, emoji }: LinkProps) {
   )
 }
 
+function GitInfo() {
+  const hash = typeof __GIT_HASH__ !== 'undefined'
+    ? __GIT_HASH__
+    : 'DEV'
+  const dateStr = typeof __GIT_DATE__ !== 'undefined'
+    ? __GIT_DATE__
+    : new Date()
+
+  return (
+    <div className="flex items-center justify-center gap-2 text-[10px] text-muted-foreground/50 font-mono mt-3 select-all">
+      <span title={formatDate(new Date(dateStr))}>
+        Last build:
+        {' '}
+        {formatDate(new Date(dateStr))}
+      </span>
+      <span>•</span>
+      <a
+        href={`https://github.com/Chilfish/anonTweet/commit/${hash}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-1 hover:text-foreground transition-colors"
+      >
+        <GitCommitHorizontal className="size-3" />
+        {hash.substring(0, 7)}
+      </a>
+    </div>
+  )
+}
+
+function SettingsFooterButton() {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="inline-flex items-center gap-1.5 transition-colors hover:text-(--primary-brand) hover:underline underline-offset-4 decoration-dotted"
+      >
+        <Settings className="size-3.5" aria-hidden />
+        设置
+      </button>
+      <SettingsPanel open={open} onOpenChange={setOpen} />
+    </>
+  )
+}
+
 export function LayoutComponent({ children }: { children?: React.ReactNode }) {
-  const [showFooter, setShowFooter] = useState(false)
+  const [showFooter, setShowFooter] = useState(true)
   const { pathname } = useLocation()
   const isHome = pathname === '/'
 
@@ -58,9 +95,7 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
       className="relative min-h-screen w-full flex flex-col font-sans text-foreground antialiased"
       style={THEME_COLOR}
     >
-      <MinimalBackground />
-
-      <div className="flex-1 w-full max-w-3xl mx-auto sm:px-4 pt-6 pb-28 flex flex-col items-center justify-center  animate-in fade-in slide-in-from-bottom-2 duration-500">
+      <div className="flex-1 w-full max-w-3xl mx-auto sm:px-4 pt-6 pb-12 flex flex-col items-center justify-center  animate-in fade-in slide-in-from-bottom-2 duration-500">
         {isHome
           ? (
               <div className="mb-8 w-full">
@@ -106,9 +141,20 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
                     <SearchIcon className="size-3.5" />
                     推文搜索
                   </Link>
+                  <Link
+                    to="/about"
+                    className="inline-flex items-center gap-1.5 transition-colors hover:text-(--primary-brand) hover:underline underline-offset-4 decoration-dotted"
+                  >
+                    <InfoIcon className="size-3.5" />
+                    关于
+                  </Link>
+                  <FooterLink to="https://github.com/Chilfish/anonTweet">GitHub</FooterLink>
+                  <SettingsFooterButton />
                 </span>
               </p>
             </div>
+
+            <GitInfo />
           </footer>
         </div>
 
@@ -128,8 +174,6 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
               )}
         </Button>
       </div>
-
-      <FloatingDock />
     </div>
   )
 }

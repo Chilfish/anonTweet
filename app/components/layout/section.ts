@@ -5,6 +5,7 @@ const SECTION_LABELS: Record<string, string> = {
   search: '搜索',
   list: 'List',
   bili: '动态发布',
+  about: '关于',
 }
 
 /** 当前路由所属栏目（用于日付线/外壳），未知路径返回空串 */

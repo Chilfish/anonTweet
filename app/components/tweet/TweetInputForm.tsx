@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Button } from '~/components/ui/button'
-import { Card, CardContent } from '~/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import {
@@ -12,6 +12,15 @@ import {
   pickSharedInput,
   resolveShareTarget,
 } from '~/lib/share'
+
+function FormatListItem({ children }: { children: React.ReactNode }) {
+  return (
+    <li className="flex items-start gap-2 text-muted-foreground">
+      <span className="mt-1 text-primary/80">•</span>
+      <span className="flex-1">{children}</span>
+    </li>
+  )
+}
 
 export function TweetInputForm() {
   const [input, setInput] = useState('')
@@ -66,7 +75,12 @@ export function TweetInputForm() {
 
   return (
     <Card className="w-full max-w-md">
-      <CardContent className="pt-6">
+      <CardHeader className="text-center pb-2">
+        <CardDescription>
+          输入链接或 ID，加载推文 / Instagram 内容
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative">
             <Label htmlFor="tweet-input" className="sr-only">
@@ -95,10 +109,44 @@ export function TweetInputForm() {
           </Button>
         </form>
 
-        <div className="mt-4 flex items-center justify-between gap-3 border-t border-border/50 pt-3 text-xs text-muted-foreground">
-          <p>
-            支持 x.com、推文 ID、instagram.com 的 /p 与 /reel
-          </p>
+        <div className="mt-6 text-xs space-y-2">
+          <p className="font-medium text-foreground/80">支持格式</p>
+          <ul className="space-y-1.5">
+            <FormatListItem>
+              <code className="bg-muted px-1.5 py-0.5 rounded-sm">x.com/.../status/123...</code>
+            </FormatListItem>
+            <FormatListItem>
+              <code className="bg-muted px-1.5 py-0.5 rounded-sm">1234567890...</code>
+              {' '}
+              (推文纯数字 ID)
+            </FormatListItem>
+            <FormatListItem>
+              <code className="bg-muted px-1.5 py-0.5 rounded-sm">
+                instagram.com/p/
+                {'{id}'}
+                /
+              </code>
+            </FormatListItem>
+            <FormatListItem>
+              <code className="bg-muted px-1.5 py-0.5 rounded-sm">
+                instagram.com/reel/
+                {'{id}'}
+                /
+              </code>
+            </FormatListItem>
+            <FormatListItem>
+              <code className="bg-muted px-1.5 py-0.5 rounded-sm">
+                instagram.com/
+                {'{username}'}
+                /p/
+                {'{id}'}
+                /
+              </code>
+            </FormatListItem>
+          </ul>
+        </div>
+
+        <div className="mt-4 flex justify-end border-t border-border/50 pt-3 text-xs text-muted-foreground">
           <Link
             to="/search"
             className="inline-flex shrink-0 items-center gap-1 transition-colors hover:text-foreground"

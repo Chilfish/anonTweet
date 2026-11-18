@@ -1,4 +1,3 @@
-import { CapabilityStrip } from '~/components/home/CapabilityStrip'
 import { ContinueReading } from '~/components/home/ContinueReading'
 import { RecentVisited } from '~/components/home/RecentVisited'
 import { Dateline } from '~/components/layout/Dateline'
@@ -30,7 +29,6 @@ export default function Home() {
   return (
     <div className="flex w-full flex-col items-center gap-5">
       <TweetInputForm />
-      <CapabilityStrip />
       <Dateline label="匿名阅读" className="w-full max-w-md px-2" />
       <ContinueReading item={latest ?? null} />
       <RecentVisited items={rest} onClear={clear} />

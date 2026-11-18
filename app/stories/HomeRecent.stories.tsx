@@ -1,10 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { VisitedItem } from '~/lib/visited'
-import { CapabilityStrip } from '~/components/home/CapabilityStrip'
 import { RecentVisited } from '~/components/home/RecentVisited'
 
 /**
- * 首页次级区块：最近查看（有记录 / 空态）与能力提示。
+ * 首页次级区块：最近查看（有记录 / 空态）。
  * 空态用于确认「无记录时整块不渲染」，不留下空洞。
  */
 const meta = {
@@ -55,8 +54,4 @@ export const Populated: Story = {
 
 export const Empty: Story = {
   render: () => <RecentVisited items={[]} />,
-}
-
-export const Capabilities: Story = {
-  render: () => <CapabilityStrip />,
 }

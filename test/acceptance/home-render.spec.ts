@@ -9,11 +9,9 @@ import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import { MemoryRouter } from 'react-router'
 import { describe, expect, it } from 'vitest'
-import { CapabilityStrip } from '~/components/home/CapabilityStrip'
 import { ContinueReading } from '~/components/home/ContinueReading'
 import { RecentVisited } from '~/components/home/RecentVisited'
 import { Dateline } from '~/components/layout/Dateline'
-import { FloatingDock } from '~/components/layout/FloatingDock'
 import { HankoMark } from '~/components/layout/HankoMark'
 import { TweetInputForm } from '~/components/tweet/TweetInputForm'
 
@@ -80,30 +78,14 @@ describe('AC-HOME-001: recent visited renders as links and hides when empty', ()
   })
 })
 
-describe('AC-HOME-002: home search entry and capability strip', () => {
-  it('offers a search entry when there is no link at hand', () => {
+describe('AC-HOME-002: home entries and decorative shell', () => {
+  it('offers a search entry and keeps the input format list', () => {
     const html = render(createElement(TweetInputForm))
 
     expect(html).toContain('href="/search"')
     expect(html).toContain('搜索推文')
-  })
-
-  it('lists the three real capabilities without link or subtitle markup', () => {
-    const html = render(createElement(CapabilityStrip))
-
-    expect(html).toContain('AI 翻译')
-    expect(html).toContain('截图导出')
-    expect(html).toContain('Markdown')
-    expect(html).not.toContain('<a ')
-    expect(html).not.toContain('href=')
-  })
-
-  it('exposes global navigation through the floating dock', () => {
-    const html = render(createElement(FloatingDock))
-
-    expect(html).toContain('aria-label="首页"')
-    expect(html).toContain('aria-label="搜索推文"')
-    expect(html).toContain('aria-label="设置"')
+    expect(html).toContain('支持格式')
+    expect(html).toContain('instagram.com/reel/')
   })
 
   it('renders the decorative hanko and dateline', () => {

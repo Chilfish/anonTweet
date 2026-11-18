@@ -66,6 +66,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ### Changed
 
+#### 外壳重做与内容恢复（2026-11-18）
+
+- 删除通栏 header，也不设常驻导航条：设置 / 关于 / GitHub / 搜索入口收在页脚（默认展开）；新增朱印与日付线两件装饰元素
+- 搜索页新增最近搜索（IndexedDB，去重 + 20 条上限，chips 点选重搜/清除）；无历史时给 3 个语法示例，点击只填入输入框
+- 去掉主题渐变：标题改纯色、移除背景品牌色光斑；新增 `--seal` 朱印色 token
+- 撤回 44469cf 的信息型删减：PageHeader 说明与横屏提示、输入卡 description + 支持格式清单、页脚 GitInfo（构建日期 + commit）与「关于 / GitHub」入口；页脚默认展开
+- 新增 `/about`：构建信息、数据与隐私边界、机器可读入口（llms.txt / openapi.json / skill）、GitHub 与 CHANGELOG；版本经 loader 读取，不进客户端 bundle
+- 首页移除与恢复后 PageHeader 重复的能力提示条
+- `AC-ABOUT-001` + 渲染测试；`AC-HOME-002` 更新为悬浮导航与装饰外壳
+
 #### llms.txt 索引化（2026-11-18）
 
 - `/llms.txt` 从「schema 摘要 + 16 条端点清单」收敛为 1.2KB 纯索引：blockquote + 调用约定 + `Start here` / `Live examples` / `Optional`
