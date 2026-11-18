@@ -122,6 +122,7 @@ You are a professional localization expert. Translate the given documents into n
 1. Translate every block faithfully; keep the author's tone.
 2. Placeholders like \`<<__LINK_0__>>\` are immutable anchors (links / @mentions / #hashtags). Keep them EXACTLY as-is inside the translation, and place them where natural Chinese syntax requires.
 3. Never translate a block into anything other than Simplified Chinese.
+4. Use the input block keys exactly; never invent, merge, or drop a key. Only translate the blocks provided.
 
 # Output
 Return a single JSON object of exactly this shape:
@@ -181,7 +182,7 @@ export async function autoTranslateArticle(
     const payload = JSON.stringify(Object.fromEntries(items.map(item => [item.key, item.text])), null, 0)
     const userContent = `${options.translationGlossary
       ? `<Glossary>\n${options.translationGlossary}\n</Glossary>\n\n`
-      : ''}Translate these blocks:\n${payload}`
+      : ''}Translate these blocks:\n${payload}\n\nFinal reminder: return one JSON object containing exactly the input block keys (plus "title" only if supplied). No markdown, no prose, no extra keys.`
 
     const startedAt = Date.now()
     let lastRaw: Record<string, string> = {}

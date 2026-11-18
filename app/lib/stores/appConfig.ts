@@ -111,7 +111,10 @@ export const useAppConfigStore = create<AppConfigState>()(
       deepseekApiKey: '',
       deepseekModel: 'deepseek-flash',
       deepseekBaseUrl: '',
-      deepseekThinkingLevel: 'high',
+      // 翻译/识图属于短文本结构化任务，DeepSeek 官方建议关闭思考：
+      // 更低延迟与成本，temperature 才生效，也减少 JSON 模式下的空输出/重试。
+      // 需要更强推理时用户可自行调到 high / max。
+      deepseekThinkingLevel: 'minimal',
       openrouterApiKey: '',
       openrouterModel: 'xiaomi/mimo-v2.5',
       openrouterBaseUrl: '',

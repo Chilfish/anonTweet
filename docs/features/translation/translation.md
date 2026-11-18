@@ -77,7 +77,7 @@ interface AIConfig {
   // DeepSeek 配置（默认引擎）
   deepseekApiKey: string
   deepseekModel: string // "deepseek-flash"（官方别名，V4.1 Flash，支持图片输入）
-  deepseekThinkingLevel: ThinkingLevel
+  deepseekThinkingLevel: ThinkingLevel // 默认 minimal：翻译类短任务关闭思考
 
   // OpenRouter 配置
   openrouterApiKey: string
@@ -196,6 +196,8 @@ flowchart LR
 ```
 
 DeepSeek 的模型名与能力以官方文档为准：`deepseek-flash`（V4.1 Flash，1M 上下文，支持图片）与 `deepseek-v4-pro`（纯文本）；`deepseek-v4-flash` / `deepseek-chat` / `deepseek-reasoner` 等旧名已退役或仅为兼容别名，不再进入模型注册表。
+
+提示词写法（schema-first、可选字段显式化、输入末尾复述输出契约、模型升级检查清单）统一记录在 [`prompt-guidelines.md`](./prompt-guidelines.md)。
 
 ### 4.3 实体级人工编辑
 

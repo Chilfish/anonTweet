@@ -175,3 +175,20 @@ describe('entityText override sanitization', () => {
     expect(result.entityText).toEqual({ '<<__HASHTAG_0__>>': '#梦见' })
   })
 })
+
+describe('prompt contract: optional entityText and closing reminder', () => {
+  it('tells the model to omit entityText when no hashtag/symbol placeholder exists', async () => {
+    const model = new MockLanguageModelV4({
+      doGenerate: modelOutput(ESCAPED_NEWLINE),
+    })
+
+    await translateText({ ...BASE_ARGS, model })
+
+    const sent = promptText(model.doGenerateCalls[0]!.prompt)
+    expect(sent).toContain('omit `entityText` entirely')
+    expect(sent).toContain('Wrong (Entity Reference has no hashtag)')
+    // 输入末尾再次复述输出契约
+    expect(sent).toContain('Final Reminder')
+    expect(sent).toContain('otherwise omit that field')
+  })
+})

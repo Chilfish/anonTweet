@@ -219,7 +219,8 @@ The input contains immutable placeholders like \`<<__TYPE_INDEX__>>\`.
 - **PRESERVE**: Keep them exactly as is.
 - **REORDER**: Move them to fit valid Chinese syntax.
 - **CONTEXT**: Use "Entity Reference" to determine if the placeholder is a Subject, Object, or Modifier, and adjust the surrounding verbs accordingly.
-You may provide translated display text for HASHTAG/SYMBOL placeholders via the \`entityText\` field in JSON, but you must still keep the placeholders unchanged inside \`translation\`. Never translate MENTION placeholders.
+- **OPTIONAL OVERRIDES**: You may provide translated display text for HASHTAG/SYMBOL placeholders via \`entityText\`. The Entity Reference may be empty or contain no hashtag/symbol — in that case omit \`entityText\` entirely. Never invent a placeholder key, and never use literal text (e.g. "#tag", "@user", a URL) as a key. Never translate MENTION placeholders.
+- **LITERAL TEXT IS NOT AN ENTITY**: A "#tag" left in the source text is only a hashtag entity if Entity Reference contains a HASHTAG placeholder for it. Otherwise treat it as plain text and do NOT add it to \`entityText\`.
 
 # 4. Newline Preservation (Preferred)
 If the source text contains newline characters, keep line breaks where it makes sense for readability.
@@ -232,9 +233,16 @@ Analyze the [Author] and [Context] to adapt your style:
 - **Tech/Specialist**: Precise terminology, Logical flow.
 
 # Output Format
-Return a single JSON object with EXACTLY this shape:
-{"translation":"...","entityText":{"<<__HASHTAG_0__>>":"#翻译后tag"}}
-No markdown, no notes, no extra keys.
+Return exactly one JSON object — no markdown, no notes, no extra top-level keys:
+- \`translation\` (required): the translated text, with every placeholder preserved exactly.
+- \`entityText\` (optional): ONLY when a HASHTAG/SYMBOL placeholder actually appears in the Entity Reference. Keys must be copied verbatim from that reference. Omit the field entirely when there is none.
+
+Examples:
+- No hashtag/symbol placeholders: {"translation":"译好的句子"}
+- One hashtag placeholder: {"translation":"看看 <<__HASHTAG_0__>> 的演出","entityText":{"<<__HASHTAG_0__>>":"#译名"}}
+- Wrong (Entity Reference has no hashtag): {"translation":"译好的句子","entityText":{"<<__HASHTAG_0__>>":"#译名"}}
+
+Before returning, re-check: every placeholder copied exactly, no invented keys, no prose outside the JSON.
 `
 
   const userContent = `
@@ -269,6 +277,9 @@ ${entityContext}
 """
 ${maskedText}
 """
+
+# Final Reminder
+Return exactly one JSON object. Keep every placeholder exactly as written. Include \`entityText\` only if a HASHTAG/SYMBOL placeholder appears in the Entity Reference above; otherwise omit that field.
 `
 
   const baseMessages: ModelMessage[] = [

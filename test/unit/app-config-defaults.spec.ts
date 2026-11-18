@@ -8,4 +8,8 @@ describe('AC-TRANS-008: 默认 AI 引擎为 DeepSeek Flash', () => {
     expect(state.visionProvider).toBe('deepseek')
     expect(state.deepseekModel).toBe('deepseek-flash')
   })
+
+  it('deepSeek 翻译默认关闭思考（短文本结构化任务）', () => {
+    expect(useAppConfigStore.getState().deepseekThinkingLevel).toBe('minimal')
+  })
 })

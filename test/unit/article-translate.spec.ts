@@ -181,5 +181,8 @@ describe('AC-TWEET-020: article translation parse-failure retry', () => {
     expect(sent).toContain('{"b1":"これは一つ目の段落です。","b2":"これは二つ目の段落です。"}')
     expect(sent).not.toContain('"key"')
     expect(sent).toContain('"blocks" is ONE object')
+    // 输入末尾复述输出契约（新模型对末尾指令权重更高）
+    expect(sent).toContain('Final reminder')
+    expect(sent).toContain('never invent, merge, or drop a key')
   })
 })

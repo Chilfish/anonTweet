@@ -25,7 +25,7 @@ Anon Tweet — 匿名浏览 Twitter/X 推文与 Instagram 帖子的全栈应用�
 docs/
 ├── INDEX.md                    # 本文档（唯一入口）
 ├── features/                   # 功能文档，按子系统组织
-│   ├── translation/            #   翻译子系统（translation.md · deepseek-ai-sdk.md）
+│   ├── translation/            #   翻译子系统（translation.md · deepseek-ai-sdk.md · prompt-guidelines.md）
 │   ├── tweet/                  #   推文子系统（article.md · space-card.md · trending-card.md · carousel-card.md · poll-card.md · search.md · transaction-id.md）
 │   ├── instagram/              #   Instagram 集成（instagram-integration.md · ig-actions-integration.md）
 │   ├── pwa/                    #   PWA（web-share-target.md · capability-audit.md）
@@ -54,6 +54,7 @@ docs/
 | **新增/修改翻译逻辑**                          | `features/translation/translation.md`                                                          | 数据流、占位符机制、6 级决策链、stream/overlay 分工            |
 | **修改文章型推文（X Article 解析/渲染/翻译）** | `features/tweet/article.md` + `planning/architecture.md`（ADR-009）                            | `content_state` 块文档、阅读页、按块翻译、缓存回填             |
 | **修改 AI Provider / DeepSeek 参数**           | `features/translation/deepseek-ai-sdk.md`                                                      | provider 级/模型级/callOptions 参数暴露策略                    |
+| **调整 AI 提示词 / 排查结构化输出失败**        | `features/translation/prompt-guidelines.md`                                                    | 模型升级后的提示词原则、失败形态与检查清单                     |
 | **修改 Instagram 集成**                        | `features/instagram/instagram-integration.md` + `features/instagram/ig-actions-integration.md` | IG 5 阶段管线、操作区、DB 缓存、caption 翻译                   |
 | **修改 AI Vision（看图说话/OCR）**             | `features/ai-vision/ai-vision.md` + `archive/ai-vision-plan.md`                                | 需求与上下文、已完成行动计划 + DR、AC-VISION                   |
 | **部署 / 环境配置**                            | `features/deploy/deployment.md`                                                                | Cloudflare Workers、`.dev.vars`、缓存层                        |

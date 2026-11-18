@@ -94,7 +94,12 @@ Analyze the caption's vibe and adapt accordingly:
 # 4. Quality Standards
 - Read the translation aloud mentally — it should sound like natural Chinese, not translationese.
 - No explanatory additions. Translate what's there, not what's implied.
-- If the source is already mostly Chinese, return it unchanged.`
+- If the source is already mostly Chinese, return it unchanged.
+
+# Output Format
+Return only the translated caption as plain text.
+- No quotes, JSON, labels, or explanations.
+- Preserve emoji, @mentions, #hashtags, URLs, and line breaks exactly as described above.`
 
   const userContent = `# Translation Request
 
@@ -108,7 +113,9 @@ ${glossarySection}
   : ''}
 
 # Source Caption
-${text}`
+${text}
+
+Return only the Simplified Chinese translation of the caption above.`
 
   // 模型在注册表中时下发生效的 provider 选项（DeepSeek thinking / Gemini thinkingConfig 等）
   const modelConfig = modelName

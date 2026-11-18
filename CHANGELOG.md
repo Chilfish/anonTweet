@@ -66,6 +66,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ### Changed
 
+#### 提示词适配新一代模型（2026-11-18）
+
+- 推文 / 文章 / IG / 视觉提示词统一补「输入末尾复述输出契约」：明确可选字段 `entityText` 只在 Entity Reference 存在 HASHTAG/SYMBOL 占位符时输出，否则整段省略；字面量 `#tag` 未解析成实体时不得补进 `entityText`
+- DeepSeek 翻译默认思考档位从 `high` 调整为 `minimal`（官方建议翻译 / OCR 关闭思考；关闭后 temperature 才生效）
+- 新增 [`docs/features/translation/prompt-guidelines.md`](docs/features/translation/prompt-guidelines.md)：调研结论、提示词原则、已知失败形态与模型升级检查清单
+
 #### AI 请求路径与 DeepSeek Flash 默认（2026-11-18）
 
 - AI 默认引擎与视觉 provider 切到 DeepSeek Flash（`deepseek-flash` 官方别名，当前由 DeepSeek-V4.1-Flash 提供，1M 上下文且支持图片输入）；persist v7→v8，仅在未配置 Gemini Key 时改写旧默认

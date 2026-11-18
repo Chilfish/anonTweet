@@ -91,8 +91,9 @@
   IG caption（`translateIGCaption.ts`）、视觉生成（`vision/describeImages.ts`）、
   OCR 翻译（`vision/translateOCR.ts`）、连通性测试（`ai-test.ts`）都会按模型注册表
   下发 `buildProviderOptions()`，并带 `AbortSignal.timeout`（AC-DECOUPLE-002）。
-- 默认引擎与视觉默认均为 DeepSeek Flash；截图 SSR 在配置 `DEEPSEEK_API_KEY` 时
-  优先用 `DEEPSEEK_MODEL=deepseek-flash`，未配置时回退 Gemini。
+- 默认引擎与视觉默认均为 DeepSeek Flash；`deepseekThinkingLevel` 默认 `minimal`（关闭思考）——翻译 / OCR 属于短文本结构化任务，官方建议关闭思考，temperature 也才生效。
+- 提示词规范（schema-first、可选字段与末尾复述契约）见 [`prompt-guidelines.md`](./prompt-guidelines.md)。
+- 截图 SSR 在配置 `DEEPSEEK_API_KEY` 时优先用 `DEEPSEEK_MODEL=deepseek-flash`，未配置时回退 Gemini。
 - 浏览器直连模式（`aiRequestMode = 'browser'`）复用同一套管线；DeepSeek 官方端点
   是否允许浏览器跨域（CORS）需以实际部署为准，被拦截时切回服务端中继。
 

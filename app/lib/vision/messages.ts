@@ -155,7 +155,7 @@ export function buildVisionMessages(args: BuildVisionMessagesArgs): ModelMessage
   const glossarySection = buildGlossarySection(glossary ?? '')
   if (glossarySection)
     parts.push({ type: 'text', text: glossarySection })
-  parts.push({ type: 'text', text: '请处理以上图片。' })
+  parts.push({ type: 'text', text: '请处理以上图片。只输出符合要求的 JSON 对象；不要输出额外文字、markdown 或多余字段。' })
 
   return [
     { role: 'system', content: systemPrompt },
