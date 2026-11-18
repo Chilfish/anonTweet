@@ -200,7 +200,7 @@ export function AIVisionSettings() {
         <SettingsGroup>
           <SettingsRow
             label="启用 AI 图片描述"
-            description="为推文配图生成 AI 描述或 OCR 文字；关闭时已缓存的描述默认隐藏，可在推文上单独展开"
+            description="为推文配图生成 AI 描述或 OCR 文字"
             id="enable-ai-vision"
           >
             <Switch
@@ -211,7 +211,7 @@ export function AIVisionSettings() {
 
           <SettingsRow
             label="显示添加入口"
-            description="在推文右上角（翻译按钮旁）显示手动添加图片描述的按钮；较少使用，默认关闭"
+            description="在推文右上角显示手动添加按钮"
             id="show-vision-entry"
           >
             <Switch
@@ -249,7 +249,7 @@ export function AIVisionSettings() {
           {enableAIVision && (
             <SettingsRow
               label="浏览器直连"
-              description="翻译与识图共用；关闭时经本站服务器中继（默认），开启后由浏览器直接请求模型服务商（需支持 CORS）"
+              description="关闭时经本站中转（默认），开启后浏览器直连模型服务商（需 CORS）"
               id="vision-request-mode"
             >
               <Switch
@@ -380,7 +380,6 @@ export function AIVisionSettings() {
             {currentModelConfig?.thinkingType !== 'none' && (
               <SettingsRow
                 label="思考强度"
-                description="感知任务默认最低即可"
               >
                 <div className="flex-1 flex justify-end">
                   <Select
@@ -402,9 +401,6 @@ export function AIVisionSettings() {
               </SettingsRow>
             )}
           </SettingsGroup>
-          <p className="px-4 text-[11px] text-muted-foreground/60 leading-tight">
-            共用翻译侧的 API Key，识图与翻译无需分别配置。
-          </p>
         </div>
       )}
     </div>

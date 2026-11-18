@@ -21,7 +21,6 @@ import { resolveAIConfig } from '~/lib/ai-provider-config'
 import { requestAITest } from '~/lib/ai/request'
 import { DEFAULT_DEEPSEEK_BASE_URL, DEFAULT_GEMINI_BASE_URL, DEFAULT_OPENROUTER_BASE_URL, models } from '~/lib/constants'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
-import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 
 /** 模型下拉中的「自定义」哨兵项，用于切换到手写模型名的输入模式 */
 const CUSTOM_MODEL_VALUE = '__custom__'
@@ -98,7 +97,6 @@ export function AITranslationSettings() {
     })),
   )
 
-  const entries = useTranslationDictionaryStore(state => state.entries)
   const [isTesting, setIsTesting] = useState(false)
 
   /** 当前生效的 provider 配置（读侧：resolveAIConfig 纯函数，替代 google/deepseek 三元） */
@@ -258,7 +256,6 @@ export function AITranslationSettings() {
         <SettingsGroup>
           <SettingsRow
             label="启用 AI 翻译"
-            description="自动识别语境并提供高质量的本地化翻译"
             id="enable-ai-translation"
           >
             <Switch
@@ -270,7 +267,6 @@ export function AITranslationSettings() {
           {enableAITranslation && (
             <SettingsRow
               label="服务提供商"
-              description="选择翻译任务的驱动引擎"
               id="ai-provider"
             >
               <div className="flex-1 flex justify-end">
@@ -296,7 +292,7 @@ export function AITranslationSettings() {
           {enableAITranslation && (
             <SettingsRow
               label="浏览器直连"
-              description="关闭时经本站服务器中继（默认）；开启后由浏览器直接请求模型服务商，需要服务商支持 CORS"
+              description="关闭时经本站中转（默认），开启后浏览器直连模型服务商（需 CORS）"
               id="ai-request-mode"
             >
               <Switch
@@ -463,7 +459,6 @@ export function AITranslationSettings() {
 
             <SettingsRow
               label="测试连接"
-              description="验证 API 配置的有效性"
             >
               <Button
                 type="button"
@@ -486,9 +481,6 @@ export function AITranslationSettings() {
               </Button>
             </SettingsRow>
           </SettingsGroup>
-          <p className="px-4 text-[10px] text-muted-foreground/50 leading-tight">
-            隐私提示：API Key 仅本地加密存储，仅在发起翻译请求时经由应用服务器安全透传。
-          </p>
         </div>
       )}
 
@@ -509,15 +501,6 @@ export function AITranslationSettings() {
                 placeholder="例如：\nひなぴよ -> Hinapiyo"
                 className="min-h-32 leading-relaxed bg-secondary/20 border-none focus-visible:ring-1 focus-visible:ring-primary/20 resize-none rounded-lg text-sm"
               />
-              {entries.length > 0 && (
-                <p className="mt-2 text-[10px] text-muted-foreground/40 font-medium">
-                  • 已联动词典中的
-                  {' '}
-                  {entries.length}
-                  {' '}
-                  个本地词条
-                </p>
-              )}
             </div>
           </SettingsGroup>
         </div>

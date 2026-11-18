@@ -55,7 +55,7 @@
 
 ## 3. API 参考
 
-导入路径：`~/components/ui/settings-layout`
+导入路径：`~/components/settings/SettingsUI`（导出 `SettingsGroup`，`SettingsRow` 即 `SettingsItem`）
 
 ### 3.1 SettingsGroup
 
@@ -107,7 +107,7 @@ interface SettingsItemProps {
 
 ```tsx
 import { BellIcon } from 'lucide-react'
-import { SettingsGroup, SettingsItem } from '~/components/ui/settings-layout'
+import { SettingsGroup, SettingsItem } from '~/components/settings/SettingsUI'
 import { Switch } from '~/components/ui/switch'
 
 <SettingsGroup title="通知">
@@ -228,7 +228,7 @@ import { LogOutIcon } from 'lucide-react'
 
 ```tsx
 import { BellIcon, UserIcon, ShieldIcon, LogOutIcon } from 'lucide-react'
-import { SettingsGroup, SettingsItem } from '~/components/ui/settings-layout'
+import { SettingsGroup, SettingsItem } from '~/components/settings/SettingsUI'
 import { Switch } from '~/components/ui/switch'
 import { Input } from '~/components/ui/input'
 

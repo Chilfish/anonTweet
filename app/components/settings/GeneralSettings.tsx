@@ -84,7 +84,6 @@ export function GeneralSettings() {
 
           <SettingsRow
             label="默认过滤无关评论"
-            description="过滤与博主无互动的评论"
             id="filter-unrelated"
           >
             <Switch
@@ -100,7 +99,6 @@ export function GeneralSettings() {
         <SettingsGroup>
           <SettingsRow
             label="媒体代理"
-            description="代理图片和视频请求"
             id="media-proxy-mode"
           >
             <Switch
@@ -130,7 +128,6 @@ export function GeneralSettings() {
         <SettingsGroup>
           <SettingsRow
             label="图片分辨率"
-            description="原图保留最大分辨率，体积更大；默认 JPG 长边封顶 2048px"
           >
             <Select
               value={currentDownloadImageSizeOption}
@@ -155,7 +152,6 @@ export function GeneralSettings() {
 
           <SettingsRow
             label="下载链接卡片图片"
-            description="一并下载推文链接卡片（link card）中的图片"
             id="download-card-images"
           >
             <Switch

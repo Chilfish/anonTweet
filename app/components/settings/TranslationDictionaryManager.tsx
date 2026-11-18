@@ -126,17 +126,7 @@ function DictionaryAddSection() {
     <div className="space-y-2">
       <div className="flex items-center justify-between px-1">
         <h4 className="text-sm font-medium text-muted-foreground">管理</h4>
-        <span className="text-xs text-muted-foreground">
-          共
-          {' '}
-          {entries.length}
-          {' '}
-          条
-        </span>
       </div>
-      <p className="px-1 text-[10px] text-muted-foreground/60 leading-tight">
-        在此添加的词汇将自动应用到 AI 翻译中，不会覆盖 AI 设置中的自定义术语表。
-      </p>
       <SettingsGroup>
         <SettingsRow
           className="cursor-pointer hover:bg-muted/50 transition-colors"
