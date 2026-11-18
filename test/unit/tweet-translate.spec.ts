@@ -1,5 +1,5 @@
 import type { LanguageModelV4GenerateResult, LanguageModelV4Prompt } from '@ai-sdk/provider'
-import type { EnrichedTweet } from '~/types'
+import type { EnrichedTweet, Entity } from '~/types'
 /**
  * test/unit/tweet-translate.spec.ts
  *
@@ -113,5 +113,65 @@ describe('AC-TWEET-021: tweet translation parse-failure retry', () => {
     // 解析失败后的重试消息同样重申「换行必须转义」，否则模型会一直吐非法 JSON
     const retry = promptText(model.doGenerateCalls[1]!.prompt)
     expect(retry).toContain('转义序列')
+  })
+})
+
+describe('entityText override sanitization', () => {
+  const INVENTED_OVERRIDE = '{"translation":"你好","entityText":{"<<__HASHTAG_0__>>":"#测试"}}'
+
+  it('does not fail a valid translation when the model invents a placeholder key', async () => {
+    // 线上复现形态：实体解析没有产出 hashtag，模型却返回 <<__HASHTAG_0__>> 覆盖
+    const model = new MockLanguageModelV4({
+      doGenerate: [
+        modelOutput(INVENTED_OVERRIDE),
+        modelOutput(INVENTED_OVERRIDE),
+      ],
+    })
+
+    const result = await translateText({ ...BASE_ARGS, model })
+
+    expect(result.translatedText).toBe('你好')
+    expect(result.entityText).toBeUndefined()
+    // 首次尝试会带反馈重试，第二次仍非法则丢弃覆盖并成功返回
+    expect(model.doGenerateCalls).toHaveLength(2)
+  })
+
+  it('keeps valid hashtag overrides and drops mention overrides', async () => {
+    const placeholders = ['<<__HASHTAG_0__>>', '<<__MENTION_1__>>']
+    const entityMap = new Map<string, Entity>([
+      [
+        '<<__HASHTAG_0__>>',
+        { type: 'hashtag', text: '#ゆめみた', index: 0 } as Entity,
+      ],
+      [
+        '<<__MENTION_1__>>',
+        { type: 'mention', text: '@user', index: 1 } as Entity,
+      ],
+    ])
+    const output = JSON.stringify({
+      translation: '看 <<__HASHTAG_0__>> 和 <<__MENTION_1__>>',
+      entityText: {
+        '<<__HASHTAG_0__>>': '#梦见',
+        '<<__MENTION_1__>>': '@翻译后的用户名',
+      },
+    })
+    const model = new MockLanguageModelV4({
+      doGenerate: [
+        modelOutput(output),
+        modelOutput(output),
+      ],
+    })
+
+    const result = await translateText({
+      ...BASE_ARGS,
+      maskedText: '看 <<__HASHTAG_0__>> 和 <<__MENTION_1__>>',
+      placeholders,
+      entityMap,
+      model,
+    })
+
+    expect(result.translatedText).toContain('<<__HASHTAG_0__>>')
+    // mention 覆盖属于越权，必须丢弃；hashtag 覆盖保留
+    expect(result.entityText).toEqual({ '<<__HASHTAG_0__>>': '#梦见' })
   })
 })

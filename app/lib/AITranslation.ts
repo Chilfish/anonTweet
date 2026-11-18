@@ -134,6 +134,31 @@ function validateEntityTextOverrides(
   return { ok: errors.length === 0, errors }
 }
 
+/**
+ * 只保留可安全应用的 `entityText` 覆盖：key 必须是实际存在的 hashtag/symbol 占位符，
+ * 值为非空字符串。非法条目直接丢弃——模型偶尔会给并不存在的占位符（例如实体解析
+ * 没产出 hashtag 时仍返回 `<<__HASHTAG_0__>>`），这不应让整条翻译失败。
+ */
+function sanitizeEntityTextOverrides(
+  entityText: Record<string, string> | undefined,
+  entityMap: Map<string, Entity> | undefined,
+): Record<string, string> | undefined {
+  if (!entityText)
+    return undefined
+
+  const allowedTypes = new Set<Entity['type']>(['hashtag', 'symbol'])
+  const next: Record<string, string> = {}
+  for (const [key, value] of Object.entries(entityText)) {
+    const entity = entityMap?.get(key)
+    if (!entity || !allowedTypes.has(entity.type) || typeof value !== 'string' || !value.trim())
+      continue
+    next[key] = value
+  }
+  return Object.keys(next).length > 0
+    ? next
+    : undefined
+}
+
 function applyEntityTextOverrides(entityMap: Map<string, Entity>, entityText: Record<string, string> | undefined) {
   if (!entityText || Object.keys(entityText).length === 0)
     return entityMap
@@ -312,20 +337,21 @@ ${maskedText}
       lastValidation = validatePlaceholders(translated, placeholders)
       lastOverrideValidation = validateEntityTextOverrides(response.output.entityText, placeholders, entityMap)
       const newlineOk = expectedNewlineCount === 0 || countNewlines(translated) > 0
-      if (lastValidation.ok && lastOverrideValidation.ok) {
-        if (newlineOk || attempt === 1) {
-          obsLog('ai.translate', {
-            ok: true,
-            ms: Date.now() - startedAt,
-            attempts,
-            model: modelName,
-            provider: strategy?.name ?? 'unknown',
-            tweetId: suffix(tweet.id_str),
-          })
-          return {
-            translatedText: translated,
-            entityText: response.output.entityText,
-          }
+      // 占位符本体正确即可交付；非法 entityText 只在首次尝试时重试一次，
+      // 第二次仍不合法就丢弃该覆盖（否则模型编造的 key 会让整条翻译失败）。
+      const canReturn = lastValidation.ok && (lastOverrideValidation.ok || attempt === 1)
+      if (canReturn && (newlineOk || attempt === 1)) {
+        obsLog('ai.translate', {
+          ok: true,
+          ms: Date.now() - startedAt,
+          attempts,
+          model: modelName,
+          provider: strategy?.name ?? 'unknown',
+          tweetId: suffix(tweet.id_str),
+        })
+        return {
+          translatedText: translated,
+          entityText: sanitizeEntityTextOverrides(response.output.entityText, entityMap),
         }
       }
 
@@ -359,7 +385,9 @@ ${maskedText}
       ]
     }
 
-    throw new Error(`AI Translation Validation Failed (missing=${lastValidation.missing.length}, extra=${lastValidation.extra.length}, entityTextErrors=${lastOverrideValidation.errors.length})`)
+    throw new Error(`AI Translation Validation Failed (missing=${lastValidation.missing.length}, extra=${lastValidation.extra.length}, entityTextErrors=${lastOverrideValidation.errors.length}${lastOverrideValidation.ok
+      ? ''
+      : `: ${lastOverrideValidation.errors.slice(0, 3).join(' | ')}`})`)
   }
   catch (error) {
     obsLog('ai.translate', {

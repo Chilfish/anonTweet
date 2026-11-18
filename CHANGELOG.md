@@ -116,6 +116,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ### Fixed
 
+#### AI 翻译容错与错误提示（2026-11-18）
+
+- 模型返回非法 `entityText`（例如为不存在的占位符编造 key）时不再让整条翻译失败：首次重试，第二次丢弃非法覆盖并正常返回译文
+- AI 失败 toast 改为中文分类标题 + 可操作建议（认证 / 余额 / 限流 / 超时 / 空输出 / 格式 / 校验失败），技术详情折叠展示，并补上模型原始输出与 `finishReason`
+- 服务端错误日志把 `aiError` 类型、HTTP 状态与原因写入首段字符串，Cloudflare 日志不再只剩请求上下文
+- 新增 `entityText` 清洗与错误提示映射单测
+
 #### Instagram 快拍提取（2026-11-14）
 
 - 升级 `@chilfish/gallery-dl-instagram` 0.2.4 → 0.2.5：stories 优先解析页面内嵌 payload，REST `reels_media` 返回 500 时仍能提取

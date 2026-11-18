@@ -1,7 +1,7 @@
 import { AISDKError, APICallError } from '@ai-sdk/provider'
 import { NoObjectGeneratedError } from 'ai'
 import { describe, expect, it, vi } from 'vitest'
-import { buildAIFailure, normalizeAIError } from '~/lib/ai-error'
+import { buildAIFailure, describeAIError, describeUnknownAIError, normalizeAIError } from '~/lib/ai-error'
 
 describe('normalizeAIError', () => {
   it('normalizes APICallError into structured transport error', () => {
@@ -164,5 +164,96 @@ describe('AC-OBS-002: AI failure payload carries the request context', () => {
       aiErrorType: 'Error',
       reason: 'boom',
     })
+  })
+})
+
+describe('describeAIError: 面向用户的错误提示', () => {
+  it('把空/纯空格的模型输出识别为「返回了空内容」', () => {
+    const presentation = describeAIError({
+      type: 'NoObjectGeneratedError',
+      message: 'No object generated: could not parse the response.',
+      generatedText: '   ',
+      finishReason: 'stop',
+    })
+
+    expect(presentation.title).toBe('模型返回了空内容')
+    expect(presentation.description).toContain('DeepSeek')
+  })
+
+  it('区分输出被截断与普通格式错误', () => {
+    expect(describeAIError({
+      type: 'NoObjectGeneratedError',
+      message: 'could not parse',
+      generatedText: '{"translation":"半句',
+      finishReason: 'length',
+    }).title).toBe('模型输出被截断')
+
+    expect(describeAIError({
+      type: 'NoObjectGeneratedError',
+      message: 'could not parse',
+      generatedText: '{"translation":',
+      finishReason: 'stop',
+    }).title).toBe('模型返回格式无法解析')
+  })
+
+  it('按状态码给出认证 / 限流 / 余额 / 上游故障提示', () => {
+    expect(describeAIError({
+      type: 'APICallError',
+      message: 'Unauthorized',
+      statusCode: 401,
+      providerMessage: 'Invalid API key.',
+    }).title).toBe('AI 认证失败')
+
+    expect(describeAIError({
+      type: 'APICallError',
+      message: 'Too many requests',
+      statusCode: 429,
+    }).title).toBe('AI 请求被限流')
+
+    expect(describeAIError({
+      type: 'APICallError',
+      message: 'Payment required',
+      statusCode: 402,
+    }).title).toBe('AI 账户余额不足')
+
+    expect(describeAIError({
+      type: 'APICallError',
+      message: 'Bad gateway',
+      statusCode: 502,
+    }).title).toBe('AI 服务暂时不可用')
+  })
+
+  it('识别超时、网络与占位符校验失败', () => {
+    expect(describeAIError({
+      type: 'TimeoutError',
+      message: 'The operation was aborted due to timeout',
+    }).title).toBe('AI 请求超时')
+
+    expect(describeAIError({
+      type: 'Error',
+      message: 'Failed to fetch',
+    }).title).toBe('AI 网络连接失败')
+
+    expect(describeAIError({
+      type: 'Error',
+      message: 'AI Translation Validation Failed (missing=0, extra=0, entityTextErrors=1)',
+    }).title).toBe('翻译结果校验失败')
+  })
+
+  it('带 providerName 时标题使用实际服务商名', () => {
+    expect(describeAIError({
+      type: 'APICallError',
+      message: 'Unauthorized',
+      statusCode: 401,
+    }, { providerName: 'DeepSeek' }).title).toBe('DeepSeek 认证失败')
+  })
+
+  it('无结构化 aiError 时也能识别网络与超时', () => {
+    expect(describeUnknownAIError(new Error('fetch failed: ECONNREFUSED')).title)
+      .toBe('AI 网络连接失败')
+    expect(describeUnknownAIError('timeout exceeded').title)
+      .toBe('AI 请求超时')
+    expect(describeUnknownAIError({ message: '自定义业务错误' }).description)
+      .toBe('自定义业务错误')
   })
 })

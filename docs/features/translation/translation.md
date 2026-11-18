@@ -162,8 +162,8 @@ interface TranslationSettings {
 3. **结构化生成**：调用 `generateText()` 并强制 JSON 输出（Zod schema 校验），返回：
    - `translation`：译文字符串（必须保留占位符）
    - `entityText?`：可选，hashtag/symbol 的显示文本覆盖（禁止 mention）
-4. **校验/重试**：占位符缺失/多余会触发一次重试；`entityText` 类型越权会触发重试。
-5. **应用覆盖**：将 `entityText` 写回 `entityMap`（不改变占位符本身，只改变最终渲染显示文本）。
+4. **校验/重试**：占位符缺失/多余会触发一次重试；`entityText` 类型越权会触发重试，第二次仍非法则**丢弃该覆盖**而不是让整条翻译失败（模型偶尔会为不存在的占位符编造 key）。
+5. **应用覆盖**：将合法的 `entityText` 写回 `entityMap`（不改变占位符本身，只改变最终渲染显示文本）。
 6. **还原 (restoreEntities)**：将译文字符串解析为翻译实体流。
 7. **合并 (applyAITranslations)**：将翻译实体按 `index` 合并回原始实体数组的 `aiTranslation` 字段。
 

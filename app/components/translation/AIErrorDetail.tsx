@@ -14,7 +14,12 @@ function truncate(text: string, max: number): string {
  * 避免 div/pre 内嵌 `<p>` 导致的非法 HTML。
  */
 export function AIErrorDetail({ error }: { error: AITransportError }) {
-  const hasMeta = error.statusCode != null || error.type || error.isRetryable
+  const hasMeta = error.statusCode != null || error.type || error.isRetryable || error.finishReason
+  const generatedPreview = error.generatedText?.trim()
+    ? truncate(error.generatedText, 300)
+    : error.generatedText != null
+      ? '（纯空格，无可读内容）'
+      : undefined
 
   return (
     <span className="mt-1 flex w-full flex-col items-stretch gap-1 text-left">
@@ -30,6 +35,13 @@ export function AIErrorDetail({ error }: { error: AITransportError }) {
           {error.type && (
             <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
               {error.type}
+            </code>
+          )}
+          {error.finishReason && (
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+              finish:
+              {' '}
+              {error.finishReason}
             </code>
           )}
           {error.isRetryable && (
@@ -62,6 +74,15 @@ export function AIErrorDetail({ error }: { error: AITransportError }) {
         <code className="block max-h-24 overflow-hidden whitespace-pre-wrap break-all rounded-md bg-black/5 px-1.5 py-1 font-mono text-[10px] leading-relaxed dark:bg-white/10">
           {truncate(error.responseBody, 300)}
         </code>
+      )}
+
+      {generatedPreview && (
+        <span className="flex flex-col gap-0.5">
+          <span className="text-[10px] text-muted-foreground/70">模型输出</span>
+          <code className="block max-h-24 overflow-hidden whitespace-pre-wrap break-all rounded-md bg-black/5 px-1.5 py-1 font-mono text-[10px] leading-relaxed dark:bg-white/10">
+            {generatedPreview}
+          </code>
+        </span>
       )}
     </span>
   )

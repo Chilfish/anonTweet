@@ -30,6 +30,178 @@ export interface AITransportError {
 /** 保留的模型原始输出上限，避免把整段响应塞进错误对象 */
 const GENERATED_TEXT_LIMIT = 2000
 
+const EMPTY_OUTPUT_RE = /^\s*$/
+const TIMEOUT_RE = /timeout|timed out|aborted|abort/i
+const NETWORK_ERROR_RE = /failed to fetch|load failed|networkerror|network error|econnrefused|enotfound|socket hang up/i
+const BALANCE_RE = /insufficient|balance|quota|余额|额度/i
+const AUTH_RE = /invalid.*api.?key|authentication|unauthorized|forbidden|incorrect api key/i
+const RATE_LIMIT_RE = /rate limit|too many requests|限流/i
+const VALIDATION_ERROR_RE = /AI Translation Validation Failed/i
+
+/** 面向用户的错误展示（标题 + 可操作建议） */
+export interface AIErrorPresentation {
+  title: string
+  description: string
+}
+
+function isTimeoutLike(message: string, type?: string): boolean {
+  return type === 'AbortError'
+    || type === 'TimeoutError'
+    || TIMEOUT_RE.test(message)
+}
+
+function providerLabel(options: { providerName?: string }): string {
+  return options.providerName || 'AI'
+}
+
+/**
+ * 把结构化 AI 错误翻译成用户能看懂的标题与建议。
+ * 技术细节（状态码 / 端点 / 原始响应）仍由 `AIErrorDetail` 展示，避免只给一句英文报错。
+ */
+export function describeAIError(
+  error: AITransportError,
+  options: { providerName?: string, fallbackTitle?: string } = {},
+): AIErrorPresentation {
+  const name = providerLabel(options)
+  const providerMessage = error.providerMessage ?? ''
+
+  if (error.type === 'NoObjectGeneratedError') {
+    const isEmpty = !error.generatedText || EMPTY_OUTPUT_RE.test(error.generatedText)
+    if (isEmpty) {
+      return {
+        title: '模型返回了空内容',
+        description: `${name} 没有返回任何可解析内容（DeepSeek 的 JSON 模式会把无法识别的输出替换成空格）。已自动重试一次仍失败，请再试一次；持续出现可降低思考强度或更换模型。`,
+      }
+    }
+    if (error.finishReason === 'length') {
+      return {
+        title: '模型输出被截断',
+        description: '生成内容达到长度上限，没能形成完整 JSON。请重试，或换用输出上限更高的模型。',
+      }
+    }
+    return {
+      title: '模型返回格式无法解析',
+      description: `${name} 没有按要求的 JSON 格式返回，已自动重试一次。请重试；若持续失败，可降低思考强度或更换模型。`,
+    }
+  }
+
+  if (VALIDATION_ERROR_RE.test(error.message)) {
+    return {
+      title: '翻译结果校验失败',
+      description: '模型改写或遗漏了必须保留的占位符（@、话题、链接），已自动重试一次仍不符合要求。请重试；持续失败可降低思考强度或更换模型。',
+    }
+  }
+
+  if (isTimeoutLike(error.message, error.type)) {
+    return {
+      title: `${name} 请求超时`,
+      description: '模型思考时间过长。可把思考强度调低（如 high → minimal）后重试，或稍后再试。',
+    }
+  }
+
+  if (error.type === 'APICallError') {
+    const status = error.statusCode
+    if (status === 402 || BALANCE_RE.test(providerMessage)) {
+      return {
+        title: `${name} 账户余额不足`,
+        description: '请到服务商控制台充值后重试。',
+      }
+    }
+    if (status === 401 || status === 403 || AUTH_RE.test(providerMessage)) {
+      return {
+        title: `${name} 认证失败`,
+        description: `API Key 无效或没有该模型权限。请检查 API Key 与 Base URL${providerMessage
+          ? `（${providerMessage}）`
+          : ''}。`,
+      }
+    }
+    if (status === 429 || RATE_LIMIT_RE.test(providerMessage)) {
+      return {
+        title: `${name} 请求被限流`,
+        description: '请求过于频繁，请稍后重试或降低并发。',
+      }
+    }
+    if (status === 404) {
+      return {
+        title: `${name} 模型或接口不存在`,
+        description: '请检查模型 ID 与 Base URL（例如 DeepSeek 使用 deepseek-flash）。',
+      }
+    }
+    if (status != null && status >= 500) {
+      return {
+        title: `${name} 服务暂时不可用`,
+        description: '上游服务异常，请稍后重试。',
+      }
+    }
+    if (status === 400) {
+      return {
+        title: `${name} 拒绝了请求参数`,
+        description: `请检查模型名、Base URL 与参数${providerMessage
+          ? `：${providerMessage}`
+          : '。'}`,
+      }
+    }
+    return {
+      title: options.fallbackTitle || `${name} 请求失败`,
+      description: providerMessage || '请检查网络、API Key、Base URL 与模型名。',
+    }
+  }
+
+  if (NETWORK_ERROR_RE.test(error.message)) {
+    return {
+      title: `${name} 网络连接失败`,
+      description: '浏览器可能被 CORS 拦截，或网络不可达。可切回服务端中继，或检查 Base URL。',
+    }
+  }
+
+  return {
+    title: options.fallbackTitle || `${name} 请求失败`,
+    description: error.message || '未知错误，请检查网络或配置。',
+  }
+}
+
+function unknownErrorMessage(error: unknown): string {
+  if (error instanceof Error)
+    return error.message
+  if (typeof error === 'string')
+    return error
+  if (error && typeof error === 'object') {
+    const obj = error as Record<string, unknown>
+    if (typeof obj.message === 'string' && obj.message)
+      return obj.message
+    if (typeof obj.error === 'string' && obj.error)
+      return obj.error
+  }
+  return ''
+}
+
+/** 无结构化 `aiError` 时的兜底展示（网络失败 / BFF 业务失败等） */
+export function describeUnknownAIError(
+  error: unknown,
+  options: { providerName?: string, fallbackTitle?: string } = {},
+): AIErrorPresentation {
+  const name = providerLabel(options)
+  const message = unknownErrorMessage(error)
+
+  if (isTimeoutLike(message)) {
+    return {
+      title: `${name} 请求超时`,
+      description: '模型响应时间过长，请稍后重试或降低思考强度。',
+    }
+  }
+  if (NETWORK_ERROR_RE.test(message)) {
+    return {
+      title: `${name} 网络连接失败`,
+      description: '请检查网络与 Base URL；浏览器直连被拒绝时可切回服务端中继。',
+    }
+  }
+
+  return {
+    title: options.fallbackTitle || `${name} 请求失败`,
+    description: message || '未知错误，请检查网络或配置。',
+  }
+}
+
 function extractProviderMessage(responseBody: string | undefined): string | undefined {
   if (!responseBody)
     return undefined
@@ -137,14 +309,24 @@ export function buildAIFailure(
   const { errorCode, message, status = 500, context } = options
   const aiError = normalizeAIError(error)
   const { targetId, targetType, model, provider } = context ?? {}
+  const statusLabel = aiError.statusCode != null
+    ? ` HTTP ${aiError.statusCode}`
+    : ''
 
-  console.error(`[AI] ${errorCode} failed:`, {
-    targetType,
-    targetId,
-    model,
-    provider,
-    status,
-  }, error)
+  // 把原因写进第一段字符串：Cloudflare / 平台日志只稳定保留 console.error 的首个参数，
+  // 旧写法把 error 作为第二参数会让线上只剩上下文、看不到真实原因。
+  console.error(
+    `[AI] ${errorCode} failed (${aiError.type}${statusLabel}): ${aiError.message}`,
+    {
+      targetType,
+      targetId,
+      model,
+      provider,
+      status,
+      providerMessage: aiError.providerMessage,
+      finishReason: aiError.finishReason,
+    },
+  )
   obsLog('ai.fail', {
     code: errorCode,
     status,
@@ -153,6 +335,8 @@ export function buildAIFailure(
     model,
     provider,
     aiErrorType: aiError.type,
+    httpStatus: aiError.statusCode,
+    finishReason: aiError.finishReason,
     reason: aiError.message,
   })
 

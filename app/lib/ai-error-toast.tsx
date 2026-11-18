@@ -1,6 +1,7 @@
 import type { AITransportError } from './ai-error'
 import { AIErrorDetail } from '~/components/translation/AIErrorDetail'
 import { toastManager } from '~/components/ui/toast'
+import { describeAIError, describeUnknownAIError } from './ai-error'
 
 /** 结构化错误详情需要更多阅读时间，不能走默认 3s 自动关闭 */
 const ERROR_DETAIL_TIMEOUT = 8000
@@ -27,46 +28,33 @@ function extractAIError(error: unknown): AITransportError | null {
   return err.aiError ?? err.response?.data?.aiError ?? null
 }
 
-function extractMessage(error: unknown): string | undefined {
-  if (error instanceof Error)
-    return error.message
-  if (typeof error === 'string')
-    return error
-  if (error && typeof error === 'object') {
-    const obj = error as Record<string, unknown>
-    if (typeof obj.message === 'string' && obj.message)
-      return obj.message
-    if (typeof obj.error === 'string' && obj.error)
-      return obj.error
-    if ('message' in obj)
-      return String(obj.message)
-  }
-  return undefined
-}
-
 /**
- * 以结构化 toast 展示 AI 连接 / 翻译失败详情（端点、状态码、响应体）。
- * 有 `aiError` 时渲染 AIErrorDetail，否则退化为一条普通错误消息。
+ * 以友好标题 + 可操作建议展示 AI 失败；结构化细节（状态码 / 端点 / 原始响应 /
+ * 模型输出）通过 `AIErrorDetail` 保留，方便排查但不抢占主信息。
  */
 export function toastAIError(error: unknown, options: ToastAIErrorOptions = {}): void {
   const aiError = extractAIError(error)
 
   if (aiError) {
-    const status = aiError.statusCode != null
-      ? ` · HTTP ${aiError.statusCode}`
-      : ''
+    const presentation = describeAIError(aiError, options)
     toastManager.add({
-      title: `${options.providerName || 'AI'} 连接失败${status}`,
-      description: <AIErrorDetail error={aiError} />,
+      title: presentation.title,
+      description: (
+        <span className="flex flex-col gap-1">
+          <span>{presentation.description}</span>
+          <AIErrorDetail error={aiError} />
+        </span>
+      ),
       type: 'error',
       timeout: ERROR_DETAIL_TIMEOUT,
     })
     return
   }
 
+  const presentation = describeUnknownAIError(error, options)
   toastManager.add({
-    title: options.fallbackTitle || 'AI 请求失败',
-    description: extractMessage(error) || '未知错误，请检查网络或配置',
+    title: presentation.title,
+    description: presentation.description,
     type: 'error',
     timeout: ERROR_DETAIL_TIMEOUT,
   })
