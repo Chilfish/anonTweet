@@ -1,4 +1,10 @@
+import { CapabilityStrip } from '~/components/home/CapabilityStrip'
+import { ContinueReading } from '~/components/home/ContinueReading'
+import { RecentVisited } from '~/components/home/RecentVisited'
+import { Dateline } from '~/components/layout/Dateline'
 import { TweetInputForm } from '~/components/tweet/TweetInputForm'
+import { useVisitedStore } from '~/lib/stores/visited'
+import { HOME_VISITED_LIMIT } from '~/lib/visited'
 
 export function meta() {
   return [
@@ -12,9 +18,22 @@ export function meta() {
 }
 
 export default function Home() {
+  const items = useVisitedStore(state => state.items)
+  const hasHydrated = useVisitedStore(state => state._hasHydrated)
+  const clear = useVisitedStore(state => state.clear)
+
+  const recent = hasHydrated
+    ? items.slice(0, HOME_VISITED_LIMIT)
+    : []
+  const [latest, ...rest] = recent
+
   return (
-    <>
+    <div className="flex w-full flex-col items-center gap-5">
       <TweetInputForm />
-    </>
+      <CapabilityStrip />
+      <Dateline label="匿名阅读" className="w-full max-w-md px-2" />
+      <ContinueReading item={latest ?? null} />
+      <RecentVisited items={rest} onClear={clear} />
+    </div>
   )
 }

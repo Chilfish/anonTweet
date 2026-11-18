@@ -7,6 +7,7 @@ import useSWR from 'swr'
 import { MyTweet } from '~/components/tweet/Tweet'
 import { TweetHeader } from '~/components/tweet/TweetHeader'
 import { useAutoTranslateTweets } from '~/hooks/use-auto-translate'
+import { useRecordVisit } from '~/hooks/use-record-visit'
 import { useTweetOperations } from '~/hooks/use-tweet-operations'
 import { fetcher } from '~/lib/fetcher'
 import { TweetNotFound, TweetSkeleton } from '~/lib/react-tweet'
@@ -212,6 +213,17 @@ export default function TweetPage({ loaderData }: Route.ComponentProps) {
     tweets,
     loaderData.tweet,
   ])
+
+  const visitedTweet = displayTweets?.[0]
+  useRecordVisit(visitedTweet
+    ? {
+        type: 'tweet',
+        id: visitedTweet.id_str,
+        title: visitedTweet.user?.name || `@${visitedTweet.user?.screen_name ?? '推文'}`,
+        snippet: decodeHtmlEntities(visitedTweet.text || '').replace(/\s+/g, ' ').trim().slice(0, 90),
+        image: visitedTweet.user?.profile_image_url_https,
+      }
+    : null)
 
   if (!tweetId) {
     return (

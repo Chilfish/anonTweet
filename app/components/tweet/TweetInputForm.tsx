@@ -1,7 +1,7 @@
 import type { FormEvent } from 'react'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, SearchIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router'
+import { Link, useNavigate, useSearchParams } from 'react-router'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
@@ -95,9 +95,18 @@ export function TweetInputForm() {
           </Button>
         </form>
 
-        <p className="mt-4 text-xs text-muted-foreground">
-          支持 x.com 推文链接、推文 ID，以及 instagram.com 的 /p、/reel 链接
-        </p>
+        <div className="mt-4 flex items-center justify-between gap-3 border-t border-border/50 pt-3 text-xs text-muted-foreground">
+          <p>
+            支持 x.com、推文 ID、instagram.com 的 /p 与 /reel
+          </p>
+          <Link
+            to="/search"
+            className="inline-flex shrink-0 items-center gap-1 transition-colors hover:text-foreground"
+          >
+            <SearchIcon className="size-3.5" />
+            搜索推文
+          </Link>
+        </div>
       </CardContent>
     </Card>
   )

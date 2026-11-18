@@ -14,6 +14,7 @@ import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { useIGOperations } from '~/hooks/use-ig-operations'
 import { useIGScreenshotAction } from '~/hooks/use-ig-screenshot-action'
+import { useRecordVisit } from '~/hooks/use-record-visit'
 import { fetcher } from '~/lib/fetcher'
 import { useAIConfig, useResolvedAIConfig } from '~/lib/stores/hooks'
 import { extractIGId, isIGStoryLikeId } from '~/lib/url-detect'
@@ -107,6 +108,18 @@ export default function IGPostPage() {
 
   const list = posts ?? []
   const primaryPost = list[0] ?? null
+
+  useRecordVisit(igId && primaryPost
+    ? {
+        type: 'ig',
+        id: igId,
+        title: primaryPost.username
+          ? `@${primaryPost.username}`
+          : 'Instagram',
+        snippet: primaryPost.description?.replace(/\s+/g, ' ').trim().slice(0, 90),
+        image: primaryPost.media?.[0]?.display_url,
+      }
+    : null)
   // 快拍 / 精选集：下载优先的列表（无帖子截图/翻译操作）
   const isStoryList = list.length > 0 && list.every(isStoryPost)
 

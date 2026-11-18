@@ -3,6 +3,7 @@ import type { ArticleBlock, EnrichedTweet } from '~/types'
 import { useRef } from 'react'
 import { ArticleEmbeddedTweet, ArticleReader, ArticleToolbar } from '~/components/article'
 import { useAutoTranslateArticle } from '~/hooks/use-auto-translate-article'
+import { useRecordVisit } from '~/hooks/use-record-visit'
 import { collectEmbeddedTweetIds } from '~/lib/article'
 import { TweetNotFound } from '~/lib/react-tweet'
 import { getTweets } from '~/lib/service/getTweet'
@@ -122,6 +123,16 @@ export default function ArticlePage({ loaderData }: Route.ComponentProps) {
     tweetId ?? undefined,
     persisted,
   )
+
+  useRecordVisit(tweet && article && tweetId
+    ? {
+        type: 'article',
+        id: tweetId,
+        title: article.title || 'X 长文',
+        snippet: article.previewText?.replace(/\s+/g, ' ').trim().slice(0, 90),
+        image: article.coverImage?.url,
+      }
+    : null)
 
   if (!tweet || !article || !tweetId) {
     return (

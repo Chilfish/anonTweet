@@ -3,7 +3,10 @@ import { useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router'
 import { Button } from '~/components/ui/button'
 import { cn } from '~/lib/utils'
+import { Dateline } from './Dateline'
+import { FloatingDock } from './FloatingDock'
 import { PageHeader } from './PageHeader'
+import { sectionLabel } from './section'
 
 const THEME_COLOR = {
   '--primary-brand': 'oklch(0.6 0.18 260)',
@@ -47,7 +50,8 @@ function FooterLink({ to, className, children, emoji }: LinkProps) {
 
 export function LayoutComponent({ children }: { children?: React.ReactNode }) {
   const [showFooter, setShowFooter] = useState(false)
-  const isHome = useLocation().pathname === '/'
+  const { pathname } = useLocation()
+  const isHome = pathname === '/'
 
   return (
     <div
@@ -56,12 +60,19 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
     >
       <MinimalBackground />
 
-      <div className="flex-1 w-full max-w-3xl mx-auto sm:px-4 pt-8 pb-12 flex flex-col items-center justify-center  animate-in fade-in slide-in-from-bottom-2 duration-500">
-        {isHome && (
-          <div className="mb-8 w-full">
-            <PageHeader />
-          </div>
-        )}
+      <div className="flex-1 w-full max-w-3xl mx-auto sm:px-4 pt-6 pb-28 flex flex-col items-center justify-center  animate-in fade-in slide-in-from-bottom-2 duration-500">
+        {isHome
+          ? (
+              <div className="mb-8 w-full">
+                <PageHeader />
+              </div>
+            )
+          : (
+              <Dateline
+                label={sectionLabel(pathname)}
+                className="mb-3 w-full px-1"
+              />
+            )}
 
         {children || <Outlet />}
       </div>
@@ -117,6 +128,8 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
               )}
         </Button>
       </div>
+
+      <FloatingDock />
     </div>
   )
 }
