@@ -74,7 +74,7 @@ export function RecentVisited({
     return null
 
   return (
-    <section className="w-full max-w-md">
+    <section className="w-full max-w-md mt-4">
       <div className="mb-1 flex items-center justify-between px-2">
         <h2 className="text-xs font-medium text-muted-foreground">最近查看</h2>
         <Link
