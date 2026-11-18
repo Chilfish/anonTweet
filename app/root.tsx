@@ -13,6 +13,8 @@ import {
 import { UpdateNotice } from '~/components/pwa/UpdateNotice'
 import { ThemeProvider } from '~/components/ThemeProvider'
 import { AnchoredToastProvider, ToastProvider } from '~/components/ui/toast'
+import { ensureDictionaryHydrated } from '~/lib/stores/TranslationDictionary'
+import { ensureVisitedHydrated } from '~/lib/stores/visited'
 import stylesheet from './app.css?url'
 import { ProgressBar } from './components/progress-bar'
 import { Button } from './components/ui/button'
@@ -99,6 +101,9 @@ export default function App(_props: Route.ComponentProps) {
   // 生产构建下注册极简 service worker（网络透传，满足可安装判定；见 app/lib/pwa/register.ts）
   useEffect(() => {
     registerServiceWorker()
+    // 本地数据改为 IndexedDB：启动即水合，翻译路径发请求前还会再 await 一次兜底
+    void ensureVisitedHydrated()
+    void ensureDictionaryHydrated()
   }, [])
 
   return (

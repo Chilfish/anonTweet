@@ -4,7 +4,7 @@ import { toastAIError } from '~/lib/ai-error-toast'
 import { requestTweetTranslation } from '~/lib/ai/request'
 import { syncTranslationData } from '~/lib/service/translationSync'
 import { useAIConfig, useResolvedAIConfig, useTranslationActions } from '~/lib/stores/hooks'
-import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
+import { ensureDictionaryHydrated, useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 import { deriveManualTranslation, shouldRenderTranslatedEntitiesDirectly } from '~/lib/translation/resolveEntities'
 import { decodeHtmlEntities, toast } from '~/lib/utils'
 
@@ -166,6 +166,7 @@ export function useTranslationEditorLogic(originalTweet: EnrichedTweet) {
 
     setIsAITranslating(true)
     try {
+      await ensureDictionaryHydrated()
       const combinedGlossary = [
         dictEntries(),
         translationGlossary,

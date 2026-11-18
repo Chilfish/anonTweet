@@ -2,7 +2,7 @@ import type { EnrichedTweet, Entity } from '~/types'
 import { useEffect, useRef } from 'react'
 import { requestTweetTranslation } from '~/lib/ai/request'
 import { useAIConfig, useResolvedAIConfig, useTranslationActions } from '~/lib/stores/hooks'
-import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
+import { ensureDictionaryHydrated, useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 
 /**
  * GET 解耦后的客户端自动翻译（阶段二任务 1 / AC-DECOUPLE-001）：
@@ -44,12 +44,14 @@ export function useAutoTranslateTweets(
       return
     firedForRef.current = anchor
 
-    const combinedGlossary = [
-      dictEntries(),
-      translationGlossary,
-    ].filter(Boolean).join('\n')
-
     void (async () => {
+      // 词典在 IndexedDB 里异步水合，发请求前确保术语表已就绪
+      await ensureDictionaryHydrated()
+      const combinedGlossary = [
+        dictEntries(),
+        translationGlossary,
+      ].filter(Boolean).join('\n')
+
       const chain = new Set<string>()
       for (const tweet of tweets) {
         await translateIfNeeded(tweet)

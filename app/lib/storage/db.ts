@@ -1,0 +1,77 @@
+import type { DBSchema, IDBPDatabase } from 'idb'
+import type { TranslationDicEntry } from '~/lib/stores/TranslationDictionary'
+import type { VisitedItem } from '~/lib/visited'
+import { openDB } from 'idb'
+
+/** IndexedDB 中的访问记录（多一个 key 字段做主键） */
+export interface StoredVisited extends VisitedItem {
+  key: string
+}
+
+export interface AnonDB extends DBSchema {
+  visited: {
+    key: string
+    value: StoredVisited
+    indexes: { ts: number }
+  }
+  dictionary: {
+    key: string
+    value: TranslationDicEntry
+    indexes: { original: string }
+  }
+}
+
+const DB_NAME = 'anon-tweet'
+const DB_VERSION = 1
+
+let dbPromise: Promise<IDBPDatabase<AnonDB>> | null = null
+
+export function isIndexedDbAvailable(): boolean {
+  return typeof indexedDB !== 'undefined'
+}
+
+function getDb(): Promise<IDBPDatabase<AnonDB>> {
+  if (!dbPromise) {
+    dbPromise = openDB<AnonDB>(DB_NAME, DB_VERSION, {
+      upgrade(db) {
+        const visited = db.createObjectStore('visited', { keyPath: 'key' })
+        visited.createIndex('ts', 'ts')
+        // original 非唯一：历史数据可能存在同词重复项，去重由 store 负责
+        const dictionary = db.createObjectStore('dictionary', { keyPath: 'id' })
+        dictionary.createIndex('original', 'original')
+      },
+    }).catch((error) => {
+      // 打开失败（隐私模式 / 被策略禁用）后允许下次重试
+      dbPromise = null
+      throw error
+    })
+  }
+  return dbPromise
+}
+
+/**
+ * 在 IndexedDB 可用时执行；不可用或打开失败返回 null。
+ * 调用方需要把 null 当作「无持久化」，退回内存态，而不是抛错打断渲染。
+ */
+export async function withDb<T>(
+  fn: (db: IDBPDatabase<AnonDB>) => Promise<T>,
+): Promise<T | null> {
+  if (!isIndexedDbAvailable())
+    return null
+  try {
+    return await fn(await getDb())
+  }
+  catch (error) {
+    console.error('[storage] IndexedDB operation failed:', error)
+    return null
+  }
+}
+
+/** 关闭连接并清空缓存（测试与需要重置存储时使用） */
+export async function closeDb(): Promise<void> {
+  if (!dbPromise)
+    return
+  const db = await dbPromise.catch(() => null)
+  db?.close()
+  dbPromise = null
+}

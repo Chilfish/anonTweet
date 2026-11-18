@@ -12,7 +12,7 @@ import { resolveAIConfig } from '~/lib/ai-provider-config'
 import { requestIGTranslation } from '~/lib/ai/request'
 import { fetcher } from '~/lib/fetcher'
 import { useAIConfig } from '~/lib/stores/hooks'
-import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
+import { ensureDictionaryHydrated, useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 import { toast } from '~/lib/utils'
 import { RichText } from '../RichText'
 
@@ -46,6 +46,7 @@ export function IGTranslateDialog({ post, onTranslated }: IGTranslateDialogProps
 
     setIsTranslating(true)
     try {
+      await ensureDictionaryHydrated()
       const combinedGlossary = [
         dictEntries(),
         aiConfig.translationGlossary,

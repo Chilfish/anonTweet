@@ -11,7 +11,7 @@ import {
   useResolvedAIVisionConfig,
   useTranslationActions,
 } from '~/lib/stores/hooks'
-import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
+import { ensureDictionaryHydrated, useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 import { toast } from '~/lib/utils'
 import { applyVisionEdits, mergeVisionInfo } from '~/lib/vision/parse'
 
@@ -97,6 +97,7 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
 
     setIsGenerating(true)
     try {
+      await ensureDictionaryHydrated()
       const combinedGlossary = [
         dictEntries(),
         translationGlossary,
@@ -171,6 +172,7 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
 
     setIsTranslating(true)
     try {
+      await ensureDictionaryHydrated()
       const combinedGlossary = [
         dictEntries(),
         translationGlossary,

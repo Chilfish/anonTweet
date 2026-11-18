@@ -1,5 +1,12 @@
 import { create } from 'zustand'
-import { createJSONStorage, persist } from 'zustand/middleware'
+import {
+  clearDictionaryStore,
+  deleteDictionaryEntry,
+  loadDictionaryEntries,
+  migrateLegacyDictionary,
+  putDictionaryEntries,
+  putDictionaryEntry,
+} from '~/lib/storage/dictionary'
 import { generateId } from '~/lib/utils'
 
 export interface TranslationDicEntry {
@@ -15,9 +22,10 @@ interface ImportResult {
 }
 
 interface TranslationDictionaryState {
+  /** IndexedDB 水合完成标记（SSR 恒为 false） */
   _hasHydrated: boolean
-  setHasHydrated: (state: boolean) => void
   entries: TranslationDicEntry[]
+  hydrate: () => Promise<void>
   // Actions
   addEntry: (entry: Omit<TranslationDicEntry, 'id' | 'createdAt'>) => void
   removeEntry: (id: string) => void
@@ -31,83 +39,107 @@ interface TranslationDictionaryState {
   getFormattedEntries: () => string
 }
 
+/**
+ * 词典：内存态 + IndexedDB 写穿。
+ *
+ * 相比 localStorage 整表重写，按记录存放后新增/删除只写单条，词条数上万也
+ * 不会阻塞主线程；读取方（翻译/识图）在发请求前 await `ensureDictionaryHydrated()`，
+ * 保证术语表不因异步水合而丢失。
+ */
 export const useTranslationDictionaryStore = create<TranslationDictionaryState>()(
-  persist(
-    (set, get) => ({
-      _hasHydrated: false,
-      setHasHydrated: state => set({ _hasHydrated: state }),
-      entries: [],
+  (set, get) => ({
+    _hasHydrated: false,
+    entries: [],
 
-      addEntry: entry => set(state => ({
-        entries: [
-          {
-            ...entry,
-            id: generateId(),
-            createdAt: Date.now(),
-          },
-          ...state.entries,
-        ],
-      })),
-
-      removeEntry: id => set(state => ({
-        entries: state.entries.filter(e => e.id !== id),
-      })),
-
-      updateEntry: (id, updates) => set(state => ({
-        entries: state.entries.map(e =>
-          e.id === id
-            ? {
-                ...e,
-                ...updates,
-              }
-            : e,
-        ),
-      })),
-
-      importEntries: (newEntries) => {
-        const currentEntries = get().entries
-        // 创建现有原文的 Set 用于快速查找
-        const existingOriginals = new Set(currentEntries.map(e => e.original))
-
-        const uniqueNew = newEntries
-          .filter(e => !existingOriginals.has(e.original))
-          .map(e => ({
-            ...e,
-            id: generateId(),
-            createdAt: Date.now(),
-          }))
-
-        if (uniqueNew.length > 0) {
-          set({
-            entries: [
-              ...uniqueNew,
-              ...currentEntries,
-            ],
-          })
-        }
-
-        return {
-          added: uniqueNew.length,
-          skipped: newEntries.length - uniqueNew.length,
-        }
-      },
-
-      clearEntries: () => set({ entries: [] }),
-
-      getFormattedEntries: () => {
-        const { entries } = get()
-        return entries.map(e => `${e.original} -> ${e.translated}`).join('\n')
-      },
-    }),
-    {
-      name: 'translation-dictionary-storage',
-      storage: createJSONStorage(() => localStorage),
-      onRehydrateStorage: (state) => {
-        return () => state?.setHasHydrated(true)
-      },
-      partialize: state => ({
-        entries: state.entries,
-      }),
+    hydrate: async () => {
+      if (typeof indexedDB === 'undefined') {
+        set({ _hasHydrated: true })
+        return
+      }
+      await migrateLegacyDictionary()
+      const entries = await loadDictionaryEntries()
+      set({ entries, _hasHydrated: true })
     },
-  ),
+
+    addEntry: (entry) => {
+      const full: TranslationDicEntry = {
+        ...entry,
+        id: generateId(),
+        createdAt: Date.now(),
+      }
+      set(state => ({
+        entries: [full, ...state.entries],
+      }))
+      void putDictionaryEntry(full)
+    },
+
+    removeEntry: (id) => {
+      set(state => ({
+        entries: state.entries.filter(e => e.id !== id),
+      }))
+      void deleteDictionaryEntry(id)
+    },
+
+    updateEntry: (id, updates) => {
+      const current = get().entries.find(e => e.id === id)
+      if (!current)
+        return
+      const next: TranslationDicEntry = {
+        ...current,
+        ...updates,
+      }
+      set(state => ({
+        entries: state.entries.map(e => e.id === id
+          ? next
+          : e),
+      }))
+      void putDictionaryEntry(next)
+    },
+
+    importEntries: (newEntries) => {
+      const currentEntries = get().entries
+      const existingOriginals = new Set(currentEntries.map(e => e.original))
+
+      const uniqueNew = newEntries
+        .filter(e => !existingOriginals.has(e.original))
+        .map(e => ({
+          ...e,
+          id: generateId(),
+          createdAt: Date.now(),
+        }))
+
+      if (uniqueNew.length > 0) {
+        set({
+          entries: [
+            ...uniqueNew,
+            ...currentEntries,
+          ],
+        })
+        void putDictionaryEntries(uniqueNew)
+      }
+
+      return {
+        added: uniqueNew.length,
+        skipped: newEntries.length - uniqueNew.length,
+      }
+    },
+
+    clearEntries: () => {
+      set({ entries: [] })
+      void clearDictionaryStore()
+    },
+
+    getFormattedEntries: () => {
+      return get().entries.map(e => `${e.original} -> ${e.translated}`).join('\n')
+    },
+  }),
 )
+
+let hydrationPromise: Promise<void> | null = null
+
+/** 幂等水合：root 启动时调用；翻译/识图发请求前再 await 一次兜底 */
+export function ensureDictionaryHydrated(): Promise<void> {
+  if (!hydrationPromise)
+    hydrationPromise = useTranslationDictionaryStore.getState().hydrate()
+  return hydrationPromise
+}
