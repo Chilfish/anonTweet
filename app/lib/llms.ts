@@ -478,14 +478,30 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
           tags: ['User'],
           operationId: 'userTimeline',
           summary: '用户时间线',
-          description: '获取指定用户的推文时间线，经 enrichTweet 清洗后返回 EnrichedTweet 数组。',
+          description: '获取指定用户的「帖子 + 回复」时间线，经 enrichTweet 清洗后返回 { tweets, nextCursor }。',
           parameters: [
             pathParam('username', '用户名'),
+            {
+              name: 'cursor',
+              in: 'query',
+              required: false,
+              description: '上一页返回的 nextCursor，用于加载更多',
+              schema: { type: 'string' },
+            },
           ],
           responses: {
-            200: jsonOk('EnrichedTweet 数组', {
-              type: 'array',
-              items: { $ref: '#/components/schemas/EnrichedTweet' },
+            200: jsonOk('当前页推文与下一页游标', {
+              type: 'object',
+              required: ['tweets', 'nextCursor'],
+              properties: {
+                tweets: {
+                  type: 'array',
+                  items: { $ref: '#/components/schemas/EnrichedTweet' },
+                },
+                nextCursor: {
+                  type: ['string', 'null'],
+                },
+              },
             }),
             429: errorJson('上游限流（未配置 TWEET_KEYS 或风控）'),
             500: errorJson('获取用户时间线失败'),

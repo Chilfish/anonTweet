@@ -4,19 +4,19 @@
 
 > 结论先行：本站的 SEO 问题**不是缺 metadata，而是缺可索引的正文**。现有 OG / canonical / JSON-LD 写得比多数同类站完整，但线上 HTML 里同一页面出现两个 `<title>`、推文页服务端只输出骨架屏，等于把排序资格让给了别人。
 >
-> **已裁决（2026-11-18）**：动态生成页（推文 / IG / List / 长文 / 搜索）一律 `noindex, follow`，不为它们做 SSR 正文改造；只保留工具页（`/`、`/about`）可索引。本轮先修 metadata 管道（单份 title/description、noindex、sitemap/robots 对齐），见 §四。
+> **已裁决（2026-11-18）**：动态生成页（推文 / IG / List / 用户资料 / 长文 / 搜索）一律 `noindex, follow`，不为它们做 SSR 正文改造；只保留工具页（`/`、`/about`）可索引。本轮先修 metadata 管道（单份 title/description、noindex、sitemap/robots 对齐），见 §四。
 
 ---
 
 ## 一、项目性质判定（决定策略的前提）
 
-| 维度     | 事实                                                                                          | SEO 含义                                                                   |
-| -------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| 产品形态 | 工具站（读取 / 翻译 / 导出推文与 IG）                                                         | 目标词是**工具意图**（「推特翻译」「推特怎么看」「推文截图」），不是内容词 |
-| 内容来源 | X / Instagram 第三方内容，非原创                                                              | 属于转载/镜像内容，Google 明确不欢迎重复内容，且有 UGC 滥用政策约束        |
-| 页面结构 | 三类：固定页（/、/about）、少量长文页（/article）、无限动态页（/tweets、/ig、/list、/search） | 无限动态页是抓取预算黑洞，必须分级对待                                     |
-| 渲染     | React Router v8 SSR                                                                           | 技术上完全可索引，问题在组件分支，不在框架                                 |
-| 语言     | 中文为主，内容语言随推文变化                                                                  | 单语站，不需要 hreflang；但 `html lang` 不应恒为 zh                        |
+| 维度     | 事实                                                                                                 | SEO 含义                                                                   |
+| -------- | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| 产品形态 | 工具站（读取 / 翻译 / 导出推文与 IG）                                                                | 目标词是**工具意图**（「推特翻译」「推特怎么看」「推文截图」），不是内容词 |
+| 内容来源 | X / Instagram 第三方内容，非原创                                                                     | 属于转载/镜像内容，Google 明确不欢迎重复内容，且有 UGC 滥用政策约束        |
+| 页面结构 | 三类：固定页（/、/about）、少量长文页（/article）、无限动态页（/tweets、/ig、/list、/user、/search） | 无限动态页是抓取预算黑洞，必须分级对待                                     |
+| 渲染     | React Router v8 SSR                                                                                  | 技术上完全可索引，问题在组件分支，不在框架                                 |
+| 语言     | 中文为主，内容语言随推文变化                                                                         | 单语站，不需要 hreflang；但 `html lang` 不应恒为 zh                        |
 
 **据此的策略基调**：
 
@@ -86,6 +86,7 @@
 | `/about`                 | index           | 自身      | 唯一能讲清「这是什么/数据边界/隐私」的页面，应作为信任锚点  |
 | `/tweets/:id`            | noindex, follow | —         | 第三方转载 + 无限集合，不做 SSR 正文改造（2026-11-18 裁决） |
 | `/ins/:id`、`/list/:id`  | noindex, follow | —         | 同上                                                        |
+| `/user/:username`        | noindex, follow | —         | 用户资料同样来自第三方，且页面集合无限                      |
 | `/article/:id`           | noindex, follow | —         | 长文页同样是动态生成页；若日后重开索引，仅此页值得单独立项  |
 | `/search`（含 `?q=`）    | noindex, follow | —         | 结果随查询串变化且无服务端正文                              |
 | `/plain-*`、`/bili`、404 | noindex, follow | —         | 同内容/隐藏/无价值                                          |
@@ -101,7 +102,7 @@
 
 1. 新增 `app/lib/seo.ts`：`buildMeta()` 统一输出 title / description / robots / OG / Twitter Card / canonical；`clampDescription()`、`ogLocale()`。
 2. `root.tsx` 删除 `<head>` 里写死的 `<title>` / description / robots / OG / Twitter Card，改为 root `meta()` 兜底。React Router 只渲染最深匹配路由的 meta，因此不再出现两份标签。
-3. 全部动态路由改为 `noindex, follow`：`tweet` / `article` / `ins` / `list` / `search` / `plain` / `plain-ig` / `bili` / `not-found`。
+3. 全部动态路由改为 `noindex, follow`：`tweet` / `article` / `ins` / `list` / `user` / `search` / `plain` / `plain-ig` / `bili` / `not-found`。
 4. `/`、`/about` 保留可索引并输出绝对 canonical；首页与关于页的 loader 返回 `baseUrl`。
 5. sitemap 只保留 `/` 与 `/about`，移除未使用的 news/image/video 命名空间。
 6. robots 增加 `Disallow: /plain-tweet/`、`/plain-ins/`、`/bili`，保留只读接口白名单。
@@ -122,7 +123,7 @@
 
 - **AC-SEO-001**：`buildMeta()` 每页只有一份 title / description / robots / og:title / og:image / twitter:card；root 兜底不再输出静态标签。
 - **AC-SEO-002**：可索引页输出绝对 canonical 与 `og:url`；`noindex` 页只输出 `noindex, follow` 且不带 canonical。
-- **AC-SEO-003**：9 个动态路由均声明 `noindex: true`；sitemap 只含 `/` 与 `/about`；robots 屏蔽截图与自用入口。
+- **AC-SEO-003**：10 个动态路由均声明 `noindex: true`；sitemap 只含 `/` 与 `/about`；robots 屏蔽截图与自用入口。
 
 验证方式：单测直接调用 `sitemap.xml` / `robots.txt` 的 loader 断言输出，并对 `buildMeta()` 做纯函数断言（不依赖浏览器）。
 线上额外人工核对过：`/`、`/about`、`/search`、`/tweets/:id`、`/plain-tweet/:id`、`/bili`、404 的 HTML 均只有 1 个 `<title>`，robots 与预期一致。

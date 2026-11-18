@@ -1,5 +1,6 @@
 import type { EnrichedTweet } from '~/types'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
+import { normalizeProfileImageUrl } from '~/lib/media-url'
 import { cn } from '~/lib/utils'
 import { TweetInfoCreatedAt } from '.'
 import { VerifiedBadge } from './verified-badge'
@@ -18,20 +19,18 @@ export function TweetHeader({ tweet, avatarSize, className }: Props) {
   return (
     <div className={cn('tweet-header flex flex-row items-start', className, isSmall && 'tweet-header-in-quote')}>
       <a
-        href={`https://x.com/${user.screen_name}`}
+        href={`/user/${user.screen_name}`}
         className={cn('inline-block relative shrink-0 z-10')}
         style={{
           height: isSmall ? '34px' : '40px',
           width: isSmall ? '34px' : '40px',
         }}
-        target="_blank"
-        rel="noopener noreferrer"
       >
         <Avatar
           className="w-full h-full"
         >
           <AvatarImage
-            src={user.profile_image_url_https}
+            src={normalizeProfileImageUrl(user.profile_image_url_https)}
             alt={user.name}
             // AC-PERF-001：头像同样懒加载，长链线程不并发拉取全部头像
             loading="lazy"
@@ -44,10 +43,8 @@ export function TweetHeader({ tweet, avatarSize, className }: Props) {
       <div className="flex flex-col flex-1 min-w-0 mx-2 h-fit gap-[0.1rem]">
         <div className="flex flex-row items-center gap-1 min-w-0">
           <a
-            href={`https://x.com/${user.screen_name}`}
+            href={`/user/${user.screen_name}`}
             className="no-underline color-inherit flex items-center hover:underline min-w-0 shrink"
-            target="_blank"
-            rel="noopener noreferrer"
           >
             <span className="font-bold truncate" title={user.name}>
               {user.name}
@@ -55,10 +52,8 @@ export function TweetHeader({ tweet, avatarSize, className }: Props) {
             <VerifiedBadge user={user} className="shrink-0 ml-1" />
           </a>
           <a
-            href={`https://x.com/${user.screen_name}`}
+            href={`/user/${user.screen_name}`}
             className="text-[#536471] dark:text-[#71767b] no-underline truncate text-sm shrink min-w-[3rem]"
-            target="_blank"
-            rel="noopener noreferrer"
             title={`@${user.screen_name}`}
           >
             @

@@ -47,3 +47,25 @@ export function normalizeMediaUrl(raw: string): string {
     return raw
   }
 }
+
+/**
+ * 头像 URL 去掉 X 的尺寸后缀（`_normal` / `_bigger` / `_mini` / `_400x400`），
+ * 取原始图：`.../hXskVj9F_normal.png` → `.../hXskVj9F.png`。
+ *
+ * 非 pbs.twimg.com 头像（IG CDN 等）没有该后缀，原样返回。
+ */
+const PROFILE_SIZE_SUFFIX_RE = /_(?:mini|normal|bigger|400x400|200x200)(?=\.(?:jpe?g|png|webp|gif)(?:[?#]|$))/i
+const TWIMG_HOST_RE = /(?:^|\.)twimg\.com$/i
+
+export function normalizeProfileImageUrl(raw: string): string {
+  if (!raw)
+    return raw
+  try {
+    if (!TWIMG_HOST_RE.test(new URL(raw).hostname))
+      return raw
+  }
+  catch {
+    return raw
+  }
+  return raw.replace(PROFILE_SIZE_SUFFIX_RE, '')
+}

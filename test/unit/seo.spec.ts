@@ -101,6 +101,7 @@ describe('AC-SEO-003: dynamic pages are noindex and sitemap/robots agree', () =>
     'app/routes/article.tsx',
     'app/routes/ins.tsx',
     'app/routes/list.tsx',
+    'app/routes/user.tsx',
     'app/routes/search.tsx',
     'app/routes/plain.tsx',
     'app/routes/plain-ig.tsx',

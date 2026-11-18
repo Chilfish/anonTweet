@@ -2,6 +2,7 @@ import type { ReactNode, Ref } from 'react'
 import type { ArticleViewMode } from './ArticleBody'
 import type { EnrichedTweet, TweetArticle } from '~/types'
 import { Separator } from '~/components/ui/separator'
+import { normalizeProfileImageUrl } from '~/lib/media-url'
 import { isArticleUrl } from '~/lib/react-tweet/utils/article'
 import { formatDate } from '~/lib/react-tweet/utils/date-utils'
 import { cn } from '~/lib/utils'
@@ -72,7 +73,7 @@ export function ArticleReader({
         <div className="flex items-center gap-3">
           {tweet.user?.profile_image_url_https && (
             <img
-              src={tweet.user.profile_image_url_https}
+              src={normalizeProfileImageUrl(tweet.user.profile_image_url_https)}
               alt={tweet.user.name}
               className="size-10 shrink-0 rounded-full object-cover"
               loading="lazy"

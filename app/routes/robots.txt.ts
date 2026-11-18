@@ -12,6 +12,7 @@ Allow: /tweets/
 Allow: /list/
 Allow: /ins/
 Allow: /article/
+Allow: /user/
 Allow: /search
 # 截图路由与自用入口不参与收录
 Disallow: /plain-tweet/

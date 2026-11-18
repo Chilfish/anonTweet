@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { normalizeMediaUrl } from '~/lib/media-url'
+import { normalizeMediaUrl, normalizeProfileImageUrl } from '~/lib/media-url'
 
 /**
  * test/unit/media-url.spec.ts
@@ -71,5 +71,40 @@ describe('normalizeMediaUrl', () => {
   it('无扩展名且无 format 参数 → 原样返回', () => {
     expect(normalizeMediaUrl('https://pbs.twimg.com/media/xyz'))
       .toBe('https://pbs.twimg.com/media/xyz')
+  })
+})
+
+describe('normalizeProfileImageUrl', () => {
+  const base = 'https://pbs.twimg.com/profile_images/1722602835299500033/hXskVj9F'
+
+  it('去掉头像尺寸后缀，取原始图', () => {
+    expect(normalizeProfileImageUrl(`${base}_normal.png`))
+      .toBe(`${base}.png`)
+    expect(normalizeProfileImageUrl(`${base}_normal.jpg`))
+      .toBe(`${base}.jpg`)
+    expect(normalizeProfileImageUrl(`${base}_bigger.png`))
+      .toBe(`${base}.png`)
+    expect(normalizeProfileImageUrl(`${base}_mini.jpg`))
+      .toBe(`${base}.jpg`)
+    expect(normalizeProfileImageUrl(`${base}_400x400.png`))
+      .toBe(`${base}.png`)
+    expect(normalizeProfileImageUrl(`${base}_200x200.png`))
+      .toBe(`${base}.png`)
+  })
+
+  it('无尺寸后缀时原样返回', () => {
+    expect(normalizeProfileImageUrl(`${base}.png`)).toBe(`${base}.png`)
+    expect(normalizeProfileImageUrl(`${base}.jpg?foo=bar`)).toBe(`${base}.jpg?foo=bar`)
+  })
+
+  it('查询串保留，只替换路径里的尺寸后缀', () => {
+    expect(normalizeProfileImageUrl(`${base}_normal.png?x=1`))
+      .toBe(`${base}.png?x=1`)
+  })
+
+  it('非 X 头像与空串不处理', () => {
+    expect(normalizeProfileImageUrl('https://scontent.cdninstagram.com/avatar_normal.jpg'))
+      .toBe('https://scontent.cdninstagram.com/avatar_normal.jpg')
+    expect(normalizeProfileImageUrl('')).toBe('')
   })
 })

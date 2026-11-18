@@ -20,6 +20,7 @@ export default [
     route('/about', 'routes/about.tsx'),
     route('/search', 'routes/search.tsx'),
     route('/history', 'routes/history.tsx'),
+    route('/user/:username', 'routes/user.tsx'),
   ]),
 
   ...prefix('api', [

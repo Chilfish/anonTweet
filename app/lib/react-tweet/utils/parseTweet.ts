@@ -6,6 +6,7 @@ import type {
   RawTweet,
   TweetUser,
 } from '~/types'
+import { normalizeProfileImageUrl } from '~/lib/media-url'
 import { obsLog } from '~/lib/obs-log'
 import { parseTrendingCard } from '~/lib/rettiwt-api/parsers/jetfuel'
 import { mapArticle } from './article'
@@ -77,7 +78,9 @@ export function transformUserResponse(sourceData: RawTweet): TweetUser | null {
     profile_image_shape: rawUser.profile_image_shape as TweetUser['profile_image_shape'],
     verified: legacy.verified,
     verified_type: legacy.verified_type || rawUser.verification?.verified_type,
-    profile_image_url_https: rawUser.avatar?.image_url?.replace('_normal', ''),
+    profile_image_url_https: normalizeProfileImageUrl(
+      rawUser.avatar?.image_url ?? legacy.profile_image_url_https ?? '',
+    ),
   }
 
   return transformedUser

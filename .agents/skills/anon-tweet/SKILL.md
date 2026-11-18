@@ -60,7 +60,7 @@ pwsh -NoProfile -File $A help
 | GET | `/api/tweet/replies/{id}?cursor=...` | 推文回复（cursor 分页） |
 | GET | `/api/tweet/list/{id}` | List 时间线（EnrichedTweet 数组） |
 | GET | `/api/user/get/{username}` | 用户资料（DB 缓存，无记录返回 null） |
-| GET | `/api/user/timeline/{username}` | 用户时间线（EnrichedTweet 数组） |
+| GET | `/api/user/timeline/{username}?cursor=...` | 用户「帖子 + 回复」时间线（cursor 分页，返回 `{ tweets, nextCursor }`） |
 | GET | `/api/ig/get/{id}` | IG 帖子（id 为 shortcode；未配 INS_COOKIES 返回空数组） |
 | POST | `/api/ig/translate/{id}` | IG caption 翻译（manualTranslation 传入则跳过 AI） |
 | GET | `/api/proxy/image?url=...` | 图片代理（url 白名单校验，返回二进制） |
@@ -122,13 +122,13 @@ Invoke-RestMethod "https://anon-tweet.chilfish.top/api/ig/translate/DWlrun0AVbE"
 - **ArticleBlock**: `type` ∈ paragraph / heading / list-item / quote / markdown / divider / image / embed-tweet / link / unknown；`key` 为稳定块 ID；段落类带 `runs`（文本/链接/mention/hashtag）；`text`（markdown）、`media`（image）、`tweetId`（embed-tweet）
 - **TweetUser**: `id_str`、`name`、`screen_name`、`profile_image_url_https`、`verified`、`is_blue_verified`、`verified_type`（Business/Government）、`profile_image_shape`（Circle/Square/Hexagon）
 - **Entity**: `type` ∈ text / hashtag / mention / url / media / symbol / media_alt / separator；`index` 为文本偏移；hashtag/mention/url/media/symbol 带 `href`；`aiTranslation` / `translation` 存翻译
-- **SearchResponse / RepliesResponse**: `{ tweets: EnrichedTweet[], nextCursor: string | null }`
+- **SearchResponse / RepliesResponse / UserTimelineResponse**: `{ tweets: EnrichedTweet[], nextCursor: string | null }`
 - **IGPost**: `id`（shortcode）、`post_id`、`url`、`username`、`fullname`、`description`（caption）、`tags`、`likes`、`type`（post/reel/story/highlight）、`media`（IGMedia[]）、`avatar_url`
 - **RawUser**: `fullName`、`userName`、`followersCount`、`followingsCount`、`statusesCount`、`likeCount`、`description`、`location`、`createdAt`、`isVerified`
 
 ## 使用注意
 
-- 回复/搜索翻页都靠 `nextCursor`，`null` 即到底
+- 回复/搜索/用户时间线翻页都靠 `nextCursor`，`null` 即到底
 - 单条推文接口返回**数组**（字段对齐 react-tweet），可能为空数组
 - IG 未配置 `INS_COOKIES` 时 `/api/ig/get` 返回空数组；AI 翻译接口需自备 apiKey + model（provider: google / deepseek / openrouter）
 - 图片代理只放行图片扩展名或 cdninstagram.com / fbcdn.net 域名（防 SSRF）

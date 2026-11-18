@@ -12,6 +12,7 @@ import { usePersistSnapshot } from '~/hooks/use-persist-snapshot'
 import { useRecordVisit } from '~/hooks/use-record-visit'
 import { useTweetOperations } from '~/hooks/use-tweet-operations'
 import { fetcher } from '~/lib/fetcher'
+import { normalizeProfileImageUrl } from '~/lib/media-url'
 import { TweetNotFound, TweetSkeleton } from '~/lib/react-tweet'
 import { buildMeta, clampDescription, ogLocale } from '~/lib/seo'
 import { getTweets } from '~/lib/service/getTweet'
@@ -231,7 +232,9 @@ export default function TweetPage({ loaderData }: Route.ComponentProps) {
         id: visitedTweet.id_str,
         title: visitedTweet.user?.name || `@${visitedTweet.user?.screen_name ?? '推文'}`,
         snippet: decodeHtmlEntities(visitedTweet.text || '').replace(/\s+/g, ' ').trim().slice(0, 90),
-        image: visitedTweet.user?.profile_image_url_https,
+        image: visitedTweet.user?.profile_image_url_https
+          ? normalizeProfileImageUrl(visitedTweet.user.profile_image_url_https)
+          : undefined,
         author: visitedTweet.user?.name,
         authorHandle: visitedTweet.user?.screen_name,
       }

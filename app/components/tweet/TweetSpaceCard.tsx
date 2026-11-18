@@ -2,7 +2,7 @@ import type { EnrichedTweet, SpaceAvailability } from '~/types'
 import { MicOff, Play } from 'lucide-react'
 import { useMemo } from 'react'
 import { MediaImage } from '~/components/ui/media'
-import { normalizeMediaUrl } from '~/lib/media-url'
+import { normalizeMediaUrl, normalizeProfileImageUrl } from '~/lib/media-url'
 import { VerifiedBadge } from '~/lib/react-tweet/twitter-theme/verified-badge'
 import {
   formatSpaceDate,
@@ -85,7 +85,7 @@ export function TweetSpaceCard({ tweet, className }: TweetSpaceCardProps) {
       listeners: `${formatSpaceListeners(space.listenersCount)} 人收听/回放`,
       date: formatSpaceDate(space.createdAt),
       avatarSrc: avatarUrl
-        ? proxyMedia(normalizeMediaUrl(avatarUrl))
+        ? proxyMedia(normalizeProfileImageUrl(normalizeMediaUrl(avatarUrl)))
         : '',
     }
   }, [space, proxyMedia])

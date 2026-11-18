@@ -217,18 +217,31 @@ describe('AC-LLMS-002: openapi.json is a valid OpenAPI 3.1 doc covering all back
     expect(doc.paths['/api/bili-post']?.post?.requestBody?.content['multipart/form-data']?.schema).toBeTruthy()
   })
 
-  it('documents user timeline as a normal endpoint (200 EnrichedTweet array + errors)', () => {
+  it('documents user timeline pagination (200 tweets + nextCursor, plus errors)', () => {
     const op = doc.paths['/api/user/timeline/{username}']?.get
     expect(op?.responses?.['200']).toBeTruthy()
     expect(op?.responses?.['429']).toBeTruthy()
     expect(op?.responses?.['500']).toBeTruthy()
 
-    const schema = (op?.responses?.['200'] as { content?: Record<string, { schema?: { type?: string, items?: unknown } }> })
+    const paramNames = ((op?.parameters ?? []) as Array<{ name?: string }>)
+      .map(param => param.name)
+    expect(paramNames).toContain('cursor')
+
+    const schema = (op?.responses?.['200'] as { content?: Record<string, { schema?: { type?: string, required?: string[], properties?: Record<string, unknown> } }> })
       ?.content?.['application/json']
       ?.schema
     expect(schema).toMatchObject({
-      type: 'array',
-      items: { $ref: '#/components/schemas/EnrichedTweet' },
+      type: 'object',
+      required: ['tweets', 'nextCursor'],
+      properties: {
+        tweets: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/EnrichedTweet' },
+        },
+        nextCursor: {
+          type: ['string', 'null'],
+        },
+      },
     })
   })
 

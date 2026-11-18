@@ -39,8 +39,8 @@
 - **预期输出**：动态页全部 `noindex, follow`；sitemap 只含可索引静态页；robots 屏蔽截图与自用入口
 - **验证方法**：`bun verify --ac AC-SEO-003`
 - **Pass 条件**：
-  - `tweet / article / ins / list / search / plain / plain-ig / bili / not-found` 路由 meta 均含 `noindex: true`
-  - sitemap 含 `/` 与 `/about`，不含 `/tweets`、`/ins`、`/list`、`/article`、`/search`、`/plain-tweet`
+  - `tweet / article / ins / list / user / search / plain / plain-ig / bili / not-found` 路由 meta 均含 `noindex: true`
+  - sitemap 含 `/` 与 `/about`，不含 `/tweets`、`/ins`、`/list`、`/user`、`/article`、`/search`、`/plain-tweet`
   - robots.txt 含 `Disallow: /plain-tweet/`、`Disallow: /plain-ins/`、`Disallow: /bili`，并声明 sitemap
 
 ---
