@@ -1,6 +1,6 @@
 # Instagram Story 接入验收标准
 
-> 版本：1.2 | 日期：2026-09-12（v1.2：列表改**网格相册 + 全屏查看器 + 快拍骨架屏**；修订 002，新增 006/007）
+> 版本：1.3 | 日期：2026-11-18（v1.3：快拍列表重做为统一相册卡片；新增 008）
 > 关联 Verifier：`test/acceptance/ac-ig-story.spec.ts` + `test/unit/ig-story-viewer.spec.ts`（007）
 > 执行命令：`bun run verify/index.ts --module ig [--ac AC-IG-STORY-NNN]`
 > 关联文档：`docs/features/instagram/instagram-integration.md` · `docs/planning/backlog.md`
@@ -129,7 +129,24 @@
 
 ---
 
-## 总计：7 条 AC
+## AC-IG-STORY-008：快拍相册卡片外壳与身份头
+
+- **背景**：v1.2 的列表是贴在页面背景上的全宽网格 + 悬浮底栏，与帖子卡、用户页等
+  `bg-card` 卡片外壳割裂；单条快拍用自然比例大图，与列表网格也不统一。
+- **输入**：tray 产出（2 条）· 单条 story
+- **验证对象**：`IGStoryList` / `IGStoryListSkeleton`
+- **Pass 条件**：
+  - 列表与单条都渲染 `data-slot="story-album"` 卡片外壳（`rounded-2xl` + `bg-card`）
+  - 卡片顶部有 `story-album-header` 身份头，副标题为 `@username · 快拍`（精选集为
+    `@username · 精选 · 标题`）
+  - 列表型：`story-album-toolbar` 位于 `story-grid` 之前，网格格块 `rounded-lg`
+  - 单条：渲染 `story-single-media`（`aspect-[9/16]`）而非网格，底部保留下载按钮
+  - 骨架屏同样渲染 `story-album` 外壳，且保持 12 个 `story-skeleton-cell`
+- **验证方法**：行为断言（`renderToString` 结构与文案）
+
+---
+
+## 总计：8 条 AC
 
 | AC              | 分类        | 依赖 INS_COOKIES | 依赖 AI | 依赖 server |
 | --------------- | ----------- | ---------------- | ------- | ----------- |
@@ -140,3 +157,4 @@
 | AC-IG-STORY-005 | 纯函数/离线 | 否               | 否      | 否          |
 | AC-IG-STORY-006 | 渲染/纯函数 | 否               | 否      | 否          |
 | AC-IG-STORY-007 | 纯函数/离线 | 否               | 否      | 否          |
+| AC-IG-STORY-008 | 渲染/离线   | 否               | 否      | 否          |

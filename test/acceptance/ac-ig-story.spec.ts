@@ -231,6 +231,43 @@ describe('AC-IG-STORY-006: story grid, skeleton structure and story-like id dete
   })
 })
 
+describe('AC-IG-STORY-008: story album shares the post-card shell', () => {
+  it('AC-IG-STORY-008: list renders as a card with an identity header and rounded tiles', () => {
+    const posts = normalizeIGPosts(trayMessages())
+    const html = renderToString(createElement(IGStoryList, { posts }))
+
+    expect(html).toContain('data-slot="story-album"')
+    expect(html).toContain('data-slot="story-album-header"')
+    expect(html).toContain('data-slot="story-album-toolbar"')
+    expect(html).toContain('@chilfish · 快拍')
+    expect(html).toContain('rounded-2xl')
+    expect(html).toContain('rounded-lg')
+    // 工具栏在网格之前，避免移动端滚到底才够得着操作
+    expect(html.indexOf('story-album-toolbar')).toBeLessThan(html.indexOf('story-grid'))
+  })
+
+  it('AC-IG-STORY-008: a single story renders a 9:16 canvas instead of a grid', () => {
+    const post = normalizeIGPost(storyMessages())!
+    const html = renderToString(createElement(IGStoryList, {
+      posts: [post],
+    }))
+
+    expect(html).toContain('data-slot="story-album"')
+    expect(html).toContain('data-slot="story-single-media"')
+    expect(html).toContain('aspect-[9/16]')
+    expect(html).not.toContain('data-slot="story-grid"')
+    expect(html).toContain('aria-label="下载该快拍"')
+  })
+
+  it('AC-IG-STORY-008: skeleton mirrors the album card shell', () => {
+    const html = renderToString(createElement(IGStoryListSkeleton))
+
+    expect(html).toContain('data-slot="story-album"')
+    expect(html).toContain('rounded-2xl')
+    expect((html.match(/data-slot="story-skeleton-cell"/g) ?? []).length).toBe(12)
+  })
+})
+
 describe('AC-IG-STORY-003: DB cache key consistency for story requests', () => {
   it('AC-IG-STORY-003: writes a fetched post under the request key it was read with', async () => {
     const story: IGPost = {

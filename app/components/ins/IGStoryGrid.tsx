@@ -50,7 +50,7 @@ export function IGStoryGrid({
 }: IGStoryGridProps) {
   return (
     <div
-      className={cn('grid grid-cols-3 gap-1 sm:grid-cols-4 md:grid-cols-5', className)}
+      className={cn('grid grid-cols-3 gap-1.5 sm:grid-cols-4 md:grid-cols-5', className)}
       data-slot="story-grid"
     >
       {posts.map((post, index) => {
@@ -70,7 +70,7 @@ export function IGStoryGrid({
             onClick={() => (selectable
               ? onToggle?.(post.id)
               : onOpen?.(index))}
-            className="group relative aspect-square overflow-hidden bg-muted/10 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background"
+            className="group relative aspect-square overflow-hidden rounded-lg bg-muted/10 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background"
           >
             {media
               ? <StoryThumb media={media} />

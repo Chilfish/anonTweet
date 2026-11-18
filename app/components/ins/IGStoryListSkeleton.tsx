@@ -7,23 +7,47 @@ const CELL_COUNT = 12
 /**
  * 快拍列表骨架屏。
  *
- * 与加载后的网格布局同形（同样的列数断点），避免数据到达时整页跳动。
- * 由 `ins.tsx` 在 `isIGStoryLikeId()` 命中时替代帖子的 `IGPostSkeleton`。
+ * 与加载后的相册卡片同形：身份头 + 条数工具栏 + 圆角缩略图网格，
+ * 列数断点一致，避免数据到达时整张卡片跳动。
  */
 export function IGStoryListSkeleton({ className }: { className?: string }) {
   return (
-    <div className={cn('flex w-full flex-col gap-3', className)}>
-      <div className="flex flex-wrap items-center gap-2" data-slot="story-skeleton-toolbar">
-        <Skeleton className="h-5 w-20 rounded" />
-        <Skeleton className="h-8 w-16 rounded-md" />
-        <Skeleton className="h-8 w-20 rounded-md" />
+    <article
+      data-slot="story-album"
+      className={cn(
+        'mx-auto w-full max-w-[600px] overflow-hidden rounded-2xl border border-border/60 bg-card',
+        className,
+      )}
+    >
+      <div className="flex items-center gap-2 px-4 pt-3 pb-2">
+        <Skeleton className="size-8 shrink-0 rounded-full" />
+        <div className="flex flex-1 flex-col gap-1.5">
+          <Skeleton className="h-3.5 w-28 rounded" />
+          <Skeleton className="h-3 w-24 rounded opacity-70" />
+        </div>
+        <Skeleton className="size-8 rounded" />
       </div>
 
-      <div className="grid grid-cols-3 gap-1 sm:grid-cols-4 md:grid-cols-5">
+      <div
+        data-slot="story-skeleton-toolbar"
+        className="flex items-center justify-between gap-2 px-4 pb-2"
+      >
+        <Skeleton className="h-3 w-16 rounded" />
+        <div className="flex items-center gap-1">
+          <Skeleton className="h-8 w-14 rounded-md opacity-70" />
+          <Skeleton className="h-8 w-20 rounded-md" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-1.5 px-2 pb-2 sm:grid-cols-4 md:grid-cols-5">
         {Array.from({ length: CELL_COUNT }, (_, i) => (
-          <Skeleton key={i} className="aspect-square rounded-none" data-slot="story-skeleton-cell" />
+          <Skeleton
+            key={i}
+            className="aspect-square rounded-lg"
+            data-slot="story-skeleton-cell"
+          />
         ))}
       </div>
-    </div>
+    </article>
   )
 }

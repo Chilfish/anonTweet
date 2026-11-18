@@ -186,8 +186,8 @@ Story（`/stories/{username}/{id}/`）与 Highlight 的识别、抓取早已可�
 本轮按「Explore（浏览）+ 一次批量动作（下载）」的工作模式重排：**缩略图网格负责扫视，全屏查看器
 负责细看与精确下载**，批量选择收敛为显式选择模式。
 
-- **网格（`IGStoryGrid`）**：`grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1` 方图缩略图（吃满
-  `Layout` 的 `max-w-3xl` 内容列）。格子是 `<button>`：浏览态 `aria-label="查看第 k 条快拍"`（点击
+- **网格（`IGStoryGrid`）**：`grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1.5` 圆角方图缩略图，
+  位于相册卡片内。格子是 `<button>`：浏览态 `aria-label="查看第 k 条快拍"`（点击
   开查看器），选择态 `选择第 k 条快拍` / `取消选择第 k 条快拍` + `aria-pressed` + `data-selected`。
   视频角标 `Play`，含 `storyLink` 的格子带「含链接贴纸」标记。缩略图复用 `IGMediaGrid` 导出的
   `getImageFitClass`（同一套「竖构图偏上裁切、不砍头」逻辑，避免两份漂移）。
@@ -197,17 +197,16 @@ Story（`/stories/{username}/{id}/`）与 Highlight 的识别、抓取早已可�
   底栏 `IGStoryMeta`（`tone="overlay"`）+ 时间 + 下载。切条三通道：左右 44px 按钮、触摸横滑
   （|Δx|>40 且 |Δx|>|Δy|）、`←/→` 键；末条 ↔ 首条**环形**。相邻条目用隐藏 `<img>` 预热 CDN。
 - **选择模式（`IGStoryList`）**：浏览态工具栏「共 N 条快拍 · 选择 · 全部下载（带进度）」；点「选择」
-  进入多选，工具栏变「已选 n / N · 全选 ⇄ 取消全选 · 下载选中(n) · 取消」，退出时清空选择。工具栏
-  `sticky top-0` + 背景模糊，长列表滚动时操作不丢。沿用 owner 口径：**默认不选、手动选择**。
-- **快拍骨架（`IGStoryListSkeleton`）**：与加载后同形（工具栏占位 + 12 个方图 `Skeleton`，列数断点
-  一致），消除加载完成时的布局跳动。`ins.tsx` 用纯函数 `isIGStoryLikeId()`（`url-detect.ts`，
-  快拍族 = 单条 `story~` / tray `stories~` / 精选集 `highlight~`）在**请求发出前**判定骨架与
-  `IGHeader` 的 `storyMode`，不再等数据回来才切换（也就不会有帖子操作按钮的闪现）。
+  进入多选，工具栏变「已选 n / N · 全选 ⇄ 取消全选 · 下载选中(n) · 取消」，退出时清空选择。
+  工具栏位于身份头与网格之间（先于网格，移动端无需滚到底才够得着）。沿用 owner 口径：**默认不选、手动选择**。
+- **快拍骨架（`IGStoryListSkeleton`）**：与加载后同形（相册卡片外壳 + 身份头占位 + 工具栏占位 + 12 个
+  圆角方图 `Skeleton`，列数断点一致），消除加载完成时的布局跳动。`ins.tsx` 用纯函数 `isIGStoryLikeId()`
+  （`url-detect.ts`，快拍族 = 单条 `story~` / tray `stories~` / 精选集 `highlight~`）在**请求发出前**
+  判定骨架与 `IGHeader` 的 `storyMode`，不再等数据回来才切换（也就不会有帖子操作按钮的闪现）。
 - **纯逻辑下沉**：环形步进 `stepViewerIndex`、夹取 `clampViewerIndex`、选择 reducer
   `storySelectionReducer` 收敛到 `app/lib/ig/storyViewer.ts`。验收层是 node 环境 + `renderToString`
   （无 `@testing-library/react` / DOM 环境），交互组件只做调用，逻辑真源可离线断言。
-- **移动端**：工具栏在手机上**贴底**（`order-last` + `sticky bottom-0`，拇指区，iOS 相册式），`sm` 起
-  回到贴顶；上下栏留 `env(safe-area-inset-*)`，避免刘海 / Home 指示条压住序号与下载按钮；查看器
+- **移动端**：上下栏留 `env(safe-area-inset-*)`，避免刘海 / Home 指示条压住序号与下载按钮；查看器
   `h-[100dvh]` 规避地址栏抖动并 `overscroll-contain`。切条在触屏走横滑（|Δx|>40 且 |Δx|>|Δy|，避免与
   纵向滚动抢手势），左右按钮保留给键盘/桌面 —— 它也是触屏读屏用户唯一可达的切条入口，故不按指针
   类型隐藏。
@@ -215,7 +214,26 @@ Story（`/stories/{username}/{id}/`）与 Highlight 的识别、抓取早已可�
   查看器内**不要**自行设 `body.overflow` —— base-ui 检测到页面已被作者锁住会主动退让（MutationObserver
   等待），反而在关闭之后才接管锁。该约束已内联在 `IGStoryViewer` 的注释里。
 - **验收**：AC-IG-STORY-002（修订为网格形态）+ AC-IG-STORY-006（网格/骨架结构 + id 判定）+
-  AC-IG-STORY-007（查看器导航与选择纯逻辑，unit 层）。
+  AC-IG-STORY-007（查看器导航与选择纯逻辑，unit 层）+ AC-IG-STORY-008（相册卡片外壳，2026-11-18）。
+
+## Story 列表：统一相册卡片（2026-11-18）
+
+上一版把网格直接铺在页面背景上（吃满 `Layout` 的 `max-w-3xl`），工具栏在移动端贴底悬浮，与站内
+帖子卡、用户页的 `bg-card` 卡片外壳割裂；单条快拍又是自然比例大图，与列表网格不同形。
+
+本轮把快拍页收进与帖子卡一致的相册卡片：
+
+- **卡片外壳（`IGStoryList`）**：`mx-auto w-full max-w-[600px] rounded-2xl border border-border/60 bg-card`；
+  单条快拍用 `max-w-[420px]` 的同款卡片。
+- **身份头**：复用 `IGCardHeader`（头像 / 名称 / 认证 / InsLogo），新增 `subtitle`：
+  `@username · 快拍`，精选集为 `@username · 精选 · 标题`。不再是只有一张网格的无主页面。
+- **工具栏**：条数 / 选择 / 全部下载（或选择态的全选 / 下载选中 / 取消）放在身份头下方、网格之前，
+  不再贴底悬浮；网格格块改为 `rounded-lg` + `gap-1.5`，在卡片内留 `px-2` 边距。
+- **单条快拍**：`aspect-[9/16]` 的 story 画布（`object-contain`，媒体视频带播放角标），底部一行
+  `IGStoryMeta` + 时间 + 下载；点击画面进全屏查看器，与列表共用同一套交互。
+- **骨架屏**：`IGStoryListSkeleton` 同步为相册卡片外壳（身份头 / 工具栏 / 12 个圆角格）。
+- **验收**：新增 AC-IG-STORY-008（`renderToString` 结构与文案）；`/ins/*` 的路由骨架也已
+  使用 `InsPageSkeleton`（见 `AC-UI-SKELETON-001`）。
 
 > ⚠️ **已知缺口（本次未处理）**：`app/root.tsx` 的 viewport meta 仍是 `width=device-width, initial-scale=1`，
 > 没有 `viewport-fit=cover` —— 于是 `env(safe-area-inset-*)` 在真机上恒为 0，上面那些 safe-area padding

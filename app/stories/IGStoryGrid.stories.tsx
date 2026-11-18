@@ -19,7 +19,7 @@ type Story = StoryObj<typeof meta>
 
 export const Browsing: Story = {
   render: () => (
-    <div className="w-[720px]">
+    <div className="w-full max-w-[720px]">
       <IGStoryGrid posts={[storyPost, highlightPost, ...trayPosts]} />
     </div>
   ),
@@ -27,7 +27,7 @@ export const Browsing: Story = {
 
 export const SelectionMode: Story = {
   render: () => (
-    <div className="w-[720px]">
+    <div className="w-full max-w-[720px]">
       <IGStoryGrid
         posts={[storyPost, highlightPost, ...trayPosts]}
         selectable
@@ -40,7 +40,7 @@ export const SelectionMode: Story = {
 
 export const DenseTray: Story = {
   render: () => (
-    <div className="w-[720px]">
+    <div className="w-full max-w-[720px]">
       <IGStoryGrid posts={trayPostsMany} />
     </div>
   ),

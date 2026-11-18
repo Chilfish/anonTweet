@@ -8,6 +8,8 @@ interface IGCardHeaderProps {
   fullname?: string
   avatarUrl?: string
   verified?: boolean
+  /** 名称下方的一行上下文（如 `@user · 快拍`） */
+  subtitle?: React.ReactNode
   className?: string
 }
 
@@ -32,6 +34,7 @@ export function IGCardHeader({
   fullname,
   avatarUrl,
   verified,
+  subtitle,
   className,
 }: IGCardHeaderProps) {
   const displayName = fullname && fullname !== username
@@ -47,10 +50,15 @@ export function IGCardHeader({
           : <AvatarFallback>{username[0]?.toUpperCase() ?? '?'}</AvatarFallback>}
       </Avatar>
 
-      <div className="flex items-center gap-1 min-w-0 flex-1">
-        <span className="text-sm font-semibold truncate">{displayName}</span>
-        {verified && (
-          <BadgeCheck className="size-4 text-white fill-[#3896F4] shrink-0" />
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <div className="flex min-w-0 items-center gap-1">
+          <span className="truncate text-sm font-semibold">{displayName}</span>
+          {verified && (
+            <BadgeCheck className="size-4 shrink-0 fill-[#3896F4] text-white" />
+          )}
+        </div>
+        {subtitle && (
+          <span className="truncate text-xs text-muted-foreground">{subtitle}</span>
         )}
       </div>
 
