@@ -66,6 +66,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ### Changed
 
+#### 文档与界面信息密度收敛（2026-11-18）
+
+- 根指令文件 `CLAUDE.md` → `AGENTS.md`，145 行压到 47 行：只留项目一句话、验证命令、6 条硬约束与文档入口；目录树、技术栈清单、核心机制、Current State、gh 流程、Git Hooks、skills 说明全部外链到 `docs/`（根文件只写无法从代码推断的约束）
+- 统一 pre-push 门禁描述：`typecheck` → `eslint .` → `verify --exit-on-fail` → `build` → `build-storybook`（修正根文件漏 `build`、`INDEX.md` 与 `git-workflow.md` 各自一套的三方矛盾）
+- 新增 [`docs/ui-design/INFORMATION-DENSITY.md`](docs/ui-design/INFORMATION-DENSITY.md)：8 条负向约束、每屏预算与验收动作；`ui-design/README.md` 的 70 行组件清单改为「以目录为准」，修掉 `./components/*.md` 断链与 `select-cossui.md` 悬空引用
+- 品牌 Hero 只在首页渲染，详情页不再被「あのん Tweet + 三段介绍」占据首屏；页脚移除 build 时间 / commit hash 与隐藏入口 `/bili`
+- 删除三处与链接重复的入口文案（`TweetArticleCard`「阅读全文 →」、`ArticleEmbedTweet`「在 X 查看 →」、B站页「点击查看动态」），AI 视觉块标题改为「AI 描述」与原生 alt 面板区分
+- 设置页删除复述 label 的 description、隐私提示 / 词条计数 / 共用 Key 三处脚注；`IGMediaGrid` 删除仅 story 使用的 `showInfoLabel`；`plain` 截图路由补 `overflow-x-auto`
+- 删除未被引用的 `app/components/ui/settings-layout.tsx`（与 `settings/SettingsUI.tsx` 重复），`SETTINGS.md` 改指真实导入路径
+
 #### 提示词适配新一代模型（2026-11-18）
 
 - 推文 / 文章 / IG / 视觉提示词统一补「输入末尾复述输出契约」：明确可选字段 `entityText` 只在 Entity Reference 存在 HASHTAG/SYMBOL 占位符时输出，否则整段省略；字面量 `#tag` 未解析成实体时不得补进 `entityText`
