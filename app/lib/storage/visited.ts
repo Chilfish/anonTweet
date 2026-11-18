@@ -5,7 +5,7 @@ import { withDb } from './db'
 
 /** 持久化保留条数（超出按时间淘汰最旧的记录） */
 export const VISITED_STORAGE_LIMIT = 200
-/** 一次水合进内存的条数（首页只展示 HOME_VISITED_LIMIT 条） */
+/** 一次水合进内存的条数（首页只展示 HOME_RECENT_LIMIT 条） */
 export const VISITED_HYDRATE_LIMIT = 20
 
 const LEGACY_STORAGE_KEY = 'visited-store'
@@ -21,14 +21,20 @@ export async function recordVisited(
   item: Omit<VisitedItem, 'ts'> & { ts?: number },
 ): Promise<void> {
   await withDb(async (db) => {
-    const tx = db.transaction('visited', 'readwrite')
+    const tx = db.transaction([
+      'visited',
+      'snapshots',
+    ], 'readwrite')
     const store = tx.objectStore('visited')
+    const snapshots = tx.objectStore('snapshots')
     await store.put(toRecord({ ...item, ts: item.ts ?? Date.now() }))
 
     let count = await store.count()
     if (count > VISITED_STORAGE_LIMIT) {
       let cursor = await store.index('ts').openCursor()
       while (cursor && count > VISITED_STORAGE_LIMIT) {
+        // 摘要淘汰时同事务删掉详情快照，避免留下孤儿数据
+        await snapshots.delete(cursor.value.key)
         await cursor.delete()
         count -= 1
         cursor = await cursor.continue()
@@ -38,8 +44,9 @@ export async function recordVisited(
   })
 }
 
-export async function loadRecentVisited(
-  limit = VISITED_HYDRATE_LIMIT,
+/** 读取完整浏览历史（默认取满持久化上限，供 /history 使用） */
+export async function loadVisitedHistory(
+  limit = VISITED_STORAGE_LIMIT,
 ): Promise<VisitedItem[]> {
   const items = await withDb(async (db) => {
     const tx = db.transaction('visited', 'readonly')
@@ -66,15 +73,33 @@ export async function loadRecentVisited(
   return items ?? []
 }
 
+export async function loadRecentVisited(
+  limit = VISITED_HYDRATE_LIMIT,
+): Promise<VisitedItem[]> {
+  return loadVisitedHistory(limit)
+}
+
 export async function removeVisitedRecord(key: string): Promise<void> {
   await withDb(async (db) => {
-    await db.delete('visited', key)
+    const tx = db.transaction([
+      'visited',
+      'snapshots',
+    ], 'readwrite')
+    await tx.objectStore('visited').delete(key)
+    await tx.objectStore('snapshots').delete(key)
+    await tx.done
   })
 }
 
 export async function clearVisitedStore(): Promise<void> {
   await withDb(async (db) => {
-    await db.clear('visited')
+    const tx = db.transaction([
+      'visited',
+      'snapshots',
+    ], 'readwrite')
+    await tx.objectStore('visited').clear()
+    await tx.objectStore('snapshots').clear()
+    await tx.done
   })
 }
 

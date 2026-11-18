@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { isSnapshotFresh, SNAPSHOT_LIMIT, SNAPSHOT_TTL } from '~/lib/snapshot'
 import { closeDb } from '~/lib/storage/db'
 import {
   clearDictionaryStore,
@@ -9,9 +10,17 @@ import {
   putDictionaryEntry,
 } from '~/lib/storage/dictionary'
 import {
+  clearSnapshots,
+  getSnapshot,
+  putSnapshot,
+} from '~/lib/storage/snapshots'
+import {
+  clearVisitedStore,
   loadRecentVisited,
+  loadVisitedHistory,
   migrateLegacyVisited,
   recordVisited,
+  removeVisitedRecord,
   VISITED_STORAGE_LIMIT,
 } from '~/lib/storage/visited'
 /**
@@ -169,5 +178,122 @@ describe('AC-HOME-003: IndexedDB storage layer', () => {
     expect((await loadDictionaryEntries()).map(entry => entry.id)).toEqual(['d1'])
     expect(localStorage.getItem('visited-store')).toBeNull()
     expect(localStorage.getItem('translation-dictionary-storage')).toBeNull()
+  })
+})
+
+function tweetSnapshot(id: string, savedAt: number) {
+  return {
+    key: `tweet:${id}`,
+    type: 'tweet' as const,
+    id,
+    tweets: [],
+    translations: {},
+    savedAt,
+  }
+}
+
+describe('AC-HOME-005: detail snapshots share lifecycle with visited records', () => {
+  it('stores and reads a snapshot by type + id, overwriting on the same key', async () => {
+    await putSnapshot({
+      ...tweetSnapshot('1', 100),
+      translations: { 1: null },
+    })
+    await putSnapshot({
+      ...tweetSnapshot('1', 200),
+      translations: {},
+    })
+    await putSnapshot({
+      key: 'ig:abc',
+      type: 'ig',
+      id: 'abc',
+      posts: [],
+      savedAt: 150,
+    })
+
+    const stored = await getSnapshot('tweet:1')
+    expect(stored?.savedAt).toBe(200)
+    expect((await getSnapshot('ig:abc'))?.type).toBe('ig')
+    expect(await getSnapshot('tweet:missing')).toBeNull()
+  })
+
+  it('treats snapshots older than the TTL as stale', () => {
+    const now = 10 * SNAPSHOT_TTL
+    expect(isSnapshotFresh({ savedAt: now - 1000 }, now)).toBe(true)
+    expect(isSnapshotFresh({ savedAt: now - SNAPSHOT_TTL - 1 }, now)).toBe(false)
+  })
+
+  it('prunes the oldest snapshots beyond SNAPSHOT_LIMIT', async () => {
+    for (let i = 0; i <= SNAPSHOT_LIMIT + 2; i += 1)
+      await putSnapshot(tweetSnapshot(`id-${i}`, i))
+
+    expect(await getSnapshot('tweet:id-0')).toBeNull()
+    expect(await getSnapshot(`tweet:id-${SNAPSHOT_LIMIT + 2}`)).not.toBeNull()
+  })
+
+  it('removes the matching snapshot when a record or the whole history is cleared', async () => {
+    await recordVisited({
+      type: 'tweet',
+      id: '1',
+      title: 'one',
+      ts: 1,
+    })
+    await putSnapshot(tweetSnapshot('1', 1))
+    await recordVisited({
+      type: 'tweet',
+      id: '2',
+      title: 'two',
+      ts: 2,
+    })
+    await putSnapshot(tweetSnapshot('2', 2))
+
+    await removeVisitedRecord('tweet:1')
+    expect(await getSnapshot('tweet:1')).toBeNull()
+    expect(await getSnapshot('tweet:2')).not.toBeNull()
+
+    await clearVisitedStore()
+    expect(await getSnapshot('tweet:2')).toBeNull()
+    expect((await loadVisitedHistory()).length).toBe(0)
+  })
+
+  it('drops a snapshot when its visited record is evicted by the storage cap', async () => {
+    await recordVisited({
+      type: 'tweet',
+      id: 'oldest',
+      title: 'oldest',
+      ts: -1,
+    })
+    await putSnapshot(tweetSnapshot('oldest', 0))
+
+    for (let i = 0; i < VISITED_STORAGE_LIMIT; i += 1) {
+      await recordVisited({
+        type: 'tweet',
+        id: `id-${i}`,
+        title: `t-${i}`,
+        ts: i,
+      })
+    }
+    await recordVisited({
+      type: 'tweet',
+      id: 'fresh',
+      title: 'fresh',
+      ts: 10_000,
+    })
+
+    expect(await getSnapshot('tweet:oldest')).toBeNull()
+  })
+
+  it('clears snapshots without touching visited records', async () => {
+    await recordVisited({
+      type: 'tweet',
+      id: '1',
+      title: 'one',
+      ts: 1,
+    })
+    await putSnapshot(tweetSnapshot('1', 1))
+
+    await clearSnapshots()
+
+    expect(await getSnapshot('tweet:1')).toBeNull()
+    expect((await loadVisitedHistory()).map(item => item.id)).toEqual(['1'])
   })
 })

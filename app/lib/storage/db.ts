@@ -1,12 +1,43 @@
 import type { DBSchema, IDBPDatabase } from 'idb'
+import type { ArticleTranslation } from '~/lib/article/translate'
 import type { TranslationDicEntry } from '~/lib/stores/TranslationDictionary'
-import type { VisitedItem } from '~/lib/visited'
+import type { VisitedItem, VisitedType } from '~/lib/visited'
+import type { EnrichedTweet, Entity, IGPostData, TweetData } from '~/types'
 import { openDB } from 'idb'
 
 /** IndexedDB 中的访问记录（多一个 key 字段做主键） */
 export interface StoredVisited extends VisitedItem {
   key: string
 }
+
+interface SnapshotBase {
+  /** 与 visited 相同：`${type}:${id}` */
+  key: string
+  type: VisitedType
+  id: string
+  /** 最后写入时间（epoch ms），用于淘汰 */
+  savedAt: number
+}
+
+/** 推文 / 长文的完整详情快照 */
+export interface TweetSnapshot extends SnapshotBase {
+  type: 'tweet' | 'article'
+  /** store 形态的推文线程（entities 中的译文已被剥离到 translations） */
+  tweets: TweetData
+  /** 逐推文译文（手动编辑或 AI 翻译），按 tweet id 索引 */
+  translations: Record<string, Entity[] | null>
+  articleTranslation?: ArticleTranslation | null
+  /** 文章内嵌推文 */
+  embeds?: Record<string, EnrichedTweet | null>
+}
+
+/** Instagram 帖子列表快照（含 caption 译文） */
+export interface IgSnapshot extends SnapshotBase {
+  type: 'ig'
+  posts: IGPostData
+}
+
+export type SnapshotRecord = TweetSnapshot | IgSnapshot
 
 export interface StoredSearch {
   /** 去重键：搜索关键词本身 */
@@ -30,10 +61,15 @@ export interface AnonDB extends DBSchema {
     value: StoredSearch
     indexes: { ts: number }
   }
+  snapshots: {
+    key: string
+    value: SnapshotRecord
+    indexes: { savedAt: number }
+  }
 }
 
 const DB_NAME = 'anon-tweet'
-const DB_VERSION = 2
+const DB_VERSION = 3
 
 let dbPromise: Promise<IDBPDatabase<AnonDB>> | null = null
 
@@ -57,6 +93,10 @@ function getDb(): Promise<IDBPDatabase<AnonDB>> {
         if (!db.objectStoreNames.contains('searches')) {
           const searches = db.createObjectStore('searches', { keyPath: 'query' })
           searches.createIndex('ts', 'ts')
+        }
+        if (!db.objectStoreNames.contains('snapshots')) {
+          const snapshots = db.createObjectStore('snapshots', { keyPath: 'key' })
+          snapshots.createIndex('savedAt', 'savedAt')
         }
       },
     }).catch((error) => {
