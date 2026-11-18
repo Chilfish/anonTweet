@@ -1,7 +1,8 @@
 import type { IGTranslationMode } from '~/components/ins/IGTranslateToggle'
+import type { IgSnapshot } from '~/lib/storage/db'
 import type { IGPostData } from '~/types'
 import { AlertCircle } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router'
 import useSWR from 'swr'
 import { IGHeader } from '~/components/ins/IGHeader'
@@ -14,9 +15,12 @@ import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { useIGOperations } from '~/hooks/use-ig-operations'
 import { useIGScreenshotAction } from '~/hooks/use-ig-screenshot-action'
+import { usePersistSnapshot } from '~/hooks/use-persist-snapshot'
 import { useRecordVisit } from '~/hooks/use-record-visit'
 import { fetcher } from '~/lib/fetcher'
 import { buildMeta } from '~/lib/seo'
+import { snapshotKey } from '~/lib/snapshot'
+import { loadFreshIgSnapshot } from '~/lib/snapshot-restore'
 import { useAIConfig, useResolvedAIConfig } from '~/lib/stores/hooks'
 import { extractIGId, isIGStoryLikeId } from '~/lib/url-detect'
 
@@ -59,6 +63,11 @@ async function getIGPost(
     translationGlossary?: string
   },
 ): Promise<IGPostData> {
+  // 未过期的本地快照直接复用，避免重复请求
+  const cached = await loadFreshIgSnapshot(id)
+  if (cached)
+    return cached
+
   const body = aiConfig?.enableAITranslation && aiConfig.apiKey && aiConfig.model
     ? {
         enableAITranslation: true,
@@ -122,6 +131,20 @@ export default function IGPostPage() {
         image: primaryPost.media?.[0]?.display_url,
       }
     : null)
+
+  // 帖子完整数据（含 caption 译文）落本地快照
+  const snapshotRecord = useMemo<IgSnapshot | null>(() => {
+    if (!igId || !posts?.length)
+      return null
+    return {
+      key: snapshotKey('ig', igId),
+      type: 'ig',
+      id: igId,
+      posts,
+      savedAt: Date.now(),
+    }
+  }, [igId, posts])
+  usePersistSnapshot(snapshotRecord)
   // 快拍 / 精选集：下载优先的列表（无帖子截图/翻译操作）
   const isStoryList = list.length > 0 && list.every(isStoryPost)
 

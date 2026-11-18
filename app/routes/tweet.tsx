@@ -1,4 +1,5 @@
 import type { Route } from './+types/tweet'
+import type { TweetSnapshot } from '~/lib/storage/db'
 import type { GetTweetSchema } from '~/lib/validations/tweet'
 import type { EnrichedTweet, TweetData } from '~/types'
 import { useEffect, useMemo, useSyncExternalStore } from 'react'
@@ -7,6 +8,7 @@ import useSWR from 'swr'
 import { MyTweet } from '~/components/tweet/Tweet'
 import { TweetHeader } from '~/components/tweet/TweetHeader'
 import { useAutoTranslateTweets } from '~/hooks/use-auto-translate'
+import { usePersistSnapshot } from '~/hooks/use-persist-snapshot'
 import { useRecordVisit } from '~/hooks/use-record-visit'
 import { useTweetOperations } from '~/hooks/use-tweet-operations'
 import { fetcher } from '~/lib/fetcher'
@@ -14,7 +16,9 @@ import { TweetNotFound, TweetSkeleton } from '~/lib/react-tweet'
 import { buildMeta, clampDescription, ogLocale } from '~/lib/seo'
 import { getTweets } from '~/lib/service/getTweet'
 import { getLocalTweet } from '~/lib/service/getTweet.server'
-import { useMainTweet, useTranslationActions, useTweets } from '~/lib/stores/hooks'
+import { snapshotKey } from '~/lib/snapshot'
+import { loadFreshTweetSnapshot, restoreTweetSnapshot } from '~/lib/snapshot-restore'
+import { useMainTweet, useTranslationActions, useTranslations, useTweets } from '~/lib/stores/hooks'
 import { decodeHtmlEntities, extractTweetId } from '~/lib/utils'
 
 export async function loader({ params, request }: Route.LoaderArgs) {
@@ -110,6 +114,13 @@ function TweetStructuredData({ tweet }: { tweet: EnrichedTweet }) {
 }
 
 async function fetchTweetData(args: GetTweetSchema): Promise<TweetData> {
+  // 命中未过期的本地快照时直接恢复 store 并返回，不再打 /api/tweet/get
+  const snapshot = await loadFreshTweetSnapshot(args.tweetId)
+  if (snapshot) {
+    restoreTweetSnapshot(snapshot)
+    return snapshot.tweets
+  }
+
   const { data } = await fetcher.post<TweetData>(`/api/tweet/get/${args.tweetId}`, args)
   return data
 }
@@ -123,6 +134,7 @@ export default function TweetPage({ loaderData }: Route.ComponentProps) {
   const { setAllTweets } = useTranslationActions()
   const storeTweets = useTweets()
   const storeMainTweet = useMainTweet()
+  const translations = useTranslations()
   const isStoreReady = useSyncExternalStore(() => () => {}, () => true, () => false)
 
   const tweetOperations = useTweetOperations()
@@ -197,6 +209,25 @@ export default function TweetPage({ loaderData }: Route.ComponentProps) {
         image: visitedTweet.user?.profile_image_url_https,
       }
     : null)
+
+  // 完整详情（线程 + 译文）落本地快照，下次打开同一推文不再请求
+  const snapshotRecord = useMemo<TweetSnapshot | null>(() => {
+    if (!tweetId || storeTweets.length === 0)
+      return null
+    return {
+      key: snapshotKey('tweet', tweetId),
+      type: 'tweet',
+      id: tweetId,
+      tweets: storeTweets,
+      translations,
+      savedAt: Date.now(),
+    }
+  }, [
+    tweetId,
+    storeTweets,
+    translations,
+  ])
+  usePersistSnapshot(snapshotRecord)
 
   if (!tweetId) {
     return (

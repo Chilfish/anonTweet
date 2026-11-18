@@ -1,14 +1,18 @@
 import type { Route } from './+types/article'
+import type { TweetSnapshot } from '~/lib/storage/db'
 import type { ArticleBlock, EnrichedTweet } from '~/types'
-import { useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { ArticleEmbeddedTweet, ArticleReader, ArticleToolbar } from '~/components/article'
 import { useAutoTranslateArticle } from '~/hooks/use-auto-translate-article'
+import { usePersistSnapshot } from '~/hooks/use-persist-snapshot'
 import { useRecordVisit } from '~/hooks/use-record-visit'
 import { collectEmbeddedTweetIds } from '~/lib/article'
 import { TweetNotFound } from '~/lib/react-tweet'
 import { buildMeta, ogLocale } from '~/lib/seo'
 import { getTweets } from '~/lib/service/getTweet'
 import { getArticleTranslation, getLocalTweet } from '~/lib/service/getTweet.server'
+import { snapshotKey } from '~/lib/snapshot'
+import { loadFreshTweetSnapshot } from '~/lib/snapshot-restore'
 import {
   useArticleTranslation,
   useTranslationActions,
@@ -102,13 +106,50 @@ export default function ArticlePage({ loaderData }: Route.ComponentProps) {
 
   const mode = useTweetMode(id)
   const stored = useArticleTranslation(id)
-  const { setTweetTranslationMode } = useTranslationActions()
+  const { setTweetTranslationMode, setArticleTranslation } = useTranslationActions()
 
   const { status, translate } = useAutoTranslateArticle(
     article ?? undefined,
     tweetId ?? undefined,
     persisted,
   )
+
+  const translation = stored ?? persisted ?? undefined
+
+  // loader 没带回译文时（DB 未配置 / 服务端缓存失效），用本地快照补位
+  useEffect(() => {
+    if (!tweetId || persisted)
+      return
+    let cancelled = false
+    void loadFreshTweetSnapshot(tweetId, 'article').then((snapshot) => {
+      if (!cancelled && snapshot?.articleTranslation)
+        setArticleTranslation(tweetId, snapshot.articleTranslation)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [tweetId, persisted, setArticleTranslation])
+
+  const snapshotRecord = useMemo<TweetSnapshot | null>(() => {
+    if (!tweetId || !tweet)
+      return null
+    return {
+      key: snapshotKey('article', tweetId),
+      type: 'article',
+      id: tweetId,
+      tweets: [tweet],
+      translations: {},
+      articleTranslation: translation ?? null,
+      embeds,
+      savedAt: Date.now(),
+    }
+  }, [
+    tweetId,
+    tweet,
+    translation,
+    embeds,
+  ])
+  usePersistSnapshot(snapshotRecord)
 
   useRecordVisit(tweet && article && tweetId
     ? {
@@ -127,8 +168,6 @@ export default function ArticlePage({ loaderData }: Route.ComponentProps) {
       </div>
     )
   }
-
-  const translation = stored ?? persisted ?? undefined
 
   // 内嵌推文：取到数据即用真实推文组件渲染；未取到（删除/受限/失败）回退链接卡
   const renderEmbed = (embedId: string) => {
