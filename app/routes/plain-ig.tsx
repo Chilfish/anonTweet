@@ -53,18 +53,20 @@ export default function PlainIGPage() {
   const loaderData = useLoaderData<typeof loader>()
 
   return (
-    <div id="main-container" className="max-w-fit max-h-fit min-w-125 bg-background">
-      <Await resolve={loaderData} errorElement={<IGNotFound />}>
-        {resolved => (resolved.post?.length
-          ? (
-              <div className="flex flex-col gap-4">
-                {resolved.post.map(post => (
-                  <PlainIGPost key={post.id} post={post} />
-                ))}
-              </div>
-            )
-          : <IGNotFound id={resolved.igId ?? undefined} />)}
-      </Await>
+    <div className="w-full overflow-x-auto">
+      <div id="main-container" className="max-w-fit max-h-fit min-w-125 bg-background">
+        <Await resolve={loaderData} errorElement={<IGNotFound />}>
+          {resolved => (resolved.post?.length
+            ? (
+                <div className="flex flex-col gap-4">
+                  {resolved.post.map(post => (
+                    <PlainIGPost key={post.id} post={post} />
+                  ))}
+                </div>
+              )
+            : <IGNotFound id={resolved.igId ?? undefined} />)}
+        </Await>
+      </div>
     </div>
   )
 }

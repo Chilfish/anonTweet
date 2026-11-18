@@ -123,9 +123,7 @@ export function IGStoryList({ posts, className }: IGStoryListProps) {
                 </Button>
 
                 <Button size="sm" disabled={selected.size === 0 || busy} onClick={downloadSelected}>
-                  下载选中 (
-                  {selected.size}
-                  )
+                  下载选中
                 </Button>
 
                 <Button variant="ghost" size="sm" onClick={exitSelection}>

@@ -145,11 +145,13 @@ function TweetContent() {
 
 export default function Plain() {
   return (
-    <div
-      id="main-container"
-      className="max-w-fit max-h-fit min-w-125 bg-background font-sans antialiased"
-    >
-      <TweetContent />
+    <div className="w-full overflow-x-auto">
+      <div
+        id="main-container"
+        className="max-w-fit max-h-fit min-w-125 bg-background font-sans antialiased"
+      >
+        <TweetContent />
+      </div>
     </div>
   )
 }

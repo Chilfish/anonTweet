@@ -353,7 +353,7 @@ export const MediaGrid3x2x2: Story = {
 export const MediaGridStacked: Story = {
   render: () => (
     <div className="w-150">
-      <IGMediaGrid media={samplePhotos} showInfoLabel />
+      <IGMediaGrid media={samplePhotos} />
     </div>
   ),
 }
@@ -369,7 +369,7 @@ export const MediaGrid20Compact: Story = {
     }))
     return (
       <div className="w-150">
-        <IGMediaGrid media={twenty} showInfoLabel />
+        <IGMediaGrid media={twenty} />
       </div>
     )
   },

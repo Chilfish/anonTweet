@@ -7,7 +7,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
 import { Button } from '~/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '~/components/ui/card'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Textarea } from '~/components/ui/textarea'
@@ -149,7 +149,6 @@ export default function PublishDynamicForm() {
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle className="text-xl font-bold">发布 Bilibili 动态</CardTitle>
-        <CardDescription>填写内容、上传图片并提供 Cookie 即可发布。</CardDescription>
       </CardHeader>
 
       <form onSubmit={handleSubmit}>
@@ -175,7 +174,7 @@ export default function PublishDynamicForm() {
                   rel="noopener noreferrer"
                   href={`https://t.bilibili.com/${postId}`}
                 >
-                  点击查看动态：
+                  查看动态 →
                   {postId}
                 </a>
               </AlertDescription>

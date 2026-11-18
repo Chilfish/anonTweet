@@ -273,7 +273,6 @@ export default function SearchPage() {
             高级搜索
           </CollapsibleTrigger>
           <CollapsibleContent className="flex flex-wrap items-center justify-center gap-1.5 p-3 rounded-lg border border-border/60 bg-card/60 mt-2">
-            <span className="text-xs text-muted-foreground mr-1">快捷插入：</span>
             {ADVANCED_OPERATORS.map(op => (
               <Button
                 key={op.label}
@@ -304,7 +303,7 @@ export default function SearchPage() {
               、
               <code className="font-mono text-xs">until:日期</code>
               {' '}
-              等高级语法，点击「高级搜索」可快捷插入运算符
+              等高级语法
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
@@ -325,7 +324,6 @@ export default function SearchPage() {
             <EmptyTitle>搜索失败</EmptyTitle>
             <EmptyDescription>
               {error}
-              ，可尝试切换到「最新 / 热门」或使用简单关键词重试
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
@@ -341,8 +339,7 @@ export default function SearchPage() {
             <EmptyDescription>
               与「
               {q}
-              」匹配的结果为空，试试切换「热门」，或检查高级语法
-              （from: / until: / min_faves:）拼写是否正确
+              」匹配的结果为空，检查高级语法拼写（from: / until: / min_faves:）
             </EmptyDescription>
           </EmptyHeader>
         </Empty>

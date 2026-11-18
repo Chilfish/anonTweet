@@ -10,8 +10,6 @@ interface IGMediaGridProps {
   maxRows?: number
   /** Max columns per row. Default 3. */
   maxCols?: number
-  /** Show "此帖共 N 张" subtitle beneath grid. For screenshot export context. */
-  showInfoLabel?: boolean
   className?: string
 }
 
@@ -284,7 +282,6 @@ export function IGMediaGrid({
   media,
   maxRows = 2,
   maxCols = 3,
-  showInfoLabel = false,
   className,
 }: IGMediaGridProps) {
   // ── Filter invalid media ──
@@ -388,7 +385,7 @@ export function IGMediaGrid({
                       : (
                           <MediaImage
                             src={m.display_url}
-                            alt={`${cursor - cols + i + 1}`}
+                            alt={`第 ${cursor - cols + i + 1} 张图片`}
                             containerClassName="size-full"
                             className={getImageFitClass(m)}
                           />
@@ -406,17 +403,6 @@ export function IGMediaGrid({
           )
         })}
       </div>
-
-      {/* Info label — for screenshot context */}
-      {showInfoLabel && layout.hiddenCount > 0 && (
-        <p className="pt-1.5 text-[11px] text-muted-foreground/40 text-center tabular-nums select-none">
-          此帖共
-          {' '}
-          {validMedia.length}
-          {' '}
-          张图片
-        </p>
-      )}
 
       {/* Collapse — only when expanded beyond compact */}
       {expanded && layout.hiddenCount > 0 && (
