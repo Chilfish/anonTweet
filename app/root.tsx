@@ -13,6 +13,7 @@ import {
 import { UpdateNotice } from '~/components/pwa/UpdateNotice'
 import { ThemeProvider } from '~/components/ThemeProvider'
 import { AnchoredToastProvider, ToastProvider } from '~/components/ui/toast'
+import { ensureSearchHistoryHydrated } from '~/lib/stores/searchHistory'
 import { ensureDictionaryHydrated } from '~/lib/stores/TranslationDictionary'
 import { ensureVisitedHydrated } from '~/lib/stores/visited'
 import stylesheet from './app.css?url'
@@ -104,6 +105,7 @@ export default function App(_props: Route.ComponentProps) {
     // 本地数据改为 IndexedDB：启动即水合，翻译路径发请求前还会再 await 一次兜底
     void ensureVisitedHydrated()
     void ensureDictionaryHydrated()
+    void ensureSearchHistoryHydrated()
   }, [])
 
   return (

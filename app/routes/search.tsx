@@ -3,6 +3,7 @@ import type { EnrichedTweet } from '~/types'
 import { ArrowRightIcon, ChevronDownIcon, SearchIcon, SearchXIcon } from 'lucide-react'
 import { memo, useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
+import { RecentSearches } from '~/components/search/RecentSearches'
 import { SearchToolbar } from '~/components/search/SearchToolbar'
 import { BackButton } from '~/components/translation/BackButton'
 import { MyTweet } from '~/components/tweet/Tweet'
@@ -24,6 +25,10 @@ import {
   useTranslationActions,
   useTweetById,
 } from '~/lib/stores/hooks'
+import {
+  ensureSearchHistoryHydrated,
+  useSearchHistoryStore,
+} from '~/lib/stores/searchHistory'
 
 export function meta() {
   return [
@@ -109,6 +114,15 @@ export default function SearchPage() {
   // 结果列表容器：页级操作条的截图捕获节点（不含操作条/加载更多按钮）
   const listRef = useRef<HTMLDivElement | null>(null)
 
+  const recentQueries = useSearchHistoryStore(state => state.queries)
+  const hasHistoryHydrated = useSearchHistoryStore(state => state._hasHydrated)
+  const recordSearchQuery = useSearchHistoryStore(state => state.record)
+  const clearSearchHistoryState = useSearchHistoryStore(state => state.clear)
+
+  useEffect(() => {
+    void ensureSearchHistoryHydrated()
+  }, [])
+
   // URL 参数变化（回退/前进/新搜索）时同步输入框
   useEffect(() => {
     setInput(q)
@@ -187,6 +201,7 @@ export default function SearchPage() {
     e.preventDefault()
     const keyword = input.trim()
     if (keyword) {
+      recordSearchQuery(keyword)
       navigate(`/search?q=${encodeURIComponent(keyword)}&type=${type}`)
     }
   }
@@ -293,20 +308,43 @@ export default function SearchPage() {
       </div>
 
       {!q && (
-        <Empty>
-          <EmptyHeader>
-            <EmptyTitle>输入关键词开始搜索</EmptyTitle>
-            <EmptyDescription>
-              支持
-              {' '}
-              <code className="font-mono text-xs">from:用户名</code>
-              、
-              <code className="font-mono text-xs">until:日期</code>
-              {' '}
-              等高级语法
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
+        <div className="flex flex-col gap-4">
+          <RecentSearches
+            queries={hasHistoryHydrated
+              ? recentQueries
+              : []}
+            onSelect={query => navigate(`/search?q=${encodeURIComponent(query)}&type=${type}`)}
+            onClear={clearSearchHistoryState}
+          />
+          <Empty>
+            <EmptyHeader>
+              <EmptyTitle>输入关键词开始搜索</EmptyTitle>
+              <EmptyDescription>
+                支持
+                {' '}
+                <code className="font-mono text-xs">from:用户名</code>
+                、
+                <code className="font-mono text-xs">until:日期</code>
+                {' '}
+                等高级语法
+              </EmptyDescription>
+            </EmptyHeader>
+            {hasHistoryHydrated && recentQueries.length === 0 && (
+              <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+                {['from:GeminiApp', '#原神', 'lang:ja'].map(example => (
+                  <button
+                    key={example}
+                    type="button"
+                    onClick={() => insertOperator(example)}
+                    className="rounded-full border border-border/60 px-2.5 py-1 font-mono text-[11px] text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+                  >
+                    {example}
+                  </button>
+                ))}
+              </div>
+            )}
+          </Empty>
+        </div>
       )}
 
       {isLoading && (

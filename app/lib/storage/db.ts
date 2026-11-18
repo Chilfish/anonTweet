@@ -8,6 +8,12 @@ export interface StoredVisited extends VisitedItem {
   key: string
 }
 
+export interface StoredSearch {
+  /** 去重键：搜索关键词本身 */
+  query: string
+  ts: number
+}
+
 export interface AnonDB extends DBSchema {
   visited: {
     key: string
@@ -19,10 +25,15 @@ export interface AnonDB extends DBSchema {
     value: TranslationDicEntry
     indexes: { original: string }
   }
+  searches: {
+    key: string
+    value: StoredSearch
+    indexes: { ts: number }
+  }
 }
 
 const DB_NAME = 'anon-tweet'
-const DB_VERSION = 1
+const DB_VERSION = 2
 
 let dbPromise: Promise<IDBPDatabase<AnonDB>> | null = null
 
@@ -34,11 +45,19 @@ function getDb(): Promise<IDBPDatabase<AnonDB>> {
   if (!dbPromise) {
     dbPromise = openDB<AnonDB>(DB_NAME, DB_VERSION, {
       upgrade(db) {
-        const visited = db.createObjectStore('visited', { keyPath: 'key' })
-        visited.createIndex('ts', 'ts')
-        // original 非唯一：历史数据可能存在同词重复项，去重由 store 负责
-        const dictionary = db.createObjectStore('dictionary', { keyPath: 'id' })
-        dictionary.createIndex('original', 'original')
+        if (!db.objectStoreNames.contains('visited')) {
+          const visited = db.createObjectStore('visited', { keyPath: 'key' })
+          visited.createIndex('ts', 'ts')
+        }
+        if (!db.objectStoreNames.contains('dictionary')) {
+          // original 非唯一：历史数据可能存在同词重复项，去重由 store 负责
+          const dictionary = db.createObjectStore('dictionary', { keyPath: 'id' })
+          dictionary.createIndex('original', 'original')
+        }
+        if (!db.objectStoreNames.contains('searches')) {
+          const searches = db.createObjectStore('searches', { keyPath: 'query' })
+          searches.createIndex('ts', 'ts')
+        }
       },
     }).catch((error) => {
       // 打开失败（隐私模式 / 被策略禁用）后允许下次重试
