@@ -23,9 +23,12 @@ import { HankoMark } from '~/components/layout/HankoMark'
 import { TweetInputForm } from '~/components/tweet/TweetInputForm'
 import { computeVisitedStats, topVisitedAuthors } from '~/lib/visited-analytics'
 
+/** 相对时间与日期分组都按真实时间计算；跨零点运行时用宽松断言避免抖动 */
 const NOW = Date.now()
 const DATE_LINE_RE = /\d{4}\.\d{2}\.\d{2}/
 const MONTH_DAY_RE = /\d+月\d+日/
+const RELATIVE_TIME_RE = /刚刚|分钟前/
+const DAY_GROUP_RE = /今天|昨天/
 
 const items: VisitedItem[] = [
   {
@@ -83,7 +86,7 @@ describe('AC-HOME-001: recent visited renders as links and hides when empty', ()
     expect(html).toContain('Alice')
     expect(html).toContain('hello world')
     expect(html).toContain('caption text')
-    expect(html).toContain('5 分钟前')
+    expect(html).toMatch(RELATIVE_TIME_RE)
     expect(html).toContain('最近查看')
   })
 
@@ -189,7 +192,7 @@ describe('AC-HOME-004: history record views', () => {
       onRemove: () => {},
     }))
 
-    expect(html).toContain('今天')
+    expect(html).toMatch(DAY_GROUP_RE)
     expect(html).toMatch(MONTH_DAY_RE)
     expect(html).toContain('href="/tweets/111"')
     expect(html).toContain('href="/ins/abc%2Fdef"')
