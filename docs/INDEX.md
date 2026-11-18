@@ -1,6 +1,6 @@
 # Anon Tweet 文档索引
 
-> **本文档是项目文档的唯一入口。** AI 和开发者在处理任何任务前，先阅读本文档了解文档全局布局，再根据任务类型按需读取对应的领域文档。规范流程见 [CLAUDE.md](../CLAUDE.md) 的「🔴 强制规范」。
+> **本文档是项目文档的唯一入口。** AI 和开发者在处理任何任务前，先阅读本文档了解文档全局布局，再根据任务类型按需读取对应的领域文档。规范流程见 [AGENTS.md](../AGENTS.md) 的「硬约束」。
 
 ---
 
@@ -33,7 +33,7 @@ docs/
 │   └── deploy/                 #   部署（deployment.md）
 ├── planning/                   # 规划与决策（architecture ADR · project-architecture · backlog）
 ├── engineering/                # 工程规范（code-style · git-workflow · release-checklist）
-├── ui-design/                  # UI 设计系统（README 总览 · GENERAL 原子组件 · SETTINGS）
+├── ui-design/                  # UI 设计系统（README 总览 · GENERAL 原子组件 · SETTINGS · INFORMATION-DENSITY 信息密度）
 ├── postmortem/                 # 尸检报告（历史踩坑沉淀，开写代码前必读）
 ├── reviews/                    # 代码审查记录（review-YYYY-MM-DD-<主题>.md）
 ├── development-log/            # 开发日志（按天记录 YYYY-MM-DD.md）
@@ -59,8 +59,8 @@ docs/
 | **修改 AI Vision（看图说话/OCR）**             | `features/ai-vision/ai-vision.md` + `archive/ai-vision-plan.md`                                | 需求与上下文、已完成行动计划 + DR、AC-VISION                   |
 | **部署 / 环境配置**                            | `features/deploy/deployment.md`                                                                | Cloudflare Workers、`.dev.vars`、缓存层                        |
 | **修改 PWA / SW / manifest / 安装体验**        | `features/pwa/web-share-target.md` + `features/pwa/capability-audit.md`                        | share_target 方案 + 能力盘点（线上核查、场景裁决、候选优先级） |
-| **修改 UI 组件、页面**                         | `engineering/code-style.md` + `ui-design/README.md`                                            | 组件拆分、命名、导入顺序、原生优先原则                         |
-| **修改原子组件（Button/Input/Dialog 等）**     | `ui-design/GENERAL.md` + `ui-design/select-cossui.md`                                          | shadcn/coss 组件使用规范                                       |
+| **修改 UI 组件、页面**                         | `engineering/code-style.md` + `ui-design/README.md` + `ui-design/INFORMATION-DENSITY.md`       | 组件拆分、命名、导入顺序、原生优先原则、信息密度               |
+| **修改原子组件（Button/Input/Dialog 等）**     | `ui-design/GENERAL.md`                                                                         | shadcn/coss 组件使用规范                                       |
 | **修改 Settings 页面**                         | `ui-design/SETTINGS.md`                                                                        | SettingsGroup / SettingsItem 强制规范                          |
 | **架构级变更前**                               | `planning/architecture.md`（ADR）+ `planning/project-architecture.md`（系统架构 v3.0）         | 先读 ADR 历史决策，再对照架构总览                              |
 | **规划下一阶段任务**                           | `planning/backlog.md` + `archive/action-plan.md`                                               | 未决任务清单、已完成里程碑记录                                 |
@@ -137,7 +137,7 @@ UI 设计     docs/ui-design/（README · GENERAL · SETTINGS）
 
 | 事件         | 动作                                                                                                        |
 | ------------ | ----------------------------------------------------------------------------------------------------------- |
-| 新 Bug 模式  | 写 `docs/postmortem/0NN-*.md`（模板 `TEMPLATE.md`），预防项同步 `CLAUDE.md` / `engineering/git-workflow.md` |
+| 新 Bug 模式  | 写 `docs/postmortem/0NN-*.md`（模板 `TEMPLATE.md`），预防项同步 `AGENTS.md` / `engineering/git-workflow.md` |
 | 每次代码审查 | 记录到 `docs/reviews/review-YYYY-MM-DD-<主题>.md`                                                           |
 | 每天收尾     | 记入 `docs/development-log/YYYY-MM-DD.md`                                                                   |
 | 架构级决策   | 以 ADR 记录到 `docs/planning/architecture.md`                                                               |
@@ -150,7 +150,7 @@ UI 设计     docs/ui-design/（README · GENERAL · SETTINGS）
 
 ### 验证门禁（commit / PR 前）
 
-`bun run typecheck` → `bun run lint` → `bun run test`；pre-push 另跑 `bun run verify/index.ts --exit-on-fail`。lefthook 已配置，**禁止 `--no-verify`**。详见 `docs/engineering/git-workflow.md`。
+pre-push 依次执行 `bun run typecheck` → `eslint .` → `bun run verify/index.ts --exit-on-fail` → `bun run build` → `bun run build-storybook`（以 [lefthook.yml](../lefthook.yml) 为准）。**禁止 `--no-verify`**。详见 `docs/engineering/git-workflow.md`。
 
 ---
 

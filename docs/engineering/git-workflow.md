@@ -71,7 +71,7 @@ Scope 使用模块名或功能名：
 1. **写代码前**，先用 Conventional Commit 格式确定 commit message（如 `feat(verify): add screenshot verifier with AC-SHOT-001~004`）
 2. **围绕这个 message 的范围编写代码**，超出范围的工作留给下一个 commit
 3. **当 diff 变大时（>10 文件或 >200 行），主动拆分**为多个独立 commit
-4. 每个 commit 应能独立通过检查（typecheck + lint + test）
+4. 每个 commit 应能独立通过检查（typecheck + lint + verify）
 5. 功能实现、测试、配置修改、文档更新应分开 commit
 
 典型拆分示例（IG 集成）：
@@ -205,6 +205,6 @@ gh pr merge 1 --merge --delete-branch
 `lefthook.yml` 由 `bun install` 时自动安装（postinstall script）。
 
 - `pre-commit`：ESLint autofix（staged files）
-- `pre-push`：真实 gate — `typecheck + lint + test + verify`（当前 test 44/44、verify 17 PASS，可正常放行）
+- `pre-push`：真实 gate — `typecheck` → `eslint .` → `verify --exit-on-fail` → `build` → `build-storybook`（以 `lefthook.yml` 为准）
 
 手动运行：`bun run lefthook run pre-push`

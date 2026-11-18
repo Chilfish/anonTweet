@@ -15,6 +15,7 @@
 - [ ] 所有组件同时考虑浅色/深色模式（项目使用 `.dark` 类切换）
 - [ ] 交互元素同时处理桌面（hover）和移动端（active/press）状态
 - [ ] 使用 `cn()` 工具函数合并类名，不要直接拼接字符串
+- [ ] 通过 [INFORMATION-DENSITY.md](./INFORMATION-DENSITY.md) 的自查：无重复事实、无口径脚注、无自证式入口
 
 ---
 
@@ -211,82 +212,12 @@
 
 ---
 
-## 7. 组件文件索引（Component Index）
+## 7. 组件索引
 
-所有 UI 组件位于 `~/components/ui/`（即 `app/components/ui/`）。
-
-### 布局与导航
-
-- `sidebar.tsx` — 完整侧边栏系统
-- `breadcrumb.tsx` — 面包屑导航
-- `tabs.tsx` — 标签页（default / underline 变体）
-- `scroll-area.tsx` — 自定义滚动条
-
-### 表单与输入
-
-- `button.tsx` — 按钮（6 种 variant、8 种 size）
-- `input.tsx` — 输入框（sm / default / lg 尺寸）
-- `input-group.tsx` — 带前缀/后缀的输入组
-- `textarea.tsx` — 文本域
-- `select.tsx` — 下拉选择器（Select / SelectContent / SelectItem）
-- `combobox.tsx` — 组合框（多选支持）
-- `autocomplete.tsx` — 自动完成
-- `checkbox.tsx` / `checkbox-group.tsx` — 复选框
-- `radio-group.tsx` — 单选组
-- `switch.tsx` — 开关
-- `slider.tsx` — 滑块
-- `number-field.tsx` — 数字输入
-- `otp-field.tsx` — OTP 验证码输入
-- `toggle.tsx` / `toggle-group.tsx` — 切换按钮
-- `calendar.tsx` — 日期选择器
-- `field.tsx` / `fieldset.tsx` / `form.tsx` — 表单结构
-- `label.tsx` — 标签（Label-Input 关联，基于 useRender）
-- `search-input.tsx` — 搜索输入框（防抖 + 中文 IME composition 支持）
-- `item-multi-select.tsx` — 项多选（批量操作场景，含搜索/全选/反选）
-
-### 浮层与反馈
-
-- `dialog.tsx` — 模态对话框（带 backdrop-blur）
-- `drawer.tsx` — 抽屉（4 方向 + 手势关闭）
-- `sheet.tsx` — 侧面板
-- `alert-dialog.tsx` — 确认对话框
-- `toast.tsx` — Toast 通知系统
-- `tooltip.tsx` — 工具提示
-- `popover.tsx` — 弹出框
-- `preview-card.tsx` — 悬停预览卡
-- `dropdown-menu.tsx` — 下拉菜单
-- `menu.tsx` — 菜单（基于 Base UI Menu，含 createHandle 复合件）
-- `context-menu.tsx` — 右键菜单
-- `command.tsx` — 命令面板
-- `spinner.tsx` — 加载指示器（animate-spin）
-- `toolbar.tsx` — 工具栏（Toolbar / ToolbarButton）
-
-### 数据展示
-
-- `card.tsx` — 卡片容器
-- `table.tsx` — 表格
-- `badge.tsx` — 徽章
-- `avatar.tsx` — 头像
-- `kbd.tsx` — 键盘快捷键
-- `progress.tsx` — 进度条
-- `meter.tsx` — 计量表
-- `skeleton.tsx` — 骨架屏
-- `empty.tsx` — 空状态
-- `alert.tsx` — 提示横幅
-- `pagination.tsx` — 分页
-
-### 特殊组件
-
-- `settings-layout.tsx` — **设置页面专用**（SettingsGroup + SettingsItem）
-- `chart.tsx` — 图表容器（recharts 封装，ChartConfig 配置）
-- `media.tsx` — 媒体加载状态
-- `frame.tsx` — 通用面板布局
-- `group.tsx` — 按钮组
-- `separator.tsx` — 分割线
-- `collapsible.tsx` — 折叠面板
-- `accordion.tsx` — 手风琴
+原子组件全部位于 `~/components/ui/`，以目录本身为准，不在此维护清单。业务组件按领域分目录：`~/components/tweet/`、`~/components/ins/`、`~/components/article/`、`~/components/settings/`。
 
 > **具体组件的使用规范请参考：**
 >
-> - **[GENERAL.md](./components/GENERAL.md)** — 按钮、输入框、卡片等通用原子组件规范
-> - **[SETTINGS.md](./components/SETTINGS.md)** — 设置页面的强制布局模式
+> - **[GENERAL.md](./GENERAL.md)** — 按钮、输入框、卡片等通用原子组件规范
+> - **[SETTINGS.md](./SETTINGS.md)** — 设置页面的强制布局模式
+> - **[INFORMATION-DENSITY.md](./INFORMATION-DENSITY.md)** — 信息密度与界面冗余的负向约束
