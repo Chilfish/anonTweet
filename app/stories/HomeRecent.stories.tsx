@@ -58,5 +58,5 @@ export const Empty: Story = {
 }
 
 export const History: Story = {
-  render: () => <HistoryList items={items} onRemove={() => {}} />,
+  render: () => <HistoryList items={items} groupBy="date" onRemove={() => {}} />,
 }
