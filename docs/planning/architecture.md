@@ -116,3 +116,19 @@
   - 新增 DB 表 `tweet_article_translations`（需 migration）
   - 三态开关（原文/译文/双语）复用现有 `translationMode`，截图选「仅译文」控长
   - 详见 `docs/features/tweet/article.md`
+
+## ADR-010: X 取数与推文组件抽为独立 npm 包
+
+- **日期**: 2026-11-18
+- **决策**: 把 `app/lib/rettiwt-api` + `app/lib/react-tweet` + `app/components/tweet` 的展示层收敛为独立仓库发布的单包多入口 `@chilfish/tweet`（`.` / `./node` / `./react`），本仓库与 `tweets-viewer` 都退化为消费者
+- **背景**: 同一份 X 逆向实现三处并存（上游 / `tweets-viewer/packages/rettiwt-api` / 本仓库内嵌副本），能力各缺一半，同一个 transaction id 缺陷两边各修一次；本仓库副本还被 `eslint.config.mjs` 整目录 ignore，属于无 lint 保护的飞地
+- **设计**:
+  - core 平台无关：HTTP 抽象为可注入 `HttpClient`（默认 `fetch`），错误模型统一为带 `status` 的 `TwitterApiError` 家族，`RettiwtPool` 为唯一调度实现
+  - `node:*`、proxy agent、fs 上传只出现在 `./node` 入口
+  - `./react` 只做「`EnrichedTweet` → DOM」，`Link` / 媒体 URL / 插槽（翻译、vision、截图）经 `TweetProvider` 注入
+  - 构建 `tsdown`（neutral + dts + 双格式）、发布走 OIDC Trusted Publisher + provenance
+- **后果**:
+  - 本仓库删除 `app/lib/rettiwt-api`、`app/lib/SmartPool.ts`、`app/lib/react-tweet`，新增 `app/lib/twitter.ts` 装配层；`axios.server` 的 Workers adapter 补丁不再需要
+  - `EnrichedTweet` 成为 core → `./react` 的唯一契约，需在 `0.1.0` 一次性定名（`id` / `quotedTweet` / `isInlineMedia`）
+  - 包是单点：两站点用 exact version 锁定，发布前必须跑消费者冒烟
+  - 详见 `docs/planning/tweet-sdk-extraction.md`
