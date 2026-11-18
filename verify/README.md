@@ -89,6 +89,8 @@ AC-DEV-001（dev server 健康）、AC-IG-009（缺 cookies → 500）、AC-MEDI
 | [AC-home.md](acceptance-criteria/AC-home.md)               | AC-HOME-001~006（最近查看 / 首页入口 / IndexedDB / 历史页 / 详情快照 / 本地优先） |
 | [AC-about.md](acceptance-criteria/AC-about.md)             | AC-ABOUT-001~002（关于页信息 / 响应式与视觉）                                     |
 | [AC-search.md](acceptance-criteria/AC-search.md)           | AC-SEARCH-001~002（最近搜索 / 语法示例 / 布局）                                   |
+| [AC-list.md](acceptance-criteria/AC-list.md)               | AC-LIST-001（列表输入 / 状态 / 布局）                                             |
+| [AC-user.md](acceptance-criteria/AC-user.md)               | AC-USER-001~002（资料卡 / 路由与时间线开关）                                      |
 | [AC-vision.md](acceptance-criteria/AC-vision.md)           | AC-VISION-001~012（AI 视觉）                                                      |
 | [AC-resolver.md](acceptance-criteria/AC-resolver.md)       | AC-RESOLVER-001（决策链收敛）                                                     |
 | [AC-decouple.md](acceptance-criteria/AC-decouple.md)       | AC-DECOUPLE-001~002（GET 解耦 + AI 超时）                                         |
