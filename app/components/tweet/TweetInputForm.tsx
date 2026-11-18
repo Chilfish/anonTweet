@@ -78,7 +78,7 @@ export function TweetInputForm() {
     <Card className="w-full max-w-md">
       <CardHeader className="text-center pb-2">
         <CardDescription>
-          输入链接或 ID，加载推文 / Instagram 内容
+          输入链接、@用户名 或 ID，加载推文 / 用户 / 列表 / Instagram 内容
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -91,7 +91,7 @@ export function TweetInputForm() {
               id="tweet-input"
               name="tweet-id"
               type="text"
-              placeholder="粘贴 URL 或输入 ID..."
+              placeholder="粘贴 URL、@用户名 或 ID..."
               value={input}
               onChange={e => setInput(e.target.value)}
               className="font-mono text-sm"
@@ -120,6 +120,20 @@ export function TweetInputForm() {
               <code className="bg-muted px-1.5 py-0.5 rounded-sm">1234567890...</code>
               {' '}
               (推文纯数字 ID)
+            </FormatListItem>
+            <FormatListItem>
+              <code className="bg-muted px-1.5 py-0.5 rounded-sm">@username</code>
+              {' '}
+              或
+              {' '}
+              <code className="bg-muted px-1.5 py-0.5 rounded-sm">x.com/username</code>
+              {' '}
+              (用户主页)
+            </FormatListItem>
+            <FormatListItem>
+              <code className="bg-muted px-1.5 py-0.5 rounded-sm">x.com/i/lists/123...</code>
+              {' '}
+              (列表)
             </FormatListItem>
             <FormatListItem>
               <code className="bg-muted px-1.5 py-0.5 rounded-sm">

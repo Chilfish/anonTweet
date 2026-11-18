@@ -20,7 +20,7 @@
 anonTweet 以**首页 "/" 作为 Web Share Target 的 GET 接收点**：Chrome Android 将站点
 安装为 PWA 后，其它 App 通过系统分享转发链接时，anonTweet 会出现在分享面板；选中后
 Chrome 带 `title/text/url` query 重新打开首页，首页 `TweetInputForm` 一次性预填 + 自动提交
-（可识别 X/IG 链接 → 跳 `/tweets/:id | /ins/:id`；不可识别 → 留框报错待手动，与手动粘贴一致）。
+（可识别 X 推文 / 用户主页 / 列表 / IG 链接 → 跳对应站内页面；不可识别 → 留框报错待手动，与手动粘贴一致）。
 
 service worker 为**极简网络透传**：不缓存、不做离线，仅用于满足 Chrome「可安装 PWA」判定
 并保持 SSR/serverless 导航每次回源。
@@ -59,6 +59,7 @@ service worker 为**极简网络透传**：不缓存、不做离线，仅用于�
 - **Pass 条件**（`app/lib/share.ts`）：
   - `pickSharedInput` 优先级 url → text → title
   - `resolveShareTarget`：X/twitter.com/mobile 链接或纯数字 id → `/tweets/{id}`；
+    用户主页链接 / `@用户名` / 裸用户名 → `/user/{username}`；`/i/lists/{id}` → `/list/{id}`；
     IG p/reel → `/ins/{shortcode}`、stories → `/ins/{user}/{id}`；混在正文里的 X 链接也能识别；
     空串/不可识别文本 → `{ ok:false, error }`（调用方留框报错，不自动跳转）
 

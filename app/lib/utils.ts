@@ -8,6 +8,8 @@ import { toastManager } from '~/components/ui/toast'
 export {
   detectInputType,
   extractIGId,
+  extractListId,
+  extractProfileUsername,
   extractTweetId,
   igIdToSourceUrl,
   isIGListId,

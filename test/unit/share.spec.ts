@@ -112,6 +112,27 @@ describe('AC-PWA-003: share target receive decision', () => {
       expect(resolveShareTarget('快看这个 https://x.com/a/status/42 好有趣')).toEqual({ ok: true, to: '/tweets/42' })
     })
 
+    it('@用户名 / 裸用户名 / 用户主页链接 → /user/{username}', () => {
+      expect(resolveShareTarget('@GeminiApp')).toEqual({ ok: true, to: '/user/GeminiApp' })
+      expect(resolveShareTarget('GeminiApp')).toEqual({ ok: true, to: '/user/GeminiApp' })
+      expect(resolveShareTarget('https://x.com/GeminiApp')).toEqual({ ok: true, to: '/user/GeminiApp' })
+      expect(resolveShareTarget('https://twitter.com/GeminiApp?s=21')).toEqual({ ok: true, to: '/user/GeminiApp' })
+    })
+
+    it('list 链接 → /list/{id}', () => {
+      expect(resolveShareTarget('https://x.com/i/lists/1234567890')).toEqual({ ok: true, to: '/list/1234567890' })
+      expect(resolveShareTarget('https://twitter.com/i/lists/42?lang=zh')).toEqual({ ok: true, to: '/list/42' })
+    })
+
+    it('x 站点保留路径不误判为用户名', () => {
+      expect(resolveShareTarget('https://x.com/search').ok).toBe(false)
+      expect(resolveShareTarget('https://x.com/settings').ok).toBe(false)
+    })
+
+    it('纯数字仍优先判为推文 ID，而不是用户名', () => {
+      expect(resolveShareTarget('1234567890')).toEqual({ ok: true, to: '/tweets/1234567890' })
+    })
+
     it('空串/纯空白 → 提示输入', () => {
       expect(resolveShareTarget('')).toEqual({
         ok: false,

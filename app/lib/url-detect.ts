@@ -25,11 +25,38 @@ const TWITTER_STATUS_RE = /(?:https?:\/\/)?(?:www\.)?twitter\.com\/\w+\/status\/
 const X_STATUS_RE = /(?:https?:\/\/)?(?:www\.)?x\.com\/\w+\/status\/(\d+)/i
 const MOBILE_TWITTER_STATUS_RE = /(?:https?:\/\/)?(?:mobile\.)?twitter\.com\/\w+\/status\/(\d+)/i
 const MOBILE_X_STATUS_RE = /(?:https?:\/\/)?(?:mobile\.)?x\.com\/\w+\/status\/(\d+)/i
+const X_LIST_RE = /(?:https?:\/\/)?(?:www\.|mobile\.)?(?:twitter|x)\.com\/i\/lists\/(\d+)/i
+const HANDLE_ONLY_RE = /^@?(\w{1,15})$/
+const PROFILE_URL_RE = /(?:https?:\/\/)?(?:www\.|mobile\.)?(?:twitter|x)\.com\/(\w{1,15})(?:[/?#]|$)/i
 const IG_POST_RE = /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:[\w.-]+\/)?p\/([\w-]+)/i
 const IG_REEL_RE = /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:[\w.-]+\/)?reel\/([\w-]+)/i
 const IG_HIGHLIGHT_RE = /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:[\w.-]+\/)?stories\/highlights\/(\d+)/i
 const IG_STORY_RE = /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:[\w.-]+\/)?stories\/([\w.]+)\/(\d+)/i
 const IG_STORIES_TRAY_RE = /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:[\w.-]+\/)?stories\/([\w.]+)\/?(?:[?#].*)?$/i
+
+/** X 站点保留路径，不能被当作 @用户名 */
+const RESERVED_HANDLES = new Set([
+  'about',
+  'compose',
+  'download',
+  'explore',
+  'hashtag',
+  'home',
+  'i',
+  'intent',
+  'list',
+  'lists',
+  'login',
+  'logout',
+  'messages',
+  'notifications',
+  'privacy',
+  'search',
+  'settings',
+  'share',
+  'signup',
+  'tos',
+])
 
 /** canonical id 分隔符（`~` 为 RFC3986 unreserved，且 Windows 文件名合法） */
 const IG_ID_SEP = '~'
@@ -60,6 +87,44 @@ export function extractTweetId(input: string): string | null {
   }
 
   return null
+}
+
+/**
+ * 列表 ID：纯数字 ID 或 `x.com/i/lists/{id}` / `twitter.com/i/lists/{id}` 链接。
+ *
+ * 纯数字在首页输入里优先判为推文 ID；列表页表单单独调用本函数时可直接用数字 ID。
+ */
+export function extractListId(input: string): string | null {
+  const trimmed = input.trim()
+  if (TWEET_ID_ONLY_RE.test(trimmed))
+    return trimmed
+  return trimmed.match(X_LIST_RE)?.[1] ?? null
+}
+
+/**
+ * 识别用户主页：`@用户名`、裸用户名，或 `x.com/{username}` / `twitter.com/{username}`。
+ * 站点保留路径（i / search / settings 等）不算用户名。
+ */
+export function extractProfileUsername(input: string): string | null {
+  const trimmed = input.trim()
+  if (!trimmed)
+    return null
+
+  const bare = trimmed.match(HANDLE_ONLY_RE)
+  if (bare) {
+    const handle = bare[1]!
+    return RESERVED_HANDLES.has(handle.toLowerCase())
+      ? null
+      : handle
+  }
+
+  const fromUrl = trimmed.match(PROFILE_URL_RE)
+  if (!fromUrl)
+    return null
+  const handle = fromUrl[1]!
+  return RESERVED_HANDLES.has(handle.toLowerCase())
+    ? null
+    : handle
 }
 
 /**

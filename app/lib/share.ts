@@ -10,12 +10,14 @@
  * navigator.share；无该 API 的环境由调用方降级为复制原文链接。
  *
  * 与 TweetInputForm 共用同一套 url-detect 判定，保证「系统分享」与「手动粘贴」
- * 的行为完全一致（可识别 → 自动跳 /tweets/:id | /ins/:id；不可识别 → 留框报错）。
+ * 的行为完全一致（可识别 → 自动跳 /tweets/:id | /user/:username | /list/:id | /ins/:id；
+ * 不可识别 → 留框报错）。
  */
 import type { EnrichedTweet, Entity, IGPost } from '~/types'
 import {
-  detectInputType,
   extractIGId,
+  extractListId,
+  extractProfileUsername,
   extractTweetId,
 } from '~/lib/url-detect'
 
@@ -48,35 +50,39 @@ export type ShareResolveResult
 
 /**
  * 与首页表单同语义的目标解析：
- * - Twitter/X → `/tweets/{id}`
+ * - 推文 ID / status URL → `/tweets/{id}`
+ * - 列表链接 → `/list/{id}`
+ * - `@用户名` / 裸用户名 / 用户主页链接 → `/user/{username}`
  * - Instagram → `/ins/{id}`
  * - 其余 → { ok:false, error }，由调用方把内容留在输入框并展示错误（与手动提交一致）。
  */
 export function resolveShareTarget(raw: string): ShareResolveResult {
   const trimmed = raw.trim()
   if (!trimmed) {
-    return { ok: false, error: '请输入 Tweet 或 Instagram 的 URL。' }
+    return { ok: false, error: '请输入推文、用户、列表或 Instagram 的链接或 ID。' }
   }
 
-  const type = detectInputType(trimmed)
-
-  if (type === 'twitter') {
-    const tweetId = extractTweetId(trimmed)
-    if (!tweetId) {
-      return { ok: false, error: '无法识别有效的 Tweet URL 或 ID，请检查格式。' }
-    }
+  const tweetId = extractTweetId(trimmed)
+  if (tweetId) {
     return { ok: true, to: `/tweets/${tweetId}` }
   }
 
-  if (type === 'instagram') {
-    const igId = extractIGId(trimmed)
-    if (!igId) {
-      return { ok: false, error: '无法识别有效的 Instagram URL，请检查格式。' }
-    }
+  const listId = extractListId(trimmed)
+  if (listId) {
+    return { ok: true, to: `/list/${listId}` }
+  }
+
+  const username = extractProfileUsername(trimmed)
+  if (username) {
+    return { ok: true, to: `/user/${username}` }
+  }
+
+  const igId = extractIGId(trimmed)
+  if (igId) {
     return { ok: true, to: `/ins/${igId}` }
   }
 
-  return { ok: false, error: '无法识别有效的 Tweet 或 Instagram URL，请检查格式。' }
+  return { ok: false, error: '无法识别有效的推文、用户、列表或 Instagram 输入，请检查格式。' }
 }
 
 /** 是否为一次有效的系统分享落地（存在任一分享字段）。 */
