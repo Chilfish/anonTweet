@@ -2,8 +2,14 @@ import type { VisitedItem } from '~/lib/visited'
 import { FileText, Images, MessageCircle } from 'lucide-react'
 import { Link } from 'react-router'
 import { MediaImage } from '~/components/ui/media'
+import { Skeleton } from '~/components/ui/skeleton'
 import { useProxyMedia } from '~/lib/stores/appConfig'
-import { formatVisitedTime, visitedHref, visitedKey } from '~/lib/visited'
+import {
+  formatVisitedTime,
+  HOME_RECENT_LIMIT,
+  visitedHref,
+  visitedKey,
+} from '~/lib/visited'
 
 const TYPE_ICON = {
   tweet: MessageCircle,
@@ -62,34 +68,59 @@ function VisitedRow({ item }: { item: VisitedItem }) {
   )
 }
 
+function VisitedRowSkeleton() {
+  return (
+    <div className="flex items-center gap-3 rounded-lg px-2 py-2">
+      <Skeleton className="size-9 shrink-0 rounded-md" />
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+        <Skeleton className="h-3.5 w-1/3 rounded" />
+        <Skeleton className="h-3 w-2/3 rounded opacity-70" />
+      </div>
+    </div>
+  )
+}
+
 /** 最近查看：首页回访入口，只保留最近几条；完整记录在 /history */
 export function RecentVisited({
   items,
+  loading = false,
   allHref = '/history',
 }: {
   items: VisitedItem[]
+  /** IndexedDB 水合未完成：占住列表高度，避免首帧空白后列表再弹出来 */
+  loading?: boolean
   allHref?: string
 }) {
-  if (!items.length)
+  if (!loading && !items.length)
     return null
 
   return (
-    <section className="w-full max-w-md mt-4">
+    <section className="w-full max-w-md mt-4" aria-busy={loading}>
       <div className="mb-1 flex items-center justify-between px-2">
         <h2 className="text-xs font-medium text-muted-foreground">最近查看</h2>
-        <Link
-          to={allHref}
-          className="text-[11px] text-muted-foreground/60 transition-colors hover:text-foreground"
-        >
-          全部
-        </Link>
+        {loading
+          ? <Skeleton className="h-3 w-8 rounded" />
+          : (
+              <Link
+                to={allHref}
+                className="text-[11px] text-muted-foreground/60 transition-colors hover:text-foreground"
+              >
+                全部
+              </Link>
+            )}
       </div>
       <ul className="flex flex-col">
-        {items.map(item => (
-          <li key={visitedKey(item)}>
-            <VisitedRow item={item} />
-          </li>
-        ))}
+        {loading
+          ? Array.from({ length: HOME_RECENT_LIMIT }, (_, index) => (
+              <li key={index}>
+                <VisitedRowSkeleton />
+              </li>
+            ))
+          : items.map(item => (
+              <li key={visitedKey(item)}>
+                <VisitedRow item={item} />
+              </li>
+            ))}
       </ul>
     </section>
   )

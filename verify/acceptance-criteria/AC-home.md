@@ -1,8 +1,8 @@
 # 首页验收标准
 
-> 版本：1.2 | 日期：2026-11-18
+> 版本：1.3 | 日期：2026-11-18
 > 背景：首页精简后只剩输入框，缺少回访入口与产品范围提示。本组 AC 锁定「最近查看」本地历史、`/history` 完整历史页、详情快照缓存与本地存储层。
-> 关联 Verifier：`test/unit/visited.spec.ts`、`test/unit/storage.spec.ts`、`test/acceptance/home-render.spec.ts`
+> 关联 Verifier：`test/unit/visited.spec.ts`、`test/unit/storage.spec.ts`、`test/unit/visited-store.spec.ts`、`test/acceptance/home-render.spec.ts`
 > 执行命令：`bun verify --module home [--ac AC-HOME-NNN]`
 
 ---
@@ -16,7 +16,9 @@
   - `formatVisitedTime`：<1 分钟「刚刚」、<1 小时「N 分钟前」、<24 小时「N 小时前」、<7 天「N 天前」、更早「M月D日」
   - `visitedHref`：tweet → `/tweets/{id}`、ig → `/ins/{id}`、article → `/article/{id}`，id 做 URL 编码
   - `RecentVisited` 渲染为可点击链接，含类型图标、标题、摘要与相对时间；传入空列表时返回空串（不占位）
+  - 水合中（`loading`）按 `HOME_RECENT_LIMIT` 条渲染行骨架并带 `aria-busy`，不给出「全部」入口与记录链接
   - 首页取 `HOME_RECENT_LIMIT`（3）条，同一记录不重复出现；头部「全部」链接指向 `/history`
+  - store 水合无论成功、读写异常还是 IndexedDB 不可用，`_hasHydrated` 都必须置 true（不允许停在骨架态）
   - 原「继续阅读」宽卡已移除，最新一条不再单独放大
   - 历史只写本机存储，不随请求发送、不上报服务端
 

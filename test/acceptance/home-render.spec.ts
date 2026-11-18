@@ -21,6 +21,7 @@ import { RecentVisited } from '~/components/home/RecentVisited'
 import { Dateline } from '~/components/layout/Dateline'
 import { HankoMark } from '~/components/layout/HankoMark'
 import { TweetInputForm } from '~/components/tweet/TweetInputForm'
+import { HOME_RECENT_LIMIT } from '~/lib/visited'
 import { computeVisitedStats, topVisitedAuthors } from '~/lib/visited-analytics'
 
 /** 相对时间与日期分组都按真实时间计算；跨零点运行时用宽松断言避免抖动 */
@@ -92,6 +93,18 @@ describe('AC-HOME-001: recent visited renders as links and hides when empty', ()
 
   it('renders nothing for an empty list', () => {
     expect(render(createElement(RecentVisited, { items: [] }))).toBe('')
+  })
+
+  it('renders placeholder rows while IndexedDB hydration is pending', () => {
+    const html = render(createElement(RecentVisited, { items: [], loading: true }))
+
+    expect(html).toContain('最近查看')
+    expect(html).toContain('aria-busy="true"')
+    // 头部「全部」占位 + 每行缩略图 / 标题 / 摘要三块
+    expect(html.match(/data-slot="skeleton"/g)).toHaveLength(1 + HOME_RECENT_LIMIT * 3)
+    // 水合前不给出「全部」入口与记录链接，避免点到空列表
+    expect(html).not.toContain('href="/history"')
+    expect(html).not.toContain('href="/tweets/111"')
   })
 })
 

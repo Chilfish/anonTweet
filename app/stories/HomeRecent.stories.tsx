@@ -4,7 +4,7 @@ import { HistoryList } from '~/components/history/HistoryList'
 import { RecentVisited } from '~/components/home/RecentVisited'
 
 /**
- * 首页次级区块：最近查看（有记录 / 空态）与 /history 的完整列表。
+ * 首页次级区块：最近查看（有记录 / 水合中骨架 / 空态）与 /history 的完整列表。
  * 空态用于确认「无记录时整块不渲染」，不留下空洞。
  */
 const meta = {
@@ -51,6 +51,10 @@ const items: VisitedItem[] = [
 
 export const Populated: Story = {
   render: () => <RecentVisited items={items} />,
+}
+
+export const Loading: Story = {
+  render: () => <RecentVisited items={[]} loading />,
 }
 
 export const Empty: Story = {

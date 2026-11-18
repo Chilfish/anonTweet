@@ -29,7 +29,7 @@ export default function Home() {
   return (
     <div className="flex w-full flex-col items-center gap-5">
       <TweetInputForm />
-      <RecentVisited items={recent} />
+      <RecentVisited items={recent} loading={!hasHydrated} />
     </div>
   )
 }

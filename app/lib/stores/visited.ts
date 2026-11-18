@@ -24,13 +24,19 @@ export const useVisitedStore = create<VisitedState>()(set => ({
   items: [],
 
   hydrate: async () => {
-    if (typeof indexedDB === 'undefined') {
-      set({ _hasHydrated: true })
-      return
+    try {
+      if (typeof indexedDB === 'undefined')
+        return
+      await migrateLegacyVisited()
+      set({ items: await loadRecentVisited() })
     }
-    await migrateLegacyVisited()
-    const items = await loadRecentVisited()
-    set({ items, _hasHydrated: true })
+    catch (error) {
+      console.error('[visited] hydrate failed:', error)
+    }
+    finally {
+      // 无论读写是否成功都要结束骨架态，否则首页会一直转
+      set({ _hasHydrated: true })
+    }
   },
 
   record: (item) => {
