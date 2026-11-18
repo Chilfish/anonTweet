@@ -1,6 +1,6 @@
 import type { EnrichedTweet, Entity } from '~/types'
 import { useEffect, useRef } from 'react'
-import { fetcher } from '~/lib/fetcher'
+import { requestTweetTranslation } from '~/lib/ai/request'
 import { useAIConfig, useResolvedAIConfig, useTranslationActions } from '~/lib/stores/hooks'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 
@@ -71,7 +71,7 @@ export function useAutoTranslateTweets(
           return
 
         try {
-          const { data } = await fetcher.post('/api/ai-translation', {
+          const data = await requestTweetTranslation({
             tweet,
             enableAITranslation: true,
             apiKey,

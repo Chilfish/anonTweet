@@ -1,7 +1,7 @@
 # AI 视觉描述子系统（AI Vision）— 需求与上下文文档
 
-> 版本：0.2｜ 日期：2026-09-12（v0.2：新增 DeepSeek 视觉渠道与模型图片能力门控）
-> 状态：**已实现**（provider：Google Gemini / DeepSeek / OpenRouter）
+> 版本：0.3｜ 日期：2026-11-18（v0.3：默认视觉引擎切到 DeepSeek Flash，OCR 翻译步补齐超时与 provider 思考配置）
+> 状态：**已实现**（provider：Google Gemini / DeepSeek / OpenRouter，默认 DeepSeek）
 > 关联：OpenRouter（`xiaomi/mimo-v2.5` 上游）｜ 文本翻译子系统（`docs/features/translation/translation.md`）｜ 截图子系统
 > 配套：`docs/archive/ai-vision-plan.md`（行动计划，已完成）｜ `verify/acceptance-criteria/AC-vision.md`（验收标准）
 
@@ -19,7 +19,7 @@
 
 ### 1.2 目标
 
-接入一个**视觉模型**（默认 `xiaomi/mimo-v2.5`，经 OpenRouter），为推文配图生成**结构化**的「看图说话」描述或「结构化 OCR + 翻译」结果，并且：
+接入一个**视觉模型**（默认 `deepseek-flash`，DeepSeek 官方别名，1M 上下文且支持图片输入），为推文配图生成**结构化**的「看图说话」描述或「结构化 OCR + 翻译」结果，并且：
 
 - **与文本翻译解耦、可并行**：独立配置、独立 API、独立 UI 入口，互不阻塞。
 - **输出结构化**：一律 `Output.object` + zod schema，不做自由文本。
@@ -113,11 +113,11 @@ export const openrouterStrategy: ProviderStrategy = {
 
 视觉 provider 与翻译侧共用策略注册表（`app/lib/providers/`）及 Key / 模型配置，当前支持：
 
-| Provider      | 视觉模型                           | 图片输入         |
-| ------------- | ---------------------------------- | ---------------- |
-| Google Gemini | `models/gemini-3-flash-preview` 等 | 支持             |
-| DeepSeek      | `deepseek-flash`                   | 支持（仅 flash） |
-| OpenRouter    | `xiaomi/mimo-v2.5` 等              | 支持             |
+| Provider         | 视觉模型                           | 图片输入         |
+| ---------------- | ---------------------------------- | ---------------- |
+| DeepSeek（默认） | `deepseek-flash`                   | 支持（仅 flash） |
+| Google Gemini    | `models/gemini-3-flash-preview` 等 | 支持             |
+| OpenRouter       | `xiaomi/mimo-v2.5` 等              | 支持             |
 
 - `IMAGE_CAPABLE_PROVIDERS`（`app/lib/ai-provider-config.ts`）在 provider 粒度放行 `google` / `deepseek` / `openrouter`。
 - `ModelConfig.supportsVision` 标记模型图片能力：`deepseek-v4-pro` 为纯文本（`false`），视觉模型下拉按此过滤；
@@ -216,8 +216,8 @@ POST /api/ai/vision
   customPrompt?: string,         // mode === 'custom' 时必填
   withContext?: boolean,         // 附推文上下文（ocr 翻译用）
   apiKey: string,
-  model: string,                 // 默认 xiaomi/mimo-v2.5
-  baseUrl?: string,              // 默认 OpenRouter
+  model: string,                 // 默认 deepseek-flash
+  baseUrl?: string,              // 留空用官方 https://api.deepseek.com
   thinkingLevel?: ThinkingLevel,
 }
 → { success, data: { visionInfo: AIVisionInfo[] } }
@@ -254,11 +254,11 @@ describeImages.ts
 ### 5.1 设置页：新 Tab「AI 图片描述」
 
 - `SettingsPanel.tsx` 增加 `<TabsTab value="ai-vision">AI 图片描述</TabsTab>`。
-- 新组件 `AIVisionSettings.tsx`，**独立配置逻辑**（不读翻译侧的 `aiProvider` / `gemini*`）：
+- 新组件 `AIVisionSettings.tsx`，与翻译侧共用各 provider 的 Key / 模型配置：
   - 开关 `enableAIVision`
-  - Provider 下拉（`openrouter` 默认；可复用策略体系扩展）
-  - API Key / Base URL / 模型（默认 `xiaomi/mimo-v2.5`，支持手写自定义模型——对齐现有 `__custom__` 哨兵模式）
-  - Thinking（默认 minimal = 关，感知任务不需要思考）
+  - Provider 下拉（`deepseek` 默认；可复用策略体系扩展）
+  - API Key / Base URL / 模型（默认 `deepseek-flash`，支持手写自定义模型——对齐现有 `__custom__` 哨兵模式）
+  - Thinking（默认跟随所选模型的首档；感知任务通常 minimal 即可）
   - **Prompt 预设**：三选一（看图说话 / 结构化OCR+翻译 / 自定义），自定义时出 textarea
   - **测试按钮**：用示例图（本地 fixture 图）跑一次 describe，验证配置 + 预览结构化输出
 

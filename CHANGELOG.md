@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ### Added
 
+#### AI 请求路径与 DeepSeek Flash 默认（2026-11-18）
+
+- 新增「浏览器直连」开关（`aiRequestMode`，默认 `server`）：关闭时经 CF Worker `/api/ai-*` 中继，开启后由浏览器直接请求模型服务商；翻译 / 文章 / IG / 视觉 / 连通性测试统一走 `app/lib/ai/request.ts` dispatcher
+- 浏览器直连复用同一套翻译与识图管线（`ai-timeout` / 图片抓取已同构），失败时提示 CORS 并引导切回服务端中继
+- 截图 SSR 翻译优先使用 `DEEPSEEK_API_KEY` + `DEEPSEEK_MODEL`（默认 `deepseek-flash`），未配置时回退 Gemini
+- `AC-TRANS-008/009` + `test/unit/app-config-defaults.spec.ts` / `test/unit/ai-request-mode.spec.ts`
+
 #### 无图链接卡对齐官方（2026-11-14）
 
 - 上游 App 卡（如 youtu.be 音乐链接）没有任何图片 binding 时，卡片回退为官方同款的左侧图标占位块 + 右侧详情，不再塌成纯文字卡
@@ -58,6 +65,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 - `CHANGELOG.md`、`CONTRIBUTING.md`
 
 ### Changed
+
+#### AI 请求路径与 DeepSeek Flash 默认（2026-11-18）
+
+- AI 默认引擎与视觉 provider 切到 DeepSeek Flash（`deepseek-flash` 官方别名，当前由 DeepSeek-V4.1-Flash 提供，1M 上下文且支持图片输入）；persist v7→v8，仅在未配置 Gemini Key 时改写旧默认
+- DeepSeek 策略对齐官方规范：`minimal` 显式下发 `thinking: { type: 'disabled' }`；思考开启时省略不生效的 `temperature` / `top_p`，且不覆盖调用方显式给出的 `thinking`
+- IG caption 与 OCR 翻译补齐 thinking / reasoning 配置与 `AbortSignal` 超时；视觉生成、连通性测试补齐超时
+- 模型注册表补官方版本与能力注释（`deepseek-v4-pro` 纯文本、旧 slug 已退役）
 
 #### Cloudflare Workers 部署（2026-11-10）
 

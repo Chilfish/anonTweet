@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover
 import { Textarea } from '~/components/ui/textarea'
 import { toastAIError } from '~/lib/ai-error-toast'
 import { resolveAIConfig } from '~/lib/ai-provider-config'
+import { requestIGTranslation } from '~/lib/ai/request'
 import { fetcher } from '~/lib/fetcher'
 import { useAIConfig } from '~/lib/stores/hooks'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
@@ -50,10 +51,8 @@ export function IGTranslateDialog({ post, onTranslated }: IGTranslateDialogProps
         aiConfig.translationGlossary,
       ].filter(Boolean).join('\n')
 
-      const { data } = await fetcher.post('/api/ai-translation', {
-        type: 'ins',
+      const data = await requestIGTranslation({
         igPost: post,
-        enableAITranslation: true,
         apiKey,
         model,
         provider: aiConfig.aiProvider,
@@ -68,7 +67,11 @@ export function IGTranslateDialog({ post, onTranslated }: IGTranslateDialogProps
         toast.success('AI 翻译完成')
       }
       else {
-        toast.error('AI 翻译失败', { description: data.error || '返回结果为空' })
+        toast.error('AI 翻译失败', {
+          description: data.success
+            ? '返回结果为空'
+            : data.error,
+        })
       }
     }
     catch (error: unknown) {

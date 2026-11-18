@@ -40,23 +40,46 @@ export function buildMediaUrl(media: MediaDetails): string {
 
 const IMAGE_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  // 服务端（Node / Workers）：Buffer 可用
+  if (typeof Buffer !== 'undefined')
+    return Buffer.from(buffer).toString('base64')
+
+  // 浏览器直连模式：分块转二进制字符串再 btoa，避免大图 String.fromCharCode 参数溢出
+  const bytes = new Uint8Array(buffer)
+  const chunkSize = 0x8000
+  let binary = ''
+  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize))
+  }
+  return btoa(binary)
+}
+
 export async function fetchImageDataUri(url: string): Promise<string> {
   // 服务端 fetch 前必须过 host 白名单（防 SSRF）
   assertAllowedMediaHost(url)
-  const resp = await fetch(url, {
-    headers: {
-      'User-Agent': IMAGE_UA,
-      'Referer': 'https://x.com/',
-      'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-      'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-    },
-  })
+
+  const isBrowser = typeof window !== 'undefined'
+  // 浏览器直连模式：twimg 不保证 CORS，走同源图片代理（服务端只代理图片、不接触 AI 请求）
+  const requestUrl = isBrowser
+    ? `/api/proxy/image?url=${encodeURIComponent(url)}`
+    : url
+
+  const resp = await fetch(requestUrl, isBrowser
+    ? undefined
+    : {
+        headers: {
+          'User-Agent': IMAGE_UA,
+          'Referer': 'https://x.com/',
+          'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+          'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+        },
+      })
   if (!resp.ok) {
     throw new Error(`Image fetch failed: ${resp.status} ${url}`)
   }
   const contentType = resp.headers.get('Content-Type') || 'image/jpeg'
-  const buf = Buffer.from(await resp.arrayBuffer())
-  return `data:${contentType};base64,${buf.toString('base64')}`
+  return `data:${contentType};base64,${arrayBufferToBase64(await resp.arrayBuffer())}`
 }
 
 /** 按 mediaIndexes 过滤 photo 并抓取，返回按请求顺序的 data URI 列表 */

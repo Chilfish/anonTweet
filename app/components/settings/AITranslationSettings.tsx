@@ -18,8 +18,8 @@ import { Textarea } from '~/components/ui/textarea'
 import { toastManager } from '~/components/ui/toast'
 import { toastAIError } from '~/lib/ai-error-toast'
 import { resolveAIConfig } from '~/lib/ai-provider-config'
+import { requestAITest } from '~/lib/ai/request'
 import { DEFAULT_DEEPSEEK_BASE_URL, DEFAULT_GEMINI_BASE_URL, DEFAULT_OPENROUTER_BASE_URL, models } from '~/lib/constants'
-import { fetcher } from '~/lib/fetcher'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 
@@ -31,6 +31,7 @@ export function AITranslationSettings() {
   const {
     enableAITranslation,
     aiProvider,
+    aiRequestMode,
     geminiApiKey,
     geminiModel,
     geminiBaseUrl,
@@ -46,6 +47,7 @@ export function AITranslationSettings() {
     translationGlossary,
     setEnableAITranslation,
     setAIProvider,
+    setAIRequestMode,
     setGeminiApiKey,
     setGeminiModel,
     setGeminiBaseUrl,
@@ -63,6 +65,7 @@ export function AITranslationSettings() {
     useShallow(state => ({
       enableAITranslation: state.enableAITranslation,
       aiProvider: state.aiProvider,
+      aiRequestMode: state.aiRequestMode,
       geminiApiKey: state.geminiApiKey,
       geminiModel: state.geminiModel,
       geminiBaseUrl: state.geminiBaseUrl,
@@ -78,6 +81,7 @@ export function AITranslationSettings() {
       translationGlossary: state.translationGlossary,
       setEnableAITranslation: state.setEnableAITranslation,
       setAIProvider: state.setAIProvider,
+      setAIRequestMode: state.setAIRequestMode,
       setGeminiApiKey: state.setGeminiApiKey,
       setGeminiModel: state.setGeminiModel,
       setGeminiBaseUrl: state.setGeminiBaseUrl,
@@ -154,15 +158,12 @@ export function AITranslationSettings() {
 
     setIsTesting(true)
     try {
-      const { data } = await fetcher.post('/api/ai-test', {
+      const data = await requestAITest({
         apiKey: currentProviderConfig.apiKey,
         model: currentProviderConfig.model,
         provider: aiProvider,
         baseUrl: currentProviderConfig.baseUrl,
         thinkingLevel: currentProviderConfig.thinkingLevel,
-        tweetId: '1',
-        enableAITranslation: true,
-        translationGlossary: '1',
       })
 
       if (data.success) {
@@ -289,6 +290,21 @@ export function AITranslationSettings() {
                   </SelectContent>
                 </Select>
               </div>
+            </SettingsRow>
+          )}
+
+          {enableAITranslation && (
+            <SettingsRow
+              label="浏览器直连"
+              description="关闭时经本站服务器中继（默认）；开启后由浏览器直接请求模型服务商，需要服务商支持 CORS"
+              id="ai-request-mode"
+            >
+              <Switch
+                checked={aiRequestMode === 'browser'}
+                onCheckedChange={checked => setAIRequestMode(checked
+                  ? 'browser'
+                  : 'server')}
+              />
             </SettingsRow>
           )}
         </SettingsGroup>

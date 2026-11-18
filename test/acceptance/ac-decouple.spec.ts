@@ -24,6 +24,7 @@ const GET_ROUTE = 'app/routes/api/tweet/get.ts'
 const TWEET_PAGE = 'app/routes/tweet.tsx'
 const PLAIN_ROUTE = 'app/routes/plain.tsx'
 const AUTO_TRANSLATE_HOOK = 'app/hooks/use-auto-translate.ts'
+const AI_REQUEST_LAYER = 'app/lib/ai/request.ts'
 const AI_TRANSLATION_LIB = 'app/lib/AITranslation.ts'
 const IG_CAPTION_LIB = 'app/lib/translateIGCaption.ts'
 const TIMEOUT_HELPER = 'app/lib/ai-timeout.ts'
@@ -43,8 +44,11 @@ describe('AC-DECOUPLE-001: GET /api/tweet/get does not inline LLM calls', () => 
   it('tweet page triggers translation via /api/ai-translation (client-side)', () => {
     const page = read(TWEET_PAGE)
     const hook = read(AUTO_TRANSLATE_HOOK)
+    const requestLayer = read(AI_REQUEST_LAYER)
     expect(page).toContain('useAutoTranslateTweets')
-    expect(hook).toContain('\'/api/ai-translation\'')
+    // 客户端经统一请求层触发；端点收敛在 dispatcher（server 模式），browser 模式直连
+    expect(hook).toContain('requestTweetTranslation')
+    expect(requestLayer).toContain('\'/api/ai-translation\'')
   })
 
   it('plain screenshot route translates via /api/ai-translation instead of GET', () => {

@@ -1,7 +1,7 @@
 import type { ArticleTranslation } from '~/lib/article/translate'
 import type { TweetArticle } from '~/types'
 import { useCallback, useEffect, useRef } from 'react'
-import { fetcher } from '~/lib/fetcher'
+import { requestArticleTranslation } from '~/lib/ai/request'
 import { syncArticleTranslation } from '~/lib/service/articleTranslationSync'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 import {
@@ -10,14 +10,6 @@ import {
   useResolvedAIConfig,
   useTranslationActions,
 } from '~/lib/stores/hooks'
-
-interface ArticleTranslationResponse {
-  success: boolean
-  data?: {
-    articleId: string
-    translation: ArticleTranslation
-  }
-}
 
 /**
  * 文章页按块翻译。
@@ -62,8 +54,7 @@ export function useAutoTranslateArticle(
 
     setArticleTranslationStatus(tweetId, 'loading')
     try {
-      const res = await fetcher.post<ArticleTranslationResponse>('/api/ai-translation', {
-        type: 'article',
+      const res = await requestArticleTranslation({
         article,
         apiKey: ai.apiKey,
         model: ai.model,
@@ -72,7 +63,9 @@ export function useAutoTranslateArticle(
         thinkingLevel: ai.thinkingLevel,
         translationGlossary,
       })
-      const next = res.data?.data?.translation
+      const next = res.success
+        ? res.data?.translation
+        : undefined
       if (next && (next.title || Object.keys(next.blocks ?? {}).length > 0)) {
         setArticleTranslation(tweetId, next)
         setArticleTranslationStatus(tweetId, 'done')

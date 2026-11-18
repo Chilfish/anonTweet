@@ -4,11 +4,11 @@
 
 ## 1. 概述 (System Overview)
 
-推文翻译子系统是 Anon Tweet 项目的核心业务模块之一，旨在为用户提供对推文内容（Text Entities）进行本地化重构的能力。该系统结合了 **Google Gemini / DeepSeek 双 AI 提供商** 的自动化翻译能力与 **人工编辑** 的精确控制，采用 **客户端主导 (Client-First)** 的状态管理策略。
+推文翻译子系统是 Anon Tweet 项目的核心业务模块之一，旨在为用户提供对推文内容（Text Entities）进行本地化重构的能力。该系统结合了 **Google Gemini / DeepSeek / OpenRouter 多 AI 提供商** 的自动化翻译能力与 **人工编辑** 的精确控制，采用 **客户端主导 (Client-First)** 的状态管理策略。默认引擎为 **DeepSeek Flash**（官方别名 `deepseek-flash`，当前由 DeepSeek-V4.1-Flash 提供，1M 上下文）。
 
 本模块主要包含四个核心领域：
 
-1. **AI 自动翻译 (AI Auto-Translation)**：基于 Vercel AI SDK 和多提供商（Google Gemini / DeepSeek）进行结构化输出翻译，并在服务端生成可渲染的翻译实体。
+1. **AI 自动翻译 (AI Auto-Translation)**：基于 Vercel AI SDK 和多提供商（Google Gemini / DeepSeek / OpenRouter）进行结构化输出翻译，并在服务端生成可渲染的翻译实体。
 2. **翻译编辑器 (Translation Editor)**：用户对实体级翻译进行人工校对、显示/隐藏管理。
 3. **翻译视图解析 (Translation View Resolution)**：6 级决策链统一决定推文渲染时应展示的翻译内容。
 4. **词典管理 (Dictionary Manager)**：维护本地术语表，用于 AI 提示词注入及 UI 辅助补全。
@@ -66,7 +66,7 @@ type EntityType = 'text' | 'hashtag' | 'mention' | 'url' | 'media_alt' | 'symbol
 ```typescript
 // app/lib/stores/appConfig.ts
 interface AIConfig {
-  aiProvider: 'google' | 'deepseek' // v2.1 新增：AI 提供商选择
+  aiProvider: 'google' | 'deepseek' | 'openrouter' // 默认 deepseek
   enableAITranslation: boolean // 是否开启 AI 自动翻译
 
   // Gemini 配置
@@ -74,10 +74,15 @@ interface AIConfig {
   geminiModel: string // e.g., "models/gemini-3-flash-preview"
   geminiThinkingLevel: ThinkingLevel // minimal | low | medium | high | max
 
-  // DeepSeek 配置 (v2.1 新增)
+  // DeepSeek 配置（默认引擎）
   deepseekApiKey: string
-  deepseekModel: string // e.g., "deepseek-flash"
+  deepseekModel: string // "deepseek-flash"（官方别名，V4.1 Flash，支持图片输入）
   deepseekThinkingLevel: ThinkingLevel
+
+  // OpenRouter 配置
+  openrouterApiKey: string
+  openrouterModel: string // e.g., "xiaomi/mimo-v2.5"
+  openrouterThinkingLevel: ThinkingLevel
 
   // 翻译显示风格
   translationGlossary: TranslationGlossaryItem[] // 术语表（用于 AI 提示词注入）
@@ -86,8 +91,9 @@ interface AIConfig {
 
 **思考强度级别** (`ThinkingLevel`): `minimal | low | medium | high | max`
 
-- **Gemini**: `level` 映射到 `thinkingBudget`：minimal→0, low→1024, medium→4096, high→16384, max→32768
-- **DeepSeek**: `level` 映射到 `reasoning_effort`：minimal→disabled, high→high, max→max
+- **Gemini**: `level` 映射到 thinkingLevel（新模型）或 `thinkingBudget`（0 / 1024 / 4096 / 16384 / 32768）
+- **DeepSeek**: `minimal` = 显式关闭思考（`thinking: { type: 'disabled' }`）；`low/medium/high` → `reasoning_effort: 'high'`；`max` → `reasoning_effort: 'max'`。思考开启时官方会忽略 `temperature` / `top_p`，策略在请求体里主动省略这两个参数
+- **OpenRouter**: `reasoning: { enabled, effort }`，`max` 收敛为 `high`
 
 ```typescript
 // app/lib/stores/translation.ts (SettingsSlice)
@@ -124,7 +130,7 @@ interface TranslationSettings {
 
 ### 3.2 配置 Store (`useAppConfigStore`)
 
-- **存储版本**: v4（新增 `aiProvider`、`deepseekApiKey`、`deepseekModel`、`deepseekThinkingLevel` 字段）。
+- **存储版本**: v7（v4 引入多 provider 字段；v5 视觉默认仅显示译文；v6 对齐 DeepSeek 官方 slug；v7 默认引擎切到 DeepSeek Flash）。
 - **`useAIConfig()` 选择器**: 聚合所有 AI 提供商相关字段，供组件和 API 调用使用。
 
 ### 3.3 词典持久化 Store (`useTranslationDictionaryStore`)
@@ -173,21 +179,23 @@ flowchart LR
 
 ### 4.2 多提供商差异性处理
 
+差异集中在 `app/lib/providers/` 的策略注册表（`ProviderStrategy`），调用侧只做 `getProviderStrategy(provider).createSDKProvider()` + `getThinkingConfig()` + `buildProviderOptions()`：
+
 ```typescript
-// app/lib/AITranslation.ts — getThinkingConfig()
-function getThinkingConfig(provider, level, modelConfig) {
-  if (provider === 'google') {
-    // type: 'level' → thinkingLevel + thinkingBudget 映射
-    return { thinkingLevel, thinkingBudget: mapLevelToBudget(level) }
-  }
-  if (provider === 'deepseek') {
-    // type: 'enabled' + reasoningEffort 映射
-    const enabled = level !== 'minimal'
-    const effort = level === 'max' ? 'max' : 'high'
-    return { thinking: { type: enabled ? 'enabled' : 'disabled' }, reasoningEffort: effort }
-  }
-}
+// app/lib/providers/deepseek.ts（当前实现要点）
+// openai-compatible 发送标准 reasoning_effort；transformRequestBody 负责：
+// 1) 未显式设置 thinking 且没有 reasoning_effort → 补 thinking: { type: 'disabled' }
+// 2) 思考开启（thinking enabled 或存在 reasoning_effort）→ 去掉不生效的 temperature / top_p
+// 3) 不覆盖调用方显式给出的 thinking（enabled / disabled）
+
+// app/lib/providers/google.ts
+// thinkingType: 'level' → thinkingLevel；'budget' → thinkingBudget
+
+// app/lib/providers/openrouter.ts
+// → providerOptions.openrouter.reasoning = { enabled, effort }
 ```
+
+DeepSeek 的模型名与能力以官方文档为准：`deepseek-flash`（V4.1 Flash，1M 上下文，支持图片）与 `deepseek-v4-pro`（纯文本）；`deepseek-v4-flash` / `deepseek-chat` / `deepseek-reasoner` 等旧名已退役或仅为兼容别名，不再进入模型注册表。
 
 ### 4.3 实体级人工编辑
 
@@ -309,6 +317,15 @@ v2.1 新增的纯函数模块，提供通用的翻译实体合并能力：
 
 ---
 
+### 8.1 AI 请求路径（`aiRequestMode`）
+
+翻译与识图请求共用同一个全局开关：
+
+- **`server`（默认）**：客户端调用本站 `/api/ai-*`，由 Cloudflare Worker 中继；服务端负责超时（`AbortSignal.timeout`）与可选 baseUrl 白名单。
+- **`browser`**：浏览器直接请求模型服务商（`app/lib/ai/request.ts` dispatcher），复用同一套翻译 / 识图管线；需要服务商允许 CORS，API Key 不再经过本站服务器。
+
+两种模式下翻译结果的持久化方式不变：编辑/保存走 `/api/tweet/set`、`/api/ig/translate/*`、`syncArticleTranslation`，视觉保存走 `/api/ai-vision` 的 save 动作。设置面板在「AI 翻译」与「AI 图片描述」两侧暴露同一开关。
+
 ## 9. 性能与缓存策略 (Performance & Caching)
 
 ### 9.1 DB 缓存
@@ -350,7 +367,7 @@ v2.1 新增的纯函数模块，提供通用的翻译实体合并能力：
 - **编辑器当前以"原始实体结构 Overlay"为主**：对于 AI 生成的"翻译实体流"（结构与原文不同），编辑器尽力回填但可能对齐不完美。
 - **跨层耦合**：AI 输出契约的变化（如 tag 翻译、占位符重排）仍会直接影响 UI 解析/渲染与缓存同步。
 - **性能抖动**：在无 DB 或 DB 未命中时，本地缓存可能缺少翻译字段，导致重复触发 AI 翻译。
-- **DeepSeek 思考模式**：`low`/`medium` 级别被映射为 `high`（DeepSeek API 限制仅支持 disabled/high/max 三档）。
+- **DeepSeek 思考模式**：`low`/`medium` 映射为 `high`（官方 `reasoning_effort` 仅接受 `high`/`max`）；思考开启时 `temperature`/`top_p` 不生效，请求体会主动省略，避免误配。
 
 ### 10.3 推荐下一步
 

@@ -44,6 +44,7 @@ export function AIVisionSettings() {
   const {
     enableAIVision,
     visionProvider,
+    aiRequestMode,
     showVisionEntry,
     geminiApiKey,
     geminiModel,
@@ -60,6 +61,7 @@ export function AIVisionSettings() {
     setEnableAIVision,
     setShowVisionEntry,
     setVisionProvider,
+    setAIRequestMode,
     setGeminiApiKey,
     setGeminiModel,
     setGeminiBaseUrl,
@@ -76,6 +78,7 @@ export function AIVisionSettings() {
     useShallow(state => ({
       enableAIVision: state.enableAIVision,
       visionProvider: state.visionProvider,
+      aiRequestMode: state.aiRequestMode,
       showVisionEntry: state.showVisionEntry,
       geminiApiKey: state.geminiApiKey,
       geminiModel: state.geminiModel,
@@ -92,6 +95,7 @@ export function AIVisionSettings() {
       setEnableAIVision: state.setEnableAIVision,
       setShowVisionEntry: state.setShowVisionEntry,
       setVisionProvider: state.setVisionProvider,
+      setAIRequestMode: state.setAIRequestMode,
       setGeminiApiKey: state.setGeminiApiKey,
       setGeminiModel: state.setGeminiModel,
       setGeminiBaseUrl: state.setGeminiBaseUrl,
@@ -239,6 +243,21 @@ export function AIVisionSettings() {
                   </SelectContent>
                 </Select>
               </div>
+            </SettingsRow>
+          )}
+
+          {enableAIVision && (
+            <SettingsRow
+              label="浏览器直连"
+              description="翻译与识图共用；关闭时经本站服务器中继（默认），开启后由浏览器直接请求模型服务商（需支持 CORS）"
+              id="vision-request-mode"
+            >
+              <Switch
+                checked={aiRequestMode === 'browser'}
+                onCheckedChange={checked => setAIRequestMode(checked
+                  ? 'browser'
+                  : 'server')}
+              />
             </SettingsRow>
           )}
         </SettingsGroup>

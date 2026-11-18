@@ -3,6 +3,7 @@ import type { EnrichedTweet } from '~/types'
 import type { AIVisionInfo, VisionMode } from '~/types/vision'
 import { useCallback, useState } from 'react'
 import { toastAIError } from '~/lib/ai-error-toast'
+import { requestVisionGenerate, requestVisionTranslate } from '~/lib/ai/request'
 import { fetcher } from '~/lib/fetcher'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 import {
@@ -100,7 +101,7 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
         dictEntries(),
         translationGlossary,
       ].filter(Boolean).join('\n')
-      const { data } = await fetcher.post('/api/ai-vision', {
+      const data = await requestVisionGenerate({
         tweet: originalTweet,
         mediaIndexes: photoIndexes,
         mode,
@@ -174,8 +175,7 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
         dictEntries(),
         translationGlossary,
       ].filter(Boolean).join('\n')
-      const { data } = await fetcher.post('/api/ai-vision', {
-        action: 'translate',
+      const data = await requestVisionTranslate({
         tweet: { id_str: tweetId, text: originalTweet.text },
         items,
         translationGlossary: combinedGlossary || undefined,

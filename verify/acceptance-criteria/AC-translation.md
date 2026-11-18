@@ -103,7 +103,29 @@
 
 ---
 
-## 总计：7 条 AC
+## AC-TRANS-008：默认 AI 引擎为 DeepSeek Flash
+
+- **验证对象**：`app/lib/stores/appConfig.ts`（app-config-store 默认值）
+- **测试**：`test/unit/app-config-defaults.spec.ts`
+- **Pass 条件**：
+  - `aiProvider === 'deepseek'`（翻译默认引擎）
+  - `visionProvider === 'deepseek'`（视觉默认引擎）
+  - `deepseekModel === 'deepseek-flash'`（DeepSeek 官方别名，当前由 V4.1-Flash 提供）
+
+---
+
+## AC-TRANS-009：AI 请求路径默认服务端中继，可切换浏览器直连
+
+- **验证对象**：`app/lib/stores/appConfig.ts`（`aiRequestMode`）、`app/lib/ai/request.ts`（`getAIRequestMode`）
+- **测试**：`test/unit/ai-request-mode.spec.ts`
+- **Pass 条件**：
+  - 默认 `aiRequestMode === 'server'`（经本站 CF Worker `/api/ai-*` 中继）
+  - 调用 `setAIRequestMode('browser')` 后 `getAIRequestMode() === 'browser'`（dispatcher 走浏览器直连）
+  - 设置面板暴露「浏览器直连」开关（翻译与视觉两侧共用同一状态）
+
+---
+
+## 总计：9 条 AC
 
 | AC           | 分类   | 依赖 AI | 依赖 Fixture |
 | ------------ | ------ | ------- | ------------ |
@@ -114,3 +136,5 @@
 | AC-TRANS-005 | 纯函数 | 否      | 否           |
 | AC-TRANS-006 | 纯函数 | 否      | 是           |
 | AC-TRANS-007 | 纯函数 | 否      | 否           |
+| AC-TRANS-008 | 纯函数 | 否      | 否           |
+| AC-TRANS-009 | 纯函数 | 否      | 否           |

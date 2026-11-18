@@ -1,7 +1,7 @@
 import type { EnrichedTweet, Entity } from '~/types'
 import { useCallback, useState } from 'react'
 import { toastAIError } from '~/lib/ai-error-toast'
-import { fetcher } from '~/lib/fetcher'
+import { requestTweetTranslation } from '~/lib/ai/request'
 import { syncTranslationData } from '~/lib/service/translationSync'
 import { useAIConfig, useResolvedAIConfig, useTranslationActions } from '~/lib/stores/hooks'
 import { useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
@@ -65,7 +65,7 @@ export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
         dictEntries(),
         translationGlossary,
       ].filter(Boolean).join('\n')
-      const { data } = await fetcher.post('/api/ai-translation', {
+      const data = await requestTweetTranslation({
         tweet: originalTweet,
         enableAITranslation: true,
         apiKey,
