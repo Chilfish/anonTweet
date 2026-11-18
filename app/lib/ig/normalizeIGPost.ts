@@ -167,3 +167,27 @@ export function normalizeIGPosts(messages: Message[]): IGPost[] {
 export function normalizeIGPost(messages: Message[]): IGPost | null {
   return normalizeIGPosts(messages)[0] ?? null
 }
+
+/**
+ * 用户 feed（`/{username}/posts/`）消息流 → 多张 IGPost。
+ *
+ * 与单帖不同，feed 的消息流是 `directory, url…, directory, url…`：
+ * 每条 directory 开启一篇帖子，其后的 url 消息都属于该帖。按 directory 切段后
+ * 复用 `normalizeIGPosts`，避免把整条时间线错误合并成一张多图帖。
+ */
+export function normalizeIGFeed(messages: Message[]): IGPost[] {
+  const groups: Message[][] = []
+  let current: Message[] | null = null
+
+  for (const msg of messages) {
+    if (msg.type === 'directory') {
+      current = [msg]
+      groups.push(current)
+    }
+    else if (current) {
+      current.push(msg)
+    }
+  }
+
+  return groups.flatMap(group => normalizeIGPosts(group))
+}

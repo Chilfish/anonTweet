@@ -2,7 +2,7 @@ import { env } from './env.server'
 import { obsLog, suffix } from './obs-log'
 import { isCloudflareWorker } from './runtime'
 
-export type CacheType = 'tweet' | 'user' | 'replies' | 'ig-post' | 'article-translation'
+export type CacheType = 'tweet' | 'user' | 'replies' | 'ig-post' | 'ig-profile' | 'article-translation'
 
 /**
  * 缓存数据包装结构，用于存储过期时间

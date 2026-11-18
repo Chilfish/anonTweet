@@ -104,3 +104,35 @@ export interface IGPost {
 
 /** API 返回的帖子数组 */
 export type IGPostData = IGPost[]
+
+/**
+ * Instagram 个人主页资料 — SDK `/{username}/info/` directory 标准化后的结构。
+ */
+export interface IGProfile {
+  /** 用户名（不含 @） */
+  username: string
+  /** 显示名 */
+  fullname: string
+  /** 简介 / bio */
+  biography: string
+  /** HD 头像 URL */
+  avatarUrl?: string
+  /** 粉丝数 */
+  followers: number
+  /** 关注数 */
+  following: number
+  /** 帖子数 */
+  mediaCount: number
+  /** 是否认证 */
+  verified?: boolean
+  /** 私有账号（帖子不可见） */
+  isPrivate?: boolean
+  /** 主页外链 */
+  externalUrl?: string
+}
+
+/** 主页接口返回：资料 + 首屏帖子 */
+export interface IGProfileData {
+  profile: IGProfile
+  posts: IGPost[]
+}

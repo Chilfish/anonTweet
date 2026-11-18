@@ -28,6 +28,7 @@ const MOBILE_X_STATUS_RE = /(?:https?:\/\/)?(?:mobile\.)?x\.com\/\w+\/status\/(\
 const X_LIST_RE = /(?:https?:\/\/)?(?:www\.|mobile\.)?(?:twitter|x)\.com\/i\/lists\/(\d+)/i
 const HANDLE_ONLY_RE = /^@?(\w{1,15})$/
 const PROFILE_URL_RE = /(?:https?:\/\/)?(?:www\.|mobile\.)?(?:twitter|x)\.com\/(\w{1,15})(?:[/?#]|$)/i
+const IG_PROFILE_RE = /^(?:https?:\/\/)?(?:www\.)?instagram\.com\/([\w.]+)\/?(?:[?#].*)?$/i
 const IG_POST_RE = /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:[\w.-]+\/)?p\/([\w-]+)/i
 const IG_REEL_RE = /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:[\w.-]+\/)?reel\/([\w-]+)/i
 const IG_HIGHLIGHT_RE = /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:[\w.-]+\/)?stories\/highlights\/(\d+)/i
@@ -60,6 +61,36 @@ const RESERVED_HANDLES = new Set([
 
 /** canonical id 分隔符（`~` 为 RFC3986 unreserved，且 Windows 文件名合法） */
 const IG_ID_SEP = '~'
+
+/** Instagram 站点保留路径，不能被当作主页用户名 */
+const IG_RESERVED_PATHS = new Set([
+  'about',
+  'accounts',
+  'api',
+  'challenge',
+  'developer',
+  'directory',
+  'emaillogin',
+  'explore',
+  'jobs',
+  'legal',
+  'oauth',
+  'p',
+  'press',
+  'privacy',
+  'reel',
+  'reels',
+  's',
+  'session',
+  'share',
+  'stories',
+  'terms',
+  'tv',
+  'web',
+])
+
+/** Instagram 用户名：字母 / 数字 / 下划线 / 点，≤30 字符 */
+export const IG_USERNAME_RE = /^[\w.]{1,30}$/
 
 export function extractTweetId(input: string): string | null {
   const trimmed = input.trim()
@@ -161,6 +192,32 @@ export function extractIGId(input: string): string | null {
 }
 
 /**
+ * 从 Instagram 主页 URL 提取用户名：`instagram.com/{username}`（可带尾斜杠 / query）。
+ *
+ * 只接受完整 URL —— 裸字符串在首页输入里与 post shortcode 无法区分，不在此猜测。
+ * 站点保留路径（p / reel / stories / explore 等）不算用户名。
+ */
+export function extractIGUsername(input: string): string | null {
+  const trimmed = input.trim()
+  if (!trimmed)
+    return null
+
+  const match = trimmed.match(IG_PROFILE_RE)
+  const username = match?.[1]
+  if (!username)
+    return null
+  if (IG_RESERVED_PATHS.has(username.toLowerCase()))
+    return null
+
+  return username
+}
+
+/** Instagram 用户名 → 主页子路径源 URL（交给 SDK `extract()`）。 */
+export function igUsernameSourceUrl(username: string, kind: 'info' | 'posts' | 'avatar' = 'posts'): string {
+  return `https://www.instagram.com/${username}/${kind}/`
+}
+
+/**
  * 该 canonical id 是否指向「列表型」请求（用户快拍 tray / 精选集）。
  *
  * 注意：highlight 的**单条 item** id 为 `highlight~{hlid}~{mediaId}`（三段），
@@ -210,7 +267,7 @@ export function detectInputType(input: string): 'twitter' | 'instagram' | null {
   const trimmed = input.trim()
   if (extractTweetId(trimmed))
     return 'twitter'
-  if (extractIGId(trimmed))
+  if (extractIGId(trimmed) || extractIGUsername(trimmed))
     return 'instagram'
   return null
 }

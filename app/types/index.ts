@@ -12,7 +12,7 @@ export type * from './article'
 export type * from './card'
 export type * from './entities'
 // Instagram 类型
-export type { IGAudio, IGMedia, IGPost, IGPostData, IGStoryLink } from './ins'
+export type { IGAudio, IGMedia, IGPost, IGPostData, IGProfile, IGProfileData, IGStoryLink } from './ins'
 export type * from './media'
 export type * from './photo'
 export type * from './poll'
