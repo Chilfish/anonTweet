@@ -6,7 +6,6 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   const staticPages = [
     { loc: `${baseUrl}/`, priority: '1.0', changefreq: 'daily' },
-    { loc: `${baseUrl}/bili`, priority: '0.3', changefreq: 'weekly' },
   ]
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>

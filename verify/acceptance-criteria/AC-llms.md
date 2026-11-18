@@ -7,18 +7,20 @@
 
 ---
 
-## AC-LLMS-001：/llms.txt 符合 llmstxt.org 规范且覆盖全部后端端点
+## AC-LLMS-001：/llms.txt 是小型索引，只链可取回资源
 
 - **输入**：`buildLlmsTxt()` 产物（`app/lib/llms.ts`）
-- **预期输出**：满足 llms.txt 规范形状的 markdown
+- **预期输出**：满足 llms.txt 规范形状、且保持索引定位的 markdown
 - **验证方法**：`bun verify --ac AC-LLMS-001`
 - **Pass 条件**：
-  - 首行 H1 标题，第二行（空行后）为 `> ` blockquote 简介
+  - 首行 H1 标题，空行后为 `> ` blockquote 简介
   - 链接按 `## ` H2 分区组织，子弹格式统一 `- [文本](链接): 描述`
   - 纯 markdown：无 HTML 标签、无表格字符 `|`、无代码围栏
   - 全部链接为相对路径（任意部署域名可用）
-  - Backend API 分区逐条列出 `apiEndpoints` 全部端点，且互不重复
-  - **Data Shapes 分区**描述常用接口（搜索 / 获取推文）出入参形态：至少包含 `EnrichedTweet` / `TweetUser` / `Entity` 字段清单、`{ tweets, nextCursor }` 分页形态、`GET /api/tweet/search` 与 `GET /api/tweet/get/{id}` 的入参说明
+  - **索引而非文档**：体积 < 3000 字符；不内联数据结构定义（不出现 `EnrichedTweet:` 之类逐字段清单），schema 一律通过 `/openapi.json` 获取
+  - **链接必须可取回**：不把 POST-only 端点（`/api/tweet/set`、`/api/ai-*`、`/api/ig/translate`、`/api/bili-post`）当作链接；示例链接均为 GET
+  - 必须链接机器可读入口 `/openapi.json` 与任务指南 `/skills/anon-tweet/SKILL.md`
+  - 不宣传隐藏入口 `/bili`；给出调用约定（HTTP 200 + success 判定、timeline 默认关闭、INS_COOKIES 缺失返回空数组）
 
 ---
 
@@ -29,8 +31,7 @@
 - **验证方法**：`bun verify --ac AC-LLMS-002`
 - **Pass 条件**：
   - `openapi` 版本前缀为 `3.1.`，`info.title` / `servers[0].url` 正确
-  - 三方奇偶校验：`apiEndpoints` 去重路径 = OpenAPI `paths` 键集合 =
-    期望路径清单（14 条）
+  - 三方奇偶校验：期望路径清单（14 条）= OpenAPI `paths` 键集合；llms.txt 不再维护第二份端点清单
   - 每个 operation 具备 `operationId` / `summary` / `tags`，响应统一挂在 `responses` 下且至少一条
   - 响应 schema 通过 `$ref` 指向 `components.schemas` 中带真实字段的定义（EnrichedTweet / IGPost / AIVisionInfo / RawUser 等），非占位 `type: object`
   - 关键端点：search 含 q/type/cursor/count query 参数；replies 含 cursor；
@@ -43,7 +44,7 @@
 
 任何新增/删除/调整后端接口（`app/routes.ts` 的 `api/*`）时，必须同步：
 
-1. `app/lib/llms.ts`：`apiEndpoints`（llms.txt 列表）+ `buildOpenApiDoc` 的 paths
+1. `app/lib/llms.ts`：`buildOpenApiDoc` 的 paths（llms.txt 只维护可读入口与示例链接）
 2. 本文件 `EXPECTED_PATHS` 对应清单（`test/unit/llms.spec.ts`）
 
 奇偶校验测试（AC-LLMS-002）会在漏改时红。

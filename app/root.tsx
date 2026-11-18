@@ -36,6 +36,8 @@ export const links: Route.LinksFunction = () => [
     href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap',
   },
   { rel: 'manifest', href: '/manifest.webmanifest' },
+  // llms.txt v2：声明覆盖本站的 LLM 索引（rel="describedby"）
+  { rel: 'describedby', href: '/llms.txt', type: 'text/markdown' },
 ]
 
 export function Layout({ children }: { children: React.ReactNode }) {

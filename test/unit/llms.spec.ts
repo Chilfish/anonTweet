@@ -3,15 +3,15 @@
  *
  * llms.txt / openapi.json 构建器单测：
  * - AC-LLMS-001：llms.txt 符合 llmstxt.org 规范形状（H1 → blockquote → H2 分区 →
- *   链接子弹列表，纯 markdown 无 HTML/表格/代码块），覆盖全部后端端点，
- *   且 Data Shapes 小节给出常用接口（搜索/获取推文）出入参形态
- * - AC-LLMS-002：OpenAPI 3.1 结构合法，paths 与端点清单三方奇偶校验
- *   （apiEndpoints ↔ OpenAPI paths ↔ 期望路径列表），关键端点参数/请求体完整，
- *   响应 schema $ref 指向带真实字段定义的 components.schemas；
- *   另做版本奇偶校验——`info.version` 单源取自 package.json，随附快照不得漂移
+ *   链接子弹列表，纯 markdown 无 HTML/表格/代码块），且保持**索引**定位：
+ *   体积受限、不内联 schema、只链 GET 可取回资源、不宣传隐藏入口
+ * - AC-LLMS-002：OpenAPI 3.1 结构合法，paths 与期望路径清单奇偶校验，
+ *   关键端点参数/请求体完整，响应 schema $ref 指向带真实字段定义的
+ *   components.schemas；另做版本奇偶校验——`info.version` 单源取自
+ *   package.json，随附快照不得漂移
  */
 import { describe, expect, it } from 'vitest'
-import { apiEndpoints, buildLlmsTxt, buildOpenApiDoc } from '~/lib/llms'
+import { buildLlmsTxt, buildOpenApiDoc } from '~/lib/llms'
 import pkg from '../../package.json'
 import { readProjectFile } from '../helpers/read-project-file'
 
@@ -24,6 +24,8 @@ const OPENAPI_SNAPSHOT_REL = '.agents/skills/anon-tweet/references/anon-tweet-op
 const LINK_BULLET_RE = /^- \[[^\]]+\]\([^)]+\): /
 const HTML_TAG_RE = /<[a-z/]/i
 const SEMVER_RE = /^\d+\.\d+\.\d+/
+/** llms.txt 只允许链这些 GET 读取端点（前缀匹配） */
+const GET_API_HREF_RE = /^\/api\/(tweet\/(get|search|replies|list)|ig\/get|user\/get|proxy\/image)/
 
 // ── 期望路径清单（与 app/routes.ts 的 api/* 前缀一一对应） ────────────────
 const EXPECTED_PATHS = [
@@ -54,9 +56,9 @@ describe('AC-LLMS-001: llms.txt matches llmstxt.org spec shape and covers all en
   })
 
   it('organizes links under H2 sections with bullet link lists', () => {
-    expect(txt).toContain('## Key Pages')
-    expect(txt).toContain('## Backend API')
-    expect(txt).toContain('\n- [/](/): ')
+    expect(txt).toContain('## Start here')
+    expect(txt).toContain('## Optional')
+    expect(txt).toContain('\n- [/openapi.json](/openapi.json): ')
 
     // 每个含链接的子弹必须是 `- [文本](链接): 描述` 完整格式
     const bulletLines = lines.filter(l => l.trim().startsWith('- '))
@@ -87,41 +89,50 @@ describe('AC-LLMS-001: llms.txt matches llmstxt.org spec shape and covers all en
       expect(h.startsWith('/')).toBe(true)
   })
 
-  it('lists every backend endpoint exactly once, plus the openapi.json entry', () => {
-    const bulletTexts = [
-      ...txt.matchAll(/^- \[([^\]]+)\]/gm),
+  it('links the machine-readable entry points', () => {
+    expect(txt).toContain('](/skills/anon-tweet/SKILL.md): ')
+  })
+
+  it('links only GET-fetchable resources', () => {
+    const hrefs = [
+      ...txt.matchAll(/\]\(([^)]+)\)/g),
     ]
       .map(m => m[1])
-      .filter((t): t is string => typeof t === 'string')
-    const endpointLabels = apiEndpoints.map(e => e.label)
+      .filter((h): h is string => typeof h === 'string')
 
-    expect(bulletTexts).toContain('/openapi.json')
-    expect(bulletTexts).toContain('/sitemap.xml')
-    for (const label of endpointLabels)
-      expect(bulletTexts).toContain(label)
+    // POST-only 端点不能作为链接（agent 跟过去只会拿到 405）
+    const writePaths = [
+      '/api/tweet/set',
+      '/api/ai-test',
+      '/api/ai-translation',
+      '/api/ai-vision',
+      '/api/ig/translate',
+      '/api/bili-post',
+    ]
+    for (const path of writePaths)
+      expect(hrefs.some(h => h.startsWith(path))).toBe(false)
 
-    // 端点行应唯一（GET+POST 同路径也算不同 label）
-    const unique = new Set(bulletTexts)
-    expect(unique.size).toBe(bulletTexts.length)
+    const apiHrefs = hrefs.filter(h => h.startsWith('/api/'))
+    expect(apiHrefs.length).toBeGreaterThan(0)
+    for (const h of apiHrefs)
+      expect(h).toMatch(GET_API_HREF_RE)
   })
 
-  it('apiEndpoints hrefs all resolve within the endpoint set', () => {
-    for (const e of apiEndpoints)
-      expect(e.href.startsWith('/api/')).toBe(true)
+  it('stays an index instead of duplicating the OpenAPI schema', () => {
+    expect(txt.length).toBeLessThan(3000)
+    expect(txt).not.toContain('## Data Shapes')
+    expect(txt).not.toContain('EnrichedTweet:')
+    expect(txt).not.toContain('- TweetUser:')
   })
 
-  it('data Shapes section describes key response types and search/get inputs', () => {
-    expect(txt).toContain('## Data Shapes')
-    expect(txt).toContain('EnrichedTweet:')
-    expect(txt).toContain('TweetUser:')
-    expect(txt).toContain('Entity:')
-    expect(txt).toContain('SearchResponse / RepliesResponse:')
+  it('does not advertise the hidden /bili entry', () => {
+    expect(txt).not.toContain('/bili')
+  })
 
-    // 关键接口入参：搜索参数与获取推文路径参数
-    expect(txt).toContain('GET /api/tweet/search:')
-    expect(txt).toContain('GET /api/tweet/get/{id}:')
-    expect(txt).toContain('nextCursor')
-    expect(txt).toContain('aiTranslation')
+  it('states the calling conventions an agent needs', () => {
+    expect(txt).toContain('/api/user/timeline')
+    expect(txt).toContain('INS_COOKIES')
+    expect(txt).toContain('success')
   })
 })
 
@@ -163,14 +174,10 @@ describe('AC-LLMS-002: openapi.json is a valid OpenAPI 3.1 doc covering all back
     expect(snapshot.info?.version).toBe(pkg.version)
   })
 
-  it('paths parity: apiEndpoints ↔ openapi paths ↔ expected list', () => {
-    const fromEndpoints = [
-      ...new Set(apiEndpoints.map(e => e.path)),
-    ].sort()
+  it('paths parity: openapi paths ↔ expected list', () => {
     const fromDoc = Object.keys(doc.paths).sort()
     const expected = [...EXPECTED_PATHS].sort()
 
-    expect(fromEndpoints).toEqual(expected)
     expect(fromDoc).toEqual(expected)
   })
 

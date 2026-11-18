@@ -4,19 +4,18 @@
  * llms.txt + OpenAPI 3.1 文档构建器（LLM 友好的站点 / API 描述）。
  *
  * - `buildLlmsTxt()` → llms.txt markdown（llmstxt.org 规范：H1 标题 → blockquote
- *   简介 → `## ` 分区 → `- [文本](链接): 描述` 子弹列表；纯 markdown，无
- *   HTML/表格/代码块；链接统一相对路径，任意域名下可用）。除链接索引外，
- *   补充「Data Shapes」小节，直接给出最常被关心的接口（搜索 / 获取推文）
- *   出入参形态（EnrichedTweet 字段等）。
+ *   简介 → 调用约定 → `## ` 分区 → `- [文本](链接): 描述` 子弹列表；纯 markdown，
+ *   无 HTML/表格/代码块；链接统一相对路径，任意域名下可用）。定位是**索引**：
+ *   只给入口与 GET 示例链接，字段级 schema 交给 `/openapi.json`。
  * - `buildOpenApiDoc(baseUrl)` → OpenAPI 3.1 JSON，覆盖 `app/routes.ts` 中
  *   `api/*` 前缀下的全部后端接口（路径/参数/请求体/响应描述），响应 schema
  *   $ref 到带真实字段定义的 `components.schemas`。
  *
  * 规范参考：https://llmstxt.org/（/llms.txt 与可选 /llms-full.txt）。
  *
- * ⚠️ 端点清单变更时（新增/删除/改路径）必须同步更新 `apiEndpoints` 与
- * `buildOpenApiDoc` 的 paths——`test/unit/llms.spec.ts`（AC-LLMS-002）会做
- * 「OpenAPI 路径 ↔ 端点清单 ↔ 期望列表」三方奇偶校验兜底。
+ * ⚠️ 端点变更时（新增/删除/改路径）必须同步 `buildOpenApiDoc` 的 paths 与
+ * `test/unit/llms.spec.ts` 的 `EXPECTED_PATHS`——AC-LLMS-002 会做奇偶校验兜底。
+ * llms.txt 不再维护第二份端点清单，避免与 OpenAPI 重复漂移。
  *
  * OpenAPI `info.version` 单源取自 `package.json`（本模块仅在服务端使用），
  * 避免与发版版本手写漂移；随附快照
@@ -25,203 +24,57 @@
  */
 import pkg from '../../package.json'
 
-/** llms.txt / OpenAPI 使用的示例值（优先取仓库 fixture 里真实存在的 id） */
+/** llms.txt 示例链接使用的真实 id / 用户名（取自仓库 fixture，保证可直接取回） */
 export const LLMS_EXAMPLES = {
   /** 推文 id（test/fixtures/tweets/normal-ja.json） */
   tweetId: '2032649981690261684',
-  /** List id（示例值） */
-  listId: '1460328522022621184',
   /** Instagram shortcode（test/fixtures/ig-posts/post-with-media.json） */
   igShortcode: 'DWlrun0AVbE',
-  /** Instagram 用户名（fixture 示例） */
+  /** Instagram / X 用户名（fixture 示例） */
   username: 'meeeei.gt',
 } as const
 
-/** 单个后端接口的 llms.txt 描述条目 */
-export interface ApiEndpointLink {
-  method: 'GET' | 'POST'
-  /** OpenAPI 路径模板（如 /api/tweet/get/{id}） */
-  path: string
-  /** llms.txt 链接文本（method + 路径模板） */
-  label: string
-  /** 相对链接（填入示例值，AI 可直接拉取） */
-  href: string
-  /** 接口描述 */
-  description: string
-}
-
 /**
- * 后端 API 端点清单（与 app/routes.ts 的 `...prefix('api', [...])` 一一对应，
- * 共 16 条路径）。
+ * llms.txt markdown 构建（相对链接，任意部署域名可用）。
+ *
+ * 定位是索引而不是文档：只给入口与可直接取回的示例链接，字段级 schema 一律
+ * 交给 /openapi.json，任务级示例交给 Skill 指南。POST-only 端点不放进链接
+ * （agent 跟过去只会拿到 405），隐藏入口 /bili 不宣传。
  */
-export const apiEndpoints: ApiEndpointLink[] = [
-  // ── Tweet ──────────────────────────────────────────────
-  {
-    method: 'GET',
-    path: '/api/tweet/get/{id}',
-    label: 'GET /api/tweet/get/{id}',
-    href: `/api/tweet/get/${LLMS_EXAMPLES.tweetId}`,
-    description: '拉取单条推文（DB 缓存 → Twitter 原文）',
-  },
-  {
-    method: 'POST',
-    path: '/api/tweet/get/{id}',
-    label: 'POST /api/tweet/get/{id}',
-    href: `/api/tweet/get/${LLMS_EXAMPLES.tweetId}`,
-    description: '旧式拉取推文（兼容旧客户端，内部不再内联 AI 翻译）',
-  },
-  {
-    method: 'GET',
-    path: '/api/tweet/list/{id}',
-    label: 'GET /api/tweet/list/{id}',
-    href: `/api/tweet/list/${LLMS_EXAMPLES.listId}`,
-    description: '拉取 List 时间线推文（EnrichedTweet 数组）',
-  },
-  {
-    method: 'GET',
-    path: '/api/tweet/replies/{id}',
-    label: 'GET /api/tweet/replies/{id}',
-    href: `/api/tweet/replies/${LLMS_EXAMPLES.tweetId}`,
-    description: '拉取推文回复（{ tweets, nextCursor }，cursor 分页）',
-  },
-  {
-    method: 'GET',
-    path: '/api/tweet/search',
-    label: 'GET /api/tweet/search',
-    href: '/api/tweet/search?q=twitter',
-    description: '推文搜索（q 必填，type/cursor/count 可选，支持 X 高级语法）',
-  },
-  {
-    method: 'POST',
-    path: '/api/tweet/set',
-    label: 'POST /api/tweet/set',
-    href: '/api/tweet/set',
-    description: '保存推文实体编辑或文章按块译文（intent: updateEntities / updateArticleTranslations）',
-  },
-  // ── Instagram ──────────────────────────────────────────
-  {
-    method: 'GET',
-    path: '/api/ig/get/{id}',
-    label: 'GET /api/ig/get/{id}',
-    href: `/api/ig/get/${LLMS_EXAMPLES.igShortcode}`,
-    description: '拉取 IG 帖子（简化版，不触发 AI 翻译）',
-  },
-  {
-    method: 'POST',
-    path: '/api/ig/get/{id}',
-    label: 'POST /api/ig/get/{id}',
-    href: `/api/ig/get/${LLMS_EXAMPLES.igShortcode}`,
-    description: '拉取 IG 帖子（可启用 AI caption 翻译）',
-  },
-  {
-    method: 'POST',
-    path: '/api/ig/translate/{id}',
-    label: 'POST /api/ig/translate/{id}',
-    href: `/api/ig/translate/${LLMS_EXAMPLES.igShortcode}`,
-    description: 'IG caption AI 翻译或手动翻译（manualTranslation 直接写入）',
-  },
-  // ── User ───────────────────────────────────────────────
-  {
-    method: 'GET',
-    path: '/api/user/get/{username}',
-    label: 'GET /api/user/get/{username}',
-    href: `/api/user/get/${LLMS_EXAMPLES.username}`,
-    description: '查询用户资料（DB 缓存）',
-  },
-  {
-    method: 'GET',
-    path: '/api/user/timeline/{username}',
-    label: 'GET /api/user/timeline/{username}',
-    href: `/api/user/timeline/${LLMS_EXAMPLES.username}`,
-    description: '用户时间线（EnrichedTweet 数组）',
-  },
-  // ── AI ─────────────────────────────────────────────────
-  {
-    method: 'POST',
-    path: '/api/ai-test',
-    label: 'POST /api/ai-test',
-    href: '/api/ai-test',
-    description: 'AI 提供商连通性测试（apiKey + model）',
-  },
-  {
-    method: 'POST',
-    path: '/api/ai-translation',
-    label: 'POST /api/ai-translation',
-    href: '/api/ai-translation',
-    description: '统一 AI 翻译端点（type: twitter / ins / article）',
-  },
-  {
-    method: 'POST',
-    path: '/api/ai-vision',
-    label: 'POST /api/ai-vision',
-    href: '/api/ai-vision',
-    description: 'AI 视觉描述生成 / OCR 翻译 / 保存（三种严格互斥请求形态）',
-  },
-  // ── Proxy / Misc ───────────────────────────────────────
-  {
-    method: 'GET',
-    path: '/api/proxy/image',
-    label: 'GET /api/proxy/image',
-    href: '/api/proxy/image?url=https%3A%2F%2Fscontent.cdninstagram.com%2Fv%2Ft51.2885-15%2Fphoto.jpg',
-    description: '图片代理（解决 IG CDN CORS/CORP，url 白名单校验）',
-  },
-  {
-    method: 'POST',
-    path: '/api/bili-post',
-    label: 'POST /api/bili-post',
-    href: '/api/bili-post',
-    description: 'Bili 动态发布（隐藏自用入口，ENABLE_BILI 控制，需 Bili Cookie）',
-  },
-]
-
-/** llms.txt markdown 构建（相对链接，任意部署域名可用） */
 export function buildLlmsTxt(): string {
-  const apiBullets = apiEndpoints
-    .map(e => `- [${e.label}](${e.href}): ${e.description}`)
-    .join('\n')
-
   return `# Anon Tweet
 
-> Anon Tweet 是一个匿名浏览 Twitter/X 推文与 Instagram 帖子的全栈应用，内置 AI 翻译（Google Gemini / DeepSeek）、截图导出与 Markdown 卡片导出。主要页面使用 HTML；后端为 /api/* 的 BFF 聚合接口，完整机器可读 API 规范见 /openapi.json。
+> 匿名读取 Twitter/X 推文、回复、搜索、List 与 Instagram 帖子的只读 BFF；AI 翻译与视觉描述按需触发。
 
-## Key Pages
+调用约定：
 
-- [/](/): 首页 — 粘贴 Twitter/X 或 Instagram 链接开始匿名浏览
-- [/search](/search): 推文搜索 — 高级语法快捷插入 + 热门/最新切换 + 分页加载
-- [/tweets/{id}](/tweets/${LLMS_EXAMPLES.tweetId}): 推文详情（AI 翻译 / 截图导出）
-- [/ins/{id}](/ins/${LLMS_EXAMPLES.igShortcode}): Instagram 帖子详情（AI 翻译 / 截图导出）
-- [/article/{id}](/article/${LLMS_EXAMPLES.tweetId}): X 长文（Article）阅读页 — 块文档渲染 + 按块 AI 翻译（原文 / 双语 / 仅译文）
-- [/bili](/bili): Bili 动态发布（隐藏自用入口）
+- 读取接口无需鉴权；HTTP 状态恒为 200，成功与否看响应里的 success / status / error
+- /api/user/timeline/{username} 默认关闭（固定 429），其余读取接口不受影响
+- Instagram 接口依赖部署端 INS_COOKIES，未配置时返回空数组
+- 单条推文接口返回数组；分页接口用 nextCursor 翻页，null 表示到底
+- 跨域图片先走 /api/proxy/image（只放行图片扩展名与 cdninstagram.com、fbcdn.net）
+- 完整字段定义在 /openapi.json，任务级示例在 Skill 指南，不要从本文件推断 schema
 
-## Backend API
+## Start here
 
-- [/openapi.json](/openapi.json): OpenAPI 3.1 规范 — 全部后端接口的路径、参数、请求与响应描述
+- [/openapi.json](/openapi.json): OpenAPI 3.1 — 全部端点、参数、请求体与响应 schema
+- [API 使用指南](/skills/anon-tweet/SKILL.md): 按任务组织的调用示例、参数说明与数据结构要点
 
-${apiBullets}
+## Live examples
 
-## Data Shapes
+- [搜索推文](/api/tweet/search?q=twitter&type=latest&count=5): GET /api/tweet/search?q=… — 返回 { tweets, nextCursor }
+- [单条推文](/api/tweet/get/${LLMS_EXAMPLES.tweetId}): GET /api/tweet/get/{id} — EnrichedTweet 数组
+- [推文回复](/api/tweet/replies/${LLMS_EXAMPLES.tweetId}): GET /api/tweet/replies/{id} — { tweets, nextCursor }
+- [用户资料](/api/user/get/${LLMS_EXAMPLES.username}): GET /api/user/get/{username} — RawUser 或 null
+- [IG 帖子](/api/ig/get/${LLMS_EXAMPLES.igShortcode}): GET /api/ig/get/{id} — IGPost 数组
 
-后端主要接口（搜索 / 获取推文）的出参是 EnrichedTweet 数组，字段对齐 react-tweet：
+## Optional
 
-- EnrichedTweet: id_str（推文 ID）、text（推文文本）、url（完整链接）、lang（语言码）、created_at（ISO 8601 创建时间）、user（作者 TweetUser）、entities（实体 Entity[]）、visionInfo（可选，AI 视觉描述）、quotedTweet（可选，引用推文）、card（可选，预览卡片）、space（可选，X Space 卡片：标题/主播/收听人数/时长）、article（可选，X 长文卡片与块文档）
-- TweetUser: id_str、name、screen_name、profile_image_url_https（头像）、verified、is_blue_verified
-- Entity: type（text / hashtag / mention / url / media / symbol / media_alt / separator）、text、index（文本偏移）、href（多数类型带链接）、translation（手动翻译）、aiTranslation（AI 翻译）
-- TweetArticle: id（文章 ID）、url、title、previewText（摘要）、plainText（纯文本兜底）、format（rich 表示带 blocks，plain 仅纯文本）、coverImage（封面）、publishedAt（epoch ms）、blocks（ArticleBlock[]，仅 rich）
-- ArticleBlock: type（paragraph / heading / list-item / quote / markdown / divider / image / embed-tweet / link / unknown）、key（稳定块 ID）、runs（行内片段：文本 / 链接 / mention / hashtag，带回读偏移与样式）、text（markdown 块）、media（image 块）、tweetId（embed-tweet）、level / ordered（heading / 列表）
-- SearchResponse / RepliesResponse: { tweets: EnrichedTweet[], nextCursor }（nextCursor 为 string 或 null，null 表示没有更多）
-
-关键接口入参：
-
-- GET /api/tweet/search: 必填 q（≤500 字符，支持 X 高级语法，如 (from:user) since:2025-01-01），可选 type=latest/top、cursor（分页游标）、count（默认 20）
-- GET /api/tweet/get/{id}: 路径参数 id 为推文 ID（如 ${LLMS_EXAMPLES.tweetId}），返回 EnrichedTweet 数组，AI 翻译存于 entities[].aiTranslation
-- GET /api/tweet/replies/{id}: 可选 cursor 翻页，返回 { tweets, nextCursor }
-- GET /api/ig/get/{id}: 路径参数 id 为 shortcode（或 username/story_id），未配置 INS_COOKIES 时返回空数组
-
-## Machine Readable
-
-- [/skills/anon-tweet/SKILL.md](/skills/anon-tweet/SKILL.md): Agent Skill — 匿名浏览 Twitter/X 与 IG 帖子的 API 使用指南（Agent Skills 规范，可导入 Claude Code / claude.ai）
-- [/sitemap.xml](/sitemap.xml): XML 站点地图
-- [/robots.txt](/robots.txt): 爬虫规则（Disallow /api/，llms.txt 与 openapi.json 不受限）
+- [推文详情页](/tweets/${LLMS_EXAMPLES.tweetId}): HTML 页面
+- [IG 详情页](/ins/${LLMS_EXAMPLES.igShortcode}): HTML 页面
+- [X 长文阅读页](/article/${LLMS_EXAMPLES.tweetId}): HTML 页面
+- [/sitemap.xml](/sitemap.xml): 可索引页面清单
+- [/robots.txt](/robots.txt): 爬虫规则
 `
 }
 

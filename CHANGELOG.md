@@ -66,9 +66,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ### Changed
 
+#### llms.txt 索引化（2026-11-18）
+
+- `/llms.txt` 从「schema 摘要 + 16 条端点清单」收敛为 1.2KB 纯索引：blockquote + 调用约定 + `Start here` / `Live examples` / `Optional`
+- 删除 `## Data Shapes`（与 `/openapi.json` 重复），字段定义只指向 OpenAPI；任务级示例指向 `/skills/anon-tweet/SKILL.md`
+- 删除 `apiEndpoints` 端点清单，AC-LLMS-001 改为「索引而非文档」并加体积/内容上限；AC-LLMS-002 奇偶校验改为 OpenAPI paths ↔ `EXPECTED_PATHS`
+- 不再把 POST-only 端点（`/api/tweet/set`、`/api/ai-*`、`/api/ig/translate`、`/api/bili-post`）作为链接；示例链接全部为可 GET 取回的真实 fixture
+- `robots.txt` 显式 Allow 只读接口；`sitemap.xml` 移除隐藏入口 `/bili`；`root.tsx` 增加 `rel="describedby"` 指向 `/llms.txt`
+- `anon-tweet` skill 移除 B 站自用端点，版本 1.3.0 → 1.3.1
+
 #### 文档与界面信息密度收敛（2026-11-18）
 
-- 根指令文件 `CLAUDE.md` → `AGENTS.md`，145 行压到 47 行：只留项目一句话、验证命令、6 条硬约束与文档入口；目录树、技术栈清单、核心机制、Current State、gh 流程、Git Hooks、skills 说明全部外链到 `docs/`（根文件只写无法从代码推断的约束）
+- 根指令文件 `CLAUDE.md` → `AGENTS.md`，145 行压到 36 行：只留项目一句话、验证命令、6 条硬约束与文档入口；目录树、技术栈清单、核心机制、Current State、gh 流程、Git Hooks、skills 说明全部外链到 `docs/`（根文件只写无法从代码推断的约束）
 - 统一 pre-push 门禁描述：`typecheck` → `eslint .` → `verify --exit-on-fail` → `build` → `build-storybook`（修正根文件漏 `build`、`INDEX.md` 与 `git-workflow.md` 各自一套的三方矛盾）
 - 新增 [`docs/ui-design/INFORMATION-DENSITY.md`](docs/ui-design/INFORMATION-DENSITY.md)：8 条负向约束、每屏预算与验收动作；`ui-design/README.md` 的 70 行组件清单改为「以目录为准」，修掉 `./components/*.md` 断链与 `select-cossui.md` 悬空引用
 - 品牌 Hero 只在首页渲染，详情页不再被「あのん Tweet + 三段介绍」占据首屏；页脚移除 build 时间 / commit hash 与隐藏入口 `/bili`

@@ -11,10 +11,10 @@ license: MIT
 compatibility: 需要 PowerShell 7+（pwsh）与网络访问部署实例；纯 PowerShell 封装，不依赖 curl/python3
 metadata:
   author: Chilfish
-  version: "1.3.0"
+  version: "1.3.1"
   base-url: https://anon-tweet.chilfish.top
   repository: https://github.com/Chilfish/anonTweet
-  updated: "2026-09-27"
+  updated: "2026-11-18"
 ---
 
 # Anon Tweet API
@@ -66,7 +66,6 @@ pwsh -NoProfile -File $A help
 | GET | `/api/proxy/image?url=...` | 图片代理（url 白名单校验，返回二进制） |
 | POST | `/api/ai-translation` | 通用 AI 翻译（`type`: twitter / ins / article） |
 | POST | `/api/ai-vision` | 图片/视频 AI 描述 |
-| POST | `/api/bili-post` | B 站动态抓取 |
 
 完整 schema 见 `references/anon-tweet-openapi.json`。
 
