@@ -214,12 +214,7 @@ export default function IGPostPage() {
         <IGHeader {...headerProps} storyMode={storyLike} />
         {storyLike
           ? <IGStoryListSkeleton className="mt-4" />
-          : (
-              <div className="flex flex-col gap-4">
-                <IGPostSkeleton />
-                <IGPostSkeleton />
-              </div>
-            )}
+          : <IGPostSkeleton />}
       </>
     )
   }

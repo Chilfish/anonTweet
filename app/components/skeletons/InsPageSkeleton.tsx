@@ -14,12 +14,7 @@ export function InsPageSkeleton({ id }: { id?: string }) {
       <PageToolbarSkeleton actions={storyLike ? 0 : 3} />
       {storyLike
         ? <IGStoryListSkeleton className="mt-4" />
-        : (
-            <div className="flex flex-col gap-4">
-              <IGPostSkeleton />
-              <IGPostSkeleton />
-            </div>
-          )}
+        : <IGPostSkeleton />}
     </>
   )
 }

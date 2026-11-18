@@ -66,6 +66,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ### Changed
 
+#### ins 帖子骨架屏（2026-11-18）
+
+- `IGPostSkeleton` 改为连续 3:2 媒体占位 + 骨架化动作栏，移除卡片级 `animate-pulse`（不再与格块动画叠加）
+- 普通帖子加载只渲染 1 张骨架（`ins.tsx` / `InsPageSkeleton`），不再是两张完整卡片
+
 #### 快拍相册网格（2026-11-18）
 
 - 快拍 / 精选集网格从 5 列小方图改为 3:4 竖版大图（手机 2 列 / 桌面 3 列，≤4 条 2 列），间距 `gap-2`，格块 hover 轻微放大
