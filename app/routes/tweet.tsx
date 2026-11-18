@@ -17,8 +17,9 @@ import { buildMeta, clampDescription, ogLocale } from '~/lib/seo'
 import { getTweets } from '~/lib/service/getTweet'
 import { getLocalTweet } from '~/lib/service/getTweet.server'
 import { snapshotKey } from '~/lib/snapshot'
-import { loadFreshTweetSnapshot, restoreTweetSnapshot } from '~/lib/snapshot-restore'
-import { useMainTweet, useTranslationActions, useTranslations, useTweets } from '~/lib/stores/hooks'
+import { loadTweetSnapshot, restoreTweetSnapshot } from '~/lib/snapshot-restore'
+import { useCommentIds, useMainTweet, useTranslationActions, useTranslations, useTweets } from '~/lib/stores/hooks'
+import { useTranslationStore } from '~/lib/stores/translation'
 import { decodeHtmlEntities, extractTweetId } from '~/lib/utils'
 
 export async function loader({ params, request }: Route.LoaderArgs) {
@@ -41,6 +42,27 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     console.error(`[tweet] load ${tweetId} failed:`, error)
     return { tweet: null, tweetId, baseUrl }
   }
+}
+
+export async function clientLoader({
+  params,
+  serverLoader,
+}: Route.ClientLoaderArgs) {
+  const tweetId = params.id
+    ? extractTweetId(params.id)
+    : null
+  if (tweetId) {
+    const snapshot = await loadTweetSnapshot(tweetId)
+    if (snapshot) {
+      restoreTweetSnapshot(snapshot)
+      return {
+        tweet: snapshot.tweets.find(tweet => tweet.id_str === tweetId) ?? snapshot.tweets[0] ?? null,
+        tweetId,
+        baseUrl: window.location.origin,
+      }
+    }
+  }
+  return serverLoader()
 }
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -114,8 +136,8 @@ function TweetStructuredData({ tweet }: { tweet: EnrichedTweet }) {
 }
 
 async function fetchTweetData(args: GetTweetSchema): Promise<TweetData> {
-  // 命中未过期的本地快照时直接恢复 store 并返回，不再打 /api/tweet/get
-  const snapshot = await loadFreshTweetSnapshot(args.tweetId)
+  // 本地优先：命中快照直接恢复 store 并返回，不再打 /api/tweet/get
+  const snapshot = await loadTweetSnapshot(args.tweetId)
   if (snapshot) {
     restoreTweetSnapshot(snapshot)
     return snapshot.tweets
@@ -135,6 +157,7 @@ export default function TweetPage({ loaderData }: Route.ComponentProps) {
   const storeTweets = useTweets()
   const storeMainTweet = useMainTweet()
   const translations = useTranslations()
+  const commentIds = useCommentIds()
   const isStoreReady = useSyncExternalStore(() => () => {}, () => true, () => false)
 
   const tweetOperations = useTweetOperations()
@@ -167,7 +190,9 @@ export default function TweetPage({ loaderData }: Route.ComponentProps) {
       }
       else {
         setAllTweets(tweets, tweetId)
-        setCommentIds([])
+        // 快照恢复的评论区要保留；切换推文时旧评论 id 不在新线程里，自动清掉
+        const currentCommentIds = useTranslationStore.getState().commentIds
+        setCommentIds(currentCommentIds.filter(id => tweets.some(t => t.id_str === id)))
       }
     }
   }, [
@@ -207,6 +232,8 @@ export default function TweetPage({ loaderData }: Route.ComponentProps) {
         title: visitedTweet.user?.name || `@${visitedTweet.user?.screen_name ?? '推文'}`,
         snippet: decodeHtmlEntities(visitedTweet.text || '').replace(/\s+/g, ' ').trim().slice(0, 90),
         image: visitedTweet.user?.profile_image_url_https,
+        author: visitedTweet.user?.name,
+        authorHandle: visitedTweet.user?.screen_name,
       }
     : null)
 
@@ -220,12 +247,14 @@ export default function TweetPage({ loaderData }: Route.ComponentProps) {
       id: tweetId,
       tweets: storeTweets,
       translations,
+      commentIds,
       savedAt: Date.now(),
     }
   }, [
     tweetId,
     storeTweets,
     translations,
+    commentIds,
   ])
   usePersistSnapshot(snapshotRecord)
 

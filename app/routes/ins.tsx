@@ -20,7 +20,8 @@ import { useRecordVisit } from '~/hooks/use-record-visit'
 import { fetcher } from '~/lib/fetcher'
 import { buildMeta } from '~/lib/seo'
 import { snapshotKey } from '~/lib/snapshot'
-import { loadFreshIgSnapshot } from '~/lib/snapshot-restore'
+import { flushSnapshot } from '~/lib/snapshot-flush'
+import { loadIgSnapshot } from '~/lib/snapshot-restore'
 import { useAIConfig, useResolvedAIConfig } from '~/lib/stores/hooks'
 import { extractIGId, isIGStoryLikeId } from '~/lib/url-detect'
 
@@ -63,8 +64,8 @@ async function getIGPost(
     translationGlossary?: string
   },
 ): Promise<IGPostData> {
-  // 未过期的本地快照直接复用，避免重复请求
-  const cached = await loadFreshIgSnapshot(id)
+  // 本地优先：命中快照直接复用，避免重复请求
+  const cached = await loadIgSnapshot(id)
   if (cached)
     return cached
 
@@ -129,6 +130,10 @@ export default function IGPostPage() {
           : 'Instagram',
         snippet: primaryPost.description?.replace(/\s+/g, ' ').trim().slice(0, 90),
         image: primaryPost.media?.[0]?.display_url,
+        author: primaryPost.username
+          ? `@${primaryPost.username}`
+          : undefined,
+        authorHandle: primaryPost.username,
       }
     : null)
 
@@ -175,6 +180,7 @@ export default function IGPostPage() {
       ),
       { revalidate: false },
     )
+    requestAnimationFrame(() => flushSnapshot(snapshotKey('ig', igId)))
   }
 
   // 共享的 header props

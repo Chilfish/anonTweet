@@ -12,7 +12,7 @@ import { buildMeta, ogLocale } from '~/lib/seo'
 import { getTweets } from '~/lib/service/getTweet'
 import { getArticleTranslation, getLocalTweet } from '~/lib/service/getTweet.server'
 import { snapshotKey } from '~/lib/snapshot'
-import { loadFreshTweetSnapshot } from '~/lib/snapshot-restore'
+import { loadTweetSnapshot } from '~/lib/snapshot-restore'
 import {
   useArticleTranslation,
   useTranslationActions,
@@ -80,6 +80,26 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   }
 }
 
+export async function clientLoader({
+  params,
+  serverLoader,
+}: Route.ClientLoaderArgs) {
+  const tweetId = extractTweetId(params.id)
+  if (tweetId) {
+    const snapshot = await loadTweetSnapshot(tweetId, 'article')
+    if (snapshot) {
+      return {
+        tweet: snapshot.tweets[0] ?? null,
+        tweetId,
+        baseUrl: window.location.origin,
+        translation: snapshot.articleTranslation ?? null,
+        embeds: snapshot.embeds ?? {},
+      }
+    }
+  }
+  return serverLoader()
+}
+
 export function meta({ loaderData }: Route.MetaArgs) {
   const tweet = loaderData?.tweet
   const article = tweet?.article
@@ -121,7 +141,7 @@ export default function ArticlePage({ loaderData }: Route.ComponentProps) {
     if (!tweetId || persisted)
       return
     let cancelled = false
-    void loadFreshTweetSnapshot(tweetId, 'article').then((snapshot) => {
+    void loadTweetSnapshot(tweetId, 'article').then((snapshot) => {
       if (!cancelled && snapshot?.articleTranslation)
         setArticleTranslation(tweetId, snapshot.articleTranslation)
     })
@@ -158,6 +178,8 @@ export default function ArticlePage({ loaderData }: Route.ComponentProps) {
         title: article.title || 'X 长文',
         snippet: article.previewText?.replace(/\s+/g, ' ').trim().slice(0, 90),
         image: article.coverImage?.url,
+        author: tweet.user?.name,
+        authorHandle: tweet.user?.screen_name,
       }
     : null)
 
