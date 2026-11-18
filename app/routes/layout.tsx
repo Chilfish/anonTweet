@@ -1,13 +1,11 @@
 import type { Route } from './+types/layout'
 import { Outlet, useNavigation } from 'react-router'
 import { Layout } from '~/components/layout/Layout'
-import { TweetSkeleton } from '~/lib/react-tweet'
+import { RouteSkeleton } from '~/components/skeletons'
 
 export default function AuthenticatedLayout(_: Route.ComponentProps) {
   const navigation = useNavigation()
-  const isNavigating = Boolean(navigation.location)
-  const navToHome = navigation.location?.pathname === '/'
-  const showSkeleton = isNavigating && !navToHome
+  const targetPath = navigation.location?.pathname
   return (
     <Layout>
       {/* <header className="w-full p-2 flex items-center">
@@ -19,8 +17,8 @@ export default function AuthenticatedLayout(_: Route.ComponentProps) {
       </header> */}
 
       {
-        showSkeleton
-          ? <TweetSkeleton />
+        targetPath
+          ? <RouteSkeleton pathname={targetPath} />
           : <Outlet />
       }
 

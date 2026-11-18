@@ -3,6 +3,7 @@ import type { TweetSnapshot } from '~/lib/storage/db'
 import type { ArticleBlock, EnrichedTweet } from '~/types'
 import { useEffect, useMemo, useRef } from 'react'
 import { ArticleEmbeddedTweet, ArticleReader, ArticleToolbar } from '~/components/article'
+import { ArticlePageSkeleton } from '~/components/skeletons'
 import { useAutoTranslateArticle } from '~/hooks/use-auto-translate-article'
 import { usePersistSnapshot } from '~/hooks/use-persist-snapshot'
 import { useRecordVisit } from '~/hooks/use-record-visit'
@@ -116,6 +117,10 @@ export function meta({ loaderData }: Route.MetaArgs) {
     baseUrl: loaderData?.baseUrl,
     noindex: true,
   })
+}
+
+export function HydrateFallback() {
+  return <ArticlePageSkeleton />
 }
 
 export default function ArticlePage({ loaderData }: Route.ComponentProps) {

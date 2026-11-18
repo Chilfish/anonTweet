@@ -52,12 +52,34 @@
 
 ---
 
-## 总计：2 条 AC
+## AC-UI-SKELETON-001：路由切换与页面加载使用页面同形骨架屏
 
-| AC               | 分类     | 依赖外部 API | 依赖 AI |
-| ---------------- | -------- | ------------ | ------- |
-| AC-UI-VISION-001 | 静态盘点 | 否           | 否      |
-| AC-UI-A11Y-001   | 静态检查 | 否           | 否      |
+- **背景**：`layout.tsx` 曾用 `useNavigation()` 拦截所有路由切换，除首页外一律渲染
+  `TweetSkeleton`。跳转 `/ins`、`/history`、`/article`、`/about` 等页面时先闪推文卡片
+  骨架，与目标版面不符；`tweet` / `article` 有 `clientLoader` 却没有自己的
+  `HydrateFallback`。
+- **输入**：`app/routes/layout.tsx`、`app/components/skeletons/*`、
+  `app/routes/{tweet,article,list}.tsx`
+- **验证方法**：静态检查（`test/acceptance/ac-ui.spec.ts`）
+- **Pass 条件**：
+  - `layout.tsx` 不再直接引用 `TweetSkeleton`，改为按目标 pathname 渲染 `RouteSkeleton`
+  - `RouteSkeleton` 为 `/`、`/tweets/`、`/article/`、`/user/`、`/list/`、`/ins/`、
+    `/search`、`/history`、`/bili`、`/about` 分别映射到各自的页面骨架组件，且文件存在
+  - 每个骨架组件都以 `Skeleton` 命名并位于 `app/components/skeletons/`
+  - `tweet` / `article` / `list` 路由导出 `HydrateFallback`，使用对应页面骨架
+  - `InsPageSkeleton` 按 `isIGStoryLikeId` 在快拍网格与帖子卡片骨架间切换
+- **诚实边界**：源码级断言只证明映射与结构存在，不证明视觉同形；视觉验收需在
+  dev 实例逐路由切换核对。
+
+---
+
+## 总计：3 条 AC
+
+| AC                 | 分类     | 依赖外部 API | 依赖 AI |
+| ------------------ | -------- | ------------ | ------- |
+| AC-UI-VISION-001   | 静态盘点 | 否           | 否      |
+| AC-UI-A11Y-001     | 静态检查 | 否           | 否      |
+| AC-UI-SKELETON-001 | 静态检查 | 否           | 否      |
 
 > 离线 AC（无服务器无 key）。Storybook 构建检查：`bun run build-storybook`，
 > 已并入 pre-push 门禁（lefthook.yml，2026-08-19）。

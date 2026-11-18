@@ -5,6 +5,7 @@ import type { EnrichedTweet, TweetData } from '~/types'
 import { useEffect, useMemo, useSyncExternalStore } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import useSWR from 'swr'
+import { TweetPageSkeleton } from '~/components/skeletons'
 import { MyTweet } from '~/components/tweet/Tweet'
 import { TweetHeader } from '~/components/tweet/TweetHeader'
 import { useAutoTranslateTweets } from '~/hooks/use-auto-translate'
@@ -99,6 +100,10 @@ export function meta({ loaderData }: Route.MetaArgs) {
     baseUrl,
     noindex: true,
   })
+}
+
+export function HydrateFallback() {
+  return <TweetPageSkeleton />
 }
 
 function TweetStructuredData({ tweet }: { tweet: EnrichedTweet }) {

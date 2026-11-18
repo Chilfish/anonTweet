@@ -204,6 +204,72 @@ describe('AC-UI-VISION-001: every used component has a story (P1-2)', () => {
   })
 })
 
+describe('AC-UI-SKELETON-001: route transitions use page-shaped skeletons', () => {
+  const PAGE_SKELETONS = [
+    'HomePageSkeleton',
+    'TweetPageSkeleton',
+    'ArticlePageSkeleton',
+    'UserPageSkeleton',
+    'ListPageSkeleton',
+    'InsPageSkeleton',
+    'SearchPageSkeleton',
+    'HistoryPageSkeleton',
+    'BiliPageSkeleton',
+    'AboutPageSkeleton',
+  ] as const
+
+  it('layout picks a skeleton by destination pathname instead of a global TweetSkeleton', () => {
+    const layout = read('app/routes/layout.tsx')
+    expect(layout).toContain('RouteSkeleton')
+    expect(layout).toContain('pathname={targetPath}')
+    expect(layout).not.toContain('TweetSkeleton')
+  })
+
+  it('route skeleton maps every in-layout route to its own page-shaped skeleton', () => {
+    const route = read('app/components/skeletons/RouteSkeleton.tsx')
+    const prefixes = [
+      '/',
+      '/tweets/',
+      '/article/',
+      '/user/',
+      '/list/',
+      '/ins/',
+      '/search',
+      '/history',
+      '/bili',
+      '/about',
+    ]
+    for (const prefix of prefixes)
+      expect(route, `missing route prefix ${prefix}`).toContain(`'${prefix}'`)
+
+    const files = readdir('app/components/skeletons')
+    for (const name of PAGE_SKELETONS) {
+      expect(route, `RouteSkeleton does not use ${name}`).toContain(name)
+      expect(files, `missing ${name}.tsx`).toContain(`${name}.tsx`)
+    }
+  })
+
+  it('routes with clientLoader export a page-shaped HydrateFallback', () => {
+    const cases = [
+      ['app/routes/tweet.tsx', 'TweetPageSkeleton'],
+      ['app/routes/article.tsx', 'ArticlePageSkeleton'],
+      ['app/routes/list.tsx', 'ListPageSkeleton'],
+    ] as const
+    for (const [file, skeleton] of cases) {
+      const source = read(file)
+      expect(source, `${file} missing HydrateFallback`).toContain('export function HydrateFallback')
+      expect(source, `${file} should use ${skeleton}`).toContain(skeleton)
+    }
+  })
+
+  it('instagram skeleton switches by story-like id', () => {
+    const ins = read('app/components/skeletons/InsPageSkeleton.tsx')
+    expect(ins).toContain('isIGStoryLikeId')
+    expect(ins).toContain('IGStoryListSkeleton')
+    expect(ins).toContain('IGPostSkeleton')
+  })
+})
+
 describe('AC-UI-A11Y-001: a11y baseline configured + known violations fixed (P1-2)', () => {
   it('a11y addon is registered in storybook main', () => {
     const main = read('.storybook/main.ts')

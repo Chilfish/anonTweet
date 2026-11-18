@@ -5,6 +5,7 @@ import axios from 'axios'
 import { AlertTriangleIcon, ListIcon } from 'lucide-react'
 import { memo, useEffect, useMemo, useState } from 'react'
 import { useLoaderData, useNavigate, useNavigation, useRevalidator } from 'react-router'
+import { ListPageSkeleton } from '~/components/skeletons'
 import { BackButton } from '~/components/translation/BackButton'
 import { MyTweet } from '~/components/tweet/Tweet'
 import { Button } from '~/components/ui/button'
@@ -19,7 +20,6 @@ import {
 import { Form } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
-import { TweetSkeleton } from '~/lib/react-tweet'
 import { buildMeta } from '~/lib/seo'
 import { extractListId } from '~/lib/url-detect'
 
@@ -32,12 +32,7 @@ export function meta() {
 }
 
 export function HydrateFallback() {
-  return (
-    <div className="mx-auto flex w-full max-w-[600px] flex-col gap-3 px-3 sm:px-0">
-      <TweetSkeleton />
-      <TweetSkeleton />
-    </div>
-  )
+  return <ListPageSkeleton />
 }
 
 export async function clientLoader({ params }: Route.LoaderArgs) {
