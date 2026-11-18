@@ -235,13 +235,12 @@ Story（`/stories/{username}/{id}/`）与 Highlight 的识别、抓取早已可�
 - **验收**：新增 AC-IG-STORY-008（`renderToString` 结构与文案）；`/ins/*` 的路由骨架也已
   使用 `InsPageSkeleton`（见 `AC-UI-SKELETON-001`）。
 
-> ⚠️ **上游依赖（2026-11-18）**：直链 `/stories/highlights/{id}/`（canonical id
-> `highlight~{id}`）目前受 `@chilfish/gallery-dl-instagram@0.2.5` 限制无法取数。上游 SDK 对
-> highlight 直链直接请求 REST `reels_media`（网页 session 已返回 500），且未解析页面内嵌的
-> `xdt_api__v1__feed__reels_media__connection`；即使解析到 reel，reel 自带 `__typename`
-> 也会被误分流到 GraphQL 解析器。修复与发版跟踪
-> [Chilfish/gallery-dl-ins#3](https://github.com/Chilfish/gallery-dl-ins/issues/3)。前端卡片与
-> 查看器逻辑已就绪，SDK 升级后即可用。
+> ✅ **上游支持（2026-11-18）**：`@chilfish/gallery-dl-instagram@0.2.6` 起支持直链
+> `/stories/highlights/{id}/`（canonical id `highlight~{id}`）：优先解析页面内嵌的
+> `xdt_api__v1__feed__reels_media__connection`，并修正 reel 带 `__typename` 时的分流。
+> 本站实测该链接返回 12 条 media，目录带 `username` / `highlight_title`；前端相册卡片与
+> 查看器直接复用。上游修复记录
+> [Chilfish/gallery-dl-ins#3](https://github.com/Chilfish/gallery-dl-ins/issues/3)。
 
 > ⚠️ **已知缺口（本次未处理）**：`app/root.tsx` 的 viewport meta 仍是 `width=device-width, initial-scale=1`，
 > 没有 `viewport-fit=cover` —— 于是 `env(safe-area-inset-*)` 在真机上恒为 0，上面那些 safe-area padding

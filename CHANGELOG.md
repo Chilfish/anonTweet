@@ -151,6 +151,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ### Fixed
 
+#### Instagram 精选集直链（2026-11-18）
+
+- 升级 `@chilfish/gallery-dl-instagram` 0.2.5 → 0.2.6：`/stories/highlights/{id}/` 直链改为解析页面内嵌 payload，REST `reels_media` 不可用时仍能取出目录与逐条媒体
+- 实测 `highlight~18115369870628555` → 12 条 media，目录带 `username` / `highlight_title`；前端相册卡片与查看器直接复用
+- 上游跟踪：[Chilfish/gallery-dl-ins#3](https://github.com/Chilfish/gallery-dl-ins/issues/3)
+
 #### AI 翻译容错与错误提示（2026-11-18）
 
 - 模型返回非法 `entityText`（例如为不存在的占位符编造 key）时不再让整条翻译失败：首次重试，第二次丢弃非法覆盖并正常返回译文
