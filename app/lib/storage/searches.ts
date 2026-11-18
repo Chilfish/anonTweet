@@ -3,6 +3,13 @@ import { withDb } from './db'
 /** 搜索历史保留条数（去重后） */
 export const SEARCH_HISTORY_LIMIT = 20
 
+/** 同一毫秒内连续搜索时也要有稳定顺序，避免索引按主键兜底 */
+let lastTs = 0
+function nextTs(): number {
+  lastTs = Math.max(Date.now(), lastTs + 1)
+  return lastTs
+}
+
 export async function recordSearch(query: string): Promise<void> {
   const trimmed = query.trim()
   if (!trimmed)
@@ -13,7 +20,7 @@ export async function recordSearch(query: string): Promise<void> {
     const store = tx.objectStore('searches')
     await store.put({
       query: trimmed,
-      ts: Date.now(),
+      ts: nextTs(),
     })
 
     let count = await store.count()

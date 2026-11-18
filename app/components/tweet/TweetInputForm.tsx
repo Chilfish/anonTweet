@@ -2,6 +2,7 @@ import type { FormEvent } from 'react'
 import { AlertCircle, SearchIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
+import { SettingsButton } from '~/components/settings/SettingsButton'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader } from '~/components/ui/card'
@@ -146,7 +147,7 @@ export function TweetInputForm() {
           </ul>
         </div>
 
-        <div className="mt-4 flex justify-end border-t border-border/50 pt-3 text-xs text-muted-foreground">
+        <div className="mt-4 flex items-center justify-between border-t border-border/50 pt-3 text-xs text-muted-foreground">
           <Link
             to="/search"
             className="inline-flex shrink-0 items-center gap-1 transition-colors hover:text-foreground"
@@ -154,6 +155,7 @@ export function TweetInputForm() {
             <SearchIcon className="size-3.5" />
             搜索推文
           </Link>
+          <SettingsButton />
         </div>
       </CardContent>
     </Card>

@@ -68,7 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 #### 外壳重做与内容恢复（2026-11-18）
 
-- 删除通栏 header，也不设常驻导航条：设置 / 关于 / GitHub / 搜索入口收在页脚（默认展开）；新增朱印与日付线两件装饰元素
+- 删除通栏 header，也不设常驻导航条：Hero 与日付线由 Layout 在每个视图固定渲染；设置与「搜索推文」同行放在输入卡底部，页脚默认收起
 - 搜索页新增最近搜索（IndexedDB，去重 + 20 条上限，chips 点选重搜/清除）；无历史时给 3 个语法示例，点击只填入输入框
 - 去掉主题渐变：标题改纯色、移除背景品牌色光斑；新增 `--seal` 朱印色 token
 - 撤回 44469cf 的信息型删减：PageHeader 说明与横屏提示、输入卡 description + 支持格式清单、页脚 GitInfo（构建日期 + commit）与「关于 / GitHub」入口；页脚默认展开

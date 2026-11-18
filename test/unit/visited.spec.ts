@@ -7,6 +7,7 @@ import type { VisitedItem } from '~/lib/visited'
 import { describe, expect, it } from 'vitest'
 import {
   formatVisitedTime,
+  HOME_RECENT_LIST_LIMIT,
   HOME_VISITED_LIMIT,
   pushVisited,
   VISITED_LIMIT,
@@ -79,7 +80,8 @@ describe('AC-HOME-001: visited history pure helpers', () => {
     expect(next.some(i => i.id === `id-${VISITED_LIMIT - 1}`)).toBe(false)
   })
 
-  it('keeps the home slice smaller than the stored limit', () => {
+  it('reserves one slot for continue-reading and three for the list', () => {
+    expect(HOME_VISITED_LIMIT).toBe(HOME_RECENT_LIST_LIMIT + 1)
     expect(HOME_VISITED_LIMIT).toBeLessThan(VISITED_LIMIT)
   })
 

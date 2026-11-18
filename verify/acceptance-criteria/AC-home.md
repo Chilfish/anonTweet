@@ -10,23 +10,23 @@
 ## AC-HOME-001：最近查看与继续阅读
 
 - **输入**：`app/lib/visited.ts` 的纯函数、`RecentVisited` / `ContinueReading` 组件
-- **预期输出**：按访问时间倒序、按类型去重的本地历史，首页最多展示 5 条
+- **预期输出**：按访问时间倒序、按类型去重的本地历史，首页展示 1 条继续阅读 + 3 条最近查看
 - **Pass 条件**：
-  - `pushVisited`：新项置顶；同一 `type + id` 只保留一条并刷新时间戳；上限 `VISITED_LIMIT`
+  - `pushVisited`：新项置顶；同一 `type + id` 只保留一条并刷新时间戳；存储上限 `VISITED_LIMIT`（200）
   - `formatVisitedTime`：<1 分钟「刚刚」、<1 小时「N 分钟前」、<24 小时「N 小时前」、<7 天「N 天前」、更早「M月D日」
   - `visitedHref`：tweet → `/tweets/{id}`、ig → `/ins/{id}`、article → `/article/{id}`，id 做 URL 编码
   - `RecentVisited` 渲染为可点击链接，含类型图标、标题、摘要与相对时间；传入空列表时返回空串（不占位）
-  - 首页最新一条由 `ContinueReading` 渲染成宽卡，其余进入 `RecentVisited`，同一记录不重复出现
+  - 首页最新一条由 `ContinueReading` 渲染成宽卡，其余最多 3 条进入 `RecentVisited`，同一记录不重复出现
   - 历史只写本机存储，不随请求发送、不上报服务端
 
 ## AC-HOME-002：首页入口与装饰外壳
 
-- **输入**：`TweetInputForm`、`FloatingDock`、`HankoMark`、`Dateline` 的渲染结果
+- **输入**：`TweetInputForm`、`HankoMark`、`Dateline` 的渲染结果
 - **预期输出**：没有现成链接时也能从首页开始，外壳有可辨认的身份但不遮挡内容
 - **Pass 条件**：
-  - 输入卡提供 `/search` 入口（`没有链接？搜索推文`）与完整支持格式清单，渲染为可点击链接
-  - 外壳不设常驻导航：设置 / 关于 / GitHub / 搜索入口收在页脚（默认展开），首页输入卡另有搜索入口
-  - 首页标题旁有朱印、输入卡下方有日付线；两者为装饰，朱印 `aria-hidden`，不承载业务数据
+  - 输入卡底部一行同时提供 `/search` 与「设置」入口；设置打开现有 `SettingsPanel`
+  - 不设常驻导航：页脚默认收起，关于 / GitHub / 搜索入口放在展开后的页脚
+  - 首页标题旁有朱印；Hero 与日付线由 Layout 渲染，在所有视图固定出现，朱印 `aria-hidden`
   - 不使用渐变文字或大面积渐变光斑；项目说明保留在 PageHeader，不另加功能宫格
 
 ## AC-HOME-003：IndexedDB 本地存储层

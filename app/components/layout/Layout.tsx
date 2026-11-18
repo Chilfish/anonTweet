@@ -1,7 +1,6 @@
-import { GitCommitHorizontal, InfoIcon, SearchIcon, Settings, XIcon } from 'lucide-react'
+import { GitCommitHorizontal, InfoIcon, SearchIcon, XIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router'
-import { SettingsPanel } from '~/components/settings/SettingsPanel'
 import { Button } from '~/components/ui/button'
 import { formatDate } from '~/lib/react-tweet'
 import { cn } from '~/lib/utils'
@@ -67,28 +66,9 @@ function GitInfo() {
   )
 }
 
-function SettingsFooterButton() {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 transition-colors hover:text-(--primary-brand) hover:underline underline-offset-4 decoration-dotted"
-      >
-        <Settings className="size-3.5" aria-hidden />
-        设置
-      </button>
-      <SettingsPanel open={open} onOpenChange={setOpen} />
-    </>
-  )
-}
-
 export function LayoutComponent({ children }: { children?: React.ReactNode }) {
-  const [showFooter, setShowFooter] = useState(true)
+  const [showFooter, setShowFooter] = useState(false)
   const { pathname } = useLocation()
-  const isHome = pathname === '/'
 
   return (
     <div
@@ -96,18 +76,14 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
       style={THEME_COLOR}
     >
       <div className="flex-1 w-full max-w-3xl mx-auto sm:px-4 pt-6 pb-12 flex flex-col items-center justify-center  animate-in fade-in slide-in-from-bottom-2 duration-500">
-        {isHome
-          ? (
-              <div className="mb-8 w-full">
-                <PageHeader />
-              </div>
-            )
-          : (
-              <Dateline
-                label={sectionLabel(pathname)}
-                className="mb-3 w-full px-1"
-              />
-            )}
+        {/* 全站固定框架：Hero + 日付线在每一个视图都出现 */}
+        <div className="mb-6 w-full">
+          <PageHeader />
+        </div>
+        <Dateline
+          label={sectionLabel(pathname) || '匿名阅读'}
+          className="mb-4 w-full px-1"
+        />
 
         {children || <Outlet />}
       </div>
@@ -149,7 +125,6 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
                     关于
                   </Link>
                   <FooterLink to="https://github.com/Chilfish/anonTweet">GitHub</FooterLink>
-                  <SettingsFooterButton />
                 </span>
               </p>
             </div>

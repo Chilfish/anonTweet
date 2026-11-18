@@ -79,11 +79,12 @@ describe('AC-HOME-001: recent visited renders as links and hides when empty', ()
 })
 
 describe('AC-HOME-002: home entries and decorative shell', () => {
-  it('offers a search entry and keeps the input format list', () => {
+  it('offers search and settings on the same row, plus the input format list', () => {
     const html = render(createElement(TweetInputForm))
 
     expect(html).toContain('href="/search"')
     expect(html).toContain('搜索推文')
+    expect(html).toContain('aria-label="设置"')
     expect(html).toContain('支持格式')
     expect(html).toContain('instagram.com/reel/')
   })

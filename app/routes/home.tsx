@@ -1,9 +1,8 @@
 import { ContinueReading } from '~/components/home/ContinueReading'
 import { RecentVisited } from '~/components/home/RecentVisited'
-import { Dateline } from '~/components/layout/Dateline'
 import { TweetInputForm } from '~/components/tweet/TweetInputForm'
 import { useVisitedStore } from '~/lib/stores/visited'
-import { HOME_VISITED_LIMIT } from '~/lib/visited'
+import { HOME_RECENT_LIST_LIMIT, HOME_VISITED_LIMIT } from '~/lib/visited'
 
 export function meta() {
   return [
@@ -29,9 +28,8 @@ export default function Home() {
   return (
     <div className="flex w-full flex-col items-center gap-5">
       <TweetInputForm />
-      <Dateline label="匿名阅读" className="w-full max-w-md px-2" />
       <ContinueReading item={latest ?? null} />
-      <RecentVisited items={rest} onClear={clear} />
+      <RecentVisited items={rest.slice(0, HOME_RECENT_LIST_LIMIT)} onClear={clear} />
     </div>
   )
 }

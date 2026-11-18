@@ -18,8 +18,10 @@ export interface VisitedItem {
 export const VISITED_LIMIT = 200
 /** 单次水合进内存的条数 */
 export const VISITED_MEMORY_LIMIT = 20
-/** 首页展示条数 */
-export const HOME_VISITED_LIMIT = 5
+/** 首页展示条数：1 条继续阅读 + 3 条最近查看 */
+export const HOME_VISITED_LIMIT = 4
+/** 首页「最近查看」列表条数 */
+export const HOME_RECENT_LIST_LIMIT = 3
 
 export function visitedKey(item: Pick<VisitedItem, 'type' | 'id'>): string {
   return `${item.type}:${item.id}`
