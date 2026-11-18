@@ -26,6 +26,8 @@ export interface TweetSnapshot extends SnapshotBase {
   tweets: TweetData
   /** 逐推文译文（手动编辑或 AI 翻译），按 tweet id 索引 */
   translations: Record<string, Entity[] | null>
+  /** 已加载的评论 id（快照恢复后保持评论区结构） */
+  commentIds?: string[]
   articleTranslation?: ArticleTranslation | null
   /** 文章内嵌推文 */
   embeds?: Record<string, EnrichedTweet | null>
@@ -38,6 +40,14 @@ export interface IgSnapshot extends SnapshotBase {
 }
 
 export type SnapshotRecord = TweetSnapshot | IgSnapshot
+
+/** 一次访问事件；id 由 IndexedDB 自增，targetId 指向 visited 记录 */
+export interface VisitEvent {
+  id?: number
+  ts: number
+  type: VisitedType
+  targetId: string
+}
 
 export interface StoredSearch {
   /** 去重键：搜索关键词本身 */
@@ -66,10 +76,15 @@ export interface AnonDB extends DBSchema {
     value: SnapshotRecord
     indexes: { savedAt: number }
   }
+  visits: {
+    key: number
+    value: VisitEvent
+    indexes: { ts: number, typeId: [VisitedType, string] }
+  }
 }
 
 const DB_NAME = 'anon-tweet'
-const DB_VERSION = 3
+const DB_VERSION = 4
 
 let dbPromise: Promise<IDBPDatabase<AnonDB>> | null = null
 
@@ -80,7 +95,7 @@ export function isIndexedDbAvailable(): boolean {
 function getDb(): Promise<IDBPDatabase<AnonDB>> {
   if (!dbPromise) {
     dbPromise = openDB<AnonDB>(DB_NAME, DB_VERSION, {
-      upgrade(db) {
+      async upgrade(db, oldVersion, _newVersion, tx) {
         if (!db.objectStoreNames.contains('visited')) {
           const visited = db.createObjectStore('visited', { keyPath: 'key' })
           visited.createIndex('ts', 'ts')
@@ -97,6 +112,28 @@ function getDb(): Promise<IDBPDatabase<AnonDB>> {
         if (!db.objectStoreNames.contains('snapshots')) {
           const snapshots = db.createObjectStore('snapshots', { keyPath: 'key' })
           snapshots.createIndex('savedAt', 'savedAt')
+        }
+        if (!db.objectStoreNames.contains('visits')) {
+          const visits = db.createObjectStore('visits', {
+            keyPath: 'id',
+            autoIncrement: true,
+          })
+          visits.createIndex('ts', 'ts')
+          visits.createIndex('typeId', ['type', 'targetId'])
+
+          // v3 → v4：把已有记录的最近访问时间回填成事件，热力图立即有历史
+          if (oldVersion > 0 && db.objectStoreNames.contains('visited')) {
+            let cursor = await tx.objectStore('visited').openCursor()
+            while (cursor) {
+              const record = cursor.value
+              await visits.add({
+                ts: record.ts,
+                type: record.type,
+                targetId: record.id,
+              })
+              cursor = await cursor.continue()
+            }
+          }
         }
       },
     }).catch((error) => {

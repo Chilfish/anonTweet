@@ -16,6 +16,8 @@ export function useRecordVisit(item: Omit<VisitedItem, 'ts'> | null) {
   const title = item?.title ?? ''
   const snippet = item?.snippet ?? ''
   const image = item?.image ?? ''
+  const author = item?.author ?? ''
+  const authorHandle = item?.authorHandle ?? ''
 
   useEffect(() => {
     if (!type || !id)
@@ -26,6 +28,8 @@ export function useRecordVisit(item: Omit<VisitedItem, 'ts'> | null) {
       title,
       snippet: snippet || undefined,
       image: image || undefined,
+      author: author || undefined,
+      authorHandle: authorHandle || undefined,
     })
   }, [
     type,
@@ -33,6 +37,8 @@ export function useRecordVisit(item: Omit<VisitedItem, 'ts'> | null) {
     title,
     snippet,
     image,
+    author,
+    authorHandle,
     record,
   ])
 }

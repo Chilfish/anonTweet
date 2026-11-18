@@ -1,12 +1,17 @@
 import type { StoredVisited } from './db'
-import type { VisitedItem } from '~/lib/visited'
-import { visitedKey } from '~/lib/visited'
+import type { VisitedEvent, VisitedItem, VisitedType } from '~/lib/visited'
+import {
+  VISIT_EVENT_LIMIT,
+  VISITED_LIMIT,
+  VISITED_MEMORY_LIMIT,
+  visitedKey,
+} from '~/lib/visited'
 import { withDb } from './db'
 
-/** 持久化保留条数（超出按时间淘汰最旧的记录） */
-export const VISITED_STORAGE_LIMIT = 200
+/** 持久化保留的去重记录数 */
+export const VISITED_STORAGE_LIMIT = VISITED_LIMIT
 /** 一次水合进内存的条数（首页只展示 HOME_RECENT_LIMIT 条） */
-export const VISITED_HYDRATE_LIMIT = 20
+export const VISITED_HYDRATE_LIMIT = VISITED_MEMORY_LIMIT
 
 const LEGACY_STORAGE_KEY = 'visited-store'
 
@@ -24,16 +29,44 @@ export async function recordVisited(
     const tx = db.transaction([
       'visited',
       'snapshots',
+      'visits',
     ], 'readwrite')
     const store = tx.objectStore('visited')
     const snapshots = tx.objectStore('snapshots')
-    await store.put(toRecord({ ...item, ts: item.ts ?? Date.now() }))
+    const visits = tx.objectStore('visits')
+    const key = visitedKey(item)
+    const ts = item.ts ?? Date.now()
+    const existing = await store.get(key)
+
+    await store.put(toRecord({
+      ...item,
+      ts,
+      firstTs: existing?.firstTs ?? existing?.ts ?? ts,
+      visits: existing
+        ? (existing.visits ?? 1) + 1
+        : 1,
+    }))
+    await visits.add({
+      ts,
+      type: item.type,
+      targetId: item.id,
+    })
+
+    let visitCount = await visits.count()
+    if (visitCount > VISIT_EVENT_LIMIT) {
+      let cursor = await visits.index('ts').openCursor()
+      while (cursor && visitCount > VISIT_EVENT_LIMIT) {
+        await cursor.delete()
+        visitCount -= 1
+        cursor = await cursor.continue()
+      }
+    }
 
     let count = await store.count()
     if (count > VISITED_STORAGE_LIMIT) {
       let cursor = await store.index('ts').openCursor()
       while (cursor && count > VISITED_STORAGE_LIMIT) {
-        // 摘要淘汰时同事务删掉详情快照，避免留下孤儿数据
+        // 摘要淘汰时同事务删掉详情快照，避免留下孤儿数据；访问事件保留为历史
         await snapshots.delete(cursor.value.key)
         await cursor.delete()
         count -= 1
@@ -63,6 +96,10 @@ export async function loadVisitedHistory(
         snippet: stored.snippet,
         image: stored.image,
         ts: stored.ts,
+        firstTs: stored.firstTs,
+        visits: stored.visits,
+        author: stored.author,
+        authorHandle: stored.authorHandle,
       })
       cursor = await cursor.continue()
     }
@@ -73,6 +110,32 @@ export async function loadVisitedHistory(
   return items ?? []
 }
 
+/** 读取访问事件（时间倒序），用于热力图 / 时段统计 */
+export async function loadVisitEvents(
+  limit = VISIT_EVENT_LIMIT,
+): Promise<VisitedEvent[]> {
+  const events = await withDb(async (db) => {
+    const tx = db.transaction('visits', 'readonly')
+    const index = tx.objectStore('visits').index('ts')
+    const result: VisitedEvent[] = []
+
+    let cursor = await index.openCursor(null, 'prev')
+    while (cursor && result.length < limit) {
+      const stored = cursor.value
+      result.push({
+        ts: stored.ts,
+        type: stored.type,
+        targetId: stored.targetId,
+      })
+      cursor = await cursor.continue()
+    }
+    await tx.done
+    return result
+  })
+
+  return events ?? []
+}
+
 export async function loadRecentVisited(
   limit = VISITED_HYDRATE_LIMIT,
 ): Promise<VisitedItem[]> {
@@ -80,13 +143,27 @@ export async function loadRecentVisited(
 }
 
 export async function removeVisitedRecord(key: string): Promise<void> {
+  const separator = key.indexOf(':')
+  const type = key.slice(0, separator) as VisitedType
+  const targetId = key.slice(separator + 1)
+
   await withDb(async (db) => {
     const tx = db.transaction([
       'visited',
       'snapshots',
+      'visits',
     ], 'readwrite')
     await tx.objectStore('visited').delete(key)
     await tx.objectStore('snapshots').delete(key)
+
+    if (separator > 0) {
+      const visits = tx.objectStore('visits')
+      let cursor = await visits.index('typeId').openCursor([type, targetId])
+      while (cursor) {
+        await cursor.delete()
+        cursor = await cursor.continue()
+      }
+    }
     await tx.done
   })
 }
@@ -96,9 +173,11 @@ export async function clearVisitedStore(): Promise<void> {
     const tx = db.transaction([
       'visited',
       'snapshots',
+      'visits',
     ], 'readwrite')
     await tx.objectStore('visited').clear()
     await tx.objectStore('snapshots').clear()
+    await tx.objectStore('visits').clear()
     await tx.done
   })
 }
@@ -117,10 +196,20 @@ export async function migrateLegacyVisited(): Promise<void> {
     const legacyItems = parsed.state?.items ?? []
 
     const migrated = await withDb(async (db) => {
-      const tx = db.transaction('visited', 'readwrite')
+      const tx = db.transaction([
+        'visited',
+        'visits',
+      ], 'readwrite')
       const store = tx.objectStore('visited')
-      for (const item of legacyItems)
+      const visits = tx.objectStore('visits')
+      for (const item of legacyItems) {
         await store.put(toRecord(item))
+        await visits.add({
+          ts: item.ts,
+          type: item.type,
+          targetId: item.id,
+        })
+      }
       await tx.done
       return true
     })
