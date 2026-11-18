@@ -1,4 +1,4 @@
-import { GitCommitHorizontal, InfoIcon, SearchIcon, XIcon } from 'lucide-react'
+import { GitCommitHorizontal, InfoIcon, XIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router'
 import { Button } from '~/components/ui/button'
@@ -109,19 +109,10 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
                 <span className="inline-flex gap-3 ml-2">
                   <FooterLink to="https://tweet.chilfish.top/memo/240y_k">女声优存档</FooterLink>
                   <FooterLink to="https://nishio.chilfish.top/zh">西尾文明暦</FooterLink>
-                  <FooterLink to="https://oshitabi.chilfish.top/">推し旅AR</FooterLink>
-                  <Link
-                    to="/search"
-                    className="inline-flex items-center gap-1.5 transition-colors hover:text-(--primary-brand) hover:underline underline-offset-4 decoration-dotted"
-                  >
-                    <SearchIcon className="size-3.5" />
-                    推文搜索
-                  </Link>
                   <Link
                     to="/about"
                     className="inline-flex items-center gap-1.5 transition-colors hover:text-(--primary-brand) hover:underline underline-offset-4 decoration-dotted"
                   >
-                    <InfoIcon className="size-3.5" />
                     关于
                   </Link>
                   <FooterLink to="https://github.com/Chilfish/anonTweet">GitHub</FooterLink>
