@@ -87,7 +87,7 @@ AC-DEV-001（dev server 健康）、AC-IG-009（缺 cookies → 500）、AC-MEDI
 | [AC-test.md](acceptance-criteria/AC-test.md)               | AC-TEST-006（parseTweet 全变体）                                                  |
 | [AC-llms.md](acceptance-criteria/AC-llms.md)               | AC-LLMS-001~002（llms.txt / openapi.json）                                        |
 | [AC-home.md](acceptance-criteria/AC-home.md)               | AC-HOME-001~006（最近查看 / 首页入口 / IndexedDB / 历史页 / 详情快照 / 本地优先） |
-| [AC-about.md](acceptance-criteria/AC-about.md)             | AC-ABOUT-001（关于页构建/数据/接口信息）                                          |
+| [AC-about.md](acceptance-criteria/AC-about.md)             | AC-ABOUT-001~002（关于页信息 / 响应式与视觉）                                     |
 | [AC-search.md](acceptance-criteria/AC-search.md)           | AC-SEARCH-001（最近搜索 / 语法示例）                                              |
 | [AC-vision.md](acceptance-criteria/AC-vision.md)           | AC-VISION-001~012（AI 视觉）                                                      |
 | [AC-resolver.md](acceptance-criteria/AC-resolver.md)       | AC-RESOLVER-001（决策链收敛）                                                     |
