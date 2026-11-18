@@ -248,6 +248,35 @@ Story（`/stories/{username}/{id}/`）与 Highlight 的识别、抓取早已可�
 > 目前是 no-op（写法与既有 `ui/drawer.tsx` 一致，那里同样待生效）。补 `viewport-fit=cover` 是**全站布局**
 > 变更（内容会顶到刘海区，需逐页确认 padding），要真机验收，不适合顺手改 —— 待有设备时单独处理。
 
+## 个人主页（2026-11-18，未上线 / 入口隐藏）
+
+> ⚠️ **状态：不发布**。实测通过主页接口拉取时，Instagram 容易把该 `INS_COOKIES` 会话判定为
+> bot（上游 `topsearch` 返回 404、主页 HTML 里取不到 profile id）。已把**全部入口隐藏**：
+> 首页输入与 Web Share 不再识别 `instagram.com/{username}`，公开的 Skill / OpenAPI / llms.txt
+> 也不再列出该接口。路由与实现保留在仓库里供后续验证，但线上不可发现、不宣传。
+> 另：用户主页请求目前仍常常拿不到结果 —— SDK 默认的 `search` 策略上游已 404，已改为
+> `info → web` 策略，但尚未在真实 cookie 下验证通过。恢复上线前必须先确认真实链路可用，
+> 并评估 bot 风控成本。
+
+新增 `GET /api/ig/user/{username}[?limit=12]` 与页面 `/ins/user/{username}`，读取资料与首屏帖子。
+
+- **取数**：SDK 的 URL resolver 本身支持 `/{username}/info/`、`/{username}/posts/`、`/{username}/avatar/`、
+  `/reels/`、`/tagged/`。裸主页 URL（`/{username}/`）只会产出 `queue` 消息，`extract()` 不展开，
+  因此直接打子路径。info 与 posts 各自新建 SDK 实例**并行**发起——同实例第二次请求起有
+  6–12s 节流（`requestInterval`）。用户名解析策略显式设为 `info → web`（默认 `search` 已失效）。
+- **标准化**：`normalizeIGProfile()` 只吃 info 的单 directory（不能复用 `normalizeIGPosts`，
+  否则会产出一张空媒体帖）；`normalizeIGFeed()` 按 directory 切段后复用单帖映射，避免把
+  整条 feed 合并成一张多图帖。首屏帖子经 `getIGPostList` 逐条落 localCache + DB。
+- **边界**：SDK 未暴露翻页游标（`cursor` 只在迭代内部更新，`_initCursor()` 未被调用），
+  只能取第一页：用 `extractor.instagram.max-posts` 截断（配置 `interpolate` 只读到
+  subcategory 层，叶子层 `posts` 不会被检查）。需要 `INS_COOKIES`；私有账号只返回资料。
+- **渲染**：资料卡（头像走 `/api/proxy/image`）+ 3 列方形帖子网格（`Link` 到 `/ins/{id}`）
+  - 同形骨架屏。入口隐藏后只能直接访问路由，不参与首页输入与分享落地。
+- **验收**：`verify/acceptance-criteria/AC-ig-profile.md`（AC-IG-PROFILE-001~004，仅覆盖离线
+  映射与渲染，不代表真实上游可用）。
+- **文档边界**：该接口**不写入** `llms.txt` / OpenAPI 路径清单 / Skill（未上线，避免被 agent
+  发现并触发 cookie 风控）；`test/unit/llms.spec.ts` 的 `EXPECTED_PATHS` 不含它。
+
 > 明确非目标：不做虚拟滚动（30~60 条方图 + `MediaImage` 原生 `loading="lazy"` 足够，出现 200+ 条再议）；
 > 不做按天分组/时间轴（额外信息噪音）；不引入 carousel 等新 UI 依赖。组件名保留 `IGStoryList`
 > （仍是该 surface 入口，改名会牵动 AC/测试/story 的追溯链）。

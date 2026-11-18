@@ -1,0 +1,38 @@
+{
+  "_meta": {
+    "source": "synthetic — derived from @chilfish/gallery-dl-instagram /{username}/info/ DirectoryMsg contract",
+    "exportedAt": "2026-11-18T00:00:00.000Z",
+    "label": "IG profile info (type: post directory, user metadata only)",
+    "schema": "Message[]"
+  },
+  "data": [
+    {
+      "type": "directory",
+      "metadata": {
+        "post_id": "1234567890",
+        "post_shortcode": "chilfish",
+        "post_url": "https://www.instagram.com/chilfish/",
+        "owner_id": "1234567890",
+        "username": "chilfish",
+        "fullname": "Chil Fish",
+        "post_date": "",
+        "date": "",
+        "description": "",
+        "likes": 0,
+        "liked": false,
+        "pinned": [],
+        "type": "post",
+        "count": 0,
+        "is_private": false,
+        "is_verified": true,
+        "profile_pic_url": "https://scontent.cdninstagram.com/v/t51.2885-19/avatar.jpg",
+        "profile_pic_url_hd": "https://scontent.cdninstagram.com/v/t51.2885-19/avatar-hd.jpg",
+        "follower_count": 12345,
+        "following_count": 321,
+        "media_count": 456,
+        "biography": "匿名浏览测试账号\n第二行简介",
+        "external_url": "https://example.com/links"
+      }
+    }
+  ]
+}

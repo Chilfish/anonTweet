@@ -1,0 +1,100 @@
+{
+  "_meta": {
+    "source": "synthetic — derived from @chilfish/gallery-dl-instagram /{username}/posts/ Message stream contract",
+    "exportedAt": "2026-11-18T00:00:00.000Z",
+    "label": "IG user feed (2 posts: photo carousel + reel)",
+    "schema": "Message[]"
+  },
+  "data": [
+    {
+      "type": "directory",
+      "metadata": {
+        "post_id": "3901234567890123456",
+        "post_shortcode": "DdL3LK7Tvj9",
+        "post_url": "https://www.instagram.com/p/DdL3LK7Tvj9/",
+        "owner_id": "1234567890",
+        "username": "chilfish",
+        "fullname": "Chil Fish",
+        "post_date": "2026-11-10T08:00:00.000Z",
+        "description": "first feed post",
+        "tags": [
+          "#test"
+        ],
+        "likes": 120,
+        "liked": false,
+        "pinned": [],
+        "coauthors": [],
+        "type": "post",
+        "count": 1,
+        "user": {
+          "pk": "1234567890",
+          "username": "chilfish",
+          "full_name": "Chil Fish",
+          "profile_pic_url": "https://scontent.cdninstagram.com/v/t51.2885-19/avatar.jpg",
+          "is_verified": true
+        }
+      }
+    },
+    {
+      "type": "url",
+      "url": "https://scontent.cdninstagram.com/v/t51.82787-15/feed-1.jpg",
+      "metadata": {
+        "num": 1,
+        "date": "2026-11-10T08:00:00.000Z",
+        "media_id": "3901234567890123456",
+        "shortcode": "DdL3LK7Tvj9",
+        "display_url": "https://scontent.cdninstagram.com/v/t51.82787-15/feed-1.jpg",
+        "video_url": null,
+        "width": 1080,
+        "height": 1350,
+        "width_original": 1080,
+        "height_original": 1350,
+        "tagged_users": []
+      }
+    },
+    {
+      "type": "directory",
+      "metadata": {
+        "post_id": "3901234567890199999",
+        "post_shortcode": "DdL3LK7Tvj0",
+        "post_url": "https://www.instagram.com/reel/DdL3LK7Tvj0/",
+        "owner_id": "1234567890",
+        "username": "chilfish",
+        "fullname": "Chil Fish",
+        "post_date": "2026-11-11T09:30:00.000Z",
+        "description": "second feed post",
+        "tags": [],
+        "likes": 42,
+        "liked": false,
+        "pinned": [],
+        "coauthors": [],
+        "type": "reel",
+        "count": 1,
+        "user": {
+          "pk": "1234567890",
+          "username": "chilfish",
+          "full_name": "Chil Fish",
+          "profile_pic_url": "https://scontent.cdninstagram.com/v/t51.2885-19/avatar.jpg",
+          "is_verified": true
+        }
+      }
+    },
+    {
+      "type": "url",
+      "url": "https://scontent.cdninstagram.com/v/t51.82787-15/feed-2.mp4",
+      "metadata": {
+        "num": 1,
+        "date": "2026-11-11T09:30:00.000Z",
+        "media_id": "3901234567890199999",
+        "shortcode": "DdL3LK7Tvj0",
+        "display_url": "https://scontent.cdninstagram.com/v/t51.82787-15/feed-2.jpg",
+        "video_url": "https://scontent.cdninstagram.com/v/t51.82787-15/feed-2.mp4",
+        "width": 1080,
+        "height": 1920,
+        "width_original": 1080,
+        "height_original": 1920,
+        "tagged_users": []
+      }
+    }
+  ]
+}

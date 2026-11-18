@@ -77,6 +77,7 @@ AC-DEV-001（dev server 健康）、AC-IG-009（缺 cookies → 500）、AC-MEDI
 | [AC-translation.md](acceptance-criteria/AC-translation.md) | AC-TRANS-001~007（占位符管线 + 视图/Provider）                                    |
 | [AC-ig.md](acceptance-criteria/AC-ig.md)                   | AC-IG-001~009（IG 集成）                                                          |
 | [AC-ig-story.md](acceptance-criteria/AC-ig-story.md)       | AC-IG-STORY-001~005（Story 提取/列表/下载/渲染/缓存）                             |
+| [AC-ig-profile.md](acceptance-criteria/AC-ig-profile.md)   | AC-IG-PROFILE-001~004（主页资料/feed 扇出/URL 识别/渲染）                         |
 | [AC-screenshot.md](acceptance-criteria/AC-screenshot.md)   | AC-SHOT-001~004 + AC-PERF-001（截图/渲染基线）                                    |
 | [AC-media.md](acceptance-criteria/AC-media.md)             | AC-MEDIA-001~006（媒体代理）                                                      |
 | [AC-postmortem.md](acceptance-criteria/AC-postmortem.md)   | AC-PM-001~007（预发布检查）                                                       |
