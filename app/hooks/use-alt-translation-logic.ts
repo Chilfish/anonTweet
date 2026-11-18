@@ -3,6 +3,8 @@ import { useCallback, useState } from 'react'
 import { toastAIError } from '~/lib/ai-error-toast'
 import { requestTweetTranslation } from '~/lib/ai/request'
 import { syncTranslationData } from '~/lib/service/translationSync'
+import { snapshotKey } from '~/lib/snapshot'
+import { flushSnapshot } from '~/lib/snapshot-flush'
 import { useAIConfig, useResolvedAIConfig, useTranslationActions } from '~/lib/stores/hooks'
 import { ensureDictionaryHydrated, useTranslationDictionaryStore } from '~/lib/stores/TranslationDictionary'
 import { deriveManualTranslation } from '~/lib/translation/resolveEntities'
@@ -136,6 +138,8 @@ export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
     setIsOpen(false)
     // 持久化到服务端（DB tweetEntities + localCache 刷新），刷新页面后仍可恢复
     syncTranslationData([originalTweet], { [tweetId]: editingEntities })
+    // store 渲染提交后立即刷新本地快照
+    requestAnimationFrame(() => flushSnapshot(snapshotKey('tweet', tweetId)))
   }, [
     tweetId,
     editingEntities,

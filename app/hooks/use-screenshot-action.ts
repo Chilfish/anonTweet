@@ -6,6 +6,8 @@ import { toastManager } from '~/components/ui/toast'
 import { captureJpeg, capturePng } from '~/lib/dom-screenshot'
 import { syncTranslationData } from '~/lib/service/translationSync'
 import { dataUrlToFile, shareImageOut } from '~/lib/share'
+import { snapshotKey } from '~/lib/snapshot'
+import { flushSnapshot } from '~/lib/snapshot-flush'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 import {
   useGlobalTranslationMode,
@@ -28,6 +30,8 @@ interface UseScreenshotActionProps {
   mainTweetOverride?: EnrichedTweet | null
   /** 截图后是否同步翻译数据到服务端（详情页默认 true）；搜索等本地翻译场景传 false。 */
   syncTranslations?: boolean
+  /** 截图后 flush 的本地快照类型：普通推文 / 文章详情。 */
+  snapshotType?: 'tweet' | 'article'
 }
 
 export function useScreenshotAction({
@@ -35,6 +39,7 @@ export function useScreenshotAction({
   captureRef,
   mainTweetOverride,
   syncTranslations = true,
+  snapshotType = 'tweet',
 }: UseScreenshotActionProps) {
   const [isCapturing, setIsCapturing] = useState(false)
 
@@ -163,6 +168,9 @@ export function useScreenshotAction({
           toastManager.add({ title: '截图保存成功', type: 'success' })
         }
 
+        // 截图成功即把当前完整数据立即写回本地快照（不等 800ms 防抖）
+        flushSnapshot(snapshotKey(snapshotType, mainForFile.id_str))
+
         // 副作用：同步数据（搜索等多卡片本地翻译场景跳过）
         if (syncTranslations) {
           await syncTranslationData(tweets, translations)
@@ -203,6 +211,7 @@ export function useScreenshotAction({
     translationMode,
     toggleSelectionMode,
     syncTranslations,
+    snapshotType,
     translations,
   ])
 

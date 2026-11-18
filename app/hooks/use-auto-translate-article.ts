@@ -3,6 +3,8 @@ import type { TweetArticle } from '~/types'
 import { useCallback, useEffect, useRef } from 'react'
 import { requestArticleTranslation } from '~/lib/ai/request'
 import { syncArticleTranslation } from '~/lib/service/articleTranslationSync'
+import { snapshotKey } from '~/lib/snapshot'
+import { flushSnapshot } from '~/lib/snapshot-flush'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 import {
   useArticleTranslation,
@@ -70,6 +72,7 @@ export function useAutoTranslateArticle(
         setArticleTranslation(tweetId, next)
         setArticleTranslationStatus(tweetId, 'done')
         void syncArticleTranslation(tweetId, next)
+        requestAnimationFrame(() => flushSnapshot(snapshotKey('article', tweetId)))
       }
       else {
         setArticleTranslationStatus(tweetId, 'error')

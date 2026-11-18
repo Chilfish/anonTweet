@@ -5,6 +5,8 @@ import { useCallback, useRef, useState } from 'react'
 import { toastManager } from '~/components/ui/toast'
 import { captureJpeg, capturePng } from '~/lib/dom-screenshot'
 import { dataUrlToFile, shareImageOut } from '~/lib/share'
+import { snapshotKey } from '~/lib/snapshot'
+import { flushSnapshot } from '~/lib/snapshot-flush'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 import { waitForRenderReady } from '~/lib/utils'
 
@@ -124,6 +126,9 @@ export function useIGScreenshotAction({ post, captureRef }: UseIGScreenshotActio
           downloadImage(dataUrl, fileName)
           toastManager.add({ title: '截图保存成功', type: 'success' })
         }
+
+        // 截图成功即把当前完整帖子数据写回本地快照
+        flushSnapshot(snapshotKey('ig', post.id))
       }
       else {
         throw new Error('生成的图片数据为空')

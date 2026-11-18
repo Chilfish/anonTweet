@@ -1,5 +1,7 @@
+import type { EnrichedTweet, IGPost } from '~/types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { isSnapshotFresh, SNAPSHOT_LIMIT, SNAPSHOT_TTL } from '~/lib/snapshot'
+import { SNAPSHOT_LIMIT } from '~/lib/snapshot'
+import { loadIgSnapshot, loadTweetSnapshot } from '~/lib/snapshot-restore'
 import { closeDb } from '~/lib/storage/db'
 import {
   clearDictionaryStore,
@@ -18,6 +20,7 @@ import {
   clearVisitedStore,
   loadRecentVisited,
   loadVisitedHistory,
+  loadVisitEvents,
   migrateLegacyVisited,
   recordVisited,
   removeVisitedRecord,
@@ -94,6 +97,72 @@ describe('AC-HOME-003: IndexedDB storage layer', () => {
     expect(items.map(item => item.id)).toEqual(['1', '2'])
     expect(items[0]?.title).toBe('first-updated')
     expect(items[0]?.ts).toBe(300)
+    expect(items[0]?.firstTs).toBe(100)
+    expect(items[0]?.visits).toBe(2)
+  })
+
+  it('logs visit events and deletes them with the record', async () => {
+    await recordVisited({
+      type: 'tweet',
+      id: '1',
+      title: 'one',
+      ts: 100,
+    })
+    await recordVisited({
+      type: 'tweet',
+      id: '1',
+      title: 'one',
+      ts: 200,
+    })
+    await recordVisited({
+      type: 'tweet',
+      id: '2',
+      title: 'two',
+      ts: 300,
+    })
+
+    expect((await loadVisitEvents()).map(event => event.ts)).toEqual([
+      300,
+      200,
+      100,
+    ])
+
+    await removeVisitedRecord('tweet:1')
+    expect((await loadVisitEvents()).map(event => event.targetId)).toEqual(['2'])
+
+    await clearVisitedStore()
+    expect(await loadVisitEvents()).toEqual([])
+  })
+
+  it('backfills visit events when upgrading an existing v3 database', async () => {
+    await closeDb()
+    await new Promise<void>((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, 3)
+      request.onupgradeneeded = () => {
+        const db = request.result
+        const visited = db.createObjectStore('visited', { keyPath: 'key' })
+        visited.createIndex('ts', 'ts')
+      }
+      request.onsuccess = () => {
+        const db = request.result
+        const tx = db.transaction('visited', 'readwrite')
+        tx.objectStore('visited').put({
+          key: 'tweet:legacy',
+          type: 'tweet',
+          id: 'legacy',
+          title: 'legacy',
+          ts: 123,
+        })
+        tx.oncomplete = () => {
+          db.close()
+          resolve()
+        }
+        tx.onerror = () => reject(tx.error)
+      }
+      request.onerror = () => reject(request.error)
+    })
+
+    expect((await loadVisitEvents()).map(event => event.ts)).toEqual([123])
   })
 
   it('trims the oldest records beyond VISITED_STORAGE_LIMIT', async () => {
@@ -175,6 +244,7 @@ describe('AC-HOME-003: IndexedDB storage layer', () => {
     await migrateLegacyDictionary()
 
     expect((await loadRecentVisited()).map(item => item.id)).toEqual(['9'])
+    expect((await loadVisitEvents()).map(event => event.ts)).toEqual([5])
     expect((await loadDictionaryEntries()).map(entry => entry.id)).toEqual(['d1'])
     expect(localStorage.getItem('visited-store')).toBeNull()
     expect(localStorage.getItem('translation-dictionary-storage')).toBeNull()
@@ -216,10 +286,25 @@ describe('AC-HOME-005: detail snapshots share lifecycle with visited records', (
     expect(await getSnapshot('tweet:missing')).toBeNull()
   })
 
-  it('treats snapshots older than the TTL as stale', () => {
-    const now = 10 * SNAPSHOT_TTL
-    expect(isSnapshotFresh({ savedAt: now - 1000 }, now)).toBe(true)
-    expect(isSnapshotFresh({ savedAt: now - SNAPSHOT_TTL - 1 }, now)).toBe(false)
+  it('loads snapshots locally regardless of age', async () => {
+    await putSnapshot({
+      ...tweetSnapshot('1', 0),
+      tweets: [
+        { id_str: '1' } as EnrichedTweet,
+      ],
+    })
+    await putSnapshot({
+      key: 'ig:abc',
+      type: 'ig',
+      id: 'abc',
+      posts: [
+        { id: 'abc' } as IGPost,
+      ],
+      savedAt: 0,
+    })
+
+    expect((await loadTweetSnapshot('1'))?.id).toBe('1')
+    expect(await loadIgSnapshot('abc')).toHaveLength(1)
   })
 
   it('prunes the oldest snapshots beyond SNAPSHOT_LIMIT', async () => {

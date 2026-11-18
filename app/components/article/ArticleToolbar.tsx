@@ -44,6 +44,7 @@ export function ArticleToolbar({
     mainTweetOverride: tweet,
     // 文章译文由 `syncArticleTranslation` 单独落库，不走实体翻译同步
     syncTranslations: false,
+    snapshotType: 'article',
   })
 
   const canToggle = hasTranslation || status === 'loading'
