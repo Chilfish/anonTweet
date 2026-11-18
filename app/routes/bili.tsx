@@ -11,13 +11,14 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '~/componen
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Textarea } from '~/components/ui/textarea'
+import { buildMeta } from '~/lib/seo'
 
 export function meta() {
-  return [
-    { title: '发布 Bilibili 动态 | Anon Tweet' },
-    { name: 'description', content: '通过 Anon Tweet 快速发布 Bilibili 动态，支持图片上传与排序。' },
-    { name: 'robots', content: 'noindex, follow' },
-  ]
+  return buildMeta({
+    title: '发布 Bilibili 动态 | Anon Tweet',
+    description: '通过 Anon Tweet 快速发布 Bilibili 动态，支持图片上传与排序。',
+    noindex: true,
+  })
 }
 
 interface ApiResponse {

@@ -19,6 +19,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from '~/components/ui/toggle-group'
 import { fetcher } from '~/lib/fetcher'
 import { TweetSkeleton } from '~/lib/react-tweet'
+import { buildMeta } from '~/lib/seo'
 import {
   useIsCapturingSelected,
   useIsTweetSelected,
@@ -30,12 +31,13 @@ import {
   useSearchHistoryStore,
 } from '~/lib/stores/searchHistory'
 
+/** 搜索结果页随查询串变化且无服务端正文，按 noindex, follow 处理 */
 export function meta() {
-  return [
-    { title: '推文搜索 | Anon Tweet' },
-    { name: 'description', content: '匿名搜索 Twitter/X 推文，支持高级搜索语法，无需登录。' },
-    { name: 'robots', content: 'noindex, follow' },
-  ]
+  return buildMeta({
+    title: '推文搜索 | Anon Tweet',
+    description: '匿名搜索 Twitter/X 推文，支持 from: / since: / min_faves: 等高级语法，无需登录。',
+    noindex: true,
+  })
 }
 
 interface SearchResponse {

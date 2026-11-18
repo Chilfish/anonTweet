@@ -12,12 +12,14 @@ import { Field } from '~/components/ui/field'
 import { Form } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
 import { TweetNotFound, TweetSkeleton } from '~/lib/react-tweet'
+import { buildMeta } from '~/lib/seo'
 
 export function meta() {
-  return [
-    { title: 'Twitter 列表查看 | Anon Tweet' },
-    { name: 'description', content: '查看 Twitter/X 列表内容，支持按列表 ID 浏览推文。' },
-  ]
+  return buildMeta({
+    title: 'Twitter 列表查看 | Anon Tweet',
+    description: '查看 Twitter/X 列表内容，支持按列表 ID 浏览推文。',
+    noindex: true,
+  })
 }
 
 export function HydrateFallback() {

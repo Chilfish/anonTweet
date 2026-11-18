@@ -6,13 +6,14 @@ import { MyPlainTweet } from '~/components/tweet/PlainTweet'
 import axios from '~/lib/axios.server'
 import { env } from '~/lib/env.server'
 import { TweetNotFound } from '~/lib/react-tweet'
+import { buildMeta } from '~/lib/seo'
 import { extractTweetId } from '~/lib/utils'
 
 export function meta() {
-  return [
-    { title: '推文截图 | Anon Tweet' },
-    { name: 'robots', content: 'noindex, follow' },
-  ]
+  return buildMeta({
+    title: '推文截图 | Anon Tweet',
+    noindex: true,
+  })
 }
 
 /**

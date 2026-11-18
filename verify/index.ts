@@ -50,6 +50,7 @@ const MODULE_PATTERNS: Record<string, string> = {
   resolver: 'AC-RESOLVER',
   decouple: 'AC-DECOUPLE',
   sec: 'AC-SEC',
+  seo: 'AC-SEO',
   obs: 'AC-OBS',
   pwa: 'AC-PWA',
   card: 'AC-CARD',

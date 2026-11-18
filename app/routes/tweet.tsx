@@ -11,6 +11,7 @@ import { useRecordVisit } from '~/hooks/use-record-visit'
 import { useTweetOperations } from '~/hooks/use-tweet-operations'
 import { fetcher } from '~/lib/fetcher'
 import { TweetNotFound, TweetSkeleton } from '~/lib/react-tweet'
+import { buildMeta, clampDescription, ogLocale } from '~/lib/seo'
 import { getTweets } from '~/lib/service/getTweet'
 import { getLocalTweet } from '~/lib/service/getTweet.server'
 import { useMainTweet, useTranslationActions, useTweets } from '~/lib/stores/hooks'
@@ -40,14 +41,14 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 
 export function meta({ loaderData }: Route.MetaArgs) {
   const tweet = loaderData?.tweet
-  const siteName = 'Anon Tweet'
-  const baseUrl = loaderData?.baseUrl || 'https://anontweet.chilfish.top'
+  const baseUrl = loaderData?.baseUrl
 
   if (!tweet) {
-    return [
-      { title: `Anon Tweet` },
-      { name: 'description', content: '匿名推文浏览器 — 第三方 Twitter/X 查看器' },
-    ]
+    return buildMeta({
+      title: 'Anon Tweet',
+      description: '匿名推文浏览器 — 第三方 Twitter/X 查看器',
+      noindex: true,
+    })
   }
 
   const authorName = tweet.user?.name || 'Twitter User'
@@ -55,50 +56,22 @@ export function meta({ loaderData }: Route.MetaArgs) {
     ? `@${tweet.user.screen_name}`
     : ''
   const tweetText = decodeHtmlEntities(tweet.text || '').replace(/\n/g, ' ').trim()
-  const description = tweetText.length > 160
-    ? `${tweetText.slice(0, 157)}...`
-    : tweetText
+  const description = clampDescription(tweetText) || `${authorName} 在 X 上发布的推文`
   const title = `${authorName} ${authorHandle} on X: "${description}" | Anon Tweet`
-
-  const canonicalUrl = `${baseUrl}/tweets/${tweet.id_str}`
 
   // Get first media image for og:image（无普通媒体时回退到投票选项图）
   const mediaImage = tweet.mediaDetails?.[0]?.media_url_https
     ?? tweet.poll?.choices.find(choice => choice.imageUrl)?.imageUrl
 
-  const tags = [
-    { title },
-    { name: 'description', content: description },
-    // Open Graph
-    { property: 'og:title', content: title },
-    { property: 'og:description', content: description },
-    { property: 'og:type', content: 'article' },
-    { property: 'og:url', content: canonicalUrl },
-    { property: 'og:site_name', content: siteName },
-    {
-      property: 'og:locale',
-      content: tweet.lang === 'zh'
-        ? 'zh_CN'
-        : 'en_US',
-    },
-    // Twitter Card
-    {
-      name: 'twitter:card',
-      content: mediaImage ? 'summary_large_image' : 'summary',
-    },
-    { name: 'twitter:title', content: title },
-    { name: 'twitter:description', content: description },
-    { name: 'twitter:site', content: '@anonTweet' },
-    // Canonical
-    { tagName: 'link', rel: 'canonical', href: canonicalUrl },
-  ]
-
-  if (mediaImage) {
-    tags.push({ property: 'og:image', content: mediaImage })
-    tags.push({ name: 'twitter:image', content: mediaImage })
-  }
-
-  return tags
+  return buildMeta({
+    title,
+    description,
+    type: 'article',
+    locale: ogLocale(tweet.lang),
+    image: mediaImage ?? null,
+    baseUrl,
+    noindex: true,
+  })
 }
 
 function TweetStructuredData({ tweet }: { tweet: EnrichedTweet }) {

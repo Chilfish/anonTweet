@@ -6,6 +6,7 @@ import { useAutoTranslateArticle } from '~/hooks/use-auto-translate-article'
 import { useRecordVisit } from '~/hooks/use-record-visit'
 import { collectEmbeddedTweetIds } from '~/lib/article'
 import { TweetNotFound } from '~/lib/react-tweet'
+import { buildMeta, ogLocale } from '~/lib/seo'
 import { getTweets } from '~/lib/service/getTweet'
 import { getArticleTranslation, getLocalTweet } from '~/lib/service/getTweet.server'
 import {
@@ -78,34 +79,19 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 export function meta({ loaderData }: Route.MetaArgs) {
   const tweet = loaderData?.tweet
   const article = tweet?.article
-  const baseUrl = loaderData?.baseUrl || 'https://anontweet.chilfish.top'
 
   const title = article?.title || 'X 长文'
-  const description = article?.previewText || ''
-  const canonicalUrl = loaderData?.tweetId
-    ? `${baseUrl}/article/${loaderData.tweetId}`
-    : baseUrl
+  const description = article?.previewText || '在 Anon Tweet 上阅读 X 长文原文与 AI 双语译文。'
 
-  const tags = [
-    { title: `${title} | Anon Tweet` },
-    { name: 'description', content: description },
-    { property: 'og:title', content: title },
-    { property: 'og:description', content: description },
-    { property: 'og:type', content: 'article' },
-    { property: 'og:url', content: canonicalUrl },
-    {
-      name: 'twitter:card',
-      content: article?.coverImage ? 'summary_large_image' : 'summary',
-    },
-    { tagName: 'link', rel: 'canonical', href: canonicalUrl },
-  ]
-
-  if (article?.coverImage?.url) {
-    tags.push({ property: 'og:image', content: article.coverImage.url })
-    tags.push({ name: 'twitter:image', content: article.coverImage.url })
-  }
-
-  return tags
+  return buildMeta({
+    title: `${title} | Anon Tweet`,
+    description,
+    type: 'article',
+    locale: ogLocale(tweet?.lang),
+    image: article?.coverImage?.url ?? null,
+    baseUrl: loaderData?.baseUrl,
+    noindex: true,
+  })
 }
 
 export default function ArticlePage({ loaderData }: Route.ComponentProps) {

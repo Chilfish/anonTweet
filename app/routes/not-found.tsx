@@ -1,10 +1,13 @@
 import type { Route } from './+types/not-found'
 import { redirect } from 'react-router'
 import { ErrorDisplay } from '~/components/error-boundary'
+import { buildMeta } from '~/lib/seo'
 
-export const meta: Route.MetaFunction = () => [
-  { title: 'Not Found' },
-]
+export const meta: Route.MetaFunction = () => buildMeta({
+  title: '页面不存在 | Anon Tweet',
+  description: '请求的页面不存在或已被删除。',
+  noindex: true,
+})
 
 export async function loader({ params }: Route.LoaderArgs) {
   const path = params['*']

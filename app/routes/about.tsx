@@ -1,20 +1,20 @@
 import type { Route } from './+types/about'
 import { Code2, ExternalLink, ShieldCheck } from 'lucide-react'
+import { buildMeta } from '~/lib/seo'
 
-export function meta() {
-  return [
-    { title: '关于 | Anon Tweet' },
-    {
-      name: 'description',
-      content: '关于 Anon Tweet：技术栈、构建信息、数据与隐私说明、机器可读接口入口。',
-    },
-  ]
+export function meta({ loaderData }: Route.MetaArgs) {
+  return buildMeta({
+    title: '关于 | Anon Tweet',
+    description: '关于 Anon Tweet：开源匿名推文 / Instagram 阅读器，含技术栈、数据与隐私说明、机器可读接口入口。',
+    canonicalPath: '/about',
+    baseUrl: loaderData?.baseUrl,
+  })
 }
 
 /** 版本只在服务端读取，避免把整个 package.json 打进客户端 bundle */
-export async function loader() {
+export async function loader({ request }: Route.LoaderArgs) {
   const pkg = await import('../../package.json')
-  return { version: pkg.version }
+  return { version: pkg.version, baseUrl: new URL(request.url).origin }
 }
 
 const GITHUB = 'https://github.com/Chilfish/anonTweet'

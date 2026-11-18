@@ -6,7 +6,15 @@ import { Await, useLoaderData } from 'react-router'
 import { PlainIGPost } from '~/components/ins/PlainIGPost'
 import { env } from '~/lib/env.server'
 import { normalizeIGPosts } from '~/lib/ig/normalizeIGPost'
+import { buildMeta } from '~/lib/seo'
 import { extractIGId, igIdToSourceUrl } from '~/lib/url-detect'
+
+export function meta() {
+  return buildMeta({
+    title: 'Instagram 截图 | Anon Tweet',
+    noindex: true,
+  })
+}
 
 export async function loader({ params }: Route.LoaderArgs): Promise<{
   post: IGPostData | null

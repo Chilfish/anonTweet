@@ -1,18 +1,22 @@
+import type { Route } from './+types/home'
 import { ContinueReading } from '~/components/home/ContinueReading'
 import { RecentVisited } from '~/components/home/RecentVisited'
 import { TweetInputForm } from '~/components/tweet/TweetInputForm'
+import { buildMeta } from '~/lib/seo'
 import { useVisitedStore } from '~/lib/stores/visited'
 import { HOME_RECENT_LIST_LIMIT, HOME_VISITED_LIMIT } from '~/lib/visited'
 
-export function meta() {
-  return [
-    { title: 'Anon Tweet — 匿名推文浏览器 | 无需登录查看 Twitter/X 推文' },
-    {
-      name: 'description',
-      content: `Anon Tweet — 第三方 Twitter / Instagram 查看器，专注于阅读体验和用户友好的界面设计。`,
-    },
-    { name: 'keywords', content: 'Twitter, X, 推文, 匿名, 翻译, AI翻译, 推文浏览器, Tweet viewer, anonymous twitter' },
-  ]
+export async function loader({ request }: Route.LoaderArgs) {
+  return { baseUrl: new URL(request.url).origin }
+}
+
+export function meta({ loaderData }: Route.MetaArgs) {
+  return buildMeta({
+    title: 'Anon Tweet — 匿名推文浏览器 | 无需登录查看 Twitter/X 推文',
+    description: '无需登录查看 Twitter/X 推文与 Instagram 帖子：评论线程、长文阅读、AI 双语翻译、卡片截图与 Markdown 导出。',
+    canonicalPath: '/',
+    baseUrl: loaderData?.baseUrl,
+  })
 }
 
 export default function Home() {

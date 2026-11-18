@@ -64,6 +64,7 @@ docs/
 | **修改 Settings 页面**                         | `ui-design/SETTINGS.md`                                                                        | SettingsGroup / SettingsItem 强制规范                          |
 | **架构级变更前**                               | `planning/architecture.md`（ADR）+ `planning/project-architecture.md`（系统架构 v3.0）         | 先读 ADR 历史决策，再对照架构总览                              |
 | **规划下一阶段任务**                           | `planning/backlog.md` + `archive/action-plan.md`                                               | 未决任务清单、已完成里程碑记录                                 |
+| **SEO / 搜索引擎收录 / 页面分级**              | `planning/seo-strategy.md`                                                                     | 项目性质判定、现状审计、索引分级、AC-SEO 验收                  |
 | **测试验证体系**                               | `../verify/README.md` + `archive/testing-infra-refactor.md`                                    | Vitest 三层架构（unit / integration / acceptance）             |
 | **写码前防复现 / 新 Bug 模式**                 | `postmortem/README.md`（+ `TEMPLATE.md`）                                                      | 高频雷区自查；新 Bug 模式写 postmortem                         |
 | **每次 commit / PR**                           | `engineering/git-workflow.md`                                                                  | 分支模型、Conventional Commits、commit 纪律、验证门禁          |
@@ -97,6 +98,7 @@ docs/
 | [Resolver AC](../verify/acceptance-criteria/AC-resolver.md)          | 翻译选择链收敛验收标准（AC-RESOLVER-001）                                   |
 | [Decouple AC](../verify/acceptance-criteria/AC-decouple.md)          | GET 与 AI 翻译解耦 + 服务端 AI 超时（AC-DECOUPLE-001~002）                  |
 | [Security AC](../verify/acceptance-criteria/AC-sec.md)               | baseUrl 白名单 + 隐私披露（AC-SEC-001）                                     |
+| [SEO AC](../verify/acceptance-criteria/AC-seo.md)                    | meta 单份 / 动态页 noindex / sitemap 一致性（AC-SEO-001~003）               |
 | [Screenshot/Perf AC](../verify/acceptance-criteria/AC-screenshot.md) | 截图验收（AC-SHOT-001~004）+ 渲染性能基线（AC-PERF-001）                    |
 | 存档：差距分析 / 二期计划                                            | `archive/verification-gap-analysis.md`（首轮差距分析，Phase 2 已完成）      |
 

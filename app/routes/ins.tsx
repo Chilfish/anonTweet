@@ -16,14 +16,16 @@ import { useIGOperations } from '~/hooks/use-ig-operations'
 import { useIGScreenshotAction } from '~/hooks/use-ig-screenshot-action'
 import { useRecordVisit } from '~/hooks/use-record-visit'
 import { fetcher } from '~/lib/fetcher'
+import { buildMeta } from '~/lib/seo'
 import { useAIConfig, useResolvedAIConfig } from '~/lib/stores/hooks'
 import { extractIGId, isIGStoryLikeId } from '~/lib/url-detect'
 
 export function meta() {
-  return [
-    { title: 'Anon Tweet — Instagram' },
-    { name: 'description', content: 'Instagram 帖子查看器' },
-  ]
+  return buildMeta({
+    title: 'Instagram 帖子查看 | Anon Tweet',
+    description: '匿名查看 Instagram 帖子、Reel 与 Story，支持媒体下载与 caption 翻译，无需登录。',
+    noindex: true,
+  })
 }
 
 function IGNotFound({ id }: { id?: string }) {

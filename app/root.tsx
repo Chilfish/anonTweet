@@ -13,6 +13,7 @@ import {
 import { UpdateNotice } from '~/components/pwa/UpdateNotice'
 import { ThemeProvider } from '~/components/ThemeProvider'
 import { AnchoredToastProvider, ToastProvider } from '~/components/ui/toast'
+import { buildMeta } from '~/lib/seo'
 import { ensureSearchHistoryHydrated } from '~/lib/stores/searchHistory'
 import { ensureDictionaryHydrated } from '~/lib/stores/TranslationDictionary'
 import { ensureVisitedHydrated } from '~/lib/stores/visited'
@@ -43,6 +44,9 @@ export const links: Route.LinksFunction = () => [
   { rel: 'describedby', href: '/llms.txt', type: 'text/markdown' },
 ]
 
+/** 兜底 meta：没有自己 meta 的路由（如 layout、错误页）继承这一份 */
+export const meta: Route.MetaFunction = () => buildMeta()
+
 export function Layout({ children }: { children: React.ReactNode }) {
   const nonce = useNonce()
 
@@ -66,13 +70,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="apple-mobile-web-app-title" content="AnonTweet" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#1D9BF0" />
-        <title>Anon Tweet — 匿名推文浏览器</title>
-        <meta name="description" content="Anon Tweet — 第三方 Twitter/X 推文浏览器，支持 AI 翻译、推文卡片导出、匿名浏览。无需登录即可查看推文内容与评论区。" />
-        <meta name="robots" content="index, follow" />
-        <meta name="googlebot" content="index, follow" />
-        <meta property="og:site_name" content="Anon Tweet" />
-        <meta property="og:locale" content="zh_CN" />
-        <meta name="twitter:card" content="summary_large_image" />
+        {/* 标题 / 描述 / robots / OG 一律由路由 meta() 输出（React Router 只渲染最深匹配
+            路由的 meta）。这里写死会与 <Meta /> 形成两个 <title>，把页面标题压掉。 */}
         <Meta />
         <Links />
         {import.meta.env.DEV && (

@@ -52,7 +52,7 @@ bun run verify/index.ts --exit-on-fail      # CI 模式（失败 exit 1）
 `verify/index.ts` 的 `MODULE_PATTERNS`）：
 
 `build, card, ci, decouple, dev, ig, media, obs, postmortem, pwa, resolver, screenshot,
-sec, test, translation, tweet, ui, vision`
+sec, seo, test, translation, tweet, ui, vision`
 
 **零匹配守卫**：`--ac` / `--module` 若一条用例都没执行（0 passed / 0 failed），即使 vitest
 本身 `exit 0`，CLI 也会以非零退出并说明原因——不再出现「命令成功但什么都没跑」。
@@ -93,6 +93,7 @@ AC-DEV-001（dev server 健康）、AC-IG-009（缺 cookies → 500）、AC-MEDI
 | [AC-resolver.md](acceptance-criteria/AC-resolver.md)       | AC-RESOLVER-001（决策链收敛）                         |
 | [AC-decouple.md](acceptance-criteria/AC-decouple.md)       | AC-DECOUPLE-001~002（GET 解耦 + AI 超时）             |
 | [AC-sec.md](acceptance-criteria/AC-sec.md)                 | AC-SEC-001（baseUrl 白名单，可选加固）                |
+| [AC-seo.md](acceptance-criteria/AC-seo.md)                 | AC-SEO-001~003（meta 单份 / noindex / sitemap）       |
 | [AC-obs.md](acceptance-criteria/AC-obs.md)                 | AC-OBS-001~002（结构化日志 / AI 失败上下文）          |
 | [AC-pwa.md](acceptance-criteria/AC-pwa.md)                 | AC-PWA-001~008（PWA 安装壳 + Web Share）              |
 | [AC-ui.md](acceptance-criteria/AC-ui.md)                   | AC-UI-VISION-001 / AC-UI-A11Y-001（Storybook）        |
