@@ -72,6 +72,45 @@ describe('createSDKProvider baseUrl forwarding', () => {
     expect(transform(body)).toBe(body)
   })
 
+  it('drops temperature / top_p when thinking is enabled (官方语义：不生效)', () => {
+    const sdk = deepseekStrategy.createSDKProvider('key', '') as any
+    const transform = sdk.__settings.transformRequestBody as (body: Record<string, any>) => Record<string, any>
+    expect(transform({
+      model: 'deepseek-flash',
+      reasoning_effort: 'high',
+      temperature: 0.5,
+      top_p: 0.9,
+      messages: [],
+    })).toEqual({
+      model: 'deepseek-flash',
+      reasoning_effort: 'high',
+      messages: [],
+    })
+  })
+
+  it('keeps temperature when thinking is explicitly disabled', () => {
+    const sdk = deepseekStrategy.createSDKProvider('key', '') as any
+    const transform = sdk.__settings.transformRequestBody as (body: Record<string, any>) => Record<string, any>
+    const body = {
+      model: 'deepseek-flash',
+      thinking: { type: 'disabled' },
+      temperature: 0.5,
+      messages: [],
+    }
+    expect(transform(body)).toBe(body)
+  })
+
+  it('does not override an explicit thinking enabled flag', () => {
+    const sdk = deepseekStrategy.createSDKProvider('key', '') as any
+    const transform = sdk.__settings.transformRequestBody as (body: Record<string, any>) => Record<string, any>
+    const body = {
+      model: 'deepseek-flash',
+      thinking: { type: 'enabled' },
+      messages: [],
+    }
+    expect(transform(body)).toBe(body)
+  })
+
   it('trims surrounding whitespace from baseUrl', () => {
     const sdk = googleStrategy.createSDKProvider('key', '  https://custom.example  ') as any
     expect(sdk.__settings.baseURL).toBe('https://custom.example')

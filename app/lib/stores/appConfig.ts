@@ -7,6 +7,12 @@ export type ScreenshotFormat = 'png' | 'jpeg'
 export type DownloadImageSize = 'large' | 'orig'
 export type ThinkingLevel = 'minimal' | 'low' | 'medium' | 'high' | 'max'
 export type AIProvider = 'google' | 'deepseek' | 'openrouter'
+/**
+ * AI 请求路径：
+ * - `server`（默认）：经本站 /api/ai-* 的 CF Worker 中继（带超时、白名单与缓存写入）
+ * - `browser`：浏览器直接请求模型服务商（需服务商支持 CORS；Key 不再经过本站服务器）
+ */
+export type AIRequestMode = 'server' | 'browser'
 
 export interface AppConfigs {
   theme: Theme
@@ -20,6 +26,8 @@ export interface AppConfigs {
   mediaProxyUrl: string
   enableAITranslation: boolean
   aiProvider: AIProvider
+  /** AI 请求路径：服务端中继（默认）或浏览器直连 */
+  aiRequestMode: AIRequestMode
   geminiApiKey: string
   geminiModel: string
   geminiBaseUrl: string
@@ -57,6 +65,7 @@ interface AppConfigState extends AppConfigs {
   setMediaProxyUrl: (mediaProxyUrl: string) => void
   setEnableAITranslation: (enable: boolean) => void
   setAIProvider: (provider: AIProvider) => void
+  setAIRequestMode: (mode: AIRequestMode) => void
   setGeminiApiKey: (apiKey: string) => void
   setGeminiModel: (model: string) => void
   setGeminiBaseUrl: (baseUrl: string) => void
@@ -91,7 +100,10 @@ export const useAppConfigStore = create<AppConfigState>()(
       enableMediaProxy: false,
       mediaProxyUrl: 'https://proxy.chilfish.top/',
       enableAITranslation: false,
-      aiProvider: 'google',
+      // 默认引擎：DeepSeek Flash（官方别名，当前由 DeepSeek-V4.1-Flash 提供，
+      // 1M 上下文，同时支持文本与图片输入，见 app/lib/constants.ts）
+      aiProvider: 'deepseek',
+      aiRequestMode: 'server',
       geminiApiKey: '',
       geminiModel: 'models/gemini-3-flash-preview',
       geminiBaseUrl: '',
@@ -106,7 +118,8 @@ export const useAppConfigStore = create<AppConfigState>()(
       openrouterThinkingLevel: 'minimal',
       translationGlossary: '',
       enableAIVision: false,
-      visionProvider: 'google',
+      // 视觉默认同样走 DeepSeek Flash（deepseek-flash 支持图片输入）
+      visionProvider: 'deepseek',
       visionShowTranslatedOnly: true,
       showVisionEntry: false,
       isInlineMedia: false,
@@ -115,6 +128,7 @@ export const useAppConfigStore = create<AppConfigState>()(
       setMediaProxyUrl: mediaProxyUrl => set({ mediaProxyUrl }),
       setEnableAITranslation: enableAITranslation => set({ enableAITranslation }),
       setAIProvider: aiProvider => set({ aiProvider }),
+      setAIRequestMode: aiRequestMode => set({ aiRequestMode }),
       setTheme: theme => set({ theme }),
       setScreenshotFormat: screenshotFormat => set({ screenshotFormat }),
       setDownloadImageSize: downloadImageSize => set({ downloadImageSize }),
@@ -141,7 +155,7 @@ export const useAppConfigStore = create<AppConfigState>()(
     }),
     {
       name: 'app-config-store',
-      version: 6,
+      version: 8,
       migrate: (persistedState, version) => {
         const state = persistedState as Partial<AppConfigs>
         let next = state
@@ -157,6 +171,22 @@ export const useAppConfigStore = create<AppConfigState>()(
           else if (next.deepseekModel === 'deepseek v4 pro') {
             next = { ...next, deepseekModel: 'deepseek-v4-pro' }
           }
+        }
+        // v6 → v7：默认引擎切到 DeepSeek Flash。仅当原选择是 Google 且没配 Gemini Key
+        // 时改写，避免把已配置 Gemini 的用户强行切到没有 Key 的 DeepSeek。
+        if (version < 7) {
+          if (!next.geminiApiKey) {
+            if (!next.aiProvider || next.aiProvider === 'google')
+              next = { ...next, aiProvider: 'deepseek' }
+            if (!next.visionProvider || next.visionProvider === 'google')
+              next = { ...next, visionProvider: 'deepseek' }
+          }
+          if (!next.deepseekModel)
+            next = { ...next, deepseekModel: 'deepseek-flash' }
+        }
+        // v7 → v8：默认保持服务端中继（CF Worker）；浏览器直连由用户显式开启
+        if (version < 8) {
+          next = { ...next, aiRequestMode: 'server' }
         }
         return next
       },

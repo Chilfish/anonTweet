@@ -21,7 +21,14 @@ export function meta() {
  * 用服务端 env key 显式触发（不再依赖 GET 内联 LLM）。
  */
 async function translateTweetsForScreenshot(tweets: TweetData, baseUrl: string): Promise<void> {
-  if (!env.GEMINI_API_KEY || !env.GEMINI_MODEL)
+  // 服务端截图翻译的默认引擎：DeepSeek Flash（配了 DEEPSEEK_API_KEY 时）；
+  // 否则退回 Gemini（沿用既有 GEMINI_API_KEY / GEMINI_MODEL 部署配置）。
+  const screenshotAI = env.DEEPSEEK_API_KEY
+    ? { apiKey: env.DEEPSEEK_API_KEY, model: env.DEEPSEEK_MODEL, provider: 'deepseek' as const }
+    : env.GEMINI_API_KEY && env.GEMINI_MODEL
+      ? { apiKey: env.GEMINI_API_KEY, model: env.GEMINI_MODEL, provider: 'google' as const }
+      : null
+  if (!screenshotAI)
     return
 
   const apiUrl = new URL('/api/ai-translation', baseUrl).toString()
@@ -31,6 +38,9 @@ async function translateTweetsForScreenshot(tweets: TweetData, baseUrl: string):
     if (seen.has(tweet.id_str))
       return
     seen.add(tweet.id_str)
+    const ai = screenshotAI
+    if (!ai)
+      return
 
     const isZhTweet = tweet.lang === 'zh'
     const hasTranslation = tweet.entities?.some(e => !!e.aiTranslation)
@@ -42,8 +52,9 @@ async function translateTweetsForScreenshot(tweets: TweetData, baseUrl: string):
       const { data } = await axios.post(apiUrl, {
         tweet,
         enableAITranslation: true,
-        apiKey: env.GEMINI_API_KEY || '',
-        model: env.GEMINI_MODEL || '',
+        apiKey: ai.apiKey,
+        model: ai.model,
+        provider: ai.provider,
         translationGlossary: '',
         force: false,
       })

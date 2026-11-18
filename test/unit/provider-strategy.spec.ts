@@ -105,9 +105,13 @@ describe('deepseekStrategy', () => {
   })
 
   describe('buildProviderOptions', () => {
-    it('returns empty options for disabled thinking', () => {
+    it('returns explicit thinking disabled for disabled thinking', () => {
       const config = makeModelConfig({ provider: 'deepseek' })
-      expect(deepseekStrategy.buildProviderOptions('disabled', config)).toEqual({})
+      expect(deepseekStrategy.buildProviderOptions('disabled', config)).toEqual({
+        deepseek: {
+          thinking: { type: 'disabled' },
+        },
+      })
     })
 
     it('returns deepseek options with reasoningEffort high', () => {

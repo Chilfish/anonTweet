@@ -72,9 +72,10 @@ TWEET_KEYS=        # 不填也能用，但会被上游限流；多个 Key 用逗
 INS_COOKIES=       # Instagram cookies；不填时 /api/ig/get 返回空数组
 
 ENABLE_AI_TRANSLATION=true
-GEMINI_API_KEY=
+DEEPSEEK_API_KEY=          # 默认 AI 引擎 DeepSeek Flash（deepseek-flash）
+DEEPSEEK_MODEL=deepseek-flash
+GEMINI_API_KEY=            # 备选引擎；未配置 DeepSeek 时截图翻译回退 Gemini
 GEMINI_MODEL=models/gemini-3-flash-preview
-# DEEPSEEK_API_KEY=
 
 ENABLE_LOCAL_CACHE=true   # Workers 运行时自动回退内存 LRU
 ENABLE_DB_CACHE=false

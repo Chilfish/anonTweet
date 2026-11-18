@@ -1,231 +1,104 @@
-# DeepSeek Provider
+# DeepSeek Provider：官方规范与仓库实现
 
-The [DeepSeek](https://www.deepseek.com) provider offers access to powerful language models through the DeepSeek API.
+> 对齐时间：2026-11-18
+> 官方文档：<https://api-docs.deepseek.com/>（Models & Pricing / Thinking Mode）
+> AI SDK：<https://ai-sdk.dev/providers/ai-sdk-providers/deepseek>（`@ai-sdk/deepseek` v3.x / AI SDK v7）
 
-API keys can be obtained from the [DeepSeek Platform](https://platform.deepseek.com/api_keys).
+## 1. 官方模型现状
 
-> **本仓库实现（重要）**
->
-> 仓库内的 DeepSeek 策略（`app/lib/providers/deepseek.ts`）**不使用** `@ai-sdk/deepseek`，而是
-> 用 **`@ai-sdk/openai-compatible`** 的 `createOpenAICompatible({ name: 'deepseek', baseURL, apiKey })`。
->
-> 原因：DeepSeek 官方 API 与 OpenCode Zen/Go 端点均为 OpenAI 兼容协议；`@ai-sdk/deepseek` 会发送其
-> 特有的 `thinking: { type }` 字段，部分第三方兼容端点（如 OpenCode）虽透传但语义不确定。openai-compatible
-> 只发标准 `reasoning_effort`，兼容面更广。
->
-> 「思考关闭」的兜底：OpenAI 兼容协议没有标准的 off 开关，因此策略通过 `transformRequestBody` 在
-> `reasoning_effort` 缺失时补发 DeepSeek 官方的 `thinking: { type: 'disabled' }`，真正做到关闭思考。
+| 模型              | 实际版本            | 上下文 | 最大输出 | 图片输入 | 思考模式         |
+| ----------------- | ------------------- | ------ | -------- | -------- | ---------------- |
+| `deepseek-flash`  | DeepSeek-V4.1-Flash | 1M     | 384K     | ✅       | 默认开启，可关闭 |
+| `deepseek-v4-pro` | DeepSeek-V4-Pro     | 1M     | 384K     | ❌       | 默认开启，可关闭 |
 
-## 参数可配置性审计
+- 模型名使用 `deepseek-flash`。`deepseek-v4-flash`、`deepseek-v4-flash-vision-exp` 仍被接受，但对应模型已退役，请求由 V4.1-Flash 承接并按 Flash 计费。
+- `deepseek-chat` / `deepseek-reasoner` 已于 2026-07-24 退役，不再使用。
+- Base URL（OpenAI 格式）：`https://api.deepseek.com`；Anthropic 格式：`https://api.deepseek.com/anthropic`。
+- 能力：JSON Output、Tool Calls、Responses API、Anthropic API、Vision（仅 flash）。
 
-以下为本仓库当前对 DeepSeek 相关参数的暴露策略（基于 `@ai-sdk/openai-compatible@3.x` 与 AI SDK v7）。
+## 2. 本仓库实现（`app/lib/providers/deepseek.ts`）
+
+**不使用** `@ai-sdk/deepseek`，而是用 `@ai-sdk/openai-compatible` 的
+`createOpenAICompatible({ name: 'deepseek', baseURL, apiKey })`：
+
+- DeepSeek 官方 API 与 OpenCode Zen/Go 等第三方中转均为 OpenAI 兼容协议；
+- openai-compatible 只发送标准 `reasoning_effort`，兼容面更广；
+- 「关闭思考」与「采样参数」通过 `transformRequestBody` 在请求体层收口。
+
+`transformRequestBody` 的三条规则：
+
+1. **关闭思考**：未显式设置 `thinking` 且没有 `reasoning_effort` 时，补发
+   `thinking: { type: 'disabled' }`（OpenAI 兼容协议没有标准 off 开关）。
+2. **思考开启时省略采样参数**：官方语义下 `temperature` / `top_p` 不生效
+   （`@ai-sdk/deepseek` 也会直接省略），这里主动移除，避免把无效参数当成生效配置。
+3. **不覆盖显式配置**：调用方显式给出 `thinking: { type: 'enabled' | 'disabled' }` 时原样透传。
+
+思考强度映射（与官方 `reasoning_effort` 对齐）：
+
+| `ThinkingLevel`           | 请求体                                                      |
+| ------------------------- | ----------------------------------------------------------- |
+| `minimal`                 | `thinking: { type: 'disabled' }`（不发送 reasoning_effort） |
+| `low` / `medium` / `high` | `thinking` 默认即可，发送 `reasoning_effort: 'high'`        |
+| `max`                     | `reasoning_effort: 'max'`                                   |
+
+> 官方仅接受 `high` / `max`；`low` / `medium` 由服务端映射为 `high`，`xhigh` 映射为 `max`。
+
+## 3. 参数可配置性审计
 
 ### Provider 级设置（`createOpenAICompatible`）
 
-| 参数                        | 是否暴露给用户 | 当前处理                                                  |
-| --------------------------- | -------------- | --------------------------------------------------------- |
-| `apiKey`                    | ✅ 已暴露      | 设置面板「API Key」                                       |
-| `baseURL`                   | ✅ 已暴露      | 设置面板「Base URL」；留空回退 `https://api.deepseek.com` |
-| `name`                      | ❌ 内部        | 固定 `'deepseek'`，决定 providerOptions 的键              |
-| `headers`                   | ❌ 硬编码      | 默认无（代理 / 自定义认证扩展用，暂无需求）               |
-| `fetch`                     | ❌ 硬编码      | 默认全局 fetch（测试 / 中间件用）                         |
-| `queryParams`               | ❌ 硬编码      | 默认无（附加 query string）                               |
-| `includeUsage`              | ❌ 硬编码      | 默认 false（流式 usage 开销）                             |
-| `supportsStructuredOutputs` | ❌ 硬编码      | 默认 false → 结构化输出退化为 `json_object`               |
-| `transformRequestBody`      | ❌ 内部        | 本仓库用它注入 `thinking: { type: 'disabled' }`           |
+| 参数                        | 是否暴露给用户 | 当前处理                                                   |
+| --------------------------- | -------------- | ---------------------------------------------------------- |
+| `apiKey`                    | ✅ 已暴露      | 设置面板「API Key」                                        |
+| `baseURL`                   | ✅ 已暴露      | 设置面板「Base URL」；留空回退 `https://api.deepseek.com`  |
+| `name`                      | ❌ 内部        | 固定 `'deepseek'`，决定 providerOptions 的键与转发命名空间 |
+| `headers`                   | ❌ 硬编码      | 默认无（代理 / 自定义认证扩展用，暂无需求）                |
+| `fetch`                     | ❌ 硬编码      | 默认全局 fetch（测试 / 中间件用）                          |
+| `queryParams`               | ❌ 硬编码      | 默认无（附加 query string）                                |
+| `includeUsage`              | ❌ 硬编码      | 默认 false（流式 usage 开销）                              |
+| `supportsStructuredOutputs` | ❌ 硬编码      | 默认 false → 结构化输出退化为 `json_object`                |
+| `transformRequestBody`      | ❌ 内部        | 关闭思考兜底 + 思考开启时移除 `temperature` / `top_p`      |
 
 ### Chat 模型级选项（providerOptions 传入）
 
-| 选项               | 请求体字段          | 是否暴露  | 当前值                                                      |
-| ------------------ | ------------------- | --------- | ----------------------------------------------------------- |
-| `reasoningEffort`  | `reasoning_effort`  | ✅ 已暴露 | 思考强度：minimal→缺省 / high / max（low/medium 映射 high） |
-| `strictJsonSchema` | 仅 json_schema 模式 | ❌ 硬编码 | 默认 true；因 `supportsStructuredOutputs=false` 当前不生效  |
-| `user`             | `user`              | ❌ 未用   | —                                                           |
-| `textVerbosity`    | `verbosity`         | ❌ 未用   | —                                                           |
+| 选项                       | 请求体字段          | 是否暴露  | 当前值                                                 |
+| -------------------------- | ------------------- | --------- | ------------------------------------------------------ |
+| `thinking`                 | `thinking.type`     | ✅ 间接   | `minimal` 时显式 `disabled`；其余依赖默认 `enabled`    |
+| `reasoningEffort`          | `reasoning_effort`  | ✅ 已暴露 | `high` / `max`                                         |
+| `strictJsonSchema`         | 仅 json_schema 模式 | ❌ 硬编码 | 默认 true；因 `supportsStructuredOutputs=false` 不生效 |
+| `user`                     | `user`              | ❌ 未用   | —                                                      |
+| `textVerbosity`            | `verbosity`         | ❌ 未用   | —                                                      |
+| `logprobs` / `topLogprobs` | 同名                | ❌ 未用   | —                                                      |
 
 ### AI SDK 标准 callOptions（`generateText` 直传）
 
-| 选项                                   | 请求体字段        | 是否暴露  | 当前硬编码值                             |
-| -------------------------------------- | ----------------- | --------- | ---------------------------------------- |
-| `temperature`                          | `temperature`     | ❌ 硬编码 | 推文 0.5 / IG 0.5（重试 0.6）/ ai-test 1 |
-| `maxTokens`                            | `max_tokens`      | ❌ 未传   | undefined（走模型默认）                  |
-| `topP`                                 | `top_p`           | ❌ 未传   | undefined                                |
-| `frequencyPenalty` / `presencePenalty` | 同名              | ❌ 未传   | undefined                                |
-| `stopSequences`                        | `stop`            | ❌ 未传   | undefined                                |
-| `responseFormat`                       | `response_format` | ✅ 自动   | 由 `Output.object` 生成（`json_object`） |
-| `seed`                                 | `seed`            | ❌ 未传   | undefined                                |
+| 选项                                   | 请求体字段        | 是否暴露  | 当前值 / 行为                                                                        |
+| -------------------------------------- | ----------------- | --------- | ------------------------------------------------------------------------------------ |
+| `temperature`                          | `temperature`     | ❌ 硬编码 | 推文 0.5 / IG 0.5（重试 0.6）/ 文章 0.4 / 视觉 0.2 / ai-test 1；**思考开启时被移除** |
+| `maxTokens`                            | `max_tokens`      | ❌ 未传   | undefined（走模型默认，最大 384K）                                                   |
+| `topP`                                 | `top_p`           | ❌ 未传   | undefined；思考开启时同样不生效                                                      |
+| `frequencyPenalty` / `presencePenalty` | 同名              | ❌ 未传   | DeepSeek 已弃用，不发送                                                              |
+| `stopSequences`                        | `stop`            | ❌ 未传   | undefined                                                                            |
+| `responseFormat`                       | `response_format` | ✅ 自动   | 由 `Output.object` 生成（`json_object`）                                             |
+| `seed`                                 | `seed`            | ❌ 未传   | undefined                                                                            |
 
-**结论 / 建议**：保持暴露 `model` / `apiKey` / `baseURL` / 思考强度即可，暂不需要新增。
-`temperature` 是唯一值得考虑的用户可配项，但翻译场景固定 0.5 已取得稳定质量，暴露反而增加出错面；
-其余（headers / maxTokens / penalties / seed）属边界场景，保持硬编码。
+**结论**：保持暴露 `model` / `apiKey` / `baseURL` / 思考强度即可。翻译场景的
+`temperature` 固定值已取得稳定质量，且思考开启时本来就不生效，不新增配置面。
 
-## Setup
+## 4. 各链路的一致性
 
-The DeepSeek provider is available via the `@ai-sdk/deepseek` module. You can install it with:
+- 推文实体翻译（`AITranslation.ts`）、文章按块翻译（`article/translate.ts`）、
+  IG caption（`translateIGCaption.ts`）、视觉生成（`vision/describeImages.ts`）、
+  OCR 翻译（`vision/translateOCR.ts`）、连通性测试（`ai-test.ts`）都会按模型注册表
+  下发 `buildProviderOptions()`，并带 `AbortSignal.timeout`（AC-DECOUPLE-002）。
+- 默认引擎与视觉默认均为 DeepSeek Flash；截图 SSR 在配置 `DEEPSEEK_API_KEY` 时
+  优先用 `DEEPSEEK_MODEL=deepseek-flash`，未配置时回退 Gemini。
+- 浏览器直连模式（`aiRequestMode = 'browser'`）复用同一套管线；DeepSeek 官方端点
+  是否允许浏览器跨域（CORS）需以实际部署为准，被拦截时切回服务端中继。
 
-<Tabs items={['pnpm', 'npm', 'yarn', 'bun']}>
-<Tab>
-<Snippet text="pnpm add @ai-sdk/deepseek" dark />
-</Tab>
-<Tab>
-<Snippet text="npm install @ai-sdk/deepseek" dark />
-</Tab>
-<Tab>
-<Snippet text="yarn add @ai-sdk/deepseek" dark />
-</Tab>
-<Tab>
-<Snippet text="bun add @ai-sdk/deepseek" dark />
-</Tab>
-</Tabs>
+## 5. 参考
 
-## Provider Instance
-
-You can import the default provider instance `deepseek` from `@ai-sdk/deepseek`:
-
-```ts
-import { deepseek } from '@ai-sdk/deepseek'
-```
-
-For custom configuration, you can import `createDeepSeek` and create a provider instance with your settings:
-
-```ts
-import { createDeepSeek } from '@ai-sdk/deepseek'
-
-const deepseek = createDeepSeek({
-  apiKey: process.env.DEEPSEEK_API_KEY ?? '',
-})
-```
-
-You can use the following optional settings to customize the DeepSeek provider instance:
-
-- **baseURL** _string_
-
-  Use a different URL prefix for API calls.
-  The default prefix is `https://api.deepseek.com`.
-
-- **apiKey** _string_
-
-  API key that is being sent using the `Authorization` header. It defaults to
-  the `DEEPSEEK_API_KEY` environment variable.
-
-- **headers** _Record&lt;string,string&gt;_
-
-  Custom headers to include in the requests.
-
-- **fetch** _(input: RequestInfo, init?: RequestInit) => Promise&lt;Response&gt;_
-
-  Custom [fetch](https://developer.mozilla.org/en-US/docs/Web/API/fetch) implementation.
-
-## Language Models
-
-You can create language models using a provider instance:
-
-```ts
-import { deepseek } from '@ai-sdk/deepseek'
-import { generateText } from 'ai'
-
-const { text } = await generateText({
-  model: deepseek('deepseek-chat'),
-  prompt: 'Write a vegetarian lasagna recipe for 4 people.',
-})
-```
-
-You can also use the `.chat()` or `.languageModel()` factory methods:
-
-```ts
-const model = deepseek.chat('deepseek-chat')
-// or
-const model = deepseek.languageModel('deepseek-chat')
-```
-
-DeepSeek language models can be used in the `streamText` function
-(see [AI SDK Core](/docs/ai-sdk-core)).
-
-The following optional provider options are available for DeepSeek models:
-
-- `thinking` _object_
-
-  Optional. Controls thinking mode (chain-of-thought reasoning). You can enable thinking mode either by using the `deepseek-reasoner` model or by setting this option.
-  - `type`: `'enabled' | 'disabled'` - Enable or disable thinking mode.
-
-```ts highlight="7-11"
-import type { DeepSeekLanguageModelOptions } from '@ai-sdk/deepseek'
-import { deepseek } from '@ai-sdk/deepseek'
-import { generateText } from 'ai'
-
-const { text, reasoning } = await generateText({
-  model: deepseek('deepseek-chat'),
-  prompt: 'How many "r"s are in the word "strawberry"?',
-  providerOptions: {
-    deepseek: {
-      thinking: { type: 'enabled' },
-    } satisfies DeepSeekLanguageModelOptions,
-  },
-})
-```
-
-### Reasoning
-
-DeepSeek has reasoning support for the `deepseek-reasoner` model. The reasoning is exposed through streaming:
-
-```ts
-import { deepseek } from '@ai-sdk/deepseek'
-import { streamText } from 'ai'
-
-const result = streamText({
-  model: deepseek('deepseek-reasoner'),
-  prompt: 'How many "r"s are in the word "strawberry"?',
-})
-
-for await (const part of result.fullStream) {
-  if (part.type === 'reasoning') {
-    // This is the reasoning text
-    console.log('Reasoning:', part.text)
-  }
-  else if (part.type === 'text') {
-    // This is the final answer
-    console.log('Answer:', part.text)
-  }
-}
-```
-
-See [AI SDK UI: Chatbot](/docs/ai-sdk-ui/chatbot#reasoning) for more details
-on how to integrate reasoning into your chatbot.
-
-### Cache Token Usage
-
-DeepSeek provides context caching on disk technology that can significantly reduce token costs for repeated content. You can access the cache hit/miss metrics through the `providerMetadata` property in the response:
-
-```ts
-import { deepseek } from '@ai-sdk/deepseek'
-import { generateText } from 'ai'
-
-const result = await generateText({
-  model: deepseek('deepseek-chat'),
-  prompt: 'Your prompt here',
-})
-
-console.log(result.providerMetadata)
-// Example output: { deepseek: { promptCacheHitTokens: 1856, promptCacheMissTokens: 5 } }
-```
-
-The metrics include:
-
-- `promptCacheHitTokens`: Number of input tokens that were cached
-- `promptCacheMissTokens`: Number of input tokens that were not cached
-
-<Note>
-  For more details about DeepSeek's caching system, see the [DeepSeek caching
-  documentation](https://api-docs.deepseek.com/guides/kv_cache#checking-cache-hit-status).
-</Note>
-
-思考模式
-DeepSeek 模型支持思考模式：在输出最终回答之前，模型会先输出一段思维链内容，以提升最终答案的准确性。
-
-思考模式开关与思考强度控制
-控制参数（OpenAI 格式） 控制参数（Anthropic 格式）
-思考模式开关(1) {"thinking": {"type": "enabled/disabled"}}
-思考强度控制(2)(3) {"reasoning_effort": "high/max"} {"output_config": {"effort": "high/max"}}
-(1) 默认思考开关为 enabled
-(2) 思考模式下，对普通请求，默认 effort 为 high；对一些复杂 Agent 类请求（如 Claude Code、OpenCode），effort 自动设置为 max
-(3) 思考模式下，出于兼容考虑 low、medium 会映射为 high, xhigh 会映射为 max
+- [DeepSeek Models & Pricing](https://api-docs.deepseek.com/quick_start/pricing)
+- [DeepSeek Thinking Mode](https://api-docs.deepseek.com/guides/thinking_mode)
+- [DeepSeek Vision](https://api-docs.deepseek.com/guides/vision)
+- [AI SDK DeepSeek Provider](https://ai-sdk.dev/providers/ai-sdk-providers/deepseek)

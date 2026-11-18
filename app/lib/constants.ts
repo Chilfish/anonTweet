@@ -20,6 +20,18 @@ export interface ModelConfig {
   supportedLevels?: ThinkingLevel[]
 }
 
+/**
+ * 模型注册表。
+ *
+ * DeepSeek 官方当前只有两个在售模型（https://api-docs.deepseek.com/quick_start/pricing）：
+ * - `deepseek-flash`：DeepSeek-V4.1-Flash 的官方别名，1M 上下文 / 384K 最大输出，
+ *   同时支持文本、图片输入与思考模式（默认开启）。旧名 `deepseek-v4-flash`、
+ *   `deepseek-v4-flash-vision-exp` 仍被接受但已退役。
+ * - `deepseek-v4-pro`：纯文本，不支持图片输入。
+ *
+ * 思考强度映射：`minimal` = 关闭思考；`low/medium/high` → `high`；`max` → `max`
+ * （官方 reasoning_effort 仅接受 high/max，low/medium 由服务端映射为 high）。
+ */
 export const models: ModelConfig[] = [
   {
     name: 'models/gemini-3-flash-preview',
@@ -46,7 +58,7 @@ export const models: ModelConfig[] = [
   },
   {
     name: 'deepseek-flash',
-    text: 'DeepSeek Flash',
+    text: 'DeepSeek Flash (V4.1)',
     provider: 'deepseek',
     thinkingType: 'level',
     supportsVision: true,

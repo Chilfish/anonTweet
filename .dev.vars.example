@@ -25,9 +25,12 @@ ENABLE_DB_CACHE=false
 ENABLE_LOCAL_CACHE=true
 
 ENABLE_AI_TRANSLATION=true
+# 截图 SSR 翻译优先用 DeepSeek Flash；未配置时回退 Gemini。
+DEEPSEEK_API_KEY=
+DEEPSEEK_MODEL=deepseek-flash
+# 备选引擎（DeepSeek 未配置时使用）
 GEMINI_API_KEY=
 GEMINI_MODEL=models/gemini-3-flash-preview
-# DEEPSEEK_API_KEY=
 # AI_TRANSLATION_TIMEOUT_MS=120000
 
 # 公开部署加固：开启后仅允许官方 AI 域名 + ALLOWED_AI_BASE_URL_HOSTS。

@@ -49,6 +49,8 @@ const serverEnvSchema = z.object({
   HOSTNAME: optionalEnv(z.url().optional()),
 
   DEEPSEEK_API_KEY: optionalEnv(z.string().min(1).optional()),
+  // 截图 SSR 翻译的服务端默认模型：优先 DeepSeek Flash（官方 deepseek-flash 别名）
+  DEEPSEEK_MODEL: optionalEnv(z.string().min(1).default('deepseek-flash')),
   GEMINI_API_KEY: optionalEnv(z.string().min(1).optional()),
   GEMINI_MODEL: optionalEnv(z.string().min(1).default('models/gemini-3-flash-preview')),
   ENABLE_AI_TRANSLATION: z.stringbool().default(false),
