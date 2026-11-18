@@ -8,6 +8,7 @@ import { renderToString } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import About from '~/routes/about'
 import pkg from '../../package.json'
+import { readProjectFile } from '../helpers/read-project-file'
 
 describe('AC-ABOUT-001: about page', () => {
   it('shows build info, GitHub links, data boundary and machine-readable endpoints', () => {
@@ -23,5 +24,16 @@ describe('AC-ABOUT-001: about page', () => {
     expect(html).toContain('/llms.txt')
     expect(html).toContain('/openapi.json')
     expect(html).toContain('/skills/anon-tweet/SKILL.md')
+  })
+})
+
+describe('AC-ABOUT-002: about page layout', () => {
+  it('keeps mobile padding, a solid surface and breakable long paths', () => {
+    const about = readProjectFile('app/routes/about.tsx')
+    expect(about, 'app/routes/about.tsx should exist').not.toBeNull()
+    expect(about).toContain('px-4')
+    expect(about).toContain('bg-card')
+    expect(about).not.toContain('bg-card/40')
+    expect(about).toContain('break-all')
   })
 })
