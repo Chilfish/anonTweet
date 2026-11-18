@@ -66,6 +66,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ### Changed
 
+#### ins 多图堆叠角标（2026-11-18）
+
+- 保留旋转照片堆，但改为整格裁切：越界部分被卡片框架压住，不再覆盖相邻图片
+- 图层边框跟随 `border-card`，静止/悬停错位收敛；`+N` 固定为轴对齐 pill 并补可访问名称
+
 #### ins 帖子骨架屏（2026-11-18）
 
 - `IGPostSkeleton` 改为连续 3:2 媒体占位 + 骨架化动作栏，移除卡片级 `animate-pulse`（不再与格块动画叠加）

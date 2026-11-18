@@ -94,58 +94,50 @@ const MAX_STACK_LAYERS = 3
  * Per-layer visual config, deepest-first (DOM order).
  *
  * z-index is intentionally inverted: the most-offset layer
- * (deepest in the physical pile) sits on top visually.  This mimics
+ * (deepest in the physical pile) sits on top visually. This mimics
  * real photo stacks — each print partially covers the one below it.
  *
- * Translates push beyond the cell boundary (~8-10 px) for a slight
- * "break out of the frame" tension.  White photo-frame borders +
- * escalating drop shadows reinforce the skeuomorphic depth.
- *
- * Hover: fan the pile wider by exaggerating offsets and rotation.
+ * Layers keep the full tile size; any part that spills outside the
+ * cell is clipped by the tile itself, so the frame visually presses
+ * down on the pile instead of letting it cover neighbouring images.
  */
 const LAYER_CONFIGS = [
   {
     // Deepest physical position — highest visual z, peeks from top-left
-    translate: 'translate-x-[8px] translate-y-[9px]',
-    rotate: 'rotate-[5.5deg]',
-    shadow: 'shadow-[0_6px_20px_rgba(0,0,0,0.15)]',
+    translate: 'translate-x-[11px] translate-y-[10px]',
+    rotate: 'rotate-[5deg]',
+    shadow: 'shadow-[0_4px_12px_rgba(0,0,0,0.10)]',
     z: 'z-30',
-    hover: 'group-hover/stack:translate-x-[13px] group-hover/stack:translate-y-[14px] group-hover/stack:rotate-[9deg]',
+    hover: 'group-hover/stack:translate-x-[15px] group-hover/stack:translate-y-[14px] group-hover/stack:rotate-[7deg]',
   },
   {
     // Middle — peeks from bottom-right
-    translate: '-translate-x-[7px] -translate-y-[6px]',
-    rotate: '-rotate-[3.5deg]',
-    shadow: 'shadow-[0_4px_12px_rgba(0,0,0,0.10)]',
+    translate: '-translate-x-[9px] -translate-y-[8px]',
+    rotate: '-rotate-[4deg]',
+    shadow: 'shadow-[0_3px_8px_rgba(0,0,0,0.07)]',
     z: 'z-20',
-    hover: 'group-hover/stack:-translate-x-[11px] group-hover/stack:-translate-y-[10px] group-hover/stack:-rotate-[6deg]',
+    hover: 'group-hover/stack:-translate-x-[13px] group-hover/stack:-translate-y-[11px] group-hover/stack:-rotate-[6deg]',
   },
   {
     // Nearest to base — peeks from top-right
-    translate: '-translate-x-[3.5px] translate-y-[4px]',
-    rotate: 'rotate-[1.5deg]',
-    shadow: 'shadow-[0_2px_5px_rgba(0,0,0,0.07)]',
+    translate: '-translate-x-[4px] translate-y-[6px]',
+    rotate: 'rotate-[2deg]',
+    shadow: 'shadow-[0_1px_4px_rgba(0,0,0,0.05)]',
     z: 'z-10',
-    hover: 'group-hover/stack:-translate-x-[6px] group-hover/stack:translate-y-[7px] group-hover/stack:rotate-[3deg]',
+    hover: 'group-hover/stack:-translate-x-[6px] group-hover/stack:translate-y-[8px] group-hover/stack:rotate-[3deg]',
   },
 ] as const
 
-/** Shared border style — like a printed photo with a thin white frame. */
-const PRINT_BORDER = 'border-[2px] border-white/85 dark:border-zinc-700'
+/** 主题语义边框：浅色像相纸留白，深色跟随卡片表面。 */
+const PRINT_BORDER = 'border border-card'
 
 /**
  * Physical photo pile — a stack of prints.
  *
- * Hidden images stack ON TOP of the last visible one, each offset
- * in a different direction and rotated slightly — like prints thrown
- * onto a pile.  White borders and drop shadows create depth; the
- * z-index is inverted so the deepest (most-offset) layer reads as
- * the "top" of the visual pile.
- *
- * Layers intentionally break out of the cell boundary (~8-10 px)
- * for a "too many to contain" tension.
- *
- * Hover fans the pile wider.  No text label needed.
+ * Hidden prints keep the tile size, rotate slightly and are clipped by
+ * the tile frame; hover fans them a little wider. The count badge is
+ * pinned to the cell corner, axis-aligned, so it stays legible
+ * regardless of how the prints are rotated.
  */
 function PhotoStack({
   topImage,
@@ -163,10 +155,11 @@ function PhotoStack({
 
   return (
     <div
-      className="relative aspect-square overflow-visible group/stack cursor-pointer select-none rounded-sm"
+      className="group/stack relative aspect-square cursor-pointer overflow-hidden rounded-sm outline-none select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
       onClick={onClick}
       role="button"
       tabIndex={0}
+      aria-label={`还有 ${hiddenCount} 张图片，展开全部`}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
@@ -174,7 +167,7 @@ function PhotoStack({
         }
       }}
     >
-      {/* Layer images — deepest to nearest */}
+      {/* Layer images — deepest to nearest, clipped by the tile frame */}
       {layers.map((media, i) => {
         const cfg = LAYER_CONFIGS[i]!
         return (
@@ -187,7 +180,7 @@ function PhotoStack({
               cfg.shadow,
               cfg.z,
               PRINT_BORDER,
-              'rounded-sm origin-center',
+              'origin-center rounded-sm',
               'transition-all duration-350 ease-out',
               cfg.hover,
             )}
@@ -202,15 +195,13 @@ function PhotoStack({
         )
       })}
 
-      {/* Top layer — base image, sits at the bottom of the z-stack */}
+      {/* Base image — fills the cell like every other tile; hidden prints peek on top */}
       <div
         className={cn(
           'absolute inset-0 z-0 overflow-hidden',
           PRINT_BORDER,
           'rounded-sm',
-          'shadow-[0_1px_2px_rgba(0,0,0,0.04)]',
-          'transition-transform duration-350 ease-out',
-          'group-hover/stack:scale-[1.02]',
+          'shadow-[0_1px_3px_rgba(0,0,0,0.05)]',
         )}
       >
         <MediaImage
@@ -221,14 +212,13 @@ function PhotoStack({
         />
       </div>
 
-      {/* Count badge */}
+      {/* Count badge — 固定轴对齐，不跟随照片旋转 */}
       <span
         className={cn(
-          'absolute bottom-1.5 right-1.5 z-40',
-          'bg-black/80',
-          'text-white text-[10px] font-semibold tabular-nums',
-          'px-1.5 py-0.5 rounded-full shadow-sm',
-          'pointer-events-none',
+          'pointer-events-none absolute bottom-1.5 right-1.5 z-40',
+          'bg-black/70 text-white backdrop-blur-[2px]',
+          'text-[10px] font-semibold tabular-nums',
+          'rounded-full px-2 py-0.5 shadow-sm',
         )}
       >
         +

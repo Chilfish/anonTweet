@@ -262,7 +262,7 @@ export const SevenImages: Story = {
   ),
 }
 
-/** 12 张 — 2 行预览 + 实体相片堆叠（真实图片层叠，无文字） */
+/** 12 张 — 2 行预览 + 实体相片堆叠（真实图片层叠 + 角落 +6） */
 export const OverflowFolded: Story = {
   render: () => (
     <InstagramPostCard
@@ -349,7 +349,7 @@ export const MediaGrid3x2x2: Story = {
   render: () => (<div className="w-150"><IGMediaGrid media={samplePhotos.slice(0, 7)} /></div>),
 }
 
-/** 实体相册堆叠 — 2 行预览 +8 */
+/** 实体相册堆叠 — 2 行预览 +6，越界部分由格子裁切 */
 export const MediaGridStacked: Story = {
   render: () => (
     <div className="w-150">
