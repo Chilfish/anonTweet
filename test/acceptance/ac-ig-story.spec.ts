@@ -242,6 +242,9 @@ describe('AC-IG-STORY-008: story album shares the post-card shell', () => {
     expect(html).toContain('@chilfish · 快拍')
     expect(html).toContain('rounded-2xl')
     expect(html).toContain('rounded-lg')
+    // 竖版 3:4 相册格，不再用 5 列小方图
+    expect(html).toContain('aspect-[3/4]')
+    expect(html).toContain('gap-2')
     // 工具栏在网格之前，避免移动端滚到底才够得着操作
     expect(html.indexOf('story-album-toolbar')).toBeLessThan(html.indexOf('story-grid'))
   })
@@ -264,6 +267,8 @@ describe('AC-IG-STORY-008: story album shares the post-card shell', () => {
 
     expect(html).toContain('data-slot="story-album"')
     expect(html).toContain('rounded-2xl')
+    expect(html).toContain('aspect-[3/4]')
+    expect(html).toContain('sm:grid-cols-3')
     expect((html.match(/data-slot="story-skeleton-cell"/g) ?? []).length).toBe(12)
   })
 })

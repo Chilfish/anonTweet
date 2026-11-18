@@ -1,13 +1,13 @@
 import { Skeleton } from '~/components/ui/skeleton'
 import { cn } from '~/lib/utils'
 
-/** 占位格数（3 列 × 4 行），与实际网格列数断点同形。 */
+/** 占位格数（12 格，手机 2 列 / 桌面 3 列）。 */
 const CELL_COUNT = 12
 
 /**
  * 快拍列表骨架屏。
  *
- * 与加载后的相册卡片同形：身份头 + 条数工具栏 + 圆角缩略图网格，
+ * 与加载后的相册卡片同形：身份头 + 条数工具栏 + 3:4 圆角竖版网格，
  * 列数断点一致，避免数据到达时整张卡片跳动。
  */
 export function IGStoryListSkeleton({ className }: { className?: string }) {
@@ -39,11 +39,11 @@ export function IGStoryListSkeleton({ className }: { className?: string }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-1.5 px-2 pb-2 sm:grid-cols-4 md:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2 px-3 pb-3 sm:grid-cols-3">
         {Array.from({ length: CELL_COUNT }, (_, i) => (
           <Skeleton
             key={i}
-            className="aspect-square rounded-lg"
+            className="aspect-[3/4] rounded-lg"
             data-slot="story-skeleton-cell"
           />
         ))}

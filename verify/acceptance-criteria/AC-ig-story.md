@@ -139,9 +139,10 @@
   - 列表与单条都渲染 `data-slot="story-album"` 卡片外壳（`rounded-2xl` + `bg-card`）
   - 卡片顶部有 `story-album-header` 身份头，副标题为 `@username · 快拍`（精选集为
     `@username · 精选 · 标题`）
-  - 列表型：`story-album-toolbar` 位于 `story-grid` 之前，网格格块 `rounded-lg`
+  - 列表型：`story-album-toolbar` 位于 `story-grid` 之前；网格为 3:4 竖版格块（`aspect-[3/4]`、
+    `gap-2`，手机 2 列 / 桌面 3 列，≤4 条时 2 列），格块 `rounded-lg`
   - 单条：渲染 `story-single-media`（`aspect-[9/16]`）而非网格，底部保留下载按钮
-  - 骨架屏同样渲染 `story-album` 外壳，且保持 12 个 `story-skeleton-cell`
+  - 骨架屏同样渲染 `story-album` 外壳与 3:4 网格，且保持 12 个 `story-skeleton-cell`
 - **验证方法**：行为断言（`renderToString` 结构与文案）
 
 ---

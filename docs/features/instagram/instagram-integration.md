@@ -186,8 +186,8 @@ Story（`/stories/{username}/{id}/`）与 Highlight 的识别、抓取早已可�
 本轮按「Explore（浏览）+ 一次批量动作（下载）」的工作模式重排：**缩略图网格负责扫视，全屏查看器
 负责细看与精确下载**，批量选择收敛为显式选择模式。
 
-- **网格（`IGStoryGrid`）**：`grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1.5` 圆角方图缩略图，
-  位于相册卡片内。格子是 `<button>`：浏览态 `aria-label="查看第 k 条快拍"`（点击
+- **网格（`IGStoryGrid`）**：`grid-cols-2 sm:grid-cols-3 gap-2` 的 3:4 竖版圆角缩略图（≤4 条时
+  2 列），位于相册卡片内。格子是 `<button>`：浏览态 `aria-label="查看第 k 条快拍"`（点击
   开查看器），选择态 `选择第 k 条快拍` / `取消选择第 k 条快拍` + `aria-pressed` + `data-selected`。
   视频角标 `Play`，含 `storyLink` 的格子带「含链接贴纸」标记。缩略图复用 `IGMediaGrid` 导出的
   `getImageFitClass`（同一套「竖构图偏上裁切、不砍头」逻辑，避免两份漂移）。
@@ -228,10 +228,11 @@ Story（`/stories/{username}/{id}/`）与 Highlight 的识别、抓取早已可�
 - **身份头**：复用 `IGCardHeader`（头像 / 名称 / 认证 / InsLogo），新增 `subtitle`：
   `@username · 快拍`，精选集为 `@username · 精选 · 标题`。不再是只有一张网格的无主页面。
 - **工具栏**：条数 / 选择 / 全部下载（或选择态的全选 / 下载选中 / 取消）放在身份头下方、网格之前，
-  不再贴底悬浮；网格格块改为 `rounded-lg` + `gap-1.5`，在卡片内留 `px-2` 边距。
+  不再贴底悬浮；网格改为 3:4 竖版格块（手机 2 列 / 桌面 3 列，≤4 条 2 列），`rounded-lg` + `gap-2`，
+  卡片内留 `px-3` 边距。
 - **单条快拍**：`aspect-[9/16]` 的 story 画布（`object-contain`，媒体视频带播放角标），底部一行
   `IGStoryMeta` + 时间 + 下载；点击画面进全屏查看器，与列表共用同一套交互。
-- **骨架屏**：`IGStoryListSkeleton` 同步为相册卡片外壳（身份头 / 工具栏 / 12 个圆角格）。
+- **骨架屏**：`IGStoryListSkeleton` 同步为相册卡片外壳（身份头 / 工具栏 / 12 个 3:4 圆角格）。
 - **验收**：新增 AC-IG-STORY-008（`renderToString` 结构与文案）；`/ins/*` 的路由骨架也已
   使用 `InsPageSkeleton`（见 `AC-UI-SKELETON-001`）。
 

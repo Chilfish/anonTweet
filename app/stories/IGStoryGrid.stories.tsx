@@ -3,7 +3,7 @@ import { IGStoryGrid } from '~/components/ins/IGStoryGrid'
 import { highlightPost, storyPost, trayPosts, trayPostsMany } from './ig.fixtures'
 
 /**
- * IGStoryGrid —— 快拍相册缩略图网格。
+ * IGStoryGrid —— 快拍相册的 3:4 竖版缩略图网格。
  *
  * 浏览态（点格开查看器）/ 选择态（点格勾选）/ 32 条稠密。
  * 视频角标与「含链接贴纸」标记分别在 story-2、storyPost 上可见。

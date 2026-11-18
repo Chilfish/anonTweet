@@ -66,6 +66,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ### Changed
 
+#### 快拍相册网格（2026-11-18）
+
+- 快拍 / 精选集网格从 5 列小方图改为 3:4 竖版大图（手机 2 列 / 桌面 3 列，≤4 条 2 列），间距 `gap-2`，格块 hover 轻微放大
+- 同步 `IGStoryListSkeleton`、`AC-IG-STORY-008` 与 Storybook
+
 #### 外壳重做与内容恢复（2026-11-18）
 
 - 删除通栏 header，也不设常驻导航条：Hero 与日付线由 Layout 在每个视图固定渲染；设置与「搜索推文」同行放在输入卡底部，页脚默认收起

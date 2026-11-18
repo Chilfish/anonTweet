@@ -29,7 +29,10 @@ function StoryThumb({ media }: { media: IGPost['media'][number] }) {
       src={media.display_url}
       alt=""
       containerClassName="size-full"
-      className={getImageFitClass(media)}
+      className={cn(
+        getImageFitClass(media),
+        'transition-transform duration-300 ease-out group-hover:scale-[1.03]',
+      )}
     />
   )
 }
@@ -37,8 +40,9 @@ function StoryThumb({ media }: { media: IGPost['media'][number] }) {
 /**
  * 快拍网格（相册）。
  *
- * 浏览态点击打开全屏查看器；选择态点击切换勾选。每格是有完整无障碍名的 `<button>`，
- * 键盘 Tab 顺序即视觉顺序（不做 roving tabindex：几十格仍可预期地逐个到达）。
+ * 3:4 竖版格块比正方形更接近 story 原始画面；默认 2 列、`sm` 起 3 列，
+ * 由 `IGStoryList` 按条目数覆盖列数。浏览态点击打开全屏查看器；选择态点击切换勾选。
+ * 每格是有完整无障碍名的 `<button>`，键盘 Tab 顺序即视觉顺序（不做 roving tabindex）。
  */
 export function IGStoryGrid({
   posts,
@@ -50,7 +54,7 @@ export function IGStoryGrid({
 }: IGStoryGridProps) {
   return (
     <div
-      className={cn('grid grid-cols-3 gap-1.5 sm:grid-cols-4 md:grid-cols-5', className)}
+      className={cn('grid grid-cols-2 gap-2 sm:grid-cols-3', className)}
       data-slot="story-grid"
     >
       {posts.map((post, index) => {
@@ -70,7 +74,7 @@ export function IGStoryGrid({
             onClick={() => (selectable
               ? onToggle?.(post.id)
               : onOpen?.(index))}
-            className="group relative aspect-square overflow-hidden rounded-lg bg-muted/10 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background"
+            className="group relative aspect-[3/4] overflow-hidden rounded-lg bg-muted/10 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background"
           >
             {media
               ? <StoryThumb media={media} />

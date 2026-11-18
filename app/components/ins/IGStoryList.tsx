@@ -27,17 +27,11 @@ function storyKind(post: IGPost | undefined): string {
   return '快拍'
 }
 
-/** 按条目数收敛列数：少量快拍不在 5 列网格里空掉大半张卡。 */
+/** 相册列数：少量条目 2 列，其余手机 2 列 / 桌面 3 列，配合 3:4 竖版格。 */
 function gridColumnsClass(total: number): string {
-  if (total <= 2)
-    return 'grid-cols-2 sm:grid-cols-2 md:grid-cols-2'
-  if (total === 3)
-    return 'grid-cols-3 sm:grid-cols-3 md:grid-cols-3'
-  if (total === 4)
-    return 'grid-cols-2 sm:grid-cols-4 md:grid-cols-4'
-  if (total <= 8)
-    return 'grid-cols-3 sm:grid-cols-4 md:grid-cols-4'
-  return 'grid-cols-3 sm:grid-cols-4 md:grid-cols-5'
+  return total <= 4
+    ? 'grid-cols-2 sm:grid-cols-2'
+    : 'grid-cols-2 sm:grid-cols-3'
 }
 
 /**
@@ -211,7 +205,7 @@ export function IGStoryList({ posts, className }: IGStoryListProps) {
                   </div>
                 </div>
 
-                <div className="px-2 pb-2">
+                <div className="px-3 pb-3">
                   <IGStoryGrid
                     posts={posts}
                     selectable={selectionMode}
