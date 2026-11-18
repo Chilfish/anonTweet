@@ -13,7 +13,6 @@ export function ArticleEmbedTweet({ tweetId }: { tweetId: string }) {
     >
       <QuoteIcon className="size-4 shrink-0 text-primary" />
       <span className="truncate">嵌入的帖子</span>
-      <span className="ml-auto shrink-0 text-xs text-primary">在 X 查看 →</span>
     </a>
   )
 }

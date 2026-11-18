@@ -70,8 +70,6 @@ export function TweetArticleCard({ article, tweetId, className }: TweetArticleCa
             {preview}
           </p>
         )}
-
-        <span className="inline-block text-xs font-medium text-primary">阅读全文 →</span>
       </div>
     </Link>
   )

@@ -92,11 +92,11 @@ export function AIVisionBlock({
         <button
           type="button"
           onClick={() => setVisionVisibility(tweet.id_str, true)}
-          title="展开图片描述"
+          title="展开 AI 描述"
           className="mt-3 flex w-full items-center gap-1.5 rounded-xl border bg-card px-3.5 py-2 text-xs font-medium text-muted-foreground/70 transition-colors hover:bg-background/40 hover:text-foreground"
         >
           <ImageIcon className="size-3.5" />
-          图片描述
+          AI 描述
           <ChevronDown className="ml-auto size-3.5" />
         </button>
       )}
@@ -108,7 +108,7 @@ export function AIVisionBlock({
             <header className="flex items-center justify-between gap-2 border-b border-border/50 px-3.5 py-2">
               <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                 <ImageIcon className="size-3.5" />
-                图片描述
+                AI 描述
               </span>
               {!chromeHidden && (
                 <div className="flex items-center gap-2">
@@ -124,7 +124,7 @@ export function AIVisionBlock({
                   <button
                     type="button"
                     onClick={() => setVisionVisibility(tweet.id_str, false)}
-                    title="本次隐藏图片描述"
+                    title="本次隐藏 AI 描述"
                     className="text-xs font-medium text-muted-foreground/70 transition-colors hover:text-foreground"
                   >
                     隐藏
@@ -135,10 +135,10 @@ export function AIVisionBlock({
                     size="icon-xs"
                     onClick={editor.initializeEditor}
                     className="hover:bg-background/50"
-                    title="生成 / 编辑图片描述"
+                    title="生成 / 编辑 AI 描述"
                   >
                     <Sparkles className="size-3.5 text-muted-foreground/70" />
-                    <span className="sr-only">生成 / 编辑图片描述</span>
+                    <span className="sr-only">生成 / 编辑 AI 描述</span>
                   </Button>
                 </div>
               )}

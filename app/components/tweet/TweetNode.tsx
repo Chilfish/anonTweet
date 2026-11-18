@@ -85,14 +85,14 @@ function VisionEntryButton({
       variant="secondary"
       size="icon-sm"
       className="bg-transparent"
-      title="添加图片描述"
+      title="添加 AI 图片描述"
       onClick={() => {
         setVisionVisibility(tweet.id_str, true)
         editor.initializeEditor()
       }}
     >
       <ImageIcon className="size-3.5 text-muted-foreground" />
-      <span className="sr-only">添加图片描述</span>
+      <span className="sr-only">添加 AI 图片描述</span>
     </Button>
   )
 }

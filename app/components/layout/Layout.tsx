@@ -1,8 +1,7 @@
-import { GitCommitHorizontal, InfoIcon, SearchIcon, XIcon } from 'lucide-react'
+import { InfoIcon, SearchIcon, XIcon } from 'lucide-react'
 import { useState } from 'react'
-import { Link, Outlet } from 'react-router'
+import { Link, Outlet, useLocation } from 'react-router'
 import { Button } from '~/components/ui/button'
-import { formatDate } from '~/lib/react-tweet'
 import { cn } from '~/lib/utils'
 import { PageHeader } from './PageHeader'
 
@@ -46,37 +45,9 @@ function FooterLink({ to, className, children, emoji }: LinkProps) {
   )
 }
 
-function GitInfo() {
-  const hash = typeof __GIT_HASH__ !== 'undefined'
-    ? __GIT_HASH__
-    : 'DEV'
-  const dateStr = typeof __GIT_DATE__ !== 'undefined'
-    ? __GIT_DATE__
-    : new Date()
-
-  return (
-    <div className="flex items-center justify-center gap-2 text-[10px] text-muted-foreground/50 font-mono mt-3 select-all">
-      <span title={formatDate(new Date(dateStr))}>
-        Last build:
-        {' '}
-        {formatDate(new Date(dateStr))}
-      </span>
-      <span>•</span>
-      <a
-        href={`https://github.com/Chilfish/anonTweet/commit/${hash}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center gap-1 hover:text-foreground transition-colors"
-      >
-        <GitCommitHorizontal className="size-3" />
-        {hash.substring(0, 7)}
-      </a>
-    </div>
-  )
-}
-
 export function LayoutComponent({ children }: { children?: React.ReactNode }) {
   const [showFooter, setShowFooter] = useState(false)
+  const isHome = useLocation().pathname === '/'
 
   return (
     <div
@@ -86,9 +57,11 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
       <MinimalBackground />
 
       <div className="flex-1 w-full max-w-3xl mx-auto sm:px-4 pt-8 pb-12 flex flex-col items-center justify-center  animate-in fade-in slide-in-from-bottom-2 duration-500">
-        <div className="mb-8 w-full">
-          <PageHeader />
-        </div>
+        {isHome && (
+          <div className="mb-8 w-full">
+            <PageHeader />
+          </div>
+        )}
 
         {children || <Outlet />}
       </div>
@@ -115,7 +88,6 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
                   <FooterLink to="https://tweet.chilfish.top/memo/240y_k">女声优存档</FooterLink>
                   <FooterLink to="https://nishio.chilfish.top/zh">西尾文明暦</FooterLink>
                   <FooterLink to="https://oshitabi.chilfish.top/">推し旅AR</FooterLink>
-                  <FooterLink to="/bili">发布到B站</FooterLink>
                   <Link
                     to="/search"
                     className="inline-flex items-center gap-1.5 transition-colors hover:text-(--primary-brand) hover:underline underline-offset-4 decoration-dotted"
@@ -126,8 +98,6 @@ export function LayoutComponent({ children }: { children?: React.ReactNode }) {
                 </span>
               </p>
             </div>
-
-            <GitInfo />
           </footer>
         </div>
 
