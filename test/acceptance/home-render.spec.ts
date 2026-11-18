@@ -9,7 +9,7 @@ import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import { MemoryRouter } from 'react-router'
 import { describe, expect, it } from 'vitest'
-import { ContinueReading } from '~/components/home/ContinueReading'
+import { HistoryList } from '~/components/history/HistoryList'
 import { RecentVisited } from '~/components/home/RecentVisited'
 import { Dateline } from '~/components/layout/Dateline'
 import { HankoMark } from '~/components/layout/HankoMark'
@@ -46,12 +46,14 @@ function render(node: React.ReactElement): string {
 }
 
 describe('AC-HOME-001: recent visited renders as links and hides when empty', () => {
-  it('renders one link per entry with type-specific href', () => {
+  it('renders one link per entry with type-specific href and a link to the full history', () => {
     const html = render(createElement(RecentVisited, { items }))
 
     expect(html).toContain('href="/tweets/111"')
     expect(html).toContain('href="/ins/abc%2Fdef"')
     expect(html).toContain('href="/article/222"')
+    expect(html).toContain('href="/history"')
+    expect(html).toContain('全部')
     expect(html).toContain('Alice')
     expect(html).toContain('hello world')
     expect(html).toContain('caption text')
@@ -62,19 +64,27 @@ describe('AC-HOME-001: recent visited renders as links and hides when empty', ()
   it('renders nothing for an empty list', () => {
     expect(render(createElement(RecentVisited, { items: [] }))).toBe('')
   })
+})
 
-  it('renders the latest entry as a continue-reading card', () => {
-    const html = render(createElement(ContinueReading, { item: items[0]! }))
+describe('AC-HOME-004: history list renders grouped rows with remove actions', () => {
+  it('groups rows by day and links each record to its detail page', () => {
+    const html = render(createElement(HistoryList, {
+      items,
+      now: NOW,
+      onRemove: () => {},
+    }))
 
-    expect(html).toContain('继续阅读')
+    expect(html).toContain('今天')
+    expect(html).toContain('更早')
     expect(html).toContain('href="/tweets/111"')
-    expect(html).toContain('Alice')
-    expect(html).toContain('hello world')
-    expect(html).not.toContain('最近查看')
+    expect(html).toContain('href="/ins/abc%2Fdef"')
+    expect(html).toContain('href="/article/222"')
+    expect(html).toContain('aria-label="移除 Alice"')
+    expect(html).toContain('aria-label="移除 Long read"')
   })
 
-  it('hides the continue-reading card without history', () => {
-    expect(render(createElement(ContinueReading, { item: null }))).toBe('')
+  it('renders nothing for an empty list', () => {
+    expect(render(createElement(HistoryList, { items: [], now: NOW }))).toBe('')
   })
 })
 

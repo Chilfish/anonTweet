@@ -31,7 +31,7 @@ docs/
 │   ├── pwa/                    #   PWA（web-share-target.md · capability-audit.md）
 │   ├── ai-vision/              #   AI 视觉描述（ai-vision.md）
 │   └── deploy/                 #   部署（deployment.md）
-├── planning/                   # 规划与决策（architecture ADR · project-architecture · backlog）
+├── planning/                   # 规划与决策（architecture ADR · project-architecture · backlog · browse-history）
 ├── engineering/                # 工程规范（code-style · git-workflow · release-checklist）
 ├── ui-design/                  # UI 设计系统（README 总览 · GENERAL 原子组件 · SETTINGS · INFORMATION-DENSITY 信息密度）
 ├── postmortem/                 # 尸检报告（历史踩坑沉淀，开写代码前必读）

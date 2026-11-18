@@ -19,6 +19,7 @@ export default [
     route('/bili', 'routes/bili.tsx'),
     route('/about', 'routes/about.tsx'),
     route('/search', 'routes/search.tsx'),
+    route('/history', 'routes/history.tsx'),
   ]),
 
   ...prefix('api', [

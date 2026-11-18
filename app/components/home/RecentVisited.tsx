@@ -62,13 +62,13 @@ function VisitedRow({ item }: { item: VisitedItem }) {
   )
 }
 
-/** 最近查看：回访入口，只保留最多 `items` 条；无记录时整块不渲染 */
+/** 最近查看：首页回访入口，只保留最近几条；完整记录在 /history */
 export function RecentVisited({
   items,
-  onClear,
+  allHref = '/history',
 }: {
   items: VisitedItem[]
-  onClear?: () => void
+  allHref?: string
 }) {
   if (!items.length)
     return null
@@ -77,15 +77,12 @@ export function RecentVisited({
     <section className="w-full max-w-md">
       <div className="mb-1 flex items-center justify-between px-2">
         <h2 className="text-xs font-medium text-muted-foreground">最近查看</h2>
-        {onClear && (
-          <button
-            type="button"
-            onClick={onClear}
-            className="text-[11px] text-muted-foreground/60 transition-colors hover:text-foreground"
-          >
-            清除
-          </button>
-        )}
+        <Link
+          to={allHref}
+          className="text-[11px] text-muted-foreground/60 transition-colors hover:text-foreground"
+        >
+          全部
+        </Link>
       </div>
       <ul className="flex flex-col">
         {items.map(item => (

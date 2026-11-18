@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { VisitedItem } from '~/lib/visited'
+import { HistoryList } from '~/components/history/HistoryList'
 import { RecentVisited } from '~/components/home/RecentVisited'
 
 /**
- * 首页次级区块：最近查看（有记录 / 空态）。
+ * 首页次级区块：最近查看（有记录 / 空态）与 /history 的完整列表。
  * 空态用于确认「无记录时整块不渲染」，不留下空洞。
  */
 const meta = {
@@ -49,9 +50,13 @@ const items: VisitedItem[] = [
 ]
 
 export const Populated: Story = {
-  render: () => <RecentVisited items={items} onClear={() => {}} />,
+  render: () => <RecentVisited items={items} />,
 }
 
 export const Empty: Story = {
   render: () => <RecentVisited items={[]} />,
+}
+
+export const History: Story = {
+  render: () => <HistoryList items={items} onRemove={() => {}} />,
 }

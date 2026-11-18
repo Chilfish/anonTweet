@@ -6,9 +6,10 @@
 import type { VisitedItem } from '~/lib/visited'
 import { describe, expect, it } from 'vitest'
 import {
+  filterVisited,
   formatVisitedTime,
-  HOME_RECENT_LIST_LIMIT,
-  HOME_VISITED_LIMIT,
+  groupVisitedByDay,
+  HOME_RECENT_LIMIT,
   pushVisited,
   VISITED_LIMIT,
   visitedHref,
@@ -80,9 +81,9 @@ describe('AC-HOME-001: visited history pure helpers', () => {
     expect(next.some(i => i.id === `id-${VISITED_LIMIT - 1}`)).toBe(false)
   })
 
-  it('reserves one slot for continue-reading and three for the list', () => {
-    expect(HOME_VISITED_LIMIT).toBe(HOME_RECENT_LIST_LIMIT + 1)
-    expect(HOME_VISITED_LIMIT).toBeLessThan(VISITED_LIMIT)
+  it('keeps the home list at three entries, smaller than the storage cap', () => {
+    expect(HOME_RECENT_LIMIT).toBe(3)
+    expect(HOME_RECENT_LIMIT).toBeLessThan(VISITED_LIMIT)
   })
 
   it('formats relative time buckets', () => {
@@ -98,5 +99,94 @@ describe('AC-HOME-001: visited history pure helpers', () => {
     expect(visitedHref({ type: 'tweet', id: '123' })).toBe('/tweets/123')
     expect(visitedHref({ type: 'article', id: '123' })).toBe('/article/123')
     expect(visitedHref({ type: 'ig', id: 'user/story-1' })).toBe('/ins/user%2Fstory-1')
+  })
+})
+
+describe('AC-HOME-004: history page filtering and day grouping', () => {
+  const list: VisitedItem[] = [
+    {
+      type: 'tweet',
+      id: 'a',
+      title: 'Chilfish',
+      snippet: '匿名查看推文与长文',
+      ts: 0,
+    },
+    {
+      type: 'article',
+      id: 'b',
+      title: '关于匿名阅读',
+      snippet: '块文档与按块翻译',
+      ts: 0,
+    },
+    {
+      type: 'ig',
+      id: 'c',
+      title: '@meeeei.gt',
+      ts: 0,
+    },
+  ]
+
+  it('filters by keyword against title and snippet, case-insensitively', () => {
+    expect(filterVisited(list, { q: 'chilfish' }).map(i => i.id)).toEqual(['a'])
+    expect(filterVisited(list, { q: '块文档' }).map(i => i.id)).toEqual(['b'])
+    expect(filterVisited(list, { q: '   ' })).toHaveLength(3)
+    expect(filterVisited(list, { q: 'nope' })).toEqual([])
+  })
+
+  it('filters by type and treats all as no filter', () => {
+    expect(filterVisited(list, { type: 'ig' }).map(i => i.id)).toEqual(['c'])
+    expect(filterVisited(list, { type: 'all' })).toHaveLength(3)
+    expect(filterVisited(list, { type: 'article', q: '匿名' }).map(i => i.id)).toEqual(['b'])
+  })
+
+  it('groups by local day and keeps newest first', () => {
+    const now = new Date(2026, 10, 18, 12).getTime()
+    const grouped = groupVisitedByDay(
+      [
+        {
+          type: 'tweet',
+          id: 'today',
+          title: 't',
+          ts: new Date(2026, 10, 18, 9).getTime(),
+        },
+        {
+          type: 'tweet',
+          id: 'yesterday',
+          title: 'y',
+          ts: new Date(2026, 10, 17, 20).getTime(),
+        },
+        {
+          type: 'ig',
+          id: 'earlier',
+          title: 'e',
+          ts: new Date(2026, 10, 10, 9).getTime(),
+        },
+      ],
+      now,
+    )
+
+    expect(grouped.map(group => group.label)).toEqual(['今天', '昨天', '更早'])
+    expect(grouped.map(group => group.items.map(i => i.id))).toEqual([
+      ['today'],
+      ['yesterday'],
+      ['earlier'],
+    ])
+  })
+
+  it('drops empty day groups', () => {
+    const now = new Date(2026, 10, 18, 12).getTime()
+    const grouped = groupVisitedByDay(
+      [
+        {
+          type: 'tweet',
+          id: 'today',
+          title: 't',
+          ts: new Date(2026, 10, 18, 9).getTime(),
+        },
+      ],
+      now,
+    )
+
+    expect(grouped.map(group => group.label)).toEqual(['今天'])
   })
 })

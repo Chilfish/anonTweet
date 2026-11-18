@@ -56,6 +56,7 @@ const MODULE_PATTERNS: Record<string, string> = {
   card: 'AC-CARD',
   space: 'AC-SPACE',
   ui: 'AC-UI',
+  home: 'AC-HOME',
   test: 'AC-TEST',
 }
 

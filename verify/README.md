@@ -71,32 +71,32 @@ AC-DEV-001（dev server 健康）、AC-IG-009（缺 cookies → 500）、AC-MEDI
 
 ## 验收标准（AC）
 
-| 文档                                                       | 覆盖                                                  |
-| ---------------------------------------------------------- | ----------------------------------------------------- |
-| [AC-tweet.md](acceptance-criteria/AC-tweet.md)             | AC-TWEET-001~011（解析 + API + 搜索 + 外壳鉴权）      |
-| [AC-translation.md](acceptance-criteria/AC-translation.md) | AC-TRANS-001~007（占位符管线 + 视图/Provider）        |
-| [AC-ig.md](acceptance-criteria/AC-ig.md)                   | AC-IG-001~009（IG 集成）                              |
-| [AC-ig-story.md](acceptance-criteria/AC-ig-story.md)       | AC-IG-STORY-001~005（Story 提取/列表/下载/渲染/缓存） |
-| [AC-screenshot.md](acceptance-criteria/AC-screenshot.md)   | AC-SHOT-001~004 + AC-PERF-001（截图/渲染基线）        |
-| [AC-media.md](acceptance-criteria/AC-media.md)             | AC-MEDIA-001~006（媒体代理）                          |
-| [AC-postmortem.md](acceptance-criteria/AC-postmortem.md)   | AC-PM-001~007（预发布检查）                           |
-| [AC-ci.md](acceptance-criteria/AC-ci.md)                   | AC-CI-001~004（CI workflow，解析 run 步骤）           |
-| [AC-build.md](acceptance-criteria/AC-build.md)             | AC-BUILD-001~003（Babel/.tsx 构建管线）               |
-| [AC-card.md](acceptance-criteria/AC-card.md)               | AC-CARD-001~014（jetfuel/trending/媒体广告卡/投票）   |
-| [AC-dev.md](acceptance-criteria/AC-dev.md)                 | AC-DEV-001~002（dev server 模式固定）                 |
-| [AC-test.md](acceptance-criteria/AC-test.md)               | AC-TEST-006（parseTweet 全变体）                      |
-| [AC-llms.md](acceptance-criteria/AC-llms.md)               | AC-LLMS-001~002（llms.txt / openapi.json）            |
-| [AC-home.md](acceptance-criteria/AC-home.md)               | AC-HOME-001~003（最近查看 / 首页入口 / IndexedDB）    |
-| [AC-about.md](acceptance-criteria/AC-about.md)             | AC-ABOUT-001（关于页构建/数据/接口信息）              |
-| [AC-search.md](acceptance-criteria/AC-search.md)           | AC-SEARCH-001（最近搜索 / 语法示例）                  |
-| [AC-vision.md](acceptance-criteria/AC-vision.md)           | AC-VISION-001~012（AI 视觉）                          |
-| [AC-resolver.md](acceptance-criteria/AC-resolver.md)       | AC-RESOLVER-001（决策链收敛）                         |
-| [AC-decouple.md](acceptance-criteria/AC-decouple.md)       | AC-DECOUPLE-001~002（GET 解耦 + AI 超时）             |
-| [AC-sec.md](acceptance-criteria/AC-sec.md)                 | AC-SEC-001（baseUrl 白名单，可选加固）                |
-| [AC-seo.md](acceptance-criteria/AC-seo.md)                 | AC-SEO-001~003（meta 单份 / noindex / sitemap）       |
-| [AC-obs.md](acceptance-criteria/AC-obs.md)                 | AC-OBS-001~002（结构化日志 / AI 失败上下文）          |
-| [AC-pwa.md](acceptance-criteria/AC-pwa.md)                 | AC-PWA-001~008（PWA 安装壳 + Web Share）              |
-| [AC-ui.md](acceptance-criteria/AC-ui.md)                   | AC-UI-VISION-001 / AC-UI-A11Y-001（Storybook）        |
+| 文档                                                       | 覆盖                                                                   |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------- |
+| [AC-tweet.md](acceptance-criteria/AC-tweet.md)             | AC-TWEET-001~011（解析 + API + 搜索 + 外壳鉴权）                       |
+| [AC-translation.md](acceptance-criteria/AC-translation.md) | AC-TRANS-001~007（占位符管线 + 视图/Provider）                         |
+| [AC-ig.md](acceptance-criteria/AC-ig.md)                   | AC-IG-001~009（IG 集成）                                               |
+| [AC-ig-story.md](acceptance-criteria/AC-ig-story.md)       | AC-IG-STORY-001~005（Story 提取/列表/下载/渲染/缓存）                  |
+| [AC-screenshot.md](acceptance-criteria/AC-screenshot.md)   | AC-SHOT-001~004 + AC-PERF-001（截图/渲染基线）                         |
+| [AC-media.md](acceptance-criteria/AC-media.md)             | AC-MEDIA-001~006（媒体代理）                                           |
+| [AC-postmortem.md](acceptance-criteria/AC-postmortem.md)   | AC-PM-001~007（预发布检查）                                            |
+| [AC-ci.md](acceptance-criteria/AC-ci.md)                   | AC-CI-001~004（CI workflow，解析 run 步骤）                            |
+| [AC-build.md](acceptance-criteria/AC-build.md)             | AC-BUILD-001~003（Babel/.tsx 构建管线）                                |
+| [AC-card.md](acceptance-criteria/AC-card.md)               | AC-CARD-001~014（jetfuel/trending/媒体广告卡/投票）                    |
+| [AC-dev.md](acceptance-criteria/AC-dev.md)                 | AC-DEV-001~002（dev server 模式固定）                                  |
+| [AC-test.md](acceptance-criteria/AC-test.md)               | AC-TEST-006（parseTweet 全变体）                                       |
+| [AC-llms.md](acceptance-criteria/AC-llms.md)               | AC-LLMS-001~002（llms.txt / openapi.json）                             |
+| [AC-home.md](acceptance-criteria/AC-home.md)               | AC-HOME-001~005（最近查看 / 首页入口 / IndexedDB / 历史页 / 详情快照） |
+| [AC-about.md](acceptance-criteria/AC-about.md)             | AC-ABOUT-001（关于页构建/数据/接口信息）                               |
+| [AC-search.md](acceptance-criteria/AC-search.md)           | AC-SEARCH-001（最近搜索 / 语法示例）                                   |
+| [AC-vision.md](acceptance-criteria/AC-vision.md)           | AC-VISION-001~012（AI 视觉）                                           |
+| [AC-resolver.md](acceptance-criteria/AC-resolver.md)       | AC-RESOLVER-001（决策链收敛）                                          |
+| [AC-decouple.md](acceptance-criteria/AC-decouple.md)       | AC-DECOUPLE-001~002（GET 解耦 + AI 超时）                              |
+| [AC-sec.md](acceptance-criteria/AC-sec.md)                 | AC-SEC-001（baseUrl 白名单，可选加固）                                 |
+| [AC-seo.md](acceptance-criteria/AC-seo.md)                 | AC-SEO-001~003（meta 单份 / noindex / sitemap）                        |
+| [AC-obs.md](acceptance-criteria/AC-obs.md)                 | AC-OBS-001~002（结构化日志 / AI 失败上下文）                           |
+| [AC-pwa.md](acceptance-criteria/AC-pwa.md)                 | AC-PWA-001~008（PWA 安装壳 + Web Share）                               |
+| [AC-ui.md](acceptance-criteria/AC-ui.md)                   | AC-UI-VISION-001 / AC-UI-A11Y-001（Storybook）                         |
 
 ## 诚实边界（已知限制）
 

@@ -3,6 +3,7 @@ const SECTION_LABELS: Record<string, string> = {
   ins: 'Instagram',
   article: '长文',
   search: '搜索',
+  history: '浏览历史',
   list: 'List',
   bili: '动态发布',
   about: '关于',

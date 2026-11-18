@@ -18,10 +18,8 @@ export interface VisitedItem {
 export const VISITED_LIMIT = 200
 /** 单次水合进内存的条数 */
 export const VISITED_MEMORY_LIMIT = 20
-/** 首页展示条数：1 条继续阅读 + 3 条最近查看 */
-export const HOME_VISITED_LIMIT = 4
-/** 首页「最近查看」列表条数 */
-export const HOME_RECENT_LIST_LIMIT = 3
+/** 首页「最近查看」列表条数（完整记录在 /history） */
+export const HOME_RECENT_LIMIT = 3
 
 export function visitedKey(item: Pick<VisitedItem, 'type' | 'id'>): string {
   return `${item.type}:${item.id}`
@@ -63,4 +61,67 @@ export function formatVisitedTime(ts: number, now = Date.now()): string {
 
   const date = new Date(ts)
   return `${date.getMonth() + 1}月${date.getDate()}日`
+}
+
+export interface VisitedFilter {
+  /** 关键词：匹配标题与摘要，忽略大小写 */
+  q?: string
+  /** 类型筛选，`all` 或缺省表示不过滤 */
+  type?: VisitedType | 'all'
+}
+
+/** /history 的客户端筛选：类型 + 关键词，保持原有倒序 */
+export function filterVisited(
+  items: VisitedItem[],
+  { q, type = 'all' }: VisitedFilter = {},
+): VisitedItem[] {
+  const keyword = q?.trim().toLowerCase() ?? ''
+  return items.filter((item) => {
+    if (type !== 'all' && item.type !== type)
+      return false
+    if (!keyword)
+      return true
+    return `${item.title} ${item.snippet ?? ''}`.toLowerCase().includes(keyword)
+  })
+}
+
+export interface VisitedGroup {
+  label: '今天' | '昨天' | '更早'
+  items: VisitedItem[]
+}
+
+function startOfDay(date: Date): number {
+  const copy = new Date(date)
+  copy.setHours(0, 0, 0, 0)
+  return copy.getTime()
+}
+
+/** 按本地日期把历史分成「今天 / 昨天 / 更早」，空分组不返回 */
+export function groupVisitedByDay(
+  items: VisitedItem[],
+  now = Date.now(),
+): VisitedGroup[] {
+  const today = startOfDay(new Date(now))
+  const yesterdayDate = new Date(today)
+  yesterdayDate.setDate(yesterdayDate.getDate() - 1)
+  const yesterday = yesterdayDate.getTime()
+
+  const buckets: Record<VisitedGroup['label'], VisitedItem[]> = {
+    今天: [],
+    昨天: [],
+    更早: [],
+  }
+
+  for (const item of items) {
+    const bucket = item.ts >= today
+      ? '今天'
+      : item.ts >= yesterday
+        ? '昨天'
+        : '更早'
+    buckets[bucket].push(item)
+  }
+
+  return (Object.keys(buckets) as VisitedGroup['label'][])
+    .filter(label => buckets[label].length > 0)
+    .map(label => ({ label, items: buckets[label] }))
 }
