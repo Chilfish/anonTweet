@@ -26,7 +26,7 @@ export function PageHeader() {
         </p>
       </div>
 
-      <div className="max-w-2xl mx-auto space-y-2 text-muted-foreground">
+      <div className="max-w-2xl mx-auto space-y-2 px-4 text-muted-foreground sm:px-0">
         <p>
           一个简洁美观的推文 / Instagram 查看与媒体下载器。
         </p>

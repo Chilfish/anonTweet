@@ -9,7 +9,14 @@ import { BackButton } from '~/components/translation/BackButton'
 import { MyTweet } from '~/components/tweet/Tweet'
 import { Button } from '~/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible'
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '~/components/ui/empty'
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '~/components/ui/empty'
 import { Form } from '~/components/ui/form'
 import {
   InputGroup,
@@ -87,18 +94,25 @@ function dedupeTweets(tweets: EnrichedTweet[]): EnrichedTweet[] {
 }
 
 /** 高级搜索语法快捷插入（X SearchTimeline rawQuery 原样透传） */
-const ADVANCED_OPERATORS: { label: string, insert: string, hint?: string }[] = [
-  { label: '来自 @', insert: 'from:' },
-  { label: '发给 @', insert: 'to:' },
-  { label: '话题 #', insert: '#' },
-  { label: '最低赞', insert: 'min_faves:' },
-  { label: '最低转', insert: 'min_retweets:' },
-  { label: '日期起', insert: 'since:' },
-  { label: '日期止', insert: 'until:' },
-  { label: '语言', insert: 'lang:' },
-  { label: '排除词', insert: '-', hint: '如 -广告' },
-  { label: '精确短语', insert: '"', hint: '配 "…"' },
+const ADVANCED_OPERATORS: { syntax: string, label: string, insert: string }[] = [
+  { syntax: 'from:', label: '来自指定用户', insert: 'from:' },
+  { syntax: 'to:', label: '发给指定用户', insert: 'to:' },
+  { syntax: '#', label: '话题标签', insert: '#' },
+  { syntax: 'lang:', label: '语言，如 ja', insert: 'lang:' },
+  { syntax: 'min_faves:', label: '最低点赞数', insert: 'min_faves:' },
+  { syntax: 'min_retweets:', label: '最低转发数', insert: 'min_retweets:' },
+  { syntax: 'since:', label: '起始日期', insert: 'since:' },
+  { syntax: 'until:', label: '截止日期', insert: 'until:' },
+  { syntax: '-', label: '排除词，如 -广告', insert: '-' },
+  { syntax: '"…"', label: '精确短语', insert: '"' },
 ]
+
+/** 空态示例：只作语法模板，点击仅填入输入框 */
+const EXAMPLE_QUERIES = [
+  { query: 'from:GeminiApp', label: '只看某个账号' },
+  { query: '#原神', label: '按话题找' },
+  { query: 'lang:ja', label: '限定语言' },
+] as const
 
 export default function SearchPage() {
   const navigate = useNavigate()
@@ -113,6 +127,7 @@ export default function SearchPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [reloadKey, setReloadKey] = useState(0)
   // 结果列表容器：页级操作条的截图捕获节点（不含操作条/加载更多按钮）
   const listRef = useRef<HTMLDivElement | null>(null)
 
@@ -169,7 +184,7 @@ export default function SearchPage() {
     return () => {
       cancelled = true
     }
-  }, [q, type])
+  }, [q, type, reloadKey])
 
   const loadMore = async () => {
     if (!nextCursor || isLoadingMore)
@@ -225,86 +240,94 @@ export default function SearchPage() {
       : '/search')
   }
 
-  return (
-    <div className="flex flex-col gap-4 px-1 w-full">
-      <div className="flex items-center w-full gap-4">
-        <BackButton />
-        <Form
-          className="flex-1"
-          onSubmit={onSubmit}
-        >
-          <InputGroup>
-            <InputGroupAddon align="inline-start">
-              <SearchIcon className="size-4 text-muted-foreground" />
-            </InputGroupAddon>
-            <InputGroupInput
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              placeholder="搜索 Twitter/X 推文..."
-              aria-label="搜索关键词"
-              autoComplete="off"
-              enterKeyHint="search"
-            />
-            <InputGroupAddon align="inline-end">
-              <Button
-                type="submit"
-                variant="ghost"
-                size="icon-sm"
-                aria-label="搜索"
-                className="text-muted-foreground"
-              >
-                <ArrowRightIcon className="size-4" />
-              </Button>
-            </InputGroupAddon>
-          </InputGroup>
-        </Form>
-      </div>
+  const resultCountLabel = nextCursor
+    ? `已加载 ${tweets.length} 条`
+    : `共 ${tweets.length} 条`
 
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <ToggleGroup
-          value={[type]}
-          onValueChange={(value) => {
-            const next = value[0]
-            if (next === 'top' || next === 'latest')
-              switchType(next)
-          }}
-          variant="outline"
-          size="sm"
-        >
-          <ToggleGroupItem value="top">热门</ToggleGroupItem>
-          <ToggleGroupItem value="latest">最新</ToggleGroupItem>
-        </ToggleGroup>
+  return (
+    <div className="mx-auto flex w-full min-w-0 max-w-[600px] flex-col gap-4 px-3 sm:px-0">
+      <div className="rounded-2xl border border-border/60 bg-card p-3 sm:p-4">
+        <div className="flex items-center gap-2">
+          <BackButton />
+          <Form
+            className="min-w-0 flex-1"
+            onSubmit={onSubmit}
+          >
+            <InputGroup>
+              <InputGroupAddon align="inline-start">
+                <SearchIcon className="size-4 text-muted-foreground" />
+              </InputGroupAddon>
+              <InputGroupInput
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                placeholder="搜索推文、话题或 @用户"
+                aria-label="搜索关键词"
+                autoComplete="off"
+                enterKeyHint="search"
+              />
+              <InputGroupAddon align="inline-end">
+                <Button
+                  type="submit"
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label="搜索"
+                  className="text-muted-foreground"
+                >
+                  <ArrowRightIcon className="size-4" />
+                </Button>
+              </InputGroupAddon>
+            </InputGroup>
+          </Form>
+        </div>
 
         <Collapsible
           open={showAdvanced}
           onOpenChange={setShowAdvanced}
         >
-          <CollapsibleTrigger
-            render={
-              <Button variant="ghost" size="sm" className="text-muted-foreground" />
-            }
-          >
-            <ChevronDownIcon
-              className={showAdvanced ? 'rotate-180 transition-transform duration-200 ease-out' : 'transition-transform duration-200 ease-out'}
-            />
-            高级搜索
-          </CollapsibleTrigger>
-          <CollapsibleContent className="flex flex-wrap items-center justify-center gap-1.5 p-3 rounded-lg border border-border/60 bg-card/60 mt-2">
-            {ADVANCED_OPERATORS.map(op => (
-              <Button
-                key={op.label}
-                type="button"
-                variant="outline"
-                size="xs"
-                className="font-mono"
-                title={op.hint ?? `${op.insert}${op.label.includes('@')
-                  ? '用户名'
-                  : '…'}`}
-                onClick={() => insertOperator(op.insert)}
-              >
-                {op.label}
-              </Button>
-            ))}
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+            <ToggleGroup
+              value={[type]}
+              onValueChange={(value) => {
+                const next = value[0]
+                if (next === 'top' || next === 'latest')
+                  switchType(next)
+              }}
+              variant="outline"
+              size="sm"
+            >
+              <ToggleGroupItem value="top">热门</ToggleGroupItem>
+              <ToggleGroupItem value="latest">最新</ToggleGroupItem>
+            </ToggleGroup>
+
+            <CollapsibleTrigger
+              render={
+                <Button variant="ghost" size="sm" className="text-muted-foreground" />
+              }
+            >
+              <ChevronDownIcon
+                className={showAdvanced ? 'rotate-180 transition-transform duration-200 ease-out' : 'transition-transform duration-200 ease-out'}
+              />
+              高级搜索
+            </CollapsibleTrigger>
+          </div>
+
+          <CollapsibleContent className="mt-3 border-t border-border/60 pt-3">
+            <p className="text-xs text-muted-foreground">
+              点击插入语法，再补上用户名、日期或数字。
+            </p>
+            <div className="mt-2 grid grid-cols-2 gap-1">
+              {ADVANCED_OPERATORS.map(op => (
+                <button
+                  key={op.syntax}
+                  type="button"
+                  onClick={() => insertOperator(op.insert)}
+                  className="flex min-w-0 flex-col gap-0.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-[0.99]"
+                >
+                  <span className="font-mono text-[13px] text-foreground">{op.syntax}</span>
+                  <span className="text-[11px] leading-snug text-muted-foreground">{op.label}</span>
+                </button>
+              ))}
+            </div>
           </CollapsibleContent>
         </Collapsible>
       </div>
@@ -332,15 +355,16 @@ export default function SearchPage() {
               </EmptyDescription>
             </EmptyHeader>
             {hasHistoryHydrated && recentQueries.length === 0 && (
-              <div className="mt-3 flex flex-wrap justify-center gap-1.5">
-                {['from:GeminiApp', '#原神', 'lang:ja'].map(example => (
+              <div className="mt-3 flex w-full max-w-sm flex-col gap-1">
+                {EXAMPLE_QUERIES.map(example => (
                   <button
-                    key={example}
+                    key={example.query}
                     type="button"
-                    onClick={() => insertOperator(example)}
-                    className="rounded-full border border-border/60 px-2.5 py-1 font-mono text-[11px] text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+                    onClick={() => insertOperator(example.query)}
+                    className="flex min-w-0 items-center justify-between gap-3 rounded-lg border border-border/60 px-2.5 py-1.5 text-left transition-colors hover:bg-muted/50 active:scale-[0.99]"
                   >
-                    {example}
+                    <span className="min-w-0 font-mono text-[11px] text-foreground">{example.query}</span>
+                    <span className="shrink-0 text-[11px] text-muted-foreground">{example.label}</span>
                   </button>
                 ))}
               </div>
@@ -350,7 +374,8 @@ export default function SearchPage() {
       )}
 
       {isLoading && (
-        <div className="w-full max-w-2xl">
+        <div className="flex w-full flex-col gap-3">
+          <TweetSkeleton />
           <TweetSkeleton />
         </div>
       )}
@@ -366,6 +391,15 @@ export default function SearchPage() {
               {error}
             </EmptyDescription>
           </EmptyHeader>
+          <EmptyContent>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setReloadKey(key => key + 1)}
+            >
+              重试
+            </Button>
+          </EmptyContent>
         </Empty>
       )}
 
@@ -382,11 +416,27 @@ export default function SearchPage() {
               」匹配的结果为空，检查高级语法拼写（from: / until: / min_faves:）
             </EmptyDescription>
           </EmptyHeader>
+          <EmptyContent>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => navigate('/search')}
+            >
+              清空关键词
+            </Button>
+          </EmptyContent>
         </Empty>
       )}
 
       {!isLoading && !error && tweets.length > 0 && (
         <>
+          <div className="flex items-baseline justify-between gap-2 border-b border-border/60 pb-2">
+            <h2 className="text-sm font-semibold">结果</h2>
+            <span className="text-xs tabular-nums text-muted-foreground">
+              {resultCountLabel}
+            </span>
+          </div>
+
           <SearchToolbar
             tweets={tweets}
             listRef={listRef}
@@ -394,7 +444,7 @@ export default function SearchPage() {
 
           <div
             ref={listRef}
-            className="flex flex-col gap-3 items-center justify-center mx-auto w-fit"
+            className="flex w-full flex-col items-center gap-3"
           >
             {tweets.map(tweet => (
               <MemoizedTweetItem

@@ -140,10 +140,10 @@ export function SearchToolbar({ tweets, listRef }: SearchToolbarProps) {
   }
 
   return (
-    <div className="flex w-full max-w-[600px] items-center justify-between gap-2 mx-auto">
+    <div className="flex w-full max-w-[600px] flex-wrap items-center justify-between gap-2 mx-auto">
       <ToggleTransButton size="sm" />
 
-      <div className="flex items-center gap-1.5">
+      <div className="flex min-w-0 flex-wrap items-center gap-1.5">
         {isSelectionMode
           ? (
               <>
