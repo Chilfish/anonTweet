@@ -1,6 +1,6 @@
 # Instagram 集成验收标准
 
-> 版本：1.5 | 日期：2026-11-19（v1.5：新增 AC-IG-010 单图占位比例；v1.4：AC-IG-003 单条 story id 改为 canonical `story~{user}~{media}`，
+> 版本：1.6 | 日期：2026-11-19（v1.6：新增 AC-IG-011 手动翻译绕过中文检测；v1.5：新增 AC-IG-010 单图占位比例；v1.4：AC-IG-003 单条 story id 改为 canonical `story~{user}~{media}`，
 > 列表型 tray/精选集见 [AC-ig-story.md](AC-ig-story.md)；v1.3：Story 接入 AC 单列；v1.2：F8 去 fixture 自证）
 > 对应 Postmortem：007 (Instagram Integration)
 > 关联 Verifier：`test/acceptance/ac-ig.spec.ts`（离线）/ `test/integration/api.ig.spec.ts`（集成）
@@ -142,7 +142,24 @@
 
 ---
 
-## 总计：10 条 AC
+## AC-IG-011：手动翻译不被「已是中文」的自动检测拦截
+
+- **输入**：`post-with-media.json` 的 caption 改为纯汉字日文 `本日発売`（汉字比例 100%）
+- **验证对象**：`translateIGCaption()`（LLM 边界打桩）+ `isChinese()`
+- **背景**：`isChinese()` 只看 CJK 汉字比例，会把「本日発売 / 新曲公開」这类纯汉字日文
+  判成中文；`translateIGCaption` 因此直接返回空串、一次请求都不发，调用方再把空结果
+  当成失败（`Translation returned empty`）——用户手动点「AI 翻译」时看到的就是这个
+- **预期输出**：显式触发（`force`）时跳过自动检测并真实调用模型；自动路径保持跳过
+- **Pass 条件**：
+  - 不传 `force`：纯汉字日文返回 `''`，且 `generateText` 未被调用
+  - 传 `force: true`：跳过检测并调用 `generateText`，返回译文
+  - `isChinese('東京公演決定です') === false`（含假名即非中文）、`isChinese('这是中文说明') === true`
+- **备注**：`requestIGTranslation`（弹窗）与 `/api/ai-translation`（`type: 'ins'`）都透传
+  `force`；`/api/ig/translate/:id` 是显式翻译接口，缺省 `force = true`
+
+---
+
+## 总计：11 条 AC
 
 | AC        | 分类        | 依赖 INS_COOKIES   | 依赖 AI       | 依赖 server |
 | --------- | ----------- | ------------------ | ------------- | ----------- |
@@ -156,3 +173,4 @@
 | AC-IG-008 | 集成        | 是                 | 否            | 是          |
 | AC-IG-009 | 集成        | 否（需无 cookies） | 否            | 是          |
 | AC-IG-010 | 渲染/离线   | 否                 | 否            | 否          |
+| AC-IG-011 | 纯函数/离线 | 否                 | 否（打桩）    | 否          |

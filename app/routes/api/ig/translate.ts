@@ -49,6 +49,8 @@ export async function action({ request, params }: Route.ActionArgs) {
     translationGlossary,
     // 手动翻译：直接写入，跳过 AI
     manualTranslation,
+    // 显式翻译接口：默认不因「已是中文」的自动检测而跳过（纯汉字日文会被误判）
+    force = true,
   } = body
 
   // ─── 手动翻译分支 ─────────────────────────
@@ -110,6 +112,7 @@ export async function action({ request, params }: Route.ActionArgs) {
       modelInstance,
       thinkingLevel,
       translationGlossary,
+      force,
     })
 
     if (!translated) {

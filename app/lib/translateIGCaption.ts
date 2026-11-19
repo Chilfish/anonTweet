@@ -7,6 +7,11 @@ import { models } from '~/lib/constants'
 import { obsLog, suffix } from '~/lib/obs-log'
 import { getProviderStrategy, getThinkingConfig } from '~/lib/providers'
 
+/** 平假名 / 片假名：出现假名即日文，不可能是中文 */
+const KANA_RE = /[\u3040-\u30FF]/
+/** CJK 统一表意文字（中日共用的汉字） */
+const CJK_RE = /[\u4E00-\u9FFF]/g
+
 /**
  * IG Caption 翻译参数（精简版 — 只传真正需要的）
  */
@@ -21,6 +26,12 @@ export interface TranslateIGCaptionArgs {
   modelName?: string
   translationGlossary?: string
   thinkingLevel?: ThinkingLevel
+  /**
+   * 用户主动点击「AI 翻译」：跳过「已是中文」的自动跳过。
+   *
+   * 自动检测无法区分纯汉字日文（本日発売 / 新曲公開），手动触发时以用户意图为准。
+   */
+  force?: boolean
 }
 
 /**
@@ -33,7 +44,7 @@ export interface TranslateIGCaptionArgs {
  * - 大量换行排版
  */
 export async function translateIGCaption(args: TranslateIGCaptionArgs): Promise<string> {
-  const { post, modelInstance, translationGlossary, modelName, thinkingLevel } = args
+  const { post, modelInstance, translationGlossary, modelName, thinkingLevel, force } = args
   const startedAt = Date.now()
   let attempts = 0
 
@@ -48,8 +59,9 @@ export async function translateIGCaption(args: TranslateIGCaptionArgs): Promise<
     return ''
   }
 
-  // 检测中文 — 如果 50%+ 是中文，跳过翻译（返回空，由调用方保持原文显示）
-  if (isChinese(text)) {
+  // 检测中文 — 如果 50%+ 是中文，跳过翻译（返回空，由调用方保持原文显示）。
+  // 手动触发（force）不跳过：纯汉字日文会被此检测误判为中文。
+  if (!force && isChinese(text)) {
     obsLog('ai.translate.ig', {
       ok: true,
       skipped: 'chinese',
@@ -194,11 +206,16 @@ Return only the Simplified Chinese translation of the caption above.`
 
 /**
  * 检测文本是否主要为中文（用于跳过翻译）。
+ *
+ * 含假名即判定为日文：CJK 统一表意文字被中日共用，只看汉字比例会把
+ * 「本日発売」这类纯汉字日文误判成中文，导致跳过翻译且不发请求。
  */
 export function isChinese(text: string): boolean {
   if (!text)
     return false
-  const chineseChars = text.match(/[\u4E00-\u9FFF]/g)
+  if (KANA_RE.test(text))
+    return false
+  const chineseChars = text.match(CJK_RE)
   return chineseChars
     ? chineseChars.length / text.length > 0.5
     : false

@@ -225,9 +225,13 @@ export function requestIGTranslation(
       modelName: payload.model,
       thinkingLevel: payload.thinkingLevel,
       translationGlossary: payload.translationGlossary,
+      force: payload.force,
     })
-    if (!captionTranslation)
-      throw new Error('Translation returned empty')
+    if (!captionTranslation) {
+      throw new Error(
+        `Translation returned empty (${payload.provider}/${payload.model})`,
+      )
+    }
     return { captionTranslation }
   })
 }

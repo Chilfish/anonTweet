@@ -1,4 +1,5 @@
 import type { IGPost } from '~/types'
+import { generateText } from 'ai'
 /**
  * test/acceptance/ac-ig.spec.ts
  *
@@ -14,7 +15,7 @@ import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 import { IGMediaGrid } from '~/components/ins/IGMediaGrid'
-import { translateIGCaption } from '~/lib/translateIGCaption'
+import { isChinese, translateIGCaption } from '~/lib/translateIGCaption'
 import { extractIGId, formatIGTime } from '~/lib/utils'
 import { loadFixture } from '../helpers/load-fixture'
 
@@ -101,6 +102,30 @@ describe('AC-IG Instagram offline acceptance', () => {
     )
     expect(gridHtml).not.toMatch(ASPECT_RATIO_ANY)
     expect(gridHtml).toContain('aspect-square')
+  })
+
+  it('AC-IG-011: force translation bypasses the Chinese auto-skip for kanji-only Japanese', async () => {
+    const post = loadFixture<IGPost>('ig-posts/post-with-media.json')
+    // 纯汉字日文：汉字比例 100%，旧检测会误判为中文
+    const kanjiOnly = { ...post, description: '本日発売' }
+    const mockedGenerate = vi.mocked(generateText)
+    mockedGenerate.mockClear()
+
+    // 自动路径：被判为中文 → 返回空串，且不发出模型请求
+    expect(await translateIGCaption({ post: kanjiOnly, modelInstance: {} as never })).toBe('')
+    expect(mockedGenerate).not.toHaveBeenCalled()
+
+    // 手动触发：force 跳过检测，真实调用模型（模拟返回中文译文）
+    expect(await translateIGCaption({
+      post: kanjiOnly,
+      modelInstance: {} as never,
+      force: true,
+    })).toBe('这是翻译结果')
+    expect(mockedGenerate).toHaveBeenCalledTimes(1)
+
+    // 含假名的日文不再被判为中文
+    expect(isChinese('東京公演決定です')).toBe(false)
+    expect(isChinese('这是中文说明')).toBe(true)
   })
 
   it('AC-IG-006: translateIGCaption returns a translation without mutating the post', async () => {
