@@ -1,6 +1,6 @@
+import { buildXShellHeaders, isUsableXDocument, X_SHELL_URLS } from '@chilfish/tweet'
 import { parseHTML } from 'linkedom'
 import { describe, expect, it } from 'vitest'
-import { buildXShellHeaders, isUsableXDocument, X_SHELL_URLS } from '~/lib/rettiwt-api/services/public/FetcherService'
 
 /**
  * test/unit/rettiwt-transaction-document.spec.ts

@@ -2,16 +2,16 @@ import type { EnrichedTweet } from '~/types'
 import { describe, expect, it, vi } from 'vitest'
 import { getTweets } from '~/lib/service/getTweet'
 
-function makeTweet(partial: Partial<EnrichedTweet> & Pick<EnrichedTweet, 'id_str'>): EnrichedTweet {
-  const { id_str, ...rest } = partial
+function makeTweet(partial: Partial<EnrichedTweet> & Pick<EnrichedTweet, 'id'>): EnrichedTweet {
+  const { id, ...rest } = partial
   return {
-    id_str,
+    id,
     text: rest.text ?? '',
     lang: rest.lang ?? 'en',
     created_at: rest.created_at ?? '',
     user: (rest.user ?? {
       screen_name: 'u',
-      id_str: 'u',
+      id: 'u',
       name: 'u',
       profile_image_url_https: '',
     }) as any,
@@ -22,14 +22,14 @@ function makeTweet(partial: Partial<EnrichedTweet> & Pick<EnrichedTweet, 'id_str
 
 describe('getTweets', () => {
   it('fetches parent chain and attaches quoted tweet', async () => {
-    const t1 = makeTweet({ id_str: '0001', text: 'root' })
+    const t1 = makeTweet({ id: '0001', text: 'root' })
     const t2 = makeTweet({
-      id_str: '0002',
+      id: '0002',
       text: 'reply',
       in_reply_to_status_id_str: '0001',
-      quoted_tweet_id: '0099',
+      quotedTweetId: '0099',
     } as any)
-    const q = makeTweet({ id_str: '0099', text: 'quoted' })
+    const q = makeTweet({ id: '0099', text: 'quoted' })
 
     const getter = vi.fn(async (id: string) => {
       if (id === '0002')
@@ -46,8 +46,8 @@ describe('getTweets', () => {
     expect(getter).toHaveBeenCalledWith('0002')
     expect(getter).toHaveBeenCalledWith('0001')
     expect(getter).toHaveBeenCalledWith('0099')
-    expect(t2.quotedTweet?.id_str).toBe('0099')
-    expect(tweets.map(t => t.id_str)).toEqual(['0001', '0002'])
+    expect(t2.quotedTweet?.id).toBe('0099')
+    expect(tweets.map(t => t.id)).toEqual(['0001', '0002'])
   })
 
   it('returns empty list when getter resolves null (error branch, getTweet.ts:10)', async () => {
@@ -57,7 +57,7 @@ describe('getTweets', () => {
   })
 
   it('does not attach quotedTweet when quoted getter returns null', async () => {
-    const t = makeTweet({ id_str: '0001', text: 'root', quoted_tweet_id: '0099' } as any)
+    const t = makeTweet({ id: '0001', text: 'root', quotedTweetId: '0099' } as any)
     const getter = vi.fn(async (id: string) => (id === '0001'
       ? t
       : null))
@@ -65,17 +65,17 @@ describe('getTweets', () => {
     const tweets = await getTweets('0001', getter as any)
 
     expect(t.quotedTweet).toBeUndefined()
-    expect(tweets.map(x => x.id_str)).toEqual(['0001'])
+    expect(tweets.map(x => x.id)).toEqual(['0001'])
   })
 
   it('returns only root when parent getter returns null', async () => {
-    const t = makeTweet({ id_str: '0001', text: 'root', in_reply_to_status_id_str: '0000' } as any)
+    const t = makeTweet({ id: '0001', text: 'root', in_reply_to_status_id_str: '0000' } as any)
     const getter = vi.fn(async (id: string) => (id === '0001'
       ? t
       : null))
 
     const tweets = await getTweets('0001', getter as any)
 
-    expect(tweets.map(x => x.id_str)).toEqual(['0001'])
+    expect(tweets.map(x => x.id)).toEqual(['0001'])
   })
 })

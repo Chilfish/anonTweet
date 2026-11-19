@@ -24,7 +24,7 @@ import {
 
 function mkTweet(overrides: Record<string, unknown> = {}): EnrichedTweet {
   return {
-    id_str: '1234567890',
+    id: '1234567890',
     url: 'https://x.com/elonmusk/status/1234567890',
     text: 'Hello world',
     user: { name: 'Elon Musk', screen_name: 'elonmusk' },

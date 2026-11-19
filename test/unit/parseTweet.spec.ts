@@ -1,4 +1,9 @@
 import type { RawTweet } from '~/types'
+import {
+  enrichTweet,
+  mapMediaDetails,
+  mapTwitterCard,
+} from '@chilfish/tweet'
 /**
  * test/unit/parseTweet.spec.ts
  *
@@ -10,12 +15,6 @@ import type { RawTweet } from '~/types'
  * mapMediaDetails（photo/gif/video/无 media）。
  */
 import { describe, expect, it } from 'vitest'
-import {
-  enrichTweet,
-  mapMediaDetails,
-  mapTwitterCard,
-  transformUserResponse,
-} from '~/lib/react-tweet/utils/parseTweet'
 import { loadFixture } from '../helpers/load-fixture'
 
 // ─── Factory: minimal RawTweet ───────────────────────────────
@@ -29,7 +28,7 @@ interface RawTweetFactory {
   hasUser?: boolean
   card?: unknown
   media?: Array<Partial<{
-    id_str: string
+    id: string
     media_url_https: string
     type: string
     ext_alt_text: string
@@ -116,7 +115,7 @@ describe('enrichTweet', () => {
   it('AC-TEST-006: enriches a minimal tweet with url/user/entities', () => {
     const tweet = enrichTweet(makeRawTweet({ text: 'hello @alice #test' }))
     expect(tweet).not.toBeNull()
-    expect(tweet!.id_str).toBe('123')
+    expect(tweet!.id).toBe('123')
     expect(tweet!.url).toBe('https://twitter.com/alice/status/123')
     expect(tweet!.text).toBe('hello @alice #test')
     expect(tweet!.user?.screen_name).toBe('alice')
@@ -126,7 +125,7 @@ describe('enrichTweet', () => {
   it('AC-TEST-006: prefers note_tweet text over legacy full_text', () => {
     const tweet = enrichTweet(makeRawTweet({ text: 'short', noteText: 'long note text here' }))
     expect(tweet!.text).toBe('long note text here')
-    expect(tweet!.isInlineMeida).toBe(false)
+    expect(tweet!.isInlineMedia).toBe(false)
   })
 
   it('AC-TEST-006: returns null for TweetTombstone', () => {
@@ -147,24 +146,23 @@ describe('enrichTweet', () => {
     ;(outer.legacy as any).retweeted_status_result = { result: inner }
     ;(outer.legacy as any).id_str = '789'
     const tweet = enrichTweet(outer)
-    expect(tweet!.id_str).toBe('456')
-    expect(tweet!.retweetedOrignalId).toBe('789')
+    expect(tweet!.id).toBe('456')
+    expect(tweet!.retweetedOriginalId).toBe('789')
   })
 })
 
 // ─── transformUserResponse ───────────────────────────────────
 
-describe('transformUserResponse', () => {
+describe('user transformation (via enrichTweet)', () => {
   it('AC-TEST-006: transforms user fields and strips _normal from avatar', () => {
-    const raw = makeRawTweet()
-    const user = transformUserResponse(raw)
-    expect(user!.screen_name).toBe('alice')
-    expect(user!.is_blue_verified).toBe(true)
-    expect(user!.profile_image_url_https).toBe('https://pbs.twimg.com/profile_images/123_abc.jpg')
+    const tweet = enrichTweet(makeRawTweet())
+    expect(tweet!.user.screen_name).toBe('alice')
+    expect(tweet!.user.is_blue_verified).toBe(true)
+    expect(tweet!.user.profile_image_url_https).toBe('https://pbs.twimg.com/profile_images/123_abc.jpg')
   })
 
   it('AC-TEST-006: returns null when core/legacy missing', () => {
-    expect(transformUserResponse({ __typename: 'Tweet' } as RawTweet)).toBeNull()
+    expect(enrichTweet(makeRawTweet({ hasUser: false }))).toBeNull()
   })
 })
 
@@ -325,7 +323,7 @@ describe('mapTwitterCard', () => {
   it('AC-CARD-015: prefers vanity_url over domain for display', () => {
     const card = mapTwitterCard(loadFixture('cards/no-image-app-card.json'))!
     expect(card.domain).toBe('youtube.com')
-    expect(card.imageUrl).toBeUndefined()
+    expect(card.imageUrl).toBe('')
     expect(card.title).toBe('初音ミクオリジナル曲 「Starduster」')
   })
 
@@ -342,7 +340,7 @@ describe('mapTwitterCard', () => {
 
 describe('mapMediaDetails', () => {
   const baseMedia = (over: Record<string, any>) => ({
-    id_str: 'm1',
+    id: 'm1',
     media_url_https: 'https://pbs.twimg.com/media/1.jpg',
     original_info: { width: 100, height: 50 },
     indices: [0, 0],

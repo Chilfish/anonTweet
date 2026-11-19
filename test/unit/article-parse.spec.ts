@@ -1,4 +1,4 @@
-import type { RawArticleContentState, RawArticleMedia } from '~/lib/rettiwt-api/types/raw/tweet/Details'
+import type { RawArticleContentState, RawArticleMedia } from '@chilfish/tweet/internals'
 import type { ArticleBlock, ArticleRun } from '~/types'
 /**
  * test/unit/article-parse.spec.ts

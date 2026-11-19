@@ -1,4 +1,6 @@
-import type { ITweetSearchResponse } from '~/lib/rettiwt-api/types/raw/tweet/Search'
+import type { ITweetSearchResponse } from '@chilfish/tweet/internals'
+import { parseSearchTimeline } from '@chilfish/tweet'
+import { TweetFilter } from '@chilfish/tweet/internals'
 /**
  * test/unit/search.spec.ts
  *
@@ -6,8 +8,6 @@ import type { ITweetSearchResponse } from '~/lib/rettiwt-api/types/raw/tweet/Sea
  * 解析器零测试是 postmortem #001 的最高危雷区 → 搜索解析必须直接单测。
  */
 import { describe, expect, it } from 'vitest'
-import { parseSearchTimeline } from '~/lib/react-tweet/utils/get-tweet'
-import { TweetFilter } from '~/lib/rettiwt-api/models/args/FetchArgs'
 import { loadFixture } from '../helpers/load-fixture'
 
 const fixture = loadFixture<ITweetSearchResponse>('search/search-tweets.json')

@@ -1,11 +1,11 @@
 import type { EnrichedTweet } from '~/types'
+import { resolveArticleLink } from '@chilfish/tweet'
 import { ImageIcon } from 'lucide-react'
 import { forwardRef, useMemo } from 'react'
 import { TranslationEditor } from '~/components/translation/TranslationEditor'
 import { Button } from '~/components/ui/button'
 import { useVisionLogic } from '~/hooks/use-vision-logic'
 import { TweetHeader, TweetMedia } from '~/lib/react-tweet'
-import { resolveArticleLink } from '~/lib/react-tweet/utils/article'
 import { useAppConfigStore } from '~/lib/stores/appConfig'
 import {
   useScreenshoting,
@@ -34,7 +34,7 @@ function TweetMediaSection({ tweet }: { tweet: EnrichedTweet }) {
 
   const tweetWithMediaConfig = useMemo(() => ({
     ...tweet,
-    isInlineMeida: isInlineMedia || tweet.isInlineMeida,
+    isInlineMedia: isInlineMedia || tweet.isInlineMedia,
   }), [tweet, isInlineMedia])
 
   if (!(tweet.mediaDetails || []).length)
@@ -64,7 +64,7 @@ function VisionEntryButton({
   const enableAIVision = useAppConfigStore(s => s.enableAIVision)
   const showVisionEntry = useAppConfigStore(s => s.showVisionEntry)
   const isScreenshoting = useScreenshoting()
-  const visionOverride = useVisionVisibility(tweet.id_str)
+  const visionOverride = useVisionVisibility(tweet.id)
   const { setVisionVisibility } = useTranslationActions()
 
   const hasPhotos = (tweet.mediaDetails ?? []).some(m => m.type === 'photo')
@@ -87,7 +87,7 @@ function VisionEntryButton({
       className="bg-transparent"
       title="添加 AI 图片描述"
       onClick={() => {
-        setVisionVisibility(tweet.id_str, true)
+        setVisionVisibility(tweet.id, true)
         editor.initializeEditor()
       }}
     >
@@ -149,7 +149,7 @@ export const TweetNode = forwardRef<HTMLDivElement, TweetNodeProps>(({
 
         {tweet.poll && <PollCardView poll={tweet.poll} />}
 
-        {article && <TweetArticleCard article={article} tweetId={tweet.id_str} />}
+        {article && <TweetArticleCard article={article} tweetId={tweet.id} />}
 
         <TweetMediaSection tweet={tweet} />
 

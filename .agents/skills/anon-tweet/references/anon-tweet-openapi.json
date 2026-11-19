@@ -1485,9 +1485,9 @@
       },
       "TweetUser": {
         "type": "object",
-        "description": "推文作者（app/types/user.ts TweetUser）",
+        "description": "推文作者（@chilfish/tweet TweetUser）",
         "required": [
-          "id_str",
+          "id",
           "name",
           "profile_image_url_https",
           "profile_image_shape",
@@ -1496,7 +1496,7 @@
           "is_blue_verified"
         ],
         "properties": {
-          "id_str": {
+          "id": {
             "type": "string"
           },
           "name": {
@@ -1685,12 +1685,12 @@
       },
       "EnrichedTweet": {
         "type": "object",
-        "description": "enrich 后的推文（app/types/index.ts EnrichedTweet），字段类型与媒体验证为 open schema。",
+        "description": "enrich 后的推文（@chilfish/tweet EnrichedTweet + app 扩展字段），字段类型与媒体验证为 open schema。",
         "required": [
           "lang",
           "created_at",
           "entities",
-          "id_str",
+          "id",
           "text",
           "user",
           "url"
@@ -1711,7 +1711,7 @@
             "format": "date-time",
             "description": "ISO 8601"
           },
-          "id_str": {
+          "id": {
             "type": "string",
             "description": "推文唯一 ID"
           },
@@ -1746,7 +1746,7 @@
             },
             "description": "AI 视觉描述结果"
           },
-          "quoted_tweet_id": {
+          "quotedTweetId": {
             "type": "string",
             "description": "引用推文 ID"
           },
@@ -2196,7 +2196,7 @@
       },
       "RawUser": {
         "type": "object",
-        "description": "用户资料（app/lib/rettiwt-api/types/data/User.ts IUser）",
+        "description": "用户资料（@chilfish/tweet/internals UserData）",
         "required": [
           "createdAt",
           "followersCount",
@@ -2205,6 +2205,7 @@
           "id",
           "isVerified",
           "likeCount",
+          "pinnedTweets",
           "profileImage",
           "statusesCount",
           "userName"
@@ -2248,8 +2249,12 @@
           "location": {
             "type": "string"
           },
-          "pinnedTweet": {
-            "type": "string"
+          "pinnedTweets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "置顶推文 ID 列表"
           },
           "profileBanner": {
             "type": "string",

@@ -14,7 +14,7 @@ describe('/api/ai-vision', () => {
 
     const res = await action({
       request: jsonRequest({
-        tweet: { id_str: '1', text: 'x' },
+        tweet: { id: '1', text: 'x' },
         mediaIndexes: [0],
         mode: 'describe',
       }),
@@ -41,7 +41,7 @@ describe('/api/ai-vision', () => {
 
     const res = await action({
       request: jsonRequest({
-        tweet: { id_str: '1', text: 'no photo', mediaDetails: [] },
+        tweet: { id: '1', text: 'no photo', mediaDetails: [] },
         mediaIndexes: [0],
         mode: 'describe',
         apiKey: 'bogus-key',

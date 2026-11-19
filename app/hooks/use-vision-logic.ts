@@ -26,7 +26,7 @@ import { applyVisionEdits, mergeVisionInfo } from '~/lib/vision/parse'
  * Postmortem #002：合并/保存逻辑全部下沉 lib/vision/parse.ts 纯函数。
  */
 export function useVisionLogic(originalTweet: EnrichedTweet) {
-  const tweetId = originalTweet.id_str
+  const tweetId = originalTweet.id
   const photoIndexes = (originalTweet.mediaDetails ?? [])
     .map((m, i) => ({ m, i }))
     .filter(x => x.m.type === 'photo')
@@ -178,7 +178,7 @@ export function useVisionLogic(originalTweet: EnrichedTweet) {
         translationGlossary,
       ].filter(Boolean).join('\n')
       const data = await requestVisionTranslate({
-        tweet: { id_str: tweetId, text: originalTweet.text },
+        tweet: { id: tweetId, text: originalTweet.text },
         items,
         translationGlossary: combinedGlossary || undefined,
         apiKey,

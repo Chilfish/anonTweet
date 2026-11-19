@@ -11,7 +11,7 @@ import { deriveManualTranslation } from '~/lib/translation/resolveEntities'
 import { decodeHtmlEntities, toast } from '~/lib/utils'
 
 export function useAltTranslationLogic(originalTweet: EnrichedTweet) {
-  const tweetId = originalTweet.id_str
+  const tweetId = originalTweet.id
   const [isOpen, setIsOpen] = useState(false)
   const [editingEntities, setEditingEntities] = useState<Entity[]>([])
   const [isAITranslating, setIsAITranslating] = useState(false)

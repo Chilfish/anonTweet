@@ -90,16 +90,16 @@ function isStatusError(error: unknown, status: number): boolean {
 function dedupeTweets(tweets: EnrichedTweet[]): EnrichedTweet[] {
   const seen = new Set<string>()
   return tweets.filter((tweet) => {
-    if (seen.has(tweet.id_str))
+    if (seen.has(tweet.id))
       return false
-    seen.add(tweet.id_str)
+    seen.add(tweet.id)
     return true
   })
 }
 
 /** 转推 / 回复上下文标签；普通帖子返回 null */
 function TweetContextLabel({ tweet }: { tweet: EnrichedTweet }) {
-  if (tweet.retweetedOrignalId) {
+  if (tweet.retweetedOriginalId) {
     return (
       <span className="flex items-center gap-1 pl-1 text-[11px] text-muted-foreground">
         <Repeat2Icon className="size-3" aria-hidden />
@@ -281,13 +281,13 @@ function TimelineSection({
       <div className="flex w-full flex-col items-center gap-3">
         {tweets.map(tweet => (
           <div
-            key={tweet.id_str}
+            key={tweet.id}
             className="flex w-full max-w-[600px] flex-col gap-1"
           >
             <TweetContextLabel tweet={tweet} />
             <MyTweet
               tweets={[tweet]}
-              mainTweetId={tweet.id_str}
+              mainTweetId={tweet.id}
             />
           </div>
         ))}

@@ -1,5 +1,6 @@
+import { mapTwitterCard } from '@chilfish/tweet'
 import { describe, expect, it } from 'vitest'
-import { mapTwitterCard } from '~/lib/react-tweet/utils/parseTweet'
+import { localizeCtaLabel } from '~/lib/react-tweet/utils'
 import carouselPayload from '../fixtures/unified-card/carousel.json'
 import singleImagePayload from '../fixtures/unified-card/single-image.json'
 import videoPayload from '../fixtures/unified-card/video.json'
@@ -49,10 +50,11 @@ describe('AC-CARD-010: image_carousel_website parsing', () => {
     })
   })
 
-  it('treats zero-width-space title as empty and localizes CTA', () => {
-    expect(card.title).toBeUndefined()
+  it('treats zero-width-space title as empty and maps the SDK CTA label', () => {
+    expect(card.title).toBe('')
     expect(card.domain).toBe('ws-tcg.com')
-    expect(card.ctaLabel).toBe('了解更多')
+    expect(card.ctaLabel).toBe('Learn more')
+    expect(localizeCtaLabel(card.ctaLabel)).toBe('了解更多')
     expect(card.mediaFirst).toBe(true)
   })
 
@@ -172,7 +174,7 @@ describe('AC-CARD-010: image_carousel_website parsing', () => {
       href: 'https://ws-tcg.com/products/bdy_bp/?utm_source=X&utm_medium=cpc&utm_campaign=BDY',
     })
     expect(parsed.imageUrl).toBe(parsed.images![0]!.url)
-    expect(parsed.ctaLabel).toBe('了解更多')
+    expect(parsed.ctaLabel).toBe('Learn more')
     expect(parsed.mediaFirst).toBe(true)
   })
 

@@ -40,13 +40,13 @@ export function materializeTweetsWithManualTranslations(
     return tweets
 
   return tweets.map((tweet) => {
-    const manual = translations[tweet.id_str]
+    const manual = translations[tweet.id]
     const materialized = materializeTweetWithManualTranslations(tweet, manual)
 
     if (!tweet.quotedTweet)
       return materialized
 
-    const quotedManual = translations[tweet.quotedTweet.id_str]
+    const quotedManual = translations[tweet.quotedTweet.id]
     return {
       ...materialized,
       quotedTweet: materializeTweetWithManualTranslations(tweet.quotedTweet, quotedManual),

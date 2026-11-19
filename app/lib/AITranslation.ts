@@ -358,7 +358,7 @@ Return exactly one JSON object. Keep every placeholder exactly as written. Inclu
           attempts,
           model: modelName,
           provider: strategy?.name ?? 'unknown',
-          tweetId: suffix(tweet.id_str),
+          tweetId: suffix(tweet.id),
         })
         return {
           translatedText: translated,
@@ -407,7 +407,7 @@ Return exactly one JSON object. Keep every placeholder exactly as written. Inclu
       attempts,
       model: modelName,
       provider: strategy?.name ?? 'unknown',
-      tweetId: suffix(tweet.id_str),
+      tweetId: suffix(tweet.id),
       reason: error instanceof Error
         ? error.message
         : 'unknown',

@@ -49,7 +49,7 @@ const CommentBranchComponent = forwardRef<HTMLDivElement, CommentBranchProps>(({
   const replies = tweet.comments || EMPTY_REPLIES
   const hasReplies = replies.length > 0
   const isCapturingSelected = useIsCapturingSelected()
-  const isSelected = useIsTweetSelected(tweet.id_str)
+  const isSelected = useIsTweetSelected(tweet.id)
 
   // 用于获取最后一个子元素的ref
   const lastChildRef = useRef<HTMLDivElement>(null)
@@ -68,7 +68,7 @@ const CommentBranchComponent = forwardRef<HTMLDivElement, CommentBranchProps>(({
       )}
 
       <SelectableTweetWrapper
-        tweetId={tweet.id_str}
+        tweetId={tweet.id}
         show={isTopLevel}
       >
         <TweetNode
@@ -82,7 +82,7 @@ const CommentBranchComponent = forwardRef<HTMLDivElement, CommentBranchProps>(({
         <div>
           {replies.map((reply, index) => (
             <CommentBranchComponent
-              key={reply.id_str}
+              key={reply.id}
               tweet={reply}
               isTopLevel={false}
               ref={index === replies.length - 1

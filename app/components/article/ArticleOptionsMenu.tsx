@@ -77,7 +77,7 @@ export function ArticleOptionsMenu({ article, tweet }: ArticleOptionsMenuProps) 
 
     const items = images.map((image, index) => ({
       url: image.url,
-      filename: `${tweet.user.screen_name}-${tweet.id_str}-article-${index + 1}.jpg`,
+      filename: `${tweet.user.screen_name}-${tweet.id}-article-${index + 1}.jpg`,
     }))
 
     toast.info(`正在下载 ${items.length} 张图片...`)

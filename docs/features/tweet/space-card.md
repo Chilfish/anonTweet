@@ -113,11 +113,11 @@ AudioSpaceById（x.com/i/api/graphql/HPEisOmj1epUNLCWTYhUWw/AudioSpaceById）
 
 | 层       | 文件                                                     | 说明                                                                                                                             |
 | -------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| 请求     | `app/lib/rettiwt-api/requests/Space.ts`                  | `SpaceRequests.details(id)`（`withReplays: true`）                                                                               |
+| 请求     | `@chilfish/tweet` `requests/Space.ts`                    | `SpaceRequests.details(id)`（`withReplays: true`）                                                                               |
 | 资源注册 | `enums/Resource.ts` · `collections/{Requests,Groups}.ts` | `SPACE_DETAILS`（漏注册会被 `_validateArgs` 静默判废）                                                                           |
 | 类型     | `app/types/space.ts`                                     | `SpaceDetails` / `SpaceHost` / `SpaceAvailability`                                                                               |
-| 纯逻辑   | `app/lib/react-tweet/utils/space.ts`                     | `resolveSpaceId` / `extractAudiospaceId` / `extractSpaceIdFromUrl` / `mapSpaceDetails` / `resolveSpacePlaybackState` / formatter |
-| 取数     | `app/lib/react-tweet/utils/get-tweet.ts`                 | `fetchSpaceDetails()` / `resolveSpaceById()` + `attachSpaceDetails()`（请求失败降级并 obsLog）                                   |
+| 纯逻辑   | `@chilfish/tweet` `parse/space.ts`                       | `resolveSpaceId` / `extractAudiospaceId` / `extractSpaceIdFromUrl` / `mapSpaceDetails` / `resolveSpacePlaybackState` / formatter |
+| 取数     | `app/lib/twitter.server.ts`                              | `fetchSpaceDetails()` / `resolveSpaceById()` + `attachSpaceDetails()`（请求失败降级并 obsLog）                                   |
 | 回填     | `app/lib/service/getTweet.server.ts`                     | `getLocalTweet()` 出口对旧缓存回填/升级 `space`（读时自愈，见 §4）                                                               |
 | 渲染     | `app/components/tweet/TweetSpaceCard.tsx`                | 紫底白字卡片 + 中性墓碑条；挂载于 `TweetNode` / `PlainTweet`                                                                     |
 | 去重     | `app/lib/react-tweet/twitter-theme/tweet-body.tsx`       | `space` 非空时跳过正文里的同一条 Space 链接（官方前端同样只显示卡片）                                                            |

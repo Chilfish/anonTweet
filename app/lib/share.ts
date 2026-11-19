@@ -234,8 +234,8 @@ export function buildTweetSharePayload(tweet: EnrichedTweet): SharePayload {
   const rawText = renderShareText(list, preferTranslation) || tweet.text?.trim() || ''
 
   const url = tweet.url?.trim() || (handle
-    ? `https://x.com/${handle}/status/${tweet.id_str}`
-    : `https://x.com/i/web/status/${tweet.id_str}`)
+    ? `https://x.com/${handle}/status/${tweet.id}`
+    : `https://x.com/i/web/status/${tweet.id}`)
 
   return {
     title: `${name}${handle

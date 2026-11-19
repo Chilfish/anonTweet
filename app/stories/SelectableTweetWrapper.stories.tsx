@@ -25,14 +25,14 @@ const box = (
 
 export const NormalMode: Story = {
   render: () => (
-    <SelectableTweetWrapper tweetId={tweetWithCard.id_str}>{box}</SelectableTweetWrapper>
+    <SelectableTweetWrapper tweetId={tweetWithCard.id}>{box}</SelectableTweetWrapper>
   ),
 }
 
 export const SelectionMode: Story = {
   render: () => (
     <WithStoreState seed={() => seedUI({ isSelectionMode: true, selectedTweetIds: [] })}>
-      <SelectableTweetWrapper tweetId={tweetWithCard.id_str}>{box}</SelectableTweetWrapper>
+      <SelectableTweetWrapper tweetId={tweetWithCard.id}>{box}</SelectableTweetWrapper>
     </WithStoreState>
   ),
 }
@@ -42,10 +42,10 @@ export const SelectionModeChecked: Story = {
     <WithStoreState
       seed={() => seedUI({
         isSelectionMode: true,
-        selectedTweetIds: [tweetWithCard.id_str],
+        selectedTweetIds: [tweetWithCard.id],
       })}
     >
-      <SelectableTweetWrapper tweetId={tweetWithCard.id_str}>{box}</SelectableTweetWrapper>
+      <SelectableTweetWrapper tweetId={tweetWithCard.id}>{box}</SelectableTweetWrapper>
     </WithStoreState>
   ),
 }
@@ -53,7 +53,7 @@ export const SelectionModeChecked: Story = {
 /** show=false：截取仅选中推文时，未选中的非顶层节点直接透传 children（保持可见性判断由上层负责） */
 export const Passthrough: Story = {
   render: () => (
-    <SelectableTweetWrapper tweetId={tweetWithCard.id_str} show={false}>
+    <SelectableTweetWrapper tweetId={tweetWithCard.id} show={false}>
       {box}
     </SelectableTweetWrapper>
   ),

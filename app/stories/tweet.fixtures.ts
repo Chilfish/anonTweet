@@ -9,7 +9,7 @@ import type { AIVisionInfo, EnrichedTweet, SpaceDetails, TrendingCardInfo, Tweet
  */
 
 const user: TweetUser = {
-  id_str: '1910260789350682624',
+  id: '1910260789350682624',
   name: '渡瀬結月の６げんめっ！',
   profile_image_url_https: 'https://pbs.twimg.com/profile_images/1910261300489551872/qvYWaoMv.jpg',
   profile_image_shape: 'Circle',
@@ -235,7 +235,7 @@ interface MakeTweetOptions {
 
 function makeTweet(opts: MakeTweetOptions = {}): EnrichedTweet {
   return {
-    id_str: opts.id ?? '2063856871824584747',
+    id: opts.id ?? '2063856871824584747',
     __typename: 'Tweet',
     lang: opts.lang ?? 'ja',
     url: `https://twitter.com/${opts.screenName ?? '6genme'}/status/${opts.id ?? '2063856871824584747'}`,
@@ -340,7 +340,7 @@ export const spaceDetails: SpaceDetails = {
   replayCount: 1233,
   isReplayAvailable: true,
   host: {
-    id_str: '1546362523561390081',
+    id: '1546362523561390081',
     name: '夢限大みゅーたいぷ',
     screen_name: 'BDP_yumemita',
     profile_image_url_https: 'https://pbs.twimg.com/profile_images/1907233594067881984/8eZPMLR5_normal.jpg',
@@ -435,7 +435,7 @@ export const tweetWithUnavailableSpace = makeTweet({
     replayCount: 0,
     isReplayAvailable: false,
     host: {
-      id_str: '',
+      id: '',
       name: '',
       screen_name: '',
       profile_image_url_https: '',

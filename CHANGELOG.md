@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ## [Unreleased]
 
+### Changed
+
+#### X 数据层切换到 `@chilfish/tweet@0.2.2`（2026-11-19）
+
+- 删除内嵌 `app/lib/rettiwt-api`（148 文件）与 `app/lib/SmartPool.ts`，新增 `app/lib/twitter.server.ts` 装配层（`createClient` + `obsLog` logger）
+- `EnrichedTweet` 字段统一为 `id` / `quotedTweetId` / `retweetedOriginalId` / `isInlineMedia`；`RawUser` 修正为 `UserData`（model 形状）
+- 旧 localCache / DB 数据在读取时归一化；CTA 文案与 Space 日期保持中文 UI
+- `@chilfish/tweet@0.2.2` 已修复 Article `fieldToggles`；无需 app 侧临时补丁
+- 测试与 AC 迁移；`typecheck` / `lint` / `test` 665 / `verify` 676 / `build` / `build-storybook` 全绿
+
 ### Added
 
 #### AI 请求路径与 DeepSeek Flash 默认（2026-11-18）

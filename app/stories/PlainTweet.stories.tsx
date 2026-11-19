@@ -27,7 +27,7 @@ export const SingleTweet: Story = {
   render: () => (
     <MyPlainTweet
       tweets={[tweetWithCard]}
-      mainTweetId={tweetWithCard.id_str}
+      mainTweetId={tweetWithCard.id}
       enableTranslation={false}
     />
   ),
@@ -37,7 +37,7 @@ export const MultiPhotoTweet: Story = {
   render: () => (
     <MyPlainTweet
       tweets={[tweetWithPhotos]}
-      mainTweetId={tweetWithPhotos.id_str}
+      mainTweetId={tweetWithPhotos.id}
       enableTranslation={false}
     />
   ),
@@ -47,7 +47,7 @@ export const TrendingCardTweet: Story = {
   render: () => (
     <MyPlainTweet
       tweets={[tweetWithTrendingCard]}
-      mainTweetId={tweetWithTrendingCard.id_str}
+      mainTweetId={tweetWithTrendingCard.id}
       enableTranslation={false}
     />
   ),
@@ -57,7 +57,7 @@ export const ThreadNoTranslation: Story = {
   render: () => (
     <MyPlainTweet
       tweets={threadTweets}
-      mainTweetId={threadTweets[2]!.id_str}
+      mainTweetId={threadTweets[2]!.id}
       enableTranslation={false}
     />
   ),
@@ -67,7 +67,7 @@ export const ThreadWithTranslation: Story = {
   render: () => (
     <MyPlainTweet
       tweets={translationThreadTweets}
-      mainTweetId={tweetEnglish.id_str}
+      mainTweetId={tweetEnglish.id}
       enableTranslation
     />
   ),

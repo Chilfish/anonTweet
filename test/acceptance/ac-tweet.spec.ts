@@ -1,5 +1,5 @@
-import type { AxiosResponse } from 'axios'
-import type { ITweetSearchResponse } from '~/lib/rettiwt-api/types/raw/tweet/Search'
+import type { HttpClient, HttpRequest } from '@chilfish/tweet'
+import type { ITweetSearchResponse } from '@chilfish/tweet/internals'
 import type { EnrichedTweet, Entity } from '~/types'
 /**
  * test/acceptance/ac-tweet.spec.ts
@@ -8,14 +8,11 @@ import type { EnrichedTweet, Entity } from '~/types'
  * - AC-TWEET-001~004 / 007：**fixture 作输入 → 调真实纯函数 → 断言产出**（F8 去「fixture 自证」，
  *   review-2026-09-11 P2-1：原实现直接断言 fixture JSON 自身字段，解析回归不会红）
  * - AC-TWEET-009：真实 `parseSearchTimeline`
- * - AC-TWEET-011：mock `axios.get` 后跑真实 `_fetchTransactionDocument`，断言外壳请求带 cookie
+ * - AC-TWEET-011：注入 `HttpClient` + `TidProvider`，断言解码后的 cookie 同时进入事务上下文与请求头
  * - AC-TWEET-005/006/008/010 为集成测试，见 test/integration/api.tweet.spec.ts
  */
-import axios from 'axios'
-import { describe, expect, it, vi } from 'vitest'
-import { parseSearchTimeline } from '~/lib/react-tweet/utils/get-tweet'
-import { RettiwtConfig } from '~/lib/rettiwt-api/models/RettiwtConfig'
-import { FetcherService } from '~/lib/rettiwt-api/services/public/FetcherService'
+import { buildXShellHeaders, FetcherService, parseSearchTimeline, ResourceType, RettiwtConfig } from '@chilfish/tweet'
+import { describe, expect, it } from 'vitest'
 import { stripTranslationsFromTweets } from '~/lib/stores/logic'
 import { mergeEntityTranslationsByIndex } from '~/lib/translation/resolveEntities'
 import { loadFixture } from '../helpers/load-fixture'
@@ -129,45 +126,75 @@ describe('AC-TWEET tweet parsing (fixture → real pipeline)', () => {
  * AC-TWEET-011 回归防护：外壳请求必须带 cookie。
  *
  * 上游 #885 曾以「抓外壳时附 cookie」修好 `OnDemandFileUrlResolutionError`，被 #888 合并时丢失；
- * 纯函数 `buildXShellHeaders` 的单测无法发现「调用点不再使用它」这一类回归，故这里 mock
- * `axios.get` 后跑真实 `_fetchTransactionDocument`，断言**实际发出的请求头**。
+ * 纯函数 `buildXShellHeaders` 的单测无法发现「调用点不再使用它」这一类回归，故这里注入
+ * `HttpClient` + `TidProvider`，跑真实 `FetcherService.request`，断言**事务上下文与实际请求头**。
  */
 const SHELL_COOKIES = 'auth_token=abc;ct0=def;twid=u%3D12345;'
-const LEGACY_SHELL = [
-  '<!DOCTYPE html><html><head>',
-  '<meta name="twitter-site-verification" content="abc123"/>',
-  '<script>window.__chunks={"5":"ondemand.s"}</script>',
-  '</head><body></body></html>',
-].join('')
 
-interface ShellProbe { _fetchTransactionDocument: () => Promise<unknown> }
-interface ShellRequest { headers: Record<string, string> }
+const TWEET_RESPONSE = {
+  data: {
+    tweetResult: {
+      result: { rest_id: '1' },
+    },
+  },
+}
 
-function mockShellGet() {
-  return vi.spyOn(axios, 'get').mockResolvedValue({ data: LEGACY_SHELL } as unknown as AxiosResponse)
+function createHttpClient(requests: Array<{ url: string, headers?: Record<string, string> }>): HttpClient {
+  return {
+    async request<T>(request: HttpRequest) {
+      requests.push({ url: request.url, headers: request.headers })
+      return {
+        status: 200,
+        statusText: 'OK',
+        headers: new Headers(),
+        data: TWEET_RESPONSE as T,
+        url: request.url,
+      }
+    },
+  }
 }
 
 describe('AC-TWEET-011: X shell request carries the session cookie', () => {
-  it('attaches the decoded cookie when an API key is configured', async () => {
+  it('attaches the cookie header and forwards the decoded cookie to the transaction provider', async () => {
     const apiKey = Buffer.from(SHELL_COOKIES).toString('base64')
-    const service = new FetcherService(new RettiwtConfig({ apiKey }))
-    const get = mockShellGet()
+    const headers = buildXShellHeaders({ 'User-Agent': 'ua' }, apiKey)
+    expect(headers.cookie).toBe(SHELL_COOKIES)
+    expect(buildXShellHeaders({ 'User-Agent': 'ua' })).not.toHaveProperty('cookie')
 
-    await (service as unknown as ShellProbe)._fetchTransactionDocument()
+    const seen: Array<string | undefined> = []
+    const requests: Array<{ url: string, headers?: Record<string, string> }> = []
+    const service = new FetcherService(new RettiwtConfig({
+      apiKey,
+      httpClient: createHttpClient(requests),
+      tidProvider: {
+        getHeader: async (context) => {
+          seen.push(context.cookie)
+          return {}
+        },
+      },
+    }))
 
-    expect(get).toHaveBeenCalledTimes(1)
-    const [url, config] = get.mock.calls[0]!
-    expect(url).toBe('https://x.com/home')
-    expect((config as unknown as ShellRequest).headers.cookie).toBe(SHELL_COOKIES)
+    await service.request(ResourceType.TWEET_DETAILS, { id: '1' })
+
+    expect(seen[0]).toContain('auth_token=abc')
+    expect(seen[0]).toContain('ct0=def')
+    expect(requests[0]!.headers?.cookie).toContain('auth_token=abc')
   })
 
   it('stays anonymous when no API key is configured', async () => {
-    const service = new FetcherService(new RettiwtConfig({}))
-    const get = mockShellGet()
+    const seen: Array<string | undefined> = []
+    const service = new FetcherService(new RettiwtConfig({
+      httpClient: createHttpClient([]),
+      tidProvider: {
+        getHeader: async (context) => {
+          seen.push(context.cookie)
+          return {}
+        },
+      },
+    }))
 
-    await (service as unknown as ShellProbe)._fetchTransactionDocument()
+    await service.request(ResourceType.TWEET_DETAILS, { id: '1' })
 
-    const [, config] = get.mock.calls[0]!
-    expect((config as unknown as ShellRequest).headers).not.toHaveProperty('cookie')
+    expect(seen[0]).toBeUndefined()
   })
 })

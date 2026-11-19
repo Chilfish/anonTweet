@@ -5,20 +5,19 @@
     "schema": "enriched-tweet-with-space"
   },
   "data": {
-    "id_str": "1968314084207788302",
     "lang": "zxx",
     "url": "https://twitter.com/BDP_yumemita/status/1968314084207788302",
     "created_at": "Wed Sep 17 14:00:21 +0000 2025",
     "__typename": "Tweet",
     "text": "https://t.co/gOS5Qc3DS4",
     "user": {
-      "id_str": "1546362523561390081",
       "name": "夢限大みゅーたいぷ",
       "screen_name": "BDP_yumemita",
       "is_blue_verified": true,
       "profile_image_shape": "Square",
       "verified_type": "Business",
-      "profile_image_url_https": "https://pbs.twimg.com/profile_images/1907233594067881984/8eZPMLR5.jpg"
+      "profile_image_url_https": "https://pbs.twimg.com/profile_images/1907233594067881984/8eZPMLR5.jpg",
+      "id": "1546362523561390081"
     },
     "entities": [
       {
@@ -31,7 +30,6 @@
         "href": "https://x.com/i/spaces/1yoKMPnjEbOxQ"
       }
     ],
-    "isInlineMeida": false,
     "space": {
       "id": "1yoKMPnjEbOxQ",
       "url": "https://x.com/i/spaces/1yoKMPnjEbOxQ",
@@ -47,14 +45,16 @@
       "replayCount": 1233,
       "isReplayAvailable": true,
       "host": {
-        "id_str": "1546362523561390081",
         "name": "夢限大みゅーたいぷ",
         "screen_name": "BDP_yumemita",
         "profile_image_url_https": "https://pbs.twimg.com/profile_images/1907233594067881984/8eZPMLR5_normal.jpg",
         "verified": false,
         "is_blue_verified": true,
-        "verified_type": "Business"
+        "verified_type": "Business",
+        "id": "1546362523561390081"
       }
-    }
+    },
+    "id": "1968314084207788302",
+    "isInlineMedia": false
   }
 }

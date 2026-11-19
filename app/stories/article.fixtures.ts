@@ -1,6 +1,6 @@
 import type { RawTweet, TweetArticle } from '~/types'
+import { mapArticle } from '@chilfish/tweet'
 import { serializeArticleBlock } from '~/lib/article/serialize'
-import { mapArticle } from '~/lib/react-tweet/utils/article'
 import mvernalFixture from '../../test/fixtures/articles/2099885132379500562.json'
 import boldRangeFixture from '../../test/fixtures/articles/2103463356913098908.json'
 import trq212Fixture from '../../test/fixtures/articles/2103576349499855160.json'

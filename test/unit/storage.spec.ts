@@ -290,7 +290,7 @@ describe('AC-HOME-005: detail snapshots share lifecycle with visited records', (
     await putSnapshot({
       ...tweetSnapshot('1', 0),
       tweets: [
-        { id_str: '1' } as EnrichedTweet,
+        { id: '1' } as EnrichedTweet,
       ],
     })
     await putSnapshot({

@@ -31,7 +31,7 @@ API 层作为 BFF，主要负责将异构数据源（Database, Twitter Private A
   - **Handler**: `app/routes/api/tweet/get.ts`
   - **逻辑**: 复合查询接口。不仅获取指定 ID 的推文，还会触发 **递归上下文解析** (Parent Chain & Quoted Tweet)。
     1. 解析请求体提取 `tweetId`、AI 翻译配置（`provider`, `model`, `thinkingLevel` 等）。
-    2. 优先读取 DB 缓存，Cache Miss 时调用 `rettiwt-api` 回源抓取并 Write-Back。
+    2. 优先读取 DB 缓存，Cache Miss 时调用 `@chilfish/tweet` 回源抓取并 Write-Back。
     3. **AI 预处理**: 若配置启用且推文非中文，可在服务端触发 AI 翻译流程，结果直接写入 `tweet.entities` 的 `aiTranslation` 字段。
   - **返回**: `TweetData` (按时间线排序的推文数组)。
 
@@ -112,7 +112,7 @@ Instagram 帖子数据获取、翻译与缓存管理。于 2026-05 完成 5 阶�
    - `tweet_user` 表: 用户元数据缓存。
    - **🆕 `ig_post` 表**: Instagram 帖子 JSON 缓存（`id`, `json_content`, `caption_translation`, `created_at`）。
 4. **Level 4: Upstream API (Source of Truth)**
-   - Twitter: 基于 `rettiwt-api` 的逆向工程接口，通过 `RettiwtPool` 进行多 Key 调度。
+   - Twitter: 基于 `@chilfish/tweet` 的逆向工程接口，通过包内 `RettiwtPool` 进行多 Key 调度。
    - Instagram: 基于 `@chilfish/gallery-dl-instagram` SDK。
 5. **Level 5: AI Engine (Transformation)**
    - Twitter: 实体占位符 (Entity Placeholders) 保护 URL/mention/hashtag。

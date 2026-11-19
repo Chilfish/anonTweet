@@ -10,7 +10,7 @@ import { MyPlainTweet } from '~/components/tweet/PlainTweet'
 export function ArticleEmbeddedTweet({ tweet }: { tweet: EnrichedTweet }) {
   return (
     <div className="my-4">
-      <MyPlainTweet tweets={[tweet]} mainTweetId={tweet.id_str} enableTranslation={false} />
+      <MyPlainTweet tweets={[tweet]} mainTweetId={tweet.id} enableTranslation={false} />
     </div>
   )
 }

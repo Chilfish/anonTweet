@@ -29,7 +29,7 @@ function seedMode(mode: 'original' | 'translation' | 'bilingual') {
     seedTranslation({
       translationMode: mode,
       translationVisibility: {
-        [tweetEnglish.id_str]: { body: true, alt: true },
+        [tweetEnglish.id]: { body: true, alt: true },
       },
     })
 }
@@ -65,10 +65,10 @@ export const ManualTranslation: Story = {
       seedTranslation({
         translationMode: 'bilingual',
         translationVisibility: {
-          [tweetEnglish.id_str]: { body: true, alt: true },
+          [tweetEnglish.id]: { body: true, alt: true },
         },
         translations: {
-          [tweetEnglish.id_str]: [
+          [tweetEnglish.id]: [
             {
               type: 'text',
               text: 'Just shipped the new design 🚀 The team worked hard on this one — check it out and let us know what you think!',

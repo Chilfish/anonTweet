@@ -27,7 +27,7 @@ describe.skipIf(!testEnv.hasServer)('AC-SHOT plain screenshot endpoints', () => 
 
   it.skipIf(!testEnv.hasTweetKeys)('AC-SHOT-001: plain tweet endpoint renders real tweet content (needs TWEET_KEYS)', async () => {
     const tweet = loadFixture<EnrichedTweet>('tweets/normal-ja.json')
-    const html = await getClient().plain.tweet(tweet.id_str)
+    const html = await getClient().plain.tweet(tweet.id)
 
     expect(html).toMatch(HTML_RE)
     expect(html).toContain(tweet.user.screen_name)

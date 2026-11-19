@@ -69,7 +69,7 @@ export const useTranslationUIStore = create<UIState & UIActions>()((set, get) =>
     ]
 
     let targetIds: string[] = [tweetId]
-    const isMainTweet = mainTweet && mainTweet.id_str === tweetId
+    const isMainTweet = mainTweet && mainTweet.id === tweetId
 
     // 保持原有逻辑：非主推文则递归选中后代
     if (!isMainTweet) {
@@ -102,9 +102,9 @@ export const useTranslationUIStore = create<UIState & UIActions>()((set, get) =>
     const { mainTweet, tweets } = useTranslationStore.getState()
     const allIds = [
       ...(mainTweet
-        ? [mainTweet.id_str]
+        ? [mainTweet.id]
         : []),
-      ...tweets.map(t => t.id_str),
+      ...tweets.map(t => t.id),
     ]
     set({ selectedTweetIds: allIds })
   },

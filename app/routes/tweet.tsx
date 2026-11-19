@@ -58,7 +58,7 @@ export async function clientLoader({
     if (snapshot) {
       restoreTweetSnapshot(snapshot)
       return {
-        tweet: snapshot.tweets.find(tweet => tweet.id_str === tweetId) ?? snapshot.tweets[0] ?? null,
+        tweet: snapshot.tweets.find(tweet => tweet.id === tweetId) ?? snapshot.tweets[0] ?? null,
         tweetId,
         baseUrl: window.location.origin,
       }
@@ -107,7 +107,7 @@ export function HydrateFallback() {
 }
 
 function TweetStructuredData({ tweet }: { tweet: EnrichedTweet }) {
-  const tweetUrl = `https://x.com/${tweet.user?.screen_name || 'i'}/status/${tweet.id_str}`
+  const tweetUrl = `https://x.com/${tweet.user?.screen_name || 'i'}/status/${tweet.id}`
   const sharedImage = tweet.mediaDetails?.[0]?.media_url_https
     ?? tweet.poll?.choices.find(choice => choice.imageUrl)?.imageUrl
   const jsonLd = {
@@ -189,16 +189,16 @@ export default function TweetPage({ loaderData }: Route.ComponentProps) {
     if (tweets && tweets.length > 0 && tweetId) {
       console.log(tweets)
       const mainTweet = tweets[0]
-      const isRetweet = mainTweet && mainTweet.retweetedOrignalId && mainTweet.retweetedOrignalId !== mainTweet.id_str
+      const isRetweet = mainTweet && mainTweet.retweetedOriginalId && mainTweet.retweetedOriginalId !== mainTweet.id
 
       if (isRetweet) {
-        navigate(`/tweets/${mainTweet.id_str}`, { replace: true })
+        navigate(`/tweets/${mainTweet.id}`, { replace: true })
       }
       else {
         setAllTweets(tweets, tweetId)
         // 快照恢复的评论区要保留；切换推文时旧评论 id 不在新线程里，自动清掉
         const currentCommentIds = useTranslationStore.getState().commentIds
-        setCommentIds(currentCommentIds.filter(id => tweets.some(t => t.id_str === id)))
+        setCommentIds(currentCommentIds.filter(id => tweets.some(t => t.id === id)))
       }
     }
   }, [
@@ -209,12 +209,12 @@ export default function TweetPage({ loaderData }: Route.ComponentProps) {
   ])
 
   // Check for retweet to show skeleton while redirecting
-  const isRetweet = tweets?.[0]?.retweetedOrignalId && tweets[0].retweetedOrignalId !== tweets[0].id_str
+  const isRetweet = tweets?.[0]?.retweetedOriginalId && tweets[0].retweetedOriginalId !== tweets[0].id
 
   // Prefer store data if it matches current tweet (allows for updates like loading comments)
   // Fall back to SSR loader data as initial display
   const displayTweets = useMemo(() => {
-    if (storeMainTweet?.id_str === tweetId && storeTweets.length > 0) {
+    if (storeMainTweet?.id === tweetId && storeTweets.length > 0) {
       return storeTweets
     }
     if (tweets)
@@ -223,7 +223,7 @@ export default function TweetPage({ loaderData }: Route.ComponentProps) {
       return [loaderData.tweet]
     return undefined
   }, [
-    storeMainTweet?.id_str,
+    storeMainTweet?.id,
     tweetId,
     storeTweets,
     tweets,
@@ -234,7 +234,7 @@ export default function TweetPage({ loaderData }: Route.ComponentProps) {
   useRecordVisit(visitedTweet
     ? {
         type: 'tweet',
-        id: visitedTweet.id_str,
+        id: visitedTweet.id,
         title: visitedTweet.user?.name || `@${visitedTweet.user?.screen_name ?? '推文'}`,
         snippet: decodeHtmlEntities(visitedTweet.text || '').replace(/\s+/g, ' ').trim().slice(0, 90),
         image: visitedTweet.user?.profile_image_url_https

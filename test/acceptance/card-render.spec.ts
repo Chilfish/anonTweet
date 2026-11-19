@@ -1,9 +1,9 @@
 import type { EnrichedTweet, TrendingCardInfo } from '~/types'
+import { mapTwitterCard } from '@chilfish/tweet'
 import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { TweetLinkCard } from '~/components/tweet/TweetCard'
-import { mapTwitterCard } from '~/lib/react-tweet/utils/parseTweet'
 import { loadFixture } from '../helpers/load-fixture'
 
 /**
@@ -48,7 +48,7 @@ function render(tweet: EnrichedTweet): string {
 describe('AC-CARD-005: trending card real render (P1-1)', () => {
   const tweet: EnrichedTweet = {
     ...baseWithCard,
-    id_str: '2089577916694942006',
+    id: '2089577916694942006',
     card: { ...baseWithCard.card!, trending: trendingInfo },
   }
 

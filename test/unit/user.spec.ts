@@ -1,6 +1,6 @@
-import type { IUserDetailsResponse } from '~/lib/rettiwt-api/types/raw/user/Details'
+import type { IUserDetailsResponse } from '@chilfish/tweet'
+import { Extractors } from '@chilfish/tweet/internals'
 import { describe, expect, it } from 'vitest'
-import { Extractors } from '~/lib/rettiwt-api/collections/Extractors'
 import { loadFixture } from '../helpers/load-fixture'
 
 /**
@@ -19,10 +19,10 @@ describe('user.single', () => {
     expect(user?.userName).toBe('ukyomigi')
     expect(user?.fullName).toBe('右京｜デザイン')
     expect(user?.followersCount).toBe(90)
-    expect(user?.pinnedTweet).toBeUndefined()
+    expect(user?.pinnedTweets).toEqual([])
   })
 
-  it('keeps pinnedTweet when upstream provides pinned_tweet_ids_str', () => {
+  it('keeps pinnedTweets when upstream provides pinned_tweet_ids_str', () => {
     const withPinned = {
       ...userDetails,
       data: {
@@ -38,6 +38,6 @@ describe('user.single', () => {
       },
     } as IUserDetailsResponse
 
-    expect(Extractors.USER_DETAILS_BY_USERNAME(withPinned)?.pinnedTweet).toBe('1234567890')
+    expect(Extractors.USER_DETAILS_BY_USERNAME(withPinned)?.pinnedTweets).toEqual(['1234567890'])
   })
 })

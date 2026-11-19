@@ -9,7 +9,7 @@
 Anon Tweet — 匿名浏览 Twitter/X 推文与 Instagram 帖子的全栈应用，AI 翻译（Google Gemini / DeepSeek 双提供商）+ 卡片导出（截图 + Markdown）。
 
 - **框架**：React Router v8（SSR + CSR Hybrid）｜ **运行时**：Bun 1.3
-- **数据源**：Twitter/X Private API（`rettiwt-api` 逆向适配）+ Instagram（`@chilfish/gallery-dl-instagram`）
+- **数据源**：Twitter/X Private API（`@chilfish/tweet`，Phase 1 已完成）+ Instagram（`@chilfish/gallery-dl-instagram`）
 - **AI**：Google Gemini + DeepSeek + OpenRouter（AI Vision，Vercel AI SDK）
 - **状态**：Zustand v5（client）/ SWR（server）｜ **持久化**：PostgreSQL（Neon Serverless）+ Drizzle ORM
 - **验证**：`verify/` 验证套件（Vitest 三层架构）+ AC 验收标准 + Postmortem 雷区
@@ -63,7 +63,7 @@ docs/
 | **修改原子组件（Button/Input/Dialog 等）**     | `ui-design/GENERAL.md`                                                                         | shadcn/coss 组件使用规范                                       |
 | **修改 Settings 页面**                         | `ui-design/SETTINGS.md`                                                                        | SettingsGroup / SettingsItem 强制规范                          |
 | **架构级变更前**                               | `planning/architecture.md`（ADR）+ `planning/project-architecture.md`（系统架构 v3.0）         | 先读 ADR 历史决策，再对照架构总览                              |
-| **推文 SDK 抽离 / 包发布**                     | `planning/tweet-sdk-extraction.md`（+ ADR-010）                                                | core / `./node` / `./react` 三入口、搬迁矩阵、迁移步骤         |
+| **推文 SDK 抽离 / 包发布**                     | `planning/tweet-sdk-extraction.md`（+ ADR-010）+ `planning/tweet-sdk-phase1-migration.md`      | core / `./node` / `./react` 三入口、搬迁矩阵、Phase 1 执行清单 |
 | **规划下一阶段任务**                           | `planning/backlog.md` + `archive/action-plan.md`                                               | 未决任务清单、已完成里程碑记录                                 |
 | **SEO / 搜索引擎收录 / 页面分级**              | `planning/seo-strategy.md`                                                                     | 项目性质判定、现状审计、索引分级、AC-SEO 验收                  |
 | **测试验证体系**                               | `../verify/README.md` + `archive/testing-infra-refactor.md`                                    | Vitest 三层架构（unit / integration / acceptance）             |

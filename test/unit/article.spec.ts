@@ -1,4 +1,6 @@
 import type { Entity, RawTweet } from '~/types'
+import { enrichTweet, extractArticleIdFromUrl, isArticleUrl, mapArticle, resolveArticleId, resolveArticleLink } from '@chilfish/tweet'
+import { TweetRequests } from '@chilfish/tweet/internals'
 /**
  * test/unit/article.spec.ts
  *
@@ -6,9 +8,6 @@ import type { Entity, RawTweet } from '~/types'
  * 且需请求侧开启 `withArticlePlainText` 才带全文（见 AC-TWEET-012 / 013）。
  */
 import { describe, expect, it } from 'vitest'
-import { extractArticleIdFromUrl, isArticleUrl, mapArticle, resolveArticleId, resolveArticleLink } from '~/lib/react-tweet/utils/article'
-import { enrichTweet } from '~/lib/react-tweet/utils/parseTweet'
-import { TweetRequests } from '~/lib/rettiwt-api/requests/Tweet'
 
 function urlEntity(href: string): Entity {
   return {
@@ -176,7 +175,7 @@ describe('AC-TWEET-013: TweetResultByRestId requests article plain text', () => 
     const config = TweetRequests.details('2104058634452005231')
     const fieldToggles = (config.params as Record<string, unknown>).fieldToggles
 
-    // 对象会被 axios 序列化成 fieldToggles[withArticlePlainText]=true，X 会忽略；
+    // 对象会被序列化成 fieldToggles[withArticlePlainText]=true，X 会忽略；
     // 必须与 variables/features 一样是 JSON 字符串。
     expect(typeof fieldToggles).toBe('string')
     expect(JSON.parse(fieldToggles as string)).toEqual({

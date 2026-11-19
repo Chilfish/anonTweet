@@ -1,15 +1,15 @@
 import type { EnrichedTweet, SpaceAvailability } from '~/types'
+import {
+  formatSpaceDuration,
+  formatSpaceListeners,
+  resolveSpacePlaybackState,
+} from '@chilfish/tweet'
 import { MicOff, Play } from 'lucide-react'
 import { useMemo } from 'react'
 import { MediaImage } from '~/components/ui/media'
 import { normalizeMediaUrl, normalizeProfileImageUrl } from '~/lib/media-url'
 import { VerifiedBadge } from '~/lib/react-tweet/twitter-theme/verified-badge'
-import {
-  formatSpaceDate,
-  formatSpaceDuration,
-  formatSpaceListeners,
-  resolveSpacePlaybackState,
-} from '~/lib/react-tweet/utils/space'
+import { formatSpaceDate } from '~/lib/react-tweet/utils/date-utils'
 import { useProxyMedia } from '~/lib/stores/appConfig'
 import { cn } from '~/lib/utils'
 

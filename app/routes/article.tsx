@@ -27,7 +27,7 @@ async function loadEmbeddedTweets(blocks: ArticleBlock[]): Promise<Record<string
   const entries = await Promise.all(ids.map(async (embedId) => {
     try {
       const tweets = await getTweets(embedId, getLocalTweet)
-      return [embedId, tweets.find(t => t.id_str === embedId) ?? tweets[0] ?? null] as const
+      return [embedId, tweets.find(t => t.id === embedId) ?? tweets[0] ?? null] as const
     }
     catch (error: unknown) {
       console.warn(`[article] embedded tweet ${embedId} unavailable:`, error)
@@ -56,7 +56,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
       getTweets(tweetId, getLocalTweet),
       getArticleTranslation(tweetId),
     ])
-    const tweet = tweets.find(t => t.id_str === tweetId) ?? tweets[0] ?? null
+    const tweet = tweets.find(t => t.id === tweetId) ?? tweets[0] ?? null
     const embeds = tweet?.article?.blocks
       ? await loadEmbeddedTweets(tweet.article.blocks)
       : {}

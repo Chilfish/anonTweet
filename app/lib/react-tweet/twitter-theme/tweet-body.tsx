@@ -1,7 +1,6 @@
 import type { EnrichedTweet } from '~/types'
+import { isArticleUrl, isSpaceUrl } from '@chilfish/tweet'
 import { cn } from '~/lib/utils'
-import { isArticleUrl } from '../utils/article'
-import { isSpaceUrl } from '../utils/space'
 import { TweetLink } from './tweet-link'
 
 interface TweetBodyProps {

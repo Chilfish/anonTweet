@@ -1,75 +1,45 @@
+import { formatDate as sdkFormatDate, formatSpaceDate as sdkFormatSpaceDate } from '@chilfish/tweet'
+
+const EN_MONTHS = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+]
+
 /**
- * Format the date string
- * @param time the date string
- * @param fmt the format string, e.g. `YYYY-MM-DD HH:mm`
+ * Space 日期：SDK 返回英文月份（`Sep 17`），app 中文 UI 需要 `9月17日`。
+ * 空值/无效值保持空串。
+ */
+export function formatSpaceDate(ms?: number | null): string {
+  const value = sdkFormatSpaceDate(ms)
+  if (!value)
+    return ''
+
+  const [month, day] = value.split(' ')
+  const index = EN_MONTHS.indexOf(month!)
+  return index >= 0
+    ? `${index + 1}月${day}日`
+    : value
+}
+
+/**
+ * 格式化日期：默认使用中文格式与北京时间（app 既有 UI 期望）。
+ *
+ * SDK 的 `formatDate` 默认使用运行时本地时区（Workers = UTC），
+ * 因此这里显式传入 `Asia/Shanghai`，避免迁移后时间整体偏移。
  */
 export function formatDate(
   time: string | number | Date,
   fmt = 'yyyy年MM月dd日 HH:mm:ss',
-) {
-  if (typeof time === 'number' && time < 1e12)
-    time *= 1000
-
-  let date = new Date(time)
-  if (Number.isNaN(date.getTime()))
-    return ''
-
-  // to beijing time
-  date = new Date(date.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }))
-
-  const pad = (num: number) => num.toString().padStart(2, '0')
-
-  const year = date.getFullYear().toString()
-  const month = pad(date.getMonth() + 1) // Months are zero-based
-  const day = pad(date.getDate())
-  const hours = pad(date.getHours())
-  const minutes = pad(date.getMinutes())
-  const seconds = pad(date.getSeconds())
-
-  return fmt
-    .replace('yyyy', year)
-    .replace('MM', month)
-    .replace('dd', day)
-    .replace('HH', hours)
-    .replace('mm', minutes)
-    .replace('ss', seconds)
-}
-
-const DATE_KEYS = [
-  'createdAt',
-  'updatedAt',
-  'date',
-  'time',
-  'timestamp',
-  'created_at',
-  'updated_at',
-  'date_time',
-  'time_stamp',
-  'startDate',
-  'endDate',
-  'start_date',
-  'end_date',
-]
-
-export function convertDate(obj: Record<string, any>, keys: string[] = DATE_KEYS) {
-  for (const [key, value] of Object.entries(obj)) {
-    if (value === null) {
-      continue
-    }
-    if (typeof value === 'object') {
-      convertDate(value)
-      continue
-    }
-    if (!keys.includes(key)) {
-      continue
-    }
-    if (typeof value !== 'string') {
-      continue
-    }
-
-    const date = new Date(value)
-    if (!Number.isNaN(date.getTime())) {
-      obj[key] = date
-    }
-  }
+): string {
+  return sdkFormatDate(time, fmt, 'Asia/Shanghai')
 }

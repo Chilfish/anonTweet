@@ -8,7 +8,7 @@ export function TweetMediaAlt({ tweet }: { tweet: EnrichedTweet }) {
   const settings = useTranslationSettings()
   const { translationMode, tweetTranslationModes } = useGlobalTranslationMode()
 
-  const tweetId = tweet.id_str
+  const tweetId = tweet.id
   const mode = tweetTranslationModes[tweetId] || translationMode
 
   if (!tweet.mediaDetails?.length)

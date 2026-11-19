@@ -1,20 +1,19 @@
-import type { IRawAudioSpace } from '~/lib/rettiwt-api'
+import type { IAudioSpace } from '@chilfish/tweet'
 import type { EnrichedTweet } from '~/types'
-import { describe, expect, it } from 'vitest'
 import {
   extractAudiospaceId,
   extractSpaceIdFromUrl,
-  formatSpaceDate,
   formatSpaceDuration,
   formatSpaceListeners,
   isSpaceUrl,
   mapSpaceDetails,
   resolveSpaceId,
   resolveSpacePlaybackState,
-} from '~/lib/react-tweet/utils/space'
-import { ResourceType, SpaceRequests } from '~/lib/rettiwt-api'
-import { FetchResourcesGroup } from '~/lib/rettiwt-api/collections/Groups'
-import { Requests } from '~/lib/rettiwt-api/collections/Requests'
+  ResourceType,
+} from '@chilfish/tweet'
+import { FetchResourcesGroup, Requests, SpaceRequests } from '@chilfish/tweet/internals'
+import { describe, expect, it } from 'vitest'
+import { formatSpaceDate } from '~/lib/react-tweet/utils/date-utils'
 import { loadFixture } from '../helpers/load-fixture'
 
 /**
@@ -31,8 +30,8 @@ import { loadFixture } from '../helpers/load-fixture'
 const SPACE_ID = '1yoKMPnjEbOxQ'
 
 const card = loadFixture<unknown>('space/audio-space-card.json')
-const audioSpace = loadFixture<IRawAudioSpace>('space/audio-space-ended.json')
-const unavailableSpace = loadFixture<IRawAudioSpace>('space/audio-space-unavailable.json')
+const audioSpace = loadFixture<IAudioSpace>('space/audio-space-ended.json')
+const unavailableSpace = loadFixture<IAudioSpace>('space/audio-space-unavailable.json')
 const tweet = loadFixture<EnrichedTweet>('tweets/with-space-ja.json')
 
 /** 以真实 metadata 为底派生待测场次：只翻转被考察的字段，保留真实结构 */
@@ -110,13 +109,13 @@ describe('AC-SPACE-002: AudioSpaceById metadata mapping', () => {
 
     expect(space!.host.name).toBe('夢限大みゅーたいぷ')
     expect(space!.host.screen_name).toBe('BDP_yumemita')
-    expect(space!.host.id_str).toBe('1546362523561390081')
+    expect(space!.host.id).toBe('1546362523561390081')
     expect(space!.host.profile_image_url_https).toContain('pbs.twimg.com/profile_images/')
   })
 
   it('AC-SPACE-002: fills verification from the tweet author when the host is the author', () => {
     // AudioSpaceById 的 creator_results 是精简对象：不含 is_blue_verified / verified_type
-    const creator = (audioSpace.metadata.creator_results as any).result
+    const creator = (audioSpace.metadata!.creator_results as any).result
     expect(creator.is_blue_verified).toBeUndefined()
     expect(creator.legacy.verified_type).toBeUndefined()
 
@@ -210,7 +209,7 @@ describe('AC-SPACE-008: request layer targets AudioSpaceById', () => {
     expect(config.method).toBe('get')
     expect(config.url).toContain('/graphql/HPEisOmj1epUNLCWTYhUWw/AudioSpaceById')
 
-    const variables = JSON.parse(config.params.variables)
+    const variables = JSON.parse(String(config.params?.variables))
     expect(variables.id).toBe(SPACE_ID)
     expect(variables.withReplays).toBe(true)
   })

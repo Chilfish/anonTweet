@@ -2,7 +2,7 @@ import type { Route } from './+types/search'
 import type { EnrichedTweet } from '~/types'
 import { data } from 'react-router'
 import { enrichTweet } from '~/lib/react-tweet'
-import { fetchSearchTweets } from '~/lib/react-tweet/utils/get-tweet'
+import { fetchSearchTweets } from '~/lib/twitter.server'
 import { searchTweetSchema } from '~/lib/validations/search'
 
 export interface SearchResponse {

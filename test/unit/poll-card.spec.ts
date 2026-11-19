@@ -1,5 +1,5 @@
+import { mapPollCard } from '@chilfish/tweet'
 import { describe, expect, it } from 'vitest'
-import { mapPollCard } from '~/lib/react-tweet/utils/poll'
 import imagePayload from '../fixtures/poll/image.json'
 import textPayload from '../fixtures/poll/text.json'
 

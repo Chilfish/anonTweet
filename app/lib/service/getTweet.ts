@@ -1,5 +1,5 @@
 import type { EnrichedTweet, TweetData } from '~/types'
-import { getEnrichedTweet } from '~/lib/react-tweet/utils/get-tweet'
+import { getEnrichedTweet } from '~/lib/twitter.server'
 
 export async function getTweets(tweetId: string, tweetGetter: typeof getEnrichedTweet = getEnrichedTweet): Promise<TweetData> {
   let tweet = await tweetGetter(tweetId)
@@ -18,8 +18,8 @@ export async function getTweets(tweetId: string, tweetGetter: typeof getEnriched
     if (!tweet) {
       break
     }
-    if (tweet.quoted_tweet_id) {
-      quotedTweet = await tweetGetter(tweet.quoted_tweet_id)
+    if (tweet.quotedTweetId) {
+      quotedTweet = await tweetGetter(tweet.quotedTweetId)
       if (quotedTweet) {
         tweet.quotedTweet = quotedTweet
       }
@@ -37,5 +37,5 @@ export async function getTweets(tweetId: string, tweetGetter: typeof getEnriched
     tweet = parentTweet
   }
 
-  return tweets.sort((a, b) => a.id_str.localeCompare(b.id_str))
+  return tweets.sort((a, b) => a.id.localeCompare(b.id))
 }

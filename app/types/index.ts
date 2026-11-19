@@ -1,12 +1,7 @@
-import type { TweetArticle } from './article'
-import type { LinkPreviewCard } from './card'
+import type { EnrichedTweet as BaseEnrichedTweet, RawTweet } from '@chilfish/tweet'
+import type { UserData } from '@chilfish/tweet/internals'
 import type { Entity } from './entities'
-import type { TweetPoll } from './poll'
-import type { SpaceDetails } from './space'
-import type { Tweet } from './tweet'
 import type { AIVisionInfo } from './vision'
-import type { IUser } from '~/lib/rettiwt-api'
-import type { ITweetDetailsResponse } from '~/lib/rettiwt-api/types/raw/tweet/Details'
 
 export type * from './article'
 export type * from './card'
@@ -20,25 +15,19 @@ export type * from './space'
 export type * from './user'
 export type * from './video'
 
-export type RawTweet = ITweetDetailsResponse['data']['tweetResult']['result']
+export type { RawTweet }
 
-export type RawUser = IUser
+/** `fetchUserDetails` / `twitter.getUser()` 返回的 model 数据形状。 */
+export type RawUser = UserData
 
-type OmitTypes = 'entities' | 'quoted_tweet' | 'edit_control' | 'isEdited' | 'isStaleEdit' | 'possibly_sensitive' | 'news_action_type' | 'card'
-
-export type EnrichedTweet = Omit<Tweet, OmitTypes> & {
-  url: string
-  entities: Entity[]
+/**
+ * 富化推文：以 `@chilfish/tweet` 的 `EnrichedTweet` 为基础，
+ * 只追加本应用的 AI 扩展字段；`quotedTweet` / `comments` 递归使用本地类型。
+ */
+export type EnrichedTweet = Omit<BaseEnrichedTweet, 'quotedTweet' | 'comments'> & {
   autoTranslationEntities?: Entity[]
   visionInfo?: AIVisionInfo[]
-  quoted_tweet_id?: string
   quotedTweet?: EnrichedTweet
-  card?: LinkPreviewCard
-  poll?: TweetPoll
-  article?: TweetArticle
-  space?: SpaceDetails
-  retweetedOrignalId?: string
-  isInlineMeida?: boolean
   comments?: EnrichedTweet[]
 }
 

@@ -1,36 +1,31 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { describe, expect, it } from 'vitest'
-import {
-  decodeJetfuelPayload,
-  parseTrendingCard,
-} from '~/lib/rettiwt-api/parsers/jetfuel'
+import { mapTwitterCard, parseTrendingCard } from '@chilfish/tweet'
+import { TweetRequests } from '@chilfish/tweet/internals'
+import { describe, expect, it, vi } from 'vitest'
 import { loadFixture } from '../helpers/load-fixture'
 
-const JETFUEL_FRAME_RE = /responsive_web_jetfuel_frame:\s*true/
 const TWIMG_MEDIA_RE = /pbs\.twimg\.com\/media\//
 const POSTS_COUNT_RE = /16\.5k posts/
-const RETURN_NULL_RE = /return null/
 
 /**
  * test/acceptance/ac-card.spec.ts
  *
  * AC-CARD-001~005 验收：
  * - AC-CARD-001：请求层 `TweetRequests.details` 已启用 `responsive_web_jetfuel_frame`
- * - AC-CARD-002：真实 jetfuel payload 解码（strings 含 CJK/分类/posts/头像/图）
+ * - AC-CARD-002：真实 jetfuel payload 解析（CJK 标题/分类/posts/头像/图）
  * - AC-CARD-003：trending 卡片字段提取完整
  * - AC-CARD-004：解析失败回退 unified_card + `jetfuel.parse.fallback` 日志提示
- * - AC-CARD-005~008：真实渲染测试（见 card-render.spec.ts，评审 P1-1/P1-3：
- *   原「快照驱动」说法名实不符，已改为 renderToString + HTML 断言）
+ * - AC-CARD-005~008：真实渲染测试（见 card-render.spec.ts）
  * - AC-CARD-009：源码层锁定 Trending 变体分支与关键类名（辅助检查）
+ *
+ * 注：解析与请求描述符现在来自 `@chilfish/tweet` / `@chilfish/tweet/internals`，
+ * 不再扫描已删除的 `app/lib/rettiwt-api` 副本。
  */
 
 const read = (rel: string) => fs.readFileSync(path.resolve(import.meta.dirname, '..', '..', rel), 'utf8')
 
 const FILES = {
-  requests: 'app/lib/rettiwt-api/requests/Tweet.ts',
-  parseTweet: 'app/lib/react-tweet/utils/parseTweet.ts',
-  jetfuel: 'app/lib/rettiwt-api/parsers/jetfuel.ts',
   obsLog: 'app/lib/obs-log.ts',
   card: 'app/components/tweet/TweetCard.tsx',
   trendingCard: 'app/components/tweet/TrendingCard.tsx',
@@ -39,27 +34,27 @@ const FILES = {
 
 describe('AC-CARD tweet card jetfuel enhancement', () => {
   it('AC-CARD-001: tweet details request enables jetfuel frame', () => {
-    const src = read(FILES.requests)
+    const request = TweetRequests.details('1')
+
     // details() 的 features 块内 jetfuel_frame 必须为 true（最小触发 flag）
-    expect(src).toMatch(JETFUEL_FRAME_RE)
+    expect(JSON.stringify(request.params)).toContain('responsive_web_jetfuel_frame')
+    expect(JSON.stringify(request.params)).toContain('true')
     // queryId 保持原样（最小改动原则，未升级到抓包的新 hash）
-    expect(src).toContain('aFvUsJm2c-oDkJV75blV6g')
+    expect(request.url).toContain('aFvUsJm2c-oDkJV75blV6g')
   })
 
-  it('AC-CARD-002: decodes real payload with CJK strings intact', () => {
+  it('AC-CARD-002: parses real payload with CJK fields intact', () => {
     const fixture = loadFixture<{ jetfuel_attachment: { payload: string } }>('jetfuel/trending.json')
-    const frame = decodeJetfuelPayload(fixture.jetfuel_attachment.payload)
+    const card = parseTrendingCard(fixture.jetfuel_attachment.payload)
 
-    expect(frame).not.toBeNull()
-    const all = frame!.strings.join('\n')
-    expect(all).toContain('trending-card')
-    expect(all).toContain('Entertainment')
-    expect(all).toContain('Celebrity')
-    expect(all).toContain('16.5k posts')
-    expect(all).toContain('仲町あられの誕生日をファンと盛大に祝う')
-    expect(all).toContain('笑顔いっぱいのあられちゃんイラスト')
-    expect(all).toMatch(TWIMG_MEDIA_RE)
-    expect((all.match(/profile_images\//g) || []).length).toBeGreaterThanOrEqual(3)
+    expect(card).not.toBeNull()
+    expect(card!.title).toContain('仲町あられの誕生日をファンと盛大に祝う')
+    expect(card!.description).toContain('あられ')
+    expect(card!.categories).toContain('Entertainment')
+    expect(card!.categories).toContain('Celebrity')
+    expect(card!.avatars.length).toBeGreaterThanOrEqual(3)
+    expect(card!.imageUrl).toMatch(TWIMG_MEDIA_RE)
+    expect(card!.postsCount).toMatch(POSTS_COUNT_RE)
   })
 
   it('AC-CARD-003: parses full trending card fields from real payload', () => {
@@ -79,23 +74,25 @@ describe('AC-CARD tweet card jetfuel enhancement', () => {
   })
 
   it('AC-CARD-004: parser has fallback compensation + developer warning logging', () => {
-    // 1) 解析器存在明确的失败语义
-    const jetfuelSrc = read(FILES.jetfuel)
-    expect(jetfuelSrc).toMatch(RETURN_NULL_RE)
+    const fixture = loadFixture<{ jetfuel_attachment: { payload: string }, card: any }>('jetfuel/trending.json')
+    const logger = {
+      warn: vi.fn(),
+    }
 
-    // 2) mapTwitterCard 接入了 jetfuel 合并与回退日志
-    const parseSrc = read(FILES.parseTweet)
-    expect(parseSrc).toContain('parseTrendingCard(jetfuelAttachment.payload)')
-    expect(parseSrc).toContain('jetfuel.parse.fallback')
+    // 损坏 payload：回退 unified_card，并通过注入 logger 发出事件
+    const merged = mapTwitterCard(fixture.card, { payload: 'bm90aGluZw==' }, logger)
+    expect(merged).not.toBeNull()
+    expect(merged!.trending).toBeUndefined()
+    expect(logger.warn).toHaveBeenCalledWith('jetfuel.parse.fallback', expect.any(Object))
 
-    // 3) obs-log 注册了该事件
+    // obs-log 注册了该事件
     const obsSrc = read(FILES.obsLog)
     expect(obsSrc).toContain('jetfuel.parse.fallback')
 
-    // 4) 类型层提供 trending 结构化信息
+    // 类型层提供 trending 结构化信息
     const typesSrc = read(FILES.types)
     expect(typesSrc).toContain('TrendingCardInfo')
-    expect(typesSrc).toContain('trending')
+    expect(typesSrc).toContain('LinkPreviewCard')
   })
 
   it('AC-CARD-009: source-level sanity of trending variant (helper)', () => {

@@ -218,7 +218,7 @@ export function useTweets() {
  * 翻译弹窗的 `updateTweet` / `setTranslation` 才能实时反映到卡片渲染。
  */
 export function useTweetById(tweetId: string): EnrichedTweet | undefined {
-  return useTranslationStore(state => state.tweets.find(t => t.id_str === tweetId))
+  return useTranslationStore(state => state.tweets.find(t => t.id === tweetId))
 }
 
 export function useMainTweet() {
@@ -233,7 +233,7 @@ export function useExcludeCommentsTweets(): EnrichedTweet[] {
 
     const seenIds = new Set<string>()
     return tweets.filter((tweet) => {
-      const id = tweet.id_str
+      const id = tweet.id
       if (excludedSet.has(id)) {
         return false
       }

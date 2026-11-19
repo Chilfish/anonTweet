@@ -36,9 +36,9 @@ async function translateTweetsForScreenshot(tweets: TweetData, baseUrl: string):
   const seen = new Set<string>()
 
   async function translateChain(tweet: EnrichedTweet) {
-    if (seen.has(tweet.id_str))
+    if (seen.has(tweet.id))
       return
-    seen.add(tweet.id_str)
+    seen.add(tweet.id)
     const ai = screenshotAI
     if (!ai)
       return
@@ -65,7 +65,7 @@ async function translateTweetsForScreenshot(tweets: TweetData, baseUrl: string):
       }
     }
     catch (error: unknown) {
-      console.error(`[plain] AI translate tweet ${tweet.id_str} failed:`, error)
+      console.error(`[plain] AI translate tweet ${tweet.id} failed:`, error)
     }
   }
 
@@ -108,10 +108,10 @@ export async function loader({
     await translateTweetsForScreenshot(tweets, baseUrl)
   }
 
-  const isRetweet = tweets[0] && tweets[0].retweetedOrignalId && tweets[0].retweetedOrignalId !== tweets[0].id_str
+  const isRetweet = tweets[0] && tweets[0].retweetedOriginalId && tweets[0].retweetedOriginalId !== tweets[0].id
 
   if (isRetweet) {
-    return redirect(`/tweets/${tweets[0]?.id_str}`)
+    return redirect(`/tweets/${tweets[0]?.id}`)
   }
   return {
     tweets,

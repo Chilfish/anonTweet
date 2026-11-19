@@ -79,7 +79,7 @@ function createDownloadItem(
   imageSize: DownloadImageSize,
 ): DownloadItem {
   // 防御性编程：如果没有 ID，说明数据源已损坏，这里做降级处理但记录警告
-  const id = tweet.id_str ?? 'unknown-id'
+  const id = tweet.id ?? 'unknown-id'
   const username = tweet.user.screen_name ?? 'unknown-user'
 
   // 使用 tweet 原始时间，若无则回退，但不建议使用 Date.now() 混淆历史数据

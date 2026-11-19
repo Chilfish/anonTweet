@@ -1,6 +1,6 @@
 import { generateEntityContext } from '~/lib/AITranslation'
 import { restoreEntities, serializeForAI } from '~/lib/react-tweet'
-import { getEnrichedTweet } from '~/lib/react-tweet/utils/get-tweet'
+import { getEnrichedTweet } from '~/lib/twitter.server'
 
 const tweet = await getEnrichedTweet('2006262603186835664')
 if (!tweet) {

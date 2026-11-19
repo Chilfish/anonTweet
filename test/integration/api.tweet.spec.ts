@@ -16,20 +16,20 @@ const HTTP_ERROR_RE = /HTTP [45]\d{2}/
 describe.skipIf(!testEnv.hasServer || !testEnv.hasTweetKeys)('AC-TWEET-005/008 tweet API (needs TWEET_KEYS + server)', () => {
   it('AC-TWEET-005: API endpoint returns tweet', async () => {
     const tweet = loadFixture<EnrichedTweet>('tweets/normal-ja.json')
-    const result = await getClient().tweet.get({ tweetId: tweet.id_str })
+    const result = await getClient().tweet.get({ tweetId: tweet.id })
 
     expect(result.length).toBeGreaterThan(0)
-    expect(result[0]!.id_str).toBeTruthy()
+    expect(result[0]!.id).toBeTruthy()
   })
 
   it('AC-TWEET-008: GET/POST consistency', async () => {
     const tweet = loadFixture<EnrichedTweet>('tweets/normal-ja.json')
     const [postResult, getResult] = await Promise.all([
-      getClient().tweet.get({ tweetId: tweet.id_str }),
-      getClient().tweet.getById(tweet.id_str),
+      getClient().tweet.get({ tweetId: tweet.id }),
+      getClient().tweet.getById(tweet.id),
     ])
 
-    expect(postResult[0]!.id_str).toBe(getResult[0]!.id_str)
+    expect(postResult[0]!.id).toBe(getResult[0]!.id)
   })
 })
 
@@ -63,7 +63,7 @@ describe.skipIf(!testEnv.hasServer || !testEnv.hasTweetKeys)('AC-TWEET-010 tweet
 
     // 元素格式同 /api/tweet/get（EnrichedTweet）
     for (const tweet of result.tweets) {
-      expect(tweet.id_str).toBeTruthy()
+      expect(tweet.id).toBeTruthy()
       expect(tweet.text).toBeTruthy()
       expect(Array.isArray(tweet.entities)).toBe(true)
       expect(tweet.user?.screen_name).toBeTruthy()
