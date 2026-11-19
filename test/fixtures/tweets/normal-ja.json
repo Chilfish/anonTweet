@@ -6,19 +6,18 @@
     "schema": "EnrichedTweet"
   },
   "data": {
-    "id_str": "2032649981690261684",
     "lang": "ja",
     "url": "https://twitter.com/kohinatamika/status/2032649981690261684",
     "created_at": "Sat Mar 14 02:48:15 +0000 2026",
     "__typename": "Tweet",
     "text": "本日お誕生日を迎えました🎂\n\n素敵な皆様に囲まれ生きれている日々、本当に幸せ者です。\n\n出会ってくださる全ての皆様、\n応援してくれる #こひなた民 の皆への感謝を胸に、\nこの一年も飛躍の年にできますよう頑張ってまいります…！\n\nこれからもよろしくお願いいたします✨ https://t.co/pskp3ufQqM",
     "user": {
-      "id_str": "1359055471106134016",
       "name": "小日向美香",
       "screen_name": "kohinatamika",
       "is_blue_verified": true,
       "profile_image_shape": "Circle",
-      "profile_image_url_https": "https://pbs.twimg.com/profile_images/1952701283900772352/nGxs0NJL.jpg"
+      "profile_image_url_https": "https://pbs.twimg.com/profile_images/1952701283900772352/nGxs0NJL.jpg",
+      "id": "1359055471106134016"
     },
     "entities": [
       {
@@ -49,7 +48,6 @@
         "type": "photo"
       }
     ],
-    "isInlineMeida": false,
     "autoTranslationEntities": [
       {
         "type": "text",
@@ -69,6 +67,8 @@
         "index": 2,
         "translation": " 的大家的感激之情，\n为了让这一年也能成为飞跃的一年，我会继续努力的……！\n\n今后也请多多关照✨"
       }
-    ]
+    ],
+    "id": "2032649981690261684",
+    "isInlineMedia": false
   }
 }

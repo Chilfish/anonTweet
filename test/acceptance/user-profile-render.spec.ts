@@ -20,6 +20,7 @@ const user: RawUser = {
   followingsCount: 56,
   statusesCount: 789,
   likeCount: 12,
+  pinnedTweets: [],
   isVerified: true,
   location: 'Tokyo',
   profileImage: 'https://pbs.twimg.com/profile_images/1722602835299500033/hXskVj9F_normal.png',

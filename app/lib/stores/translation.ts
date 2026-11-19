@@ -199,7 +199,7 @@ const createDataSlice: StateCreator<
     const cleaned = stripTranslationsFromTweets(data)
     set(state => ({
       tweets: cleaned,
-      mainTweet: cleaned.find(t => t.id_str === mainTweetId) || null,
+      mainTweet: cleaned.find(t => t.id === mainTweetId) || null,
       translations: {
         ...state.translations,
         ...extracted,
@@ -209,8 +209,8 @@ const createDataSlice: StateCreator<
 
   appendTweets: (data) => {
     const state = get()
-    const existingIds = new Set(state.tweets.map(t => t.id_str))
-    const newTweets = data.filter(t => !existingIds.has(t.id_str))
+    const existingIds = new Set(state.tweets.map(t => t.id))
+    const newTweets = data.filter(t => !existingIds.has(t.id))
 
     if (newTweets.length === 0)
       return
@@ -232,7 +232,7 @@ const createDataSlice: StateCreator<
   updateTweet: (tweetId, updates) => {
     set((state) => {
       const updateList = (list: EnrichedTweet[]) =>
-        list.map(t => (t.id_str === tweetId
+        list.map(t => (t.id === tweetId
           ? {
               ...t,
               ...updates,
@@ -240,7 +240,7 @@ const createDataSlice: StateCreator<
           : t))
 
       const newTweets = updateList(state.tweets)
-      const newMainTweet = state.mainTweet?.id_str === tweetId
+      const newMainTweet = state.mainTweet?.id === tweetId
         ? {
             ...state.mainTweet,
             ...updates,

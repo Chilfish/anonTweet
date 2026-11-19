@@ -39,7 +39,7 @@ export function useAutoTranslateTweets(
       return
 
     // 以首条推文 id 为锚点，同一数据只触发一轮（SWR 重验证等场景不重复翻译）
-    const anchor = tweets[0]!.id_str
+    const anchor = tweets[0]!.id
     if (firedForRef.current === anchor)
       return
     firedForRef.current = anchor
@@ -56,15 +56,15 @@ export function useAutoTranslateTweets(
       for (const tweet of tweets) {
         await translateIfNeeded(tweet)
         const quoted = tweet.quotedTweet
-        if (quoted && quoted.id_str && !chain.has(quoted.id_str)) {
+        if (quoted && quoted.id && !chain.has(quoted.id)) {
           await translateIfNeeded(quoted)
         }
       }
 
       async function translateIfNeeded(tweet: EnrichedTweet) {
-        if (chain.has(tweet.id_str))
+        if (chain.has(tweet.id))
           return
-        chain.add(tweet.id_str)
+        chain.add(tweet.id)
 
         const isZhTweet = tweet.lang === 'zh'
         const hasTranslation = tweet.entities?.some(e => !!e.aiTranslation)
@@ -86,10 +86,10 @@ export function useAutoTranslateTweets(
 
           if (data.success && data.data?.entities) {
             if (onTranslated) {
-              onTranslated(tweet.id_str, data.data.entities)
+              onTranslated(tweet.id, data.data.entities)
             }
             else {
-              updateTweet(tweet.id_str, {
+              updateTweet(tweet.id, {
                 entities: data.data.entities,
                 autoTranslationEntities: undefined,
               })
@@ -97,7 +97,7 @@ export function useAutoTranslateTweets(
           }
         }
         catch (error: unknown) {
-          console.error(`[AutoTranslate] tweet ${tweet.id_str} failed`, error)
+          console.error(`[AutoTranslate] tweet ${tweet.id} failed`, error)
         }
       }
     })()

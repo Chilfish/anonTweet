@@ -64,9 +64,9 @@ interface SearchResponse {
  */
 const MemoizedTweetItem = memo(({ tweet: initialTweet }: { tweet: EnrichedTweet }) => {
   const { appendTweets } = useTranslationActions()
-  const displayTweet = useTweetById(initialTweet.id_str) ?? initialTweet
+  const displayTweet = useTweetById(initialTweet.id) ?? initialTweet
   const isCapturingSelected = useIsCapturingSelected()
-  const isSelected = useIsTweetSelected(initialTweet.id_str)
+  const isSelected = useIsTweetSelected(initialTweet.id)
 
   useEffect(() => {
     appendTweets([initialTweet])
@@ -78,7 +78,7 @@ const MemoizedTweetItem = memo(({ tweet: initialTweet }: { tweet: EnrichedTweet 
   return (
     <MyTweet
       tweets={[displayTweet]}
-      mainTweetId={initialTweet.id_str}
+      mainTweetId={initialTweet.id}
     />
   )
 })
@@ -86,9 +86,9 @@ const MemoizedTweetItem = memo(({ tweet: initialTweet }: { tweet: EnrichedTweet 
 function dedupeTweets(tweets: EnrichedTweet[]): EnrichedTweet[] {
   const seen = new Set<string>()
   return tweets.filter((tweet) => {
-    if (seen.has(tweet.id_str))
+    if (seen.has(tweet.id))
       return false
-    seen.add(tweet.id_str)
+    seen.add(tweet.id)
     return true
   })
 }
@@ -449,7 +449,7 @@ export default function SearchPage() {
             {tweets.map(tweet => (
               <MemoizedTweetItem
                 tweet={tweet}
-                key={tweet.id_str}
+                key={tweet.id}
               />
             ))}
           </div>

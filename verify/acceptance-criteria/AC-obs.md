@@ -1,6 +1,6 @@
 # 可观测性结构化日志验收标准
 
-> 版本：1.1 | 日期：2026-09-27（新增 AC-OBS-002 AI 失败响应上下文；1.0 为 AC-OBS-001 结构化日志）
+> 版本：1.2 | 日期：2026-11-19（P4 验证对象从 `SmartPool.ts` 改为装配层 `twitter.server.ts`；RettiwtPool 已移入 `@chilfish/tweet`）
 > 关联 Backlog：阶段二任务 3（可观测性：翻译耗时/缓存命中率/RettiwtPool 状态结构化日志）
 > 目标：为阶段三「三层缓存规模化与命中率指标」提供指标来源
 > 执行命令：`bun run verify/index.ts --module obs` / `--ac AC-OBS-001`
@@ -20,7 +20,7 @@
 - `app/lib/AITranslation.ts`（推文翻译计时）
 - `app/lib/translateIGCaption.ts`（IG caption 翻译计时）
 - `app/lib/localCache.ts`（缓存命中/未命中）
-- `app/lib/SmartPool.ts`（轮换 / 耗尽状态）
+- `app/lib/twitter.server.ts`（把 `obsLog` 适配为包内 `RettiwtPool` 的 logger；轮换 / 耗尽事件由包发出）
 
 ### Pass 条件
 
@@ -32,8 +32,9 @@
   （失败含 `ok: false` 与 `reason`）；不含 apiKey/baseUrl 等敏感字段。
 - **P3 缓存命中（源码扫描）**：`localCache.ts` 的 `getLocalCache` 记录
   `obsLog('cache.get'`，字段含 `hit`（布尔）与 `adapter`。
-- **P4 池状态（源码扫描）**：`SmartPool.ts` 记录 `obsLog('pool.rotate'`（轮换/冷却）与
-  `obsLog('pool.exhaust'`（全部 Key 耗尽）。
+- **P4 池状态（源码扫描）**：装配层 `twitter.server.ts` 用 `createClient({ ..., logger })`
+  把 `obsLog` 适配为包内 `RettiwtPool` 的 logger；`pool.rotate`（轮换/冷却）与
+  `pool.exhaust`（全部 Key 耗尽）事件由 `@chilfish/tweet` 发出。
 - **P5 单元测试**：`obsLog` 输出为可解析的单行 JSON（含 `ts`+`event`）；`suffix` 截断/短值原样。
 
 ### 验收命令

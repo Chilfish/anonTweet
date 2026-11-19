@@ -1,20 +1,19 @@
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
+import { mapTwitterCard, parseTrendingCard } from '@chilfish/tweet'
 import { describe, expect, it, vi } from 'vitest'
-import {
-  decodeJetfuelPayload,
-  extractJetfuelStrings,
-  parseTrendingCard,
-} from '~/lib/rettiwt-api/parsers/jetfuel'
 
 const POSTS_COUNT_RE = /16\.5k posts/
 
 /**
  * test/unit/jetfuel.spec.ts
  *
- * P0 覆盖（postmortem #001 解析器先测后写）：jetfuel payload 解码、trending 卡片
- * 字段提取、CJK 字符串提取、损坏/空 payload 回退、mapTwitterCard 合并策略。
+ * P0 覆盖（postmortem #001 解析器先测后写）：trending 卡片字段提取、CJK 字符串、
+ * 损坏/空 payload 回退、mapTwitterCard 合并策略。
  * fixture：test/fixtures/jetfuel/trending.json（真实推文 2089577916694942006）。
+ *
+ * 注：`decodeJetfuelPayload` / `extractJetfuelStrings` 属于包内实现细节，未从
+ * `@chilfish/tweet` 导出；这里通过 `parseTrendingCard` 做端到端行为覆盖。
  */
 
 function loadFixture() {
@@ -25,56 +24,29 @@ function loadFixture() {
   }
 }
 
-// ─── decodeJetfuelPayload ───────────────────────────────────
-
-describe('decodeJetfuelPayload', () => {
-  it('AC-CARD-002: decodes real payload and keeps CJK strings intact', () => {
-    const { jetfuel_attachment } = loadFixture()
-    const frame = decodeJetfuelPayload(jetfuel_attachment.payload)
-
-    expect(frame).not.toBeNull()
-    expect(frame!.strings.length).toBeGreaterThan(5)
-
-    const all = frame!.strings.join('\n')
-    expect(all).toContain('trending-card')
-    expect(all).toContain('Entertainment')
-    expect(all).toContain('Celebrity')
-    expect(all).toContain('16.5k posts')
-    // CJK 不被截断（emusks 的 ASCII-only 实现会丢标题）
-    expect(all).toContain('仲町あられの誕生日をファンと盛大に祝う')
-    expect(all).toContain('笑顔いっぱいのあられちゃんイラスト')
-    // 图片与头像 URL
-    const mediaMatches = all.match(/pbs\.twimg\.com\/media\//g) || []
-    const avatarMatches = all.match(/profile_images\//g) || []
-    expect(mediaMatches.length).toBeGreaterThanOrEqual(1)
-    expect(avatarMatches.length).toBeGreaterThanOrEqual(3)
-  })
-
-  it('returns null for empty / garbage input', () => {
-    expect(decodeJetfuelPayload('')).toBeNull()
-    expect(decodeJetfuelPayload('!!!not-base64!!!')).toBeNull()
-    // "aGVsbG8=" = "hello"（<6 字节，不足 framing 头）应返回 null
-    expect(decodeJetfuelPayload('aGVsbG8=')).toBeNull()
-    // 长度足够但内容无可提取字符串的合法 base64 → 返回帧对象（strings 为空）
-    const frame = decodeJetfuelPayload('aGVsbG8gd29ybGQgdGhpcyBpcyBhIGxvbmcgc3RyaW5nIHRvIHRlc3Q=')
-    expect(frame).not.toBeNull()
-  })
-})
-
-// ─── extractJetfuelStrings ───────────────────────────────────
-
-describe('extractJetfuelStrings', () => {
-  it('AC-CARD-002: extracts length-prefixed UTF-8 strings incl. CJK', () => {
-    const { jetfuel_attachment } = loadFixture()
-    const strings = extractJetfuelStrings(jetfuel_attachment.payload)
-    expect(strings.includes('仲町あられの誕生日をファンと盛大に祝う')).toBe(true)
-    expect(strings.some(s => s.includes('16.5k posts'))).toBe(true)
-  })
-})
-
-// ─── parseTrendingCard ───────────────────────────────────────
-
 describe('parseTrendingCard', () => {
+  it('AC-CARD-002: decodes real payload and keeps CJK fields intact', () => {
+    const { jetfuel_attachment } = loadFixture()
+    const card = parseTrendingCard(jetfuel_attachment.payload)
+
+    expect(card).not.toBeNull()
+    // CJK 不被截断（emusks 的 ASCII-only 实现会丢标题）
+    expect(card!.title).toBe('仲町あられの誕生日をファンと盛大に祝う')
+    expect(card!.description).toContain('あられ')
+    expect(card!.categories).toContain('Entertainment')
+    expect(card!.categories).toContain('Celebrity')
+    expect(card!.avatars.length).toBeGreaterThanOrEqual(3)
+    expect(card!.postsCount).toMatch(POSTS_COUNT_RE)
+    expect(card!.imageUrl).toContain('pbs.twimg.com/media/')
+  })
+
+  it('returns null for empty / garbage / too-short input', () => {
+    expect(parseTrendingCard('')).toBeNull()
+    expect(parseTrendingCard('!!!not-base64!!!')).toBeNull()
+    // "aGVsbG8=" = "hello"（<6 字节，不足 framing 头）
+    expect(parseTrendingCard('aGVsbG8=')).toBeNull()
+  })
+
   it('AC-CARD-003: extracts full trending card fields', () => {
     const { jetfuel_attachment } = loadFixture()
     const card = parseTrendingCard(jetfuel_attachment.payload)
@@ -91,11 +63,6 @@ describe('parseTrendingCard', () => {
     expect(card!.description && card!.description.length).toBeGreaterThan(50)
   })
 
-  it('returns null for damaged payload (fallback trigger)', () => {
-    expect(parseTrendingCard('')).toBeNull()
-    expect(parseTrendingCard('bm90aGluZw==')).toBeNull() // "nothing"
-  })
-
   it('returns null when critical fields (title/image) are missing', () => {
     // 构造只有随机字符串的假 payload：字符串里没有 media URL 与 CJK 标题
     const bogus = Buffer.from([
@@ -108,13 +75,10 @@ describe('parseTrendingCard', () => {
   })
 })
 
-// ─── mapTwitterCard + jetfuel 合并（回退补偿）──────────────
-
 describe('mapTwitterCard with jetfuel merge', () => {
   const { card, jetfuel_attachment } = loadFixture()
 
-  it('AC-CARD-004: merges jetfuel data over unified_card when payload valid', async () => {
-    const { mapTwitterCard } = await import('~/lib/react-tweet/utils/parseTweet')
+  it('AC-CARD-004: merges jetfuel data over unified_card when payload valid', () => {
     const merged = mapTwitterCard(card, jetfuel_attachment)
 
     expect(merged).not.toBeNull()
@@ -126,32 +90,29 @@ describe('mapTwitterCard with jetfuel merge', () => {
     expect(merged!.imageUrl).toContain('HPxZhM0aQAAZxz3.jpg')
   })
 
-  it('AC-CARD-004: falls back to unified_card and logs when payload damaged', async () => {
-    const { mapTwitterCard } = await import('~/lib/react-tweet/utils/parseTweet')
-    const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
+  it('AC-CARD-004: falls back to unified_card and logs when payload damaged', () => {
+    const logger = {
+      warn: vi.fn(),
+    }
 
-    const merged = mapTwitterCard(card, { payload: 'bm90aGluZw==' })
+    const merged = mapTwitterCard(card, { payload: 'bm90aGluZw==' }, logger)
     expect(merged).not.toBeNull()
     expect(merged!.title).toBe('仲町あられの誕生日をファンと盛大に祝う') // unified_card 兜底
     expect(merged!.trending).toBeUndefined()
 
-    // 开发者提示日志
-    const logCalls = spy.mock.calls.map(c => c.join(' '))
-    expect(logCalls.some(l => l.includes('jetfuel.parse.fallback'))).toBe(true)
-    spy.mockRestore()
+    expect(logger.warn).toHaveBeenCalledWith('jetfuel.parse.fallback', expect.any(Object))
   })
 
-  it('AC-CARD-004: no jetfuel attachment -> silent unified_card result, no fallback log', async () => {
-    const { mapTwitterCard } = await import('~/lib/react-tweet/utils/parseTweet')
-    const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
+  it('AC-CARD-004: no jetfuel attachment -> silent unified_card result, no fallback log', () => {
+    const logger = {
+      warn: vi.fn(),
+    }
 
-    const merged = mapTwitterCard(card)
+    const merged = mapTwitterCard(card, undefined, logger)
     expect(merged).not.toBeNull()
     expect(merged!.title).toBe('仲町あられの誕生日をファンと盛大に祝う')
     expect(merged!.trending).toBeUndefined()
 
-    const logCalls = spy.mock.calls.map(c => c.join(' '))
-    expect(logCalls.some(l => l.includes('jetfuel.parse.fallback'))).toBe(false)
-    spy.mockRestore()
+    expect(logger.warn).not.toHaveBeenCalled()
   })
 })

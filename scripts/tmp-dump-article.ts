@@ -1,13 +1,13 @@
 import { mkdir, writeFile } from 'node:fs/promises'
-import { twitterPool } from '~/lib/react-tweet/utils/get-tweet'
-import { ResourceType } from '~/lib/rettiwt-api'
+import { ResourceType } from '@chilfish/tweet'
+import { twitter } from '~/lib/twitter.server'
 
 const ids = process.argv.slice(2)
 
 await mkdir('test/fixtures/articles', { recursive: true })
 
 for (const id of ids) {
-  const response = await twitterPool.run(async fetcher =>
+  const response = await twitter.run(async fetcher =>
     fetcher.request<any>(ResourceType.TWEET_DETAILS, { id }),
   )
   const result = response.data.tweetResult.result

@@ -1,6 +1,6 @@
-import type { FetcherService } from '~/lib/rettiwt-api'
+import type { FetcherService } from '@chilfish/tweet'
+import { RettiwtPool } from '@chilfish/tweet'
 import { describe, expect, it, vi } from 'vitest'
-import { RettiwtPool } from '~/lib/SmartPool'
 
 const ALL_KEYS_EXHAUSTED_RE = /All keys exhausted/
 const FORBIDDEN_RE = /forbidden/

@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, GalleryHorizontalEnd, LayoutGrid, Play } fro
 import { useRef, useState } from 'react'
 import { MediaImage } from '~/components/ui/media'
 import { normalizeMediaUrl } from '~/lib/media-url'
+import { localizeCtaLabel } from '~/lib/react-tweet/utils'
 import { useProxyMedia } from '~/lib/stores/appConfig'
 import { useScreenshoting } from '~/lib/stores/hooks'
 import { cn } from '~/lib/utils'
@@ -272,7 +273,7 @@ export function CarouselCardView({
             rel="noopener noreferrer"
             className="shrink-0 rounded-full bg-foreground px-3 py-1 text-xs font-semibold text-background transition-opacity hover:opacity-80"
           >
-            {card.ctaLabel}
+            {localizeCtaLabel(card.ctaLabel)}
           </a>
         )}
 

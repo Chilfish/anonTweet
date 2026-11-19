@@ -25,7 +25,7 @@ const FILES = {
   aiTweet: 'app/lib/AITranslation.ts',
   aiIG: 'app/lib/translateIGCaption.ts',
   cache: 'app/lib/localCache.ts',
-  pool: 'app/lib/SmartPool.ts',
+  pool: 'app/lib/twitter.server.ts',
 } as const
 
 describe('AC-OBS-001: structured JSON observability logs', () => {
@@ -71,9 +71,11 @@ describe('AC-OBS-001: structured JSON observability logs', () => {
     expect(src).toMatch(ADAPTER_NAME_RE)
   })
 
-  it('pool logs rotation and exhaustion events', () => {
+  it('pool logger is wired at the assembly layer', () => {
     const src = read(FILES.pool)
-    expect(src).toContain('obsLog(\'pool.rotate\'')
-    expect(src).toContain('obsLog(\'pool.exhaust\'')
+    // 包内的 RettiwtPool 负责发出事件；装配层必须把 obsLog 适配成 logger 传入。
+    expect(src).toContain('createClient({')
+    expect(src).toContain('logger')
+    expect(src).toContain('obsLog(event as ObsEvent')
   })
 })

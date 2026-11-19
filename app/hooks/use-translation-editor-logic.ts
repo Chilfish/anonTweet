@@ -56,7 +56,7 @@ function prepareInitialEntities(
 }
 
 export function useTranslationEditorLogic(originalTweet: EnrichedTweet) {
-  const tweetId = originalTweet.id_str
+  const tweetId = originalTweet.id
   const [isOpen, setIsOpen] = useState(false)
   const [isAITranslating, setIsAITranslating] = useState(false)
 

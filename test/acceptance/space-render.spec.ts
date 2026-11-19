@@ -1,11 +1,11 @@
-import type { IRawAudioSpace } from '~/lib/rettiwt-api'
+import type { IAudioSpace } from '@chilfish/tweet'
 import type { EnrichedTweet, SpaceDetails } from '~/types'
+import { mapSpaceDetails } from '@chilfish/tweet'
 import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { TweetSpaceCard } from '~/components/tweet/TweetSpaceCard'
 import { TweetBody } from '~/lib/react-tweet'
-import { mapSpaceDetails } from '~/lib/react-tweet/utils/space'
 import { loadFixture } from '../helpers/load-fixture'
 
 /**
@@ -143,7 +143,7 @@ describe('AC-SPACE-009: deleted space renders an explanatory tombstone', () => {
 })
 
 describe('AC-SPACE-010: replay-disabled space offers no playback', () => {
-  const endedSpace = loadFixture<IRawAudioSpace>('space/audio-space-ended.json')
+  const endedSpace = loadFixture<IAudioSpace>('space/audio-space-ended.json')
   // 以真实元数据为底，仅关闭回放开关 —— availability 交由 mapper 推导，保持链路真实
   const replayDisabled = mapSpaceDetails('1yoKMPnjEbOxQ', {
     ...endedSpace,

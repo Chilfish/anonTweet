@@ -139,7 +139,7 @@ function TranslationEditorInner({
             )}
 
             <ToggleTransButton
-              tweetId={originalTweet.id_str}
+              tweetId={originalTweet.id}
               variant="outline"
               size="sm"
               className="text-muted-foreground hover:text-foreground"

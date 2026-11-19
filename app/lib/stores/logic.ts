@@ -36,7 +36,7 @@ export function extractTranslationsFromEntities(tweets: EnrichedTweet | Enriched
     )
 
     if (hasTranslation) {
-      extracted[tweet.id_str] = tweet.entities
+      extracted[tweet.id] = tweet.entities
     }
   }
 
@@ -97,12 +97,12 @@ export function stripTranslationsFromTweets(tweets: EnrichedTweet[]): EnrichedTw
 /** 递归查找所有后代 Tweet ID (纯函数) */
 export function findDescendantIds(allTweets: EnrichedTweet[], parentId: string): string[] {
   const children = allTweets.filter(t => t.in_reply_to_status_id_str === parentId)
-  let ids = children.map(t => t.id_str)
+  let ids = children.map(t => t.id)
 
   children.forEach((child) => {
     ids = [
       ...ids,
-      ...findDescendantIds(allTweets, child.id_str),
+      ...findDescendantIds(allTweets, child.id),
     ]
   })
 

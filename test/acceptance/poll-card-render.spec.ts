@@ -1,9 +1,9 @@
 import type { TweetPoll } from '~/types'
+import { mapPollCard } from '@chilfish/tweet'
 import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { PollCardView } from '~/components/tweet/PollCard'
-import { mapPollCard } from '~/lib/react-tweet/utils/poll'
 import imagePayload from '../fixtures/poll/image.json'
 import textPayload from '../fixtures/poll/text.json'
 

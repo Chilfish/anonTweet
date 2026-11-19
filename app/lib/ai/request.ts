@@ -132,7 +132,7 @@ export function requestTweetTranslation(
 ): Promise<AIResponse<TweetTranslationData>> {
   return dispatch(AI_TRANSLATION_ENDPOINT, payload, {
     errorCode: 'Failed to generate text',
-    targetId: payload.tweet.id_str,
+    targetId: payload.tweet.id,
     targetType: 'tweet',
     model: payload.model,
     provider: payload.provider,
@@ -146,7 +146,7 @@ export function requestTweetTranslation(
       apiKey: payload.apiKey,
       thinkingLevel: payload.thinkingLevel,
     })
-    return { tweetId: payload.tweet.id_str, entities }
+    return { tweetId: payload.tweet.id, entities }
   })
 }
 
@@ -257,7 +257,7 @@ export function requestVisionGenerate(
 ): Promise<AIResponse<VisionGenerateData>> {
   return dispatch(AI_VISION_ENDPOINT, payload, {
     errorCode: 'Vision generation failed',
-    targetId: payload.tweet.id_str,
+    targetId: payload.tweet.id,
     targetType: 'tweet',
     model: payload.model,
     provider: payload.provider,
@@ -268,7 +268,7 @@ export function requestVisionGenerate(
 }
 
 export interface VisionTranslatePayload {
-  tweet: { id_str: string, text: string }
+  tweet: { id: string, text: string }
   items: Array<{ index: number, originalText: string }>
   apiKey: string
   model: string
@@ -287,7 +287,7 @@ export function requestVisionTranslate(
 ): Promise<AIResponse<VisionTranslateData>> {
   return dispatch(AI_VISION_ENDPOINT, { action: 'translate', ...payload }, {
     errorCode: 'Vision OCR translation failed',
-    targetId: payload.tweet.id_str,
+    targetId: payload.tweet.id,
     targetType: 'tweet',
     model: payload.model,
     provider: payload.provider,

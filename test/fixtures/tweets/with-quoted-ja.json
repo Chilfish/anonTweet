@@ -6,19 +6,18 @@
     "schema": "EnrichedTweet"
   },
   "data": {
-    "id_str": "2069391558357688803",
     "lang": "ja",
     "url": "https://twitter.com/Watase_Yuzuki/status/2069391558357688803",
     "created_at": "Tue Jun 23 12:06:09 +0000 2026",
     "__typename": "Tweet",
     "text": "明日の21時からは #6げんめっ❕\n遊びに来てね~( *ˊᵕˋ*) https://t.co/CyefGfDAeS",
     "user": {
-      "id_str": "1253494572841201665",
       "name": "渡瀬 結月",
       "screen_name": "Watase_Yuzuki",
       "is_blue_verified": false,
       "profile_image_shape": "Circle",
-      "profile_image_url_https": "https://pbs.twimg.com/profile_images/1915924842475671552/NR21FUt2.jpg"
+      "profile_image_url_https": "https://pbs.twimg.com/profile_images/1915924842475671552/NR21FUt2.jpg",
+      "id": "1253494572841201665"
     },
     "entities": [
       {
@@ -41,7 +40,6 @@
         "aiTranslation": "❕\n欢迎来玩哦~( *ˊᵕˋ*)"
       }
     ],
-    "quoted_tweet_id": "2063856871824584747",
     "mediaDetails": [
       {
         "index": 0,
@@ -53,21 +51,19 @@
         "type": "photo"
       }
     ],
-    "isInlineMeida": false,
     "quotedTweet": {
-      "id_str": "2063856871824584747",
       "lang": "ja",
       "url": "https://twitter.com/6genme/status/2063856871824584747",
       "created_at": "Mon Jun 08 05:33:17 +0000 2026",
       "__typename": "Tweet",
       "text": "『#渡瀬結月 の #６げんめっ！』#15\n\n６月の放送日は6/24（水）21時～です！  \n放送ページはこちらから！↓ \nhttps://t.co/v34aHROs13\n\n🎸チャンネル会員も随時募集中！🎸\nhttps://t.co/svmMUOo6NW \n公式HPのリンクはこちら！↓   https://t.co/MrXtF5Ydu3   \n\n今月もお楽しみに！    \n\n #ゆむんちゅ",
       "user": {
-        "id_str": "1910260789350682624",
         "name": "渡瀬結月の６げんめっ！",
         "screen_name": "6genme",
         "is_blue_verified": false,
         "profile_image_shape": "Circle",
-        "profile_image_url_https": "https://pbs.twimg.com/profile_images/1910261300489551872/qvYWaoMv.jpg"
+        "profile_image_url_https": "https://pbs.twimg.com/profile_images/1910261300489551872/qvYWaoMv.jpg",
+        "id": "1910260789350682624"
       },
       "entities": [
         {
@@ -160,7 +156,11 @@
         "domain": "live.nicovideo.jp",
         "imageUrl": "https://pbs.twimg.com/media/HQVvgGIbAAAWXed.jpg"
       },
-      "isInlineMeida": false
-    }
+      "id": "2063856871824584747",
+      "isInlineMedia": false
+    },
+    "id": "2069391558357688803",
+    "quotedTweetId": "2063856871824584747",
+    "isInlineMedia": false
   }
 }

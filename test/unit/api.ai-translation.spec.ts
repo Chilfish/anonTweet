@@ -37,7 +37,7 @@ describe('/api/ai/ai-translation', () => {
     const req = new Request('http://localhost/api/ai/ai-translation', {
       method: 'POST',
       body: JSON.stringify({
-        tweet: { id_str: '1', lang: 'en' },
+        tweet: { id: '1', lang: 'en' },
         enableAITranslation: true,
         apiKey: '',
         model: '',
@@ -57,7 +57,7 @@ describe('/api/ai/ai-translation', () => {
       method: 'POST',
       body: JSON.stringify({
         tweet: {
-          id_str: '1',
+          id: '1',
           lang: 'en',
           text: 'a',
           entities: [],

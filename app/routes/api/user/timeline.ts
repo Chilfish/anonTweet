@@ -1,8 +1,8 @@
 import type { Route } from './+types/timeline'
 import { data } from 'react-router'
 import { env } from '~/lib/env.server'
-import { getEnrichedUserTimeline } from '~/lib/react-tweet/utils/get-tweet'
 import { getDBUser } from '~/lib/service/getUser.server'
+import { getEnrichedUserTimeline } from '~/lib/twitter.server'
 
 /**
  * 用户时间线接口：功能开关 `ENABLE_TIMELINE` 控制（默认关闭）。

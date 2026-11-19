@@ -10,7 +10,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const fetchSearchTweetsMock = vi.fn()
 
-vi.mock('~/lib/react-tweet/utils/get-tweet', () => ({
+vi.mock('~/lib/twitter.server', () => ({
   fetchSearchTweets: (...args: unknown[]) => fetchSearchTweetsMock(...args),
 }))
 

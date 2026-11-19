@@ -35,11 +35,11 @@ export const Display: Story = {
       seed={() => seedTranslation({
         translationMode: 'bilingual',
         translationVisibility: {
-          [tweetEnglish.id_str]: { body: true, alt: true },
+          [tweetEnglish.id]: { body: true, alt: true },
         },
       })}
     >
-      <TranslationDisplay tweetId={tweetEnglish.id_str} originalTweet={tweetEnglish} />
+      <TranslationDisplay tweetId={tweetEnglish.id} originalTweet={tweetEnglish} />
     </WithStoreState>
   ),
 }

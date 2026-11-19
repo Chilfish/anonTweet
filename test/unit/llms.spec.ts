@@ -251,7 +251,7 @@ describe('AC-LLMS-002: openapi.json is a valid OpenAPI 3.1 doc covering all back
     it('core response components exist with real fields', () => {
       const enriched = schemas.EnrichedTweet as { properties?: Record<string, unknown> }
       expect(enriched?.properties).toMatchObject({
-        id_str: expect.anything(),
+        id: expect.anything(),
         text: expect.anything(),
         entities: expect.anything(),
         user: expect.anything(),

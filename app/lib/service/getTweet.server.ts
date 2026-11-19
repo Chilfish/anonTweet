@@ -1,12 +1,12 @@
 import type { ArticleTranslation } from '~/lib/article/translate'
 import type { EnrichedTweet, TranslationEntity } from '~/types'
 import type { AIVisionInfo } from '~/types/vision'
+import { isArticleUrl, resolveSpaceId } from '@chilfish/tweet'
 import { eq } from 'drizzle-orm'
 import { getDbClient, isDbAvailable } from '~/lib/database/db.server'
 import { tweet, tweetArticleTranslations, tweetEntities } from '~/lib/database/schema'
-import { isArticleUrl } from '~/lib/react-tweet/utils/article'
-import { getEnrichedTweet, resolveSpaceById } from '~/lib/react-tweet/utils/get-tweet'
-import { resolveSpaceId } from '~/lib/react-tweet/utils/space'
+import { normalizeEnrichedTweet } from '~/lib/tweet-normalize'
+import { getEnrichedTweet, resolveSpaceById } from '~/lib/twitter.server'
 import { getLocalCache, setLocalCache } from '../localCache'
 
 /**
@@ -37,7 +37,7 @@ async function backfillSpaceDetails(tweet: EnrichedTweet): Promise<EnrichedTweet
   const patched: EnrichedTweet = { ...tweet, space }
 
   await Promise.allSettled([
-    setLocalCache({ id: tweet.id_str, type: 'tweet', value: patched }),
+    setLocalCache({ id: tweet.id, type: 'tweet', value: patched }),
     insertToTweetDB([patched]),
   ])
 
@@ -63,14 +63,14 @@ async function backfillArticleDetails(tweet: EnrichedTweet): Promise<EnrichedTwe
   if (!hasArticleLink)
     return tweet
 
-  const fresh = await getEnrichedTweet(tweet.id_str)
+  const fresh = await getEnrichedTweet(tweet.id)
   if (!fresh?.article)
     return tweet
 
   const patched: EnrichedTweet = { ...tweet, article: fresh.article }
 
   await Promise.allSettled([
-    setLocalCache({ id: tweet.id_str, type: 'tweet', value: patched }),
+    setLocalCache({ id: tweet.id, type: 'tweet', value: patched }),
     insertToTweetDB([patched]),
   ])
 
@@ -89,14 +89,14 @@ async function backfillCardCarousel(tweet: EnrichedTweet): Promise<EnrichedTweet
   if (!tweet.card || tweet.card.type !== 'unified_card' || tweet.card.layout)
     return tweet
 
-  const fresh = await getEnrichedTweet(tweet.id_str)
+  const fresh = await getEnrichedTweet(tweet.id)
   if (!fresh?.card)
     return tweet
 
   const patched: EnrichedTweet = { ...tweet, card: fresh.card }
 
   await Promise.allSettled([
-    setLocalCache({ id: tweet.id_str, type: 'tweet', value: patched }),
+    setLocalCache({ id: tweet.id, type: 'tweet', value: patched }),
     insertToTweetDB([patched]),
   ])
 
@@ -119,8 +119,10 @@ export async function getLocalTweet(tweetId: string): Promise<EnrichedTweet | nu
   if (!tweet)
     return tweet
 
+  const normalized = normalizeEnrichedTweet(tweet)
+
   return backfillCardCarousel(
-    await backfillArticleDetails(await backfillSpaceDetails(tweet)),
+    await backfillArticleDetails(await backfillSpaceDetails(normalized)),
   )
 }
 
@@ -160,11 +162,11 @@ export async function insertToTweetDB(tweets: EnrichedTweet[]) {
     for (const enrichedTweet of tweets) {
       await db.insert(tweet)
         .values({
-          tweetId: enrichedTweet.id_str,
+          tweetId: enrichedTweet.id,
           tweetOwnerId: enrichedTweet.user.screen_name,
           jsonContent: {
             ...enrichedTweet,
-            retweetedOrignalId: undefined,
+            retweetedOriginalId: undefined,
           },
         })
         .onConflictDoUpdate({
@@ -172,7 +174,7 @@ export async function insertToTweetDB(tweets: EnrichedTweet[]) {
           set: {
             jsonContent: {
               ...enrichedTweet,
-              retweetedOrignalId: undefined,
+              retweetedOriginalId: undefined,
             },
           },
         })
@@ -325,11 +327,11 @@ export async function getDBTweet(tweetId: string): Promise<EnrichedTweet | null>
       where: eq(tweet.tweetId, tweetId),
     })
 
-    const enrichedTweet = cachedTweet?.jsonContent || await getEnrichedTweet(tweetId)
-
-    if (!enrichedTweet) {
+    const rawTweet = cachedTweet?.jsonContent || await getEnrichedTweet(tweetId)
+    if (!rawTweet) {
       return null
     }
+    const enrichedTweet = normalizeEnrichedTweet(rawTweet)
 
     if (!cachedTweet?.id) {
       await insertToTweetDB([enrichedTweet])

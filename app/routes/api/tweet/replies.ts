@@ -2,7 +2,7 @@ import type { Route } from './+types/replies'
 import type { TweetData } from '~/types'
 import { getLocalCache } from '~/lib/localCache'
 import { enrichTweet } from '~/lib/react-tweet'
-import { fetchReplies } from '~/lib/react-tweet/utils/get-tweet'
+import { fetchReplies } from '~/lib/twitter.server'
 
 export interface RepliesResponse {
   tweets: TweetData
@@ -33,7 +33,7 @@ export async function loader({
   const { tweets, nextCursor } = await getLocalReplies(id, cursor)
 
   return {
-    tweets: tweets.filter(tweet => tweet.id_str !== id),
+    tweets: tweets.filter(tweet => tweet.id !== id),
     nextCursor: nextCursor || null,
   }
 }

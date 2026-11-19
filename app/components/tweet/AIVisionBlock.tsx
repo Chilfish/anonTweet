@@ -54,7 +54,7 @@ export function AIVisionBlock({
     s => s.setVisionShowTranslatedOnly,
   )
   const isScreenshoting = useScreenshoting()
-  const visionOverride = useVisionVisibility(tweet.id_str)
+  const visionOverride = useVisionVisibility(tweet.id)
   const { setVisionVisibility } = useTranslationActions()
   const internalEditor = useVisionLogic(tweet)
   const editor = externalEditor ?? internalEditor
@@ -91,7 +91,7 @@ export function AIVisionBlock({
       {state === 'collapsed' && (
         <button
           type="button"
-          onClick={() => setVisionVisibility(tweet.id_str, true)}
+          onClick={() => setVisionVisibility(tweet.id, true)}
           title="展开 AI 描述"
           className="mt-3 flex w-full items-center gap-1.5 rounded-xl border bg-card px-3.5 py-2 text-xs font-medium text-muted-foreground/70 transition-colors hover:bg-background/40 hover:text-foreground"
         >
@@ -123,7 +123,7 @@ export function AIVisionBlock({
                   </button>
                   <button
                     type="button"
-                    onClick={() => setVisionVisibility(tweet.id_str, false)}
+                    onClick={() => setVisionVisibility(tweet.id, false)}
                     title="本次隐藏 AI 描述"
                     className="text-xs font-medium text-muted-foreground/70 transition-colors hover:text-foreground"
                   >

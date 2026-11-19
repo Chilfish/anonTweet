@@ -254,7 +254,7 @@ async function handleTweetTranslation(args: Extract<AITranslationSchema, { type?
         success: true,
         message: 'No translation needed or already translated',
         data: {
-          tweetId: tweet.id_str,
+          tweetId: tweet.id,
           entities: tweet.entities || [],
         },
       })
@@ -266,7 +266,7 @@ async function handleTweetTranslation(args: Extract<AITranslationSchema, { type?
         error: 'Invalid request',
         status: 400,
         message: 'Invalid request data: API key or model is missing',
-        targetId: tweet.id_str,
+        targetId: tweet.id,
         targetType: 'tweet',
       })
     }
@@ -278,7 +278,7 @@ async function handleTweetTranslation(args: Extract<AITranslationSchema, { type?
         error: 'baseUrl not allowed',
         status: 400,
         message: 'baseUrl 不在白名单内：仅支持官方提供商域名或 ALLOWED_AI_BASE_URL_HOSTS 扩展域名（AC-SEC-001，ENABLE_AI_BASE_URL_WHITELIST=true）',
-        targetId: tweet.id_str,
+        targetId: tweet.id,
         targetType: 'tweet',
       })
     }
@@ -295,7 +295,7 @@ async function handleTweetTranslation(args: Extract<AITranslationSchema, { type?
 
     try {
       await setLocalCache({
-        id: tweet.id_str,
+        id: tweet.id,
         type: 'tweet',
         value: {
           ...tweet,
@@ -311,7 +311,7 @@ async function handleTweetTranslation(args: Extract<AITranslationSchema, { type?
     return data({
       success: true,
       data: {
-        tweetId: tweet.id_str,
+        tweetId: tweet.id,
         entities: mergedEntities,
       },
     })
@@ -322,7 +322,7 @@ async function handleTweetTranslation(args: Extract<AITranslationSchema, { type?
       message: '翻译推文失败',
       context: {
         targetType: 'tweet',
-        targetId: tweet?.id_str,
+        targetId: tweet?.id,
         model,
         provider: resolvedProvider,
       },

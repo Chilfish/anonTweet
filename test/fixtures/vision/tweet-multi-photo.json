@@ -6,19 +6,18 @@
     "schema": "EnrichedTweet"
   },
   "data": {
-    "id_str": "9000000000000000001",
     "lang": "ja",
     "url": "https://twitter.com/vision_test/status/9000000000000000001",
     "created_at": "Sat Mar 14 02:48:15 +0000 2026",
     "__typename": "Tweet",
     "text": "スクリーンショットを添付します https://t.co/vision",
     "user": {
-      "id_str": "1",
       "name": "Vision Test",
       "screen_name": "vision_test",
       "is_blue_verified": false,
       "profile_image_shape": "Circle",
-      "profile_image_url_https": "https://pbs.twimg.com/profile_images/vision.jpg"
+      "profile_image_url_https": "https://pbs.twimg.com/profile_images/vision.jpg",
+      "id": "1"
     },
     "entities": [
       {
@@ -56,6 +55,7 @@
         "type": "photo"
       }
     ],
-    "isInlineMeida": false
+    "id": "9000000000000000001",
+    "isInlineMedia": false
   }
 }

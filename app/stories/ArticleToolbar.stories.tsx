@@ -32,7 +32,7 @@ function ToolbarDemo({ status = 'idle', hasTranslation = false }: {
   const captureRef = useRef<HTMLDivElement>(null)
   return (
     <ArticleToolbar
-      tweetId={tweetEnglish.id_str}
+      tweetId={tweetEnglish.id}
       article={articleMarkdown}
       tweet={tweetEnglish}
       captureRef={captureRef}

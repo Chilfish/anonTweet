@@ -40,7 +40,7 @@ export const ToggleGlobal: Story = {
 }
 
 export const TogglePerTweet: Story = {
-  render: () => <ToggleTransButton tweetId={tweetEnglish.id_str} />,
+  render: () => <ToggleTransButton tweetId={tweetEnglish.id} />,
 }
 
 export const SaveScreenshot: Story = {

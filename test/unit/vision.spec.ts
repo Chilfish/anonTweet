@@ -57,13 +57,13 @@ describe('vision AC-VISION-001: AIVisionInfo 结构完整', () => {
     })[0]!
     const tweet: EnrichedTweet = {
       __typename: 'Tweet',
-      id_str: '1',
+      id: '1',
       lang: 'ja',
       created_at: 'x',
       text: 'hi',
       entities: [],
       user: {
-        id_str: '1',
+        id: '1',
         name: 'n',
         screen_name: 's',
         is_blue_verified: false,
@@ -386,13 +386,13 @@ describe('vision AC-VISION-006: 无 photo 返回空，不发起模型请求', ()
   it('runImageVision 对无 photo 推文返回 []，假 key 不触发请求', async () => {
     const tweet: EnrichedTweet = {
       __typename: 'Tweet',
-      id_str: '2',
+      id: '2',
       lang: 'ja',
       created_at: 'x',
       text: 'video only',
       entities: [],
       user: {
-        id_str: '1',
+        id: '1',
         name: 'n',
         screen_name: 's',
         is_blue_verified: false,

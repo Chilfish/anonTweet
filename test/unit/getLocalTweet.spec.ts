@@ -23,7 +23,7 @@ vi.mock('~/lib/localCache', () => ({
   setLocalCache: (...args: unknown[]) => setLocalCache(...args),
 }))
 
-vi.mock('~/lib/react-tweet/utils/get-tweet', () => ({
+vi.mock('~/lib/twitter.server', () => ({
   getEnrichedTweet: (...args: unknown[]) => getEnrichedTweet(...args),
   resolveSpaceById: (...args: unknown[]) => resolveSpaceById(...args),
 }))
@@ -33,14 +33,14 @@ const { getLocalTweet } = await import('~/lib/service/getTweet.server')
 /** 旧缓存里的推文：无 card、无 space，只有一条 Space 链接实体（真实样本形态） */
 function cachedSpaceTweet(overrides: Partial<EnrichedTweet> = {}): EnrichedTweet {
   return {
-    id_str: '1871586443388420240',
+    id: '1871586443388420240',
     lang: 'zxx',
     url: 'https://twitter.com/nonoka_yumemita/status/1871586443388420240',
     created_at: 'Tue Dec 24 14:59:15 +0000 2024',
     __typename: 'Tweet',
     text: 'https://t.co/ELCNFX5yGy',
     user: {
-      id_str: '1',
+      id: '1',
       name: '宮永ののか',
       screen_name: 'nonoka_yumemita',
       profile_image_url_https: '',
@@ -78,7 +78,7 @@ const tombstone = {
   replayCount: 0,
   isReplayAvailable: false,
   host: {
-    id_str: '',
+    id: '',
     name: '',
     screen_name: '',
     profile_image_url_https: '',
@@ -194,12 +194,12 @@ const flatArticle = {
 describe('AC-TWEET-015: upgrades flat cached articles to the rich block document', () => {
   it('AC-TWEET-015: re-fetches and persists the rich article for a flat cache entry', async () => {
     getLocalCache.mockResolvedValue(cachedSpaceTweet({
-      id_str: '2104058634452005231',
+      id: '2104058634452005231',
       entities: [articleUrlEntity],
       article: flatArticle,
     }))
     getEnrichedTweet.mockResolvedValue(cachedSpaceTweet({
-      id_str: '2104058634452005231',
+      id: '2104058634452005231',
       entities: [articleUrlEntity],
       article: {
         ...flatArticle,

@@ -2,13 +2,47 @@ import type { MediaAnimatedGif, MediaDetails, MediaVideo } from '~/types'
 import { normalizeMediaUrl } from '~/lib/media-url'
 import { useProxyMedia } from '~/lib/stores/appConfig'
 
-export * from './article'
 export * from './date-utils'
-export * from './entitytParser'
-// export * from './get-tweet'
-export * from './parseTweet'
-export * from './poll'
-export * from './space'
+export type {
+  ArticleBlock,
+  ArticleInlineStyle,
+  ArticleMedia,
+  ArticleRun,
+  Entity,
+  EntityWithType,
+  MediaAltEntity,
+  SeparatorEntity,
+  TranslationEntity,
+  TweetArticle,
+  TweetPoll,
+} from '@chilfish/tweet'
+export {
+  applyAITranslations,
+  collectEmbeddedTweetIds,
+  derivePlainText,
+  enrichTweet,
+  extractArticleIdFromUrl,
+  extractAudiospaceId,
+  extractSpaceIdFromUrl,
+  getEntities,
+  getMediaAltEntities,
+  isArticleUrl,
+  isSpaceUrl,
+  mapArticle,
+  mapPollCard,
+  mapSpaceDetails,
+  mediaFromRaw,
+  normalizeEntityMap,
+  organizeTweets,
+  parseContentState,
+  parseTrendingCard,
+  resolveArticleId,
+  resolveArticleLink,
+  resolveSpaceId,
+  resolveSpacePlaybackState,
+  restoreEntities,
+  serializeForAI,
+} from '@chilfish/tweet'
 
 export interface TweetCoreProps {
   id: string
@@ -40,6 +74,29 @@ export function getMp4Video(media: MediaAnimatedGif | MediaVideo) {
   const proxyMedia = useProxyMedia()
   video.url = proxyMedia(video.url, true)
   return video
+}
+
+const CTA_LABELS: Record<string, string> = {
+  'Learn more': '了解更多',
+  'Visit': '访问',
+  'Shop now': '立即购买',
+  'Book now': '立即预订',
+  'Sign up': '注册',
+  'Download': '下载',
+  'Install': '安装',
+  'Watch': '观看',
+  'Listen': '收听',
+  'Get offer': '获取优惠',
+  'Order now': '立即下单',
+  'Shop': '购买',
+  'Play': '播放',
+}
+
+/** 把 `@chilfish/tweet` 的英文 CTA 文案映射为中文；未知值原样返回。 */
+export function localizeCtaLabel(label?: string): string | undefined {
+  return label
+    ? CTA_LABELS[label] ?? label
+    : label
 }
 
 export function formatNumber(n: number): string {

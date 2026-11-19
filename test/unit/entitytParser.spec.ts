@@ -1,6 +1,6 @@
 import type { Entity } from '~/types'
+import { applyAITranslations, restoreEntities, serializeForAI } from '@chilfish/tweet'
 import { describe, expect, it } from 'vitest'
-import { applyAITranslations, restoreEntities, serializeForAI } from '~/lib/react-tweet/utils/entitytParser'
 
 describe('entitytParser', () => {
   // AC-TRANS-001/002: serialize → restore 占位符往返（自 verify/translation.verifier 并入）

@@ -96,7 +96,7 @@ describe.skipIf(!testEnv.hasServer)('AC-OBS-002 AI failure context', () => {
     expect(res.status).toBe(200)
     expect(body).toMatchObject({
       targetType: 'tweet',
-      targetId: tweet.id_str,
+      targetId: tweet.id,
       provider: UNKNOWN_PROVIDER,
     })
   })

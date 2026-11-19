@@ -1,12 +1,12 @@
 import type { Ref, RefObject } from 'react'
 import type { AppConfigs } from '~/lib/stores/appConfig'
 import type { TweetData } from '~/types'
+import { organizeTweets } from '@chilfish/tweet'
 import { ChevronDown, Loader2 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react'
 import { Button } from '~/components/ui/button'
 import { useElementSize } from '~/hooks/use-element-size'
 import { TweetContainer } from '~/lib/react-tweet'
-import { organizeTweets } from '~/lib/react-tweet/utils/organizeTweets'
 import {
   useIsCapturingSelected,
   useScreenshoting,
@@ -99,7 +99,7 @@ export function MyTweet({
   return (
     <TweetContainer
       ref={containerRef}
-      id={mainTweet.id_str}
+      id={mainTweet.id}
       className={cn('tweet-loaded', containerClassName)}
     >
       <div className="relative">
@@ -109,8 +109,8 @@ export function MyTweet({
             {ancestors.map((parentTweet) => {
               return (
                 <SelectableTweetWrapper
-                  key={parentTweet.id_str}
-                  tweetId={parentTweet.id_str}
+                  key={parentTweet.id}
+                  tweetId={parentTweet.id}
                 >
                   <TweetNode
                     tweet={parentTweet}
@@ -131,7 +131,7 @@ export function MyTweet({
 
         {/* 2. 主推文 (Main Focus) */}
         <SelectableTweetWrapper
-          tweetId={mainTweet.id_str}
+          tweetId={mainTweet.id}
           className={cn(hasComments && 'pb-4 border-b border-[#cfd9de] dark:border-[#333639]')}
         >
           <article className="relative">
@@ -149,7 +149,7 @@ export function MyTweet({
       {hasComments && (
         <section>
           {commentThreads.map(thread => (
-            <CommentBranch key={thread.id_str} tweet={thread} />
+            <CommentBranch key={thread.id} tweet={thread} />
           ))}
 
           {!!(hasMoreComments && loadMoreComments && !isScreenshoting) && (

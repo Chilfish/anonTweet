@@ -126,7 +126,7 @@ export function SearchToolbar({ tweets, listRef }: SearchToolbarProps) {
     syncTranslations: false,
   })
 
-  const ids = useMemo(() => tweets.map(tweet => tweet.id_str), [tweets])
+  const ids = useMemo(() => tweets.map(tweet => tweet.id), [tweets])
   const selectedSet = useMemo(() => new Set(selectedTweetIds), [selectedTweetIds])
   const selectedCount = ids.filter(id => selectedSet.has(id)).length
   const isAllSelected = ids.length > 0 && selectedCount === ids.length

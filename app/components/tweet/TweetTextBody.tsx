@@ -7,7 +7,7 @@ import { useTweetMode } from '~/lib/stores/hooks'
 export function TweetTextBody({ tweet }: { tweet: EnrichedTweet }) {
   const { shouldShow } = useTweetTranslation(tweet, 'body')
 
-  const mode = useTweetMode(tweet.id_str)
+  const mode = useTweetMode(tweet.id)
   const isShowRawText = mode !== 'translation' || !shouldShow
 
   return (
@@ -16,7 +16,7 @@ export function TweetTextBody({ tweet }: { tweet: EnrichedTweet }) {
       {isShowRawText && <TweetBody tweet={tweet} isTranslated={false} />}
       {/* 翻译显示 */}
       <TranslationDisplay
-        tweetId={`${tweet.id_str}`}
+        tweetId={`${tweet.id}`}
         originalTweet={tweet}
       />
     </>

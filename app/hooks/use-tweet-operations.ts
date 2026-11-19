@@ -40,7 +40,7 @@ export function useTweetOperations(data?: TweetOperationsData) {
 
   useEffect(() => {
     setRepliesCursor(null)
-  }, [mainTweet?.id_str])
+  }, [mainTweet?.id])
 
   const loadComments = async (): Promise<void> => {
     if (!mainTweet)
@@ -55,13 +55,13 @@ export function useTweetOperations(data?: TweetOperationsData) {
 
     setIsLoadingComments(true)
     try {
-      const { data } = await fetcher.get<RepliesResponse>(`/api/tweet/replies/${mainTweet.id_str}`)
+      const { data } = await fetcher.get<RepliesResponse>(`/api/tweet/replies/${mainTweet.id}`)
       const tweets = data?.tweets || []
       setRepliesCursor(data?.nextCursor || null)
 
       if (tweets.length > 0) {
         appendTweets(tweets)
-        setCommentIds(tweets.map(tweet => tweet.id_str))
+        setCommentIds(tweets.map(tweet => tweet.id))
         toast.success(`已获取 ${tweets.length} 条评论`, {
           description: '默认仅筛选出与博主有互动的回复',
         })
@@ -87,7 +87,7 @@ export function useTweetOperations(data?: TweetOperationsData) {
 
     setIsLoadingComments(true)
     try {
-      const url = `/api/tweet/replies/${mainTweet.id_str}?cursor=${encodeURIComponent(repliesCursor)}`
+      const url = `/api/tweet/replies/${mainTweet.id}?cursor=${encodeURIComponent(repliesCursor)}`
       const { data } = await fetcher.get<RepliesResponse>(url)
 
       const tweets = data?.tweets || []
@@ -101,7 +101,7 @@ export function useTweetOperations(data?: TweetOperationsData) {
 
         const merged = new Set([
           ...commentIds,
-          ...tweets.map(tweet => tweet.id_str),
+          ...tweets.map(tweet => tweet.id),
         ])
         setCommentIds([...merged])
 

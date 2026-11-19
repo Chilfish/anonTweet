@@ -65,7 +65,7 @@ const MemoizedTweetItem = memo(({ tweet }: { tweet: EnrichedTweet }) => {
   return (
     <MyTweet
       tweets={wrappedTweets}
-      mainTweetId={tweet.id_str}
+      mainTweetId={tweet.id}
     />
   )
 })
@@ -197,7 +197,7 @@ export default function ListPage(_props: Route.ComponentProps) {
                   {tweets.map(tweet => (
                     <MemoizedTweetItem
                       tweet={tweet}
-                      key={tweet.id_str}
+                      key={tweet.id}
                     />
                   ))}
                 </div>

@@ -44,7 +44,7 @@ const aiConfigFields = {
 
 const tweetField = z
   .object({
-    id_str: z.string().min(1),
+    id: z.string().min(1),
     text: z.string(),
     // 客户端可携带 visionInfo（generate 合并用）；存在则必须结构合法（防缓存污染）
     visionInfo: visionInfoArraySchema.optional(),
@@ -148,7 +148,7 @@ async function handleGenerate(args: z.infer<typeof generateSchema>) {
         error: 'baseUrl not allowed',
         status: 400,
         message: 'baseUrl 不在白名单内：仅支持官方提供商域名或 ALLOWED_AI_BASE_URL_HOSTS 扩展域名（AC-SEC-001，ENABLE_AI_BASE_URL_WHITELIST=true）',
-        targetId: tweet.id_str,
+        targetId: tweet.id,
         targetType: 'tweet',
       })
     }
@@ -172,10 +172,10 @@ async function handleGenerate(args: z.infer<typeof generateSchema>) {
       visionInfo,
     )
     try {
-      await updateTweetVisionInfo(tweet.id_str, merged, tweet as EnrichedTweet)
+      await updateTweetVisionInfo(tweet.id, merged, tweet as EnrichedTweet)
     }
     catch (persistError: unknown) {
-      console.warn(`[Vision] persist failed for ${tweet.id_str}:`, persistError)
+      console.warn(`[Vision] persist failed for ${tweet.id}:`, persistError)
     }
 
     return data({
@@ -188,7 +188,7 @@ async function handleGenerate(args: z.infer<typeof generateSchema>) {
       errorCode: 'Vision generation failed',
       context: {
         targetType: 'tweet',
-        targetId: tweet.id_str,
+        targetId: tweet.id,
         model,
         provider: resolvedProvider,
       },
@@ -200,13 +200,13 @@ async function handleSave(args: z.infer<typeof saveSchema>) {
   const { tweet } = args
   try {
     // 持久化到 localCache + DB（字段级合并，防客户端旧快照整体覆盖 DB）
-    await updateTweetVisionInfo(tweet.id_str, tweet.visionInfo, tweet as EnrichedTweet)
+    await updateTweetVisionInfo(tweet.id, tweet.visionInfo, tweet as EnrichedTweet)
     return data({ success: true })
   }
   catch (error: unknown) {
     return data(buildAIFailure(error, {
       errorCode: 'Vision save failed',
-      context: { targetType: 'tweet', targetId: tweet.id_str },
+      context: { targetType: 'tweet', targetId: tweet.id },
     }))
   }
 }
@@ -233,7 +233,7 @@ async function handleTranslate(args: z.infer<typeof translateSchema>) {
         error: 'baseUrl not allowed',
         status: 400,
         message: 'baseUrl 不在白名单内：仅支持官方提供商域名或 ALLOWED_AI_BASE_URL_HOSTS 扩展域名（AC-SEC-001，ENABLE_AI_BASE_URL_WHITELIST=true）',
-        targetId: tweet.id_str,
+        targetId: tweet.id,
         targetType: 'tweet',
       })
     }
@@ -258,7 +258,7 @@ async function handleTranslate(args: z.infer<typeof translateSchema>) {
       errorCode: 'Vision OCR translation failed',
       context: {
         targetType: 'tweet',
-        targetId: tweet.id_str,
+        targetId: tweet.id,
         model,
         provider: resolvedProvider,
       },

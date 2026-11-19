@@ -39,7 +39,7 @@ export async function syncTranslationData(
 
       if (entities.length === 0)
         return null
-      return { tweetId: tweet.id_str, entities }
+      return { tweetId: tweet.id, entities }
     })
     .filter(Boolean)
 

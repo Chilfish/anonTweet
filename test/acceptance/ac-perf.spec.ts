@@ -38,7 +38,7 @@ const base = loadFixture<EnrichedTweet>('tweets/with-quoted-ja.json')
 
 function cloneWithId(id: string, extraMedia: number): EnrichedTweet {
   const t = JSON.parse(JSON.stringify(base)) as EnrichedTweet
-  t.id_str = id
+  t.id = id
   t.text = `${t.text} (${id})`
   if (extraMedia > 0) {
     t.mediaDetails = Array.from({ length: extraMedia }, (_, i) => ({

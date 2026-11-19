@@ -147,7 +147,7 @@ export function useScreenshotAction({
         const ext = screenshotFormat === 'png'
           ? 'png'
           : 'jpg'
-        const fileName = `${mainForFile.user.screen_name}-${mainForFile.id_str}-${now}.${ext}`
+        const fileName = `${mainForFile.user.screen_name}-${mainForFile.id}-${now}.${ext}`
 
         if (mode === 'share') {
           // AC-PWA-007：优先系统分享图片，不支持/失败回退下载；shared/aborted 静默收尾
@@ -169,7 +169,7 @@ export function useScreenshotAction({
         }
 
         // 截图成功即把当前完整数据立即写回本地快照（不等 800ms 防抖）
-        flushSnapshot(snapshotKey(snapshotType, mainForFile.id_str))
+        flushSnapshot(snapshotKey(snapshotType, mainForFile.id))
 
         // 副作用：同步数据（搜索等多卡片本地翻译场景跳过）
         if (syncTranslations) {

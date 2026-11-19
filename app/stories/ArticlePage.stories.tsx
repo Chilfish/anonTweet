@@ -27,7 +27,7 @@ function ArticlePageDemo({ initialMode = 'original' }: { initialMode?: ArticleVi
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-6">
       <ArticleToolbar
-        tweetId={tweetEnglish.id_str}
+        tweetId={tweetEnglish.id}
         article={articleRich}
         tweet={tweetEnglish}
         captureRef={captureRef}

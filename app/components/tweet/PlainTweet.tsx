@@ -119,7 +119,7 @@ function UnifiedTweet({ tweet, variant, enableTranslation }: UnifiedTweetProps) 
 
         <AIVisionBlock tweet={tweet} hideChrome />
 
-        {tweet.article && <TweetArticleCard article={tweet.article} tweetId={tweet.id_str} />}
+        {tweet.article && <TweetArticleCard article={tweet.article} tweetId={tweet.id} />}
 
         {tweet.card && <TweetLinkCard tweet={tweet} />}
         {tweet.space && <TweetSpaceCard tweet={tweet} />}
@@ -144,11 +144,11 @@ interface MyTweetProps {
 
 export function MyPlainTweet({ tweets, mainTweetId, enableTranslation }: MyTweetProps) {
   const { mainTweet, parentTweets } = useMemo(() => {
-    const main = tweets.find(tweet => tweet.id_str === mainTweetId)
+    const main = tweets.find(tweet => tweet.id === mainTweetId)
     if (!main) {
       return { mainTweet: null, parentTweets: [] }
     }
-    const parents = tweets.filter(tweet => tweet.id_str !== mainTweetId)
+    const parents = tweets.filter(tweet => tweet.id !== mainTweetId)
     return { mainTweet: main, parentTweets: parents }
   }, [tweets, mainTweetId])
 
@@ -163,14 +163,14 @@ export function MyPlainTweet({ tweets, mainTweetId, enableTranslation }: MyTweet
 
   return (
     <TweetContainer
-      id={mainTweet.id_str}
+      id={mainTweet.id}
       className="tweet-loaded"
     >
       {hasThread && (
         <>
           {parentTweets.map(parentTweet => (
             <UnifiedTweet
-              key={parentTweet.id_str}
+              key={parentTweet.id}
               tweet={parentTweet}
               enableTranslation={enableTranslation}
               variant="thread"

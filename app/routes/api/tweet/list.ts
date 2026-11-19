@@ -1,7 +1,7 @@
 import type { Route } from './+types/get'
 import type { TweetData } from '~/types'
 import { enrichTweet } from '~/lib/react-tweet'
-import { fetchListTweets } from '~/lib/react-tweet/utils/get-tweet'
+import { fetchListTweets } from '~/lib/twitter.server'
 
 export async function loader({
   params,

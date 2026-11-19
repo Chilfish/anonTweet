@@ -6,7 +6,7 @@ import { resolveTranslationView } from '~/lib/translation/resolveTranslationView
 const DEFAULT_VISIBILITY = { body: true, alt: true } as const
 
 export function useTweetTranslation(tweet: EnrichedTweet, type: 'body' | 'alt' = 'body') {
-  const tweetId = tweet.id_str
+  const tweetId = tweet.id
 
   const { mode, visibility, manualTranslation } = useTranslationStore(
     useShallow(state => ({

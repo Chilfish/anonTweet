@@ -63,7 +63,7 @@ function generateTweetMarkdown(tweet: EnrichedTweet): string {
   const author = tweet.user
   const date = new Date(tweet.created_at)
   const formattedDate = format(date, 'yyyy-MM-dd HH:mm:ss')
-  const tweetUrl = tweet.url || `https://x.com/${author.screen_name}/status/${tweet.id_str}`
+  const tweetUrl = tweet.url || `https://x.com/${author.screen_name}/status/${tweet.id}`
 
   parts.push(`${indent}**${author.name}** (@${author.screen_name}) · ${formattedDate}`)
   parts.push(`${indent}[Link to Tweet](${tweetUrl})`)

@@ -817,9 +817,9 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
         // ── Tweet 相关 ───────────────────────────────────────
         TweetUser: {
           type: 'object',
-          description: '推文作者（app/types/user.ts TweetUser）',
+          description: '推文作者（@chilfish/tweet TweetUser）',
           required: [
-            'id_str',
+            'id',
             'name',
             'profile_image_url_https',
             'profile_image_shape',
@@ -828,7 +828,7 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
             'is_blue_verified',
           ],
           properties: {
-            id_str: { type: 'string' },
+            id: { type: 'string' },
             name: { type: 'string' },
             profile_image_url_https: { type: 'string', format: 'uri', description: '头像 URL' },
             profile_image_shape: {
@@ -928,12 +928,12 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
         },
         EnrichedTweet: {
           type: 'object',
-          description: 'enrich 后的推文（app/types/index.ts EnrichedTweet），字段类型与媒体验证为 open schema。',
+          description: 'enrich 后的推文（@chilfish/tweet EnrichedTweet + app 扩展字段），字段类型与媒体验证为 open schema。',
           required: [
             'lang',
             'created_at',
             'entities',
-            'id_str',
+            'id',
             'text',
             'user',
             'url',
@@ -945,7 +945,7 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
             },
             lang: { type: 'string', description: '语言代码，如 en/ja' },
             created_at: { type: 'string', format: 'date-time', description: 'ISO 8601' },
-            id_str: { type: 'string', description: '推文唯一 ID' },
+            id: { type: 'string', description: '推文唯一 ID' },
             text: { type: 'string' },
             url: { type: 'string', format: 'uri', description: '推文完整 URL' },
             user: { $ref: '#/components/schemas/TweetUser' },
@@ -963,7 +963,7 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
               items: { $ref: '#/components/schemas/AIVisionInfo' },
               description: 'AI 视觉描述结果',
             },
-            quoted_tweet_id: { type: 'string', description: '引用推文 ID' },
+            quotedTweetId: { type: 'string', description: '引用推文 ID' },
             quotedTweet: { $ref: '#/components/schemas/EnrichedTweet', description: '引用推文（递归）' },
             card: { type: 'object', description: '预览卡片（LinkPreviewCard）' },
             poll: { type: 'object', description: '投票（TweetPoll，见 app/types/poll.ts；仅投票推文有）' },
@@ -1204,7 +1204,7 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
         // ── User 相关 ────────────────────────────────────────
         RawUser: {
           type: 'object',
-          description: '用户资料（app/lib/rettiwt-api/types/data/User.ts IUser）',
+          description: '用户资料（@chilfish/tweet/internals UserData）',
           required: [
             'createdAt',
             'followersCount',
@@ -1213,6 +1213,7 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
             'id',
             'isVerified',
             'likeCount',
+            'pinnedTweets',
             'profileImage',
             'statusesCount',
             'userName',
@@ -1229,7 +1230,11 @@ export function buildOpenApiDoc(baseUrl: string): Record<string, unknown> {
             isVerified: { type: 'boolean' },
             likeCount: { type: 'integer' },
             location: { type: 'string' },
-            pinnedTweet: { type: 'string' },
+            pinnedTweets: {
+              type: 'array',
+              items: { type: 'string' },
+              description: '置顶推文 ID 列表',
+            },
             profileBanner: { type: 'string', description: '封面图 URL' },
             profileImage: { type: 'string', format: 'uri' },
             statusesCount: { type: 'integer' },
