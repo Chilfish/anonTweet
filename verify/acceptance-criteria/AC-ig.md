@@ -1,6 +1,6 @@
 # Instagram 集成验收标准
 
-> 版本：1.4 | 日期：2026-09-12（v1.4：AC-IG-003 单条 story id 改为 canonical `story~{user}~{media}`，
+> 版本：1.5 | 日期：2026-11-19（v1.5：新增 AC-IG-010 单图占位比例；v1.4：AC-IG-003 单条 story id 改为 canonical `story~{user}~{media}`，
 > 列表型 tray/精选集见 [AC-ig-story.md](AC-ig-story.md)；v1.3：Story 接入 AC 单列；v1.2：F8 去 fixture 自证）
 > 对应 Postmortem：007 (Instagram Integration)
 > 关联 Verifier：`test/acceptance/ac-ig.spec.ts`（离线）/ `test/integration/api.ig.spec.ts`（集成）
@@ -128,7 +128,21 @@
 
 ---
 
-## 总计：9 条 AC
+## AC-IG-010：单图媒体占位比例（骨架 / 加载失败不塌陷）
+
+- **输入**：`test/fixtures/ig-posts/post-with-media.json` 的首条 media（1440×1920）
+- **验证对象**：`IGMediaGrid` 单图分支（`renderToString`）
+- **背景**：单图没有网格格子兜底，容器高度此前取决于 `<img>` 固有尺寸——图片未就绪时约等于一行文字高，骨架塌成一条细灰带；加载完成后才撑开，卡片整体跳动
+- **预期输出**：单图容器在图片就绪前就按 `width / height` 锁定 `aspect-ratio`
+- **Pass 条件**：
+  - 单图渲染含 `aspect-ratio: 0.75`（1440/1920）
+  - 单图加载态仍渲染 `data-slot="skeleton"`
+  - 多图网格不套用单图比例（仍为 `aspect-square` 格子）
+- **备注**：`width` 优先、缺失时回退 `width_original`；两者都缺失时保持原有（自然比例）行为
+
+---
+
+## 总计：10 条 AC
 
 | AC        | 分类        | 依赖 INS_COOKIES   | 依赖 AI       | 依赖 server |
 | --------- | ----------- | ------------------ | ------------- | ----------- |
@@ -141,3 +155,4 @@
 | AC-IG-007 | 集成        | 是                 | 否            | 是          |
 | AC-IG-008 | 集成        | 是                 | 否            | 是          |
 | AC-IG-009 | 集成        | 否（需无 cookies） | 否            | 是          |
+| AC-IG-010 | 渲染/离线   | 否                 | 否            | 否          |

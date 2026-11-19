@@ -230,22 +230,45 @@ function PhotoStack({
 
 // ─── Single Image ────────────────────────────────────────────────
 
+/**
+ * 单图/单视频的占位比例（宽 / 高）。
+ *
+ * 单图没有网格格子兜底，必须用接口给的显示尺寸（其次原图尺寸）锁定
+ * `aspect-ratio`：否则图片加载中 / 加载失败时容器高度取决于 `<img>` 的
+ * 固有尺寸（未就绪时约等于一行文字高），骨架会塌成一条细灰带；加载完成后
+ * 再撑开，卡片整体跳动。
+ */
+function getMediaAspectRatio(media: IGMedia): number | undefined {
+  const w = media.width || media.width_original
+  const h = media.height || media.height_original
+  return w && h
+    ? w / h
+    : undefined
+}
+
 function SingleMedia({ media }: { media: IGMedia }) {
+  const aspectRatio = getMediaAspectRatio(media)
+
   return (
-    <div className="relative overflow-hidden bg-muted/10">
+    <div
+      className="relative overflow-hidden bg-muted/10"
+      style={aspectRatio
+        ? { aspectRatio }
+        : undefined}
+    >
       {media.type === 'video'
         ? (
             <MediaVideo
               src={media.video_url!}
               preload="metadata"
-              containerClassName="w-full"
+              containerClassName="size-full"
             />
           )
         : (
             <MediaImage
               src={media.display_url}
               alt=""
-              containerClassName="w-full"
+              containerClassName="size-full"
               className={cn(getImageFitClass(media))}
             />
           )}

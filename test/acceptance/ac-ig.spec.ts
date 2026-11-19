@@ -10,7 +10,10 @@ import type { IGPost } from '~/types'
  *   原实现只查 fixture 有 captionTranslation + 源码不含 `post.description =`，从未调用该函数）
  * - AC-IG-007/008/009 为集成测试，见 test/integration/api.ig.spec.ts
  */
+import { createElement } from 'react'
+import { renderToString } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
+import { IGMediaGrid } from '~/components/ins/IGMediaGrid'
 import { translateIGCaption } from '~/lib/translateIGCaption'
 import { extractIGId, formatIGTime } from '~/lib/utils'
 import { loadFixture } from '../helpers/load-fixture'
@@ -24,6 +27,9 @@ vi.mock('ai', () => ({
 }))
 
 type IGPostWithTranslation = IGPost & { captionTranslation?: string }
+
+const ASPECT_RATIO_075 = /aspect-ratio:\s*0?\.75/
+const ASPECT_RATIO_ANY = /aspect-ratio:/
 
 describe('AC-IG Instagram offline acceptance', () => {
   it('AC-IG-001: post fixture has complete structure (extractIGId agrees with id)', () => {
@@ -74,6 +80,27 @@ describe('AC-IG Instagram offline acceptance', () => {
     expect(plainFormat).toBeTruthy()
     expect(cardFormat).not.toBe(plainFormat)
     expect(String(plainFormat)).toContain('2026')
+  })
+
+  it('AC-IG-010: single-media grid reserves the media aspect ratio while the image loads', () => {
+    const post = loadFixture<IGPost>('ig-posts/post-with-media.json')
+    const [first] = post.media
+
+    // 1440×1920 → 0.75，占位容器必须在图片就绪前就有确定高度
+    const singleHtml = renderToString(
+      createElement(IGMediaGrid, {
+        media: [first!],
+      }),
+    )
+    expect(singleHtml).toMatch(ASPECT_RATIO_075)
+    expect(singleHtml).toContain('data-slot="skeleton"')
+
+    // 多图走 aspect-square 网格，不应套用单图比例
+    const gridHtml = renderToString(
+      createElement(IGMediaGrid, { media: post.media }),
+    )
+    expect(gridHtml).not.toMatch(ASPECT_RATIO_ANY)
+    expect(gridHtml).toContain('aspect-square')
   })
 
   it('AC-IG-006: translateIGCaption returns a translation without mutating the post', async () => {
