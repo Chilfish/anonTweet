@@ -3,22 +3,22 @@
 > 创建时间：2026-08-31
 > 分支：`feat/tweet-search`
 > 关联：`docs/planning/backlog.md`（阶段二待办）、`verify/acceptance-criteria/AC-tweet.md`（AC-TWEET-009/010）
-> 数据层：`rettiwt-api`（`TweetService.search` 已具备，本任务补齐授权组与 App 接入）
+> 数据层：`@chilfish/tweet`（`TwitterClient.searchTweets` / `parseSearchTimeline`；guest 白名单已随包）
 
 ## 目标
 
 打通 Twitter/X 搜索链路：`/search` 页面输入关键词 → BFF `/api/tweet/search` →
-`rettiwt-api` `TWEET_SEARCH` 资源 → X `SearchTimeline`，返回分页推文列表
+`@chilfish/tweet` `TWEET_SEARCH` 资源 → X `SearchTimeline`，返回分页推文列表
 （推文元素格式同 `/api/tweet/get` 的 `EnrichedTweet`，支持 `cursor` 翻页）。
 
 ## 现状盘点（2026-08-31）
 
-- `rettiwt-api` 底层搜索能力**已完整**：`TweetRequests.search()`（SearchTimeline 请求）、
+- `@chilfish/tweet` 底层搜索能力**已完整**：`TweetRequests.search()`（SearchTimeline 请求）、
   `TweetService.search()`（含按时间倒序）、`Extractors.TWEET_SEARCH`（CursoredData 解析）、
   `Requests.TWEET_SEARCH` 映射均已就位，`FetchResourcesGroup` 已包含 `TWEET_SEARCH`。
-- **缺口 1（rettiwt-api 层）**：`AllowGuestAuthenticationGroup` 未包含 `TWEET_SEARCH`——
+- **缺口 1（`@chilfish/tweet` 层）**：`AllowGuestAuthenticationGroup` 未包含 `TWEET_SEARCH`——
   无 `apiKey` 的 guest 池直接抛 `RESOURCE_NOT_ALLOWED`。补上后无 Key 部署也可尝试 guest 搜索。
-- **缺口 2（App 数据层）**：`app/lib/react-tweet/utils/get-tweet.ts` 无搜索 fetch/解析函数。
+- **缺口 2（App 数据层）**：`app/lib/twitter.server.ts` 的搜索 fetch/解析函数（Phase 1 后）。
 - **缺口 3（BFF + 前端）**：无 `/api/tweet/search` 路由、无 `/search` 页面、footer 无入口。
 
 ## 接口约定
@@ -35,13 +35,13 @@
 
 ## 实施计划
 
-| Phase   | 内容                                                                 | 状态    |
-| ------- | -------------------------------------------------------------------- | ------- |
-| Phase 1 | rettiwt-api：`TWEET_SEARCH` 加入 `AllowGuestAuthenticationGroup`     | ✅ 完成 |
-| Phase 2 | 数据层：`parseSearchTimeline` 纯函数 + `fetchSearchTweets`（池化）   | ✅ 完成 |
-| Phase 3 | BFF：`/api/tweet/search` loader + `validations/search.ts` + 路由注册 | ✅ 完成 |
-| Phase 4 | 前端：`/search` 页面 + footer 入口                                   | ✅ 完成 |
-| Phase 5 | 测试：fixture + 单测 + AC-TWEET-009/010 + 门禁 + 提交 + PR           | ✅ 完成 |
+| Phase   | 内容                                                                   | 状态    |
+| ------- | ---------------------------------------------------------------------- | ------- |
+| Phase 1 | `@chilfish/tweet`：`TWEET_SEARCH` 加入 `AllowGuestAuthenticationGroup` | ✅ 完成 |
+| Phase 2 | 数据层：`parseSearchTimeline` 纯函数 + `fetchSearchTweets`（池化）     | ✅ 完成 |
+| Phase 3 | BFF：`/api/tweet/search` loader + `validations/search.ts` + 路由注册   | ✅ 完成 |
+| Phase 4 | 前端：`/search` 页面 + footer 入口                                     | ✅ 完成 |
+| Phase 5 | 测试：fixture + 单测 + AC-TWEET-009/010 + 门禁 + 提交 + PR             | ✅ 完成 |
 
 ## 迭代记录（2026-08-31）
 

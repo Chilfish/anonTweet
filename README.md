@@ -39,7 +39,7 @@
 
 - **框架**：React Router v8（SSR + CSR）
 - **运行时**：Bun 1.4、TypeScript、Cloudflare Workers（workerd）
-- **数据源**：Twitter/X 接口（内置 `rettiwt-api` 逆向适配）、Instagram（`@chilfish/gallery-dl-instagram`）
+- **数据源**：Twitter/X 接口（`@chilfish/tweet` 取数与富化）、Instagram（`@chilfish/gallery-dl-instagram`）
 - **AI**：Vercel AI SDK（Gemini / DeepSeek / OpenRouter）
 - **UI**：Tailwind CSS v4、shadcn/ui、coss、Lucide
 - **状态**：Zustand（客户端）、SWR（服务端数据）
@@ -89,7 +89,7 @@ ENABLE_TIMELINE=false      # 用户时间线接口，默认关闭（固定 429 �
 <details>
 <summary>TWEET_KEYS 怎么获取</summary>
 
-内置的 rettiwt-api 走 Twitter 用户凭证抓取，配置多个 Key 可以轮换，降低被限流的概率。
+`@chilfish/tweet` 走 Twitter 用户凭证抓取，配置多个 Key 可以轮换，降低被限流的概率。
 
 1. 安装浏览器扩展：Chrome 用 [X Auth Helper](https://chromewebstore.google.com/detail/x-auth-helper/igpkhkjmpdecacocghpgkghdcmcmpfhp)，Firefox 用 [Rettiwt Auth Helper](https://addons.mozilla.org/en-US/firefox/addon/rettiwt-auth-helper)
 2. 建议在无痕窗口里登录 X 账号

@@ -45,13 +45,13 @@ binding 子集升级到 `jetfuel_attachment` 全量数据，同时为解析不�
 
 ### Phase 1 — 请求层（最小改动）
 
-`app/lib/rettiwt-api/requests/Tweet.ts#details()`：`responsive_web_jetfuel_frame`
+`@chilfish/tweet` `requests/Tweet.ts#details()`：`responsive_web_jetfuel_frame`
 `false → true`。已验证该单一 flag 即可让响应带出 `jetfuel_attachment`
 （`tmp/probe-jetfuel-A.ts`）；不变更 queryId / variables / 其余 features，避免风险。
 
 ### Phase 2 — 解析器 + 类型
 
-**新文件** `app/lib/rettiwt-api/parsers/jetfuel.ts`（纯函数，禁 React 依赖）：
+**实现** `@chilfish/tweet` `parse/jetfuel.ts`（纯函数，禁 React 依赖）：
 
 - `decodeJetfuelPayload(base64: string): JetfuelFrame | null`
   - 解码字节，扫描：长度前缀 UTF-8 字符串（`<len:u8> <bytes>`，含 CJK 可读性判断）、
@@ -136,15 +136,15 @@ mapTwitterCard(cardData, jetfuelAttachment?)
 
 ```
 新增:
-  app/lib/rettiwt-api/parsers/jetfuel.ts
+  @chilfish/tweet parse/jetfuel.ts（Phase 1 后）
   test/unit/jetfuel.spec.ts
   test/fixtures/jetfuel/trending.json
   verify/acceptance-criteria/AC-card.md
   verify/modules/card.verifier.ts（如有需要）
 修改:
-  app/lib/rettiwt-api/requests/Tweet.ts        (jetfuel_frame: true)
+  @chilfish/tweet requests/Tweet.ts          (jetfuel_frame: true；Phase 1 后)
   app/types/card.ts                            (TrendingCardInfo)
-  app/lib/react-tweet/utils/parseTweet.ts      (mapTwitterCard 合并 jetfuel)
+  @chilfish/tweet parse/tweet.ts               (mapTwitterCard 合并 jetfuel；Phase 1 后)
   app/components/tweet/TweetCard.tsx           (Trending 卡片变体)
   docs/development-log/*                       (开发日志)
   docs/planning/backlog.md                     (任务状态)

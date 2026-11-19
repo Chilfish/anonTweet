@@ -117,10 +117,10 @@ Invoke-RestMethod "https://anon-tweet.chilfish.top/api/ig/translate/DWlrun0AVbE"
 
 ## 数据结构要点
 
-- **EnrichedTweet**: `id_str`、`text`、`url`、`lang`（如 en/ja/zxx）、`created_at`（ISO 8601）、`user`（TweetUser）、`entities`（Entity[]），可选 `quoted_tweet_id` / `card` / `mediaDetails` / `visionInfo` / `article`
+- **EnrichedTweet**: `id`、`text`、`url`、`lang`（如 en/ja/zxx）、`created_at`（ISO 8601）、`user`（TweetUser）、`entities`（Entity[]），可选 `quotedTweetId` / `card` / `mediaDetails` / `visionInfo` / `article`
 - **TweetArticle**（文章推文才有）: `id`、`url`、`title`、`previewText`、`plainText`、`format`（`rich` 带 `blocks`，`plain` 仅纯文本）、`coverImage`、`publishedAt`（epoch ms）、`blocks`（ArticleBlock[]）
 - **ArticleBlock**: `type` ∈ paragraph / heading / list-item / quote / markdown / divider / image / embed-tweet / link / unknown；`key` 为稳定块 ID；段落类带 `runs`（文本/链接/mention/hashtag）；`text`（markdown）、`media`（image）、`tweetId`（embed-tweet）
-- **TweetUser**: `id_str`、`name`、`screen_name`、`profile_image_url_https`、`verified`、`is_blue_verified`、`verified_type`（Business/Government）、`profile_image_shape`（Circle/Square/Hexagon）
+- **TweetUser**: `id`、`name`、`screen_name`、`profile_image_url_https`、`verified`、`is_blue_verified`、`verified_type`（Business/Government）、`profile_image_shape`（Circle/Square/Hexagon）
 - **Entity**: `type` ∈ text / hashtag / mention / url / media / symbol / media_alt / separator；`index` 为文本偏移；hashtag/mention/url/media/symbol 带 `href`；`aiTranslation` / `translation` 存翻译
 - **SearchResponse / RepliesResponse / UserTimelineResponse**: `{ tweets: EnrichedTweet[], nextCursor: string | null }`
 - **IGPost**: `id`（shortcode）、`post_id`、`url`、`username`、`fullname`、`description`（caption）、`tags`、`likes`、`type`（post/reel/story/highlight）、`media`（IGMedia[]）、`avatar_url`
