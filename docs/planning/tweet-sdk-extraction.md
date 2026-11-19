@@ -8,11 +8,11 @@
 
 同一份 X 逆向实现现在有三处活体：
 
-| 位置 | 性质 |
-| --- | --- |
-| 上游 `Rishikant181/Rettiwt-API` | 原始来源，节奏与我们无关 |
-| `I:\dev\tweets-viewer\packages\rettiwt-api` | workspace 私有包，端点多、有测试与 proxy |
-| `app/lib/rettiwt-api`（本仓库） | 内嵌副本，Workers 适配、jetfuel、Article、成熟 Pool |
+| 位置                                        | 性质                                                |
+| ------------------------------------------- | --------------------------------------------------- |
+| 上游 `Rishikant181/Rettiwt-API`             | 原始来源，节奏与我们无关                            |
+| `I:\dev\tweets-viewer\packages\rettiwt-api` | workspace 私有包，端点多、有测试与 proxy            |
+| `app/lib/rettiwt-api`（本仓库）             | 内嵌副本，Workers 适配、jetfuel、Article、成熟 Pool |
 
 三方的定制已经互相不可合并：
 
@@ -26,12 +26,12 @@
 
 ### 2.1 核心库
 
-| 指标 | 本仓库 `app/lib/rettiwt-api` | `tweets-viewer/packages/rettiwt-api` |
-| --- | --- | --- |
-| 文件数 | 148 | 197 |
-| TS 行数 | 32,778 | 37,642 |
-| 独有文件 | **0**（是 viewer 的子集） | 49 |
-| 同路径但内容不同 | **35** | 35 |
+| 指标             | 本仓库 `app/lib/rettiwt-api` | `tweets-viewer/packages/rettiwt-api` |
+| ---------------- | ---------------------------- | ------------------------------------ |
+| 文件数           | 148                          | 197                                  |
+| TS 行数          | 32,778                       | 37,642                               |
+| 独有文件         | **0**（是 viewer 的子集）    | 49                                   |
+| 同路径但内容不同 | **35**                       | 35                                   |
 
 viewer 独有的 49 个文件里，值得吸收的是 `helper/{parseTweet,entitytParser,RettiwtPool,space,date-utils}.ts`、`services/public/{TwitterAPIClient,TweetEnrichmentService,SpaceService}.ts`、`types/enriched/*`、`types/raw/{space,user,tweet}/*` 的增量端点、`__tests__/`。
 
@@ -41,34 +41,34 @@ viewer 独有的 49 个文件里，值得吸收的是 `helper/{parseTweet,entity
 
 ### 2.2 平台耦合点（抽包必须先解掉）
 
-| 耦合 | 位置 | 处理 |
-| --- | --- | --- |
-| `node:https` Agent | `models/RettiwtConfig.ts` | 移入 `./node`，core 只接受注入的 `dispatcher` |
-| `node:querystring` | `requests/User.ts`、`requests/DirectMessage.ts` | 换 `URLSearchParams` |
-| `node:fs` | `requests/Media.ts`、`services/public/TweetService.ts` | 上传改 `Blob` / `Uint8Array`，读盘移入 `./node` |
-| `Buffer` | `services/internal/AuthService.ts`（base64） | 换 `atob` / `btoa` 或 `Uint8Array` 实现 |
-| `process.env` | `app/lib/SmartPool.ts` | Pool 只收 `keys` 与注入配置 |
-| `~/lib/axios.server` | `FetcherService.ts`、`AuthService.ts` | 由方案 §4.1 的 `HttpClient` 取代 |
-| `~/types` | `parsers/jetfuel.ts` | 类型随包搬迁（`TrendingCardInfo` 进 core 类型） |
-| axios 全形态 | `AxiosRequestConfig` / `AxiosError` / `AxiosHeaders` | 见 §4.1 / §4.2 |
+| 耦合                 | 位置                                                   | 处理                                            |
+| -------------------- | ------------------------------------------------------ | ----------------------------------------------- |
+| `node:https` Agent   | `models/RettiwtConfig.ts`                              | 移入 `./node`，core 只接受注入的 `dispatcher`   |
+| `node:querystring`   | `requests/User.ts`、`requests/DirectMessage.ts`        | 换 `URLSearchParams`                            |
+| `node:fs`            | `requests/Media.ts`、`services/public/TweetService.ts` | 上传改 `Blob` / `Uint8Array`，读盘移入 `./node` |
+| `Buffer`             | `services/internal/AuthService.ts`（base64）           | 换 `atob` / `btoa` 或 `Uint8Array` 实现         |
+| `process.env`        | `app/lib/SmartPool.ts`                                 | Pool 只收 `keys` 与注入配置                     |
+| `~/lib/axios.server` | `FetcherService.ts`、`AuthService.ts`                  | 由方案 §4.1 的 `HttpClient` 取代                |
+| `~/types`            | `parsers/jetfuel.ts`                                   | 类型随包搬迁（`TrendingCardInfo` 进 core 类型） |
+| axios 全形态         | `AxiosRequestConfig` / `AxiosError` / `AxiosHeaders`   | 见 §4.1 / §4.2                                  |
 
 ### 2.3 UI 层
 
-| 位置 | 文件数 | 行数 | 状态 |
-| --- | --- | --- | --- |
-| `app/lib/react-tweet`（react-tweet fork，MIT） | 25 | 2,829 | 展示组件 + 解析工具混在一起 |
-| `app/components/tweet` | 20 | 2,638 | 展示 + 产品逻辑混在一起 |
-| `app/types`（推文相关子集，`article`/`card`/`entities`/`media`/`photo`/`poll`/`space`/`tweet`/`user`/`video`） | 10 | 485 | 需随 core 走 |
+| 位置                                                                                                           | 文件数 | 行数  | 状态                        |
+| -------------------------------------------------------------------------------------------------------------- | ------ | ----- | --------------------------- |
+| `app/lib/react-tweet`（react-tweet fork，MIT）                                                                 | 25     | 2,829 | 展示组件 + 解析工具混在一起 |
+| `app/components/tweet`                                                                                         | 20     | 2,638 | 展示 + 产品逻辑混在一起     |
+| `app/types`（推文相关子集，`article`/`card`/`entities`/`media`/`photo`/`poll`/`space`/`tweet`/`user`/`video`） | 10     | 485   | 需随 core 走                |
 
 `app/components/tweet` 的 `~/` 依赖分布（实测）：每个组件 1–9 处，集中在 `~/lib/stores/*`（translation / appConfig）、`~/components/ui/*`、`~/hooks/*`、`react-router`、`~/lib/media-url`。
 
 按可复用性可分三类：
 
-| 类别 | 组件 | 结论 |
-| --- | --- | --- |
-| 纯展示 | `TweetHeader` / `TweetTextBody` / `TweetMediaAlt` / `TweetCard` / `TweetArticleCard` / `PollCard` / `TrendingCard` / `CarouselCard` / `TweetSpaceCard` / `ThreadLine`，以及 `react-tweet/twitter-theme/*` | 进 `./react` |
-| 需注入的容器 | `TweetNode`（插槽：翻译编辑器 / vision 块 / 媒体配置）、`MyTweet`（线程 + 评论组织） | 进 `./react`，但去掉 store 依赖，改 props / context |
-| 产品逻辑 | `TweetOptionsMenu`（截图/设置）、`TweetInputForm`（分享/设置）、`AIVisionBlock`、`CommentBranch`、`SelectableTweetWrapper`、`FilterUnrelatedToggle`、`PlainTweet` | **留在 app**，用包内组件拼装 |
+| 类别         | 组件                                                                                                                                                                                                      | 结论                                                |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| 纯展示       | `TweetHeader` / `TweetTextBody` / `TweetMediaAlt` / `TweetCard` / `TweetArticleCard` / `PollCard` / `TrendingCard` / `CarouselCard` / `TweetSpaceCard` / `ThreadLine`，以及 `react-tweet/twitter-theme/*` | 进 `./react`                                        |
+| 需注入的容器 | `TweetNode`（插槽：翻译编辑器 / vision 块 / 媒体配置）、`MyTweet`（线程 + 评论组织）                                                                                                                      | 进 `./react`，但去掉 store 依赖，改 props / context |
+| 产品逻辑     | `TweetOptionsMenu`（截图/设置）、`TweetInputForm`（分享/设置）、`AIVisionBlock`、`CommentBranch`、`SelectableTweetWrapper`、`FilterUnrelatedToggle`、`PlainTweet`                                         | **留在 app**，用包内组件拼装                        |
 
 ## 3. 目标产物
 
@@ -197,17 +197,17 @@ new RettiwtPool(keys, {
 
 ## 6. 搬迁矩阵
 
-| 内容 | 来源 | 去向 |
-| --- | --- | --- |
-| resource / transport / auth | viewer 骨架 | `lib/` |
-| jetfuel、Article、guest 搜索放行、置顶推文修复 | 本仓库 | `lib/` |
-| `SmartPool` → `RettiwtPool` | 本仓库 + viewer 错误类型 | `lib/pool/` |
-| `parseTweet` / `entitytParser` / `poll` / `space` / `article` / `organizeTweets` | 本仓库（更全）+ viewer 的 `types/enriched` | `lib/parse/` |
-| `normalizeMediaUrl` / `normalizeProfileImageUrl` | 本仓库 `app/lib/media-url.ts` | `lib/media-url.ts` |
-| proxy（http/https/socks） | viewer | `node/` |
-| user 端点增量（about / search / settings / history / media update） | viewer | `lib/` |
-| fixtures + `__tests__` | viewer | `test/` |
-| `twitter-theme/*` + 10 个展示组件 + `TweetNode` / `TweetThread` | 本仓库 UI（更新） | `react/` |
+| 内容                                                                             | 来源                                       | 去向               |
+| -------------------------------------------------------------------------------- | ------------------------------------------ | ------------------ |
+| resource / transport / auth                                                      | viewer 骨架                                | `lib/`             |
+| jetfuel、Article、guest 搜索放行、置顶推文修复                                   | 本仓库                                     | `lib/`             |
+| `SmartPool` → `RettiwtPool`                                                      | 本仓库 + viewer 错误类型                   | `lib/pool/`        |
+| `parseTweet` / `entitytParser` / `poll` / `space` / `article` / `organizeTweets` | 本仓库（更全）+ viewer 的 `types/enriched` | `lib/parse/`       |
+| `normalizeMediaUrl` / `normalizeProfileImageUrl`                                 | 本仓库 `app/lib/media-url.ts`              | `lib/media-url.ts` |
+| proxy（http/https/socks）                                                        | viewer                                     | `node/`            |
+| user 端点增量（about / search / settings / history / media update）              | viewer                                     | `lib/`             |
+| fixtures + `__tests__`                                                           | viewer                                     | `test/`            |
+| `twitter-theme/*` + 10 个展示组件 + `TweetNode` / `TweetThread`                  | 本仓库 UI（更新）                          | `react/`           |
 
 ## 7. 迁移步骤
 
@@ -242,24 +242,24 @@ new RettiwtPool(keys, {
 
 ## 8. 验证与门禁
 
-| 层 | 手段 |
-| --- | --- |
-| 包内单测 | 解析器 fixture 回归、`Requests` 描述符快照、Pool 故障转移（冷却/退避/耗尽） |
-| 包内集成 | 可选真实 key 的 `describe.skipIf` 用例（沿用验证套件的 SKIP 语义） |
-| 消费者门禁 | 本仓库 `verify/` 全三层 + `tweets-viewer` 的 `test` 与 `test:visual` |
-| 发布前 | tag ↔ version ↔ CHANGELOG 三向校验；`npm publish --provenance` |
+| 层         | 手段                                                                        |
+| ---------- | --------------------------------------------------------------------------- |
+| 包内单测   | 解析器 fixture 回归、`Requests` 描述符快照、Pool 故障转移（冷却/退避/耗尽） |
+| 包内集成   | 可选真实 key 的 `describe.skipIf` 用例（沿用验证套件的 SKIP 语义）          |
+| 消费者门禁 | 本仓库 `verify/` 全三层 + `tweets-viewer` 的 `test` 与 `test:visual`        |
+| 发布前     | tag ↔ version ↔ CHANGELOG 三向校验；`npm publish --provenance`              |
 
-`verify/` 的 AC 编号契约不变：AC-TWEET-*/AC-CARD-*/AC-SPACE-* 仍在本仓库，只是被测实现换成了包。
+`verify/` 的 AC 编号契约不变：AC-TWEET-_/AC-CARD-_/AC-SPACE-* 仍在本仓库，只是被测实现换成了包。
 
 ## 9. 风险
 
-| 风险 | 说明 | 缓解 |
-| --- | --- | --- |
-| 单点故障 | 包坏了两站一起坏 | exact version 锁 + 回滚只改版本号；发布前消费者冒烟 |
+| 风险         | 说明                                                    | 缓解                                                         |
+| ------------ | ------------------------------------------------------- | ------------------------------------------------------------ |
+| 单点故障     | 包坏了两站一起坏                                        | exact version 锁 + 回滚只改版本号；发布前消费者冒烟          |
 | Workers 兼容 | `x-client-transaction-id` + linkedom 在新运行时下的行为 | 包 CI 加 Workers 环境冒烟（miniflare），`tidProvider` 可注入 |
-| 上游继续漂移 | 逆向契约无版本 | fixture 快照 + 月度探针（postmortem 013/014 预防项落地） |
-| UI 抽取回归 | 插槽改造触碰截图与翻译呈现 | 分两步：先纯展示组件，再容器；截图 AC 作为硬门禁 |
-| 许可证归属 | fork 的 relicense 风险 | 保留 MIT + NOTICE，不改上游 copyright |
+| 上游继续漂移 | 逆向契约无版本                                          | fixture 快照 + 月度探针（postmortem 013/014 预防项落地）     |
+| UI 抽取回归  | 插槽改造触碰截图与翻译呈现                              | 分两步：先纯展示组件，再容器；截图 AC 作为硬门禁             |
+| 许可证归属   | fork 的 relicense 风险                                  | 保留 MIT + NOTICE，不改上游 copyright                        |
 
 ## 10. 待决问题
 
