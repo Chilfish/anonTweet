@@ -10,7 +10,7 @@
         "@ai-sdk/openai-compatible": "^3.0.92",
         "@base-ui/react": "^1.9.0",
         "@chilfish/gallery-dl-instagram": "^0.2.6",
-        "@chilfish/tweet": "0.2.1",
+        "@chilfish/tweet": "0.2.2",
         "@dnd-kit/core": "^6.3.1",
         "@dnd-kit/sortable": "^10.0.0",
         "@dnd-kit/utilities": "^3.2.2",
@@ -177,7 +177,7 @@
 
     "@chilfish/gallery-dl-instagram": ["@chilfish/gallery-dl-instagram@0.2.6", "", { "bin": { "dl-ins": "dist/dl-ins.mjs" } }, "sha512-EfGXp+UKeOXqsumZ+qepVCrxHUoZvCA59dYw9MAzGb/eWEZXSNKwIVUaT6OrT4o3T0iwGZdul9YMHN2hi0srUQ=="],
 
-    "@chilfish/tweet": ["@chilfish/tweet@0.2.1", "", { "dependencies": { "linkedom": "^0.18.15", "x-client-transaction-id": "^0.3.3" }, "peerDependencies": { "undici": "^8.12.4" }, "optionalPeers": ["undici"], "bin": { "tweet-cli": "dist/cli-bin.js" } }, "sha512-NYTMITZqMrzJA1gF8oGNiAMFLGr7x45fLXp2JMIk8U7a3bOghInqq3r6dwGkmfYU1d6Cs5aJK5lnD6LpDLkkEQ=="],
+    "@chilfish/tweet": ["@chilfish/tweet@0.2.2", "", { "dependencies": { "linkedom": "^0.18.15", "x-client-transaction-id": "^0.3.3" }, "peerDependencies": { "undici": "^8.12.4" }, "optionalPeers": ["undici"], "bin": { "tweet-cli": "dist/cli-bin.js" } }, "sha512-t21EPvycpUROQKVvSRIjyQe6SlPOd4YodywoWlttmg8pmOYcZCHkAiU3+eZRYvUxayapuFS/8OY1go1dZQo/HA=="],
 
     "@chromatic-com/storybook": ["@chromatic-com/storybook@5.6.0", "", { "dependencies": { "@neoconfetti/react": "^1.0.0", "chromatic": "^18.12.1", "jsonfile": "^6.1.0", "strip-ansi": "^7.1.0" }, "peerDependencies": { "storybook": "^0.0.0-0 || ^10.1.0 || ^10.1.0-0 || ^10.2.0-0 || ^10.3.0-0 || ^10.4.0-0 || ^10.5.0-0 || ^10.6.0-0 || ^11.0.0-0" } }, "sha512-Z7YMtr9DVwegQeWcBeQaiK5dLcAvgpX53Qr/eGGYTyAEqTb1meUr5VQNq1wmst0Lj+gT6lQEco0PuFfUuf3jzA=="],
 

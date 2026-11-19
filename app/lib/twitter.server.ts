@@ -14,7 +14,6 @@ import {
 } from '@chilfish/tweet'
 import { env } from '~/lib/env.server'
 import { obsLog } from '~/lib/obs-log'
-import '~/lib/tweet-request-patch'
 
 const logger = {
   warn: (event: string, fields?: Record<string, unknown>) =>
