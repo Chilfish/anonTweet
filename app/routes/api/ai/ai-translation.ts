@@ -180,7 +180,6 @@ async function handleIGTranslation(args: Extract<AITranslationSchema, { type: 'i
       modelName: model,
       thinkingLevel: thinkingLevel as ThinkingLevel | undefined,
       translationGlossary,
-      force,
     })
 
     if (!translated) {

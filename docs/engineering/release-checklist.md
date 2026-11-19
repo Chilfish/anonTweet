@@ -50,7 +50,7 @@
 
 - [ ] `/ins/:shortcode` 透卡相框 + 九宫格媒体正常
 - [ ] `/plain-ins/:shortcode` 纯净版渲染正常
-- [ ] IG caption 翻译正常（`isChinese()` 守卫 + DB 回写）
+- [ ] IG caption 翻译正常（一律翻译 + DB 回写）
 
 ### 稳定性
 

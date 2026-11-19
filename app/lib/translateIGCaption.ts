@@ -26,12 +26,6 @@ export interface TranslateIGCaptionArgs {
   modelName?: string
   translationGlossary?: string
   thinkingLevel?: ThinkingLevel
-  /**
-   * 用户主动点击「AI 翻译」：跳过「已是中文」的自动跳过。
-   *
-   * 自动检测无法区分纯汉字日文（本日発売 / 新曲公開），手动触发时以用户意图为准。
-   */
-  force?: boolean
 }
 
 /**
@@ -42,9 +36,12 @@ export interface TranslateIGCaptionArgs {
  * - 短格式内容（标题党、诗意、日常碎碎念）
  * - @mention / #hashtag 比推文更随意
  * - 大量换行排版
+ *
+ * 不做「已是中文」的跳过：IG 帖子的 caption 一律翻译（纯汉字日文与中文无法靠
+ * 字符集区分，任何自动跳过的启发式都会误伤）。无 caption 时返回空串。
  */
 export async function translateIGCaption(args: TranslateIGCaptionArgs): Promise<string> {
-  const { post, modelInstance, translationGlossary, modelName, thinkingLevel, force } = args
+  const { post, modelInstance, translationGlossary, modelName, thinkingLevel } = args
   const startedAt = Date.now()
   let attempts = 0
 
@@ -53,18 +50,6 @@ export async function translateIGCaption(args: TranslateIGCaptionArgs): Promise<
     obsLog('ai.translate.ig', {
       ok: true,
       skipped: 'no-text',
-      ms: Date.now() - startedAt,
-      postId: suffix(post.id),
-    })
-    return ''
-  }
-
-  // 检测中文 — 如果 50%+ 是中文，跳过翻译（返回空，由调用方保持原文显示）。
-  // 手动触发（force）不跳过：纯汉字日文会被此检测误判为中文。
-  if (!force && isChinese(text)) {
-    obsLog('ai.translate.ig', {
-      ok: true,
-      skipped: 'chinese',
       ms: Date.now() - startedAt,
       postId: suffix(post.id),
     })

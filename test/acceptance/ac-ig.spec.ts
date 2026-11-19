@@ -15,7 +15,7 @@ import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 import { IGMediaGrid } from '~/components/ins/IGMediaGrid'
-import { isChinese, translateIGCaption } from '~/lib/translateIGCaption'
+import { translateIGCaption } from '~/lib/translateIGCaption'
 import { extractIGId, formatIGTime } from '~/lib/utils'
 import { loadFixture } from '../helpers/load-fixture'
 
@@ -104,28 +104,29 @@ describe('AC-IG Instagram offline acceptance', () => {
     expect(gridHtml).toContain('aspect-square')
   })
 
-  it('AC-IG-011: force translation bypasses the Chinese auto-skip for kanji-only Japanese', async () => {
+  it('AC-IG-011: IG caption always goes to the model, with no Chinese auto-skip', async () => {
     const post = loadFixture<IGPost>('ig-posts/post-with-media.json')
-    // 纯汉字日文：汉字比例 100%，旧检测会误判为中文
-    const kanjiOnly = { ...post, description: '本日発売' }
     const mockedGenerate = vi.mocked(generateText)
     mockedGenerate.mockClear()
 
-    // 自动路径：被判为中文 → 返回空串，且不发出模型请求
-    expect(await translateIGCaption({ post: kanjiOnly, modelInstance: {} as never })).toBe('')
-    expect(mockedGenerate).not.toHaveBeenCalled()
-
-    // 手动触发：force 跳过检测，真实调用模型（模拟返回中文译文）
+    // 纯汉字日文与纯中文都不跳过（中文/日文共用汉字，检测必然误伤）
     expect(await translateIGCaption({
-      post: kanjiOnly,
+      post: { ...post, description: '本日発売' },
       modelInstance: {} as never,
-      force: true,
     })).toBe('这是翻译结果')
-    expect(mockedGenerate).toHaveBeenCalledTimes(1)
+    expect(await translateIGCaption({
+      post: { ...post, description: '这是中文说明' },
+      modelInstance: {} as never,
+    })).toBe('这是翻译结果')
+    expect(mockedGenerate).toHaveBeenCalledTimes(2)
 
-    // 含假名的日文不再被判为中文
-    expect(isChinese('東京公演決定です')).toBe(false)
-    expect(isChinese('这是中文说明')).toBe(true)
+    // 只有无 caption 才不发请求
+    mockedGenerate.mockClear()
+    expect(await translateIGCaption({
+      post: { ...post, description: '' },
+      modelInstance: {} as never,
+    })).toBe('')
+    expect(mockedGenerate).not.toHaveBeenCalled()
   })
 
   it('AC-IG-006: translateIGCaption returns a translation without mutating the post', async () => {
@@ -137,9 +138,9 @@ describe('AC-IG Instagram offline acceptance', () => {
     expect(translated).toBe('这是翻译结果')
     expect(post.description).toBe(original)
 
-    // 已是中文 → 跳过翻译，返回空串，且不改写原文
+    // 已是中文 → 同样翻译（IG 不做中文跳过），且不改写原文
     const chinesePost: IGPost = { ...post, description: '这是一段中文说明，无需翻译。' }
-    expect(await translateIGCaption({ post: chinesePost, modelInstance: {} as never })).toBe('')
+    expect(await translateIGCaption({ post: chinesePost, modelInstance: {} as never })).toBe('这是翻译结果')
     expect(chinesePost.description).toBe('这是一段中文说明，无需翻译。')
 
     // 无文本 → 返回空串

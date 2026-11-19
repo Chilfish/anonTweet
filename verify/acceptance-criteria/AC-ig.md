@@ -1,6 +1,6 @@
 # Instagram 集成验收标准
 
-> 版本：1.6 | 日期：2026-11-19（v1.6：新增 AC-IG-011 手动翻译绕过中文检测；v1.5：新增 AC-IG-010 单图占位比例；v1.4：AC-IG-003 单条 story id 改为 canonical `story~{user}~{media}`，
+> 版本：1.6 | 日期：2026-11-19（v1.6：新增 AC-IG-011 IG caption 一律翻译；v1.5：新增 AC-IG-010 单图占位比例；v1.4：AC-IG-003 单条 story id 改为 canonical `story~{user}~{media}`，
 > 列表型 tray/精选集见 [AC-ig-story.md](AC-ig-story.md)；v1.3：Story 接入 AC 单列；v1.2：F8 去 fixture 自证）
 > 对应 Postmortem：007 (Instagram Integration)
 > 关联 Verifier：`test/acceptance/ac-ig.spec.ts`（离线）/ `test/integration/api.ig.spec.ts`（集成）
@@ -88,7 +88,7 @@
 - **预期输出**：返回译文串；`post.description` 全程不被改写
 - **Pass 条件**：
   - 非中文 caption → 返回译文（`generateText` 打桩）
-  - 已是中文 caption → 跳过翻译返回 `''`
+  - 中文 caption → 同样返回译文（IG 不做中文跳过）
   - 空 caption → 返回 `''`
   - 三种路径下 `post.description` 均保持不变
 
@@ -142,20 +142,19 @@
 
 ---
 
-## AC-IG-011：手动翻译不被「已是中文」的自动检测拦截
+## AC-IG-011：IG caption 一律翻译（不做中文跳过检测）
 
-- **输入**：`post-with-media.json` 的 caption 改为纯汉字日文 `本日発売`（汉字比例 100%）
-- **验证对象**：`translateIGCaption()`（LLM 边界打桩）+ `isChinese()`
-- **背景**：`isChinese()` 只看 CJK 汉字比例，会把「本日発売 / 新曲公開」这类纯汉字日文
-  判成中文；`translateIGCaption` 因此直接返回空串、一次请求都不发，调用方再把空结果
-  当成失败（`Translation returned empty`）——用户手动点「AI 翻译」时看到的就是这个
-- **预期输出**：显式触发（`force`）时跳过自动检测并真实调用模型；自动路径保持跳过
+- **输入**：`post-with-media.json`，caption 分别改为纯汉字日文 `本日発売`、纯中文 `这是中文说明`、空串
+- **验证对象**：`translateIGCaption()`（LLM 边界打桩）
+- **背景**：旧实现用汉字比例判断「已是中文」并跳过翻译，但纯汉字日文（本日発売 / 新曲公開）
+  会被误判为中文——直接返回空串、一次请求都不发，调用方再把空结果当成失败
+  （`Translation returned empty`）。实际场景中 IG 帖子一律需要翻译，该启发式只会误伤
+- **预期输出**：有 caption 就调用模型；只有无 caption 才返回空串且不发请求
 - **Pass 条件**：
-  - 不传 `force`：纯汉字日文返回 `''`，且 `generateText` 未被调用
-  - 传 `force: true`：跳过检测并调用 `generateText`，返回译文
-  - `isChinese('東京公演決定です') === false`（含假名即非中文）、`isChinese('这是中文说明') === true`
-- **备注**：`requestIGTranslation`（弹窗）与 `/api/ai-translation`（`type: 'ins'`）都透传
-  `force`；`/api/ig/translate/:id` 是显式翻译接口，缺省 `force = true`
+  - 纯汉字日文 → 调用 `generateText` 并返回译文
+  - 纯中文 → 同样调用 `generateText` 并返回译文
+  - 空 caption → 返回 `''`，且 `generateText` 未被调用
+- **备注**：`isChinese()` 仍保留给视觉 OCR 使用（含假名即判为日文），不再参与 IG 翻译
 
 ---
 

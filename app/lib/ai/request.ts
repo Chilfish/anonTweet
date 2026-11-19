@@ -225,7 +225,6 @@ export function requestIGTranslation(
       modelName: payload.model,
       thinkingLevel: payload.thinkingLevel,
       translationGlossary: payload.translationGlossary,
-      force: payload.force,
     })
     if (!captionTranslation) {
       throw new Error(

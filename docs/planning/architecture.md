@@ -42,7 +42,7 @@
 - **决策**: 通过 Vercel AI SDK 抽象 Google Gemini 与 DeepSeek 双提供商，`provider` 参数运行时切换
 - **设计**:
   - Twitter: 实体级翻译（placeholder 保护）→ `autoTranslateTweet()`
-  - IG: caption 纯文本翻译 → `translateIGCaption()`（`isChinese()` 守卫）
+  - IG: caption 纯文本翻译 → `translateIGCaption()`（一律翻译，无中文跳过）
   - 思考强度映射: Gemini `thinkingLevel→budget`；DeepSeek `reasoning_effort`
 - **理由**: 解耦具体 AI SDK，支持运行时切换，避免供应商锁定
 - **后果**: `resolveTranslationView.ts` 6 级决策链统一渲染优先级

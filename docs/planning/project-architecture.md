@@ -116,7 +116,7 @@ Instagram 帖子数据获取、翻译与缓存管理。于 2026-05 完成 5 阶�
    - Instagram: 基于 `@chilfish/gallery-dl-instagram` SDK。
 5. **Level 5: AI Engine (Transformation)**
    - Twitter: 实体占位符 (Entity Placeholders) 保护 URL/mention/hashtag。
-   - Instagram: 纯文本翻译，`isChinese()` 检测跳过中文。
+   - Instagram: 纯文本翻译，caption 一律翻译（不做中文跳过检测）。
    - 支持 Google Gemini 和 DeepSeek 双提供商。
 
 ### 3.2 运行时数据合并 (Runtime Injection)
