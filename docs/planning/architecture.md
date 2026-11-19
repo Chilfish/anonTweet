@@ -120,7 +120,7 @@
 ## ADR-010: X 取数与推文组件抽为独立 npm 包
 
 - **日期**: 2026-11-18
-- **进度**: Phase 0 完成（`@chilfish/tweet@0.2.1` 已发布）；**Phase 1 完成（2026-11-19，代码门禁全绿）**，逐文件清单见 [`tweet-sdk-phase1-migration.md`](./tweet-sdk-phase1-migration.md)
+- **进度**: Phase 0 完成（`@chilfish/tweet@0.2.2` 已发布）；**Phase 1 完成（2026-11-19，代码门禁全绿）**，逐文件清单见 [`tweet-sdk-phase1-migration.md`](./tweet-sdk-phase1-migration.md)
 - **决策**: 把 `app/lib/rettiwt-api` + `app/lib/react-tweet` + `app/components/tweet` 的展示层收敛为独立仓库发布的单包多入口 `@chilfish/tweet`（`.` / `./node` / `./react`），本仓库与 `tweets-viewer` 都退化为消费者
 - **背景**: 同一份 X 逆向实现三处并存（上游 / `tweets-viewer/packages/rettiwt-api` / 本仓库内嵌副本），能力各缺一半，同一个 transaction id 缺陷两边各修一次；本仓库副本还被 `eslint.config.mjs` 整目录 ignore，属于无 lint 保护的飞地
 - **设计**:

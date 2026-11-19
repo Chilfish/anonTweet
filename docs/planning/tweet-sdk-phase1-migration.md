@@ -1,7 +1,7 @@
 # Phase 1：切换到 `@chilfish/tweet`（数据层）
 
 > 状态：**Phase 1 已完成**（2026-11-19，代码门禁全绿；真实 Key 手测待执行）
-> 上游版本：`@chilfish/tweet@0.2.1`（npm `latest`，2026-11-19）
+> 上游版本：`@chilfish/tweet@0.2.2`（npm `latest`，2026-11-19）
 > 关联：[tweet-sdk-extraction.md](./tweet-sdk-extraction.md)、[ADR-010](./architecture.md)、[issue #1](https://github.com/Chilfish/tweet-sdk/issues/1)、[issue #3](https://github.com/Chilfish/tweet-sdk/issues/3)、[issue #4](https://github.com/Chilfish/tweet-sdk/issues/4)（fieldToggles 缺口）
 > 范围：**只做 core 数据层与解析富化**；`./react` 组件留给 Phase 3。
 
@@ -28,7 +28,7 @@
 
 ---
 
-## 2. 上游契约（0.2.1 实测）
+## 2. 上游契约（0.2.2 实测）
 
 | 入口                        | 本仓库用到的符号                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -36,15 +36,15 @@
 | `@chilfish/tweet/internals` | `RawTweet` 之外的 raw response 类型、`IListTweetsResponse`、`IRawSpace` / `ISpaceDetailsResponse`、`RawArticle*`；`Extractors` / `findByFilter` / `Requests` / `TweetRequests` / `SpaceRequests` / `ListRequests` / `UserRequests` / `MediaRequests` / `TweetFilter`；`UserDetails`（class）/ `UserData`（结构）                                                                                                                                                                                                                                                                                        |
 | `@chilfish/tweet/node`      | **不使用**（Workers；proxy / fs 不需要）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 
-关键行为（0.2.1 已确认）：
+关键行为（0.2.2 已确认）：
 
 - `createClient({ keys: string })` 按逗号拆分，与 `TWEET_KEYS` 语义一致。
 - `NotSupportedError` 默认 `status: 403`；`PoolExhaustedError` 保留真实 status（网络错误不伪造 401）。
 - 默认分类器：`429/401/403` 轮换 + 冷却；`408/425/5xx` 重试不冷却。
 - `RettiwtPool.status()` 返回 per-key 状态。
 - `Logger` 为 `{ warn?(event, fields) }`，`pool.rotate` 字段含 `keySuffix`。
-- 版本锁定 **exact 0.2.1**；升级前先跑本仓库门禁。
-- **已知缺口**：`TweetRequests.details` 未带 `fieldToggles`（Article 富文本/全文退化）。本仓库用 `app/lib/tweet-request-patch.ts` 临时补丁；上游修复后删除（[issue #4](https://github.com/Chilfish/tweet-sdk/issues/4)）。
+- 版本锁定 **exact 0.2.2**；升级前先跑本仓库门禁。
+- `TweetRequests.details` / `replies` 已带 Article `fieldToggles`（`withArticleRichContentState` + `withArticlePlainText`）；0.2.2 起不再需要 app 侧补丁。
 
 ---
 
@@ -79,7 +79,7 @@
 
 ### A. 依赖与装配
 
-1. `bun add @chilfish/tweet@0.2.1`（exact，不用 `^`）。
+1. `bun add @chilfish/tweet@0.2.2`（exact，不用 `^`）。
 2. 新增 `app/lib/twitter.server.ts`（用 `.server` 后缀，防止 `env.server` 进入客户端 bundle；对齐仓库既有 `*.server.ts` 约定）：
 
 ```ts
@@ -225,7 +225,7 @@ export type EnrichedTweet = Omit<BaseEnrichedTweet, 'quotedTweet' | 'comments'> 
 | #   | 提交                                              | 内容                                                                   |
 | --- | ------------------------------------------------- | ---------------------------------------------------------------------- |
 | 1   | `docs(planning): Phase 1 迁移执行方案`            | 本文档 + INDEX / backlog / 开发日志                                    |
-| 2   | `chore(deps): 接入 @chilfish/tweet@0.2.1`         | `package.json` / lockfile / 移除直接 `linkedom` 依赖                   |
+| 2   | `chore(deps): 接入 @chilfish/tweet@0.2.2`         | `package.json` / lockfile / 移除直接 `linkedom` 依赖                   |
 | 3   | `refactor(twitter): 用 SDK 装配取数层`            | `twitter.server.ts` + 删除 `get-tweet.ts` + 9 个 importer              |
 | 4   | `refactor(types): 富化类型改为 SDK 契约`          | `app/types/*` + `RawUser → UserData` + llms schema 描述                |
 | 5   | `refactor(parse): 解析层切换为包导出`             | utils barrel / article / media-url / 7 个文件删除                      |
@@ -292,7 +292,7 @@ bun run build-storybook
 
 ### 9.1 实际改动
 
-- 依赖：`@chilfish/tweet@0.2.1`（exact）；移除 `x-client-transaction-id`；`linkedom` 仅测试使用。
+- 依赖：`@chilfish/tweet@0.2.2`（exact）；移除 `x-client-transaction-id`；`linkedom` 仅测试使用。
 - 装配：新增 `app/lib/twitter.server.ts`（`createClient` + `env.TWEET_KEYS` + `obsLog` logger），保留 `getTweets` / `resolveSpaceById` / 缓存回填在 app。
 - 类型：`app/types` 改为包 re-export；`EnrichedTweet` 只扩展 `autoTranslationEntities` / `visionInfo`，并递归覆盖 `quotedTweet` / `comments`；`RawUser = UserData`。
 - 解析：删除 `app/lib/react-tweet/utils` 下 7 个已进包文件；保留 `index.ts`（barrel）与 `date-utils.ts`（`Asia/Shanghai` + 中文格式 wrapper）。
@@ -316,5 +316,5 @@ bun run build-storybook
 ### 9.3 遗留
 
 - **真实 Key 手测**：`get` / `search` / `replies` / Space / Article 五链路需在有 `TWEET_KEYS` 的环境执行。
-- **SDK fieldToggles**：`app/lib/tweet-request-patch.ts` 是临时 monkey-patch；`@chilfish/tweet@0.2.2` 修复后删除。
+- **SDK fieldToggles**：`@chilfish/tweet@0.2.2` 已修复；临时补丁已删除，AC-TWEET-013 保留为回归防护。
 - **Phase 2/3**：`tweets-viewer` 切换与 `./react` 组件不在本阶段范围。
