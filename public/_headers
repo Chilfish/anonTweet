@@ -7,6 +7,10 @@
 /manifest.webmanifest
   Content-Type: application/manifest+json; charset=utf-8
 
-/skills/anon-tweet/SKILL.md
+/skills/anon-tweet/*.md
+  Content-Type: text/markdown; charset=utf-8
+  Cache-Control: public, max-age=300
+
+/skills/anon-tweet/references/*.md
   Content-Type: text/markdown; charset=utf-8
   Cache-Control: public, max-age=300

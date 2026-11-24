@@ -14,13 +14,16 @@ import { env } from './app/lib/env.server.ts'
  * `Content-Type: text/markdown` 缺 charset → 浏览器按系统默认编码（GBK/CP1252）
  * 渲染 UTF-8 中文产生乱码。sirv 的 send() 会尊重预设的 Content-Type，故在
  * 静态中间件之前设好即可；构建产物由 public/_headers 补齐。
+ *
+ * 覆盖 SKILL.md 与 references/*.md（skill 采用渐进披露，参考文档也可能被直接抓取）。
  */
 function skillsMarkdownCharset(): Plugin {
   return {
     name: 'skills-markdown-charset',
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
-        if (req.url?.startsWith('/skills/anon-tweet/SKILL.md')) {
+        const path = req.url?.split('?')[0] ?? ''
+        if (path.startsWith('/skills/anon-tweet/') && path.endsWith('.md')) {
           res.setHeader('Content-Type', 'text/markdown; charset=utf-8')
         }
         next()
