@@ -13,7 +13,7 @@
   `app/lib/llms.ts` 直接读取该字段注入，不手写；
   `test/unit/llms.spec.ts`（AC-LLMS-002）做版本奇偶校验兜底。
 - **anon-tweet skill 版本** — 单源 `SKILL.md` 的 `metadata.version`
-  （第三方安装器 `npx skills add` 读取该字段）。`scripts/anon-tweet.ps1` 的
+  （第三方安装器 `npx skills add` 读取该字段）。`scripts/anon-tweet.ts` 的
   User-Agent 运行时从 `../SKILL.md` 读取，不再维护手写副本。
   skill 独立于应用发版：skill 迭代不代表应用接口变更，反之亦然。
 - 发版走 `docs/engineering/git-workflow.md#版本发布`：CHANGELOG 更新 → 版本号 → PR → tag → GitHub Release

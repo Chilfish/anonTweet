@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ### Changed
 
+#### anon-tweet Skill 规范化：TS CLI + 渐进披露文档（2026-11-24）
+
+- `SKILL.md` 按 Agent Skills 规范重写：description 收敛为「做什么 + 何时用」；数据结构下沉到 `references/data-shapes.md`；示例从 PowerShell 改为跨平台 `fetch`
+- 文档对齐当前接口：IG GET/POST 分工、`/api/user/get` 只读 DB 缓存、用户时间线默认 429、文章推文 `article`、图片代理白名单
+- `scripts/anon-tweet.ps1` 替换为 `scripts/anon-tweet.ts`（零依赖，Bun 直接运行；Node 22.6+ 可加 `--experimental-strip-types`）：补齐 `translate` 的 AI 分支、修正 `ig/translate` 与 `timeline` 的结果解析、错误统一走 stderr
+- `/skills/anon-tweet/` 下所有 `.md` 的 charset 响应头统一补齐（dev 中间件 + `public/_headers`）
+
 #### X 数据层切换到 `@chilfish/tweet@0.2.2`（2026-11-19）
 
 - 删除内嵌 `app/lib/rettiwt-api`（148 文件）与 `app/lib/SmartPool.ts`，新增 `app/lib/twitter.server.ts` 装配层（`createClient` + `obsLog` logger）

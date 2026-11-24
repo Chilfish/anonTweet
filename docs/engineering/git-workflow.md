@@ -189,7 +189,7 @@ gh pr merge 1 --merge --delete-branch
 8. 走 `docs/engineering/release-checklist.md` 真机验收
 
 > **skill 版本另算**：`anon-tweet` skill 的 `SKILL.md` `metadata.version` 独立于
-> 应用版本（第三方安装器读取该字段），skill 迭代不随应用发版；其 `scripts/anon-tweet.ps1`
+> 应用版本（第三方安装器读取该字段），skill 迭代不随应用发版；其 `scripts/anon-tweet.ts`
 > 的 UA 版本运行时从 `SKILL.md` 读取，无需同步。详见 `release-checklist.md#版本纪律`。
 
 ## Issue 管理
