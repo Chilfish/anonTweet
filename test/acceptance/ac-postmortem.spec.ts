@@ -31,6 +31,7 @@ const REPORT_IDS = [
   '014',
   '015',
   '016',
+  '017',
 ]
 const REPORT_FILE_RE = /^\d{3}-.+\.md$/
 const STATUS_RE = /\*\*状态\*\*:\s*(?:Active|Mitigated)/
@@ -71,7 +72,7 @@ function parseChangedFiles(content: string): string[] {
 }
 
 describe('AC-PM postmortem pre-release integrity', () => {
-  it('AC-PM-001: report directory complete (001~016 + README + TEMPLATE)', () => {
+  it('AC-PM-001: report directory complete (001~017 + README + TEMPLATE)', () => {
     const dir = projectPath(POSTMORTEM_DIR_REL)
     const reports = listReports()
     const ids = reports.map(f => f.slice(0, 3))

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ## [Unreleased]
 
+### Fixed
+
+#### dev server 固定 Node 运行时（2026-11-25）
+
+- `bun run dev` 经 devkit 包装后 dev server 从 Node 换到了 Bun；`@cloudflare/vite-plugin` 的 miniflare 依赖 undici Dispatcher 做进程内转发，Bun 的 `undici` 是残缺 shim，启动时 `__vite_plugin_cloudflare_get_export_types__` 真连 `localhost:80` 直接 ECONNREFUSED，CI verify 集成层起不来
+- `scripts/dev.ts` 的 `resolveServerSpawn` 改为 `runtime: 'node'` 并注明原因；`docs/postmortem/017` 记录
+
 ### Changed
 
 #### 多图推文（>4 张）改横向轮播（2026-11-25）

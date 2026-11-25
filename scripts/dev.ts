@@ -38,9 +38,17 @@ if (isDbCacheEnabled()) {
   }
 }
 
+/**
+ * 运行时必须是 Node：`@cloudflare/vite-plugin` 的 miniflare 用 undici 的
+ * dispatcher 做内部转发（`__vite_plugin_cloudflare_*` 请求打到 `http://localhost`），
+ * 而 Bun 的 `undici` 只是残缺 shim（没有真正的 MockAgent/Dispatcher），
+ * 换到 Bun 后这些内部请求会真连 `localhost:80`，启动直接 ECONNREFUSED。
+ * 旧脚本走 `.bin/react-router` 的 `#!/usr/bin/env node` 恰好跑在 Node 上，
+ * devkit 包装后必须显式声明。
+ */
 const plan = resolveServerSpawn(
   {
-    runtime: 'bun',
+    runtime: 'node',
     command: 'react-router',
     args: ['dev'],
   },
