@@ -19,7 +19,7 @@
 
 - 绕过 `/api/proxy/image` 的 URL 白名单，造成 SSRF
 - 未授权读到别人的缓存数据，或命中数据库里的敏感字段
-- 服务端泄露 `TWEET_KEYS`、`INS_COOKIES`、`DB_URL`、AI API Key 等环境变量
+- 服务端泄露 `TWEET_KEYS`、`INS_COOKIES`、`DATABASE_URL`、AI API Key 等环境变量
 - 注入类问题：命令注入、XSS、SQL 注入
 - 绕过 `ENABLE_TIMELINE` 等功能开关
 

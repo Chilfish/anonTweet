@@ -9,7 +9,7 @@
   },
   "upload_source_maps": true,
   // 非敏感的运行时配置。敏感值走 `wrangler secret put`：
-  // TWEET_KEYS / INS_COOKIES / DB_URL / GEMINI_API_KEY / DEEPSEEK_API_KEY。
+  // TWEET_KEYS / INS_COOKIES / DATABASE_URL / GEMINI_API_KEY / DEEPSEEK_API_KEY。
   // HOSTNAME 可留空：截图路由会回退到请求 origin；自定义域名固定后建议显式设置。
   "vars": {
     "ENVIRONMENT": "production",

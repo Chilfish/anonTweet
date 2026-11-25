@@ -36,9 +36,25 @@
 
 ---
 
-## 总计：2 条 AC
+## AC-DEV-003：`bun run dev` 按需拉起本地数据库栈
+
+- **输入**：`package.json`、`scripts/dev.ts`、`dev.config.ts`、`app/lib/env.server.ts`、`app/lib/database/db.server.ts`
+- **验证对象**：单条 `bun run dev` 的本地 Postgres + Neon HTTP `/sql` 代理编排
+- **预期输出**：
+  - `dev` 脚本固定 `NODE_ENV=development` 并进入 `scripts/dev.ts`
+  - `ENABLE_DB_CACHE=true` 时先 `ensureDevServices`，再启动 `react-router dev`
+  - `dev.config.ts` 读取 `.dev.vars`，迁移目录为 `drizzle`，代理端点为本地 URL
+  - 应用读取 `DATABASE_URL` 与 `NEON_HTTP_ENDPOINT`，且只对本地库设置 `neonConfig.fetchEndpoint`
+- **验证方法**：仓库级静态检查（acceptance 层）——**辅助检查，非行为验收**
+- **说明**：真实链路（本地 Postgres → 代理 → workerd）由 `docs/features/deploy/local-database.md`
+  的手动流程验证；本条防止脚本或配置被误删后静默失效。
+
+---
+
+## 总计：3 条 AC
 
 | AC         | 分类                   | 依赖外部 API | 依赖 AI |
 | ---------- | ---------------------- | ------------ | ------- |
 | AC-DEV-001 | 集成（行为）           | 否           | 否      |
 | AC-DEV-002 | 仓库级静态（辅助检查） | 否           | 否      |
+| AC-DEV-003 | 仓库级静态（辅助检查） | 否           | 否      |

@@ -22,15 +22,47 @@ describe('env.server createEnv', () => {
       ENVIRONMENT: 'development',
       TWEET_KEYS: '',
       HOSTNAME: '',
-      DB_URL: '',
+      DATABASE_URL: '',
+      NEON_HTTP_ENDPOINT: '',
       GEMINI_API_KEY: '',
       GEMINI_MODEL: '',
     })
 
     expect(mod.HOSTNAME).toBe('http://localhost:9080')
-    expect(mod.DB_URL).toBeUndefined()
+    expect(mod.DATABASE_URL).toBeUndefined()
+    expect(mod.NEON_HTTP_ENDPOINT).toBeUndefined()
     expect(mod.GEMINI_API_KEY).toBeUndefined()
     expect(mod.GEMINI_MODEL).toBe('models/gemini-3-flash-preview')
+  })
+
+  it('maps the legacy DB_URL to DATABASE_URL during the secret rename', () => {
+    // 线上 secret 尚未改名时仍可用；DATABASE_URL 始终优先。
+    const legacy = createEnv({
+      ENVIRONMENT: 'development',
+      TWEET_KEYS: '',
+      DB_URL: 'postgres://user:pass@db.example.com/app',
+    })
+    expect(legacy.DATABASE_URL).toBe('postgres://user:pass@db.example.com/app')
+
+    const both = createEnv({
+      ENVIRONMENT: 'development',
+      TWEET_KEYS: '',
+      DB_URL: 'postgres://user:pass@db.example.com/legacy',
+      DATABASE_URL: 'postgres://user:pass@db.example.com/current',
+    })
+    expect(both.DATABASE_URL).toBe('postgres://user:pass@db.example.com/current')
+  })
+
+  it('reads the local proxy endpoint written by devkit', () => {
+    const mod = createEnv({
+      ENVIRONMENT: 'development',
+      TWEET_KEYS: '',
+      DATABASE_URL: 'postgres://postgres@127.0.0.1:5432/anon_tweet_dev',
+      NEON_HTTP_ENDPOINT: 'http://127.0.0.1:4444/sql',
+    })
+
+    expect(mod.DATABASE_URL).toBe('postgres://postgres@127.0.0.1:5432/anon_tweet_dev')
+    expect(mod.NEON_HTTP_ENDPOINT).toBe('http://127.0.0.1:4444/sql')
   })
 
   it('parses string booleans', () => {

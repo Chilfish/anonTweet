@@ -44,7 +44,7 @@ bun run preview                 # build + vite preview（workerd 本地预览）
   ```bash
   bunx wrangler secret put TWEET_KEYS
   bunx wrangler secret put INS_COOKIES
-  bunx wrangler secret put DB_URL
+  bunx wrangler secret put DATABASE_URL
   bunx wrangler secret put GEMINI_API_KEY
   bunx wrangler secret put DEEPSEEK_API_KEY
   ```
@@ -53,6 +53,7 @@ bun run preview                 # build + vite preview（workerd 本地预览）
 Workers 注意事项：
 
 - **必须使用 Workers Paid**：免费版 CPU 10ms / 50 subrequests，SSR + linkedom 解析不够用；Paid 默认 30s CPU、10,000 subrequests。
+- 数据库连接 secret 的正式名是 `DATABASE_URL`；旧名 `DB_URL` 在 `app/lib/env.server.ts` 里过渡兼容一版，改名后请删除旧 secret。
 - 单个变量上限 5KB。`TWEET_KEYS` 是 base64 cookie，多 Key 很容易超；拆成独立 secret 或改用 KV。
 - 兼容日期 `2026-11-10` 已自动启用 `nodejs_compat`，`process.env` 会注入 vars/secrets。
 - 文件系统是只读 `/bundle` + 按请求隔离的 `/tmp`，**不要开** `ENABLE_LOCAL_CACHE`；缓存用内存 LRU + `ENABLE_DB_CACHE`（Neon HTTP）。
@@ -75,6 +76,8 @@ bun run secrets:sync
 - 开发：`bun run dev`（workerd，http://localhost:9080）
 - 生产构建预览：`bun run preview`（`build` + `vite preview`）
 - 本地环境变量写 `.dev.vars`，由 wrangler / Vite 插件原生读取。
+- 本地数据库：`.dev.vars` 里设 `ENABLE_DB_CACHE=true`，`bun run dev` 会自动拉起 devkit 的
+  Postgres + Neon HTTP `/sql` 代理；设为 `false` 时只起 dev server。详见 [`local-database.md`](local-database.md)。
 
 ---
 
@@ -108,7 +111,7 @@ bun run secrets:sync
 ### 故障 A: `❌ Invalid environment variables`
 
 - **根本原因**: 环境变量验证器（Zod）拦截了非法的配置注入。
-- **对策**: 校验 `DB_URL` 的字符串格式、`HOSTNAME` 是否包含协议头；确认 `.dev.vars` 的引号 / 行内注释写法被正确解析。
+- **对策**: 校验 `DATABASE_URL` 的字符串格式、`HOSTNAME` 是否包含协议头；确认 `.dev.vars` 的引号 / 行内注释写法被正确解析。
 
 ### 故障 B: 上游速率限制 (429 Too Many Requests)
 

@@ -33,7 +33,7 @@
 - [ ] `bun run build` 成功产出 `build/client` 与 `build/server`
 - [ ] `bun run deploy -- --no-deploy` 构建校验通过
 - [ ] `bun run deploy` 部署成功（使用 `build/server/wrangler.json`）
-- [ ] Worker secrets 已设置（`TWEET_KEYS` / `INS_COOKIES` / `DB_URL` / `GEMINI_API_KEY` / `DEEPSEEK_API_KEY`）
+- [ ] Worker secrets 已设置（`TWEET_KEYS` / `INS_COOKIES` / `DATABASE_URL` / `GEMINI_API_KEY` / `DEEPSEEK_API_KEY`）
 - [ ] `ENABLE_LOCAL_CACHE=false`、`ENABLE_DB_CACHE=true`（Workers）
 - [ ] 生产域名 `HOSTNAME` 配置正确（或留空回退请求 origin；自定义域名就绪）
 

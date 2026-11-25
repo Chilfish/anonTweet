@@ -17,8 +17,12 @@ TWEET_KEYS=
 # Instagram cookies；不填时 /api/ig/get 返回空数组。
 INS_COOKIES=
 
-# PostgreSQL / Neon。启用 DB 缓存时必须填。
-DB_URL=
+# PostgreSQL / Neon。启用 DB 缓存时必须填；线上用 `wrangler secret put DATABASE_URL`。
+# 本地开发：ENABLE_DB_CACHE=true 时，`bun run dev` 会自动把 DATABASE_URL /
+# NEON_HTTP_ENDPOINT 写成本机 Postgres 与 /sql 代理的地址
+# （见 docs/features/deploy/local-database.md）。
+DATABASE_URL=
+NEON_HTTP_ENDPOINT=
 ENABLE_DB_CACHE=false
 
 # 本地缓存：开发/测试生效；Workers 上自动回退内存 LRU，持久化请用 DB。

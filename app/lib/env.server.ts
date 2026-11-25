@@ -40,7 +40,9 @@ const serverEnvSchema = z.object({
   // Instagram — cookies for gallery-dl-instagram SDK
   INS_COOKIES: optionalEnv(z.string().optional()),
 
-  DB_URL: optionalEnv(z.url().optional()),
+  DATABASE_URL: optionalEnv(z.url().optional()),
+  // Neon HTTP `/sql` 端点。仅本地开发由 devkit 写入（指向本地代理），线上不设置。
+  NEON_HTTP_ENDPOINT: optionalEnv(z.url().optional()),
   ENABLE_DB_CACHE: z.stringbool().default(false),
   ENABLE_LOCAL_CACHE: z.stringbool().default(false),
 
@@ -72,12 +74,25 @@ const serverEnvSchema = z.object({
 export type ServerEnv = z.infer<typeof serverEnvSchema> & { HOSTNAME?: string }
 
 /**
+ * 过渡兼容：线上 secret 仍叫 `DB_URL` 时映射到 `DATABASE_URL`。
+ * 标准名已统一为 `DATABASE_URL`（devkit 也只写这个名字）；等线上
+ * `wrangler secret put DATABASE_URL` 完成并删除旧 secret 后，可移除本函数。
+ */
+function normalizeDatabaseUrl(source: Record<string, string | undefined>): Record<string, string | undefined> {
+  if (source.DATABASE_URL || !source.DB_URL)
+    return source
+  if (source.ENVIRONMENT === 'production')
+    console.warn('⚠️  DB_URL is deprecated. Rename the secret to DATABASE_URL.')
+  return { ...source, DATABASE_URL: source.DB_URL }
+}
+
+/**
  * 纯函数：从给定的 env 源（默认 process.env）校验并构建环境对象。
  * 抽离为纯函数以便测试注入合成 env（无需 vi.resetModules，vitest / bun 原生 runner 双兼容），
  * 且符合 postmortem #002「纯逻辑下沉 lib + 单测」规范。dotenv 副作用仍只在模块加载时执行一次。
  */
 export function createEnv(source: Record<string, string | undefined> = process.env): ServerEnv {
-  const parsed = serverEnvSchema.safeParse(source)
+  const parsed = serverEnvSchema.safeParse(normalizeDatabaseUrl(source))
 
   if (parsed.success === false) {
     console.error(

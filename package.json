@@ -6,7 +6,7 @@
   "packageManager": "bun@1.4.4",
   "scripts": {
     "build": "cross-env NODE_ENV=production react-router build",
-    "dev": "cross-env NODE_ENV=development react-router dev",
+    "dev": "cross-env NODE_ENV=development bun scripts/dev.ts",
     "preview": "bun run build && vite preview",
     "deploy": "bun scripts/deploy.ts",
     "secrets:sync": "bun scripts/sync-github-secrets.ts",
@@ -18,6 +18,8 @@
     "test:watch": "vitest --project unit --project acceptance",
     "lint": "eslint . --fix",
     "postinstall": "lefthook install",
+    "devkit": "bun scripts/devkit.ts",
+    "dev:status": "cross-env LOCAL=1 bun scripts/devkit.ts dev status",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
@@ -74,6 +76,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "^10.0.0",
     "@babel/preset-typescript": "7.29.7",
+    "@chilfish/devkit": "^0.2.0",
     "@chromatic-com/storybook": "^5.6.0",
     "@cloudflare/vite-plugin": "^1.69.1",
     "@react-router/dev": "^8.5.1",
@@ -98,6 +101,7 @@
     "fake-indexeddb": "^6.2.8",
     "lefthook": "^2.2.2",
     "linkedom": "^0.18.15",
+    "pg": "^8.23.1",
     "storybook": "^10.6.7",
     "typescript": "6.0.3",
     "vite": "^8.3.8",

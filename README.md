@@ -78,8 +78,8 @@ GEMINI_API_KEY=            # 备选引擎；未配置 DeepSeek 时截图翻译�
 GEMINI_MODEL=models/gemini-3-flash-preview
 
 ENABLE_LOCAL_CACHE=true   # Workers 运行时自动回退内存 LRU
-ENABLE_DB_CACHE=false
-# DB_URL=postgres://...
+ENABLE_DB_CACHE=false     # 改 true 后 bun run dev 自动拉起本地 Postgres + /sql 代理
+# DATABASE_URL=postgres://...   # 本地开发不用手填，见「本地数据库」
 
 ENABLE_TIMELINE=false      # 用户时间线接口，默认关闭（固定 429 防滥用）
 ```
@@ -104,13 +104,30 @@ ENABLE_TIMELINE=false      # 用户时间线接口，默认关闭（固定 429 �
 
 ### 数据库（可选）
 
-只有配置了 `DB_URL` 且 `ENABLE_DB_CACHE=true` 时才需要初始化。
+只有配置了 `DATABASE_URL` 且 `ENABLE_DB_CACHE=true` 时才需要初始化。线上用 `wrangler secret put DATABASE_URL`（旧名 `DB_URL` 仍兼容）。
 
 ```bash
 bun run db:push       # 推送 schema，适合原型阶段
 bun run db:generate   # 或生成迁移文件
 bun run db:migrate
 ```
+
+#### 本地数据库
+
+workerd 不能直连 TCP，本地走 devkit 启的 Postgres + Neon HTTP `/sql` 代理。只需把开关打开：
+
+```env
+# .dev.vars
+ENABLE_DB_CACHE=true
+```
+
+```bash
+bun run dev           # 自动：Postgres → 建库 → 迁移 → /sql 代理 → react-router dev
+bun run dev:status    # 可选：只读检查本地栈
+```
+
+`ENABLE_DB_CACHE=false` 时 `bun run dev` 不碰本地库，和以前一样只起 dev server。
+完整流程、停止与排障见 [`docs/features/deploy/local-database.md`](docs/features/deploy/local-database.md)。
 
 ### 启动
 
@@ -130,7 +147,7 @@ bun run deploy                  # 构建 + wrangler deploy
 bun run preview                 # build + vite preview（workerd）
 ```
 
-首次部署前用 `bunx wrangler secret put` 设置 `TWEET_KEYS`、`INS_COOKIES`、`DB_URL`、`GEMINI_API_KEY`、`DEEPSEEK_API_KEY`；非敏感开关在 `wrangler.jsonc` 的 `vars` 里。Workers 需要 Paid 套餐（免费版 CPU 10ms 不够 SSR），并且 `ENABLE_LOCAL_CACHE` 必须关闭、缓存走 DB。
+首次部署前用 `bunx wrangler secret put` 设置 `TWEET_KEYS`、`INS_COOKIES`、`DATABASE_URL`、`GEMINI_API_KEY`、`DEEPSEEK_API_KEY`；非敏感开关在 `wrangler.jsonc` 的 `vars` 里。Workers 需要 Paid 套餐（免费版 CPU 10ms 不够 SSR），并且 `ENABLE_LOCAL_CACHE` 必须关闭、缓存走 DB。
 
 CI/CD：在本地 `.env` 配好 `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID`，执行 `bun run secrets:sync` 写入 GitHub Actions Secrets。之后 push 到 `main` 的非纯文档变更会自动触发 Deploy workflow（也可在 Actions 里手动触发）。
 
@@ -147,7 +164,8 @@ BFF 接口都在 `/api` 下，覆盖 tweet / ig / user / ai / proxy 几组，完
 ## 常用命令
 
 ```bash
-bun run dev                              # 开发服务器（workerd）
+bun run dev                              # 开发服务器（workerd；ENABLE_DB_CACHE=true 时连带本地库）
+bun run dev:status                       # 检查本地数据库栈
 bun run build                            # 生产构建
 bun run preview                          # workerd 预览生产构建
 bun run deploy                           # 构建并部署到 Cloudflare Workers
