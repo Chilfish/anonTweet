@@ -520,6 +520,21 @@ export const tweetWithPhotosNoAlt = makeTweet({
   ],
 })
 
+/**
+ * 20 张媒体（X 单条上限）：>4 张走横向轮播 + 计数胶囊。
+ * 暂未收录真实 20 图样本，这里用占位图只表达「数量多 + 4:5 竖图」。
+ */
+export const tweetWithManyPhotos = makeTweet({
+  id: '9000000000000000005',
+  text: '20 枚の写真をまとめて投稿します https://t.co/many',
+  mediaDetails: Array.from({ length: 20 }, (_, index) => ({
+    index,
+    media_url_https: `https://picsum.photos/seed/tweet-many-${index}/720/900`,
+    original_info: { width: 720, height: 900 },
+    type: 'photo' as const,
+  })),
+})
+
 /** AI 视觉描述已完成（describe 模式，双语可见性由 store 决定） */
 export const tweetWithVisionDone = makeTweet({
   id: '9000000000000000002',

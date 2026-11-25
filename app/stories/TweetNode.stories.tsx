@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { TweetNode } from '~/components/tweet/TweetNode'
-import { tweetWithCard, tweetWithPhotos, tweetWithQuoted, tweetWithTrendingCard } from './tweet.fixtures'
+import { tweetWithCard, tweetWithManyPhotos, tweetWithPhotos, tweetWithQuoted, tweetWithTrendingCard } from './tweet.fixtures'
 
 /**
  * TweetNode —— 单条推文节点（头部 + 正文 + 媒体 + 卡片 + 引推）。
@@ -32,6 +32,11 @@ export const MainWithTrendingCard: Story = {
 
 export const MainWithPhotos: Story = {
   render: () => <TweetNode tweet={tweetWithPhotos} variant="main" />,
+}
+
+/** 20 张媒体：>4 张切横向轮播（露边 + 计数），不再是十几行的长条网格 */
+export const MainWithManyPhotos: Story = {
+  render: () => <TweetNode tweet={tweetWithManyPhotos} variant="main" />,
 }
 
 export const ThreadVariant: Story = {

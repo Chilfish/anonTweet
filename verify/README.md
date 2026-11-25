@@ -73,7 +73,7 @@ AC-DEV-001（dev server 健康）、AC-IG-009（缺 cookies → 500）、AC-MEDI
 
 | 文档                                                       | 覆盖                                                                              |
 | ---------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| [AC-tweet.md](acceptance-criteria/AC-tweet.md)             | AC-TWEET-001~011（解析 + API + 搜索 + 外壳鉴权）                                  |
+| [AC-tweet.md](acceptance-criteria/AC-tweet.md)             | AC-TWEET-001~022（解析 + API + 搜索 + 外壳鉴权 + 多图轮播）                       |
 | [AC-translation.md](acceptance-criteria/AC-translation.md) | AC-TRANS-001~007（占位符管线 + 视图/Provider）                                    |
 | [AC-ig.md](acceptance-criteria/AC-ig.md)                   | AC-IG-001~011（IG 集成 + 占位比例 + 手动翻译）                                    |
 | [AC-ig-story.md](acceptance-criteria/AC-ig-story.md)       | AC-IG-STORY-001~005（Story 提取/列表/下载/渲染/缓存）                             |

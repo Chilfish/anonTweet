@@ -1,8 +1,10 @@
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import type { CardCarouselImage, LinkPreviewCard } from '~/types'
-import { ChevronLeft, ChevronRight, GalleryHorizontalEnd, LayoutGrid, Play } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { GalleryHorizontalEnd, LayoutGrid, Play } from 'lucide-react'
+import { useState } from 'react'
 import { MediaImage } from '~/components/ui/media'
+import { MediaCarousel, MediaCarouselPage } from '~/components/ui/media-carousel'
+import { clampAspectRatio } from '~/lib/media-aspect'
 import { normalizeMediaUrl } from '~/lib/media-url'
 import { localizeCtaLabel } from '~/lib/react-tweet/utils'
 import { useProxyMedia } from '~/lib/stores/appConfig'
@@ -35,7 +37,9 @@ function aspectStyle(image?: CardCarouselImage): CSSProperties {
   const ratio = image && image.width > 0 && image.height > 0
     ? image.width / image.height
     : 0.8
-  return { aspectRatio: `${Math.min(1, Math.max(0.6, ratio))}` }
+  return {
+    aspectRatio: String(clampAspectRatio(ratio, 0.6, 1)),
+  }
 }
 
 /** 视频时长 badge：6006ms → 0:06；超过 1 小时 → 1:02:03 */
@@ -62,9 +66,7 @@ export function CarouselCardView({
   const images = card.images ?? []
   const proxyMedia = useProxyMedia()
   const isScreenshoting = useScreenshoting()
-  const [activeIndex, setActiveIndex] = useState(0)
   const [tiled, setTiled] = useState(false)
-  const trackRef = useRef<HTMLDivElement>(null)
 
   if (images.length === 0)
     return null
@@ -76,25 +78,7 @@ export function CarouselCardView({
     : null)
   const mediaAspect = aspectStyle(images[0])
 
-  const scrollToIndex = (index: number) => {
-    const track = trackRef.current
-    if (!track)
-      return
-    const clamped = Math.min(Math.max(index, 0), images.length - 1)
-    track.scrollTo({ left: clamped * track.clientWidth, behavior: 'smooth' })
-  }
-
-  const handleScroll = () => {
-    const track = trackRef.current
-    if (!track)
-      return
-    const width = track.clientWidth
-    if (!width)
-      return
-    setActiveIndex(Math.min(images.length - 1, Math.max(0, Math.round(track.scrollLeft / width))))
-  }
-
-  const renderMedia = (media: CardCarouselImage, index: number, tiledMode: boolean) => {
+  const renderAnchor = (media: CardCarouselImage, index: number) => {
     const isVideo = media.type === 'video'
     const duration = isVideo
       ? formatDuration(media.video?.durationMs)
@@ -102,7 +86,6 @@ export function CarouselCardView({
 
     return (
       <a
-        key={`${index}-${media.url}`}
         href={media.href || card.url || undefined}
         target="_blank"
         rel="noopener noreferrer"
@@ -113,13 +96,7 @@ export function CarouselCardView({
           : images.length > 1
             ? `第 ${index + 1} 个，共 ${images.length} 个`
             : undefined}
-        className={cn(
-          'relative block bg-muted/40',
-          tiledMode ? 'w-full' : 'w-full shrink-0 snap-center',
-        )}
-        style={tiledMode
-          ? aspectStyle(media)
-          : mediaAspect}
+        className="absolute inset-0 block"
       >
         <MediaImage
           src={proxyMedia(normalizeMediaUrl(media.url))}
@@ -151,10 +128,32 @@ export function CarouselCardView({
     )
   }
 
-  const media = images.length === 1
+  /** 平铺网格 / 单图：每格按自己的原比例 */
+  const renderTile = (media: CardCarouselImage, index: number) => (
+    <div
+      key={`${index}-${media.url}`}
+      className="relative w-full bg-muted/40"
+      style={aspectStyle(media)}
+    >
+      {renderAnchor(media, index)}
+    </div>
+  )
+
+  /** 轮播页：统一按首图比例，滑动时不跳高 */
+  const renderPage = (media: CardCarouselImage, index: number) => (
+    <MediaCarouselPage
+      key={`${index}-${media.url}`}
+      className="w-full snap-center bg-muted/40"
+      style={mediaAspect}
+    >
+      {renderAnchor(media, index)}
+    </MediaCarouselPage>
+  )
+
+  const media: ReactNode = images.length === 1
     ? (
         <div className="relative" role="group" aria-label="媒体">
-          {renderMedia(images[0]!, 0, true)}
+          {renderTile(images[0]!, 0)}
         </div>
       )
     : effectiveTiled
@@ -166,72 +165,17 @@ export function CarouselCardView({
             role="group"
             aria-label={`媒体，共 ${images.length} 个`}
           >
-            {images.map((image, index) => renderMedia(image, index, true))}
+            {images.map(renderTile)}
           </div>
         )
       : (
-          <div
-            className="relative"
-            role="group"
-            aria-roledescription="carousel"
-            aria-label={`媒体轮播，共 ${images.length} 个`}
+          <MediaCarousel
+            itemCount={images.length}
+            ariaLabel={`媒体轮播，共 ${images.length} 个`}
+            indicator="dots"
           >
-            <div
-              ref={trackRef}
-              onScroll={handleScroll}
-              className="flex snap-x snap-mandatory overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            >
-              {images.map((image, index) => renderMedia(image, index, false))}
-            </div>
-
-            <button
-              type="button"
-              aria-label="上一张"
-              disabled={activeIndex === 0}
-              onClick={() => scrollToIndex(activeIndex - 1)}
-              className={cn(
-                'absolute top-1/2 left-2 hidden size-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white transition-opacity sm:flex',
-                'hover:bg-black/60 focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:outline-none',
-                activeIndex === 0 && 'pointer-events-none opacity-0',
-              )}
-            >
-              <ChevronLeft className="size-5" />
-            </button>
-            <button
-              type="button"
-              aria-label="下一张"
-              disabled={activeIndex === images.length - 1}
-              onClick={() => scrollToIndex(activeIndex + 1)}
-              className={cn(
-                'absolute top-1/2 right-2 hidden size-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white transition-opacity sm:flex',
-                'hover:bg-black/60 focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:outline-none',
-                activeIndex === images.length - 1 && 'pointer-events-none opacity-0',
-              )}
-            >
-              <ChevronRight className="size-5" />
-            </button>
-
-            <div
-              className="pointer-events-none absolute bottom-2 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-black/40 px-2 py-1"
-              aria-hidden
-            >
-              {images.map((image, index) => (
-                <span
-                  key={`${index}-${image.url}`}
-                  className={cn(
-                    'size-1.5 rounded-full transition-colors',
-                    index === activeIndex
-                      ? 'bg-white'
-                      : 'bg-white/45',
-                  )}
-                />
-              ))}
-            </div>
-
-            <span className="sr-only" aria-live="polite">
-              {`第 ${activeIndex + 1} 张，共 ${images.length} 张`}
-            </span>
-          </div>
+            {images.map(renderPage)}
+          </MediaCarousel>
         )
 
   const footer = (
@@ -282,11 +226,7 @@ export function CarouselCardView({
             type="button"
             aria-pressed={effectiveTiled}
             title={effectiveTiled ? '切换为轮播' : '切换为平铺'}
-            onClick={() => {
-              setTiled(value => !value)
-              setActiveIndex(0)
-              trackRef.current?.scrollTo({ left: 0 })
-            }}
+            onClick={() => setTiled(value => !value)}
             className="shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
           >
             {effectiveTiled

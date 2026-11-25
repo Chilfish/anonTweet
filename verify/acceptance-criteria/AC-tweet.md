@@ -301,7 +301,34 @@
 
 ---
 
-## 总计：21 条 AC
+## AC-TWEET-022：>4 张媒体改横向轮播（离线）
+
+- **输入**：构造的 `EnrichedTweet`（`mediaDetails` 为 20 / 8 / 5 / 4 张 1440×1800 竖图；
+  另含视频混排、引用推文（`quoted`）、竖向模式（`isInlineMedia`））
+- **预期输出**：`length > 4` 且非竖向模式时渲染横向 scroll-snap 轮播（露边）；
+  ≤4 张保持官方经典网格；截图（plain 路由）复用同一布局，不切换形态
+- **验证方法**：`bun run verify/index.ts --ac AC-TWEET-022`
+  （`test/acceptance/tweet-media-carousel.spec.ts` + `test/unit/media-aspect.spec.ts`）
+- **前置条件**：无（纯渲染/纯函数，离线）
+- **Pass 条件**：
+  - 20 张：`snap-x` 轨道、`aria-roledescription="carousel"`、计数胶囊 `1 / 20`、
+    sr-only「第 1 张，共 20 张」、20 个 `<img>`（全部图片都在 DOM 里）
+  - 单页宽度 `basis-[60%]` + `snap-center`（中间一张 + 左右各露 20%，与官方实测一致），轨道 `gap-1`
+  - 每页按**各自**原比例：高度封顶 `min(640px, 80vh)`，页宽 = 比例 × 最大高度
+    （轨道 `items-start`）。1440×1800 → 0.8；720×2400 → 0.3（宽 192px，完整窄条）；
+    2400×1000 → 2.4；病态比例（1:50 / 5:1）夹在 0.1–4
+  - 不再出现 `grid-rows-2`；4 张仍是 `grid-cols-2` 网格、无箭头/计数
+  - 单张竖图保留 `max-w-[85%]` 与原比例
+  - 轮播内视频只渲染封面 + 时长 badge（`0:07`），不出现 `<video>`
+  - 引用推文：可滑动 + 计数，但不渲染上一张/下一张箭头（宽度不足）
+  - 竖向模式（`isInlineMedia`）维持 `flex flex-col` 堆叠，不切轮播
+  - 截图 / plain 路由不改布局（没有 `forceTile` 之类的形态开关）
+  - `getMediaAspectRatio`：图片取 `original_info`，视频优先 `video_info.aspect_ratio`，
+    非法值回退 1；`clampAspectRatio` 夹界并保留两位小数
+
+---
+
+## 总计：22 条 AC
 
 | AC           | 分类                  | 依赖外部 API | 依赖 AI |
 | ------------ | --------------------- | ------------ | ------- |
@@ -326,5 +353,6 @@
 | AC-TWEET-019 | 纯函数 + 渲染（离线） | 否           | 否      |
 | AC-TWEET-020 | 行为断言（mock/离线） | 否           | 否      |
 | AC-TWEET-021 | 行为断言（mock/离线） | 否           | 否      |
+| AC-TWEET-022 | 行为断言（渲染/离线） | 否           | 否      |
 
 > 离线 AC 可通过 fixture 直接验证，无需网络；集成 AC 需要 `TWEET_KEYS` 环境变量。

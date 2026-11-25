@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ### Changed
 
+#### 多图推文（>4 张）改横向轮播（2026-11-25）
+
+- 推文媒体按数量分档：≤4 张保持官方经典网格，>4 张切横向 scroll-snap 轮播（每页 60% 宽：中间一张 + 左右各露 20%，右上角 `1 / 20` 计数）；20 张不再撑成十几行的长条
+- 抽出共享 primitive `MediaCarousel` / `MediaCarouselPage`（原生滚动 + 箭头 + 指示器），广告多图卡轮播同步复用（整页 + 圆点行为不变）
+- 轮播页按**每张图自己的原比例**：高度封顶 `min(640px, 80vh)`，页宽 = 比例 × 最大高度（竖向长图收成完整窄条，不裁剪也不无限拉高），轨道顶部对齐；病态比例夹在 0.1–4
+- 截图（plain 路由 / `screenshoting`）与常态同构，不为导出切换布局；引用推文保留滑动与计数、隐藏箭头
+- `AC-TWEET-022` + `test/acceptance/tweet-media-carousel.spec.ts` / `test/unit/media-aspect.spec.ts`
+
 #### anon-tweet Skill 规范化：TS CLI + 渐进披露文档（2026-11-24）
 
 - `SKILL.md` 按 Agent Skills 规范重写：description 收敛为「做什么 + 何时用」；数据结构下沉到 `references/data-shapes.md`；示例从 PowerShell 改为跨平台 `fetch`
@@ -25,6 +33,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 - 测试与 AC 迁移；`typecheck` / `lint` / `test` 665 / `verify` 676 / `build` / `build-storybook` 全绿
 
 ### Added
+
+#### 本地数据库接入 `@chilfish/devkit`（2026-11-25）
+
+- 新增 `dev.config.ts` + `scripts/dev.ts`：`ENABLE_DB_CACHE=true` 时，`bun run dev` 自动启动本机 Postgres、建库、跑 `drizzle/` 迁移、拉起 Neon HTTP `/sql` 代理，并把 `DATABASE_URL` / `NEON_HTTP_ENDPOINT` 写进 `.dev.vars`；关闭时仍只起 dev server（集成测试固定关闭，不依赖本机 Postgres）
+- 连接变量统一为 `DATABASE_URL`（旧 `DB_URL` 过渡兼容一版）；`db.server` 在存在 `NEON_HTTP_ENDPOINT` 时设置 `neonConfig.fetchEndpoint`，workerd 可直接访问本地库
+- `AC-DEV-003` + `test/unit/env.server.spec.ts`；文档见 `docs/features/deploy/local-database.md`
+- 线上需把 secret 从 `DB_URL` 改名为 `DATABASE_URL`，随后删除旧 secret
 
 #### AI 请求路径与 DeepSeek Flash 默认（2026-11-18）
 

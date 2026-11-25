@@ -26,11 +26,11 @@ docs/
 ├── INDEX.md                    # 本文档（唯一入口）
 ├── features/                   # 功能文档，按子系统组织
 │   ├── translation/            #   翻译子系统（translation.md · deepseek-ai-sdk.md · prompt-guidelines.md）
-│   ├── tweet/                  #   推文子系统（article.md · space-card.md · trending-card.md · carousel-card.md · poll-card.md · search.md · transaction-id.md）
+│   ├── tweet/                  #   推文子系统（article.md · space-card.md · trending-card.md · carousel-card.md · media-carousel.md · poll-card.md · search.md · transaction-id.md）
 │   ├── instagram/              #   Instagram 集成（instagram-integration.md · ig-actions-integration.md）
 │   ├── pwa/                    #   PWA（web-share-target.md · capability-audit.md）
 │   ├── ai-vision/              #   AI 视觉描述（ai-vision.md）
-│   └── deploy/                 #   部署（deployment.md）
+│   └── deploy/                 #   部署（deployment.md · local-database.md）
 ├── planning/                   # 规划与决策（architecture ADR · project-architecture · backlog · browse-history）
 ├── engineering/                # 工程规范（code-style · git-workflow · release-checklist）
 ├── ui-design/                  # UI 设计系统（README 总览 · GENERAL 原子组件 · SETTINGS · INFORMATION-DENSITY 信息密度）
@@ -53,11 +53,13 @@ docs/
 | ---------------------------------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
 | **新增/修改翻译逻辑**                          | `features/translation/translation.md`                                                          | 数据流、占位符机制、6 级决策链、stream/overlay 分工            |
 | **修改文章型推文（X Article 解析/渲染/翻译）** | `features/tweet/article.md` + `planning/architecture.md`（ADR-009）                            | `content_state` 块文档、阅读页、按块翻译、缓存回填             |
+| **修改推文多图媒体（网格 / >4 张轮播）**       | `features/tweet/media-carousel.md` + `ui-design/INFORMATION-DENSITY.md`                        | 数量分档、露边轮播、比例夹界、截图不换形态                     |
 | **修改 AI Provider / DeepSeek 参数**           | `features/translation/deepseek-ai-sdk.md`                                                      | provider 级/模型级/callOptions 参数暴露策略                    |
 | **调整 AI 提示词 / 排查结构化输出失败**        | `features/translation/prompt-guidelines.md`                                                    | 模型升级后的提示词原则、失败形态与检查清单                     |
 | **修改 Instagram 集成**                        | `features/instagram/instagram-integration.md` + `features/instagram/ig-actions-integration.md` | IG 5 阶段管线、操作区、DB 缓存、caption 翻译                   |
 | **修改 AI Vision（看图说话/OCR）**             | `features/ai-vision/ai-vision.md` + `archive/ai-vision-plan.md`                                | 需求与上下文、已完成行动计划 + DR、AC-VISION                   |
 | **部署 / 环境配置**                            | `features/deploy/deployment.md`                                                                | Cloudflare Workers、`.dev.vars`、缓存层                        |
+| **本地数据库（Postgres + Neon 代理）**         | `features/deploy/local-database.md` + `dev.config.ts`                                          | devkit 启停、`.dev.vars` 写入、迁移与排障                      |
 | **修改 PWA / SW / manifest / 安装体验**        | `features/pwa/web-share-target.md` + `features/pwa/capability-audit.md`                        | share_target 方案 + 能力盘点（线上核查、场景裁决、候选优先级） |
 | **修改 UI 组件、页面**                         | `engineering/code-style.md` + `ui-design/README.md` + `ui-design/INFORMATION-DENSITY.md`       | 组件拆分、命名、导入顺序、原生优先原则、信息密度               |
 | **修改原子组件（Button/Input/Dialog 等）**     | `ui-design/GENERAL.md`                                                                         | shadcn/coss 组件使用规范                                       |
@@ -109,7 +111,8 @@ docs/
 
 ```bash
 bun install              # 安装依赖
-bun run dev              # 开发服务器 (http://localhost:9080)
+bun run dev              # 开发服务器 (http://localhost:9080；ENABLE_DB_CACHE=true 时连带本地库)
+bun run dev:status       # 检查本地数据库栈
 bun run build            # 生产构建
 bun run typecheck        # 类型检查（react-router typegen + tsc）
 bun run lint             # ESLint（@antfu/eslint-config，autofix）
