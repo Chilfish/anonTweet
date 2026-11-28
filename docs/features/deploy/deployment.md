@@ -48,6 +48,13 @@ bun run preview                 # build + vite preview（workerd 本地预览）
   bunx wrangler secret put GEMINI_API_KEY
   bunx wrangler secret put DEEPSEEK_API_KEY
   ```
+- 本机 `.dev.vars` 改完后用 `bun run secrets:worker` 批量同步，默认只推 `INS_COOKIES`，可追加名称：
+  ```bash
+  bun run secrets:worker                # INS_COOKIES
+  bun run secrets:worker TWEET_KEYS     # 指定 secret，可多个
+  bun run secrets:worker --dry-run      # 只校验本地值
+  ```
+  值经 stdin 传入，不进进程参数与日志；超过 5KB 会直接报错。`wrangler secret put` 只更新线上 binding，不重新上传代码，**改完立即生效，不需要再 deploy**。
 - `HOSTNAME` 可留空：截图路由会回退到请求 origin。固定自定义域名后建议显式设置，否则同 zone 内的自请求需要走 Custom Domain（见 §4）。
 
 Workers 注意事项：
